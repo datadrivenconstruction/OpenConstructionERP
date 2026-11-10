@@ -71,7 +71,7 @@ export function ShareDialog({ roomName, isOpen, onClose }: ShareDialogProps) {
             onClick={handleCopy}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
               copied
-                ? 'bg-emerald-500 text-white'
+                ? 'bg-semantic-success text-white'
                 : 'bg-oe-blue text-white hover:bg-oe-blue-hover'
             }`}
           >

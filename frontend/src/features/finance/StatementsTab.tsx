@@ -234,7 +234,7 @@ function AmountRow({
       <span
         className={clsx(
           'shrink-0 text-right tabular-nums',
-          total ? 'text-base font-bold text-content-primary' : 'text-sm text-content-primary',
+          total ? 'text-base font-semibold text-content-primary' : 'text-sm text-content-primary',
         )}
       >
         <MoneyDisplay amount={amount} currency={currency} colorize={colorize} />

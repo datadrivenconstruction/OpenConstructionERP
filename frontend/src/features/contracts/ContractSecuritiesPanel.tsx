@@ -835,7 +835,7 @@ export function ContractSecuritiesPanel({
             </p>
 
             {!amountValid(draft.amount) && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+              <p className="mt-1 text-xs text-semantic-error">
                 {t('contracts.securities.amount_invalid', {
                   defaultValue:
                     'Enter the face value as a number, with no currency symbol or thousands separator.',
@@ -843,14 +843,14 @@ export function ContractSecuritiesPanel({
               </p>
             )}
             {!percentValid(draft.percent_of_contract) && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+              <p className="mt-1 text-xs text-semantic-error">
                 {t('contracts.securities.percent_invalid', {
                   defaultValue: 'Enter a percentage between 0 and 100.',
                 })}
               </p>
             )}
             {clearedLocked && (
-              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+              <p className="mt-1 text-xs text-semantic-warning">
                 {t('contracts.securities.clear_locked', {
                   defaultValue:
                     'A saved date, percentage or currency cannot be emptied here, only replaced. The stored value is kept for any box left blank.',

@@ -176,7 +176,7 @@ function PresetGroup({
 }: PresetGroupProps) {
   return (
     <div className="border-b border-border-light p-1.5 last:border-b-0">
-      <div className="flex items-center gap-1 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+      <div className="flex items-center gap-1 px-2 py-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {icon}
         {title}
       </div>
@@ -201,7 +201,7 @@ function PresetGroup({
                     {p.name}
                   </span>
                   {p.description && (
-                    <span className="block text-[10px] text-content-tertiary">
+                    <span className="block text-2xs text-content-tertiary">
                       {p.description}
                     </span>
                   )}

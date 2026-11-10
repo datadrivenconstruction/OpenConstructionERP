@@ -229,8 +229,8 @@ export function PrequalModal({ subcontractor, onClose }: PrequalModalProps) {
                         'flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors',
                         selected
                           ? opt === 'yes'
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
-                            : 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-200'
+                            ? 'border-semantic-success/60 bg-semantic-success-bg text-semantic-success'
+                            : 'border-semantic-error/60 bg-semantic-error-bg text-semantic-error'
                           : 'border-border-light bg-surface-primary text-content-secondary hover:border-oe-blue/40 hover:text-content-primary',
                       )}
                       aria-pressed={selected}
@@ -273,10 +273,10 @@ export function PrequalModal({ subcontractor, onClose }: PrequalModalProps) {
               answered === 0
                 ? 'text-content-tertiary'
                 : score >= 80
-                  ? 'text-emerald-600 dark:text-emerald-400'
+                  ? 'text-semantic-success'
                   : score >= 50
-                    ? 'text-amber-600 dark:text-amber-400'
-                    : 'text-rose-600 dark:text-rose-400',
+                    ? 'text-semantic-warning'
+                    : 'text-semantic-error',
             )}
           >
             {answered === 0 ? '—' : score}

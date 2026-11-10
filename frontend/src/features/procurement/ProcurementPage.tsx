@@ -616,7 +616,7 @@ export function ProcurementPage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
         </div>
       )}
@@ -1509,7 +1509,7 @@ function PurchaseOrdersTab({
                       type="button"
                       onClick={() => removeLineItem(idx)}
                       disabled={figuresLocked}
-                      className="flex h-9 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                      className="flex h-9 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors disabled:opacity-40 disabled:pointer-events-none"
                       title={t('common.remove', { defaultValue: 'Remove' })}
                       aria-label={t('procurement.remove_line', {
                         defaultValue: 'Remove line {{line}}',
@@ -1587,7 +1587,7 @@ function PurchaseOrdersTab({
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-surface-secondary/60 px-3 py-2.5">
                   <span className="text-sm font-semibold text-content-primary">{t('procurement.total', { defaultValue: 'Total' })}</span>
-                  <span className="text-base font-bold tabular-nums text-content-primary">{displayCurrency} {fmtFixed(poTotal, 2)}</span>
+                  <span className="text-base font-semibold tabular-nums text-content-primary">{displayCurrency} {fmtFixed(poTotal, 2)}</span>
                 </div>
               </div>
             </div>

@@ -78,20 +78,20 @@ export function statusClasses(status: ControlsStatus): {
   switch (status) {
     case 'red':
       return {
-        dot: 'bg-rose-500',
+        dot: 'bg-semantic-error',
         border: 'border-l-rose-500',
-        text: 'text-rose-600 dark:text-rose-400',
+        text: 'text-semantic-error',
       };
     case 'amber':
       return {
-        dot: 'bg-amber-500',
+        dot: 'bg-semantic-warning',
         border: 'border-l-amber-500',
-        text: 'text-amber-600 dark:text-amber-400',
+        text: 'text-semantic-warning',
       };
     case 'green':
     default:
       return {
-        dot: 'bg-emerald-500',
+        dot: 'bg-semantic-success',
         border: 'border-l-emerald-500',
         text: 'text-content-primary',
       };

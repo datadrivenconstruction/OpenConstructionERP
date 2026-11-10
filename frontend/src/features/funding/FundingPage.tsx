@@ -363,7 +363,7 @@ export function FundingPage() {
           defaultValue: 'Programme, application, draw, proof of use - and the dates that decide all four',
         })}
       >
-        <ol className="ml-4 list-decimal space-y-1 text-sm text-gray-600 dark:text-gray-300">
+        <ol className="ml-4 list-decimal space-y-1 text-sm text-content-secondary">
           <li>
             {t('funding.how_step_1', {
               defaultValue:
@@ -389,7 +389,7 @@ export function FundingPage() {
             })}
           </li>
         </ol>
-        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-3 text-sm text-content-tertiary">
           {t('funding.how_links', {
             defaultValue:
               'Works with the cost plan for the eligible base, the schedule for the award period, and invoicing for the draws.',
@@ -448,7 +448,7 @@ export function FundingPage() {
         />
       </div>
 
-      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-1 border-b border-border-light">
         {(['applications', 'deadlines', 'programmes'] as TabId[]).map((id) => (
           <button
             key={id}
@@ -457,7 +457,7 @@ export function FundingPage() {
             className={
               tab === id
                 ? 'border-b-2 border-blue-600 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300'
-                : 'px-3 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                : 'px-3 py-2 text-sm text-content-secondary hover:text-content-primary'
             }
           >
             {t(`funding.tab_${id}`, {
@@ -506,7 +506,7 @@ export function FundingPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase text-gray-500 dark:text-gray-400">
+                <thead className="text-left text-xs uppercase text-content-tertiary">
                   <tr>
                     <th className="px-3 py-2">{t('funding.field.code', { defaultValue: 'Reference' })}</th>
                     <th className="px-3 py-2">{t('funding.field.programme', { defaultValue: 'Programme' })}</th>
@@ -527,7 +527,7 @@ export function FundingPage() {
                       <tr
                         key={row.id}
                         onClick={() => setOpenApplication(row.id)}
-                        className="cursor-pointer border-t border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/40"
+                        className="cursor-pointer border-t border-border-light hover:bg-surface-secondary"
                       >
                         <td className="px-3 py-2 font-medium">
                           <button
@@ -550,7 +550,7 @@ export function FundingPage() {
                         <td className="px-3 py-2 text-right tabular-nums">{money(row.approved_amount)}</td>
                         {/* Two dates and a separator: keep the browser from choosing
                             the middle of one of them as the place to break. */}
-                        <td className="whitespace-nowrap px-3 py-2 tabular-nums text-gray-600 dark:text-gray-300">
+                        <td className="whitespace-nowrap px-3 py-2 tabular-nums text-content-secondary">
                           {row.award_period_start || row.award_period_end
                             ? `${date(row.award_period_start)} … ${date(row.award_period_end)}`
                             : '—'}
@@ -577,7 +577,7 @@ export function FundingPage() {
               })}
             />
           ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            <ul className="divide-y divide-border-light">
               {obligations.map((row) => (
                 <li key={row.id} className="flex flex-wrap items-center gap-3 px-3 py-2">
                   {/* Deliberately NOT `whitespace-nowrap`, unlike the date ranges.
@@ -589,15 +589,15 @@ export function FundingPage() {
                   <span
                     className={
                       row.overdue
-                        ? 'w-28 shrink-0 font-medium tabular-nums text-red-600 dark:text-red-400'
-                        : 'w-28 shrink-0 tabular-nums text-gray-600 dark:text-gray-300'
+                        ? 'w-28 shrink-0 font-medium tabular-nums text-semantic-error'
+                        : 'w-28 shrink-0 tabular-nums text-content-secondary'
                     }
                   >
                     {date(row.due_on)}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{obligationLabel(row, t)}</span>
-                    <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+                    <span className="block truncate text-xs text-content-tertiary">
                       {t(`funding.obligation_source.${row.source}`, { defaultValue: row.source })}
                       {row.source_reference ? ` · ${row.source_reference}` : ''}
                     </span>
@@ -630,21 +630,21 @@ export function FundingPage() {
 
       {tab === 'programmes' && (
         <Card>
-          <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 p-3 dark:border-gray-800">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border-light p-3">
             <div className="relative">
               <Search className="pointer-events-none absolute start-2 top-2.5 h-4 w-4 text-gray-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('funding.search_programmes', { defaultValue: 'Search programmes' })}
-                className="rounded border border-gray-300 py-1.5 ps-8 pe-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+                className="rounded border border-border py-1.5 ps-8 pe-2 text-sm"
               />
             </div>
             <input
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value.toUpperCase().slice(0, 2))}
               placeholder={t('funding.filter_country', { defaultValue: 'Country' })}
-              className="w-24 rounded border border-gray-300 px-2 py-1.5 text-sm uppercase dark:border-gray-600 dark:bg-gray-800"
+              className="w-24 rounded border border-border px-2 py-1.5 text-sm uppercase"
             />
             <Button
               variant="secondary"
@@ -671,7 +671,7 @@ export function FundingPage() {
               }}
             />
           ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            <ul className="divide-y divide-border-light">
               {programmes.map((row) => (
                 <li key={row.id} className="px-3 py-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -687,7 +687,7 @@ export function FundingPage() {
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-0.5 text-xs text-content-tertiary">
                     {row.authority_name}
                     {declaresPercent(row.funding_rate_percent)
                       ? ` · ${t('funding.rate_label', {
@@ -718,54 +718,54 @@ export function FundingPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.field.code', { defaultValue: 'Reference' })}
                   </span>
                   <input
                     value={programmeDraft.code}
                     onChange={(e) => setProgrammeField('code', e.target.value)}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5"
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.field.title', { defaultValue: 'Title' })}
                   </span>
                   <input
                     value={programmeDraft.name}
                     onChange={(e) => setProgrammeField('name', e.target.value)}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5"
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.field.authority', { defaultValue: 'Authority' })}
                   </span>
                   <input
                     value={programmeDraft.authority_name}
                     onChange={(e) => setProgrammeField('authority_name', e.target.value)}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5"
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.filter_country', { defaultValue: 'Country' })}
                   </span>
                   <input
                     value={programmeDraft.country}
                     onChange={(e) => setProgrammeField('country', e.target.value.toUpperCase().slice(0, 2))}
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 uppercase dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5 uppercase"
                   />
                 </label>
               </div>
 
-              <fieldset className="space-y-3 border-t border-gray-100 pt-3 dark:border-gray-800">
-                <legend className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <fieldset className="space-y-3 border-t border-border-light pt-3">
+                <legend className="text-xs font-medium uppercase tracking-wide text-content-tertiary">
                   {t('funding.programme_terms', { defaultValue: 'Terms' })}
                 </legend>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.instrument', { defaultValue: 'Instrument' })}
                     </span>
                     <select
@@ -773,7 +773,7 @@ export function FundingPage() {
                       onChange={(e) =>
                         setProgrammeField('instrument', e.target.value as FundingProgramme['instrument'])
                       }
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5"
                     >
                       {INSTRUMENTS.map((value) => (
                         <option key={value} value={value}>
@@ -783,7 +783,7 @@ export function FundingPage() {
                     </select>
                   </label>
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.status', { defaultValue: 'Status' })}
                     </span>
                     <select
@@ -791,7 +791,7 @@ export function FundingPage() {
                       onChange={(e) =>
                         setProgrammeField('status', e.target.value as FundingProgramme['status'])
                       }
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5"
                     >
                       {PROGRAMME_STATUSES.map((value) => (
                         <option key={value} value={value}>
@@ -803,36 +803,36 @@ export function FundingPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.rate', { defaultValue: 'Funding rate, %' })}
                     </span>
                     <input
                       value={programmeDraft.funding_rate_percent}
                       onChange={(e) => setProgrammeField('funding_rate_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.aid_cap', { defaultValue: 'Aid intensity ceiling, %' })}
                     </span>
                     <input
                       value={programmeDraft.aid_intensity_cap_percent}
                       onChange={(e) => setProgrammeField('aid_intensity_cap_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.own_share_percent', { defaultValue: 'Own contribution, %' })}
                     </span>
                     <input
                       value={programmeDraft.own_share_percent}
                       onChange={(e) => setProgrammeField('own_share_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                 </div>
@@ -845,7 +845,7 @@ export function FundingPage() {
                     }
                     className="mt-0.5"
                   />
-                  <span className="text-gray-600 dark:text-gray-300">
+                  <span className="text-content-secondary">
                     {t('funding.field.before_start', {
                       defaultValue: 'The application must be filed before the works begin',
                     })}
@@ -853,46 +853,46 @@ export function FundingPage() {
                 </label>
               </fieldset>
 
-              <fieldset className="space-y-3 border-t border-gray-100 pt-3 dark:border-gray-800">
-                <legend className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <fieldset className="space-y-3 border-t border-border-light pt-3">
+                <legend className="text-xs font-medium uppercase tracking-wide text-content-tertiary">
                   {t('funding.programme_clock', { defaultValue: 'Deadlines these terms create' })}
                 </legend>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.proof_days', { defaultValue: 'Proof of use due, days' })}
                     </span>
                     <input
                       value={programmeDraft.proof_of_use_due_days}
                       onChange={(e) => setProgrammeField('proof_of_use_due_days', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.spend_days', { defaultValue: 'Spend a draw within, days' })}
                     </span>
                     <input
                       value={programmeDraft.disbursement_spend_days}
                       onChange={(e) => setProgrammeField('disbursement_spend_days', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                    <span className="mb-1 block text-content-secondary">
                       {t('funding.field.retention_years', { defaultValue: 'Keep records, years' })}
                     </span>
                     <input
                       value={programmeDraft.retention_years}
                       onChange={(e) => setProgrammeField('retention_years', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-content-tertiary">
                   {t('funding.programme_clock_hint', {
                     defaultValue:
                       'Left at zero, no deadline is derived from this programme and every date has to be entered by hand.',
@@ -929,33 +929,33 @@ export function FundingPage() {
             </h2>
             <div className="space-y-3">
               <label className="block text-sm">
-                <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                <span className="mb-1 block text-content-secondary">
                   {t('funding.field.code', { defaultValue: 'Reference' })}
                 </span>
                 <input
                   value={draftCode}
                   onChange={(e) => setDraftCode(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                  className="w-full rounded border border-border px-2 py-1.5"
                 />
               </label>
               <label className="block text-sm">
-                <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                <span className="mb-1 block text-content-secondary">
                   {t('funding.field.title', { defaultValue: 'Title' })}
                 </span>
                 <input
                   value={draftTitle}
                   onChange={(e) => setDraftTitle(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                  className="w-full rounded border border-border px-2 py-1.5"
                 />
               </label>
               <label className="block text-sm">
-                <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                <span className="mb-1 block text-content-secondary">
                   {t('funding.field.programme', { defaultValue: 'Programme' })}
                 </span>
                 <select
                   value={draftProgramme}
                   onChange={(e) => setDraftProgramme(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+                  className="w-full rounded border border-border px-2 py-1.5"
                 >
                   <option value="">
                     {t('funding.choose_programme', { defaultValue: 'Choose a programme' })}
@@ -969,25 +969,25 @@ export function FundingPage() {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.field.eligible_base', { defaultValue: 'Eligible cost base' })}
                   </span>
                   <input
                     value={draftBase}
                     onChange={(e) => setDraftBase(e.target.value)}
                     inputMode="decimal"
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block text-gray-600 dark:text-gray-300">
+                  <span className="mb-1 block text-content-secondary">
                     {t('funding.field.requested', { defaultValue: 'Requested' })}
                   </span>
                   <input
                     value={draftRequested}
                     onChange={(e) => setDraftRequested(e.target.value)}
                     inputMode="decimal"
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-right tabular-nums dark:border-gray-600 dark:bg-gray-800"
+                    className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
                   />
                 </label>
               </div>
@@ -1007,7 +1007,7 @@ export function FundingPage() {
         </div>
       )}
 
-      <p className="text-xs text-gray-400 dark:text-gray-500">
+      <p className="text-xs text-content-quaternary">
         {t('funding.locale_note', {
           defaultValue: 'Deadline checks use your own calendar date, not the server clock.',
         })}

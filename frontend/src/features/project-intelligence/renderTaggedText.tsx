@@ -14,12 +14,12 @@
 import React from 'react';
 
 const TAG_STYLES: Record<string, string> = {
-  CRITICAL: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  BLOCKER: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  HIGH: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  MEDIUM: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-  WARNING: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-  LOW: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  CRITICAL: 'bg-semantic-error-bg text-semantic-error',
+  BLOCKER: 'bg-semantic-error-bg text-semantic-error',
+  HIGH: 'bg-semantic-warning-bg text-semantic-warning',
+  MEDIUM: 'bg-semantic-warning-bg text-semantic-warning',
+  WARNING: 'bg-semantic-warning-bg text-semantic-warning',
+  LOW: 'bg-semantic-success-bg text-semantic-success',
   INFO: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
 };
 
@@ -57,7 +57,7 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
       parts.push(
         <code
           key={key}
-          className="rounded bg-surface-tertiary px-1 py-0.5 font-mono text-[11px]"
+          className="rounded bg-surface-tertiary px-1 py-0.5 font-mono text-2xs"
         >
           {m[2]}
         </code>,

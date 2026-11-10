@@ -126,7 +126,7 @@ export function FloatingQueuePanel() {
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-surface-secondary rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-oe-blue rounded-full transition-all duration-1000 ease-linear"
+                        className="h-full bg-oe-blue rounded-full transition-all duration-500 ease-linear"
                         style={{ width: `${task.progress}%` }}
                       />
                     </div>

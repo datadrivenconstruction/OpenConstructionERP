@@ -84,7 +84,7 @@ function ModeButton({ id, active, onClick, icon, label }: ModeButtonProps) {
       tabIndex={active ? 0 : -1}
       onClick={onClick}
       className={clsx(
-        'inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium transition-colors',
+        'inline-flex items-center gap-1 h-6 px-2 rounded-full text-2xs font-medium transition-colors',
         active
           ? 'bg-oe-blue text-white'
           : 'text-content-secondary hover:bg-surface-secondary',

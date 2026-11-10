@@ -197,9 +197,9 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
             >
               {headerName}
             </h2>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-content-tertiary">
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs text-content-tertiary">
               <Badge variant="neutral">{asset.model_name}</Badge>
-              <span className="font-mono text-[10px] text-content-quaternary">
+              <span className="font-mono text-2xs text-content-quaternary">
                 {asset.stable_id}
               </span>
             </div>
@@ -285,7 +285,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
                 value={
                   asset.asset_info.operational_status ? (
                     <span
-                      className={`inline-block rounded-md border px-2 py-0.5 text-[11px] ${statusTone(
+                      className={`inline-block rounded-md border px-2 py-0.5 text-2xs ${statusTone(
                         asset.asset_info.operational_status,
                       )}`}
                     >
@@ -397,13 +397,13 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
                     className="flex items-start justify-between gap-3 rounded border border-border-light bg-surface-secondary/50 px-2 py-1"
                   >
                     <span
-                      className="max-w-[45%] shrink-0 truncate text-[11px] text-content-tertiary"
+                      className="max-w-[45%] shrink-0 truncate text-2xs text-content-tertiary"
                       title={key}
                     >
                       {prettyKey(key)}
                     </span>
                     <span
-                      className="min-w-0 break-words text-right text-[11px] font-medium text-content-primary"
+                      className="min-w-0 break-words text-right text-2xs font-medium text-content-primary"
                       title={String(value)}
                     >
                       {String(value)}
@@ -440,11 +440,11 @@ function Section({
 }) {
   return (
     <section className="mb-4">
-      <header className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+      <header className="mb-1.5 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
         {icon}
         <span>{title}</span>
         {count != null && (
-          <span className="ml-1 rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] font-normal text-content-secondary">
+          <span className="ml-1 rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-normal text-content-secondary">
             {count}
           </span>
         )}

@@ -56,14 +56,14 @@ function CopyableCommand({ command }: { command: string }) {
   };
 
   return (
-    <div className="flex items-stretch gap-0 rounded-lg border border-amber-300/80 dark:border-amber-700/80 overflow-hidden font-mono text-[12.5px] bg-white dark:bg-surface-primary">
+    <div className="flex items-stretch gap-0 rounded-lg border border-semantic-warning/30 overflow-hidden font-mono text-sm bg-white dark:bg-surface-primary">
       <code className="flex-1 px-3 py-2 overflow-x-auto whitespace-nowrap text-content-primary select-all">
         {command}
       </code>
       <button
         type="button"
         onClick={onCopy}
-        className="shrink-0 inline-flex items-center gap-1.5 px-3 border-l border-amber-300/80 dark:border-amber-700/80 bg-amber-100/70 hover:bg-amber-200/70 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-100 text-xs font-semibold transition"
+        className="shrink-0 inline-flex items-center gap-1.5 px-3 border-l border-semantic-warning/30 bg-semantic-warning/10 hover:bg-semantic-warning/10 text-semantic-warning text-xs font-semibold transition"
         aria-label={t('match_elements.embedder_copy_command', 'Copy command')}
       >
         {copied ? (
@@ -85,11 +85,11 @@ function CopyableCommand({ command }: { command: string }) {
 function TrustBadges({ status }: { status: EmbedderStatus }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 font-medium">
+    <div className="flex flex-wrap items-center gap-1.5 text-2xs">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-semantic-success-bg border border-semantic-success/30 text-semantic-success font-medium">
         {status.license}
       </span>
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-200 font-medium">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-semantic-info-bg border border-semantic-info/30 text-semantic-info font-medium">
         {t('match_elements.embedder_languages_caption', '{{n}}+ languages', {
           n: status.languages_supported,
         })}
@@ -97,7 +97,7 @@ function TrustBadges({ status }: { status: EmbedderStatus }) {
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 font-medium">
         {t('match_elements.embedder_runs_locally', 'Runs locally')}
       </span>
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-secondary border border-border-light text-content-secondary font-medium">
         {t('match_elements.embedder_no_api_key', 'No API key')}
       </span>
     </div>
@@ -111,21 +111,21 @@ function LoadedState({ status }: { status: EmbedderStatus }) {
   const precision = status.int8_mode ? 'INT8 ONNX' : 'FP32';
 
   return (
-    <div className="rounded-xl border border-emerald-300/80 dark:border-emerald-800/80 bg-emerald-50/60 dark:bg-emerald-950/20">
+    <div className="rounded-xl border border-semantic-success/30 bg-semantic-success/10">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-2.5 px-3 py-2 text-left"
         aria-expanded={open}
       >
-        <span className="shrink-0 w-6 h-6 rounded-md bg-emerald-500 text-white inline-flex items-center justify-center">
+        <span className="shrink-0 w-6 h-6 rounded-md bg-semantic-success text-white inline-flex items-center justify-center">
           <CheckCircle2 className="w-3.5 h-3.5" />
         </span>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 leading-tight">
+          <div className="text-sm font-semibold text-semantic-success leading-tight">
             {t('match_elements.embedder_loaded_title', 'Language model ready')}
           </div>
-          <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/80 truncate">
+          <div className="text-2xs text-emerald-800/80 dark:text-emerald-200/80 truncate">
             {t(
               'match_elements.embedder_loaded_caption',
               '{{model}} · {{precision}} · ~{{size}} MB · {{license}} · {{n}}+ languages',
@@ -140,15 +140,15 @@ function LoadedState({ status }: { status: EmbedderStatus }) {
           </div>
         </div>
         {open ? (
-          <ChevronUp className="w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
+          <ChevronUp className="w-4 h-4 text-semantic-success shrink-0" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
+          <ChevronDown className="w-4 h-4 text-semantic-success shrink-0" />
         )}
       </button>
       {open && (
-        <div className="px-3 pb-3 space-y-2 border-t border-emerald-200/70 dark:border-emerald-800/60 pt-2">
+        <div className="px-3 pb-3 space-y-2 border-t border-semantic-success/30 pt-2">
           <TrustBadges status={status} />
-          <div className="text-[11px] text-content-tertiary">
+          <div className="text-2xs text-content-tertiary">
             {t(
               'match_elements.embedder_runtime_caption',
               'Runtime: {{runtime}} · model_loaded={{loaded}}',
@@ -162,7 +162,7 @@ function LoadedState({ status }: { status: EmbedderStatus }) {
             href={status.homepage}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] text-emerald-800 dark:text-emerald-200 underline hover:opacity-80"
+            className="inline-flex items-center gap-1 text-2xs text-semantic-success underline hover:opacity-80"
           >
             <ExternalLink className="w-3 h-3" />
             {t('match_elements.embedder_homepage_link', 'Model homepage')}
@@ -222,25 +222,25 @@ function MissingState({ status }: { status: EmbedderStatus }) {
   // rendering the box anyway would offer an empty command to copy.
   const pipRoute = status.pip_command.length > 0;
   return (
-    <div className="rounded-xl border border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 via-amber-50 to-orange-50 dark:from-amber-950/40 dark:via-amber-950/30 dark:to-orange-950/30 p-4 space-y-3">
+    <div className="rounded-xl border border-semantic-warning/30 bg-gradient-to-br from-amber-50 via-amber-50 to-orange-50 dark:from-amber-950/40 dark:via-amber-950/30 dark:to-orange-950/30 p-4 space-y-3">
       <div className="flex items-start gap-3">
         <span className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white inline-flex items-center justify-center shadow-sm shadow-amber-500/30">
           <Cpu className="w-5 h-5" />
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100 leading-tight">
+            <h3 className="text-sm font-semibold text-semantic-warning leading-tight">
               {t(
                 'match_elements.embedder_required_title',
                 'Free language model required',
               )}
             </h3>
-            <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-300" />
+            <Sparkles className="w-3.5 h-3.5 text-semantic-warning" />
           </div>
           <div className="mt-0.5">
             <TrustBadges status={status} />
           </div>
-          <p className="mt-2 text-[12.5px] text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
+          <p className="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
             {installSentence(status, t)}
           </p>
         </div>
@@ -250,7 +250,7 @@ function MissingState({ status }: { status: EmbedderStatus }) {
         <>
           <CopyableCommand command={status.pip_command} />
 
-          <div className="text-[11px] text-amber-900/80 dark:text-amber-100/80">
+          <div className="text-2xs text-amber-900/80 dark:text-amber-100/80">
             {t(
               'match_elements.embedder_install_hint_after',
               'After install, restart the backend.',
@@ -266,7 +266,7 @@ function MissingState({ status }: { status: EmbedderStatus }) {
         </>
       )}
 
-      <div className="text-[11px] text-amber-900/80 dark:text-amber-100/80 pt-1 border-t border-amber-200/70 dark:border-amber-800/60">
+      <div className="text-2xs text-amber-900/80 dark:text-amber-100/80 pt-1 border-t border-semantic-warning/30 dark:border-amber-800/60">
         <a
           href={status.homepage}
           target="_blank"

@@ -159,7 +159,7 @@ function HowPortfolioWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1200,7 +1200,7 @@ function Stat({
       <dt className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</dt>
       <dd
         className={
-          'mt-0.5 text-xl font-bold tabular-nums ' +
+          'mt-0.5 text-xl font-semibold tabular-nums ' +
           (tone === 'warning' ? 'text-semantic-warning' : 'text-content-primary')
         }
       >

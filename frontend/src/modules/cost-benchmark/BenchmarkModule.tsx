@@ -47,10 +47,10 @@ function formatCurrency(value: number, currency: string): string {
 }
 
 function getPercentileColor(pct: number): string {
-  if (pct <= 25) return 'text-emerald-600 dark:text-emerald-400';
-  if (pct <= 50) return 'text-green-600 dark:text-green-400';
-  if (pct <= 75) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
+  if (pct <= 25) return 'text-semantic-success';
+  if (pct <= 50) return 'text-semantic-success';
+  if (pct <= 75) return 'text-semantic-warning';
+  return 'text-semantic-error';
 }
 
 function getPercentileLabelKey(pct: number): { key: string; defaultValue: string } {
@@ -69,14 +69,14 @@ function getConfidenceMeta(level: 'high' | 'medium' | 'low'): {
     return {
       key: 'benchmarks.conf_high',
       defaultValue: 'High',
-      className: 'text-emerald-600 dark:text-emerald-400',
+      className: 'text-semantic-success',
     };
   }
   if (level === 'medium') {
     return {
       key: 'benchmarks.conf_medium',
       defaultValue: 'Medium',
-      className: 'text-amber-600 dark:text-amber-400',
+      className: 'text-semantic-warning',
     };
   }
   return {
@@ -267,7 +267,7 @@ export default function BenchmarkModule() {
           <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-content-primary">
+          <h1 className="text-xl font-semibold text-content-primary">
             {t('benchmarks.title', { defaultValue: 'Cost Benchmarks' })}
           </h1>
           <p className="text-sm text-content-tertiary">
@@ -404,7 +404,7 @@ export default function BenchmarkModule() {
         {/* Auto-fill hint: when a project is selected but has no recorded
             area, tell the user the area is theirs to enter. */}
         {selectedProjectId && projectData.data && !projectData.data.gfa && (
-          <p className="mb-3 text-xs text-amber-600 dark:text-amber-400">
+          <p className="mb-3 text-xs text-semantic-warning">
             {t('benchmarks.no_area_hint', {
               defaultValue:
                 'This project has no recorded floor area yet. Enter the area below to complete the comparison.',
@@ -480,7 +480,7 @@ export default function BenchmarkModule() {
           <p className="text-xs text-content-tertiary mb-1">
             {t('benchmarks.your_cost_unit', { defaultValue: 'Your Cost / {{unit}}', unit: rateUnit })}
           </p>
-          <p className="text-2xl font-bold text-content-primary">
+          <p className="text-2xl font-semibold text-content-primary">
             {/* RATE (reciprocal) */}
             {fmtRate(analysis.costPerM2, regionInfo.currency)}
           </p>
@@ -495,7 +495,7 @@ export default function BenchmarkModule() {
           <p className="text-xs text-content-tertiary mb-1">
             {t('benchmarks.percentile_industry', { defaultValue: 'Percentile vs Industry' })}
           </p>
-          <p className={`text-2xl font-bold ${getPercentileColor(analysis.percentile)}`}>
+          <p className={`text-2xl font-semibold ${getPercentileColor(analysis.percentile)}`}>
             P{fmtFixed(analysis.percentile, 0)}
           </p>
           <p className="text-xs text-content-tertiary mt-1">
@@ -511,7 +511,7 @@ export default function BenchmarkModule() {
           </p>
           {ownPortfolio && percentileVsOwn !== null ? (
             <>
-              <p className={`text-2xl font-bold ${getPercentileColor(percentileVsOwn)}`}>
+              <p className={`text-2xl font-semibold ${getPercentileColor(percentileVsOwn)}`}>
                 P{fmtFixed(percentileVsOwn, 0)}
               </p>
               <p className="text-xs text-content-tertiary mt-1">
@@ -523,7 +523,7 @@ export default function BenchmarkModule() {
             </>
           ) : (
             <>
-              <p className="text-2xl font-bold text-content-quaternary">—</p>
+              <p className="text-2xl font-semibold text-content-quaternary">—</p>
               <p className="text-xs text-content-tertiary mt-1">
                 {portfolioQuery.isLoading
                   ? t('benchmarks.portfolio_loading', { defaultValue: 'Loading your projects...' })
@@ -541,7 +541,7 @@ export default function BenchmarkModule() {
           <p className="text-xs text-content-tertiary mb-1">
             {t('benchmarks.diff_median', { defaultValue: 'Difference from Median' })}
           </p>
-          <p className={`text-2xl font-bold ${analysis.diffFromMedian > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+          <p className={`text-2xl font-semibold ${analysis.diffFromMedian > 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
             {/* RATE (reciprocal): difference of two EUR/m2 rates is itself EUR/m2 */}
             {analysis.diffFromMedian > 0 ? '+' : ''}{fmtRate(analysis.diffFromMedian, regionInfo.currency)}
           </p>
@@ -629,7 +629,7 @@ export default function BenchmarkModule() {
             className="absolute top-0 h-8 w-0.5 bg-content-primary"
             style={{ left: `${markerLeft}%` }}
           >
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-content-primary px-2 py-0.5 text-2xs font-bold text-white">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-content-primary px-2 py-0.5 text-2xs font-semibold text-white">
               {/* RATE (reciprocal); marker POSITION (markerLeft) stays metric */}
               {fmtRate(analysis.costPerM2, regionInfo.currency)}
             </div>
@@ -648,23 +648,23 @@ export default function BenchmarkModule() {
 
         {/* Range details table - all RATE (reciprocal) */}
         <div className="mt-4 grid grid-cols-5 gap-2 text-center text-xs">
-          <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 p-2">
+          <div className="rounded-lg bg-semantic-success-bg p-2">
             <p className="text-content-tertiary">{t('benchmarks.min', { defaultValue: 'Min' })}</p>
             <p className="font-semibold text-content-primary">{fmtRate(benchmarkRange.min, regionInfo.currency)}</p>
           </div>
-          <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-2">
+          <div className="rounded-lg bg-semantic-success-bg p-2">
             <p className="text-content-tertiary">{t('benchmarks.q1', { defaultValue: 'Q1 (25th)' })}</p>
             <p className="font-semibold text-content-primary">{fmtRate(benchmarkRange.q1, regionInfo.currency)}</p>
           </div>
           <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-2 ring-1 ring-blue-200 dark:ring-blue-800">
             <p className="text-content-tertiary">{t('benchmarks.median', { defaultValue: 'Median' })}</p>
-            <p className="font-bold text-content-primary">{fmtRate(benchmarkRange.median, regionInfo.currency)}</p>
+            <p className="font-semibold text-content-primary">{fmtRate(benchmarkRange.median, regionInfo.currency)}</p>
           </div>
-          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 p-2">
+          <div className="rounded-lg bg-semantic-warning-bg p-2">
             <p className="text-content-tertiary">{t('benchmarks.q3', { defaultValue: 'Q3 (75th)' })}</p>
             <p className="font-semibold text-content-primary">{fmtRate(benchmarkRange.q3, regionInfo.currency)}</p>
           </div>
-          <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-2">
+          <div className="rounded-lg bg-semantic-error-bg p-2">
             <p className="text-content-tertiary">{t('benchmarks.max', { defaultValue: 'Max' })}</p>
             <p className="font-semibold text-content-primary">{fmtRate(benchmarkRange.max, regionInfo.currency)}</p>
           </div>
@@ -720,7 +720,7 @@ export default function BenchmarkModule() {
               </div>
               {/* Your value marker - RATE (reciprocal); youPct position stays metric */}
               <div className="absolute top-0 h-4 w-0.5 bg-content-primary" style={{ left: `${youPct}%` }}>
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-content-primary px-2 py-0.5 text-2xs font-bold text-white">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-content-primary px-2 py-0.5 text-2xs font-semibold text-white">
                   {fmtRate(analysis.costPerM2, cur)}
                 </div>
               </div>
@@ -776,7 +776,7 @@ export default function BenchmarkModule() {
               {Math.round(benchmarkRange.split.kg300Pct * 100)}%
             </div>
             <div
-              className="flex items-center justify-center bg-amber-500/80 text-2xs font-semibold text-white"
+              className="flex items-center justify-center bg-semantic-warning/80 text-2xs font-semibold text-white"
               style={{ width: `${benchmarkRange.split.kg400Pct * 100}%` }}
             >
               {Math.round(benchmarkRange.split.kg400Pct * 100)}%
@@ -792,19 +792,19 @@ export default function BenchmarkModule() {
                   {t('benchmarks.kg300', { defaultValue: 'KG300 Construction' })}
                 </span>
               </div>
-              <p className="mt-1 text-base font-bold text-content-primary">
+              <p className="mt-1 text-base font-semibold text-content-primary">
                 {/* RATE (reciprocal) + per-unit suffix follows display system */}
                 {fmtRate(kgSplit.kg300, regionInfo.currency)}/{rateUnit}
               </p>
             </div>
             <div className="rounded-lg bg-surface-secondary p-3">
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-amber-500/80" />
+                <span className="h-2.5 w-2.5 rounded-sm bg-semantic-warning/80" />
                 <span className="text-xs font-medium text-content-secondary">
                   {t('benchmarks.kg400', { defaultValue: 'KG400 Technical' })}
                 </span>
               </div>
-              <p className="mt-1 text-base font-bold text-content-primary">
+              <p className="mt-1 text-base font-semibold text-content-primary">
                 {/* RATE (reciprocal) + per-unit suffix follows display system */}
                 {fmtRate(kgSplit.kg400, regionInfo.currency)}/{rateUnit}
               </p>
@@ -823,7 +823,7 @@ export default function BenchmarkModule() {
                 defaultValue: benchmarkRange.secondary.label,
               })}
             </p>
-            <p className="mt-3 text-2xl font-bold text-content-primary">
+            <p className="mt-3 text-2xl font-semibold text-content-primary">
               {/* Per-unit rate is "currency per bed/room/pupil/dwelling" - the
                   secondary unit is a COUNT with no metric->imperial mapping, so
                   this value is left canonical (NOT an m2 rate). */}
@@ -868,7 +868,7 @@ export default function BenchmarkModule() {
               <span className="text-xs font-semibold text-content-secondary">
                 {t('benchmarks.kg300', { defaultValue: 'KG300 Construction' })}
               </span>
-              <span className="text-xs font-bold text-content-primary tabular-nums">
+              <span className="text-xs font-semibold text-content-primary tabular-nums">
                 {/* RATE (reciprocal) + per-unit suffix follows display system */}
                 {fmtRate(kgSplit.kg300, regionInfo.currency)}/{rateUnit}
               </span>
@@ -894,7 +894,7 @@ export default function BenchmarkModule() {
               <span className="text-xs font-semibold text-content-secondary">
                 {t('benchmarks.kg400', { defaultValue: 'KG400 Technical' })}
               </span>
-              <span className="text-xs font-bold text-content-primary tabular-nums">
+              <span className="text-xs font-semibold text-content-primary tabular-nums">
                 {/* RATE (reciprocal) + per-unit suffix follows display system */}
                 {fmtRate(kgSplit.kg400, regionInfo.currency)}/{rateUnit}
               </span>
@@ -906,7 +906,7 @@ export default function BenchmarkModule() {
                   row={row}
                   max={maxElementValue}
                   currency={regionInfo.currency}
-                  barClass="bg-amber-500/70"
+                  barClass="bg-semantic-warning/70"
                   rateFactor={rateFactor}
                   t={t}
                 />

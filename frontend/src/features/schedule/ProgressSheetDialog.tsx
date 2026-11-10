@@ -430,7 +430,7 @@ export function ProgressSheetDialog({ open, onClose, scheduleId, activities, can
                               <li
                                 key={`${issue.rule_id}-${issue.code}-${i}`}
                                 className={`flex items-start gap-1 ${
-                                  issue.severity === 'error' ? 'text-semantic-error' : 'text-amber-600'
+                                  issue.severity === 'error' ? 'text-semantic-error' : 'text-semantic-warning'
                                 }`}
                               >
                                 <AlertTriangle size={12} className="mt-0.5 shrink-0" />

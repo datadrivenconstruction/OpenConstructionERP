@@ -151,7 +151,7 @@ export default function BIMSpatialTreePanel({
 
   if (elements.length === 0) {
     return (
-      <div className="p-3 text-[11px] text-content-tertiary italic" data-testid="bim-structure-empty">
+      <div className="p-3 text-2xs text-content-tertiary italic" data-testid="bim-structure-empty">
         {t('bim.structure.empty', {
           defaultValue: 'No elements to show. Load a model with element data to browse its structure.',
         })}
@@ -170,13 +170,13 @@ export default function BIMSpatialTreePanel({
           placeholder={t('bim.structure.search_placeholder', {
             defaultValue: 'Find element, type or storey...',
           })}
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
           data-testid="bim-structure-search"
         />
       </div>
 
       {tree.length === 0 ? (
-        <p className="px-2 text-[11px] text-content-tertiary italic">
+        <p className="px-2 text-2xs text-content-tertiary italic">
           {t('bim.structure.no_matches', { defaultValue: 'No elements match your search.' })}
         </p>
       ) : (
@@ -199,12 +199,12 @@ export default function BIMSpatialTreePanel({
                   <button
                     type="button"
                     onClick={() => onHighlightElements(storey.ids)}
-                    className="flex flex-1 min-w-0 items-center gap-1.5 py-1 text-left text-[11px] font-medium text-content-primary"
+                    className="flex flex-1 min-w-0 items-center gap-1.5 py-1 text-left text-2xs font-medium text-content-primary"
                     title={t('bim.structure.highlight_storey', { defaultValue: 'Highlight this storey' })}
                   >
                     <Layers3 size={12} className="text-oe-blue shrink-0" />
                     <span className="truncate">{storey.label}</span>
-                    <span className="ms-auto shrink-0 rounded bg-surface-tertiary px-1 text-[9px] tabular-nums text-content-tertiary">
+                    <span className="ms-auto shrink-0 rounded bg-surface-tertiary px-1 text-2xs tabular-nums text-content-tertiary">
                       {storey.ids.length}
                     </span>
                   </button>
@@ -230,12 +230,12 @@ export default function BIMSpatialTreePanel({
                             <button
                               type="button"
                               onClick={() => onHighlightElements(type.ids)}
-                              className="flex flex-1 min-w-0 items-center gap-1.5 py-1 text-left text-[11px] text-content-secondary"
+                              className="flex flex-1 min-w-0 items-center gap-1.5 py-1 text-left text-2xs text-content-secondary"
                               title={t('bim.structure.highlight_type', { defaultValue: 'Highlight all of this type' })}
                             >
                               <Box size={11} className="text-content-tertiary shrink-0" />
                               <span className="truncate">{type.label}</span>
-                              <span className="ms-auto shrink-0 rounded bg-surface-tertiary px-1 text-[9px] tabular-nums text-content-tertiary">
+                              <span className="ms-auto shrink-0 rounded bg-surface-tertiary px-1 text-2xs tabular-nums text-content-tertiary">
                                 {type.ids.length}
                               </span>
                             </button>
@@ -251,7 +251,7 @@ export default function BIMSpatialTreePanel({
                                       type="button"
                                       onClick={() => onSelectElement(leaf.id)}
                                       data-testid="bim-structure-leaf"
-                                      className={`flex w-full min-w-0 items-center gap-1.5 rounded px-1 py-0.5 text-left text-[11px] ${
+                                      className={`flex w-full min-w-0 items-center gap-1.5 rounded px-1 py-0.5 text-left text-2xs ${
                                         active
                                           ? 'bg-oe-blue/10 text-oe-blue'
                                           : 'text-content-secondary hover:bg-surface-tertiary'
@@ -264,7 +264,7 @@ export default function BIMSpatialTreePanel({
                                 );
                               })}
                               {type.leaves.length > LEAF_CAP && (
-                                <li className="px-1 py-0.5 text-[10px] italic text-content-tertiary">
+                                <li className="px-1 py-0.5 text-2xs italic text-content-tertiary">
                                   {t('bim.structure.more_elements', {
                                     defaultValue: '+{{count}} more (refine the search to see them)',
                                     count: type.leaves.length - LEAF_CAP,

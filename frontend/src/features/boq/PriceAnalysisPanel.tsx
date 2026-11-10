@@ -69,7 +69,7 @@ function kindLabel(
 /** Colour per resource kind, same assignment as the BOQ cost breakdown. */
 const KIND_DOT_CLASSES: Record<string, string> = {
   material: 'bg-blue-500',
-  labor: 'bg-amber-500',
+  labor: 'bg-semantic-warning',
   machinery: 'bg-teal-500',
   equipment: 'bg-violet-500',
   subcontractor: 'bg-pink-500',
@@ -261,7 +261,7 @@ export function PriceAnalysisPanel({
         {/* ── Body ───────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
           {downloadError && (
-            <p className="text-xs text-red-600 dark:text-red-400">{downloadError}</p>
+            <p className="text-xs text-semantic-error">{downloadError}</p>
           )}
 
           {isLoading && !data && (
@@ -272,7 +272,7 @@ export function PriceAnalysisPanel({
           )}
 
           {error != null && !data && (
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-semantic-error">
               {t('boq.price_analysis_failed', {
                 defaultValue: 'The price analysis could not be loaded.',
               })}
@@ -505,10 +505,10 @@ function MarkupSummary({ data }: { data: PriceAnalysisResponse }) {
         </span>
       </div>
       <div className="flex items-center justify-between text-xs">
-        <span className="font-bold text-content-primary text-sm">
+        <span className="font-semibold text-content-primary text-sm">
           {t('price_breakdown.line.position_total', { defaultValue: 'Position total' })}
         </span>
-        <span className="font-bold text-content-primary text-sm tabular-nums">
+        <span className="font-semibold text-content-primary text-sm tabular-nums">
           {formatCurrency(data.position_total, data.currency)}
         </span>
       </div>

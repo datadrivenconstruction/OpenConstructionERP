@@ -327,13 +327,13 @@ export function CustomColumnsDialog({
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-content-primary">{preset.name}</p>
               {allApplied && (
-                <span className="inline-flex items-center gap-0.5 text-2xs font-medium text-emerald-600">
+                <span className="inline-flex items-center gap-0.5 text-2xs font-medium text-semantic-success">
                   <Check size={11} />
                   {t('boq.applied', { defaultValue: 'Applied' })}
                 </span>
               )}
               {someApplied && !allApplied && (
-                <span className="text-2xs font-medium text-amber-600">
+                <span className="text-2xs font-medium text-semantic-warning">
                   {t('boq.partial', { defaultValue: 'Partial' })}
                 </span>
               )}
@@ -345,7 +345,7 @@ export function CustomColumnsDialog({
               {preset.columns.map((c) => (
                 <span
                   key={c.name}
-                  className={`inline-block rounded px-1.5 py-0.5 text-2xs ${existingNames.has(c.name) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-secondary text-content-secondary'}`}
+                  className={`inline-block rounded px-1.5 py-0.5 text-2xs ${existingNames.has(c.name) ? 'bg-semantic-success/10 text-semantic-success' : 'bg-surface-secondary text-content-secondary'}`}
                 >
                   {c.display_name}
                 </span>
@@ -569,7 +569,7 @@ export function CustomColumnsDialog({
                               </span>
                               <div className="h-1 w-16 rounded-full bg-surface-secondary overflow-hidden">
                                 <div
-                                  className={`h-full ${fillPct >= 50 ? 'bg-emerald-500' : fillPct >= 10 ? 'bg-amber-500' : 'bg-content-quaternary'}`}
+                                  className={`h-full ${fillPct >= 50 ? 'bg-semantic-success' : fillPct >= 10 ? 'bg-semantic-warning' : 'bg-content-quaternary'}`}
                                   style={{ width: `${fillPct}%` }}
                                 />
                               </div>

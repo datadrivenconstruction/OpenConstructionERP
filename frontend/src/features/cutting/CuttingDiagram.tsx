@@ -34,12 +34,12 @@ export function LinearPlanDiagram({ bars, trimMm }: { bars: LinearBar[]; trimMm:
               <span className="font-medium">{bar.stock_label || bar.stock_ref}</span>
               <span className="tabular-nums">{t('cutting.mm_value', { defaultValue: '{{value}} mm', value: bar.length_mm })}</span>
               {bar.is_offcut && (
-                <span className="rounded bg-emerald-500/10 px-1.5 text-2xs font-medium text-emerald-700 dark:text-emerald-300">
+                <span className="rounded bg-semantic-success/10 px-1.5 text-2xs font-medium text-semantic-success">
                   {t('cutting.from_inventory', { defaultValue: 'From inventory' })}
                 </span>
               )}
               {offcut > 0 && (
-                <span className="text-emerald-700 dark:text-emerald-300">
+                <span className="text-semantic-success">
                   {t('cutting.offcut_value', { defaultValue: 'Offcut {{value}} mm', value: bar.offcut_mm })}
                 </span>
               )}
@@ -117,7 +117,7 @@ export function SheetPlanDiagram({ sheets }: { sheets: SheetLayout[] }) {
                 {t('cutting.size_value', { defaultValue: '{{length}} x {{width}} mm', length: sheet.length_mm, width: sheet.width_mm })}
               </span>
               {sheet.is_offcut && (
-                <span className="rounded bg-emerald-500/10 px-1.5 text-2xs font-medium text-emerald-700 dark:text-emerald-300">
+                <span className="rounded bg-semantic-success/10 px-1.5 text-2xs font-medium text-semantic-success">
                   {t('cutting.from_inventory', { defaultValue: 'From inventory' })}
                 </span>
               )}

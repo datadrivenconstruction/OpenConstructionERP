@@ -50,7 +50,7 @@ export function PlugCell({
     <div
       data-testid="plug-cell"
       data-source={plug.source}
-      className="rounded border border-dashed border-amber-400 bg-amber-50/70 px-1.5 py-1 text-right dark:border-amber-700 dark:bg-amber-950/20"
+      className="rounded border border-dashed border-semantic-warning/60 bg-semantic-warning/10 px-1.5 py-1 text-right"
     >
       {editing ? (
         <div className="flex items-center justify-end gap-1">
@@ -104,8 +104,8 @@ export function PlugCell({
             plug.source === 'manual'
               ? 'bg-oe-blue/10 text-oe-blue'
               : plug.source === 'none'
-                ? 'bg-red-100 text-red-700'
-                : 'bg-amber-100 text-amber-800',
+                ? 'bg-semantic-error-bg text-semantic-error'
+                : 'bg-semantic-warning-bg text-semantic-warning',
           )}
         >
           {t(key, { defaultValue: dflt })}
@@ -117,7 +117,7 @@ export function PlugCell({
             aria-label={t('bid_management.plug_clear', { defaultValue: 'Clear manual plug' })}
             title={t('bid_management.plug_clear', { defaultValue: 'Clear manual plug' })}
             onClick={() => onSave(null)}
-            className="text-content-tertiary hover:text-red-600"
+            className="text-content-tertiary hover:text-semantic-error"
           >
             <X size={11} />
           </button>
@@ -198,7 +198,7 @@ export function LevelingCheckBanner({ check }: { check?: LevelingCheck | null })
   return (
     <div
       data-testid="leveling-check"
-      className="space-y-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200"
+      className="space-y-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
     >
       {failed.map((r) => (
         <div key={`${r.rule_id}-${r.element_ref ?? ''}`} className="flex items-start gap-2">

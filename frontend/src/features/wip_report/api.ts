@@ -172,8 +172,8 @@ export function fadeTone(fade: string | null | undefined): FadeTone {
 }
 
 export function fadeClass(tone: FadeTone): string {
-  if (tone === 'fade') return 'text-rose-600';
-  if (tone === 'gain') return 'text-emerald-600';
+  if (tone === 'fade') return 'text-semantic-error';
+  if (tone === 'gain') return 'text-semantic-success';
   return 'text-content-secondary';
 }
 

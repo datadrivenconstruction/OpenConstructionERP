@@ -181,11 +181,11 @@ export function RegisterPage() {
       {/* ── Left: benefits (desktop) ── */}
       <div className="hidden lg:flex lg:w-[460px] xl:w-[500px] shrink-0 relative z-10 flex-col justify-center ps-14 xl:ps-20 pe-8 xl:pe-10 py-6">
         <div className="mb-4 animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <h2 className="text-xl font-bold text-content-primary leading-snug">
+          <h2 className="text-xl font-semibold text-content-primary leading-snug">
             {t('login.hero_title', 'Construction cost estimation,')}{' '}
             <span className="gradient-text">{t('login.hero_highlight', 'reimagined')}</span>
           </h2>
-          <p className="mt-1.5 text-[13px] text-content-secondary leading-relaxed">
+          <p className="mt-1.5 text-sm text-content-secondary leading-relaxed">
             {t('login.hero_desc', 'Professional BOQ, 4D scheduling, 5D cost model, and tendering - all in one open-source platform.')}
           </p>
         </div>
@@ -217,7 +217,7 @@ export function RegisterPage() {
             <p className="text-2xs text-content-secondary leading-snug">
               {t('login.privacy', 'All data is processed and stored locally on your machine. Nothing is sent to external servers. You own your data - always.')}
             </p>
-            <p className="mt-0.5 text-[10px] text-content-quaternary leading-snug">
+            <p className="mt-0.5 text-2xs text-content-quaternary leading-snug">
               * {t('login.privacy_ai', 'If you use built-in AI tools, some data may be sent to the AI provider you configure (OpenAI, Anthropic, etc.). You control which provider to use and what data to share.')}
             </p>
           </div>
@@ -414,7 +414,7 @@ export function RegisterPage() {
                     onChange={(e) => setPrivacyAccepted(e.target.checked)}
                     className="mt-0.5 h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue cursor-pointer shrink-0"
                   />
-                  <span className="text-[11px] text-content-secondary leading-snug">
+                  <span className="text-2xs text-content-secondary leading-snug">
                     {t('auth.privacy_consent', 'I agree to the')}{' '}
                     <a
                       href="/privacy-policy.html"

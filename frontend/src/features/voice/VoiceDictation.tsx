@@ -221,7 +221,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                     ))}
                   </span>
                 )}
-                <span className="text-[11px] tabular-nums text-content-secondary">{formatSeconds(voice.seconds)}</span>
+                <span className="text-2xs tabular-nums text-content-secondary">{formatSeconds(voice.seconds)}</span>
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-content-secondary">

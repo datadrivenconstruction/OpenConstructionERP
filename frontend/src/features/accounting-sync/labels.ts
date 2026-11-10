@@ -186,7 +186,7 @@ export function logStatusVariant(s: string): BadgeVariant {
 
 /** Tailwind classes per finding severity. */
 export function severityClass(severity: string): string {
-  if (severity === 'error') return 'bg-rose-100 text-rose-700';
-  if (severity === 'warning') return 'bg-amber-100 text-amber-700';
-  return 'bg-sky-100 text-sky-700';
+  if (severity === 'error') return 'bg-semantic-error-bg text-semantic-error';
+  if (severity === 'warning') return 'bg-semantic-warning-bg text-semantic-warning';
+  return 'bg-semantic-info-bg text-semantic-info';
 }

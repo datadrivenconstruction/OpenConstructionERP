@@ -98,7 +98,7 @@ function FileListTagsCell({
         <TagPill key={tag.id} tag={tag} size="sm" />
       ))}
       {tags.length > 4 && (
-        <span className="text-[9px] text-content-tertiary tabular-nums self-center">
+        <span className="text-2xs text-content-tertiary tabular-nums self-center">
           +{tags.length - 4}
         </span>
       )}
@@ -305,8 +305,8 @@ export function FileList({
                           'inline-flex items-center justify-center h-6 w-6 rounded-md transition-colors',
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
                           isFavorite
-                            ? 'text-amber-500 hover:text-amber-600'
-                            : 'text-content-tertiary/40 hover:text-amber-500',
+                            ? 'text-semantic-warning hover:text-semantic-warning'
+                            : 'text-content-tertiary/40 hover:text-semantic-warning',
                         )}
                         title={
                           isFavorite
@@ -326,7 +326,7 @@ export function FileList({
                       <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
                       {typeof row.extra?.drawing_number === 'string' && row.extra.drawing_number && (
                         <span
-                          className="font-mono text-[11px] text-content-tertiary shrink-0"
+                          className="font-mono text-2xs text-content-tertiary shrink-0"
                           title={t('files.drawing_number', { defaultValue: 'Drawing number' })}
                         >
                           {row.extra.drawing_number}
@@ -337,7 +337,7 @@ export function FileList({
                       </span>
                       {typeof row.extra?.revision_code === 'string' && row.extra.revision_code && (
                         <span
-                          className="inline-flex items-center rounded-md border border-border-light px-1.5 py-0.5 text-[10px] font-medium text-content-secondary shrink-0"
+                          className="inline-flex items-center rounded-md border border-border-light px-1.5 py-0.5 text-2xs font-medium text-content-secondary shrink-0"
                           title={t('files.revision', { defaultValue: 'Revision' })}
                         >
                           Rev {row.extra.revision_code}
@@ -346,7 +346,7 @@ export function FileList({
                       {/* CDE state moved to its own dedicated Status column. */}
                     </div>
                     {typeof row.extra?.snippet === 'string' && row.extra.snippet && (
-                      <p className="mt-0.5 ms-6 text-[11px] leading-snug text-content-secondary line-clamp-2">
+                      <p className="mt-0.5 ms-6 text-2xs leading-snug text-content-secondary line-clamp-2">
                         <SnippetHighlight text={row.extra.snippet} query={searchQuery ?? ''} />
                       </p>
                     )}
@@ -388,7 +388,7 @@ export function FileList({
                         onOpen(row);
                       }}
                       className={clsx(
-                        'inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10.5px] font-medium transition-colors',
+                        'inline-flex items-center gap-1 h-6 px-2 rounded-md text-2xs font-medium transition-colors',
                         'border border-border-light text-content-secondary',
                         'hover:border-oe-blue/40 hover:text-oe-blue hover:bg-oe-blue/5',
                       )}

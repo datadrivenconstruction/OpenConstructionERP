@@ -65,7 +65,7 @@ export default function SemanticModelSettings() {
             <Sparkles size={20} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-content-primary">
+            <h3 className="text-base font-semibold text-content-primary">
               {t('settings.semantic_title', { defaultValue: 'Semantic search' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -100,7 +100,7 @@ export default function SemanticModelSettings() {
             onClick={handleToggle}
             className={clsx(
               'relative inline-flex h-[26px] w-[48px] shrink-0 cursor-pointer rounded-full p-[3px] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50 disabled:cursor-wait disabled:opacity-60',
-              enabled ? 'bg-oe-blue' : 'bg-gray-200 dark:bg-gray-700',
+              enabled ? 'bg-oe-blue' : 'bg-surface-secondary',
             )}
           >
             <span

@@ -159,8 +159,8 @@ export function ConflictResolutionPanel({
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-              <GitMerge className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-semantic-warning-bg">
+              <GitMerge className="h-4 w-4 text-semantic-warning" />
             </div>
             <div>
               <h2 className="text-sm font-semibold text-content-primary">
@@ -195,7 +195,7 @@ export function ConflictResolutionPanel({
         {activeConflict && (
           <div className="flex flex-wrap items-center gap-4 px-6 py-3 bg-surface-secondary text-xs text-content-tertiary border-b border-border">
             <span className="flex items-center gap-1.5">
-              <AlertTriangle size={12} className="text-amber-500" />
+              <AlertTriangle size={12} className="text-semantic-warning" />
               <span className="font-mono font-medium text-content-secondary">
                 {activeConflict.positionOrdinal}
               </span>
@@ -306,7 +306,7 @@ export function ConflictResolutionPanel({
                     data-testid="btn-apply-manual"
                     className={clsx(
                       'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
-                      'bg-emerald-500 text-white hover:bg-emerald-600',
+                      'bg-semantic-success text-white hover:bg-semantic-success',
                       'disabled:opacity-40 disabled:pointer-events-none',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
                     )}

@@ -141,17 +141,17 @@ export function WipReportPage() {
                     <td className="px-3 py-2">
                       <div className="font-medium text-content-primary">{r.project_name}</div>
                       {r.loss_job && (
-                        <span className="text-2xs font-medium text-rose-600">{t('wip_report.loss_job_badge', { defaultValue: 'Loss job' })}</span>
+                        <span className="text-2xs font-medium text-semantic-error">{t('wip_report.loss_job_badge', { defaultValue: 'Loss job' })}</span>
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.contract_value, r.currency)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{r.percent_complete}%</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.earned_revenue, r.currency)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.billed_to_date, r.currency)}</td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${pos === 'over' ? 'bg-amber-50 font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400' : 'text-content-tertiary'}`}>
+                    <td className={`px-3 py-2 text-right tabular-nums ${pos === 'over' ? 'bg-semantic-warning-bg font-medium text-semantic-warning' : 'text-content-tertiary'}`}>
                       {formatCurrency(r.over_billing, r.currency)}
                     </td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${pos === 'under' ? 'bg-sky-50 font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-400' : 'text-content-tertiary'}`}>
+                    <td className={`px-3 py-2 text-right tabular-nums ${pos === 'under' ? 'bg-semantic-info-bg font-medium text-semantic-info' : 'text-content-tertiary'}`}>
                       {formatCurrency(r.under_billing, r.currency)}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(r.projected_gross_profit, r.currency)}</td>
@@ -173,8 +173,8 @@ export function WipReportPage() {
                   <td className="px-3 py-2 text-right tabular-nums">{tot.percent_complete}%</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.earned_revenue, tot.currency)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.billed_to_date, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-amber-700 dark:text-amber-400">{formatCurrency(tot.over_billing, tot.currency)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-sky-700 dark:text-sky-400">{formatCurrency(tot.under_billing, tot.currency)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-semantic-warning">{formatCurrency(tot.over_billing, tot.currency)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-semantic-info">{formatCurrency(tot.under_billing, tot.currency)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.projected_gross_profit, tot.currency)}</td>
                   <td className={`px-3 py-2 text-right tabular-nums ${fadeClass(fadeTone(tot.fade))}`}>{formatCurrency(tot.fade, tot.currency)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(tot.backlog, tot.currency)}</td>

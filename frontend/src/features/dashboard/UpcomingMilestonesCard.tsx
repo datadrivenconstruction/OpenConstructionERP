@@ -143,7 +143,7 @@ export function UpcomingMilestonesCard() {
         <ul className="flex flex-col gap-2.5">
           {milestones.map((m) => (
             <li key={m.id} className="flex items-center gap-3">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950/40">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-semantic-warning-bg text-semantic-warning">
                 <Flag size={13} strokeWidth={1.75} />
               </div>
               <div className="min-w-0 flex-1">
@@ -184,10 +184,10 @@ function DueChip({ days, t }: DueChipProps) {
       count: n,
       n,
     });
-    tone = 'bg-rose-50 text-rose-600 dark:bg-rose-950/40';
+    tone = 'bg-semantic-error-bg text-semantic-error';
   } else if (days === 0) {
     label = t('dashboard.milestones_today', { defaultValue: 'today' });
-    tone = 'bg-amber-50 text-amber-600 dark:bg-amber-950/40';
+    tone = 'bg-semantic-warning-bg text-semantic-warning';
   } else {
     label = t('dashboard.milestones_in_days', {
       defaultValue: 'in {{n}} days',
@@ -195,11 +195,11 @@ function DueChip({ days, t }: DueChipProps) {
       count: days,
       n: days,
     });
-    tone = days <= 3 ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40';
+    tone = days <= 3 ? 'bg-semantic-warning-bg text-semantic-warning' : 'bg-semantic-success-bg text-semantic-success';
   }
 
   return (
-    <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${tone}`}>
+    <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-2xs font-medium ${tone}`}>
       {label}
     </span>
   );

@@ -26,10 +26,10 @@ import { STAGES } from './StageRail';
 const ROLE_META: Record<StepRole, { icon: typeof Brain; tone: string; labelKey: string; labelFallback: string }> = {
   thought: { icon: Brain, tone: 'text-indigo-500', labelKey: 'aiest.role.thought', labelFallback: 'Thinking' },
   tool_call: { icon: Wrench, tone: 'text-oe-blue', labelKey: 'aiest.role.tool_call', labelFallback: 'Tool call' },
-  observation: { icon: Eye, tone: 'text-emerald-500', labelKey: 'aiest.role.observation', labelFallback: 'Observation' },
+  observation: { icon: Eye, tone: 'text-semantic-success', labelKey: 'aiest.role.observation', labelFallback: 'Observation' },
   answer: { icon: MessageSquare, tone: 'text-content-primary', labelKey: 'aiest.role.answer', labelFallback: 'Answer' },
-  error: { icon: AlertCircle, tone: 'text-rose-500', labelKey: 'aiest.role.error', labelFallback: 'Error' },
-  stage_complete: { icon: CheckCircle2, tone: 'text-emerald-500', labelKey: 'aiest.role.stage_complete', labelFallback: 'Stage done' },
+  error: { icon: AlertCircle, tone: 'text-semantic-error', labelKey: 'aiest.role.error', labelFallback: 'Error' },
+  stage_complete: { icon: CheckCircle2, tone: 'text-semantic-success', labelKey: 'aiest.role.stage_complete', labelFallback: 'Stage done' },
 };
 
 function stepText(step: StepOut): string {
@@ -87,7 +87,7 @@ export function AgentTimelineDrawer({
             {t('aiest.timeline.loading', { defaultValue: 'Loading the timeline...' })}
           </div>
         ) : stepsQ.isError ? (
-          <p className="py-12 text-center text-sm text-rose-600">
+          <p className="py-12 text-center text-sm text-semantic-error">
             {t('aiest.timeline.error', { defaultValue: 'Could not load the agent timeline.' })}
           </p>
         ) : steps.length === 0 ? (
@@ -114,17 +114,17 @@ export function AgentTimelineDrawer({
                         {t(meta.labelKey, { defaultValue: meta.labelFallback })}
                       </span>
                       {stageDef && (
-                        <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] text-content-tertiary">
+                        <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs text-content-tertiary">
                           {t(stageDef.titleKey, { defaultValue: stageDef.titleFallback })}
                         </span>
                       )}
                       <DateDisplay
                         value={step.created_at}
                         format="time"
-                        className="text-[10px] text-content-tertiary"
+                        className="text-2xs text-content-tertiary"
                       />
                       {step.took_ms != null && (
-                        <span className="text-[10px] text-content-tertiary tabular-nums">
+                        <span className="text-2xs text-content-tertiary tabular-nums">
                           {step.took_ms} ms
                         </span>
                       )}

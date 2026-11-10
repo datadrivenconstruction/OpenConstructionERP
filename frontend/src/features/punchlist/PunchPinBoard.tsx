@@ -350,7 +350,7 @@ export function PunchPinBoard({
         </div>
 
         {/* Canvas area */}
-        <div className="relative max-h-[65vh] overflow-auto bg-neutral-100 p-3 dark:bg-neutral-900">
+        <div className="relative max-h-[65vh] overflow-auto bg-surface-secondary p-3">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 size={28} className="animate-spin text-oe-blue" />
@@ -389,7 +389,7 @@ export function PunchPinBoard({
                       backgroundColor: color,
                     }}
                     className={clsx(
-                      'absolute z-10 flex h-6 w-6 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full rounded-bl-none border-2 border-white text-2xs font-bold text-white shadow-md',
+                      'absolute z-10 flex h-6 w-6 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full rounded-bl-none border-2 border-white text-2xs font-semibold text-white shadow-md',
                       placing ? 'pointer-events-none opacity-70' : 'hover:scale-110',
                     )}
                   >
@@ -468,7 +468,7 @@ export function PunchPinBoard({
                   >
                     <span
                       style={{ backgroundColor: PIN_COLOR[pin.priority] }}
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-2xs font-semibold text-white"
                     >
                       {idx + 1}
                     </span>

@@ -224,7 +224,7 @@ export function PhoneLogEditDialog({
       </WideModalSection>
 
       {saveMutation.isError && (
-        <p className="text-sm text-red-600">{getErrorMessage(saveMutation.error)}</p>
+        <p className="text-sm text-semantic-error">{getErrorMessage(saveMutation.error)}</p>
       )}
     </WideModal>
   );

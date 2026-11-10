@@ -224,7 +224,7 @@ function SummaryRow({
       tabIndex={-1}
       className={clsx(
         'align-top focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue',
-        held && 'bg-amber-50/60 dark:bg-amber-950/20',
+        held && 'bg-semantic-warning/10',
         line.emphasis && !held && 'bg-surface-secondary/40',
       )}
       data-testid={`hakedis-line-${line.key}`}
@@ -259,7 +259,7 @@ function SummaryRow({
 
         {held && (
           <p
-            className="mt-1 flex items-start gap-1.5 break-words text-xs text-amber-800 dark:text-amber-300"
+            className="mt-1 flex items-start gap-1.5 break-words text-xs text-semantic-warning"
             data-testid={`hakedis-line-reason-${line.key}`}
           >
             <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -279,8 +279,8 @@ function SummaryRow({
             className={clsx(
               'mt-1 flex items-start gap-1.5 break-words text-xs',
               finding.severity === 'error' || finding.engine_error
-                ? 'text-red-700 dark:text-red-400'
-                : 'text-amber-800 dark:text-amber-300',
+                ? 'text-semantic-error'
+                : 'text-semantic-warning',
             )}
             data-testid={`hakedis-line-finding-${line.key}`}
           >

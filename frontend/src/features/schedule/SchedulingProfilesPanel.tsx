@@ -244,7 +244,7 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
-                  {p.is_default && <Star size={14} className="text-amber-500" aria-hidden />}
+                  {p.is_default && <Star size={14} className="text-semantic-warning" aria-hidden />}
                   {p.name}
                 </div>
                 <div className="text-xs text-content-tertiary">

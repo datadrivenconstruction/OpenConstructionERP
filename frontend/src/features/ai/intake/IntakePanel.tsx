@@ -291,7 +291,7 @@ export function IntakePanel({
         </div>
 
         {degraded && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-[#92400e] dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-[#92400e]">
             <AlertCircle size={14} className="mt-0.5 shrink-0" />
             {t(degraded.i18nKey, { defaultValue: degraded.defaultValue })}
           </div>

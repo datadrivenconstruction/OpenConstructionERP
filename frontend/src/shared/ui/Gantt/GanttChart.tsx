@@ -1059,7 +1059,7 @@ export function GanttChart({
               x={effectiveX + 6}
               y={barY + BAR_HEIGHT / 2}
               dominantBaseline="central"
-              className="pointer-events-none select-none fill-current text-[11px] font-medium"
+              className="pointer-events-none select-none fill-current text-2xs font-medium"
               fill={a.progress > 40 ? '#ffffff' : '#1f2937'}
             >
               {a.name.length > Math.floor(effectiveWidth / 7)
@@ -1286,7 +1286,7 @@ export function GanttChart({
                   y={HEADER_HEIGHT / 4 + 1}
                   dominantBaseline="central"
                   clipPath={`url(#${clipPrefix}-top-${i})`}
-                  className="fill-current text-[10px] font-semibold uppercase tracking-wider"
+                  className="fill-current text-2xs font-semibold uppercase tracking-wider"
                   fill="var(--color-content-tertiary, #94a3b8)"
                 >
                   {cell.label}
@@ -1320,7 +1320,7 @@ export function GanttChart({
                   y={HEADER_HEIGHT * 0.75 + 1}
                   dominantBaseline="central"
                   textAnchor="middle"
-                  className="fill-current text-[10px] font-medium"
+                  className="fill-current text-2xs font-medium"
                   fill="var(--color-content-tertiary, #94a3b8)"
                 >
                   {cell.label}
@@ -1398,7 +1398,7 @@ export function GanttChart({
                   y={5}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="text-[9px] font-bold"
+                  className="text-2xs font-semibold"
                   fill="white"
                 >
                   {t('gantt.today', 'Today')}

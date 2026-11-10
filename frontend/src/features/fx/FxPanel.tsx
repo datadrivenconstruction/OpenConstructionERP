@@ -759,7 +759,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
                   hint below is about which set to pick, not about how many
                   were offered. */}
               {setsQuery.data && <TruncationNotice page={setsQuery.data} className="mt-1" />}
-              <span className="mt-0.5 block text-[11px] text-content-tertiary">
+              <span className="mt-0.5 block text-2xs text-content-tertiary">
                 {t('fx.field_pinned_set_hint', {
                   defaultValue:
                     'Pin to a locked set. An unlocked one can be rewritten by the next refresh, and then the pin holds a moving target.',

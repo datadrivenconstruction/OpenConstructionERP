@@ -768,7 +768,7 @@ function FieldConfig({ field, onPatch }: FieldConfigProps) {
 function ConfigRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-0.5 block text-[11px] font-medium text-content-tertiary">{label}</span>
+      <span className="mb-0.5 block text-2xs font-medium text-content-tertiary">{label}</span>
       {children}
     </label>
   );
@@ -880,7 +880,7 @@ function FormulaEditor({ field, refs, onPatch }: FormulaEditorProps) {
         onChange={(e) => onPatch({ formula: e.target.value })}
         placeholder={t('forms.formula_ph', { defaultValue: 'e.g. length * width' })}
       />
-      <div className="flex items-center gap-1 text-[11px]">
+      <div className="flex items-center gap-1 text-2xs">
         <span className="text-content-tertiary">{t('forms.unit', { defaultValue: 'Unit' })}:</span>
         <input
           className={clsx(inputCls, 'h-7 max-w-[8rem] text-xs')}
@@ -890,18 +890,18 @@ function FormulaEditor({ field, refs, onPatch }: FormulaEditorProps) {
         />
       </div>
       {parsed && !parsed.ok && (
-        <p className="text-[11px] text-semantic-error">
+        <p className="text-2xs text-semantic-error">
           {t('forms.formula_invalid', { defaultValue: 'Invalid formula' })}: {parsed.error}
         </p>
       )}
       {badRefs.length > 0 && (
-        <p className="text-[11px] text-semantic-error">
+        <p className="text-2xs text-semantic-error">
           {t('forms.formula_unknown', { defaultValue: 'Unknown field(s)' })}: {fmtList(badRefs)}
         </p>
       )}
       {refs.length > 0 && (
         <div className="flex flex-wrap gap-1 pt-0.5">
-          <span className="text-[11px] text-content-tertiary">
+          <span className="text-2xs text-content-tertiary">
             {t('forms.insert_field', { defaultValue: 'Insert' })}:
           </span>
           {refs.map((r) => (
@@ -909,7 +909,7 @@ function FormulaEditor({ field, refs, onPatch }: FormulaEditorProps) {
               key={r.key}
               type="button"
               onClick={() => onPatch({ formula: `${expr}${expr && !expr.endsWith(' ') ? ' ' : ''}${r.key}` })}
-              className="rounded border border-border bg-surface-primary px-1.5 py-0.5 font-mono text-[11px] text-oe-blue hover:bg-oe-blue-subtle"
+              className="rounded border border-border bg-surface-primary px-1.5 py-0.5 font-mono text-2xs text-oe-blue hover:bg-oe-blue-subtle"
             >
               {r.key}
             </button>
@@ -936,7 +936,7 @@ function ConditionEditor({ title, rule, refs, onChange }: ConditionEditorProps) 
 
   if (isGroup) {
     return (
-      <div className="text-[11px] text-content-tertiary">
+      <div className="text-2xs text-content-tertiary">
         <span className="font-medium text-content-secondary">{title}</span>{' '}
         {t('forms.advanced_rule', { defaultValue: 'an advanced rule (kept as-is).' })}{' '}
         <button type="button" onClick={() => onChange(null)} className="text-oe-blue hover:underline">
@@ -961,17 +961,17 @@ function ConditionEditor({ title, rule, refs, onChange }: ConditionEditorProps) 
 
   return (
     <div className="space-y-1.5">
-      <span className="block text-[11px] font-medium text-content-secondary">{title}</span>
+      <span className="block text-2xs font-medium text-content-secondary">{title}</span>
       {!leaf ? (
         refs.length === 0 ? (
-          <p className="text-[11px] text-content-tertiary">
+          <p className="text-2xs text-content-tertiary">
             {t('forms.logic_needs_fields', { defaultValue: 'Add another field first to build a rule.' })}
           </p>
         ) : (
           <button
             type="button"
             onClick={() => setLeaf({ field: refs[0]!.key, op: 'not_empty' })}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-oe-blue hover:underline"
+            className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
           >
             <Plus size={11} />
             {t('forms.add_condition', { defaultValue: 'Add a condition' })}
@@ -1045,7 +1045,7 @@ function ExpanderToggle({
       type="button"
       onClick={onClick}
       className={clsx(
-        'inline-flex items-center gap-1 text-[11px] font-medium transition-colors',
+        'inline-flex items-center gap-1 text-2xs font-medium transition-colors',
         active ? 'text-oe-blue' : 'text-content-tertiary hover:text-content-secondary',
       )}
     >

@@ -457,7 +457,7 @@ export function LoginPageNext() {
 
       {/* Preview badge — top-left so users know this is /login-next. */}
       <div className="absolute top-4 left-4 z-30">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-white/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/70">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-white/60 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/70">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
@@ -510,13 +510,13 @@ export function LoginPageNext() {
           <div className="oe-spot" aria-hidden />
 
           {/* Eyebrow */}
-          <div className="oe-font-display relative mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-[11px] font-semibold tracking-[0.08em] uppercase text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/80">
+          <div className="oe-font-display relative mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-2xs font-semibold tracking-wider uppercase text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/80">
             <span className="oe-pulse relative flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             <span>{t('login.welcome_eyebrow', 'First-time setup')}</span>
           </div>
 
           {/* Headline */}
-          <h1 className="oe-font-display relative max-w-[640px] text-[46px] xl:text-[60px] leading-[0.95] font-extrabold tracking-[-0.04em] text-content-primary dark:text-white">
+          <h1 className="oe-font-display relative max-w-[640px] text-[46px] xl:text-[60px] leading-[0.95] font-semibold tracking-tight text-content-primary dark:text-white">
             {t('login.welcome_h_a', 'A clean slate,')}{' '}
             <span className="relative inline-block">
               <span className="oe-font-serif italic font-normal bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#38bdf8] bg-clip-text text-transparent">
@@ -526,7 +526,7 @@ export function LoginPageNext() {
             </span>
           </h1>
 
-          <p className="oe-font-display relative mt-5 max-w-[480px] text-[15px] leading-[1.6] text-content-secondary dark:text-white/65">
+          <p className="oe-font-display relative mt-5 max-w-[480px] text-base leading-[1.6] text-content-secondary dark:text-white/65">
             {t('login.welcome_sub_modules', 'Sign in to unlock every module - your workspace is empty until you import or create.')}
           </p>
 
@@ -546,14 +546,14 @@ export function LoginPageNext() {
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${tone.bg} ${tone.fg} ${tone.ring}`}>
                     <Icon size={16} strokeWidth={1.8} />
                   </div>
-                  <div className="mt-2.5 text-[12px] font-semibold leading-tight text-content-primary dark:text-white">
+                  <div className="mt-2.5 text-xs font-semibold leading-tight text-content-primary dark:text-white">
                     {m.label}
                   </div>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className={`text-[18px] font-extrabold tracking-tight leading-none ${m.stat === '—' ? 'text-content-quaternary/60' : 'text-content-primary dark:text-white'}`}>
+                    <span className={`text-xl font-semibold tracking-tight leading-none ${m.stat === '—' ? 'text-content-quaternary/60' : 'text-content-primary dark:text-white'}`}>
                       {m.stat}
                     </span>
-                    <span className="text-[10px] uppercase tracking-[0.08em] font-medium text-content-tertiary">
+                    <span className="text-2xs uppercase tracking-wider font-medium text-content-tertiary">
                       {m.hint}
                     </span>
                   </div>
@@ -562,13 +562,13 @@ export function LoginPageNext() {
             })}
           </div>
 
-          <div className="oe-font-display relative mt-7 flex items-center gap-3 text-[11px] font-medium text-content-tertiary">
+          <div className="oe-font-display relative mt-7 flex items-center gap-3 text-2xs font-medium text-content-tertiary">
             <div className="oe-spec-bar h-[2px] w-12 rounded-full" />
             <span>{t('login.workspace_status_first', 'Empty workspace - sign in to set up your first project')}</span>
           </div>
 
           {/* Copyright — left-bottom, sits below the hero content. */}
-          <div className="relative mt-auto pt-10 text-[11px] text-content-tertiary/80 dark:text-white/40">
+          <div className="relative mt-auto pt-10 text-2xs text-content-tertiary/80 dark:text-white/40">
             © 2026{' '}
             <a
               href="https://www.linkedin.com/in/boikoartem/"
@@ -591,7 +591,7 @@ export function LoginPageNext() {
               <div className="lg:hidden mb-6 flex flex-col items-center">
                 <Logo size="md" animate />
                 <span
-                  className="mt-2.5 text-xl font-medium tracking-[-0.02em] text-content-primary dark:text-white"
+                  className="mt-2.5 text-xl font-medium tracking-tight text-content-primary dark:text-white"
                   style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                 >
                   Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
@@ -602,7 +602,7 @@ export function LoginPageNext() {
               <div className="hidden lg:flex items-center gap-2.5 mb-7">
                 <Logo size="sm" animate />
                 <span
-                  className="text-[15px] font-medium tracking-[-0.02em] text-content-primary dark:text-white"
+                  className="text-base font-medium tracking-tight text-content-primary dark:text-white"
                   style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                 >
                   Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary dark:text-white/50">ERP</span>
@@ -611,7 +611,7 @@ export function LoginPageNext() {
 
               {/* Headline */}
               <div className="animate-stagger-in" style={{ animationDelay: '60ms' }}>
-                <h2 className="oe-font-display text-[28px] font-bold tracking-[-0.025em] text-content-primary dark:text-white">
+                <h2 className="oe-font-display text-[28px] font-semibold tracking-tight text-content-primary dark:text-white">
                   {t('auth.welcome_back', 'Welcome back')}
                 </h2>
                 <p className="oe-font-display mt-1.5 text-sm text-content-secondary dark:text-white/60">
@@ -736,7 +736,7 @@ export function LoginPageNext() {
                         disabled={demoLoading !== null}
                         className="oe-glass-lite group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left transition-all hover:translate-y-[-1px] hover:border-oe-blue/30 disabled:opacity-50"
                       >
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-semibold shadow-sm`}>
                           {demoLoading === acct.email ? (
                             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -747,8 +747,8 @@ export function LoginPageNext() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[13px] font-semibold text-content-primary dark:text-white">{acct.name}</div>
-                          <div className="text-[11px] text-content-tertiary truncate">{acct.email} · {acct.role}</div>
+                          <div className="text-sm font-semibold text-content-primary dark:text-white">{acct.name}</div>
+                          <div className="text-2xs text-content-tertiary truncate">{acct.email} · {acct.role}</div>
                         </div>
                         <ArrowUpRight size={15} className="text-content-quaternary group-hover:text-oe-blue transition-colors shrink-0" />
                       </button>

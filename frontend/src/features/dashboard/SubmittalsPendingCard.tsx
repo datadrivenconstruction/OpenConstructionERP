@@ -131,12 +131,12 @@ export function SubmittalsPendingCard() {
             {
               label: t('dashboard.submittals_approved', { defaultValue: 'Approved' }),
               value: nf.format(buckets.approved),
-              tone: 'text-emerald-600',
+              tone: 'text-semantic-success',
             },
             {
               label: t('dashboard.submittals_overdue', { defaultValue: 'Overdue' }),
               value: nf.format(buckets.overdue),
-              tone: buckets.overdue > 0 ? 'text-rose-600' : 'text-content-secondary',
+              tone: buckets.overdue > 0 ? 'text-semantic-error' : 'text-content-secondary',
             },
           ]}
         />

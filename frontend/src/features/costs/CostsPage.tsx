@@ -1204,7 +1204,7 @@ export function CostsPage() {
               size="sm"
               icon={<TrendingUp size={14} />}
               onClick={() => setShowEscalation((p) => !p)}
-              className={showEscalation ? 'border-amber-300 text-amber-600 bg-amber-50 dark:bg-amber-900/20' : ''}
+              className={showEscalation ? 'border-semantic-warning/30 text-semantic-warning bg-semantic-warning-bg' : ''}
             >
               {t('costs.escalation', { defaultValue: 'Escalation' })}
             </Button>
@@ -1354,7 +1354,7 @@ export function CostsPage() {
           onClick={() => setSpecialTab(specialTab === 'favourites' ? '' : 'favourites')}
           className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
             specialTab === 'favourites'
-              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+              ? 'bg-semantic-warning-bg text-semantic-warning border border-semantic-warning/30'
               : 'text-content-secondary hover:bg-surface-secondary border border-transparent'
           }`}
         >
@@ -1494,7 +1494,7 @@ export function CostsPage() {
           {semanticSearch && data?.semanticUnavailable && !semanticOff && (
             <div
               role="status"
-              className="flex items-start gap-2 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400"
+              className="flex items-start gap-2 rounded-lg border border-amber-400/40 bg-semantic-warning/10 px-3 py-2 text-xs text-semantic-warning dark:text-amber-400"
             >
               <Info size={14} className="mt-0.5 shrink-0" />
               <span>
@@ -2345,7 +2345,7 @@ function AddToBOQModal({
               the target project's currency. */}
           {mismatchedCount > 0 && (
             <div
-              className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200"
+              className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
               data-testid="add-to-boq-fx-warning"
             >
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
@@ -2613,7 +2613,7 @@ function CreateAssemblyFromCostsModal({
                 cannot show a meaningful blended sum — surface an inline warning
                 and suppress the total instead of mislabeling it. */}
             {hasMixedCurrencies ? (
-              <div className="mt-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200">
+              <div className="mt-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
                 {t('costs.assembly_mixed_currency_warning', {
                   defaultValue:
                     'Assemblies must be single-currency. The selected items span {{count}} currencies ({{list}}) - pick items that share one currency to continue.',
@@ -3762,12 +3762,12 @@ function CostItemRow({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <HardHat size={12} className="text-amber-500" />
+                    <HardHat size={12} className="text-semantic-warning" />
                     <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
                       {t('costs.component_labor', { defaultValue: 'Labor' })}
                     </span>
                   </div>
-                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                  <div className="text-sm font-semibold tabular-nums text-content-primary">
                     {laborCost > 0 ? money(laborCost) : '—'}
                   </div>
                   {laborHours > 0 && (
@@ -3788,7 +3788,7 @@ function CostItemRow({
                       {t('costs.component_equipment', { defaultValue: 'Equipment' })}
                     </span>
                   </div>
-                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                  <div className="text-sm font-semibold tabular-nums text-content-primary">
                     {equipmentCost > 0 ? money(equipmentCost) : '—'}
                   </div>
                   {machines.length > 0 && (
@@ -3799,12 +3799,12 @@ function CostItemRow({
                 </div>
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Package size={12} className="text-green-600" />
+                    <Package size={12} className="text-semantic-success" />
                     <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
                       {t('costs.component_material', { defaultValue: 'Materials' })}
                     </span>
                   </div>
-                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                  <div className="text-sm font-semibold tabular-nums text-content-primary">
                     {materialCost > 0 ? money(materialCost) : '—'}
                   </div>
                   {materials.length > 0 && (
@@ -3819,7 +3819,7 @@ function CostItemRow({
                       {t('costs.total', { defaultValue: 'Total' })}
                     </span>
                   </div>
-                  <div className="text-sm font-bold tabular-nums text-content-primary">{money(item.rate)}</div>
+                  <div className="text-sm font-semibold tabular-nums text-content-primary">{money(item.rate)}</div>
                   <div className="text-2xs text-content-tertiary mt-0.5">
                     {t('costs.per_unit', { defaultValue: 'per {{unit}}', unit: item.unit })}
                   </div>
@@ -3903,8 +3903,8 @@ function CostItemRow({
                   <tbody className="divide-y divide-border-light">
                     {detail.components.map((comp, i) => {
                       const TYPE_COLOR_MAP: Record<string, string> = {
-                        labor: 'text-amber-700 bg-amber-50',
-                        material: 'text-green-700 bg-green-50',
+                        labor: 'text-semantic-warning bg-semantic-warning-bg',
+                        material: 'text-semantic-success bg-semantic-success-bg',
                         equipment: 'text-blue-600 bg-blue-50',
                         operator: 'text-violet-600 bg-violet-50',
                         electricity: 'text-cyan-600 bg-cyan-50',
@@ -4179,7 +4179,7 @@ function ComparePanel({
                   <tr>
                     <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">
                       <div className="flex items-center gap-1">
-                        <HardHat size={12} className="text-amber-500" />
+                        <HardHat size={12} className="text-semantic-warning" />
                         {t('costs.labor', { defaultValue: 'Labor' })}
                       </div>
                     </td>
@@ -4192,7 +4192,7 @@ function ComparePanel({
                   <tr>
                     <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">
                       <div className="flex items-center gap-1">
-                        <Package size={12} className="text-emerald-500" />
+                        <Package size={12} className="text-semantic-success" />
                         {t('costs.material', { defaultValue: 'Material' })}
                       </div>
                     </td>

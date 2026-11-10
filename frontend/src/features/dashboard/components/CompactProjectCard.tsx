@@ -35,11 +35,11 @@ export interface CompactProjectCardProps {
 const regionColorMap: Record<string, string> = {
   DACH: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   UK: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  US: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  GULF: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  RU: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  US: 'bg-semantic-error-bg text-semantic-error',
+  GULF: 'bg-semantic-warning-bg text-semantic-warning',
+  RU: 'bg-semantic-success-bg text-semantic-success',
   NORDIC: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
-  DEFAULT: 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300',
+  DEFAULT: 'bg-surface-secondary text-content-secondary',
 };
 
 // One of three places that turn a stored classification standard into a name
@@ -138,7 +138,7 @@ export function CompactProjectCard({
       <div className="p-3.5">
         <div className="flex items-start justify-between gap-2">
           <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(region)}`}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(region)}`}
           >
             {name.charAt(0).toUpperCase()}
           </div>
@@ -184,14 +184,14 @@ export function CompactProjectCard({
       {hasValue && (
         <div className="px-3.5 pb-2">
           <div className="rounded-lg border border-border-light bg-gradient-to-br from-oe-blue-subtle/60 via-surface-elevated to-surface-elevated px-3 py-1.5">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('projects.card_total_value', { defaultValue: 'Total value' })}
             </div>
             <div className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="text-base font-bold tabular-nums text-content-primary">
+              <span className="text-base font-semibold tabular-nums text-content-primary">
                 {formatCompactValue(numericValue)}
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                 {currency}
               </span>
             </div>

@@ -276,7 +276,7 @@ export function CompareViewer({
       <div className={clsx('grid flex-1 gap-2', mode === 'side' ? 'grid-cols-2' : 'grid-cols-1')}>
         <div className="relative min-h-0">
           {mode === 'side' && (
-            <span className="absolute left-2 top-2 z-10 rounded bg-red-600/90 px-1.5 py-0.5 text-2xs font-semibold text-white">
+            <span className="absolute left-2 top-2 z-10 rounded bg-semantic-error/90 px-1.5 py-0.5 text-2xs font-semibold text-white">
               {t('drawing_compare.viewer_old', { defaultValue: 'Older revision' })}
             </span>
           )}
@@ -325,7 +325,7 @@ export function CompareViewer({
       </div>
       {mode === 'overlay' && (
         <div className="flex flex-wrap items-center gap-3 text-xs text-content-secondary">
-          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-red-600" />{t('drawing_compare.legend_old', { defaultValue: 'Only in the older revision' })}</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-semantic-error" />{t('drawing_compare.legend_old', { defaultValue: 'Only in the older revision' })}</span>
           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-blue-600" />{t('drawing_compare.legend_new', { defaultValue: 'Only in the newer revision' })}</span>
           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-gray-400" />{t('drawing_compare.legend_same', { defaultValue: 'Unchanged' })}</span>
         </div>

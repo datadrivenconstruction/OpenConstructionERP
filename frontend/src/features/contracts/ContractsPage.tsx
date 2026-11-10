@@ -164,19 +164,19 @@ const CONTRACT_TYPE_COLORS: Record<
 > = {
   lump_sum: { bg: 'bg-blue-50 dark:bg-blue-950/40', ring: 'ring-blue-200 dark:ring-blue-800', text: 'text-blue-700 dark:text-blue-300' },
   gmp: { bg: 'bg-violet-50 dark:bg-violet-950/40', ring: 'ring-violet-200 dark:ring-violet-800', text: 'text-violet-700 dark:text-violet-300' },
-  cost_plus: { bg: 'bg-amber-50 dark:bg-amber-950/40', ring: 'ring-amber-200 dark:ring-amber-800', text: 'text-amber-700 dark:text-amber-300' },
-  tm: { bg: 'bg-emerald-50 dark:bg-emerald-950/40', ring: 'ring-emerald-200 dark:ring-emerald-800', text: 'text-emerald-700 dark:text-emerald-300' },
-  unit_price: { bg: 'bg-sky-50 dark:bg-sky-950/40', ring: 'ring-sky-200 dark:ring-sky-800', text: 'text-sky-700 dark:text-sky-300' },
+  cost_plus: { bg: 'bg-semantic-warning-bg', ring: 'ring-semantic-warning/30', text: 'text-semantic-warning' },
+  tm: { bg: 'bg-semantic-success-bg', ring: 'ring-semantic-success/30', text: 'text-semantic-success' },
+  unit_price: { bg: 'bg-semantic-info-bg', ring: 'ring-semantic-info/30', text: 'text-semantic-info' },
   design_build: { bg: 'bg-fuchsia-50 dark:bg-fuchsia-950/40', ring: 'ring-fuchsia-200 dark:ring-fuchsia-800', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
-  combination: { bg: 'bg-slate-50 dark:bg-slate-800/60', ring: 'ring-slate-200 dark:ring-slate-700', text: 'text-slate-700 dark:text-slate-300' },
+  combination: { bg: 'bg-surface-secondary', ring: 'ring-slate-200 dark:ring-slate-700', text: 'text-content-secondary' },
   remeasurement: { bg: 'bg-teal-50 dark:bg-teal-950/40', ring: 'ring-teal-200 dark:ring-teal-800', text: 'text-teal-700 dark:text-teal-300' },
 };
 
 /** Neutral fallback so an unknown/missing contract type never crashes the chip. */
 const CONTRACT_TYPE_FALLBACK = {
-  bg: 'bg-slate-50 dark:bg-slate-800/60',
+  bg: 'bg-surface-secondary',
   ring: 'ring-slate-200 dark:ring-slate-700',
-  text: 'text-slate-700 dark:text-slate-300',
+  text: 'text-content-secondary',
 };
 
 const CONTRACT_STATUS_VARIANT: Record<
@@ -478,7 +478,7 @@ function HowContractsWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -2815,7 +2815,7 @@ export function ContractDetailDrawer({
 function KPI({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm font-semibold text-content-primary">

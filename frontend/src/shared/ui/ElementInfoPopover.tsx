@@ -161,9 +161,9 @@ function sourceIcon(source: ElementPayload['source']) {
     case 'bim':
       return <Cuboid size={14} className="text-oe-blue" />;
     case 'dwg':
-      return <PenLine size={14} className="text-emerald-500" />;
+      return <PenLine size={14} className="text-semantic-success" />;
     case 'pdf':
-      return <Ruler size={14} className="text-amber-500" />;
+      return <Ruler size={14} className="text-semantic-warning" />;
   }
 }
 
@@ -260,14 +260,14 @@ export function ElementInfoPopover({
               {title}
             </span>
             {subtitle && (
-              <span className="block text-[10px] text-content-tertiary truncate">
+              <span className="block text-2xs text-content-tertiary truncate">
                 {subtitle}
               </span>
             )}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
-          <span className="text-[9px] text-content-quaternary uppercase tracking-wider font-medium">
+          <span className="text-2xs text-content-quaternary uppercase tracking-wider font-medium">
             {sourceLabel(element.source, t)}
           </span>
           <button
@@ -284,11 +284,11 @@ export function ElementInfoPopover({
       {/* Properties / Quantities */}
       <div className="max-h-64 overflow-y-auto">
         {rows.length === 0 ? (
-          <div className="px-4 py-3 text-[11px] text-content-tertiary italic">
+          <div className="px-4 py-3 text-2xs text-content-tertiary italic">
             {t('element_info.no_properties', { defaultValue: 'No numeric properties available.' })}
           </div>
         ) : (
-          <table className="w-full text-[11px]">
+          <table className="w-full text-2xs">
             <tbody>
               {rows.map((row, idx) => (
                 <tr
@@ -301,7 +301,7 @@ export function ElementInfoPopover({
                   <td className="px-4 py-1.5 text-right text-content-primary tabular-nums font-mono">
                     {row.value}
                     {row.unit && (
-                      <span className="ml-1 text-content-tertiary font-sans text-[10px]">
+                      <span className="ml-1 text-content-tertiary font-sans text-2xs">
                         {row.unit}
                       </span>
                     )}
@@ -319,7 +319,7 @@ export function ElementInfoPopover({
           <button
             type="button"
             onClick={handleLinkClick}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark transition-colors"
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-2xs font-semibold text-white shadow-sm hover:bg-oe-blue-dark transition-colors"
           >
             <Link2 size={12} />
             {t('element_info.link_to_boq', { defaultValue: 'Link to BOQ' })}
@@ -329,7 +329,7 @@ export function ElementInfoPopover({
 
       {/* Element ID footer */}
       <div className="px-4 py-1 bg-surface-secondary/20 border-t border-border-light/30">
-        <span className="text-[9px] text-content-quaternary font-mono truncate block">
+        <span className="text-2xs text-content-quaternary font-mono truncate block">
           ID: {element.id}
         </span>
       </div>

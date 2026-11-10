@@ -163,7 +163,7 @@ const PRIORITY_BADGE_VARIANT: Record<PunchPriority, 'neutral' | 'blue' | 'warnin
 /** Extra CSS applied to priority badges to differentiate medium (yellow) from high (orange). */
 const PRIORITY_BADGE_CLS: Record<PunchPriority, string> = {
   low: '',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+  medium: 'bg-semantic-warning-bg text-semantic-warning',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
   critical: '',
 };
@@ -512,10 +512,10 @@ function punchDrawingLink(item: {
 }
 
 const PRIORITY_RADIO_COLORS: Record<PunchPriority, string> = {
-  low: 'bg-gray-100 text-gray-700 border-gray-300 peer-checked:bg-gray-200 peer-checked:border-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
+  low: 'bg-surface-secondary text-content-secondary border-border peer-checked:bg-gray-200 peer-checked:border-gray-500',
   medium: 'bg-blue-50 text-blue-700 border-blue-200 peer-checked:bg-blue-100 peer-checked:border-blue-500 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-  high: 'bg-amber-50 text-amber-700 border-amber-200 peer-checked:bg-amber-100 peer-checked:border-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  critical: 'bg-red-50 text-red-700 border-red-200 peer-checked:bg-red-100 peer-checked:border-red-500 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  high: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30 peer-checked:bg-amber-100 peer-checked:border-amber-500',
+  critical: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30 peer-checked:bg-red-100 peer-checked:border-red-500',
 };
 
 function AddPunchModal({
@@ -623,7 +623,7 @@ function AddPunchModal({
             placeholder={t('punch.title_placeholder', {
               defaultValue: 'e.g. Missing fire seal on Level 3 penetration',
             })}
-            className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+            className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
             autoFocus
           />
         </WideModalField>
@@ -864,7 +864,7 @@ function AddPunchModal({
                   onChange={(e) => set('location_x', e.target.value)}
                   placeholder="0.50"
                   aria-label={t('punch.field_pin_x', { defaultValue: 'Pin X (0-1)' })}
-                  className={clsx(inputCls, xError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                  className={clsx(inputCls, xError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
                 />
                 <input
                   type="number"
@@ -875,7 +875,7 @@ function AddPunchModal({
                   onChange={(e) => set('location_y', e.target.value)}
                   placeholder="0.50"
                   aria-label={t('punch.field_pin_y', { defaultValue: 'Pin Y (0-1)' })}
-                  className={clsx(inputCls, yError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                  className={clsx(inputCls, yError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
                 />
               </div>
             </WideModalField>
@@ -923,7 +923,7 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
         'p-3 mb-2 hover:shadow-md transition-shadow border-l-4 cursor-pointer',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
         PRIORITY_STRIPE_CLS[item.priority],
-        isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
+        isOverdue && 'bg-semantic-error/10',
       )}
     >
       {/* Title: bold, clamped to 2 lines */}
@@ -1034,12 +1034,12 @@ function KanbanView({
   }, [items]);
 
   const COLUMN_HEADER_CLS: Record<PunchStatus, string> = {
-    open: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    open: 'bg-semantic-error-bg text-semantic-error',
     assigned: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
-    in_progress: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    in_progress: 'bg-semantic-warning-bg text-semantic-warning',
     resolved: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    verified: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    closed: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
+    verified: 'bg-semantic-success-bg text-semantic-success',
+    closed: 'bg-surface-secondary text-content-primary',
   };
 
   return (
@@ -1063,7 +1063,7 @@ function KanbanView({
                     .join(' '),
                 })}
               </span>
-              <span className="text-xs font-bold rounded-full px-2 py-0.5 bg-white/30">
+              <span className="text-xs font-semibold rounded-full px-2 py-0.5 bg-white/30">
                 {colItems.length}
               </span>
             </div>
@@ -2215,7 +2215,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
           : selected
           ? 'bg-oe-blue/5 hover:bg-oe-blue/10'
           : isOverdue
-          ? 'bg-red-50/40 hover:bg-red-50/70 dark:bg-red-950/10 dark:hover:bg-red-950/20'
+          ? 'bg-semantic-error/10 hover:bg-semantic-error/10'
           : 'hover:bg-surface-secondary/50',
       )}
     >
@@ -2354,7 +2354,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
           })}
           <button
             onClick={() => onDelete(item.id)}
-            className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
             aria-label={t('common.delete', { defaultValue: 'Delete' })}
             title={t('common.delete', { defaultValue: 'Delete' })}
           >

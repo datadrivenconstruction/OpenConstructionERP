@@ -113,7 +113,7 @@ function ScoreCard({
       </div>
 
       <div className="mt-2.5 flex items-baseline gap-1.5">
-        <span className="text-2xl font-bold tabular-nums text-content-primary">{pct(score.observed_rate)}%</span>
+        <span className="text-2xl font-semibold tabular-nums text-content-primary">{pct(score.observed_rate)}%</span>
         <span className="text-xs text-content-tertiary">
           {t('agents.accuracy.accurate', { defaultValue: 'accurate' })}
         </span>

@@ -221,7 +221,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
                           .sort(([, a], [, b]) => b - a)
                           .map(([tbl, count]) => (
                             <tr key={tbl} className="border-b border-border-light last:border-0">
-                              <td className="px-3 py-1.5 font-mono text-[11px] text-content-secondary truncate">
+                              <td className="px-3 py-1.5 font-mono text-2xs text-content-secondary truncate">
                                 {tbl}
                               </td>
                               <td className="px-3 py-1.5 text-right tabular-nums text-content-tertiary">
@@ -236,7 +236,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
               </div>
 
               {preview.estimated_size_bytes > 200 * 1024 * 1024 && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 text-xs">
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning-bg text-semantic-warning text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>
                     {t('files.export.large_warn', {

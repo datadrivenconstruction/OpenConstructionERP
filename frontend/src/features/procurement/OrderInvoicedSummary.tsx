@@ -40,7 +40,7 @@ export function OrderInvoicedSummary({
     >
       <div className="flex items-center justify-end gap-1 whitespace-nowrap">
         <span>{t('procurement.po_invoiced_label', { defaultValue: 'Invoiced (net)' })}</span>
-        <span className={clsx('tabular-nums', over && 'font-medium text-amber-600 dark:text-amber-400')}>
+        <span className={clsx('tabular-nums', over && 'font-medium text-semantic-warning')}>
           <MoneyDisplay amount={invoicedN} currency={currency} />
         </span>
         <span>/</span>
@@ -50,12 +50,12 @@ export function OrderInvoicedSummary({
       </div>
       <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-surface-secondary">
         <div
-          className={clsx('h-full rounded-full', over ? 'bg-amber-500' : 'bg-oe-blue')}
+          className={clsx('h-full rounded-full', over ? 'bg-semantic-warning' : 'bg-oe-blue')}
           style={{ width: `${over ? 100 : pct}%` }}
         />
       </div>
       {over && (
-        <div className="mt-0.5 text-amber-600 dark:text-amber-400">
+        <div className="mt-0.5 text-semantic-warning">
           {t('procurement.po_invoiced_over', { defaultValue: 'Invoiced above the order value' })}
         </div>
       )}

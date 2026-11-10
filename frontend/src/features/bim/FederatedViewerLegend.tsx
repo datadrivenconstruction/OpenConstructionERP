@@ -69,11 +69,11 @@ export function FederatedViewerLegend({ disciplines, onToggleVisible }: Props) {
                 aria-hidden
               />
               <span className="truncate font-medium">{d.modelName}</span>
-              <span className="ml-auto rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-500">
+              <span className="ml-auto rounded bg-slate-100 px-1.5 py-0.5 text-2xs uppercase tracking-wide text-slate-500">
                 {disciplineLabel(t, d.discipline)}
               </span>
               {typeof d.elementCount === 'number' ? (
-                <span className="font-mono text-[10px] text-slate-400">
+                <span className="font-mono text-2xs text-slate-400">
                   {d.elementCount.toLocaleString(getNumberLocale())}
                 </span>
               ) : null}

@@ -63,10 +63,10 @@ export function PipelinePreview() {
           <Workflow className="w-4 h-4" />
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-content-primary truncate">
+          <h3 className="text-sm font-semibold text-content-primary truncate">
             {t('match_elements.pipeline.title', 'Match pipeline')}
           </h3>
-          <p className="text-[11px] text-content-tertiary">
+          <p className="text-2xs text-content-tertiary">
             {t(
               'match_elements.pipeline.subtitle',
               'Seven steps from CAD file to priced BoQ - every step is visible and tunable',
@@ -78,7 +78,7 @@ export function PipelinePreview() {
         {ORDER.map((name, i) => (
           <li
             key={name}
-            className="inline-flex items-center gap-1 text-[10px] font-semibold"
+            className="inline-flex items-center gap-1 text-2xs font-semibold"
           >
             <span className="px-1.5 py-0.5 rounded border bg-surface-secondary border-border text-content-tertiary">
               {i + 1}. {t(`match_elements.pipeline.step_${name}`, { defaultValue: name })}
@@ -89,7 +89,7 @@ export function PipelinePreview() {
           </li>
         ))}
       </ol>
-      <p className="px-3 py-2 text-[11px] text-content-tertiary">
+      <p className="px-3 py-2 text-2xs text-content-tertiary">
         {t('match_elements.pipeline.preview_hint', {
           defaultValue:
             'Pick a project and finish the quick setup below - these seven stages then run here, each visible and tunable.',
@@ -232,10 +232,10 @@ export function MatchPipeline({ sessionId }: Props) {
             <Workflow className="w-4 h-4" />
           </span>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-content-primary truncate">
+            <h3 className="text-sm font-semibold text-content-primary truncate">
               {t('match_elements.pipeline.title', 'Match pipeline')}
             </h3>
-            <p className="text-[11px] text-content-tertiary">
+            <p className="text-2xs text-content-tertiary">
               {t(
                 'match_elements.pipeline.subtitle',
                 'Seven steps from CAD file to priced BoQ - every step is visible and tunable',
@@ -298,16 +298,16 @@ export function MatchPipeline({ sessionId }: Props) {
           return (
             <li
               key={name}
-              className="inline-flex items-center gap-1 text-[10px] font-semibold"
+              className="inline-flex items-center gap-1 text-2xs font-semibold"
             >
               <span
                 className={`px-1.5 py-0.5 rounded border ${
                   status === 'done'
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300/70 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-200'
+                    ? 'bg-semantic-success-bg border-semantic-success/30 text-semantic-success'
                     : status === 'running'
                       ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-300/70 dark:border-blue-700/50 text-blue-800 dark:text-blue-200'
                       : status === 'error'
-                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300/70 dark:border-rose-700/50 text-rose-800 dark:text-rose-200'
+                        ? 'bg-semantic-error-bg border-semantic-error/30 text-semantic-error'
                         : 'bg-surface-secondary border-border text-content-tertiary'
                 }`}
               >
@@ -332,7 +332,7 @@ export function MatchPipeline({ sessionId }: Props) {
               {t('match_elements.pipeline.loading', 'Loading pipeline…')}
             </div>
           ) : stagesQ.isError ? (
-            <div className="text-xs text-rose-600 dark:text-rose-400 py-4 text-center">
+            <div className="text-xs text-semantic-error py-4 text-center">
               {(stagesQ.error as Error)?.message ??
                 t(
                   'match_elements.pipeline.load_failed',
@@ -344,7 +344,7 @@ export function MatchPipeline({ sessionId }: Props) {
               {pipelineError && (
                 <div
                   role="alert"
-                  className="mb-3 flex items-start justify-between gap-2 text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/40 rounded-lg px-3 py-2"
+                  className="mb-3 flex items-start justify-between gap-2 text-xs text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-3 py-2"
                 >
                   <span className="break-words">{pipelineError}</span>
                   <button

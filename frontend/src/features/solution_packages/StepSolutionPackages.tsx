@@ -25,7 +25,7 @@ export function StepSolutionPackages({
   return (
     <div className="space-y-4" data-testid="step-solution-packages">
       <div>
-        <h2 className="text-xl font-bold text-content-primary">{t('packages.step_title', { defaultValue: 'Choose your packages' })}</h2>
+        <h2 className="text-xl font-semibold text-content-primary">{t('packages.step_title', { defaultValue: 'Choose your packages' })}</h2>
         <p className="mt-1 text-sm text-content-secondary">{t('packages.step_subtitle', { defaultValue: 'Each package switches on the modules one kind of work needs. Only those show in your menu, and you can add any other module or package later.' })}</p>
       </div>
       {isLoading && <Loader2 className="animate-spin text-oe-blue" aria-label={t('packages.loading', { defaultValue: 'Loading packages' })} />}

@@ -40,11 +40,11 @@ export interface CoordinationTimelineProps {
 function IconForType({ type }: { type: string }) {
   switch (type) {
     case 'clash_run':
-      return <Radar size={16} className="text-amber-600" />;
+      return <Radar size={16} className="text-semantic-warning" />;
     case 'federation_created':
       return <Layers size={16} className="text-blue-600" />;
     case 'rule_pack_installed':
-      return <ClipboardCheck size={16} className="text-emerald-600" />;
+      return <ClipboardCheck size={16} className="text-semantic-success" />;
     case 'bcf_export':
       return <Download size={16} className="text-purple-600" />;
     default:

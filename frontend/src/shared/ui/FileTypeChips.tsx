@@ -66,7 +66,7 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
       label: t('projects.chip_dwg', { defaultValue: 'DWG' }),
       icon: PenTool,
       color:
-        'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+        'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
     },
     {
       key: 'pdf',
@@ -74,7 +74,7 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
       label: t('projects.chip_pdf', { defaultValue: 'PDF' }),
       icon: FileText,
       color:
-        'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
+        'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
     },
     {
       key: 'xls',
@@ -82,7 +82,7 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
       label: t('projects.chip_excel', { defaultValue: 'Excel' }),
       icon: Layers,
       color:
-        'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
+        'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
     },
     {
       key: 'photo',
@@ -90,7 +90,7 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
       label: t('projects.chip_photo', { defaultValue: 'Photo' }),
       icon: ImageIcon,
       color:
-        'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800',
+        'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
     },
   ];
 
@@ -105,10 +105,10 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
 
   const sizing =
     size === 'xs'
-      ? 'px-1 py-[1px] text-[9px] gap-0.5'
+      ? 'px-1 py-[1px] text-2xs gap-0.5'
       : size === 'sm'
-        ? 'px-1.5 py-0.5 text-[10px] gap-1'
-        : 'px-2 py-0.5 text-[11px] gap-1';
+        ? 'px-1.5 py-0.5 text-2xs gap-1'
+        : 'px-2 py-0.5 text-2xs gap-1';
   const iconSize = size === 'xs' ? 8 : size === 'sm' ? 10 : 12;
   const gap = size === 'md' ? 'gap-1.5' : 'gap-1';
 

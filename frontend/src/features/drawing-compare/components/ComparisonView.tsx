@@ -29,9 +29,9 @@ interface ComparisonViewProps {
 }
 
 const LIGHT: Record<string, string> = {
-  passed: 'bg-emerald-500',
-  warnings: 'bg-amber-500',
-  errors: 'bg-red-500',
+  passed: 'bg-semantic-success',
+  warnings: 'bg-semantic-warning',
+  errors: 'bg-semantic-error',
 };
 
 export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: ComparisonViewProps) {
@@ -88,7 +88,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
         <div className="min-w-0 space-y-0.5 text-sm">
           <h2 className="truncate text-base font-semibold">{comparison.name}</h2>
           <p className="truncate">
-            <span className="font-medium text-red-600">{t('drawing_compare.old_revision', { defaultValue: 'Older revision' })}:</span>{' '}
+            <span className="font-medium text-semantic-error">{t('drawing_compare.old_revision', { defaultValue: 'Older revision' })}:</span>{' '}
             {side(comparison.old_label, comparison.old_revision, comparison.old_page)}
           </p>
           <p className="truncate">
@@ -137,7 +137,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
         </div>
       </div>
       {failing.length > 0 && (
-        <ul className="space-y-0.5 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <ul className="space-y-0.5 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg p-2 text-xs text-semantic-warning">
           {failing.map((r, i) => (
             <li key={`${r.rule_id}-${i}`}>{r.message}</li>
           ))}
@@ -153,7 +153,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
                 {t('drawing_compare.rendering', { defaultValue: 'Rendering both sheets...' })}
               </p>
             ) : pair.error ? (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-semantic-error">
                 {t('drawing_compare.sheet_unavailable', { defaultValue: 'A revision could not be opened; the change list is still available.' })}
               </p>
             ) : pair.old && pair.new ? (
@@ -238,8 +238,8 @@ function DwgLayerTable({ comparison }: { comparison: Comparison }) {
                 <td className="py-1 font-mono">{r.layer}</td>
                 <td>{r.entity_type}</td>
                 <td className="text-right text-blue-600">{r.added}</td>
-                <td className="text-right text-red-600">{r.removed}</td>
-                <td className="text-right text-amber-700">{r.modified}</td>
+                <td className="text-right text-semantic-error">{r.removed}</td>
+                <td className="text-right text-semantic-warning">{r.modified}</td>
               </tr>
             ))}
           </tbody>

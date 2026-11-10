@@ -100,7 +100,7 @@ function styleFor(row: ApprovalRow, isActive: boolean): { tone: Tone; style: Nod
       tone: 'pending',
       style: {
         badge: 'warning',
-        ring: 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        ring: 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning',
         icon: Clock,
       },
     };

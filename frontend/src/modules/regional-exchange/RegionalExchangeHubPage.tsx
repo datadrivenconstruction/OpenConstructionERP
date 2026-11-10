@@ -119,7 +119,7 @@ function MarketFlag({ code, size = 18 }: { code: string; size?: number }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex h-[13px] min-w-[18px] items-center justify-center rounded-[2px] bg-surface-tertiary px-1 text-[9px] font-bold leading-none text-content-tertiary"
+      className="inline-flex h-[13px] min-w-[18px] items-center justify-center rounded-xs bg-surface-tertiary px-1 text-2xs font-semibold leading-none text-content-tertiary"
     >
       {code.toUpperCase()}
     </span>
@@ -144,7 +144,7 @@ function SupportChip({ level, direction }: { level: SupportLevel; direction: 'im
   return (
     <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
       {level === 'native' ? (
-        <Check size={11} aria-hidden="true" className="text-emerald-600" />
+        <Check size={11} aria-hidden="true" className="text-semantic-success" />
       ) : null}
       {label}:{' '}
       <span className={level === 'native' ? 'font-semibold text-content-secondary' : ''}>

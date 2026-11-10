@@ -613,7 +613,7 @@ function ItemModal({
               placeholder={t('site_prep.title_placeholder', {
                 defaultValue: 'e.g. Site access road and gate installed',
               })}
-              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-red-300')}
+              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30')}
             />
             {titleError && (
               <p className="mt-1 text-xs text-semantic-error">

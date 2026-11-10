@@ -155,7 +155,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
               {indexLabel(spiHealth)}
             </Badge>
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
             {formatIndex(data.spi)}
           </p>
           <p className="mt-0.5 text-xs text-content-tertiary">
@@ -176,7 +176,7 @@ export function EvmPanel({ scheduleId, asOfDate, currency }: EvmPanelProps) {
               {indexLabel(cpiHealth)}
             </Badge>
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
             {formatIndex(data.cpi)}
           </p>
           <p className="mt-0.5 text-xs text-content-tertiary">

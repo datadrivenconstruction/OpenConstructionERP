@@ -101,7 +101,7 @@ const UNIVERSAL_PRESETS: ColumnPreset[] = [
     name: 'Quality Control',
     description: 'Inspection status, inspector and date - for QA workflow',
     icon: ShieldCheck,
-    iconClass: 'text-emerald-600 bg-emerald-500/10',
+    iconClass: 'text-semantic-success bg-semantic-success/10',
     columns: [
       {
         name: 'qc_status',
@@ -119,7 +119,7 @@ const UNIVERSAL_PRESETS: ColumnPreset[] = [
     name: 'Sustainability',
     description: 'CO₂ footprint, EPD reference and material source',
     icon: Leaf,
-    iconClass: 'text-green-600 bg-green-500/10',
+    iconClass: 'text-semantic-success bg-semantic-success/10',
     columns: [
       { name: 'co2_kg_per_unit', display_name: 'CO₂ kg/unit', column_type: 'number' },
       { name: 'epd_reference', display_name: 'EPD Reference', column_type: 'text' },
@@ -132,7 +132,7 @@ const UNIVERSAL_PRESETS: ColumnPreset[] = [
     name: 'Status & Scope',
     description: 'Position status, scope flag, risk level and owner - for review workflows',
     icon: Flag,
-    iconClass: 'text-amber-600 bg-amber-500/10',
+    iconClass: 'text-semantic-warning bg-semantic-warning/10',
     columns: [
       {
         name: 'position_status',
@@ -181,7 +181,7 @@ const UNIVERSAL_PRESETS: ColumnPreset[] = [
     name: 'Schedule',
     description: 'Start, end, duration and WBS code - link BOQ rows to the construction schedule',
     icon: CalendarIcon,
-    iconClass: 'text-sky-600 bg-sky-500/10',
+    iconClass: 'text-semantic-info bg-semantic-info/10',
     columns: [
       { name: 'wbs_code', display_name: 'WBS Code', column_type: 'text' },
       { name: 'start_date', display_name: 'Start Date', column_type: 'date' },
@@ -202,7 +202,7 @@ const REGIONAL_PRESETS: ColumnPreset[] = [
     description:
       'Splits unit rate into Lohn / Material / Geräte / Sonstiges + risk markup. Lohn/Material/Geräte auto-fill from position resources - no manual entry.',
     icon: FileCheck,
-    iconClass: 'text-rose-600 bg-rose-500/10',
+    iconClass: 'text-semantic-error bg-semantic-error/10',
     columns: [
       { name: 'kg_bezug', display_name: 'KG-Bezug (DIN 276)', column_type: 'text' },
       // Lohn / Material / Geräte are derived from `metadata.resources[]`:
@@ -296,7 +296,7 @@ const REGIONAL_PRESETS: ColumnPreset[] = [
     description:
       'AIQS code, trade element, AS reference and floor area type - Australian QS measurement practice',
     icon: Globe,
-    iconClass: 'text-yellow-600 bg-yellow-500/10',
+    iconClass: 'text-semantic-warning bg-semantic-warning/10',
     columns: [
       { name: 'aiqs_code', display_name: 'AIQS Code', column_type: 'text' },
       { name: 'trade_element', display_name: 'Trade Element', column_type: 'text' },
@@ -364,7 +364,7 @@ const REGIONAL_PRESETS: ColumnPreset[] = [
     description:
       'Item code, feature description and the labour / material / machinery split behind a comprehensive unit rate, plus management fee and profit - GB 50500-2013 bill-of-quantities valuation. The three cost-element columns auto-fill from position resources.',
     icon: Layers,
-    iconClass: 'text-red-600 bg-red-500/10',
+    iconClass: 'text-semantic-error bg-semantic-error/10',
     columns: [
       // Display names are bilingual, matching how the rest of the Chinese
       // content in this codebase is written (the CN markup stack in

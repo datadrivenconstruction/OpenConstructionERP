@@ -43,8 +43,8 @@ function Delta({ value }: { value: string }) {
     <span
       className={clsx(
         'font-mono',
-        sign > 0 && 'text-red-600 dark:text-red-400',
-        sign < 0 && 'text-emerald-600 dark:text-emerald-400',
+        sign > 0 && 'text-semantic-error',
+        sign < 0 && 'text-semantic-success',
         sign === 0 && 'text-content-tertiary',
       )}
     >

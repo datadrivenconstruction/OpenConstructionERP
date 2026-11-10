@@ -715,7 +715,7 @@ export function PropertyDevPage() {
                 >
                   <h3
                     id={`propdev-group-${g.id}`}
-                    className="px-1 pb-1.5 text-2xs font-semibold uppercase tracking-[0.08em] text-content-tertiary"
+                    className="px-1 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
                   >
                     {g.label}
                   </h3>
@@ -772,7 +772,7 @@ export function PropertyDevPage() {
                           />
                           <span
                             className={clsx(
-                              'text-[10px] leading-tight font-medium line-clamp-2 px-1',
+                              'text-2xs leading-tight font-medium line-clamp-2 px-1',
                               active ? 'text-white' : 'text-content-secondary group-hover:text-content-primary',
                             )}
                           >
@@ -1337,7 +1337,7 @@ function BuyersTab({
                             className={clsx(
                               'inline-flex items-center gap-1',
                               days != null && days < 7
-                                ? 'text-rose-600 font-medium'
+                                ? 'text-semantic-error font-medium'
                                 : 'text-content-secondary',
                             )}
                           >
@@ -1861,7 +1861,7 @@ function LeadDetailDrawer({
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           data-testid="delete-lead-btn"
         >
           <Trash2 size={12} />
@@ -2646,7 +2646,7 @@ function ReservationsTab({
                               <button
                                 type="button"
                                 onClick={() => setConvertId(r.id)}
-                                className="inline-flex items-center gap-1 rounded border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10"
+                                className="inline-flex items-center gap-1 rounded border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
                                 title={t('propdev.convert_to_spa', { defaultValue: 'Convert to SPA' })}
                               >
                                 <ArrowRightCircle size={12} />
@@ -2656,7 +2656,7 @@ function ReservationsTab({
                                 type="button"
                                 disabled={expireMut.isPending}
                                 onClick={() => expireMut.mutate(r.id)}
-                                className="rounded p-1 text-content-secondary hover:bg-amber-100 hover:text-amber-700"
+                                className="rounded p-1 text-content-secondary hover:bg-semantic-warning-bg hover:text-semantic-warning"
                                 title={t('propdev.expire', { defaultValue: 'Expire now' })}
                                 aria-label={t('propdev.expire', { defaultValue: 'Expire now' })}
                               >
@@ -2676,7 +2676,7 @@ function ReservationsTab({
                                   if (!ok) return;
                                   cancelMut.mutate(r.id);
                                 }}
-                                className="rounded p-1 text-content-secondary hover:bg-rose-100 hover:text-rose-700"
+                                className="rounded p-1 text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error"
                                 title={t('propdev.cancel', { defaultValue: 'Cancel' })}
                                 aria-label={t('propdev.cancel', { defaultValue: 'Cancel' })}
                               >
@@ -3254,7 +3254,7 @@ function SpaTab({
                               type="button"
                               disabled={sendMut.isPending}
                               onClick={() => sendMut.mutate(s.id)}
-                              className="rounded p-1 text-content-secondary hover:bg-amber-100 hover:text-amber-700"
+                              className="rounded p-1 text-content-secondary hover:bg-semantic-warning-bg hover:text-semantic-warning"
                               title={t('propdev.send_for_signature', { defaultValue: 'Send for signature' })}
                               aria-label={t('propdev.send_for_signature', { defaultValue: 'Send for signature' })}
                             >
@@ -3266,7 +3266,7 @@ function SpaTab({
                               type="button"
                               disabled={signMut.isPending}
                               onClick={() => signMut.mutate(s.id)}
-                              className="rounded p-1 text-content-secondary hover:bg-emerald-100 hover:text-emerald-700"
+                              className="rounded p-1 text-content-secondary hover:bg-semantic-success-bg hover:text-semantic-success"
                               title={t('propdev.sign', { defaultValue: 'Sign / countersign' })}
                               aria-label={t('propdev.sign', { defaultValue: 'Sign / countersign' })}
                             >
@@ -3287,7 +3287,7 @@ function SpaTab({
                                 if (!ok) return;
                                 voidMut.mutate(s.id);
                               }}
-                              className="rounded p-1 text-content-secondary hover:bg-rose-100 hover:text-rose-700"
+                              className="rounded p-1 text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error"
                               title={t('propdev.void', { defaultValue: 'Void' })}
                               aria-label={t('propdev.void', { defaultValue: 'Void' })}
                             >
@@ -3610,7 +3610,7 @@ function InstalmentsTable({
                           <button
                             type="button"
                             onClick={() => setPayingId(ins.id)}
-                            className="inline-flex items-center gap-1 rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 hover:bg-emerald-100"
+                            className="inline-flex items-center gap-1 rounded border border-semantic-success/30 bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success hover:bg-semantic-success-bg"
                             title={t('propdev.mark_paid', { defaultValue: 'Mark paid' })}
                           >
                             <DollarSign size={10} />
@@ -3620,7 +3620,7 @@ function InstalmentsTable({
                             type="button"
                             disabled={demandMut.isPending}
                             onClick={() => demandMut.mutate(ins.id)}
-                            className="rounded p-1 text-content-secondary hover:bg-amber-100 hover:text-amber-700"
+                            className="rounded p-1 text-content-secondary hover:bg-semantic-warning-bg hover:text-semantic-warning"
                             title={t('propdev.send_demand', { defaultValue: 'Send demand' })}
                             aria-label={t('propdev.send_demand', { defaultValue: 'Send demand' })}
                           >
@@ -3639,7 +3639,7 @@ function InstalmentsTable({
                               if (!ok) return;
                               waiveMut.mutate(ins.id);
                             }}
-                            className="rounded p-1 text-content-secondary hover:bg-amber-100 hover:text-amber-700"
+                            className="rounded p-1 text-content-secondary hover:bg-semantic-warning-bg hover:text-semantic-warning"
                             title={t('propdev.waive', { defaultValue: 'Waive' })}
                             aria-label={t('propdev.waive', { defaultValue: 'Waive' })}
                           >
@@ -3745,7 +3745,7 @@ function MarkPaidModal({
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className={inputCls}
           />
-          <p className="mt-1 text-[11px] text-content-tertiary">
+          <p className="mt-1 text-2xs text-content-tertiary">
             {t('propdev.outstanding', { defaultValue: 'Outstanding' })}:{' '}
             <MoneyDisplay amount={outstanding} currency={currency || undefined} />
           </p>
@@ -3841,7 +3841,7 @@ function GenerateScheduleModal({
       }
     >
       {blockedByActive && (
-        <div className="mx-5 mt-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <div className="mx-5 mt-3 rounded border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
           {t('propdev.suspend_first', {
             defaultValue: 'This contract already has an active schedule. Suspend it before generating a new one.',
           })}
@@ -3874,7 +3874,7 @@ function GenerateScheduleModal({
                   <div>
                     <p className="font-medium">{tmpl.label}</p>
                     <p className="text-xs text-content-secondary">{tmpl.description}</p>
-                    <p className="mt-1 text-[10px] text-content-tertiary">
+                    <p className="mt-1 text-2xs text-content-tertiary">
                       {tmpl.milestone_count} × {tmpl.splits.join(' / ')}%
                     </p>
                   </div>
@@ -4082,7 +4082,7 @@ function PaymentScheduleTab({
                   key={s.id}
                   type="button"
                   onClick={() => setGenerateForSpa(s)}
-                  className="inline-flex items-center gap-1.5 rounded border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10"
+                  className="inline-flex items-center gap-1.5 rounded border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
                 >
                   <Receipt size={11} />
                   {s.contract_number}
@@ -4091,7 +4091,7 @@ function PaymentScheduleTab({
               );
             })}
             {spasWithoutSchedule.length > 12 && (
-              <span className="text-[11px] text-content-tertiary self-center">
+              <span className="text-2xs text-content-tertiary self-center">
                 {t('propdev.and_n_more', {
                   defaultValue: '… and {{n}} more',
                   n: spasWithoutSchedule.length - 12,
@@ -4190,7 +4190,7 @@ function PaymentScheduleTab({
                               type="button"
                               disabled={suspendMut.isPending}
                               onClick={() => suspendMut.mutate(sch.id)}
-                              className="rounded p-1 text-content-secondary hover:bg-amber-100 hover:text-amber-700"
+                              className="rounded p-1 text-content-secondary hover:bg-semantic-warning-bg hover:text-semantic-warning"
                               title={t('propdev.suspend', { defaultValue: 'Suspend' })}
                               aria-label={t('propdev.suspend', { defaultValue: 'Suspend' })}
                             >
@@ -4202,7 +4202,7 @@ function PaymentScheduleTab({
                               type="button"
                               disabled={activateMut.isPending}
                               onClick={() => activateMut.mutate(sch.id)}
-                              className="rounded p-1 text-content-secondary hover:bg-emerald-100 hover:text-emerald-700"
+                              className="rounded p-1 text-content-secondary hover:bg-semantic-success-bg hover:text-semantic-success"
                               title={t('propdev.activate', { defaultValue: 'Activate' })}
                               aria-label={t('propdev.activate', { defaultValue: 'Activate' })}
                             >
@@ -4427,7 +4427,7 @@ function HandoverPlotRow({ plot, buyer }: { plot: Plot; buyer: Buyer | undefined
                 </span>
               )}
               {h.snag_count_at_handover > 0 && (
-                <span className="text-amber-600">
+                <span className="text-semantic-warning">
                   · {h.snag_count_at_handover} {t('propdev.snags', { defaultValue: 'snags' })}
                 </span>
               )}
@@ -5424,7 +5424,7 @@ function PlotDetailDrawer({
             if (!ok) return;
             deleteMu.mutate();
           }}
-          className="inline-flex items-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           disabled={deleteMu.isPending}
           data-testid="delete-plot"
         >
@@ -5476,7 +5476,7 @@ function PlotDetailDrawer({
                   </button>
                   {statusMenuOpen && (
                     <div role="menu" className="absolute left-0 z-10 mt-1 min-w-[200px] rounded-md border border-border-light bg-surface-primary shadow-lg">
-                      <div className="border-b border-border-light px-3 py-1.5 text-[10px] uppercase tracking-wide text-content-tertiary">
+                      <div className="border-b border-border-light px-3 py-1.5 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('propdev.move_to', { defaultValue: 'Move to' })}
                       </div>
                       {transitions.map((next) => (
@@ -5615,19 +5615,19 @@ function PlotHandoverSummary({ plotId }: { plotId: string }) {
       </p>
       <div className="grid grid-cols-3 gap-2 text-xs">
         <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
-          <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+          <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.scheduled', { defaultValue: 'Scheduled' })}
           </p>
           <p className="text-lg font-semibold tabular-nums">{scheduled}</p>
         </div>
         <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
-          <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+          <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.completed', { defaultValue: 'Completed' })}
           </p>
           <p className="text-lg font-semibold tabular-nums">{completed}</p>
         </div>
         <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
-          <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+          <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.warranty_open_label', {
               defaultValue: 'Warranty open',
             })}
@@ -5635,7 +5635,7 @@ function PlotHandoverSummary({ plotId }: { plotId: string }) {
           <p
             className={
               'text-lg font-semibold tabular-nums ' +
-              (openClaims > 0 ? 'text-rose-700' : '')
+              (openClaims > 0 ? 'text-semantic-error' : '')
             }
           >
             {openClaims}
@@ -5991,7 +5991,7 @@ export function BuyerDetailDrawer({
           <button
             type="button"
             onClick={() => setConfirmCancel(true)}
-            className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 hover:border-amber-300"
+            className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg hover:border-semantic-warning/30"
             data-testid="cancel-buyer-btn"
             title={t('propdev.cancel_buyer_hint', {
               defaultValue: 'Cancel buyer and compute deposit forfeiture',
@@ -6005,7 +6005,7 @@ export function BuyerDetailDrawer({
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           data-testid="delete-buyer-btn"
         >
           <Trash2 size={12} />
@@ -6108,15 +6108,15 @@ export function BuyerDetailDrawer({
                 <div className={clsx(
                   'rounded-lg px-3 py-2 text-center',
                   freezeDays < 0
-                    ? 'bg-rose-100 text-rose-800'
+                    ? 'bg-semantic-error-bg text-semantic-error'
                     : freezeDays < 7
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-sky-100 text-sky-800',
+                      ? 'bg-semantic-warning-bg text-semantic-warning'
+                      : 'bg-semantic-info-bg text-semantic-info',
                 )}>
                   <p className="text-2xl font-semibold leading-none">
                     {Math.abs(freezeDays)}
                   </p>
-                  <p className="mt-0.5 text-[10px] uppercase tracking-wide">
+                  <p className="mt-0.5 text-2xs uppercase tracking-wide">
                     {freezeDays < 0
                       ? t('propdev.days_overdue', { defaultValue: 'days overdue' })
                       : t('propdev.days_left', { defaultValue: 'days left' })}
@@ -6311,7 +6311,7 @@ function StageProgress({ current }: { current: BuyerStatus }) {
   };
   if (current === 'cancelled') {
     return (
-      <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-center text-sm text-rose-800">
+      <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3 text-center text-sm text-semantic-error">
         {labels.cancelled}
       </div>
     );
@@ -6334,7 +6334,7 @@ function StageProgress({ current }: { current: BuyerStatus }) {
                 {reached ? <Check size={12} /> : i + 1}
               </div>
               <span className={clsx(
-                'mt-1 text-[10px] uppercase tracking-wide truncate max-w-full',
+                'mt-1 text-2xs uppercase tracking-wide truncate max-w-full',
                 active ? 'text-content-primary font-medium' : 'text-content-tertiary',
               )}>
                 {labels[s]}
@@ -7048,7 +7048,7 @@ function SyncToContactsToggle({
             defaultValue: 'Sync to Contacts directory',
           })}
         </p>
-        <p className="text-[11px] text-content-tertiary mt-0.5 leading-snug">
+        <p className="text-2xs text-content-tertiary mt-0.5 leading-snug">
           {t('propdev.sync_to_contacts_hint', {
             defaultValue:
               'Mirrors this entry into the Contacts module. If a contact with the same email already exists it is linked, otherwise a new contact is created and tagged.',
@@ -7139,7 +7139,7 @@ function DevelopmentFormBody({
   if (!activeProjectId) {
     return (
       <div
-        className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-3 text-xs text-amber-900"
+        className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-3 text-xs text-semantic-warning"
         role="alert"
       >
         {t('propdev.select_project_first', {
@@ -7750,7 +7750,7 @@ function PlotFormBody({
         </div>
       ) : (
         <div
-          className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+          className="mb-4 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
           role="alert"
         >
           {t('propdev.select_development_first', {

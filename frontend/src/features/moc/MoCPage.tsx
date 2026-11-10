@@ -154,18 +154,18 @@ const CATEGORY_CONFIG: Record<
   scope: { icon: Maximize2, color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800' },
   design: { icon: PenTool, color: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800' },
   process: { icon: Workflow, color: 'text-cyan-600 bg-cyan-50 border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/30 dark:border-cyan-800' },
-  material: { icon: Package, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
-  safety: { icon: ShieldAlert, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
+  material: { icon: Package, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
+  safety: { icon: ShieldAlert, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30' },
   organizational: { icon: Users, color: 'text-teal-600 bg-teal-50 border-teal-200 dark:text-teal-400 dark:bg-teal-950/30 dark:border-teal-800' },
-  regulatory: { icon: Scale, color: 'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-800' },
-  other: { icon: MoreHorizontal, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
+  regulatory: { icon: Scale, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30' },
+  other: { icon: MoreHorizontal, color: 'text-content-secondary bg-surface-secondary border-border-light' },
 };
 
 const RISK_LEVELS: MoCRiskLevel[] = ['low', 'medium', 'high', 'critical'];
 
 const RISK_CONFIG: Record<MoCRiskLevel, { variant: BadgeVariant; cls: string }> = {
-  low: { variant: 'neutral', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
-  medium: { variant: 'warning', cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' },
+  low: { variant: 'neutral', cls: 'bg-surface-secondary text-content-secondary' },
+  medium: { variant: 'warning', cls: 'bg-semantic-warning-bg text-semantic-warning' },
   high: { variant: 'warning', cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300' },
   critical: { variant: 'error', cls: '' },
 };
@@ -181,8 +181,8 @@ const STATUS_FLOW: MoCStatus[] = [
 const STATUS_CONFIG: Record<MoCStatus, { variant: BadgeVariant; cls: string }> = {
   proposed: { variant: 'blue', cls: '' },
   reviewed: { variant: 'warning', cls: '' },
-  accepted: { variant: 'success', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' },
-  declined: { variant: 'neutral', cls: 'bg-gray-200 text-gray-600 line-through dark:bg-gray-700 dark:text-gray-400' },
+  accepted: { variant: 'success', cls: 'bg-semantic-success-bg text-semantic-success' },
+  declined: { variant: 'neutral', cls: 'bg-surface-secondary text-content-secondary line-through' },
   implemented: { variant: 'success', cls: '' },
 };
 
@@ -279,14 +279,14 @@ const EXPOSURE_BUCKETS: {
     labelKey: 'moc.exposure_committed',
     labelDefault: 'Committed (accepted)',
     accent:
-      'border-amber-300 bg-amber-50 ring-1 ring-amber-300/40 dark:border-amber-800 dark:bg-amber-950/30 dark:ring-amber-700/40',
+      'border-semantic-warning/30 bg-semantic-warning-bg ring-1 ring-semantic-warning/30',
     emphasized: true,
   },
   {
     key: 'implemented',
     labelKey: 'moc.exposure_realized',
     labelDefault: 'Realized (implemented)',
-    accent: 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/20',
+    accent: 'border-semantic-success/30 bg-semantic-success-bg',
   },
 ];
 
@@ -359,7 +359,7 @@ function MoCExposureBand({
                         count === 0
                           ? 'text-content-quaternary'
                           : b.emphasized
-                            ? 'text-amber-700 dark:text-amber-300'
+                            ? 'text-semantic-warning'
                             : 'text-content-primary',
                       )}
                     >
@@ -600,7 +600,7 @@ function MoCFormModal({
               placeholder={t('moc.title_placeholder', {
                 defaultValue: 'e.g. Switch facade cladding from brick to rainscreen panels',
               })}
-              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
               autoFocus
             />
             {titleError && (
@@ -762,7 +762,7 @@ function TransitionModal({
             className={clsx(
               'flex h-9 w-9 items-center justify-center rounded-lg shrink-0',
               action === 'decline'
-                ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+                ? 'bg-semantic-error-bg text-semantic-error'
                 : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
             )}
           >
@@ -1054,7 +1054,7 @@ const MoCRow = React.memo(function MoCRow({
         {/* Cost impact */}
         <span className="text-xs text-content-tertiary w-28 text-right shrink-0 hidden md:block tabular-nums">
           {money ? (
-            <span className="flex items-center justify-end gap-0.5 text-amber-500 font-medium">
+            <span className="flex items-center justify-end gap-0.5 text-semantic-warning font-medium">
               <DollarSign size={12} />
               {money}
             </span>
@@ -1093,7 +1093,7 @@ const MoCRow = React.memo(function MoCRow({
               </span>
             </span>
             {money && (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+              <span className="flex items-center gap-1 text-semantic-warning font-medium">
                 <DollarSign size={13} /> {money}
               </span>
             )}
@@ -1156,7 +1156,7 @@ const MoCRow = React.memo(function MoCRow({
                         )}
                       </div>
                       <div className="text-right shrink-0 text-2xs tabular-nums text-content-tertiary">
-                        {impMoney && <div className="text-amber-600 dark:text-amber-400 font-medium">{impMoney}</div>}
+                        {impMoney && <div className="text-semantic-warning font-medium">{impMoney}</div>}
                         {imp.schedule_delta_days !== 0 && (
                           <div>
                             {imp.schedule_delta_days > 0 ? '+' : ''}
@@ -1197,14 +1197,14 @@ const MoCRow = React.memo(function MoCRow({
               className={clsx(
                 'rounded-lg border p-3',
                 entry.status === 'declined'
-                  ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
-                  : 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800',
+                  ? 'bg-semantic-error-bg border-semantic-error/30'
+                  : 'bg-semantic-success-bg border-semantic-success/30',
               )}
             >
               <p
                 className={clsx(
                   'text-xs mb-1 font-medium uppercase tracking-wide',
-                  entry.status === 'declined' ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400',
+                  entry.status === 'declined' ? 'text-semantic-error' : 'text-semantic-success',
                 )}
               >
                 {t('moc.label_decision_notes', { defaultValue: 'Decision notes' })}
@@ -1881,7 +1881,7 @@ export function MoCPage() {
               <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
                 {t('moc.stat_accepted', { defaultValue: 'Accepted' })}
               </p>
-              <p className="text-lg font-semibold mt-1 tabular-nums text-emerald-500">{stats.accepted}</p>
+              <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-success">{stats.accepted}</p>
             </div>
             <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
               <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">

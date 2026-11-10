@@ -1008,7 +1008,7 @@ export function ResourcesPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="!text-rose-600 hover:!bg-rose-50"
+                      className="!text-semantic-error hover:!bg-semantic-error-bg"
                       icon={<Trash2 size={12} />}
                       onClick={() => setBulkDeleteOpen(true)}
                       data-testid="resources-bulk-delete"
@@ -1576,7 +1576,7 @@ function ResourceTable({
                           e.stopPropagation();
                           onDelete(r);
                         }}
-                        className="rounded p-1 text-content-secondary hover:text-rose-600 hover:bg-rose-50"
+                        className="rounded p-1 text-content-secondary hover:text-semantic-error hover:bg-semantic-error-bg"
                         aria-label={t('resources.delete_aria', {
                           defaultValue: 'Delete {{name}}',
                           name: r.name,
@@ -1931,7 +1931,7 @@ function RequestsTab({
               className={clsx(
                 'px-2 py-0.5 rounded-full border transition-colors',
                 statusFilter === 'open'
-                  ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                  ? 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning'
                   : 'border-border-light text-content-secondary hover:bg-surface-secondary',
               )}
             >
@@ -1943,7 +1943,7 @@ function RequestsTab({
               className={clsx(
                 'px-2 py-0.5 rounded-full border transition-colors',
                 statusFilter === 'fulfilled'
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                  ? 'border-semantic-success/60 bg-semantic-success-bg text-semantic-success'
                   : 'border-border-light text-content-secondary hover:bg-surface-secondary',
               )}
             >
@@ -3203,7 +3203,7 @@ function AssignmentsTab({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="ms-auto !text-rose-600 hover:!bg-rose-50"
+                  className="ms-auto !text-semantic-error hover:!bg-semantic-error-bg"
                   icon={<Trash2 size={12} />}
                   onClick={() => setBulkDeleteOpen(true)}
                   data-testid="assign-bulk-delete"
@@ -3407,7 +3407,7 @@ function AssignmentsTab({
                           <td className="px-3 py-1.5 text-xs tabular-nums">
                             <DateDisplay value={a.end_at} />
                             {isPast && (
-                              <span className="ms-1 text-[10px] uppercase text-content-tertiary">
+                              <span className="ms-1 text-2xs uppercase text-content-tertiary">
                                 ({t('resources.past', { defaultValue: 'past' })})
                               </span>
                             )}
@@ -3436,7 +3436,7 @@ function AssignmentsTab({
                                 <button
                                   type="button"
                                   onClick={() => setDeleteTarget(a)}
-                                  className="rounded p-1 text-content-secondary hover:text-rose-600 hover:bg-rose-50"
+                                  className="rounded p-1 text-content-secondary hover:text-semantic-error hover:bg-semantic-error-bg"
                                   aria-label={t('common.delete', {
                                     defaultValue: 'Delete',
                                   })}

@@ -502,7 +502,7 @@ function HowHSEWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1066,7 +1066,7 @@ function KpiCard({
   // overpower the table data they sit above.
   const toneCls: Record<KpiTone, string> = {
     success: 'border-semantic-success/30 bg-semantic-success/5 text-semantic-success',
-    warning: 'border-amber-500/30 bg-amber-50 text-amber-700',
+    warning: 'border-amber-500/30 bg-semantic-warning-bg text-semantic-warning',
     error: 'border-semantic-error/30 bg-semantic-error/5 text-semantic-error',
     blue: 'border-oe-blue/30 bg-oe-blue-subtle text-oe-blue-text',
     neutral: 'border-border bg-surface-secondary text-content-tertiary',
@@ -2217,7 +2217,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
                           <span
                             className={
                               days <= 3
-                                ? 'text-amber-600 font-medium'
+                                ? 'text-semantic-warning font-medium'
                                 : 'text-content-secondary'
                             }
                           >
@@ -2568,7 +2568,7 @@ function PermitDetailDrawer({
               days !== null && days < 0
                 ? 'text-semantic-error font-semibold'
                 : days !== null && days <= 3
-                  ? 'text-amber-600 font-semibold'
+                  ? 'text-semantic-warning font-semibold'
                   : 'text-content-primary font-medium'
             }
           >
@@ -3220,7 +3220,7 @@ function PPETab({ projectId }: { projectId: string }) {
                           <span
                             className={
                               flag
-                                ? 'text-amber-600 font-medium text-xs'
+                                ? 'text-semantic-warning font-medium text-xs'
                                 : 'text-content-secondary text-xs'
                             }
                           >
@@ -3228,7 +3228,7 @@ function PPETab({ projectId }: { projectId: string }) {
                             {flag && (
                               <AlertTriangle
                                 size={12}
-                                className="inline ml-1 text-amber-600"
+                                className="inline ml-1 text-semantic-warning"
                               />
                             )}
                           </span>
@@ -3422,7 +3422,7 @@ function PPEDetailDrawer({ item, onClose }: { item: PPEIssue; onClose: () => voi
               expiryDays !== null && expiryDays < 0
                 ? 'text-semantic-error font-semibold'
                 : expiryDays !== null && expiryDays <= 30
-                  ? 'text-amber-600 font-semibold'
+                  ? 'text-semantic-warning font-semibold'
                   : 'text-content-primary'
             }
           >
@@ -4314,7 +4314,7 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
                         ) : (
                           <span
                             className={
-                              days <= 3 ? 'text-amber-600 font-medium' : 'text-content-secondary'
+                              days <= 3 ? 'text-semantic-warning font-medium' : 'text-content-secondary'
                             }
                           >
                             {t('hse_advanced.in_days', { defaultValue: 'in {{n}}d', n: days })}

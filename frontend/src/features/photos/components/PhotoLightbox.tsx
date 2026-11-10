@@ -109,7 +109,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
             return style ? (
               <div
                 key={h.id}
-                className="pointer-events-none absolute border-2 border-amber-400"
+                className="pointer-events-none absolute border-2 border-semantic-warning/60"
                 style={style}
                 title={String(h.payload.hazard ?? '')}
               />

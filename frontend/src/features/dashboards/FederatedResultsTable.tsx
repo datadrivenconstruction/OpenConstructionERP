@@ -139,7 +139,7 @@ function renderCell(
   if (col === PROJECT_COL && typeof value === 'string') {
     return (
       <span
-        className="inline-flex items-center rounded bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-300"
+        className="inline-flex items-center rounded bg-semantic-success/10 px-2 py-0.5 font-mono text-2xs text-emerald-300"
         data-testid={`federation-chip-project-${value}`}
         title={value}
       >
@@ -150,7 +150,7 @@ function renderCell(
   if (col === SNAPSHOT_COL && typeof value === 'string') {
     return (
       <span
-        className="inline-flex items-center rounded bg-sky-500/10 px-2 py-0.5 font-mono text-[11px] text-sky-300"
+        className="inline-flex items-center rounded bg-semantic-info/10 px-2 py-0.5 font-mono text-2xs text-sky-300"
         data-testid={`federation-chip-snapshot-${value}`}
         title={value}
       >

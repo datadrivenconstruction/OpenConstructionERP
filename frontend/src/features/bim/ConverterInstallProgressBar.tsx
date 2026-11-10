@@ -163,7 +163,7 @@ export function ConverterInstallProgressBar({
       </div>
       <div
         className={clsx(
-          'flex items-center justify-between gap-2 text-[10px] tabular-nums',
+          'flex items-center justify-between gap-2 text-2xs tabular-nums',
           microTone,
         )}
       >

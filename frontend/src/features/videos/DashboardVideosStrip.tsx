@@ -93,7 +93,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                 >
                   <Play size={15} className="ms-0.5" fill="currentColor" />
                 </span>
-                <span className="absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                <span className="absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-white">
                   <MonitorPlay size={10} aria-hidden="true" />
                   {t('videos.tile_badge', { defaultValue: 'Video' })}
                 </span>
@@ -101,7 +101,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                   <span
                     data-testid="dashboard-video-lang"
                     title={t('dashboard.content_language_fallback', { defaultValue: 'Not yet available in your language' })}
-                    className="absolute end-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+                    className="absolute end-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-white"
                   >
                     {tags[i]}
                   </span>

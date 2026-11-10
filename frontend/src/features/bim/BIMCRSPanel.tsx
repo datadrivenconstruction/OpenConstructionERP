@@ -118,17 +118,17 @@ export function BIMCRSPanel({
     >
       <div className="flex items-center gap-1.5 mb-1">
         <Globe2 size={12} className="shrink-0" />
-        <span className="text-[10px] font-semibold uppercase tracking-wide">
+        <span className="text-2xs font-semibold uppercase tracking-wide">
           {t('bim.crs.label', { defaultValue: 'Detected CRS' })}
         </span>
       </div>
 
       {hasCRS ? (
         <>
-          <div className="text-[11px] font-semibold leading-tight truncate" title={name ?? ''}>
+          <div className="text-2xs font-semibold leading-tight truncate" title={name ?? ''}>
             {name || `EPSG:${epsg}`}
           </div>
-          <div className="text-[10px] opacity-80 mt-0.5 tabular-nums">
+          <div className="text-2xs opacity-80 mt-0.5 tabular-nums">
             EPSG:{epsg}
             {confidencePct != null && (
               <>
@@ -145,7 +145,7 @@ export function BIMCRSPanel({
           </div>
         </>
       ) : (
-        <div className="text-[11px] leading-snug">
+        <div className="text-2xs leading-snug">
           {t('bim.crs.unknown', {
             defaultValue:
               'CRS could not be auto-detected - model uses local coordinates.',
@@ -188,7 +188,7 @@ export function BIMCRSPanel({
               >
                 {opt.epsg === epsg && <Check size={10} className="text-emerald-500" />}
                 <span className="truncate flex-1">{opt.label}</span>
-                <span className="text-[9px] text-content-tertiary tabular-nums">
+                <span className="text-2xs text-content-tertiary tabular-nums">
                   EPSG:{opt.epsg}
                 </span>
               </button>

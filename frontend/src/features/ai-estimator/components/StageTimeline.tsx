@@ -15,11 +15,11 @@ import { STAGES } from './StageRail';
 function StatusIcon({ status }: { status: StageStatus }) {
   switch (status) {
     case 'complete':
-      return <Check className="h-3.5 w-3.5 text-emerald-500" />;
+      return <Check className="h-3.5 w-3.5 text-semantic-success" />;
     case 'active':
       return <Loader2 className="h-3.5 w-3.5 animate-spin text-oe-blue" />;
     case 'error':
-      return <AlertCircle className="h-3.5 w-3.5 text-rose-500" />;
+      return <AlertCircle className="h-3.5 w-3.5 text-semantic-error" />;
     default:
       return <Circle className="h-3 w-3 text-content-tertiary" />;
   }
@@ -61,7 +61,7 @@ export function StageTimeline({
                 row.status === 'active'
                   ? 'font-medium text-oe-blue'
                   : isError
-                    ? 'font-medium text-rose-600 dark:text-rose-400'
+                    ? 'font-medium text-semantic-error'
                     : row.status === 'complete'
                       ? 'text-content-secondary'
                       : 'text-content-tertiary',
@@ -73,7 +73,7 @@ export function StageTimeline({
         );
       })}
       {failureReason && (
-        <li className="mt-1 rounded border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] text-rose-800 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-200">
+        <li className="mt-1 rounded border border-semantic-error/30 bg-semantic-error-bg px-2 py-1 text-2xs text-semantic-error">
           {failureReason}
         </li>
       )}

@@ -387,12 +387,12 @@ export function BuyerPortalPage() {
       <ShellWrapper>
         <div
           data-testid="buyer-portal-error"
-          className="rounded-2xl border border-amber-300/40 bg-amber-50 dark:bg-amber-900/20 p-6 text-center space-y-3"
+          className="rounded-2xl border border-semantic-warning/30 bg-semantic-warning-bg p-6 text-center space-y-3"
         >
           <AlertTriangle
             size={28}
             strokeWidth={1.5}
-            className="mx-auto text-amber-600 dark:text-amber-400"
+            className="mx-auto text-semantic-warning"
           />
           <h2 className="text-base font-semibold text-content-primary">
             {t('buyer_portal.error.title', {
@@ -861,7 +861,7 @@ function QuickLinkTile({
     variant === 'primary'
       ? 'bg-oe-blue text-white hover:bg-oe-blue-hover border-oe-blue'
       : variant === 'accent'
-        ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-900/40'
+        ? 'bg-semantic-warning-bg text-semantic-warning hover:bg-amber-200 border-semantic-warning/30 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-900/40'
         : 'bg-surface-primary text-content-primary hover:bg-surface-secondary border-border-light';
   return (
     <a
@@ -1109,7 +1109,7 @@ function instalmentTimelineColor(
     case 'overdue':
       return 'border-semantic-error/40 bg-semantic-error/5';
     case 'due':
-      return 'border-amber-300/60 bg-amber-50 dark:bg-amber-900/10';
+      return 'border-semantic-warning/30 bg-semantic-warning-bg';
     case 'waived':
     case 'cancelled':
       return 'border-border-light/60 bg-surface-secondary/30';
@@ -1853,7 +1853,7 @@ function ShellWrapper({
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div
-              className="w-8 h-8 rounded-md bg-oe-blue text-white grid place-items-center text-sm font-bold"
+              className="w-8 h-8 rounded-md bg-oe-blue text-white grid place-items-center text-sm font-semibold"
               aria-hidden
             >
               OE
@@ -1970,7 +1970,7 @@ function InstalmentStatusPill({
       : status === 'overdue'
         ? 'bg-semantic-error/10 text-semantic-error'
         : status === 'due'
-          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+          ? 'bg-semantic-warning-bg text-semantic-warning'
           : status === 'waived' || status === 'cancelled'
             ? 'bg-surface-secondary text-content-tertiary'
             : 'bg-surface-secondary text-content-secondary';

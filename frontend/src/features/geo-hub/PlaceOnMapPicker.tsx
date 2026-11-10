@@ -360,7 +360,7 @@ export function PlaceOnMapPicker({
       }
     >
       {!hasAnchor && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-300/50 bg-amber-50 px-3.5 py-2.5 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-100">
+        <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-sm text-semantic-warning">
           <MapPin size={16} className="mt-0.5 shrink-0" />
           <span>
             {t('geo_hub.place.anchor_first', {
@@ -459,7 +459,7 @@ export function PlaceOnMapPicker({
                         </p>
                       </div>
                       {placed ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-2.5 py-1 text-xs font-semibold text-semantic-success">
                           <Check size={13} />
                           {t('geo_hub.place.on_map', {
                             defaultValue: 'On the map',
@@ -533,7 +533,7 @@ export function PlaceOnMapPicker({
                       key={doc.id}
                       className="flex items-center gap-3 bg-surface-primary px-3.5 py-2.5"
                     >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-rose-500/10 text-rose-500">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-semantic-error/10 text-semantic-error">
                         <FileText size={16} />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -545,7 +545,7 @@ export function PlaceOnMapPicker({
                         </p>
                       </div>
                       {placed ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-2.5 py-1 text-xs font-semibold text-semantic-success">
                           <Check size={13} />
                           {t('geo_hub.place.on_map', {
                             defaultValue: 'On the map',

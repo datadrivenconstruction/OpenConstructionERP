@@ -134,13 +134,13 @@ function DepthMeter({ positions }: { positions: number }) {
           <span
             key={i}
             aria-hidden
-            className={`h-3 w-[5px] rounded-[2px] transition-colors duration-normal ease-oe ${
+            className={`h-3 w-[5px] rounded-xs transition-colors duration-normal ease-oe ${
               i < level ? 'bg-oe-blue' : 'bg-border-light'
             }`}
           />
         ))}
       </div>
-      <span className="text-[10px] font-medium uppercase tracking-wide text-content-quaternary">
+      <span className="text-2xs font-medium uppercase tracking-wide text-content-quaternary">
         {t('costs.base_depth', { defaultValue: 'Depth' })}
       </span>
     </div>
@@ -231,7 +231,7 @@ function BaseVariantCard({
         </div>
         {loaded && (
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+            className={`shrink-0 rounded-full px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide ${
               active ? 'bg-oe-blue/15 text-oe-blue' : 'bg-semantic-success/15 text-semantic-success'
             }`}
           >
@@ -241,7 +241,7 @@ function BaseVariantCard({
           </span>
         )}
         {!loaded && variant.bundled && (
-          <span className="shrink-0 rounded-full bg-surface-secondary px-2 py-0.5 text-[10px] font-medium text-content-tertiary">
+          <span className="shrink-0 rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
             {t('costs.base_included', { defaultValue: 'Included' })}
           </span>
         )}
@@ -251,7 +251,7 @@ function BaseVariantCard({
           file holds the base in it (Turkiye has no English text), say which
           language the work items will really be in. */}
       {variant.text_lang_code && variant.text_lang_code !== variant.lang_code && (
-        <div className="mt-1.5 text-[11px] font-medium text-semantic-warning" data-testid="base-text-lang-note">
+        <div className="mt-1.5 text-2xs font-medium text-semantic-warning" data-testid="base-text-lang-note">
           {t('costs.base_text_only_in', {
             defaultValue: 'Work items in {{language}} only',
             language: languageName(variant.text_lang_code, i18n.language),
@@ -260,7 +260,7 @@ function BaseVariantCard({
       )}
 
       {unfinishedSwitch && (
-        <div className="mt-1.5 text-[11px] font-medium text-semantic-warning" data-testid="base-switch-unfinished">
+        <div className="mt-1.5 text-2xs font-medium text-semantic-warning" data-testid="base-switch-unfinished">
           {t('costs.base_market_unfinished', {
             defaultValue: 'A market switch of this base has not finished',
           })}
@@ -270,19 +270,19 @@ function BaseVariantCard({
       {/* Count + currency + coefficient marker */}
       <div className="mt-2.5 flex items-end justify-between gap-2">
         <div>
-          <div className="text-lg font-bold leading-none tabular-nums text-content-primary">
+          <div className="text-lg font-semibold leading-none tabular-nums text-content-primary">
             {positionsLabel(shownPositions)}
           </div>
-          <div className="text-[11px] text-content-tertiary">
+          <div className="text-2xs text-content-tertiary">
             {t('costs.base_positions', { defaultValue: 'positions' })}
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-content-secondary">
+          <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium tabular-nums text-content-secondary">
             {variant.currency}
           </span>
           {variant.coefficient && (
-            <span className="text-[10px] text-content-quaternary">
+            <span className="text-2xs text-content-quaternary">
               {t('costs.base_coefficient', { defaultValue: 'coefficient base' })}
             </span>
           )}
@@ -615,11 +615,11 @@ export function BaseCatalogBrowser({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-content-primary">{family.name}</span>
-                    <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-content-secondary">
+                    <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
                       {family.norm_system}
                     </span>
                     {multiMarket && (
-                      <span className="rounded bg-oe-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-oe-blue">
+                      <span className="rounded bg-oe-blue/10 px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
                         {t('costs.base_family_markets', {
                           defaultValue: '{{count}} markets',
                           count: family.market_count,
@@ -628,7 +628,7 @@ export function BaseCatalogBrowser({
                     )}
                     {coefficient && (
                       <span
-                        className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-content-tertiary"
+                        className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-tertiary"
                         title={t('costs.base_coefficient_hint', {
                           defaultValue: 'Priced through a resource price sheet rather than by resource code',
                         })}
@@ -637,7 +637,7 @@ export function BaseCatalogBrowser({
                       </span>
                     )}
                     {loadedInFamily > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success/15 px-1.5 py-0.5 text-[10px] font-semibold text-semantic-success">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success/15 px-1.5 py-0.5 text-2xs font-semibold text-semantic-success">
                         <Check size={10} />
                         {t('costs.base_family_loaded_count', {
                           defaultValue: '{{count}} loaded',
@@ -646,7 +646,7 @@ export function BaseCatalogBrowser({
                       </span>
                     )}
                     {activeVariant && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue/15 px-1.5 py-0.5 text-[10px] font-semibold text-oe-blue">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue/15 px-1.5 py-0.5 text-2xs font-semibold text-oe-blue">
                         <Check size={10} />
                         {t('costs.base_family_active', {
                           defaultValue: 'Active: {{market}}',
@@ -659,7 +659,7 @@ export function BaseCatalogBrowser({
                     {t(`costs.base_family_desc.${family.key}`, { defaultValue: family.description })}
                   </div>
                   {family.attribution && (
-                    <div className="truncate text-[11px] text-content-tertiary" data-testid="base-family-attribution">
+                    <div className="truncate text-2xs text-content-tertiary" data-testid="base-family-attribution">
                       {t('costs.base_source_attribution', {
                         defaultValue: 'Source: {{attribution}}, {{licence}}',
                         attribution: family.attribution,
@@ -669,10 +669,10 @@ export function BaseCatalogBrowser({
                   )}
                 </div>
                 <div className="hidden shrink-0 text-right sm:block">
-                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                  <div className="text-sm font-semibold tabular-nums text-content-primary">
                     {positionsLabel(family.positions)}
                   </div>
-                  <div className="text-[11px] text-content-tertiary">
+                  <div className="text-2xs text-content-tertiary">
                     {t('costs.base_positions', { defaultValue: 'positions' })}
                   </div>
                 </div>

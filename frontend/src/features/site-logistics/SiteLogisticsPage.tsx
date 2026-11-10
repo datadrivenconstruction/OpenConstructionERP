@@ -114,7 +114,7 @@ const STATUS_ORDER: DeliveryStatus[] = [
 const STATUS_CONFIG: Record<DeliveryStatus, { label: string; cls: string }> = {
   requested: {
     label: 'Requested',
-    cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    cls: 'bg-semantic-warning-bg text-semantic-warning',
   },
   approved: {
     label: 'Approved',
@@ -126,11 +126,11 @@ const STATUS_CONFIG: Record<DeliveryStatus, { label: string; cls: string }> = {
   },
   completed: {
     label: 'Completed',
-    cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    cls: 'bg-semantic-success-bg text-semantic-success',
   },
   rejected: {
     label: 'Rejected',
-    cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    cls: 'bg-semantic-error-bg text-semantic-error',
   },
 };
 
@@ -634,7 +634,7 @@ function BookDeliveryModal({
                 })}
                 className={clsx(
                   inputCls,
-                  supplierError && 'border-semantic-error focus:ring-red-300',
+                  supplierError && 'border-semantic-error focus:ring-semantic-error/30',
                 )}
                 autoFocus
               />
@@ -978,7 +978,7 @@ export function DeliveryRow({
                 return (
                   <span
                     key={line.id}
-                    className="inline-flex items-center gap-0.5 rounded border border-border px-1 py-0.5 text-[9px] font-semibold text-content-tertiary"
+                    className="inline-flex items-center gap-0.5 rounded border border-border px-1 py-0.5 text-2xs font-semibold text-content-tertiary"
                     title={t('siteLogistics.detached_line_hint', {
                       defaultValue:
                         'The estimate line this was booked against has been deleted. The delivery record stands.',
@@ -1001,7 +1001,7 @@ export function DeliveryRow({
                     defaultValue: 'Open {{description}} in the bill',
                     description: line.description,
                   })}
-                  className="inline-flex items-center gap-0.5 rounded border border-oe-blue/30 bg-oe-blue-subtle px-1 py-0.5 text-[9px] font-semibold text-oe-blue-text hover:bg-oe-blue/10 transition-colors"
+                  className="inline-flex items-center gap-0.5 rounded border border-oe-blue/30 bg-oe-blue-subtle px-1 py-0.5 text-2xs font-semibold text-oe-blue-text hover:bg-oe-blue/10 transition-colors"
                 >
                   <Table2 size={9} className="shrink-0" />
                   {label}
@@ -1927,7 +1927,7 @@ function LaydownCard({
     <Card padding="none" className="p-4 flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <MapPin size={16} className="text-emerald-600 shrink-0" />
+          <MapPin size={16} className="text-semantic-success shrink-0" />
           <span className="text-sm font-semibold text-content-primary truncate">{zone.name}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -1999,7 +1999,7 @@ function LaydownEditForm({
   return (
     <Card padding="none" className="p-4 flex flex-col gap-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-        <Pencil size={14} className="text-emerald-600 shrink-0" />
+        <Pencil size={14} className="text-semantic-success shrink-0" />
         {t('siteLogistics.edit_zone', { defaultValue: 'Edit zone' })}
       </div>
       <input
@@ -2098,7 +2098,7 @@ function OccupancyChip({
       className={clsx(
         'inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-2xs font-semibold tabular-nums shrink-0',
         over
-          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+          ? 'bg-semantic-warning-bg text-semantic-warning'
           : 'bg-surface-secondary text-content-secondary',
       )}
       title={
@@ -2506,7 +2506,7 @@ function GateTimeline({
           {/* Legend + empty-day hint */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-2xs text-content-tertiary">
             <span className="inline-flex items-center gap-1">
-              <AlertTriangle size={11} className="text-amber-600" />
+              <AlertTriangle size={11} className="text-semantic-warning" />
               {t('siteLogistics.timeline_legend_over', {
                 defaultValue: 'Amber occupancy means the gate is over capacity at some point',
               })}
@@ -2595,7 +2595,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
                 defaultValue: 'Positions with deliveries',
               })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {data.linked_position_count}
             </span>
           </div>
@@ -2603,7 +2603,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('siteLogistics.stat_value_on_site', { defaultValue: 'Value on site' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               <MoneyDisplay amount={data.delivered_value_total} currency={currency} />
             </span>
           </div>
@@ -2612,7 +2612,7 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
               <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                 {t('siteLogistics.stat_detached_lines', { defaultValue: 'Lines off the bill' })}
               </span>
-              <span className="mt-1 flex items-center gap-1.5 text-2xl font-bold tabular-nums text-content-primary">
+              <span className="mt-1 flex items-center gap-1.5 text-2xl font-semibold tabular-nums text-content-primary">
                 <Unlink size={16} className="shrink-0 text-content-tertiary" />
                 {data.detached_line_count}
               </span>
@@ -3043,7 +3043,7 @@ export function SiteLogisticsPage() {
               <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                 {c.label}
               </span>
-              <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+              <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
                 {c.value}
               </span>
             </div>

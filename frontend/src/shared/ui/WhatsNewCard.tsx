@@ -262,10 +262,10 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
             'inline-flex items-center gap-2 rounded-full',
             'border border-sky-400/50 ring-1 ring-sky-500/20',
             'dark:border-sky-500/40 dark:ring-sky-400/15',
-            'bg-white/65 dark:bg-slate-900/50 backdrop-blur-md',
-            'px-4 py-2 text-[13px] font-medium',
+            'bg-white/65 backdrop-blur-md',
+            'px-4 py-2 text-sm font-medium',
             'text-blue-700 hover:text-blue-800 dark:text-sky-200 dark:hover:text-sky-100',
-            'hover:bg-sky-500/10 dark:hover:bg-sky-400/10',
+            'hover:bg-semantic-info/10',
             'hover:ring-sky-500/40 hover:shadow-md hover:shadow-sky-500/20',
             'shadow-sm shadow-sky-500/10 transition-all',
           ].join(' ')}
@@ -305,7 +305,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
         <div className="relative shrink-0">
           <span
             aria-hidden="true"
-            className="absolute inset-0 rounded-lg bg-sky-500/30 animate-ping"
+            className="absolute inset-0 rounded-lg bg-semantic-info/30 animate-ping"
           />
           <div className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-blue-500/30">
             <Sparkles size={13} strokeWidth={2.5} />
@@ -314,13 +314,13 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
 
         {/* Headline + tagline (single line on desktop) */}
         <div className="flex min-w-0 items-baseline gap-2">
-          <h2 className="truncate text-[13px] sm:text-sm font-semibold text-blue-900 dark:text-sky-100 leading-tight">
+          <h2 className="truncate text-sm sm:text-sm font-semibold text-blue-900 dark:text-sky-100 leading-tight">
             {t('whatsnew.title', {
               defaultValue: "What's new in v{{version}}",
               version,
             })}
           </h2>
-          <span className="hidden md:inline truncate text-[12px] text-blue-700/75 dark:text-sky-300/70">
+          <span className="hidden md:inline truncate text-xs text-blue-700/75 dark:text-sky-300/70">
             {t('whatsnew.tagline', {
               defaultValue: 'Tap a chip for details.',
             })}
@@ -357,7 +357,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
           <button
             type="button"
             onClick={handleTour}
-            className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm shadow-blue-500/30 ring-1 ring-blue-500/20 transition-all"
+            className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-2.5 py-1 text-2xs font-semibold text-white shadow-sm shadow-blue-500/30 ring-1 ring-blue-500/20 transition-all"
           >
             <Sparkles size={11} />
             <span className="hidden sm:inline">
@@ -370,7 +370,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
           <button
             type="button"
             onClick={handleChangelog}
-            className="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-medium text-blue-700 hover:text-blue-800 dark:text-sky-300 dark:hover:text-sky-200 hover:bg-sky-500/10 dark:hover:bg-sky-400/10 transition-colors"
+            className="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-2xs font-medium text-blue-700 hover:text-blue-800 hover:bg-semantic-info/10 transition-colors"
           >
             {t('whatsnew.changelog_link', {
               defaultValue: 'Full release notes',
@@ -381,7 +381,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
             type="button"
             onClick={handleDismiss}
             aria-label={t('whatsnew.dismiss', { defaultValue: 'Dismiss' })}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-sky-600/70 hover:text-blue-700 hover:bg-sky-500/10 dark:text-sky-300/70 dark:hover:text-sky-100 dark:hover:bg-sky-400/10 transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-sky-600/70 hover:text-blue-700 hover:bg-semantic-info/10 dark:text-sky-300/70 dark:hover:text-sky-100 dark:hover:bg-sky-400/10 transition-colors"
           >
             <X size={14} />
           </button>
@@ -480,11 +480,11 @@ function ChipWithPopover({
         aria-controls={`whatsnew-chip-${s.id}-popover`}
         title={t(s.titleKey, { defaultValue: s.titleDefault })}
         className={[
-          'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium',
+          'inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium',
           'ring-1 transition-colors',
           expanded
             ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white ring-blue-500/40 shadow-sm shadow-blue-500/30'
-            : 'bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15',
+            : 'bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15',
         ].join(' ')}
       >
         <Icon size={11} strokeWidth={2.25} />
@@ -508,13 +508,13 @@ function ChipWithPopover({
                 zIndex: 1000,
               }}
               className={[
-                'rounded-lg border border-sky-300/60 ring-1 ring-sky-500/10',
+                'rounded-lg border border-semantic-info/30 ring-1 ring-sky-500/10',
                 'dark:border-sky-700/50 dark:ring-sky-400/10',
-                'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md',
+                'bg-white/95 backdrop-blur-md',
                 'shadow-lg shadow-sky-500/20 p-3',
               ].join(' ')}
             >
-              <h3 className="text-[12px] font-semibold text-blue-900 dark:text-sky-100 leading-snug mb-1.5 line-clamp-4">
+              <h3 className="text-xs font-semibold text-blue-900 dark:text-sky-100 leading-snug mb-1.5 line-clamp-4">
                 {t(s.titleKey, { defaultValue: s.titleDefault })}
               </h3>
               <ul className="space-y-0.5">
@@ -525,7 +525,7 @@ function ChipWithPopover({
                   >
                     <span
                       aria-hidden="true"
-                      className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-sky-500/70"
+                      className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-semantic-info/70"
                     />
                     <span>{t(b.key, { defaultValue: b.default })}</span>
                   </li>
@@ -534,7 +534,7 @@ function ChipWithPopover({
               <button
                 type="button"
                 onClick={onReadMore}
-                className="mt-2 inline-flex items-center gap-0.5 text-[11px] font-medium text-blue-700 hover:text-blue-800 dark:text-sky-300 dark:hover:text-sky-100 transition-colors"
+                className="mt-2 inline-flex items-center gap-0.5 text-2xs font-medium text-blue-700 hover:text-blue-800 dark:text-sky-300 dark:hover:text-sky-100 transition-colors"
               >
                 {t('whatsnew.read_more', { defaultValue: 'Read more' })}
                 <ArrowRight size={11} />

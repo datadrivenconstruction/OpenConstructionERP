@@ -101,7 +101,7 @@ export function RecurringLinesPanel({ open, boqId, positions, readOnly, onClose,
                 {line.drifting && (
                   <AlertTriangle
                     size={13}
-                    className="text-amber-600"
+                    className="text-semantic-warning"
                     aria-label={t('boq.recurring_drifting', { defaultValue: 'Priced differently' })}
                   />
                 )}

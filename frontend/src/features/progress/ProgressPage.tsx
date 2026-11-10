@@ -334,7 +334,7 @@ function VarianceRow({ item }: { item: PositionQuantityVarianceItem }) {
   const { t } = useTranslation();
   const pc = clampPct(parseFloat(item.percent_complete));
   const varianceTone = item.is_over_run
-    ? 'text-amber-600 dark:text-amber-400'
+    ? 'text-semantic-warning'
     : item.is_under_run
       ? 'text-content-secondary'
       : 'text-content-primary';

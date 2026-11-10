@@ -113,7 +113,7 @@ export function ConfidenceBadge({ confidence }: { confidence: ActivityConfidence
       title={confidenceTooltip(t, confidence)}
       data-testid="confidence-badge"
       data-band={confidence.band}
-      className={`inline-flex shrink-0 cursor-help items-center gap-0.5 rounded border px-1 py-0.5 text-[9px] font-semibold tabular-nums ${BAND_CLASSES[confidence.band]}`}
+      className={`inline-flex shrink-0 cursor-help items-center gap-0.5 rounded border px-1 py-0.5 text-2xs font-semibold tabular-nums ${BAND_CLASSES[confidence.band]}`}
     >
       {confidence.band === 'low' && <AlertTriangle size={9} className="shrink-0" />}
       {formatScore(confidence.score)}

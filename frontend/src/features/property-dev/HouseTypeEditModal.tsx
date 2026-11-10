@@ -693,18 +693,18 @@ export function HouseTypeEditModal({
         {/* Live preview column */}
         <aside className="hidden lg:flex flex-col gap-3">
           <div className="sticky top-2 rounded-xl border border-border-light bg-surface-secondary p-4">
-            <div className="text-[10px] uppercase tracking-wide text-content-tertiary">
+            <div className="text-2xs uppercase tracking-wide text-content-tertiary">
               {t('property_dev.house_type.preview_label', { defaultValue: 'Live preview' })}
             </div>
             <div className="mt-3 flex items-center gap-2">
               {previewCountry ? (
                 <CountryFlag code={previewCountry.code} size={20} />
               ) : form.countryValue === CUSTOM_SENTINEL ? (
-                <span className="inline-flex h-5 w-7 items-center justify-center rounded-[2px] bg-oe-blue/15 text-[10px] font-semibold text-oe-blue">
+                <span className="inline-flex h-5 w-7 items-center justify-center rounded-xs bg-oe-blue/15 text-2xs font-semibold text-oe-blue">
                   ✱
                 </span>
               ) : (
-                <span className="inline-flex h-5 w-7 items-center justify-center rounded-[2px] bg-content-tertiary/15 text-[10px] text-content-tertiary">
+                <span className="inline-flex h-5 w-7 items-center justify-center rounded-xs bg-content-tertiary/15 text-2xs text-content-tertiary">
                   ⌀
                 </span>
               )}
@@ -726,7 +726,7 @@ export function HouseTypeEditModal({
                   defaultValue: 'No description set.',
                 })}
             </div>
-            <ul className="mt-3 grid grid-cols-2 gap-y-1.5 text-[11px] text-content-secondary">
+            <ul className="mt-3 grid grid-cols-2 gap-y-1.5 text-2xs text-content-secondary">
               <li>
                 <span className="text-content-tertiary">m²:</span>{' '}
                 {form.area_typical_m2 || '—'}
@@ -778,13 +778,13 @@ export function HouseTypeEditModal({
               </li>
             </ul>
             {(form.typical_price_min || form.typical_price_max) && (
-              <div className="mt-3 rounded-md border border-border-light/60 bg-surface-primary px-2 py-1.5 text-[11px] text-content-secondary">
+              <div className="mt-3 rounded-md border border-border-light/60 bg-surface-primary px-2 py-1.5 text-2xs text-content-secondary">
                 {form.typical_price_min || '—'} – {form.typical_price_max || '—'}{' '}
                 {form.currency || ''}
               </div>
             )}
           </div>
-          <div className="rounded-xl border border-border-light/60 bg-surface-primary p-3 text-[11px] leading-relaxed text-content-tertiary">
+          <div className="rounded-xl border border-border-light/60 bg-surface-primary p-3 text-2xs leading-relaxed text-content-tertiary">
             {t('property_dev.house_type.preview_tip', {
               defaultValue:
                 'Tip: keep code short and stable - it appears in BOQ rollups, plot drawers, and tender exports.',

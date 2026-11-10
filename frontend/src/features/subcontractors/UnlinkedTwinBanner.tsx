@@ -78,10 +78,10 @@ export function UnlinkedTwinBanner({
         <div
           key={`${pair.agreement_id}:${pair.contract_id}`}
           role="status"
-          className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-sm dark:border-amber-800 dark:bg-amber-950/30 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="flex min-w-0 items-start gap-2">
-            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
             <div className="min-w-0">
               <p className="text-content-primary">
                 {t('subcontractors.twin.message', {

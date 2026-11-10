@@ -33,15 +33,15 @@ export type BlockNodeProps = NodeProps;
 
 /** Tailwind text colour per slot type — used for the small slot label. */
 const SLOT_TYPE_TEXT_COLOR: Record<SlotDataType, string> = {
-  selector: 'text-gray-600 dark:text-gray-300',
-  predicate: 'text-green-700 dark:text-green-300',
+  selector: 'text-content-secondary',
+  predicate: 'text-semantic-success',
   attribute: 'text-purple-700 dark:text-purple-300',
   constraint: 'text-blue-700 dark:text-blue-300',
-  variable: 'text-yellow-700 dark:text-yellow-300',
+  variable: 'text-semantic-warning',
   number: 'text-cyan-700 dark:text-cyan-300',
   string: 'text-pink-700 dark:text-pink-300',
   boolean: 'text-teal-700 dark:text-teal-300',
-  any: 'text-slate-500 dark:text-slate-400',
+  any: 'text-content-tertiary',
 };
 
 export function BlockNode({ id, data, selected }: BlockNodeProps) {
@@ -123,7 +123,7 @@ export function BlockNode({ id, data, selected }: BlockNodeProps) {
             onBlur={commitTitle}
             onKeyDown={handleTitleKeyDown}
             autoFocus
-            className="h-6 w-full rounded border border-border bg-white px-1 text-sm dark:bg-gray-900"
+            className="h-6 w-full rounded border border-border bg-surface-primary px-1 text-sm"
           />
         ) : (
           <button

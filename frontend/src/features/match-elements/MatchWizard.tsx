@@ -161,11 +161,11 @@ function Stepper({
             >
               <span
                 className={clsx(
-                  'w-11 h-11 rounded-full flex items-center justify-center text-base font-bold transition-all duration-300',
+                  'w-11 h-11 rounded-full flex items-center justify-center text-base font-semibold transition-all duration-300',
                   isCurrent &&
                     'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/40 ring-4 ring-indigo-100 dark:ring-indigo-900/40 scale-110',
                   isDone &&
-                    'bg-emerald-500 text-white shadow-md shadow-emerald-500/40',
+                    'bg-semantic-success text-white shadow-md shadow-emerald-500/40',
                   !isCurrent && !isDone &&
                     'bg-surface-secondary text-content-tertiary border-2 border-border',
                 )}
@@ -281,13 +281,13 @@ const STAGE_VISUALS: Record<
   '02_Demolition': {
     Icon: Hammer,
     tint: 'from-rose-500/10 to-transparent',
-    iconBg: 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-200',
+    iconBg: 'bg-semantic-error-bg text-semantic-error',
     defaultBlurb: 'Strip-out, deconstruction, hazmat removal.',
   },
   '03_Earthwork': {
     Icon: Mountain,
     tint: 'from-amber-500/10 to-transparent',
-    iconBg: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200',
+    iconBg: 'bg-semantic-warning-bg text-semantic-warning',
     defaultBlurb: 'Excavation, fill, grading, dewatering.',
   },
   '04_Foundations': {
@@ -299,7 +299,7 @@ const STAGE_VISUALS: Record<
   '05_Substructure': {
     Icon: Box,
     tint: 'from-slate-500/10 to-transparent',
-    iconBg: 'bg-slate-200 text-slate-800 dark:bg-slate-800/60 dark:text-slate-100',
+    iconBg: 'bg-surface-secondary text-content-primary',
     defaultBlurb: 'Basement walls, lower-level slabs, retaining structures.',
   },
   '06_Superstructure': {
@@ -311,7 +311,7 @@ const STAGE_VISUALS: Record<
   '07_Envelope': {
     Icon: SquareStack,
     tint: 'from-sky-500/10 to-transparent',
-    iconBg: 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200',
+    iconBg: 'bg-semantic-info-bg text-semantic-info',
     defaultBlurb: 'Facade, curtain wall, roof, glazing, insulation.',
   },
   '08_Interior': {
@@ -329,7 +329,7 @@ const STAGE_VISUALS: Record<
   '10_Finishes': {
     Icon: Paintbrush,
     tint: 'from-emerald-500/10 to-transparent',
-    iconBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200',
+    iconBg: 'bg-semantic-success-bg text-semantic-success',
     defaultBlurb: 'Plaster, paint, flooring, tiling, joinery.',
   },
   '11_FixedFurnishings': {
@@ -341,13 +341,13 @@ const STAGE_VISUALS: Record<
   '12_Equipment': {
     Icon: Wrench,
     tint: 'from-zinc-500/10 to-transparent',
-    iconBg: 'bg-zinc-200 text-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100',
+    iconBg: 'bg-surface-secondary text-content-primary',
     defaultBlurb: 'Process / lab / kitchen / specialty equipment.',
   },
   '13_Sitework': {
     Icon: TreePine,
     tint: 'from-green-500/10 to-transparent',
-    iconBg: 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-200',
+    iconBg: 'bg-semantic-success-bg text-semantic-success',
     defaultBlurb: 'Paving, landscaping, fences, site utilities.',
   },
 };
@@ -375,7 +375,7 @@ function StageStep({
   return (
     <div className="animate-[wizard-fade_300ms_ease-out]">
       <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
+        <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
           {t('match_wizard.step1_eyebrow', 'Step 1')}
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-content-primary mb-1.5">
@@ -486,7 +486,7 @@ function StageStep({
       {/* Compact strip — less common phases. Icon-led so the user can
           scan visually; full label sits next to the icon so nothing is
           lost behind a tooltip. Wraps freely on narrow widths. */}
-      <div className="text-[11px] uppercase tracking-[0.14em] text-content-tertiary font-semibold mb-2">
+      <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-2">
         {t('match_wizard.stage_other_label', 'Other phases')}
       </div>
       <div className="flex flex-wrap gap-1.5">
@@ -516,8 +516,8 @@ function StageStep({
       </div>
 
       {sessions.length > 0 && (
-        <div className="mt-7 rounded-2xl bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-surface-primary border border-amber-200/60 dark:border-amber-800/40 p-4">
-          <div className="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-2 inline-flex items-center gap-1.5">
+        <div className="mt-7 rounded-2xl bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-surface-primary border border-semantic-warning/30 p-4">
+          <div className="text-xs font-semibold text-semantic-warning mb-2 inline-flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
             {t('match_wizard.resume_title', 'Resume a saved session')}
           </div>
@@ -527,7 +527,7 @@ function StageStep({
                 key={s.id}
                 type="button"
                 onClick={() => onResume(s.id)}
-                className="text-xs px-2.5 py-1 rounded-full bg-white dark:bg-surface-primary border border-amber-300/60 dark:border-amber-700/40 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-900 dark:text-amber-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-px"
+                className="text-xs px-2.5 py-1 rounded-full bg-white dark:bg-surface-primary border border-semantic-warning/30 hover:bg-semantic-warning-bg text-semantic-warning shadow-sm transition-all hover:shadow-md hover:-translate-y-px"
                 title={s.id}
               >
                 {s.name || s.id.slice(0, 8)}
@@ -659,7 +659,7 @@ export function CatalogueStep({
   return (
     <div className="animate-[wizard-fade_300ms_ease-out]">
       <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
+        <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
           {t('match_wizard.step2_eyebrow', 'Step 2')}
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-content-primary mb-1.5">
@@ -676,15 +676,15 @@ export function CatalogueStep({
             tell the user at a glance what makes this step different from
             a plain dropdown of price lists. */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40">
             <Sparkles className="w-3 h-3" />
             {t('match_wizard.step2_chip_semantic', 'Semantic search')}
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-medium bg-semantic-success-bg text-semantic-success border border-semantic-success/30">
             <Database className="w-3 h-3" />
             {t('match_wizard.step2_chip_bgem3', 'BGE-M3 embeddings')}
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-secondary text-content-secondary border border-border-light">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-medium bg-surface-secondary text-content-secondary border border-border-light">
             {t('match_wizard.step2_chip_lang', 'Plain-language queries')}
           </span>
         </div>
@@ -700,15 +700,15 @@ export function CatalogueStep({
       {!cataloguesQ.isLoading && installed.length === 0 && (
         <div
           data-testid="no-catalogue-banner"
-          className="rounded-2xl border-2 border-amber-300/70 dark:border-amber-700/50 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/30 dark:to-surface-primary p-5 mb-4"
+          className="rounded-2xl border-2 border-semantic-warning/30 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/30 dark:to-surface-primary p-5 mb-4"
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <span className="shrink-0 w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-200 inline-flex items-center justify-center">
+            <span className="shrink-0 w-9 h-9 rounded-xl bg-semantic-warning-bg text-semantic-warning inline-flex items-center justify-center">
               <AlertTriangle className="w-4 h-4" />
             </span>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-amber-900 dark:text-amber-100">
+              <h3 className="text-sm font-semibold text-semantic-warning">
                 {t(
                   'match_wizard.no_installed_title',
                   'Install a catalogue first',
@@ -739,7 +739,7 @@ export function CatalogueStep({
                 )}
               </button>
               {available.length === 0 && (
-                <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-300/70">
+                <p className="mt-2 text-2xs text-amber-700/80 dark:text-amber-300/70">
                   {t(
                     'match_wizard.no_installed_no_available',
                     'No catalogues are available from the server. Check the Qdrant / costs registry status.',
@@ -753,7 +753,7 @@ export function CatalogueStep({
 
       {installed.length > 0 && (
         <>
-          <div className="text-[11px] uppercase tracking-[0.14em] text-content-tertiary font-semibold mb-3">
+          <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-3">
             {t('match_wizard.installed_label', 'Installed')}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 mb-5">
@@ -766,7 +766,7 @@ export function CatalogueStep({
                 <div className="font-medium text-sm text-content-primary mb-0.5 pr-7">
                   {c.country_iso} · {c.city}
                 </div>
-                <div className="text-[11px] text-content-tertiary">
+                <div className="text-2xs text-content-tertiary">
                   {c.language?.toUpperCase()} · {c.currency} · {c.size_mb} MB
                 </div>
               </SelectableTile>
@@ -780,7 +780,7 @@ export function CatalogueStep({
           <div
             ref={availableAnchorRef}
             data-testid="catalogues-available-anchor"
-            className="text-[11px] uppercase tracking-[0.14em] text-content-tertiary font-semibold mb-3 mt-2 scroll-mt-20"
+            className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-3 mt-2 scroll-mt-20"
           >
             {t('match_wizard.available_label', 'Available to install ({{n}})', {
               n: available.length,
@@ -816,9 +816,9 @@ export function CatalogueStep({
                       'rounded-2xl border p-3 transition-colors',
                       'border-border-light bg-surface-primary',
                       (isInstalling || isFinalizing) &&
-                        'border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20',
+                        'border-semantic-success/30 bg-semantic-success/10',
                       isFailed &&
-                        'border-rose-300 dark:border-rose-700 bg-rose-50/40 dark:bg-rose-950/20',
+                        'border-semantic-error/30 bg-semantic-error/10',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -826,7 +826,7 @@ export function CatalogueStep({
                         <div className="font-medium text-sm text-content-primary truncate">
                           {c.country_iso} · {c.city}
                         </div>
-                        <div className="text-[11px] text-content-tertiary mt-0.5">
+                        <div className="text-2xs text-content-tertiary mt-0.5">
                           {c.language?.toUpperCase()} · {c.currency} · {c.size_mb} MB
                         </div>
                       </div>
@@ -891,15 +891,15 @@ export function CatalogueStep({
                       </button>
                     </div>
                     {(isInstalling || isFinalizing) && job && (
-                      <div className="mt-2 h-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 overflow-hidden">
+                      <div className="mt-2 h-1 rounded-full bg-semantic-success-bg overflow-hidden">
                         <div
-                          className="h-full bg-emerald-500 transition-all duration-500"
+                          className="h-full bg-semantic-success transition-all duration-500"
                           style={{ width: `${isFinalizing ? 100 : job.progress}%` }}
                         />
                       </div>
                     )}
                     {isFailed && (
-                      <div className="mt-1.5 text-[11px] text-rose-700 dark:text-rose-300 line-clamp-2">
+                      <div className="mt-1.5 text-2xs text-semantic-error line-clamp-2">
                         {job?.errorMessage || t('match_wizard.install_failed', 'Install failed')}
                       </div>
                     )}
@@ -953,7 +953,7 @@ function SourceStep({
   return (
     <div className="animate-[wizard-fade_300ms_ease-out]">
       <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
+        <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
           {t('match_wizard.step3_eyebrow', 'Step 3')}
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-content-primary mb-1.5">
@@ -1018,7 +1018,7 @@ function SourceStep({
                     <Building2 className="w-4 h-4 text-content-tertiary" />
                     <span className="font-medium text-sm truncate">{m.name}</span>
                   </div>
-                  <div className="text-[11px] text-content-tertiary">
+                  <div className="text-2xs text-content-tertiary">
                     {(m.model_format || '?').toUpperCase()} ·{' '}
                     {m.element_count ?? 0} elements ·{' '}
                     {isReady ? t('match_wizard.bim_ready', 'Ready') : (m.status ?? 'pending')}
@@ -1049,7 +1049,7 @@ function SourceStep({
               <FileSpreadsheet className="w-8 h-8 mx-auto text-content-tertiary mb-2" />
               <div className="text-sm text-content-secondary">
                 {selected?.kind === 'excel' ? (
-                  <span className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-semantic-success font-medium">
                     <Check className="w-4 h-4" strokeWidth={3} />
                     {selected.file.name}{' '}
                     <span className="text-content-quaternary font-normal">
@@ -1091,7 +1091,7 @@ function SourceStep({
               <FileType className="w-8 h-8 mx-auto text-content-tertiary mb-2" />
               <div className="text-sm text-content-secondary">
                 {selected?.kind === 'pdf' ? (
-                  <span className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-semantic-success font-medium">
                     <Check className="w-4 h-4" strokeWidth={3} />
                     {selected.file.name}{' '}
                     <span className="text-content-quaternary font-normal">
@@ -1218,7 +1218,7 @@ function ReviewStep({
   return (
     <div className="animate-[wizard-fade_300ms_ease-out]">
       <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
+        <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold mb-1.5">
           {t('match_wizard.step4_eyebrow', 'Step 4')}
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-content-primary mb-1.5">
@@ -1239,7 +1239,7 @@ function ReviewStep({
               <it.icon className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] uppercase tracking-[0.12em] text-content-tertiary font-semibold">
+              <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                 {it.label}
               </div>
               <div className="text-sm text-content-primary truncate">{it.value}</div>
@@ -1403,7 +1403,7 @@ export function MatchWizard({
             <Target className="w-4 h-4" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-bold text-content-primary leading-tight">
+            <h2 className="text-sm font-semibold text-content-primary leading-tight">
               {t(
                 'match_wizard.goal_title',
                 'From your model to a priced Bill of Quantities',

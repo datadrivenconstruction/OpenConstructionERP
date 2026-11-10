@@ -592,13 +592,13 @@ export function ClashHealthWidget(_props: { projects?: ProjectRef[] } = {}) {
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
             {t('dashboard.clash_high', { defaultValue: 'High' })}
           </div>
-          <div className="text-xl font-semibold text-red-600 tabular-nums">{payload.high}</div>
+          <div className="text-xl font-semibold text-semantic-error tabular-nums">{payload.high}</div>
         </div>
         <div>
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
             {t('dashboard.clash_medium', { defaultValue: 'Medium' })}
           </div>
-          <div className="text-xl font-semibold text-amber-600 tabular-nums">{payload.medium}</div>
+          <div className="text-xl font-semibold text-semantic-warning tabular-nums">{payload.medium}</div>
         </div>
         <div>
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
@@ -654,24 +654,24 @@ export function ValidationHealthWidget(_props: { projects?: ProjectRef[] } = {})
   return (
     <WidgetCard icon={icon} title={title} subtitle={subtitle}>
       <div className="grid grid-cols-3 gap-4">
-        <div className="text-center rounded-md bg-emerald-50 dark:bg-emerald-950/30 py-3">
-          <div className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+        <div className="text-center rounded-md bg-semantic-success-bg py-3">
+          <div className="text-2xl font-semibold text-semantic-success tabular-nums">
             {payload.passed}
           </div>
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mt-1">
             {t('dashboard.validation_pass', { defaultValue: 'Passed' })}
           </div>
         </div>
-        <div className="text-center rounded-md bg-amber-50 dark:bg-amber-950/30 py-3">
-          <div className="text-2xl font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
+        <div className="text-center rounded-md bg-semantic-warning-bg py-3">
+          <div className="text-2xl font-semibold text-semantic-warning tabular-nums">
             {payload.warnings}
           </div>
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mt-1">
             {t('dashboard.validation_warn', { defaultValue: 'Warnings' })}
           </div>
         </div>
-        <div className="text-center rounded-md bg-red-50 dark:bg-red-950/30 py-3">
-          <div className="text-2xl font-semibold text-red-700 dark:text-red-300 tabular-nums">
+        <div className="text-center rounded-md bg-semantic-error-bg py-3">
+          <div className="text-2xl font-semibold text-semantic-error tabular-nums">
             {payload.errors}
           </div>
           <div className="text-2xs uppercase tracking-wider text-content-tertiary mt-1">
@@ -730,7 +730,7 @@ export function WeatherSiteWidget(_props: { projects?: ProjectRef[] } = {}) {
   return (
     <WidgetCard icon={icon} title={title} subtitle={subtitle}>
       <div className="flex items-center gap-4">
-        <div className="text-4xl font-light tabular-nums">
+        <div className="text-4xl font-normal tabular-nums">
           {`${Math.round(payload.temperature_c)}°`}
         </div>
         <div className="min-w-0 flex-1">

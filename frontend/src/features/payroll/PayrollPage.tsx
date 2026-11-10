@@ -187,7 +187,7 @@ function HowPayrollWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -753,7 +753,7 @@ export default function PayrollPage() {
       {/* Labour cost rollup (surfaced beside the cost model) */}
       <Card className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-warning-bg text-semantic-warning">
             <Coins size={18} />
           </div>
           <div className="flex-1">
@@ -1012,7 +1012,7 @@ export default function PayrollPage() {
                   </thead>
                   <tbody>
                     {reconciliation.rows.map((r, i) => (
-                      <tr key={`${r.worker_key}-${r.work_date}-${i}`} className={r.matched ? '' : 'text-amber-600'}>
+                      <tr key={`${r.worker_key}-${r.work_date}-${i}`} className={r.matched ? '' : 'text-semantic-warning'}>
                         <td className="px-2 py-1">{r.worker_key}</td>
                         <td className="px-2 py-1">{r.work_date ?? '-'}</td>
                         <td className="px-2 py-1 text-right tabular-nums">{r.batch_hours}</td>

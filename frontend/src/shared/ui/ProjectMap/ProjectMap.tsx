@@ -436,7 +436,7 @@ export function ProjectMap({
     return shell(
       <div className="absolute inset-0 flex items-center justify-center gap-2 text-content-tertiary">
         <Loader2 size={14} className="animate-spin" />
-        <span className="text-[11px] font-medium">
+        <span className="text-2xs font-medium">
           {t('projects.map_locating', { defaultValue: 'Locating…' })}
         </span>
       </div>,
@@ -447,7 +447,7 @@ export function ProjectMap({
     return shell(
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-content-quaternary">
         <MapPin size={isCard ? 18 : 24} strokeWidth={1.5} />
-        <span className="text-[10px] font-medium">
+        <span className="text-2xs font-medium">
           {query || t('projects.map_no_location', { defaultValue: 'No location set' })}
         </span>
       </div>,
@@ -479,7 +479,7 @@ export function ProjectMap({
           {(label || query) && (
             <div className="pointer-events-none absolute inset-x-2 bottom-2 flex items-center gap-1 rounded-md bg-surface-elevated/90 backdrop-blur-sm px-2 py-1 shadow-sm">
               <MapPin size={11} className="shrink-0 text-oe-blue" />
-              <span className="truncate text-[11px] font-medium text-content-primary">
+              <span className="truncate text-2xs font-medium text-content-primary">
                 {label || query}
               </span>
             </div>
@@ -544,14 +544,14 @@ export function ProjectMap({
         <div
           data-testid="project-map-card-credit"
           title={credit}
-          className="pointer-events-none absolute left-1 top-1 z-[2] max-w-[calc(100%-0.5rem)] truncate rounded bg-surface-elevated/85 px-1 py-px text-[9px] leading-tight text-content-tertiary"
+          className="pointer-events-none absolute left-1 top-1 z-[2] max-w-[calc(100%-0.5rem)] truncate rounded bg-surface-elevated/85 px-1 py-px text-2xs leading-tight text-content-tertiary"
         >
           {credit}
         </div>
         {(label || query) && (
           <div className="pointer-events-none absolute inset-x-2 bottom-2 flex items-center gap-1 rounded-md bg-surface-elevated/90 backdrop-blur-sm px-2 py-1 shadow-sm">
             <MapPin size={11} className="shrink-0 text-oe-blue" />
-            <span className="truncate text-[11px] font-medium text-content-primary">
+            <span className="truncate text-2xs font-medium text-content-primary">
               {label || query}
             </span>
           </div>

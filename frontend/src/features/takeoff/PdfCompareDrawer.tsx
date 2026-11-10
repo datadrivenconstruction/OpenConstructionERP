@@ -82,7 +82,7 @@ function ChangeBadge({ type }: { type: TakeoffMeasurementDiffRow['change_type'] 
             : 'Unchanged',
   });
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-content-secondary">
+    <span className="inline-flex items-center gap-1 text-2xs font-medium text-content-secondary">
       <span className={clsx('h-2 w-2 rounded-full', CHANGE_DOT[type])} />
       {label}
     </span>
@@ -300,7 +300,7 @@ export function PdfCompareDrawer({
         {/* Document pickers */}
         <div className="flex items-end gap-2">
           <label className="flex-1 min-w-0">
-            <span className="block text-[11px] font-medium text-content-tertiary mb-1">
+            <span className="block text-2xs font-medium text-content-tertiary mb-1">
               {t('takeoff_compare.from_document', { defaultValue: 'Baseline (before)' })}
             </span>
             <select
@@ -319,7 +319,7 @@ export function PdfCompareDrawer({
           </label>
           <ArrowRight size={16} className="mb-2 shrink-0 text-content-tertiary" />
           <label className="flex-1 min-w-0">
-            <span className="block text-[11px] font-medium text-content-tertiary mb-1">
+            <span className="block text-2xs font-medium text-content-tertiary mb-1">
               {t('takeoff_compare.to_document', { defaultValue: 'Target (after)' })}
             </span>
             <select
@@ -387,7 +387,7 @@ export function PdfCompareDrawer({
               <Icon size={13} />
               <span className="truncate">{label}</span>
               {count > 0 && (
-                <Badge variant="neutral" className="ml-0.5 text-[9px]">
+                <Badge variant="neutral" className="ml-0.5 text-2xs">
                   {count}
                 </Badge>
               )}
@@ -495,10 +495,10 @@ function CarryOverPanel({
   const { t } = useTranslation();
   return (
     <div className="mb-4 rounded-lg border border-border-light p-3" data-testid="takeoff-carry-panel">
-      <div className="text-[11px] font-medium text-content-tertiary mb-1">
+      <div className="text-2xs font-medium text-content-tertiary mb-1">
         {t('takeoff_compare.carry_heading', { defaultValue: 'Carry measurements to the new revision' })}
       </div>
-      <p className="text-[11px] text-content-secondary">
+      <p className="text-2xs text-content-secondary">
         {t('takeoff_compare.carry_hint', {
           defaultValue:
             'Copies every confirmed measurement of the baseline onto the target at the same place, re-checks the scale, and marks each copy for review.',
@@ -533,7 +533,7 @@ function CarryOverPanel({
             })}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <label className="inline-flex items-center gap-1.5 text-[11px] text-content-secondary cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 text-2xs text-content-secondary cursor-pointer">
               <input
                 type="checkbox"
                 checked={pushQuantity}
@@ -547,7 +547,7 @@ function CarryOverPanel({
               onClick={onConfirmAll}
               disabled={confirming}
               data-testid="takeoff-carry-confirm-all"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white disabled:opacity-50"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white disabled:opacity-50"
             >
               <CheckCheck size={13} />
               {t('takeoff_compare.carry_confirm_all', { defaultValue: 'Confirm all after review' })}
@@ -596,7 +596,7 @@ function CarryAlignment({
 
   return (
     <div className="mt-3 border-t border-border-light pt-3" data-testid="takeoff-carry-align">
-      <p className="text-[11px] text-content-secondary">
+      <p className="text-2xs text-content-secondary">
         {t('takeoff_compare.carry_align_hint', {
           defaultValue:
             'Sheets moved or inserted? Match the pages by sheet number and title first, and see how sure each placement is before anything is copied.',
@@ -613,18 +613,18 @@ function CarryAlignment({
         {t('takeoff_compare.carry_match_pages', { defaultValue: 'Match pages' })}
       </button>
       {previewError && (
-        <p role="alert" className="mt-2 text-[11px] text-semantic-error" data-testid="takeoff-carry-preview-error">
+        <p role="alert" className="mt-2 text-2xs text-semantic-error" data-testid="takeoff-carry-preview-error">
           {previewError}
         </p>
       )}
       {preview && preview.pages.length === 0 && (
-        <p className="mt-2 text-[11px] text-content-tertiary">
+        <p className="mt-2 text-2xs text-content-tertiary">
           {t('takeoff_compare.carry_no_pages', { defaultValue: 'No pages could be matched between the two revisions.' })}
         </p>
       )}
       {preview && (
         <div className="mt-2" data-testid="takeoff-carry-preview-result">
-          <table className="w-full text-[11px]">
+          <table className="w-full text-2xs">
             <thead>
               <tr className="text-start text-content-tertiary">
                 <th className="py-1 font-medium">
@@ -653,7 +653,7 @@ function CarryAlignment({
                         const v = Number(e.target.value);
                         setPageMap((m) => (v ? { ...m, [p.old]: v } : m));
                       }}
-                      className="rounded border border-border bg-surface-primary px-1 py-0.5 text-[11px]"
+                      className="rounded border border-border bg-surface-primary px-1 py-0.5 text-2xs"
                     >
                       {p.new == null && !pageMap[p.old] && <option value="">-</option>}
                       {pageOptions.map((n) => (
@@ -674,7 +674,7 @@ function CarryAlignment({
             {(['high', 'review', 'remeasure'] as const).map((band) => (
               <span
                 key={band}
-                className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${BAND_CLASS[band]}`}
+                className={`rounded px-1.5 py-0.5 text-2xs font-medium ${BAND_CLASS[band]}`}
               >
                 {t(`takeoff_compare.carry_band_${band}`, { defaultValue: band })}: {counts[band] ?? 0}
               </span>
@@ -685,7 +685,7 @@ function CarryAlignment({
               type="button"
               onClick={() => previewMutation.mutate(Object.keys(pageMap).length ? pageMap : undefined)}
               disabled={previewMutation.isPending || Object.keys(pageMap).length === 0}
-              className="rounded-md border border-border px-2.5 py-1 text-[11px] font-semibold disabled:opacity-50"
+              className="rounded-md border border-border px-2.5 py-1 text-2xs font-semibold disabled:opacity-50"
             >
               {t('takeoff_compare.carry_recheck', { defaultValue: 'Re-check with my pages' })}
             </button>
@@ -694,7 +694,7 @@ function CarryAlignment({
               onClick={() => onCarry({ align: 'auto', pageMap, measurementIds: highIds })}
               disabled={!enabled || highIds.length === 0}
               data-testid="takeoff-carry-accept-high"
-              className="rounded-md border border-oe-blue px-2.5 py-1 text-[11px] font-semibold text-oe-blue disabled:opacity-50"
+              className="rounded-md border border-oe-blue px-2.5 py-1 text-2xs font-semibold text-oe-blue disabled:opacity-50"
             >
               {t('takeoff_compare.carry_accept_high', { defaultValue: 'Carry high confidence only' })}
             </button>
@@ -703,7 +703,7 @@ function CarryAlignment({
               onClick={() => onCarry({ align: 'auto', pageMap })}
               disabled={!enabled}
               data-testid="takeoff-carry-accept-all"
-              className="rounded-md bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white disabled:opacity-50"
+              className="rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white disabled:opacity-50"
             >
               {t('takeoff_compare.carry_accept_matched', { defaultValue: 'Carry matched, review each' })}
             </button>
@@ -719,12 +719,12 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
   if (deltas.length === 0) return null;
   return (
     <div className="mb-4 rounded-lg border border-border-light p-3" data-testid="takeoff-position-deltas">
-      <div className="text-[11px] font-medium text-content-tertiary mb-2">
+      <div className="text-2xs font-medium text-content-tertiary mb-2">
         {t('takeoff_compare.position_deltas', { defaultValue: 'Quantity change per BOQ position' })}
       </div>
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-[10px] text-content-tertiary">
+          <tr className="text-2xs text-content-tertiary">
             <th className="text-left font-medium pb-1">{t('takeoff_compare.position', { defaultValue: 'Position' })}</th>
             <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_in_boq', { defaultValue: 'In BOQ' })}</th>
             <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_before', { defaultValue: 'Before' })}</th>
@@ -739,7 +739,7 @@ function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; 
               <td className="py-1 pr-2 truncate max-w-[10rem]" title={d.description ?? undefined}>
                 <span className="font-medium text-content-primary">{d.ordinal ?? '?'}</span>
                 {d.carried_pending > 0 && (
-                  <Badge variant="warning" className="ml-1 text-[9px]">
+                  <Badge variant="warning" className="ml-1 text-2xs">
                     {t('takeoff_compare.carried_pending_short', {
                       defaultValue: '{{n}} to review',
                       n: d.carried_pending,
@@ -824,7 +824,7 @@ function SummaryTab({
       )}
 
       <div className="rounded-lg border border-border-light p-3">
-        <div className="text-[11px] font-medium text-content-tertiary mb-2">
+        <div className="text-2xs font-medium text-content-tertiary mb-2">
           {t('takeoff_compare.measurements_heading', { defaultValue: 'Measurement changes' })}
         </div>
         <div className="flex flex-col gap-1">
@@ -838,7 +838,7 @@ function SummaryTab({
       </div>
 
       <div className="rounded-lg border border-border-light p-3">
-        <div className="text-[11px] font-medium text-content-tertiary mb-1">
+        <div className="text-2xs font-medium text-content-tertiary mb-1">
           {t('takeoff_compare.net_cost_impact', { defaultValue: 'Net cost impact' })}
         </div>
         {summary.net_cost_impact != null && summary.cost_currency ? (
@@ -875,7 +875,7 @@ function SummaryTab({
           {t('takeoff_compare.create_variation', { defaultValue: 'Create variation from delta' })}
         </button>
         {!canCreateVariation && (
-          <p className="mt-1 text-[10px] text-content-tertiary">
+          <p className="mt-1 text-2xs text-content-tertiary">
             {t('takeoff_compare.create_variation_disabled', {
               defaultValue: 'Pick two documents with at least one change to raise a variation.',
             })}
@@ -941,18 +941,18 @@ function MeasurementsTab({
           </div>
           {r.carry_status === 'needs_review' && (
             <div className="mt-1.5 flex flex-wrap items-center gap-2" data-testid="takeoff-carried-row">
-              <Badge variant="warning" className="text-[9px]">
+              <Badge variant="warning" className="text-2xs">
                 {t('takeoff_compare.carried_needs_review', { defaultValue: 'Carried, needs review' })}
               </Badge>
               {r.scale_check === 'changed' && (
-                <span className="text-[10px] text-amber-600">
+                <span className="text-2xs text-amber-600">
                   {t('takeoff_compare.scale_changed', {
                     defaultValue: 'New sheet has a different scale: value recomputed from the same points',
                   })}
                 </span>
               )}
               {r.scale_check === 'unverified' && (
-                <span className="text-[10px] text-amber-600">
+                <span className="text-2xs text-amber-600">
                   {t('takeoff_compare.scale_unverified', {
                     defaultValue: 'New sheet is not calibrated: old scale kept',
                   })}
@@ -962,14 +962,14 @@ function MeasurementsTab({
                 type="button"
                 onClick={() => onConfirm(r.measurement_id)}
                 disabled={confirming}
-                className="ml-auto rounded border border-border-light px-2 py-0.5 text-[10px] font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
+                className="ml-auto rounded border border-border-light px-2 py-0.5 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
               >
                 {t('takeoff_compare.carry_confirm', { defaultValue: 'Confirm' })}
               </button>
             </div>
           )}
           <div className="mt-1.5 flex items-center gap-2 text-xs text-content-secondary">
-            <span className="text-[10px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {t('takeoff_compare.page_n', { defaultValue: 'p.{{n}}', n: r.page })}
             </span>
             <span className="tabular-nums">{r.old_value != null ? fmtFixed(r.old_value, 2) : '—'}</span>
@@ -981,7 +981,7 @@ function MeasurementsTab({
           </div>
           {r.linked_boq_position_id && (
             <div className="mt-1.5 flex items-center justify-between gap-2">
-              <span className="text-[10px] text-content-tertiary">
+              <span className="text-2xs text-content-tertiary">
                 {t('takeoff_compare.linked_boq', { defaultValue: 'Linked to BOQ position' })}
               </span>
               {r.cost_impact != null && r.cost_currency ? (
@@ -992,7 +992,7 @@ function MeasurementsTab({
                   className="text-xs font-semibold"
                 />
               ) : (
-                <span className="text-[10px] text-content-tertiary">
+                <span className="text-2xs text-content-tertiary">
                   {t('takeoff_compare.no_value_change', { defaultValue: 'No value change' })}
                 </span>
               )}

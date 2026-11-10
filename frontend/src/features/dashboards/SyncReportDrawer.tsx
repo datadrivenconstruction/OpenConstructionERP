@@ -192,7 +192,7 @@ function IssueGroup({ title, issues, testId }: IssueGroupProps) {
   if (issues.length === 0) return null;
   return (
     <section data-testid={`sync-issue-group-${testId}`}>
-      <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-content-tertiary">
+      <h4 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {title}
       </h4>
       <ul className="space-y-1.5">
@@ -219,7 +219,7 @@ function IssueRow({ issue }: { issue: SyncIssue }) {
       <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
       <div className="flex-1">
         <div className="font-medium">{issue.column}</div>
-        <div className="text-[11px] opacity-80">
+        <div className="text-2xs opacity-80">
           {issue.message ||
             (issue.kind === 'column_rename' && issue.new_column
               ? `→ ${issue.new_column}`
@@ -229,7 +229,7 @@ function IssueRow({ issue }: { issue: SyncIssue }) {
                   ? `${issue.old_dtype ?? '?'} → ${issue.new_dtype ?? '?'}`
                   : '')}
         </div>
-        <div className="text-[10px] opacity-60 mt-0.5">
+        <div className="text-2xs opacity-60 mt-0.5">
           {issue.suggested_fix === 'manual'
             ? 'Manual review required'
             : 'Auto-healable'}

@@ -235,7 +235,7 @@ export function MeasurementLedger({
             type="button"
             onClick={() => setShowFilters((v) => !v)}
             className={clsx(
-              'flex items-center gap-1 px-1.5 py-1 rounded text-[10px] transition-colors',
+              'flex items-center gap-1 px-1.5 py-1 rounded text-2xs transition-colors',
               showFilters || hasFilters
                 ? 'bg-oe-blue/10 text-oe-blue border border-oe-blue/30'
                 : 'hover:bg-surface-secondary text-content-tertiary border border-transparent',
@@ -253,7 +253,7 @@ export function MeasurementLedger({
             type="button"
             onClick={handleExport}
             disabled={rows.length === 0}
-            className="flex items-center gap-1 px-1.5 py-1 rounded text-[10px] hover:bg-surface-secondary text-content-tertiary disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            className="flex items-center gap-1 px-1.5 py-1 rounded text-2xs hover:bg-surface-secondary text-content-tertiary disabled:opacity-40 disabled:pointer-events-none transition-colors"
             title={t('takeoff_viewer.export_filtered_csv', {
               defaultValue: 'Export filtered view as CSV',
             })}
@@ -267,7 +267,7 @@ export function MeasurementLedger({
               type="button"
               onClick={() => onAddAllToBoq(linkableRows)}
               disabled={linkableRows.length === 0}
-              className="flex items-center gap-1 px-1.5 py-1 rounded text-[10px] bg-oe-blue/10 text-oe-blue border border-oe-blue/30 hover:bg-oe-blue/20 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              className="flex items-center gap-1 px-1.5 py-1 rounded text-2xs bg-oe-blue/10 text-oe-blue border border-oe-blue/30 hover:bg-oe-blue/20 disabled:opacity-40 disabled:pointer-events-none transition-colors"
               title={t('takeoff_viewer.ledger_add_all_to_boq_hint', {
                 defaultValue:
                   'Send every filtered measurement to a BOQ as new positions',
@@ -323,7 +323,7 @@ export function MeasurementLedger({
             <button
               type="button"
               onClick={clearFilters}
-              className="flex items-center gap-1 text-[10px] text-content-tertiary hover:text-content-primary transition-colors"
+              className="flex items-center gap-1 text-2xs text-content-tertiary hover:text-content-primary transition-colors"
             >
               <X size={9} />
               {t('takeoff_viewer.clear_filters', { defaultValue: 'Clear filters' })}
@@ -344,7 +344,7 @@ export function MeasurementLedger({
       ) : (
         <div ref={scrollContainerRef} className="max-h-[500px] overflow-auto">
           <table
-            className="w-full text-[11px] tabular-nums"
+            className="w-full text-2xs tabular-nums"
             data-testid="ledger-table"
           >
             <thead className="sticky top-0 bg-surface-primary/95 backdrop-blur-sm z-10">
@@ -555,7 +555,7 @@ function GroupRows({
               {measurement.type}
               {measurement.isDeduction && (
                 <span
-                  className="ml-1 text-[9px] font-semibold uppercase text-semantic-error"
+                  className="ml-1 text-2xs font-semibold uppercase text-semantic-error"
                   data-testid="ledger-deduction-badge"
                 >
                   {t('takeoff_viewer.deduction', { defaultValue: 'deduction' })}
@@ -563,7 +563,7 @@ function GroupRows({
               )}
               {isWall && (
                 <span
-                  className="ml-1 text-[9px] font-semibold uppercase text-oe-blue"
+                  className="ml-1 text-2xs font-semibold uppercase text-oe-blue"
                   data-testid="ledger-wall-badge"
                   title={t('takeoff_wall.ledger_badge_hint', {
                     defaultValue: 'Wall area: length x height, minus openings',
@@ -579,7 +579,7 @@ function GroupRows({
               )}
               {adjustment && (
                 <span
-                  className="ml-1 text-[9px] font-semibold text-oe-blue tabular-nums"
+                  className="ml-1 text-2xs font-semibold text-oe-blue tabular-nums"
                   data-testid="ledger-adjustment-badge"
                   title={t('takeoff_viewer.adjustment_hint', {
                     defaultValue:
@@ -744,7 +744,7 @@ function FilterChipGroup<T extends string | number>({
   if (options.length === 0) return null;
   return (
     <div>
-      <p className="text-[9px] font-bold uppercase tracking-wider text-content-tertiary mb-0.5">
+      <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
         {label}
       </p>
       <div className="flex flex-wrap gap-1">
@@ -756,7 +756,7 @@ function FilterChipGroup<T extends string | number>({
               type="button"
               onClick={() => onToggle(opt)}
               className={clsx(
-                'px-1.5 py-0.5 rounded-full text-[10px] border transition-colors',
+                'px-1.5 py-0.5 rounded-full text-2xs border transition-colors',
                 on
                   ? 'bg-oe-blue/15 text-oe-blue border-oe-blue/30'
                   : 'bg-surface-primary text-content-secondary border-border hover:border-oe-blue/40',

@@ -300,8 +300,8 @@ function TaskPicker({
   const statusVariant: Record<Task['status'], string> = {
     draft: 'text-content-tertiary',
     open: 'text-oe-blue',
-    in_progress: 'text-amber-600 dark:text-amber-400',
-    completed: 'text-emerald-600 dark:text-emerald-400',
+    in_progress: 'text-semantic-warning',
+    completed: 'text-semantic-success',
   };
 
   return (
@@ -476,7 +476,7 @@ function HowScheduleAdvancedWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1095,7 +1095,7 @@ function ProjectLpsDashboard({ projectId }: { projectId: string }) {
                   </span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-secondary">
                     <div
-                      className="h-full rounded-full bg-rose-500/70"
+                      className="h-full rounded-full bg-semantic-error/70"
                       style={{ width: `${Math.max(4, widthPct)}%` }}
                     />
                   </div>
@@ -1136,7 +1136,7 @@ function DashStat({
       <dt className="text-2xs uppercase tracking-wide text-content-tertiary truncate" title={label}>
         {label}
       </dt>
-      <dd className={clsx('mt-0.5 text-xl font-bold tabular-nums', toneCls)}>{value}</dd>
+      <dd className={clsx('mt-0.5 text-xl font-semibold tabular-nums', toneCls)}>{value}</dd>
       {hint && <p className="text-2xs text-content-tertiary">{hint}</p>}
     </div>
   );
@@ -1484,8 +1484,8 @@ function VarianceBadge({ days }: { days: number | null }) {
       className={clsx(
         'inline-flex items-center rounded-md px-1.5 py-px text-2xs font-medium tabular-nums',
         positive
-          ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
-          : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+          ? 'bg-semantic-error/15 text-semantic-error'
+          : 'bg-semantic-success/15 text-semantic-success',
       )}
       data-testid={positive ? 'phase-variance-late' : 'phase-variance-early'}
       title={
@@ -1956,7 +1956,7 @@ function PhasesCardGrid({
           >
             {onCritical && (
               <span
-                className="absolute top-2 right-2 inline-flex items-center gap-0.5 rounded-md bg-rose-500/15 px-1.5 py-px text-2xs font-semibold text-rose-700 dark:text-rose-300"
+                className="absolute top-2 right-2 inline-flex items-center gap-0.5 rounded-md bg-semantic-error/15 px-1.5 py-px text-2xs font-semibold text-semantic-error"
                 title={t('schedule_advanced.cp_tooltip', { defaultValue: 'On the critical path - slipping this phase delays the project finish' })}
                 data-testid="phase-cp-badge"
               >
@@ -1969,7 +1969,7 @@ function PhasesCardGrid({
                 {milestone && (
                   <Diamond
                     size={11}
-                    className="text-amber-500 shrink-0 rotate-45"
+                    className="text-semantic-warning shrink-0 rotate-45"
                     aria-label={t('schedule_advanced.milestone', { defaultValue: 'Milestone' })}
                     data-testid="phase-milestone-glyph"
                   />
@@ -1978,7 +1978,7 @@ function PhasesCardGrid({
                 {p.pulled_status === 'completed' && (
                   <Check
                     size={11}
-                    className="text-emerald-600 shrink-0"
+                    className="text-semantic-success shrink-0"
                     aria-label={t('schedule_advanced.phase_status.completed', { defaultValue: 'Completed' })}
                   />
                 )}
@@ -2004,9 +2004,9 @@ function PhasesCardGrid({
                 className={clsx(
                   'h-full transition-all',
                   p.pulled_status === 'completed'
-                    ? 'bg-emerald-500'
+                    ? 'bg-semantic-success'
                     : delayed
-                      ? 'bg-rose-500'
+                      ? 'bg-semantic-error'
                       : 'bg-blue-500',
                 )}
                 style={{ width: `${pct}%` }}
@@ -2091,7 +2091,7 @@ function PhasesTableView({
                   key={p.id}
                   className={clsx(
                     'border-t border-border-light hover:bg-surface-secondary',
-                    onCritical && 'bg-rose-500/5',
+                    onCritical && 'bg-semantic-error/5',
                   )}
                   data-phase-id={p.id}
                   data-critical={onCritical ? 'true' : 'false'}
@@ -2099,10 +2099,10 @@ function PhasesTableView({
                   <td className="px-4 py-2 text-xs text-content-tertiary tabular-nums">{idx + 1}</td>
                   <td className="px-4 py-2 font-medium">
                     <button type="button" className="text-left hover:text-oe-blue flex items-center gap-1.5" onClick={() => onEdit(p)}>
-                      {isPhaseMilestone(p) && <Diamond size={10} className="text-amber-500 rotate-45 shrink-0" aria-hidden />}
+                      {isPhaseMilestone(p) && <Diamond size={10} className="text-semantic-warning rotate-45 shrink-0" aria-hidden />}
                       {p.name}
                       {onCritical && (
-                        <span className="rounded-md bg-rose-500/15 px-1 py-px text-2xs font-semibold text-rose-700 dark:text-rose-300" title={t('schedule_advanced.cp_tooltip', { defaultValue: 'On the critical path - slipping this phase delays the project finish' })} data-testid="phase-cp-badge">CP</span>
+                        <span className="rounded-md bg-semantic-error/15 px-1 py-px text-2xs font-semibold text-semantic-error" title={t('schedule_advanced.cp_tooltip', { defaultValue: 'On the critical path - slipping this phase delays the project finish' })} data-testid="phase-cp-badge">CP</span>
                       )}
                     </button>
                   </td>
@@ -2130,9 +2130,9 @@ function PhasesTableView({
                           className={clsx(
                             'h-full',
                             p.pulled_status === 'completed'
-                              ? 'bg-emerald-500'
+                              ? 'bg-semantic-success'
                               : delayed
-                                ? 'bg-rose-500'
+                                ? 'bg-semantic-error'
                                 : 'bg-blue-500',
                           )}
                           style={{ width: `${pct}%` }}
@@ -2219,11 +2219,11 @@ function PhasesTimelineView({
           const variance = phaseVarianceDays(p, deltas);
           const pipColor =
             p.pulled_status === 'completed'
-              ? 'bg-emerald-500'
+              ? 'bg-semantic-success'
               : delayed
-                ? 'bg-rose-500'
+                ? 'bg-semantic-error'
                 : p.pulled_status === 'active'
-                  ? 'bg-amber-500'
+                  ? 'bg-semantic-warning'
                   : p.pulled_status === 'pulled'
                     ? 'bg-blue-500'
                     : 'bg-slate-400';
@@ -2234,7 +2234,7 @@ function PhasesTimelineView({
               data-phase-id={p.id}
             >
               <span className={clsx('inline-block h-2.5 w-2.5 shrink-0 rounded-full', pipColor)} aria-hidden />
-              {isPhaseMilestone(p) && <Diamond size={12} className="text-amber-500 rotate-45 shrink-0" aria-label={t('schedule_advanced.milestone', { defaultValue: 'Milestone' })} />}
+              {isPhaseMilestone(p) && <Diamond size={12} className="text-semantic-warning rotate-45 shrink-0" aria-label={t('schedule_advanced.milestone', { defaultValue: 'Milestone' })} />}
               <button
                 type="button"
                 className="flex-1 truncate text-left text-sm font-medium hover:text-oe-blue"
@@ -2243,7 +2243,7 @@ function PhasesTimelineView({
                 {p.name}
               </button>
               {onCritical && (
-                <span className="rounded-md bg-rose-500/15 px-1.5 py-px text-2xs font-semibold text-rose-700 dark:text-rose-300" data-testid="phase-cp-badge">CP</span>
+                <span className="rounded-md bg-semantic-error/15 px-1.5 py-px text-2xs font-semibold text-semantic-error" data-testid="phase-cp-badge">CP</span>
               )}
               <VarianceBadge days={variance} />
             </li>
@@ -2258,17 +2258,17 @@ function PhasesTimelineView({
           <span className="flex items-center gap-3">
             {/* Legend — keeps colour semantics discoverable */}
             <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-blue-500" />{t('schedule_advanced.legend_planned', { defaultValue: 'Planned' })}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-amber-500" />{t('schedule_advanced.legend_active', { defaultValue: 'Active' })}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-emerald-500" />{t('schedule_advanced.legend_done', { defaultValue: 'Done' })}</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-rose-500" />{t('schedule_advanced.legend_delayed', { defaultValue: 'Delayed' })}</span>
-            <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block h-3 w-px bg-rose-500" />{t('schedule_advanced.today', { defaultValue: 'Today' })}</span>
+            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-semantic-warning" />{t('schedule_advanced.legend_active', { defaultValue: 'Active' })}</span>
+            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-semantic-success" />{t('schedule_advanced.legend_done', { defaultValue: 'Done' })}</span>
+            <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-3 rounded-sm bg-semantic-error" />{t('schedule_advanced.legend_delayed', { defaultValue: 'Delayed' })}</span>
+            <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block h-3 w-px bg-semantic-error" />{t('schedule_advanced.today', { defaultValue: 'Today' })}</span>
           </span>
           <span><DateDisplay value={new Date(maxEnd).toISOString().slice(0, 10)} /></span>
         </div>
         <div className="relative">
           {todayPct != null && (
             <div
-              className="absolute top-0 bottom-0 w-px bg-rose-500 pointer-events-none z-10"
+              className="absolute top-0 bottom-0 w-px bg-semantic-error pointer-events-none z-10"
               style={{ left: `calc(180px + (100% - 180px) * ${todayPct / 100})` }}
               aria-hidden
               data-testid="phases-gantt-today"
@@ -2287,11 +2287,11 @@ function PhasesTimelineView({
               const milestone = isPhaseMilestone(p);
               const barColor =
                 p.pulled_status === 'completed'
-                  ? 'bg-emerald-500'
+                  ? 'bg-semantic-success'
                   : p.pulled_status === 'active'
                     ? delayed
-                      ? 'bg-rose-500'
-                      : 'bg-amber-500'
+                      ? 'bg-semantic-error'
+                      : 'bg-semantic-warning'
                     : p.pulled_status === 'pulled'
                       ? 'bg-blue-500'
                       : 'bg-slate-400';
@@ -2309,7 +2309,7 @@ function PhasesTimelineView({
                     title={p.name}
                   >
                     {onCritical && (
-                      <span className="rounded-sm bg-rose-500/15 px-1 py-px text-2xs font-semibold text-rose-700 dark:text-rose-300" title={t('schedule_advanced.cp_tooltip', { defaultValue: 'On the critical path - slipping this phase delays the project finish' })} data-testid="phase-cp-badge">CP</span>
+                      <span className="rounded-sm bg-semantic-error/15 px-1 py-px text-2xs font-semibold text-semantic-error" title={t('schedule_advanced.cp_tooltip', { defaultValue: 'On the critical path - slipping this phase delays the project finish' })} data-testid="phase-cp-badge">CP</span>
                     )}
                     <span className="truncate">{p.name}</span>
                     <VarianceBadge days={variance} />
@@ -2343,14 +2343,14 @@ function PhasesTimelineView({
                             style={{ left: `${left}%` }}
                             title={p.planned_start ?? ''}
                           >
-                            <Diamond size={14} className={clsx('rotate-45', delayed ? 'text-rose-500 fill-rose-500' : 'text-amber-500 fill-amber-400')} />
+                            <Diamond size={14} className={clsx('rotate-45', delayed ? 'text-semantic-error fill-rose-500' : 'text-semantic-warning fill-amber-400')} />
                           </div>
                         ) : (
                           <div
                             className={clsx(
                               'absolute top-1 bottom-1 rounded-sm flex items-center justify-center text-2xs font-medium text-white px-2 truncate',
                               barColor,
-                              onCritical && 'ring-1 ring-rose-300 ring-offset-1 ring-offset-surface-primary',
+                              onCritical && 'ring-1 ring-semantic-error/30 ring-offset-1 ring-offset-surface-primary',
                             )}
                             style={{ left: `${left}%`, width: `${width}%` }}
                             title={`${p.planned_start} → ${p.planned_finish}`}
@@ -3117,7 +3117,7 @@ function WeeklyTab({
           {t('schedule_advanced.ppc_title', { defaultValue: 'Percent Plan Complete' })}
         </h3>
         <div className="flex flex-col items-center justify-center py-6">
-          <div className="text-5xl font-bold text-oe-blue">
+          <div className="text-5xl font-semibold text-oe-blue">
             {fmtPercent(ppc, 0)}
           </div>
           <div className="mt-3 h-2 w-full max-w-[200px] rounded-full bg-surface-secondary overflow-hidden">

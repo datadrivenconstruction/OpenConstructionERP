@@ -318,7 +318,7 @@ export function ClockPanel({ projectId }: { projectId: string }) {
         disabled={!resourceId || busy}
         onClick={onTap}
         className={clsx(
-          'flex min-h-[96px] w-full items-center justify-center gap-3 rounded-2xl text-xl font-bold text-content-inverse shadow-sm transition-opacity disabled:opacity-50',
+          'flex min-h-[96px] w-full items-center justify-center gap-3 rounded-2xl text-xl font-semibold text-content-inverse shadow-sm transition-opacity disabled:opacity-50',
           isIn ? 'bg-semantic-error' : 'bg-oe-blue',
         )}
       >

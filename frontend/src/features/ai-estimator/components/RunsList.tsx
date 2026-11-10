@@ -46,9 +46,9 @@ export function RunsList({ runs, loading, error, onRetry, locale, onNew, onOpen 
           ))}
         </div>
       ) : error ? (
-        <Card padding="md" className="border-rose-200 dark:border-rose-900/50">
+        <Card padding="md" className="border-semantic-error/30">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-semantic-error" />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-content-primary">
                 {t('aiest.runs.load_error', { defaultValue: 'Could not load your estimates' })}

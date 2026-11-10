@@ -23,11 +23,11 @@ const WEEK_OPTIONS = [8, 12, 26] as const;
 export function demandCellClasses(cell: WorkforceCell | undefined): string {
   switch (cell?.status) {
     case 'short':
-      return 'bg-rose-500/90 text-white font-semibold';
+      return 'bg-semantic-error/90 text-white font-semibold';
     case 'tight':
       return 'bg-amber-400/80 text-amber-950';
     case 'balanced':
-      return 'bg-emerald-500/60 text-emerald-950';
+      return 'bg-semantic-success/60 text-emerald-950';
     case 'surplus':
       return 'bg-sky-300/50 text-sky-950';
     default:
@@ -166,7 +166,7 @@ export function TradeDemandPanel() {
                     {t('workforce.trade', { defaultValue: 'Trade' })}
                   </div>
                   {data.weeks.map((w) => (
-                    <div key={w.index} className="text-center text-[11px] text-content-tertiary" title={`${w.start} - ${w.end}`}>
+                    <div key={w.index} className="text-center text-2xs text-content-tertiary" title={`${w.start} - ${w.end}`}>
                       {w.label}
                     </div>
                   ))}
@@ -176,7 +176,7 @@ export function TradeDemandPanel() {
                     <div key={row.trade || '_none'} className="grid items-center gap-1" style={{ gridTemplateColumns: cols }}>
                       <div className="min-w-0 pr-2">
                         <div className="truncate text-sm font-medium text-content-primary">{tradeLabel(row)}</div>
-                        <div className="truncate text-[11px] text-content-tertiary">
+                        <div className="truncate text-2xs text-content-tertiary">
                           {t('workforce.row_sub', {
                             defaultValue: '{{count}} available · peak short {{short}}',
                             count: row.available_resources,
@@ -193,7 +193,7 @@ export function TradeDemandPanel() {
                             disabled={c.status === 'idle'}
                             onClick={() => setSel(active ? null : { trade: row.trade, week: c.week_index })}
                             title={`${t('workforce.demand', { defaultValue: 'Demand' })} ${fmt(c.demand_fte)} / ${t('workforce.available', { defaultValue: 'Available' })} ${fmt(c.available_fte)}`}
-                            className={`flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${demandCellClasses(c)} ${
+                            className={`flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${demandCellClasses(c)} ${
                               active ? 'ring-2 ring-inset ring-oe-blue' : ''
                             }`}
                           >

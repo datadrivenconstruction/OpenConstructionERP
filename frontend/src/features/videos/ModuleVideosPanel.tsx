@@ -164,7 +164,7 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
                   <span className="relative block h-[54px] w-24 shrink-0 overflow-hidden rounded-md bg-slate-900">
                     <VideoCover src={video.cover} width={96} height={54} className="h-full w-full object-cover" />
                     {video.duration ? (
-                      <span className="absolute bottom-0.5 end-0.5 rounded bg-black/75 px-1 font-mono text-[9px] text-white">
+                      <span className="absolute bottom-0.5 end-0.5 rounded bg-black/75 px-1 font-mono text-2xs text-white">
                         {formatClock(video.duration)}
                       </span>
                     ) : null}
@@ -175,7 +175,7 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
                     </span>
                     <span className="mt-0.5 flex items-center gap-1 text-2xs text-content-tertiary">
                       {video.status !== 'published' && (
-                        <span className="inline-flex items-center gap-0.5 text-amber-700 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-0.5 text-semantic-warning">
                           <Hourglass size={10} aria-hidden />
                           {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
                         </span>

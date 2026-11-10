@@ -181,7 +181,7 @@ export function FileActionsBar({
           type="button"
           onClick={onReindex}
           disabled={reindexing}
-          className="inline-flex items-center gap-1.5 h-7 px-2 rounded-full text-[11px] font-medium text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 h-7 px-2 rounded-full text-2xs font-medium text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-60"
           title={t('files.search.reindex_hint', {
             defaultValue: 'Re-scan every file so recent uploads become searchable by their text',
           })}
@@ -211,7 +211,7 @@ export function FileActionsBar({
                 type="button"
                 onClick={() => onExtensionChange(p.ext)}
                 className={clsx(
-                  'inline-flex h-7 items-center rounded-full px-2.5 text-[11px] font-medium transition-colors',
+                  'inline-flex h-7 items-center rounded-full px-2.5 text-2xs font-medium transition-colors',
                   active
                     ? 'bg-oe-blue text-white'
                     : 'border border-border-light text-content-secondary hover:bg-surface-secondary',
@@ -229,7 +229,7 @@ export function FileActionsBar({
               aria-haspopup="listbox"
               aria-expanded={moreOpen}
               className={clsx(
-                'inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[11px] font-medium transition-colors',
+                'inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-2xs font-medium transition-colors',
                 extraActive
                   ? 'bg-oe-blue text-white'
                   : 'border border-border-light text-content-secondary hover:bg-surface-secondary',
@@ -255,7 +255,7 @@ export function FileActionsBar({
                       setMoreOpen(false);
                     }}
                     className={clsx(
-                      'w-full px-3 py-1.5 text-left text-[11px] transition-colors',
+                      'w-full px-3 py-1.5 text-left text-2xs transition-colors',
                       extension === p.ext
                         ? 'bg-oe-blue/10 text-oe-blue font-medium'
                         : 'text-content-secondary hover:bg-surface-secondary',
@@ -279,7 +279,7 @@ export function FileActionsBar({
             className={clsx(
               'inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg border transition-colors',
               favoritesOnly
-                ? 'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-500/40'
+                ? 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning'
                 : 'border-border-light text-content-secondary hover:bg-surface-secondary',
             )}
             title={t('files.favorites.filter', { defaultValue: 'Show favourites only' })}

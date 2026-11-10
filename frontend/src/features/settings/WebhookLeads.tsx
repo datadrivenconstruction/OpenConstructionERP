@@ -256,11 +256,11 @@ export function WebhookLeads() {
 
       {/* Reveal-once secret banner */}
       {revealedSecret && (
-        <Card className="p-4 border-amber-400 bg-amber-50">
+        <Card className="p-4 border-semantic-warning/60 bg-semantic-warning-bg">
           <div className="flex items-start gap-3">
-            <KeyRound className="w-5 h-5 text-amber-600 mt-0.5" />
+            <KeyRound className="w-5 h-5 text-semantic-warning mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-amber-800">
+              <p className="font-medium text-semantic-warning">
                 {t('webhook_leads.secret_once', {
                   defaultValue:
                     'Copy this secret now - it is shown only once and cannot be retrieved later.',
@@ -443,7 +443,7 @@ export function WebhookLeads() {
                     deleteSource.mutate(s.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4 text-red-500" />
+                  <Trash2 className="w-4 h-4 text-semantic-error" />
                 </Button>
               </div>
             ))}
@@ -538,7 +538,7 @@ export function WebhookLeads() {
                     className="ml-auto"
                     onClick={() => deleteMapping.mutate(m.id)}
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    <Trash2 className="w-3.5 h-3.5 text-semantic-error" />
                   </Button>
                 </div>
               ))}
@@ -607,11 +607,11 @@ export function WebhookLeads() {
                       <td className="py-2 pr-3">{l.remote_ip}</td>
                       <td className="py-2 pr-3 max-w-xs truncate">
                         {l.created_lead_id ? (
-                          <span className="text-green-600">
+                          <span className="text-semantic-success">
                             {l.created_lead_id.slice(0, 8)}…
                           </span>
                         ) : (
-                          <span className="text-red-500">
+                          <span className="text-semantic-error">
                             {l.error_message}
                           </span>
                         )}

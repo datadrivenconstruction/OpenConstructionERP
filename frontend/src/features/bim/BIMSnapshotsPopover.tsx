@@ -118,7 +118,7 @@ export default function BIMSnapshotsPopover({
               {t('dashboards.snapshots_title', { defaultValue: 'Data snapshots' })}
             </h3>
             {items.length > 0 && (
-              <span className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-[10px] tabular-nums text-content-tertiary">
+              <span className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-2xs tabular-nums text-content-tertiary">
                 {items.length}
               </span>
             )}
@@ -212,7 +212,7 @@ function SnapshotRow({ snapshot, onDelete, deleting }: SnapshotRowProps) {
         <div className="truncate text-xs font-medium text-content-primary">
           {snapshot.label}
         </div>
-        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-content-tertiary">
+        <div className="flex items-center gap-2 mt-0.5 text-2xs text-content-tertiary">
           <span className="tabular-nums">
             {formatNumber(snapshot.total_entities)}{' '}
             {t('dashboards.entities_short', { defaultValue: 'entities' })}

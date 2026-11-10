@@ -168,7 +168,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   />
                   {options.showCompanyName && companyName && (
                     <span
-                      className="truncate text-sm font-bold text-content-primary"
+                      className="truncate text-sm font-semibold text-content-primary"
                       data-testid="brand-company-name"
                     >
                       {companyName}
@@ -177,7 +177,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                 </span>
               ) : (
                 <span
-                  className="block truncate text-[17px] font-extrabold text-content-primary leading-none"
+                  className="block truncate text-[17px] font-semibold text-content-primary leading-none"
                   style={{
                     fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     letterSpacing: '-0.02em',
@@ -192,7 +192,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   is satisfied while the user's logo stays the dominant
                   visual; font is small + muted on purpose. */}
               <span
-                className="mt-1 block text-[8px] leading-none text-content-quaternary truncate"
+                className="mt-1 block text-2xs leading-none text-content-quaternary truncate"
                 style={{
                   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   letterSpacing: '0.03em',
@@ -219,7 +219,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   15px and clipped against the pencil. */}
               <Logo size="xs" />
               <span
-                className="text-[13px] font-medium text-content-primary whitespace-nowrap leading-none"
+                className="text-sm font-medium text-content-primary whitespace-nowrap leading-none"
                 style={{
                   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   letterSpacing: '-0.02em',
@@ -531,7 +531,7 @@ function BrandingEditor({
                         defaultValue: 'Current logo',
                       })}
                     </p>
-                    <p className="text-[11px] text-content-tertiary truncate">
+                    <p className="text-2xs text-content-tertiary truncate">
                       {Math.round(logoDataUrl.length / 1024)} KB
                     </p>
                   </div>
@@ -571,7 +571,7 @@ function BrandingEditor({
                   className="w-full ps-9 pe-3 py-2 rounded-lg bg-surface-secondary border border-border-light focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20 focus:outline-none text-sm text-content-primary placeholder:text-content-tertiary"
                 />
               </div>
-              <p className="text-[11px] text-content-tertiary mt-1.5">
+              <p className="text-2xs text-content-tertiary mt-1.5">
                 {nameDraft.length}/{MAX_NAME_LEN}
               </p>
               <button

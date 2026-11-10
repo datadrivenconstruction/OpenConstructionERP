@@ -140,7 +140,7 @@ export function PlotsTab({
                 data-testid="plot-tile"
               >
                 <span className="text-xs font-semibold leading-none">{p.plot_number}</span>
-                {ht && <span className="mt-0.5 text-[10px] opacity-80">{ht.code}</span>}
+                {ht && <span className="mt-0.5 text-2xs opacity-80">{ht.code}</span>}
               </button>
             );
           })}

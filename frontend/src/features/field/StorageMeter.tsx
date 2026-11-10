@@ -67,7 +67,7 @@ export function StorageMeter({ ops, now }: StorageMeterProps) {
         </p>
       )}
       {level !== 'ok' && (
-        <p role="alert" className={`text-xs font-medium ${level === 'full' ? 'text-rose-600' : 'text-amber-700'}`}>
+        <p role="alert" className={`text-xs font-medium ${level === 'full' ? 'text-semantic-error' : 'text-semantic-warning'}`}>
           {t('field.quota.warning', {
             defaultValue: 'Phone storage is almost full. Sync soon so photos are not lost.',
           })}

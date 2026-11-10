@@ -53,7 +53,7 @@ function ClampedText({ text }: { text: string }) {
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => !v)}
-        className="mt-0.5 rounded text-[11px] font-medium text-[var(--act-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)]"
+        className="mt-0.5 rounded text-2xs font-medium text-[var(--act-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)]"
       >
         {open
           ? t('erp_chat.action.show_less', { defaultValue: 'Show less' })
@@ -92,7 +92,7 @@ function NoteLine({ note }: { note: ActionNote }) {
   const warning = note.tone === 'warning';
   return (
     <p
-      className={clsx('flex items-start gap-1.5 text-[11px] leading-snug', warning ? 'text-[var(--act-text)]' : 'text-[var(--act-text-2)]')}
+      className={clsx('flex items-start gap-1.5 text-2xs leading-snug', warning ? 'text-[var(--act-text)]' : 'text-[var(--act-text-2)]')}
       data-testid="action-note"
       data-tone={note.tone}
     >
@@ -126,7 +126,7 @@ export function ActionFieldTable({ fields, notes = [], showBefore = true, classN
     <div className={className}>
     <dl
       className={clsx(
-        'grid grid-cols-[minmax(84px,36%)_1fr] gap-x-3 text-[13px] leading-snug',
+        'grid grid-cols-[minmax(84px,36%)_1fr] gap-x-3 text-sm leading-snug',
       )}
       data-testid="action-field-table"
     >

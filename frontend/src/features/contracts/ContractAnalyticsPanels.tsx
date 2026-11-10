@@ -67,9 +67,9 @@ import { fmtPercent } from '@/shared/lib/formatters';
 
 /* ── Semantic tie-out colours (mirror ComplianceGate.tsx) ─────────────── */
 
-const SUCCESS = 'text-emerald-600 dark:text-emerald-400';
-const WARNING = 'text-amber-600 dark:text-amber-400';
-const DANGER = 'text-red-600 dark:text-red-400';
+const SUCCESS = 'text-semantic-success';
+const WARNING = 'text-semantic-warning';
+const DANGER = 'text-semantic-error';
 const MUTED = 'text-content-tertiary';
 
 /** Mirror of the (unexported) Badge variant union, for status → badge mapping. */
@@ -400,8 +400,8 @@ function FindingList({
             className={clsx(
               'rounded-lg border px-3 py-2 text-sm',
               isError
-                ? 'border-red-200 bg-red-50/60 dark:border-red-900 dark:bg-red-950/30'
-                : 'border-amber-200 bg-amber-50/60 dark:border-amber-800 dark:bg-amber-950/30',
+                ? 'border-semantic-error/30 bg-semantic-error/10'
+                : 'border-semantic-warning/30 bg-semantic-warning/10',
             )}
           >
             <div className="flex items-start gap-2">
@@ -453,9 +453,9 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
     const banner = (() => {
       if (report.status === 'errors') {
         return {
-          cls: 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40',
+          cls: 'border-semantic-error/30 bg-semantic-error-bg',
           icon: <ShieldX size={18} className={clsx('mt-0.5 shrink-0', DANGER)} />,
-          titleCls: 'text-red-800 dark:text-red-300',
+          titleCls: 'text-semantic-error',
           title: t('contracts.completeness_errors_title', {
             defaultValue: 'Completeness check found blocking issues',
           }),
@@ -463,9 +463,9 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       }
       if (report.status === 'warnings') {
         return {
-          cls: 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40',
+          cls: 'border-semantic-warning/30 bg-semantic-warning-bg',
           icon: <ShieldAlert size={18} className={clsx('mt-0.5 shrink-0', WARNING)} />,
-          titleCls: 'text-amber-800 dark:text-amber-300',
+          titleCls: 'text-semantic-warning',
           title: t('contracts.completeness_warnings_title', {
             defaultValue: 'Complete, with warnings to review',
           }),
@@ -473,9 +473,9 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       }
       if (report.status === 'passed') {
         return {
-          cls: 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40',
+          cls: 'border-semantic-success/30 bg-semantic-success-bg',
           icon: <ShieldCheck size={18} className={clsx('mt-0.5 shrink-0', SUCCESS)} />,
-          titleCls: 'text-emerald-800 dark:text-emerald-300',
+          titleCls: 'text-semantic-success',
           title: t('contracts.completeness_passed_title', {
             defaultValue: 'All completeness checks passed',
           }),
@@ -772,7 +772,7 @@ function FinalAccountChecklistPanel({ contractId }: { contractId: string }) {
           </div>
           <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
             <div
-              className={clsx('h-full rounded-full', data.ready ? 'bg-emerald-500' : 'bg-amber-500')}
+              className={clsx('h-full rounded-full', data.ready ? 'bg-semantic-success' : 'bg-semantic-warning')}
               style={{ width: `${Math.min(100, Math.max(0, toNum(data.completion_percent)))}%` }}
             />
           </div>

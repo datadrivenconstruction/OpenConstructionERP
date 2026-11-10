@@ -239,19 +239,19 @@ export function sourceTone(source: ForecastSource): string {
     case 'budget':
       return 'bg-surface-secondary text-content-secondary';
     case 'estimate':
-      return 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300';
+      return 'bg-semantic-info-bg text-semantic-info';
     case 'partly_awarded':
-      return 'bg-sky-50 text-indigo-700 ring-1 ring-inset ring-indigo-200 dark:bg-sky-950/40 dark:text-indigo-300 dark:ring-indigo-800';
+      return 'bg-semantic-info-bg text-indigo-700 ring-1 ring-inset ring-indigo-200 dark:text-indigo-300 dark:ring-indigo-800';
     case 'awarded':
       return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300';
     case 'measured':
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300';
+      return 'bg-semantic-warning-bg text-semantic-warning';
     case 'final':
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
+      return 'bg-semantic-success-bg text-semantic-success';
     case 'manual':
       return 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300';
     case 'invoiced':
-      return 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
+      return 'bg-semantic-error-bg text-semantic-error';
     case 'evm':
       return 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300';
     default:

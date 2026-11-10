@@ -440,7 +440,7 @@ function InterfaceModal({
                   setTouched(true);
                 }}
                 placeholder={t('interface_management.reference_placeholder', { defaultValue: 'e.g. IF-014' })}
-                className={clsx(inputCls, refError && 'border-semantic-error focus:ring-red-300')}
+                className={clsx(inputCls, refError && 'border-semantic-error focus:ring-semantic-error/30')}
                 autoFocus
               />
               {refError && (
@@ -465,7 +465,7 @@ function InterfaceModal({
                 placeholder={t('interface_management.title_placeholder', {
                   defaultValue: 'e.g. Duct penetration through core wall at Level 3',
                 })}
-                className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-red-300')}
+                className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30')}
               />
               {titleError && (
                 <p className="mt-1 text-xs text-semantic-error">

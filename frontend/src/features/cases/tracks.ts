@@ -53,8 +53,8 @@ export const CASE_TRACKS: CaseTrack[] = [
       'For client-side project managers and owners: phase gates and every management area, from stakeholders to staffing.',
     icon: Milestone,
     tint: {
-      tile: 'bg-sky-500/10 text-sky-600 ring-sky-500/20 dark:text-sky-400',
-      chip: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+      tile: 'bg-semantic-info/10 text-semantic-info ring-sky-500/20 dark:text-sky-400',
+      chip: 'border-sky-500/40 bg-semantic-info/10 text-semantic-info dark:text-sky-300',
     },
     caseIds: [
       'steer-a-client-project-area-by-area',
@@ -80,8 +80,8 @@ export const CASE_TRACKS: CaseTrack[] = [
       'For cost managers and project controllers: the monthly forecast, commitments, changes and exact payments.',
     icon: LineChart,
     tint: {
-      tile: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 dark:text-emerald-400',
-      chip: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+      tile: 'bg-semantic-success/10 text-semantic-success ring-emerald-500/20 dark:text-emerald-400',
+      chip: 'border-emerald-500/40 bg-semantic-success/10 text-semantic-success dark:text-emerald-300',
     },
     caseIds: [
       'run-the-monthly-cost-report',
@@ -142,8 +142,8 @@ export const CASE_TRACKS: CaseTrack[] = [
     forDefault: 'For site managers and foremen: diary, safety, quality and progress.',
     icon: HardHat,
     tint: {
-      tile: 'bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400',
-      chip: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+      tile: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/20 dark:text-amber-400',
+      chip: 'border-amber-500/40 bg-semantic-warning/10 text-semantic-warning dark:text-amber-300',
     },
     caseIds: [
       'run-the-site-day',
@@ -161,8 +161,8 @@ export const CASE_TRACKS: CaseTrack[] = [
     forDefault: 'For contractors and quantity surveyors: valuations, changes and payment.',
     icon: Banknote,
     tint: {
-      tile: 'bg-rose-500/10 text-rose-600 ring-rose-500/20 dark:text-rose-400',
-      chip: 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300',
+      tile: 'bg-semantic-error/10 text-semantic-error ring-rose-500/20 dark:text-rose-400',
+      chip: 'border-rose-500/40 bg-semantic-error/10 text-semantic-error dark:text-rose-300',
     },
     caseIds: [
       'prepare-an-interim-payment-application',

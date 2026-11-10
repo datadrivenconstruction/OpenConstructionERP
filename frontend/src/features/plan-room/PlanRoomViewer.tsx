@@ -378,7 +378,7 @@ export function PlanRoomViewer({
       </div>
 
       {/* ── Canvas + overlays ───────────────────────────────────────────── */}
-      <div className="relative max-h-[70vh] overflow-auto bg-neutral-100 p-3 dark:bg-neutral-900">
+      <div className="relative max-h-[70vh] overflow-auto bg-surface-secondary p-3">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 size={28} className="animate-spin text-oe-blue" />

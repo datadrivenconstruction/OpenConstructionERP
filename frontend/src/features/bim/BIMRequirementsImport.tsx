@@ -677,7 +677,7 @@ function SummaryChip({
   return (
     <div className={clsx('rounded-md p-2 text-center', toneClass)}>
       <div className="text-lg font-semibold">{value}</div>
-      <div className="text-[10px] uppercase tracking-wide opacity-80">{label}</div>
+      <div className="text-2xs uppercase tracking-wide opacity-80">{label}</div>
     </div>
   );
 }

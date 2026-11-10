@@ -63,7 +63,7 @@ export function Slider({
         className="w-full accent-oe-blue cursor-pointer disabled:cursor-not-allowed"
       />
       {marks && marks.length > 0 && (
-        <div className="flex justify-between text-[10px] text-content-tertiary px-0.5">
+        <div className="flex justify-between text-2xs text-content-tertiary px-0.5">
           {marks.map((m) => (
             <span key={m.value} className="text-center">
               {m.label}

@@ -395,7 +395,7 @@ export function IssuesHubPage() {
 
           {/* Partial-failure banner - some sources loaded, others did not. */}
           {warnings.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
               <AlertTriangle size={14} className="shrink-0" />
               <span>
                 {t('issues.partial_warning', {
@@ -610,7 +610,7 @@ function IssueRow({ issue, onOpen }: { issue: UnifiedIssue; onOpen: () => void }
       className={clsx(
         'flex cursor-pointer items-center gap-3 border-b border-border-light px-4 py-3 text-sm transition-colors last:border-b-0 min-w-[760px]',
         'hover:bg-surface-secondary/50 focus:outline-none focus-visible:bg-surface-secondary/60',
-        overdue && 'bg-red-50/40 dark:bg-red-950/15',
+        overdue && 'bg-semantic-error/10',
       )}
     >
       {/* Source */}

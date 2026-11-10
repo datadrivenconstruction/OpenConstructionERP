@@ -57,26 +57,26 @@ const ACCENT_STYLES: Record<
   rose: {
     bar: 'from-rose-400/80 via-rose-500/80 to-orange-400/80',
     glow: 'from-rose-500/20',
-    iconBg: 'bg-rose-50 dark:bg-rose-500/10',
-    iconText: 'text-rose-600 dark:text-rose-400',
+    iconBg: 'bg-semantic-error-bg',
+    iconText: 'text-semantic-error',
   },
   amber: {
     bar: 'from-amber-400/80 via-amber-500/80 to-yellow-400/80',
     glow: 'from-amber-500/20',
-    iconBg: 'bg-amber-50 dark:bg-amber-500/10',
-    iconText: 'text-amber-600 dark:text-amber-400',
+    iconBg: 'bg-semantic-warning-bg',
+    iconText: 'text-semantic-warning',
   },
   emerald: {
     bar: 'from-emerald-400/80 via-emerald-500/80 to-teal-400/80',
     glow: 'from-emerald-500/20',
-    iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
-    iconText: 'text-emerald-600 dark:text-emerald-400',
+    iconBg: 'bg-semantic-success-bg',
+    iconText: 'text-semantic-success',
   },
   sky: {
     bar: 'from-sky-400/80 via-blue-500/80 to-indigo-400/80',
     glow: 'from-sky-500/20',
-    iconBg: 'bg-sky-50 dark:bg-sky-500/10',
-    iconText: 'text-sky-600 dark:text-sky-400',
+    iconBg: 'bg-semantic-info-bg',
+    iconText: 'text-semantic-info',
   },
 };
 
@@ -170,7 +170,7 @@ function KPICard({
             >
               {icon}
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="inline-flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {label}
               {hint ? <InfoHint inline text={hint} /> : null}
             </span>
@@ -179,13 +179,13 @@ function KPICard({
             <span
               data-testid={testId ? `${testId}-delta` : undefined}
               className={clsx(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold',
                 delta.direction === 'up' &&
-                  'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
+                  'bg-semantic-error-bg text-semantic-error',
                 delta.direction === 'down' &&
-                  'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+                  'bg-semantic-success-bg text-semantic-success',
                 delta.direction === 'flat' &&
-                  'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300',
+                  'bg-surface-secondary text-content-secondary',
               )}
             >
               {delta.direction === 'up' && <ArrowUpRight size={11} />}
@@ -201,7 +201,7 @@ function KPICard({
             />
           ) : null}
         </div>
-        <div className="mt-4 text-3xl font-bold tracking-tight text-content-primary">
+        <div className="mt-4 text-3xl font-semibold tracking-tight text-content-primary">
           {primary}
         </div>
         {secondary ? (
@@ -219,11 +219,11 @@ function SkeletonCard() {
     <div className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-elevated/90 p-5 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800" />
       <div className="flex items-center gap-2.5">
-        <div className="h-9 w-9 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700" />
-        <div className="h-3 w-24 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="h-9 w-9 animate-pulse rounded-xl bg-surface-secondary" />
+        <div className="h-3 w-24 animate-pulse rounded bg-surface-secondary" />
       </div>
-      <div className="mt-4 h-8 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-      <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+      <div className="mt-4 h-8 w-3/4 animate-pulse rounded bg-surface-secondary" />
+      <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-surface-secondary" />
     </div>
   );
 }
@@ -244,10 +244,10 @@ function StatTile({ icon, label, value, footer, hint }: StatTileProps) {
   return (
     <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="flex items-center gap-2 text-content-tertiary">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-content-secondary dark:bg-slate-800">
+        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-secondary text-content-secondary">
           {icon}
         </span>
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider">
+        <span className="inline-flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider">
           {label}
           {hint ? <InfoHint inline text={hint} /> : null}
         </span>

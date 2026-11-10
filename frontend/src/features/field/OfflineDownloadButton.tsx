@@ -27,7 +27,7 @@ export function OfflineDownloadButton({ session }: { session: FieldSession | nul
         data-testid="offline-download"
         onClick={() => void run()}
         disabled={!session || state.kind === 'busy'}
-        className="flex h-12 items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 text-sm font-semibold text-sky-700 disabled:opacity-50"
+        className="flex h-12 items-center justify-center gap-2 rounded-xl border border-semantic-info/30 bg-semantic-info-bg px-4 text-sm font-semibold text-semantic-info disabled:opacity-50"
       >
         {state.kind === 'busy' ? (
           <Loader2 size={18} className="animate-spin" aria-hidden="true" />
@@ -37,12 +37,12 @@ export function OfflineDownloadButton({ session }: { session: FieldSession | nul
         {t('field.offline.download', { defaultValue: 'Download for offline' })}
       </button>
       {state.kind === 'done' && (
-        <p role="status" data-testid="offline-download-done" className="text-xs text-emerald-700">
+        <p role="status" data-testid="offline-download-done" className="text-xs text-semantic-success">
           {t('field.offline.downloaded', { count: state.count, defaultValue: 'Saved for offline: {{count}}' })}
         </p>
       )}
       {state.kind === 'failed' && (
-        <p role="alert" data-testid="offline-download-failed" className="text-xs text-rose-600">
+        <p role="alert" data-testid="offline-download-failed" className="text-xs text-semantic-error">
           {t('field.offline.download_failed', {
             defaultValue: 'Could not download. Try again when you have signal.',
           })}

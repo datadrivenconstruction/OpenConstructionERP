@@ -402,9 +402,9 @@ interface ChipProps {
 
 function Chip({ label, value, tone }: ChipProps) {
   const toneCls: Record<ChipProps['tone'], string> = {
-    success: 'bg-green-50 dark:bg-green-950/30 text-semantic-success',
-    warning: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300',
-    error: 'bg-red-50 dark:bg-red-950/30 text-semantic-error',
+    success: 'bg-semantic-success-bg text-semantic-success',
+    warning: 'bg-semantic-warning-bg text-semantic-warning',
+    error: 'bg-semantic-error-bg text-semantic-error',
   };
   return (
     <div className={`rounded-lg px-3 py-2 ${toneCls[tone]}`}>

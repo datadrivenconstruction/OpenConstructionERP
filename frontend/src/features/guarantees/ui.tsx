@@ -36,7 +36,7 @@ export function AlertBadge({ band, days }: { band: AlertBand | null; days: numbe
     <span
       className={clsx(
         'inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-medium',
-        days < 0 ? 'bg-rose-100 text-rose-700' : alertBandClass(band),
+        days < 0 ? 'bg-semantic-error-bg text-semantic-error' : alertBandClass(band),
       )}
     >
       {text}
@@ -126,15 +126,15 @@ export function ValidationBlock({ findings }: { findings: GuaranteeFinding[] }) 
       data-testid="guarantees-validation"
       className={clsx(
         'rounded-xl border p-3',
-        tone === 'ok' && 'border-emerald-200 bg-emerald-50',
-        tone === 'warn' && 'border-amber-200 bg-amber-50',
-        tone === 'error' && 'border-rose-200 bg-rose-50',
+        tone === 'ok' && 'border-semantic-success/30 bg-semantic-success-bg',
+        tone === 'warn' && 'border-semantic-warning/30 bg-semantic-warning-bg',
+        tone === 'error' && 'border-semantic-error/30 bg-semantic-error-bg',
       )}
     >
       <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
         <Icon
           size={16}
-          className={clsx(tone === 'ok' && 'text-emerald-600', tone === 'warn' && 'text-amber-600', tone === 'error' && 'text-rose-600')}
+          className={clsx(tone === 'ok' && 'text-semantic-success', tone === 'warn' && 'text-semantic-warning', tone === 'error' && 'text-semantic-error')}
         />
         {findings.length === 0
           ? t('guarantees.validation_ok', { defaultValue: 'All guarantee checks pass' })

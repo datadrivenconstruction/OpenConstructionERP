@@ -31,11 +31,11 @@ export interface BIMModelPickerProps {
 }
 
 function statusIcon(status: string) {
-  if (status === 'ready') return <CheckCircle2 className="w-3 h-3 text-emerald-500" />;
+  if (status === 'ready') return <CheckCircle2 className="w-3 h-3 text-semantic-success" />;
   if (status === 'processing' || status === 'pending')
     return <Loader2 className="w-3 h-3 animate-spin text-content-tertiary" />;
   if (status === 'failed' || status === 'error')
-    return <AlertTriangle className="w-3 h-3 text-rose-500" />;
+    return <AlertTriangle className="w-3 h-3 text-semantic-error" />;
   return <Box className="w-3 h-3 text-content-tertiary" />;
 }
 
@@ -117,7 +117,7 @@ export function BIMModelPicker({
               {m.element_count}
             </span>
             {m.model_format && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-tertiary text-content-tertiary uppercase shrink-0 font-medium">
+              <span className="text-2xs px-1.5 py-0.5 rounded bg-surface-tertiary text-content-tertiary uppercase shrink-0 font-medium">
                 {m.model_format}
               </span>
             )}

@@ -66,7 +66,7 @@ function MetricRow({ icon, label, count, total, percent, color }: MetricRowProps
         </div>
         <div className="h-1.5 rounded-full bg-surface-secondary overflow-hidden">
           <div
-            className={`h-full transition-all duration-700 ease-out ${color}`}
+            className={`h-full transition-all duration-500 ease-out ${color}`}
             style={{ width: `${pctDisplay}%` }}
           />
         </div>
@@ -120,10 +120,10 @@ export default function BIMCoverageCard() {
 
   const headlineColor =
     headlinePercent >= 75
-      ? 'text-emerald-600'
+      ? 'text-semantic-success'
       : headlinePercent >= 40
-        ? 'text-amber-600'
-        : 'text-rose-600';
+        ? 'text-semantic-warning'
+        : 'text-semantic-error';
 
   return (
     <div
@@ -132,7 +132,7 @@ export default function BIMCoverageCard() {
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-600">
+          <div className="h-10 w-10 rounded-lg bg-semantic-warning-bg flex items-center justify-center text-semantic-warning">
             <Cuboid size={20} strokeWidth={1.75} />
           </div>
           <div>
@@ -151,10 +151,10 @@ export default function BIMCoverageCard() {
           </div>
         </div>
         <div className="text-right">
-          <div className={`text-2xl font-bold tabular-nums ${headlineColor}`}>
+          <div className={`text-2xl font-semibold tabular-nums ${headlineColor}`}>
             {headlinePercent}%
           </div>
-          <div className="text-[10px] uppercase tracking-wider text-content-quaternary">
+          <div className="text-2xs uppercase tracking-wider text-content-quaternary">
             {t('dashboard.bim_coverage_headline', { defaultValue: 'avg coverage' })}
           </div>
         </div>
@@ -172,20 +172,20 @@ export default function BIMCoverageCard() {
           color="bg-blue-50 dark:bg-blue-950/40"
         />
         <MetricRow
-          icon={<ShieldCheck size={12} className="text-emerald-600" />}
+          icon={<ShieldCheck size={12} className="text-semantic-success" />}
           label={t('dashboard.bim_costed', { defaultValue: 'Costed' })}
           count={data.elements_costed}
           total={totalElements}
           percent={data.percent_costed}
-          color="bg-emerald-50 dark:bg-emerald-950/40"
+          color="bg-semantic-success-bg"
         />
         <MetricRow
-          icon={<ShieldCheck size={12} className="text-amber-600" />}
+          icon={<ShieldCheck size={12} className="text-semantic-warning" />}
           label={t('dashboard.bim_validated', { defaultValue: 'Validated' })}
           count={data.elements_validated}
           total={totalElements}
           percent={data.percent_validated}
-          color="bg-amber-50 dark:bg-amber-950/40"
+          color="bg-semantic-warning-bg"
         />
         <MetricRow
           icon={<FileText size={12} className="text-violet-600" />}
@@ -198,12 +198,12 @@ export default function BIMCoverageCard() {
           color="bg-violet-50 dark:bg-violet-950/40"
         />
         <MetricRow
-          icon={<CheckSquare size={12} className="text-rose-600" />}
+          icon={<CheckSquare size={12} className="text-semantic-error" />}
           label={t('dashboard.bim_with_tasks', { defaultValue: 'With tasks' })}
           count={data.elements_with_tasks}
           total={totalElements}
           percent={data.percent_with_tasks}
-          color="bg-rose-50 dark:bg-rose-950/40"
+          color="bg-semantic-error-bg"
         />
         <MetricRow
           icon={<Calendar size={12} className="text-cyan-600" />}

@@ -460,7 +460,7 @@ export function AnalyticsPage() {
                   <div className="space-y-0.5">
                     {currencyTotals.map((v) => (
                       <div key={v.currency} className="flex items-baseline justify-between gap-2">
-                        <span className="text-base font-bold text-content-primary tabular-nums truncate">
+                        <span className="text-base font-semibold text-content-primary tabular-nums truncate">
                           {compactCurrency(v.total_planned, v.currency)}
                         </span>
                         <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
@@ -501,7 +501,7 @@ export function AnalyticsPage() {
                     {currencyTotals.map((v) => (
                       <div key={v.currency} className="flex items-baseline justify-between gap-2">
                         <span
-                          className={`text-base font-bold tabular-nums truncate ${
+                          className={`text-base font-semibold tabular-nums truncate ${
                             v.total_variance >= 0 ? 'text-semantic-success' : 'text-semantic-error'
                           }`}
                         >

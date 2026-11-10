@@ -146,7 +146,7 @@ function WidgetRow({ id, hidden, onToggle, span, onSetSpan }: RowProps) {
                 aria-label={opt.title}
                 aria-pressed={active}
                 title={opt.title}
-                className={`px-1.5 py-1 text-[11px] font-medium transition-colors ${
+                className={`px-1.5 py-1 text-2xs font-medium transition-colors ${
                   active
                     ? 'bg-oe-blue text-white'
                     : 'text-content-tertiary hover:bg-surface-secondary'

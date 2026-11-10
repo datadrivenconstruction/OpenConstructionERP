@@ -301,7 +301,7 @@ export function EditBuyerModal({
         <div
           role="alert"
           data-testid="edit-buyer-error"
-          className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+          className="mb-4 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error"
         >
           {serverError}
         </div>

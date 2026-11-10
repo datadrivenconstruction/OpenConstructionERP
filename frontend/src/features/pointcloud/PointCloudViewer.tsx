@@ -406,7 +406,7 @@ function ToolbarButton({
       >
         <Icon size={17} />
         {badge != null && badge > 0 && (
-          <span className="absolute -right-1 -top-1 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-oe-blue px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-surface-primary">
+          <span className="absolute -right-1 -top-1 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-oe-blue px-1 text-2xs font-semibold leading-none text-white ring-2 ring-surface-primary">
             {badge}
           </span>
         )}
@@ -414,7 +414,7 @@ function ToolbarButton({
       <span className="pointer-events-none absolute left-1/2 top-full z-40 mt-2 hidden -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md bg-content-primary px-2 py-1 text-2xs font-medium text-surface-primary shadow-lg group-hover:flex">
         {label}
         {shortcut && (
-          <kbd className="rounded border border-surface-primary/30 px-1 font-sans text-[10px] font-semibold uppercase leading-tight">
+          <kbd className="rounded border border-surface-primary/30 px-1 font-sans text-2xs font-semibold uppercase leading-tight">
             {shortcut}
           </kbd>
         )}
@@ -3262,7 +3262,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
             data-testid="pointcloud-measure-label"
           >
             <div>{formatLengthMm(pathMetrics.totalLength)}</div>
-            <div className="text-[10px] font-normal text-white/75">
+            <div className="text-2xs font-normal text-white/75">
               {t('pointcloud.measure_path_segments', {
                 defaultValue: '{{count}} segments',
                 count: pathMetrics.segmentCount,

@@ -70,7 +70,7 @@ export function OfflineFallback() {
       data-testid="offline-fallback"
       className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 py-12 text-center"
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-semantic-warning-bg text-semantic-warning">
         <CloudOff size={28} strokeWidth={1.75} />
       </div>
       <h1 className="text-xl font-semibold text-content-primary">

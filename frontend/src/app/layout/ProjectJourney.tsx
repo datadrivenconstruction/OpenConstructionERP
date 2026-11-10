@@ -82,11 +82,11 @@ const ARC_ACCENT: Record<
     glyph: 'text-violet-500',
   },
   deliver: {
-    dot: 'bg-emerald-500',
-    text: 'text-emerald-500',
-    bar: 'bg-emerald-500',
+    dot: 'bg-semantic-success',
+    text: 'text-semantic-success',
+    bar: 'bg-semantic-success',
     wash: 'from-emerald-500/[0.08]',
-    glyph: 'text-emerald-500',
+    glyph: 'text-semantic-success',
   },
 };
 
@@ -289,7 +289,7 @@ function ProjectJourneyPanel({
               <section key={arc.key} aria-label={t(arc.nameKey, { defaultValue: arc.name })}>
                 <div className="mb-2.5 flex items-center gap-2">
                   <span className={clsx('h-2 w-2 shrink-0 rounded-full', accent.dot)} aria-hidden />
-                  <h3 className={clsx('text-xs font-bold uppercase tracking-wider', accent.text)}>
+                  <h3 className={clsx('text-xs font-semibold uppercase tracking-wider', accent.text)}>
                     {t(arc.nameKey, { defaultValue: arc.name })}
                   </h3>
                   <span className="truncate text-2xs text-content-tertiary">
@@ -354,7 +354,7 @@ function ProjectJourneyPanel({
                               </div>
                             </div>
                             {isCurrent && (
-                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-oe-blue/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-oe-blue">
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-oe-blue/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-oe-blue">
                                 {t('journey.here', { defaultValue: 'Here' })}
                               </span>
                             )}
@@ -397,10 +397,10 @@ function ProjectJourneyPanel({
             className="rounded-xl border border-dashed border-border-light bg-surface-secondary/40 p-3"
           >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-semantic-warning/15 text-semantic-warning">
                 <Sparkles size={15} strokeWidth={1.75} />
               </span>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-content-secondary">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
                 {t('journey.always_on.title', { defaultValue: 'Always on' })}
               </h3>
               <span className="text-2xs text-content-tertiary">
@@ -715,7 +715,7 @@ function CasesPill({
                     </li>
                   ))}
                 </ul>
-                <div className="border-t border-border-light/70 px-3 py-1.5 text-[10px] text-content-tertiary">
+                <div className="border-t border-border-light/70 px-3 py-1.5 text-2xs text-content-tertiary">
                   {count > previewTitles.length
                     ? t('journey.cases_more_hint', {
                         defaultValue: '+{{n}} more - click to open',

@@ -66,15 +66,15 @@ function Tile({
 }) {
   const toneClass = {
     neutral: 'border-border bg-surface-primary',
-    positive: 'border-emerald-300/70 dark:border-emerald-800/70 bg-emerald-50/40 dark:bg-emerald-950/20',
-    warning: 'border-amber-300/70 dark:border-amber-700/70 bg-amber-50/40 dark:bg-amber-950/20',
-    critical: 'border-red-300/70 dark:border-red-800/70 bg-red-50/40 dark:bg-red-950/20',
+    positive: 'border-semantic-success/30 bg-semantic-success/10',
+    warning: 'border-semantic-warning/30 bg-semantic-warning/10',
+    critical: 'border-semantic-error/30 bg-semantic-error/10',
   }[tone];
   return (
     <div className={`rounded-lg border ${toneClass} px-3 py-2`}>
-      <div className="text-[11px] uppercase tracking-wide text-content-tertiary">{label}</div>
+      <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
       <div className="text-lg font-semibold text-content-primary leading-tight">{value}</div>
-      {hint && <div className="text-[11px] text-content-tertiary mt-0.5">{hint}</div>}
+      {hint && <div className="text-2xs text-content-tertiary mt-0.5">{hint}</div>}
     </div>
   );
 }
@@ -83,15 +83,15 @@ function AlertRow({ alert }: { alert: AnalyticsAlert }) {
   const isCritical = alert.severity === 'critical';
   const Icon = isCritical ? XOctagon : AlertTriangle;
   const tone = isCritical
-    ? 'border-red-300 dark:border-red-800 bg-red-50/70 dark:bg-red-950/30 text-red-900 dark:text-red-100'
-    : 'border-amber-300 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-950/30 text-amber-900 dark:text-amber-100';
+    ? 'border-semantic-error/30 bg-semantic-error/10 text-semantic-error'
+    : 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning';
   return (
     <div className={`rounded-lg border px-3 py-2 flex items-start gap-2 ${tone}`}>
       <Icon className="w-4 h-4 mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold leading-tight">{alert.title}</div>
-        <div className="text-[12px] mt-0.5">{alert.detail}</div>
-        <div className="text-[11px] mt-1 opacity-80">
+        <div className="text-xs mt-0.5">{alert.detail}</div>
+        <div className="text-2xs mt-1 opacity-80">
           {fmtPct(alert.metric)} ≥ {fmtPct(alert.threshold)} · {alert.spec_ref}
         </div>
       </div>
@@ -111,7 +111,7 @@ function BreakdownTable({
   if (rows.length === 0) {
     return (
       <div>
-        <div className="text-[11px] uppercase tracking-wide text-content-tertiary mb-1">
+        <div className="text-2xs uppercase tracking-wide text-content-tertiary mb-1">
           {caption}
         </div>
         <div className="text-xs text-content-tertiary italic">{emptyLabel}</div>
@@ -121,7 +121,7 @@ function BreakdownTable({
   const max = Math.max(...rows.map((r) => r.searches));
   return (
     <div>
-      <div className="text-[11px] uppercase tracking-wide text-content-tertiary mb-1">
+      <div className="text-2xs uppercase tracking-wide text-content-tertiary mb-1">
         {caption}
       </div>
       <div className="space-y-1">
@@ -137,7 +137,7 @@ function BreakdownTable({
                   className="absolute inset-y-0 left-0 bg-sky-400/70 dark:bg-sky-500/60"
                   style={{ width: `${pct}%` }}
                 />
-                <div className="absolute inset-0 flex items-center justify-end pr-1.5 text-[10.5px] font-medium text-content-primary">
+                <div className="absolute inset-0 flex items-center justify-end pr-1.5 text-2xs font-medium text-content-primary">
                   {r.searches}
                 </div>
               </div>
@@ -166,7 +166,7 @@ function Histogram({
   const max = Math.max(...entries.map(([, v]) => v));
   return (
     <div>
-      <div className="text-[11px] uppercase tracking-wide text-content-tertiary mb-1">
+      <div className="text-2xs uppercase tracking-wide text-content-tertiary mb-1">
         {caption}
       </div>
       <div className="flex items-end gap-1 h-16">
@@ -174,12 +174,12 @@ function Histogram({
           const h = max > 0 ? (v / max) * 100 : 0;
           return (
             <div key={k} className="flex-1 flex flex-col items-center justify-end gap-0.5">
-              <div className="text-[10px] tabular-nums text-content-tertiary">{v}</div>
+              <div className="text-2xs tabular-nums text-content-tertiary">{v}</div>
               <div
                 className="w-full rounded-t bg-indigo-400/70 dark:bg-indigo-500/60"
                 style={{ height: `${Math.max(2, h)}%` }}
               />
-              <div className="text-[10px] text-content-secondary">{k}</div>
+              <div className="text-2xs text-content-secondary">{k}</div>
             </div>
           );
         })}
@@ -225,9 +225,9 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
   const data = q.data;
   const empty = data.total_searches === 0;
   const headerTone = data.alerts.some((a) => a.severity === 'critical')
-    ? 'border-red-300 dark:border-red-800 bg-red-50/40 dark:bg-red-950/20'
+    ? 'border-semantic-error/30 bg-semantic-error/10'
     : data.alerts.length > 0
-      ? 'border-amber-300 dark:border-amber-700 bg-amber-50/40 dark:bg-amber-950/20'
+      ? 'border-semantic-warning/30 bg-semantic-warning/10'
       : 'border-border bg-surface-primary';
 
   const headlinePickRate = empty ? '—' : fmtPct(data.pick_rate);
@@ -242,14 +242,14 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
           className="flex-1 flex items-center gap-2.5 text-left min-w-0"
           aria-expanded={open}
         >
-          <span className="shrink-0 w-6 h-6 rounded-md bg-sky-500 text-white inline-flex items-center justify-center">
+          <span className="shrink-0 w-6 h-6 rounded-md bg-semantic-info text-white inline-flex items-center justify-center">
             <BarChart3 className="w-3.5 h-3.5" />
           </span>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-content-primary leading-tight">
               {t('match_elements.analytics_title', 'Match analytics')}
               {data.alerts.length > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100">
+                <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-amber-200 text-semantic-warning dark:bg-amber-800 dark:text-amber-100">
                   <AlertTriangle className="w-2.5 h-2.5" />
                   {t('match_elements.analytics_alerts_count', '{{n}} alert', {
                     n: data.alerts.length,
@@ -258,7 +258,7 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-content-tertiary truncate">
+            <div className="text-2xs text-content-tertiary truncate">
               {empty
                 ? t(
                     'match_elements.analytics_empty_caption',
@@ -445,7 +445,7 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
                 />
               </div>
 
-              <div className="text-[10.5px] text-content-tertiary inline-flex items-center gap-1">
+              <div className="text-2xs text-content-tertiary inline-flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
                 {t(
                   'match_elements.analytics_footer',

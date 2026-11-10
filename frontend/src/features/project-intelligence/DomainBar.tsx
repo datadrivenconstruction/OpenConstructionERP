@@ -44,7 +44,7 @@ export function DomainBar({ label, score, color, onClick, isSelected }: DomainBa
       </span>
       <div className="flex-1 h-1.5 bg-border-light/40 rounded-full overflow-hidden">
         <div
-          className="h-full rounded-full transition-all duration-700 ease-out"
+          className="h-full rounded-full transition-all duration-500 ease-out"
           style={{
             width: `${animatedWidth}%`,
             backgroundColor: color,

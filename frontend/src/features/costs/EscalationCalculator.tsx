@@ -119,8 +119,8 @@ export function EscalationCalculator({
     <div className={clsx('rounded-xl border border-border bg-surface-primary p-5', className)}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-          <TrendingUp size={16} className="text-amber-600" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-semantic-warning-bg">
+          <TrendingUp size={16} className="text-semantic-warning" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-content-primary">
@@ -242,7 +242,7 @@ export function EscalationCalculator({
                 className="flex items-center gap-1 rounded-md bg-surface-secondary px-2 py-1"
               >
                 <span className="text-2xs text-content-tertiary">{year}</span>
-                <span className="text-2xs font-medium text-amber-600">+{fmtPercent(rate)}</span>
+                <span className="text-2xs font-medium text-semantic-warning">+{fmtPercent(rate)}</span>
               </div>
             ))}
           </div>
@@ -250,7 +250,7 @@ export function EscalationCalculator({
       )}
 
       {/* Result */}
-      <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-900/10 p-4">
+      <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 p-4">
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-2xs text-content-tertiary mb-0.5">
@@ -264,7 +264,7 @@ export function EscalationCalculator({
             <p className="text-2xs text-content-tertiary mb-0.5">
               {t('costs.escalation_factor', { defaultValue: 'Factor' })}
             </p>
-            <p className="text-sm font-semibold text-amber-600 tabular-nums">
+            <p className="text-sm font-semibold text-semantic-warning tabular-nums">
               {fmtFixed(escalation.factor, 4)}x
               <span className="text-2xs ml-1">(+{totalPctChange}%)</span>
             </p>
@@ -273,7 +273,7 @@ export function EscalationCalculator({
             <p className="text-2xs text-content-tertiary mb-0.5">
               {t('costs.escalated_cost', { defaultValue: 'Escalated cost' })} ({targetYear})
             </p>
-            <p className="text-sm font-bold text-content-primary tabular-nums">
+            <p className="text-sm font-semibold text-content-primary tabular-nums">
               {fmt(escalatedAmount)}
             </p>
           </div>

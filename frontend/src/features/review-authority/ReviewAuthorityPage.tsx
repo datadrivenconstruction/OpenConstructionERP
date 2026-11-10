@@ -283,7 +283,7 @@ function CreateCycleModal({
             })}
             className={clsx(
               inputCls,
-              nameError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -476,7 +476,7 @@ function EditCycleModal({
             }}
             className={clsx(
               inputCls,
-              nameError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -670,7 +670,7 @@ function AddRemarkModal({
             rows={3}
             className={clsx(
               textareaCls,
-              textError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              textError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -1147,7 +1147,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
             <Button
               variant="secondary"
               size="sm"
-              className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="text-semantic-error hover:bg-semantic-error-bg"
               icon={<Trash2 size={13} />}
               onClick={handleDelete}
             >
@@ -1620,7 +1620,7 @@ export function ReviewAuthorityPage() {
       </DismissibleInfo>
 
       {!projectId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
         </div>
       )}

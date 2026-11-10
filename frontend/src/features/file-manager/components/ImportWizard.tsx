@@ -245,7 +245,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               </div>
 
               {preview.warnings.length > 0 && (
-                <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 p-2.5 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-2.5 text-xs text-semantic-warning space-y-1">
                   {preview.warnings.map((w, i) => (
                     <p key={i} className="flex items-start gap-1.5">
                       <AlertTriangle size={12} className="shrink-0 mt-0.5" />
@@ -350,7 +350,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
 
           {step === 'result' && result && (
             <>
-              <div className="flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2.5 text-semantic-success">
                 <CheckCircle2 size={18} />
                 <span className="text-sm font-semibold">
                   {t('files.import.result_done', { defaultValue: 'Import complete' })}
@@ -384,7 +384,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               </div>
 
               {result.warnings.length > 0 && (
-                <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 p-2.5 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-2.5 text-xs text-semantic-warning space-y-1">
                   {result.warnings.map((w, i) => (
                     <p key={i}>{w}</p>
                   ))}

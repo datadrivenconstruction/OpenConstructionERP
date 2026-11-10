@@ -182,7 +182,7 @@ function SectionHeader({
   return (
     <div className="mt-1 flex items-center gap-1.5 px-2 pt-2 pb-1">
       <Icon size={12} className="text-content-tertiary" strokeWidth={2} />
-      <h3 className="text-2xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+      <h3 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
         {label}
       </h3>
       <span className="ml-auto text-2xs font-medium tabular-nums text-content-tertiary">
@@ -226,7 +226,7 @@ function Row({
         'group flex w-full items-start gap-2 rounded-md border px-2 py-2 text-left',
         'transition-colors',
         focused
-          ? 'border-emerald-400/60 bg-emerald-50 dark:bg-emerald-950/30'
+          ? 'border-emerald-400/60 bg-semantic-success-bg dark:bg-emerald-950/30'
           : 'border-transparent hover:border-border hover:bg-surface-secondary',
         disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
@@ -374,7 +374,7 @@ export function OverlaySidebar({
         // can be open simultaneously since the canvas is tall enough for a
         // 60vh top panel + a 50vh bottom panel.
         'absolute bottom-3 left-3 z-20 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         // Hide on phone-width so it doesn't cover the whole map; users
         // get the collapsed pill instead (rendered when toggled).
@@ -386,7 +386,7 @@ export function OverlaySidebar({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('geo_hub.overlay_sidebar.title', {
               defaultValue: 'Layers on this project',
             })}

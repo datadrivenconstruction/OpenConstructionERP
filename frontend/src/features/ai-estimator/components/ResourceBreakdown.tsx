@@ -92,7 +92,7 @@ export function ResourceBreakdown({
               <td className="px-2.5 py-1.5">
                 <span className="font-medium text-content-primary">{r.name}</span>
                 {r.code && (
-                  <span className="ml-1.5 font-mono text-[10px] text-content-tertiary">
+                  <span className="ml-1.5 font-mono text-2xs text-content-tertiary">
                     {r.code}
                   </span>
                 )}
@@ -100,7 +100,7 @@ export function ResourceBreakdown({
               <td className="px-2.5 py-1.5">
                 <span
                   className={clsx(
-                    'inline-block rounded px-1.5 py-0.5 text-[10px] font-medium capitalize',
+                    'inline-block rounded px-1.5 py-0.5 text-2xs font-medium capitalize',
                     resourceTypeBadge(r.type),
                   )}
                 >

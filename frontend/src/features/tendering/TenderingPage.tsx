@@ -1091,15 +1091,15 @@ export function BidComparisonTable({
           <tfoot>
             <tr className="border-t-2 border-border bg-surface-secondary/30">
               <td
-                className={`px-3 py-3 font-bold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
+                className={`px-3 py-3 font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
               >
                 {t('tendering.total', 'TOTAL')}
               </td>
-              <td className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary">
+              <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
                 {formatCurrency(comparison.budget_total, currency)}
               </td>
               {showCarbon && (
-                <td className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary">
+                <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
                   {carbon ? kgToTonnes(carbon.total_kg, getNumberLocale()) : '-'}
                 </td>
               )}
@@ -1108,7 +1108,7 @@ export function BidComparisonTable({
                   key={`total-${bt.bid_id}`}
                   className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
                 >
-                  <span className="font-bold text-content-primary">
+                  <span className="font-semibold text-content-primary">
                     {formatCurrency(bt.total, bt.currency)}
                   </span>
                   <span className="ml-1.5">

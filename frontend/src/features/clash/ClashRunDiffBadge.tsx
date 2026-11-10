@@ -97,7 +97,7 @@ export function ClashRunDiffBadge({
         defaultValue: 'Clashes first seen in this run',
       }),
       icon: <PlusCircle size={13} />,
-      tone: 'bg-rose-50 text-rose-700 ring-rose-200',
+      tone: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30',
     },
     {
       key: 'reopened',
@@ -115,7 +115,7 @@ export function ClashRunDiffBadge({
         defaultValue: 'Open clashes carried over from the previous run',
       }),
       icon: <CircleDot size={13} />,
-      tone: 'bg-amber-50 text-amber-700 ring-amber-200',
+      tone: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30',
     },
     {
       key: 'resolved',
@@ -124,7 +124,7 @@ export function ClashRunDiffBadge({
         defaultValue: 'Clashes from the previous run that are gone now',
       }),
       icon: <CheckCircle2 size={13} />,
-      tone: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+      tone: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30',
     },
     {
       key: 'ignored',

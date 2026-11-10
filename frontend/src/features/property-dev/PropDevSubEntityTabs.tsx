@@ -1506,7 +1506,7 @@ export function BrokersTab() {
                         className={clsx(
                           'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
                           b.active
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-semantic-success-bg text-semantic-success'
                             : 'bg-slate-200 text-slate-700',
                         )}
                         title={t('propdev.broker.toggle_active', {
@@ -2677,7 +2677,7 @@ function PriceMatrixFormModal({
               <button
                 type="button"
                 onClick={() => removeRule(i)}
-                className="col-span-1 text-content-tertiary hover:text-red-600"
+                className="col-span-1 text-content-tertiary hover:text-semantic-error"
                 aria-label={t('common.remove', { defaultValue: 'Remove' })}
               >
                 <Trash2 size={14} />
@@ -2768,7 +2768,7 @@ function PriceMatrixPreviewModal({
             {t('common.loading', { defaultValue: 'Loading…' })}
           </p>
         ) : previewQ.isError ? (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-semantic-error">
             {getErrorMessage(previewQ.error)}
           </p>
         ) : previewQ.data ? (
@@ -3091,7 +3091,7 @@ function EscrowAccountCard({
           <div className="text-content-tertiary">
             {t('propdev.escrow.balance', { defaultValue: 'Balance' })}
           </div>
-          <div className="font-bold tabular-nums text-oe-blue">
+          <div className="font-semibold tabular-nums text-oe-blue">
             {balanceQ.data ? fmtFixed(toNumber(balanceQ.data.balance), 2) : '—'}
           </div>
         </div>
@@ -3105,7 +3105,7 @@ function EscrowAccountCard({
             defaultValue: '{{count}} transactions',
           })}
           {balanceQ.data && balanceQ.data.unreconciled_count > 0 && (
-            <span className="text-amber-600 ml-2">
+            <span className="text-semantic-warning ml-2">
               ·{' '}
               {t('propdev.escrow.unreconciled_count', {
                 count: balanceQ.data.unreconciled_count,

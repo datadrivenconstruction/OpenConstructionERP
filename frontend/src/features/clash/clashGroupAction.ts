@@ -55,11 +55,11 @@ export function confidenceLabel(score: number): string {
 export function confidenceChipClass(score: number): string {
   switch (confidenceBand(score)) {
     case 'high':
-      return 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200';
+      return 'bg-semantic-success-bg text-semantic-success ring-1 ring-semantic-success/30';
     case 'medium':
-      return 'bg-amber-50 text-amber-700 ring-1 ring-amber-200';
+      return 'bg-semantic-warning-bg text-semantic-warning ring-1 ring-semantic-warning/30';
     default:
-      return 'bg-rose-50 text-rose-700 ring-1 ring-rose-200';
+      return 'bg-semantic-error-bg text-semantic-error ring-1 ring-semantic-error/30';
   }
 }
 

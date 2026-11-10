@@ -87,7 +87,7 @@ export function ClarificationCard({
 
       {published ? (
         <div className="mt-2 rounded-lg bg-surface-secondary px-3 py-2" data-testid="clarification-published-view">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+          <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
             {t('tendering.clarification.answer', { defaultValue: 'Answer' })}
           </p>
           <p className="whitespace-pre-line text-sm text-content-primary">{item.answer}</p>

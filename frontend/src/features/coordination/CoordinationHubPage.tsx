@@ -110,7 +110,7 @@ function GlassPanel({
   return (
     <section
       data-testid={testId}
-      className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04] dark:border-white/5 dark:bg-slate-900/40 dark:shadow-slate-950/30"
+      className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04] dark:shadow-slate-950/30"
     >
       <div
         aria-hidden
@@ -119,7 +119,7 @@ function GlassPanel({
       <div className="relative flex items-start justify-between gap-3 border-b border-white/40 px-5 py-4 dark:border-white/5">
         <div className="flex items-start gap-3">
           {icon ? (
-            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-content-secondary dark:bg-slate-800">
+            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-surface-secondary text-content-secondary">
               {icon}
             </div>
           ) : null}
@@ -204,7 +204,7 @@ function QuickActionTile({
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/40 bg-white/40 px-3.5 py-3 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:bg-white/70 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-900/40 dark:hover:bg-slate-800/60"
+      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/40 bg-white/40 px-3.5 py-3 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:bg-white/70 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue transition-colors group-hover:bg-oe-blue group-hover:text-white">
         {icon}

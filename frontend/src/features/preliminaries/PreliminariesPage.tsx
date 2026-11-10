@@ -390,7 +390,7 @@ function SummaryStrip({
           <div
             className={
               'mt-1 tabular-nums ' +
-              (tile.strong ? 'text-2xl font-bold text-content-primary' : 'text-lg font-semibold text-content-secondary')
+              (tile.strong ? 'text-2xl font-semibold text-content-primary' : 'text-lg font-semibold text-content-secondary')
             }
           >
             {tile.value}
@@ -484,7 +484,7 @@ function StarterChecklistBar({
   return (
     <Card padding="md">
       <div className="mb-2 flex items-center gap-2">
-        <Lightbulb size={16} className="shrink-0 text-amber-500" />
+        <Lightbulb size={16} className="shrink-0 text-semantic-warning" />
         <h2 className="text-sm font-semibold text-content-primary">
           {t('preliminaries.checklist_title', { defaultValue: 'Common preliminaries' })}
         </h2>
@@ -655,7 +655,7 @@ function ItemsTable({
                     <button
                       type="button"
                       onClick={() => onDelete(row.id)}
-                      className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                      className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                       aria-label={t('preliminaries.delete_item', { defaultValue: 'Delete item' })}
                     >
                       <Trash2 size={14} />

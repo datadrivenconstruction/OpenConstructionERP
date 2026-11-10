@@ -117,11 +117,11 @@ export function QualityScoreRing({
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className="transition-all duration-700 ease-out"
+            className="transition-all duration-500 ease-out"
           />
         </svg>
         <div className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center">
-          <span className="text-xs font-bold tabular-nums" style={{ color }}>
+          <span className="text-xs font-semibold tabular-nums" style={{ color }}>
             {score}
           </span>
         </div>
@@ -534,8 +534,8 @@ export function ExportWarningDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="w-96 rounded-xl border border-border bg-surface-elevated p-5 shadow-2xl animate-fade-in">
         <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-            <ShieldCheck size={20} className="text-amber-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-warning-bg">
+            <ShieldCheck size={20} className="text-semantic-warning" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-content-primary">
@@ -564,7 +564,7 @@ export function ExportWarningDialog({
           </button>
           <button
             onClick={() => onConfirm(exportWarning.format)}
-            className="flex h-8 items-center gap-1.5 rounded-lg bg-amber-500 px-4 text-xs font-medium text-white hover:bg-amber-600 transition-colors"
+            className="flex h-8 items-center gap-1.5 rounded-lg bg-semantic-warning px-4 text-xs font-medium text-white hover:bg-semantic-warning transition-colors"
           >
             <Download size={13} />
             {t('boq.export_anyway', { defaultValue: 'Export Anyway' })}

@@ -386,7 +386,7 @@ export default function ClashProfileManager() {
                   {p.description}
                 </p>
               )}
-              <div className="flex items-center gap-3 mt-2 text-[11px] text-content-tertiary">
+              <div className="flex items-center gap-3 mt-2 text-2xs text-content-tertiary">
                 <span>
                   {t('clash.profiles.toleranceShort', {
                     defaultValue: 'tol {{mm}} mm',

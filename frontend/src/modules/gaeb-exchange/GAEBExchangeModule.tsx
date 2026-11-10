@@ -613,7 +613,7 @@ export default function GAEBExchangeModule() {
                   </button>
                 </div>
                 {parsedPositions && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-semantic-success">
                     <CheckCircle2 size={14} />
                     {parsedPositions.length} {t('gaeb.positions_found', { defaultValue: 'positions found' })}
                     {/* Phase read from the file's DP element - the old price
@@ -630,7 +630,7 @@ export default function GAEBExchangeModule() {
                   </div>
                 )}
                 {parseError && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-rose-600">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-semantic-error">
                     <AlertTriangle size={14} />
                     {parseError}
                   </div>
@@ -751,12 +751,12 @@ export default function GAEBExchangeModule() {
 
           {/* Import result */}
           {importResult && (
-            <div className={`rounded-xl border p-4 ${importResult.errors.length > 0 ? 'border-amber-300 bg-amber-50/50 dark:bg-amber-950/20' : 'border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20'}`}>
+            <div className={`rounded-xl border p-4 ${importResult.errors.length > 0 ? 'border-semantic-warning/30 bg-semantic-warning/10' : 'border-semantic-success/30 bg-semantic-success/10'}`}>
               <div className="flex items-center gap-2 text-sm font-medium">
                 {importResult.errors.length > 0 ? (
-                  <AlertTriangle size={16} className="text-amber-600" />
+                  <AlertTriangle size={16} className="text-semantic-warning" />
                 ) : (
-                  <CheckCircle2 size={16} className="text-emerald-600" />
+                  <CheckCircle2 size={16} className="text-semantic-success" />
                 )}
                 <span className="text-content-primary">
                   {importResult.imported} {t('gaeb.positions_imported', { defaultValue: 'positions imported' })}
@@ -875,15 +875,15 @@ export default function GAEBExchangeModule() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="rounded-lg bg-surface-secondary/50 p-3 text-center">
                   <div className="text-2xs text-content-tertiary uppercase">{t('gaeb.positions', { defaultValue: 'Positions' })}</div>
-                  <div className="text-lg font-bold text-content-primary">{exportablePositions.filter((p) => !p.isSection).length}</div>
+                  <div className="text-lg font-semibold text-content-primary">{exportablePositions.filter((p) => !p.isSection).length}</div>
                 </div>
                 <div className="rounded-lg bg-surface-secondary/50 p-3 text-center">
                   <div className="text-2xs text-content-tertiary uppercase">{t('gaeb.sections', { defaultValue: 'Sections' })}</div>
-                  <div className="text-lg font-bold text-content-primary">{exportablePositions.filter((p) => p.isSection).length}</div>
+                  <div className="text-lg font-semibold text-content-primary">{exportablePositions.filter((p) => p.isSection).length}</div>
                 </div>
                 <div className="rounded-lg bg-surface-secondary/50 p-3 text-center">
                   <div className="text-2xs text-content-tertiary uppercase">{t('gaeb.format_label', { defaultValue: 'Format' })}</div>
-                  <div className="text-lg font-bold text-content-primary">{exportFormat}</div>
+                  <div className="text-lg font-semibold text-content-primary">{exportFormat}</div>
                 </div>
                 <div className="rounded-lg bg-surface-secondary/50 p-3 text-center" data-testid="gaeb-prices-tile">
                   <div className="text-2xs text-content-tertiary uppercase">{t('gaeb.prices', { defaultValue: 'Prices' })}</div>
@@ -893,7 +893,7 @@ export default function GAEBExchangeModule() {
                       no way back - so the partial state names how many rates
                       are still missing instead of rounding up to Yes. */}
                   <div
-                    className={`text-lg font-bold ${priceState === 'partial' ? 'text-amber-600 dark:text-amber-400' : 'text-content-primary'}`}
+                    className={`text-lg font-semibold ${priceState === 'partial' ? 'text-semantic-warning' : 'text-content-primary'}`}
                   >
                     {priceState === 'all' && t('common.yes', { defaultValue: 'Yes' })}
                     {/* `boq.partial` is the platform's existing "some but not
@@ -902,7 +902,7 @@ export default function GAEBExchangeModule() {
                     {priceState === 'none' && t('common.no', { defaultValue: 'No' })}
                   </div>
                   {priceState === 'partial' && (
-                    <div className="text-2xs text-amber-600 dark:text-amber-400">
+                    <div className="text-2xs text-semantic-warning">
                       {t('gaeb.prices_missing', {
                         count: coverage.missing,
                         defaultValue: '{{count}} line without a rate',

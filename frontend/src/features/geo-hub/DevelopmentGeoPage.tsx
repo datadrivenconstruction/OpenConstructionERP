@@ -205,7 +205,7 @@ export function DevelopmentGeoPage() {
               })}
             </h1>
             {development.data && (
-              <p className="text-2xs uppercase tracking-[0.14em] text-content-tertiary">
+              <p className="text-2xs uppercase tracking-wider text-content-tertiary">
                 {development.data.name}
               </p>
             )}
@@ -226,7 +226,7 @@ export function DevelopmentGeoPage() {
         {error && (
           <div className="absolute inset-0 z-30 flex items-center justify-center p-6">
             {isStaleBackend ? (
-              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-amber-300/40 bg-amber-950/60 px-4 py-3 text-sm text-amber-100 shadow-md backdrop-blur-md">
+              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-semantic-warning/30 bg-amber-950/60 px-4 py-3 text-sm text-amber-100 shadow-md backdrop-blur-md">
                 <ServerCrash size={16} className="mt-0.5 shrink-0 text-amber-300" />
                 <span>
                   {t('geo_hub.project_stale_backend', {
@@ -236,7 +236,7 @@ export function DevelopmentGeoPage() {
                 </span>
               </div>
             ) : (
-              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-red-300/40 bg-red-950/60 px-4 py-3 text-sm text-red-100 shadow-md backdrop-blur-md">
+              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-semantic-error/30 bg-red-950/60 px-4 py-3 text-sm text-red-100 shadow-md backdrop-blur-md">
                 <AlertTriangle size={16} className="mt-0.5 shrink-0 text-red-300" />
                 <span>
                   {t('geo_hub.load_failed', {

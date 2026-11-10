@@ -290,7 +290,7 @@ export function BatchActionBar({
               type="button"
               onClick={() => setFactorDialog({ kind: 'rate', value: '1.10' })}
               aria-label={t('boq.batch_rate_factor', { defaultValue: 'Multiply rate by factor' })}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-warning/10 px-3 py-1.5 text-xs font-medium text-semantic-warning hover:bg-semantic-warning/20 transition-colors"
             >
               <Percent size={14} />
               {t('boq.batch_rate_factor', { defaultValue: 'Multiply rate' })}
@@ -303,7 +303,7 @@ export function BatchActionBar({
               type="button"
               onClick={() => setFactorDialog({ kind: 'quantity', value: '1.00' })}
               aria-label={t('boq.batch_qty_factor', { defaultValue: 'Multiply quantity by factor' })}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-success/10 px-3 py-1.5 text-xs font-medium text-semantic-success hover:bg-semantic-success/20 transition-colors"
             >
               <Hash size={14} />
               {t('boq.batch_qty_factor', { defaultValue: 'Multiply qty' })}
@@ -329,7 +329,7 @@ export function BatchActionBar({
               type="button"
               onClick={() => setFindReplaceDialog({ find: '', replace: '', caseSensitive: false })}
               aria-label={t('boq.batch_find_replace', { defaultValue: 'Find and replace' })}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-info/10 px-3 py-1.5 text-xs font-medium text-semantic-info hover:bg-semantic-info/20 transition-colors"
             >
               <Replace size={14} />
               {t('boq.batch_find_replace_short', { defaultValue: 'Find & replace' })}

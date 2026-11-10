@@ -68,7 +68,7 @@ export function NlPatternHints({ patterns, onPick }: NlPatternHintsProps) {
                   <button
                     type="button"
                     onClick={() => onPick?.(example)}
-                    className="mt-0.5 block w-full text-left font-mono text-[11px] text-content-tertiary hover:text-oe-blue"
+                    className="mt-0.5 block w-full text-left font-mono text-2xs text-content-tertiary hover:text-oe-blue"
                   >
                     {example}
                   </button>

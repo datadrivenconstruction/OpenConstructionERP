@@ -367,7 +367,7 @@ export default function PropertySearchPanel({
       <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
         {t('bim.property_search_title', { defaultValue: 'Property search' })}
       </h3>
-      <p className="text-[10px] text-content-tertiary">
+      <p className="text-2xs text-content-tertiary">
         {t('bim.property_search_hint', {
           defaultValue:
             'Filter the full DDC dataframe (1000+ columns). Matches isolate in the 3D view.',
@@ -381,14 +381,14 @@ export default function PropertySearchPanel({
           model before they hit the backend). */}
       {hasChildPicker && (
         <>
-          <label className="block text-[10px] font-medium text-content-secondary">
+          <label className="block text-2xs font-medium text-content-secondary">
             {t('bim.property_search_target', { defaultValue: 'Target model' })}
           </label>
           <select
             value={targetModelId}
             onChange={(e) => setTargetModelId(e.target.value)}
             disabled={loading}
-            className="w-full min-w-0 px-2 py-1 text-[11px] rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+            className="w-full min-w-0 px-2 py-1 text-2xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
             data-testid="property-search-target"
           >
             {childModelIds!.map((id) => (
@@ -401,7 +401,7 @@ export default function PropertySearchPanel({
       )}
 
       {/* Property picker: type to narrow a list that runs to 1000+ entries. */}
-      <span className="block text-[10px] font-medium text-content-secondary">
+      <span className="block text-2xs font-medium text-content-secondary">
         {t('bim.property_search_column', { defaultValue: 'Column' })}
       </span>
       <SearchCombobox
@@ -433,7 +433,7 @@ export default function PropertySearchPanel({
           Surface that explicitly so the user knows what to do next. */}
       {schema.length === 0 && !error && (
         <p
-          className="text-[10px] text-content-tertiary leading-tight"
+          className="text-2xs text-content-tertiary leading-tight"
           data-testid="property-search-empty-hint"
         >
           {t('bim.property_search_no_schema_hint', {
@@ -450,7 +450,7 @@ export default function PropertySearchPanel({
           onChange={(e) => setOp(e.target.value as SearchOp)}
           disabled={loading}
           aria-label={t('bim.property_search_operator', { defaultValue: 'Operator' })}
-          className="shrink-0 px-2 py-1 text-[11px] rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="shrink-0 px-2 py-1 text-2xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
           data-testid="property-search-op"
         >
           {OPS.map((o) => (
@@ -497,7 +497,7 @@ export default function PropertySearchPanel({
           type="button"
           onClick={handleSearch}
           disabled={!canSearch}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue px-2 py-1 text-[11px] font-medium text-white hover:bg-oe-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue px-2 py-1 text-2xs font-medium text-white hover:bg-oe-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="property-search-submit"
         >
           {loading ? <Loader2 size={11} className="animate-spin" /> : <Search size={11} />}
@@ -507,7 +507,7 @@ export default function PropertySearchPanel({
           <button
             type="button"
             onClick={handleClear}
-            className="shrink-0 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-secondary hover:bg-surface-tertiary"
+            className="shrink-0 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-secondary hover:bg-surface-tertiary"
             data-testid="property-search-clear"
           >
             <X size={11} />
@@ -520,7 +520,7 @@ export default function PropertySearchPanel({
         <button
           type="button"
           onClick={() => onCreateRule(column, value.trim())}
-          className="inline-flex items-center justify-center gap-1 rounded-md border border-oe-blue/40 px-2 py-1 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/5"
+          className="inline-flex items-center justify-center gap-1 rounded-md border border-oe-blue/40 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/5"
           data-testid="property-search-create-rule"
           title={t('bim.property_search_create_rule_hint', {
             defaultValue: 'Open a quantity rule with this property and value as its filter, then link it to a BOQ position.',
@@ -532,7 +532,7 @@ export default function PropertySearchPanel({
 
       {outcome?.kind === 'hits' && !error && (
         <div role="status" className="flex flex-col gap-0.5">
-          <p className="text-[10px] text-content-secondary" data-testid="property-search-result-count">
+          <p className="text-2xs text-content-secondary" data-testid="property-search-result-count">
             {t('bim.property_search_results', {
               defaultValue_one: '{{count}} matching element',
               defaultValue_other: '{{count}} matching elements',
@@ -540,7 +540,7 @@ export default function PropertySearchPanel({
             })}
           </p>
           {outcome.unmatched > 0 && (
-            <p className="text-[10px] text-amber-700 dark:text-amber-400" data-testid="property-search-unmatched">
+            <p className="text-2xs text-amber-700 dark:text-amber-400" data-testid="property-search-unmatched">
               {t('bim.property_search_unmatched', {
                 defaultValue_one: '{{count}} more match has no element in the 3D view.',
                 defaultValue_other: '{{count}} more matches have no element in the 3D view.',
@@ -549,7 +549,7 @@ export default function PropertySearchPanel({
             </p>
           )}
           {outcome.truncated && (
-            <p className="text-[10px] text-content-tertiary" data-testid="property-search-truncated">
+            <p className="text-2xs text-content-tertiary" data-testid="property-search-truncated">
               {t('bim.property_search_truncated', {
                 defaultValue: 'Only the first {{limit}} matches are shown. Narrow the search to see the rest.',
                 limit: fmtNumber(QUERY_LIMIT, 0),
@@ -559,14 +559,14 @@ export default function PropertySearchPanel({
         </div>
       )}
       {outcome?.kind === 'none' && !error && (
-        <p className="text-[10px] text-content-secondary" role="status" data-testid="property-search-no-match">
+        <p className="text-2xs text-content-secondary" role="status" data-testid="property-search-no-match">
           {t('bim.property_search_no_match', {
             defaultValue: 'No element matches this search. The 3D view is unchanged.',
           })}
         </p>
       )}
       {outcome?.kind === 'unplaced' && !error && (
-        <p className="text-[10px] text-amber-700 dark:text-amber-400" role="status" data-testid="property-search-unplaced">
+        <p className="text-2xs text-amber-700 dark:text-amber-400" role="status" data-testid="property-search-unplaced">
           {t('bim.property_search_unplaced', {
             defaultValue_one: '{{count}} element matches, but none of them is in the 3D view. The view is unchanged.',
             defaultValue_other:
@@ -577,7 +577,7 @@ export default function PropertySearchPanel({
       )}
       {showCappedNotice && (
         <p
-          className="text-[10px] text-amber-700 dark:text-amber-400"
+          className="text-2xs text-amber-700 dark:text-amber-400"
           role="status"
           data-testid="property-search-capped-properties"
         >
@@ -588,13 +588,13 @@ export default function PropertySearchPanel({
         </p>
       )}
       {readAs !== null && outcome !== null && !error && (
-        <p className="text-[10px] text-content-tertiary" data-testid="property-search-read-as">
+        <p className="text-2xs text-content-tertiary" data-testid="property-search-read-as">
           {t('bim.property_search_read_as', { defaultValue: 'Read as {{number}}', number: readAs })}
         </p>
       )}
       {error && (
         <p
-          className="text-[10px] text-rose-600 dark:text-rose-400"
+          className="text-2xs text-rose-600 dark:text-rose-400"
           role="alert"
           data-testid="property-search-error"
         >

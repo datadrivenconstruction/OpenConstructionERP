@@ -240,7 +240,7 @@ export function AIChatPanel({
         </div>
         <button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={18} />

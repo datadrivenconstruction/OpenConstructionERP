@@ -125,7 +125,7 @@ export function YamlEditor({
             ref={gutterRef}
             aria-hidden="true"
             data-testid={`${testId}-gutter`}
-            className="select-none overflow-hidden bg-surface-secondary px-2 py-2 text-right font-mono text-[11px] leading-5 text-content-tertiary"
+            className="select-none overflow-hidden bg-surface-secondary px-2 py-2 text-right font-mono text-2xs leading-5 text-content-tertiary"
             style={{ minWidth: '2.5rem' }}
           >
             {lineNumberLines.map((n) => (
@@ -150,14 +150,14 @@ export function YamlEditor({
           aria-label={t('bim_requirements.yaml_editor_label', { defaultValue: 'YAML rule pack editor' })}
           aria-readonly={readonly}
           className={clsx(
-            'flex-1 resize-y bg-transparent px-3 py-2 font-mono text-[12px] leading-5 text-content-primary outline-none',
+            'flex-1 resize-y bg-transparent px-3 py-2 font-mono text-xs leading-5 text-content-primary outline-none',
             readonly && 'cursor-default text-content-secondary',
           )}
         />
         {parsed && !error && (
           <span
             data-testid={`${testId}-parsed-badge`}
-            className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700"
+            className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-medium text-semantic-success"
           >
             <CheckCircle2 size={10} />
             parsed
@@ -168,7 +168,7 @@ export function YamlEditor({
         <div
           data-testid={`${testId}-error`}
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700"
+          className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-xs text-semantic-error"
         >
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
           <span className="whitespace-pre-wrap">{error}</span>

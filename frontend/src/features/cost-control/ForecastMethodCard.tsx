@@ -60,7 +60,7 @@ function FindingList({
               onClick={() => onOpen(f)}
               className="flex w-full items-start gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-surface-secondary/60"
             >
-              <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+              <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm text-content-primary">{f.message}</span>
                 <span className="block text-xs text-content-tertiary">{f.suggestion}</span>

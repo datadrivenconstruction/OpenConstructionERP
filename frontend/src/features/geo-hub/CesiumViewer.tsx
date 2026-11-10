@@ -2085,7 +2085,7 @@ export function CesiumViewer({
         <summary
           className={[
             'inline-flex cursor-pointer list-none items-center gap-1 rounded',
-            'bg-black/40 px-1.5 py-0.5 text-[10px] leading-tight text-white/80',
+            'bg-black/40 px-1.5 py-0.5 text-2xs leading-tight text-white/80',
             'backdrop-blur-sm hover:text-white',
             'marker:hidden [&::-webkit-details-marker]:hidden',
           ].join(' ')}
@@ -2103,11 +2103,11 @@ export function CesiumViewer({
         <div
           className={[
             'absolute bottom-full left-0 mb-1 w-72 rounded-md border border-white/15',
-            'bg-slate-900/95 px-3 py-2 text-[11px] leading-relaxed text-slate-100',
+            'bg-slate-900/95 px-3 py-2 text-2xs leading-relaxed text-slate-100',
             'shadow-lg backdrop-blur-md',
           ].join(' ')}
         >
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300/90">
+          <div className="mb-1 text-2xs font-semibold uppercase tracking-wide text-emerald-300/90">
             {t('geo_hub.licenses_heading', {
               defaultValue: 'Open Data & Open Source',
             })}
@@ -2190,7 +2190,7 @@ export function CesiumViewer({
               <span className="text-slate-400">Apache 2.0 · autocomplete geocoder</span>
             </li>
           </ul>
-          <div className="mt-2 text-[10px] text-slate-400">
+          <div className="mt-2 text-2xs text-slate-400">
             {t('geo_hub.licenses_footer', {
               defaultValue:
                 'No vendor lock-in. Self-host the entire stack. Cesium Ion + commercial imagery providers are intentionally not used.',
@@ -2234,7 +2234,7 @@ export function CesiumViewer({
               className="pointer-events-none absolute -inset-px rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 opacity-60 blur-2xl ring-1 ring-amber-400/20"
             />
             <div className="relative">
-              <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/30">
+              <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-warning/15 text-amber-300 ring-1 ring-amber-400/30">
                 <Download size={18} strokeWidth={2} />
               </div>
               <h3 className="text-base font-semibold text-white">
@@ -2266,7 +2266,7 @@ export function CesiumViewer({
               className="pointer-events-none absolute -inset-px rounded-xl bg-gradient-to-br from-red-500/30 to-rose-500/20 opacity-60 blur-2xl ring-1 ring-red-400/20"
             />
             <div className="relative">
-              <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-red-500/15 text-red-300 ring-1 ring-red-400/30">
+              <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-error/15 text-red-300 ring-1 ring-red-400/30">
                 <AlertTriangle size={18} strokeWidth={2} />
               </div>
               <h3 className="text-base font-semibold text-white">

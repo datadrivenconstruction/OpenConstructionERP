@@ -327,7 +327,7 @@ export default function SelectionSetsPanel({
         className={`flex flex-col gap-2 p-3 ${className ?? ''}`}
         data-testid="bim-selection-sets-panel"
       >
-        <p className="text-[11px] text-content-tertiary italic">
+        <p className="text-2xs text-content-tertiary italic">
           {t('bim.selection_sets_no_model', {
             defaultValue: 'Load a BIM model to manage selection sets.',
           })}
@@ -371,7 +371,7 @@ export default function SelectionSetsPanel({
               autoFocus
               maxLength={60}
               data-testid={`bim-selection-set-rename-input-${set.id}`}
-              className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[11px]"
+              className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
             />
           ) : (
             <button
@@ -380,13 +380,13 @@ export default function SelectionSetsPanel({
               title={t('bim.selection_sets_rename_hint', {
                 defaultValue: 'Double-click to rename',
               })}
-              className="flex-1 min-w-0 text-left text-[11px] font-medium text-content-primary truncate"
+              className="flex-1 min-w-0 text-left text-2xs font-medium text-content-primary truncate"
               data-testid={`bim-selection-set-name-${set.id}`}
             >
               {set.name}
             </button>
           )}
-          <span className="text-[10px] text-content-tertiary tabular-nums shrink-0">
+          <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
             {set.elementIds.length}
           </span>
           {/* Move to folder (B4) */}
@@ -427,7 +427,7 @@ export default function SelectionSetsPanel({
                 defaultValue: 'Folder (optional)',
               })}
               data-testid={`bim-selection-set-folder-edit-input-${set.id}`}
-              className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[11px]"
+              className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
             />
             <button
               type="button"
@@ -470,7 +470,7 @@ export default function SelectionSetsPanel({
               aria-label={t('bim.selection_sets_clear_color', {
                 defaultValue: 'Clear colour',
               })}
-              className="h-4 w-4 rounded-full border border-border-light bg-surface-secondary text-[8px] text-content-tertiary flex items-center justify-center"
+              className="h-4 w-4 rounded-full border border-border-light bg-surface-secondary text-2xs text-content-tertiary flex items-center justify-center"
             >
               <X size={8} />
             </button>
@@ -487,7 +487,7 @@ export default function SelectionSetsPanel({
               defaultValue: 'Restore selection',
             })}
             data-testid={`bim-selection-set-restore-${set.id}`}
-            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-2xs text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Crosshair size={10} />
             {t('bim.selection_sets_restore_short', {
@@ -502,7 +502,7 @@ export default function SelectionSetsPanel({
               defaultValue: 'Add to current selection',
             })}
             data-testid={`bim-selection-set-add-${set.id}`}
-            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-2xs text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={10} />
             {t('bim.selection_sets_add_short', { defaultValue: 'Add' })}
@@ -515,7 +515,7 @@ export default function SelectionSetsPanel({
               defaultValue: 'Replace with current selection',
             })}
             data-testid={`bim-selection-set-update-${set.id}`}
-            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded text-2xs text-content-secondary hover:bg-surface-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw size={10} />
             {t('bim.selection_sets_update_short', {
@@ -529,14 +529,14 @@ export default function SelectionSetsPanel({
                 type="button"
                 onClick={() => handleDeleteConfirm(set.id)}
                 data-testid={`bim-selection-set-delete-confirm-${set.id}`}
-                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] text-white bg-rose-600 hover:bg-rose-700"
+                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-2xs text-white bg-rose-600 hover:bg-rose-700"
               >
                 {t('common.confirm', { defaultValue: 'Confirm' })}
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingDeleteId(null)}
-                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] text-content-tertiary hover:bg-surface-tertiary"
+                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-2xs text-content-tertiary hover:bg-surface-tertiary"
               >
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </button>
@@ -574,7 +574,7 @@ export default function SelectionSetsPanel({
               onClick={handleOpenCreate}
               disabled={!canCreate}
               data-testid="bim-selection-set-save-new"
-              className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-medium border transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium border transition-colors ${
                 canCreate
                   ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/40 hover:bg-oe-blue/20'
                   : 'bg-surface-secondary text-content-tertiary border-border-light cursor-not-allowed'
@@ -586,14 +586,14 @@ export default function SelectionSetsPanel({
               })}
             </button>
             {currentSelectionCount === 0 ? (
-              <p className="text-[10px] text-content-tertiary">
+              <p className="text-2xs text-content-tertiary">
                 {t('bim.selection_sets_hint_empty', {
                   defaultValue:
                     "Select elements in the viewer, then click here to save them as a set.",
                 })}
               </p>
             ) : (
-              <p className="text-[10px] text-content-tertiary">
+              <p className="text-2xs text-content-tertiary">
                 {t('bim.selection_sets_hint_active', {
                   defaultValue: '{{count}} element(s) currently selected.',
                   count: currentSelectionCount,
@@ -618,7 +618,7 @@ export default function SelectionSetsPanel({
                   defaultValue: 'e.g. Level 3 Columns',
                 })}
                 data-testid="bim-selection-set-name-input"
-                className="flex-1 min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-[11px] focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="flex-1 min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
               />
               <button
                 type="button"
@@ -653,12 +653,12 @@ export default function SelectionSetsPanel({
                 defaultValue: 'Folder (optional)',
               })}
               data-testid="bim-selection-set-folder-input"
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-[11px] focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
             />
             {createError ? (
-              <p className="text-[10px] text-rose-600">{createError}</p>
+              <p className="text-2xs text-rose-600">{createError}</p>
             ) : (
-              <p className="text-[10px] text-content-tertiary">
+              <p className="text-2xs text-content-tertiary">
                 {t('bim.selection_sets_create_hint', {
                   defaultValue:
                     '{{count}} element(s) will be saved into this set.',
@@ -684,7 +684,7 @@ export default function SelectionSetsPanel({
       >
         {sets.length === 0 ? (
           <p
-            className="text-[11px] text-content-tertiary italic"
+            className="text-2xs text-content-tertiary italic"
             data-testid="bim-selection-sets-empty"
           >
             {t('bim.selection_sets_empty', {
@@ -718,7 +718,7 @@ export default function SelectionSetsPanel({
                   type="button"
                   onClick={() => toggleFolder(folderName)}
                   data-testid={`bim-selection-set-folder-toggle-${folderName}`}
-                  className="flex items-center gap-1 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-content-secondary hover:bg-surface-tertiary rounded"
+                  className="flex items-center gap-1 px-1 py-0.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary hover:bg-surface-tertiary rounded"
                 >
                   {isCollapsed ? (
                     <ChevronRight size={11} />
@@ -747,7 +747,7 @@ export default function SelectionSetsPanel({
       {/* Footer help — hidden when no sets exist (empty-state already
           covers it). */}
       {sets.length > 0 && (
-        <p className="text-[10px] text-content-tertiary">
+        <p className="text-2xs text-content-tertiary">
           <PlusCircle size={10} className="inline mr-1" />
           {t('bim.selection_sets_footer_hint', {
             defaultValue:

@@ -273,10 +273,10 @@ export function ViewerToolbar({
 
       {active === 'section' && (
         <div
-          className="flex flex-col gap-1 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-[11px] text-content-secondary min-w-[180px]"
+          className="flex flex-col gap-1 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-2xs text-content-secondary min-w-[180px]"
           data-testid="viewer-tool-section-panel"
         >
-          <div className="flex items-center gap-1.5 px-1 pb-1 text-[10px] uppercase tracking-wide text-content-tertiary border-b border-border-light/60">
+          <div className="flex items-center gap-1.5 px-1 pb-1 text-2xs uppercase tracking-wide text-content-tertiary border-b border-border-light/60">
             <Crop size={10} />
             {t('viewerTools.section_box', { defaultValue: 'Section box' })}
           </div>
@@ -307,7 +307,7 @@ export function ViewerToolbar({
           </button>
           {noGeometryHint && (
             <p
-              className="mt-0.5 px-1 text-[10px] text-amber-600 leading-tight"
+              className="mt-0.5 px-1 text-2xs text-amber-600 leading-tight"
               data-testid="viewer-section-no-geometry"
               role="status"
             >
@@ -317,7 +317,7 @@ export function ViewerToolbar({
             </p>
           )}
           <SectionOffsetsReadout sectionBox={sectionBox} />
-          <p className="mt-1 px-1 text-[10px] text-content-tertiary leading-tight">
+          <p className="mt-1 px-1 text-2xs text-content-tertiary leading-tight">
             {t('viewerTools.section_hint', {
               defaultValue:
                 'Drag handles to slice · Reset to disable · Esc to exit',
@@ -328,10 +328,10 @@ export function ViewerToolbar({
 
       {active === 'walk' && (
         <div
-          className="flex flex-col gap-2 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-[11px] text-content-secondary min-w-[220px]"
+          className="flex flex-col gap-2 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-2xs text-content-secondary min-w-[220px]"
           data-testid="viewer-tool-walk-panel"
         >
-          <div className="flex items-center gap-1.5 px-1 text-[10px] uppercase tracking-wide text-content-tertiary border-b border-border-light/60 pb-1">
+          <div className="flex items-center gap-1.5 px-1 text-2xs uppercase tracking-wide text-content-tertiary border-b border-border-light/60 pb-1">
             <Move3d size={10} />
             {t('viewerTools.walk', { defaultValue: 'Walk' })}
           </div>
@@ -356,7 +356,7 @@ export function ViewerToolbar({
               {fmtFixed(flightSpeed, 1)}
             </span>
           </label>
-          <p className="px-1 text-[10px] text-content-tertiary leading-tight">
+          <p className="px-1 text-2xs text-content-tertiary leading-tight">
             {t('viewerTools.walk_hint', {
               defaultValue:
                 'Mouse: look · WASD / arrows: move · Space/Shift: up/down · Shift+W: sprint · Esc: exit',
@@ -367,10 +367,10 @@ export function ViewerToolbar({
 
       {active === 'measure' && (
         <div
-          className="flex flex-col gap-2 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-[11px] text-content-secondary min-w-[220px]"
+          className="flex flex-col gap-2 rounded-md bg-surface-primary border border-border-light shadow-sm p-2 text-2xs text-content-secondary min-w-[220px]"
           data-testid="viewer-tool-measure-panel"
         >
-          <div className="flex items-center gap-1.5 px-1 text-[10px] uppercase tracking-wide text-content-tertiary border-b border-border-light/60 pb-1">
+          <div className="flex items-center gap-1.5 px-1 text-2xs uppercase tracking-wide text-content-tertiary border-b border-border-light/60 pb-1">
             <Ruler size={10} />
             {t('viewerTools.measure', { defaultValue: 'Measure' })}
           </div>
@@ -383,7 +383,7 @@ export function ViewerToolbar({
                 .toString()
                 .replace('{{count}}', String(measurementCount))}
             </span>
-            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-oe-blue text-white text-[10px] font-medium">
+            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-oe-blue text-white text-2xs font-medium">
               {measurementCount}
             </span>
           </div>
@@ -404,7 +404,7 @@ export function ViewerToolbar({
                 })}
                 data-testid="viewer-measure-copy"
                 className={clsx(
-                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
+                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium transition-colors',
                   copiedFlash
                     ? 'bg-emerald-500/20 text-emerald-600'
                     : 'text-content-secondary hover:bg-surface-tertiary',
@@ -428,7 +428,7 @@ export function ViewerToolbar({
               defaultValue: 'Clear all measurements',
             })}
           </button>
-          <p className="px-1 text-[10px] text-content-tertiary leading-tight">
+          <p className="px-1 text-2xs text-content-tertiary leading-tight">
             {t('viewerTools.measure_hint', {
               defaultValue:
                 'Click to add points · Right-click to finish · Esc to cancel',
@@ -486,7 +486,7 @@ function SectionOffsetsReadout({
   const fmt = (v: number): string => fmtFixed(v, 3);
   return (
     <div
-      className="grid grid-cols-3 gap-x-2 text-[10px] text-content-tertiary tabular-nums mt-1"
+      className="grid grid-cols-3 gap-x-2 text-2xs text-content-tertiary tabular-nums mt-1"
       data-testid="viewer-section-offsets"
     >
       <span>X: {fmt(bounds.min.x)}…{fmt(bounds.max.x)}</span>

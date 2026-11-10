@@ -280,7 +280,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
               <GitCompareArrows size={18} />
             </div>
-            <h2 className="text-lg font-bold text-content-primary">{t('boq.compare_title', { defaultValue: 'BOQ Comparison' })}</h2>
+            <h2 className="text-lg font-semibold text-content-primary">{t('boq.compare_title', { defaultValue: 'BOQ Comparison' })}</h2>
           </div>
           <button
             onClick={onClose}
@@ -307,9 +307,9 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                 {/* BOQ A summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
                   <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">A</div>
-                  <div className="text-sm font-bold text-content-primary truncate">{boqA.name}</div>
+                  <div className="text-sm font-semibold text-content-primary truncate">{boqA.name}</div>
                   <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-content-primary tabular-nums">{currencyFmt.format(totalA)}</span>
+                    <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalA)}</span>
                     <span className="text-xs text-content-tertiary">{currencyA || '--'}</span>
                   </div>
                   <div className="mt-1 text-xs text-content-tertiary">{boqA.positions.length} {t('boq.positions_label', { defaultValue: 'positions' })}</div>
@@ -318,9 +318,9 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                 {/* BOQ B summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
                   <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">B</div>
-                  <div className="text-sm font-bold text-content-primary truncate">{boqB.name}</div>
+                  <div className="text-sm font-semibold text-content-primary truncate">{boqB.name}</div>
                   <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-content-primary tabular-nums">{currencyFmt.format(totalB)}</span>
+                    <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalB)}</span>
                     <span className="text-xs text-content-tertiary">{currencyB || '--'}</span>
                   </div>
                   <div className="mt-1 text-xs text-content-tertiary">{boqB.positions.length} {t('boq.positions_label', { defaultValue: 'positions' })}</div>
@@ -331,11 +331,11 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                   Across currencies there is no cross-project FX rate, so we
                   never blend them into one diff (money rule b). */}
               {currencyMismatch ? (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
+                <div className="rounded-xl border border-amber-500/30 bg-semantic-warning-bg dark:bg-amber-950/30 p-4 text-center">
                   <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">
                     {t('boq.compare_difference', { defaultValue: 'Difference (B vs A)' })}
                   </div>
-                  <div className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                  <div className="text-sm font-medium text-semantic-warning">
                     {t('boq.compare_currency_mismatch', {
                       defaultValue:
                         'These estimates use different currencies ({{currencyA}} vs {{currencyB}}), so totals cannot be subtracted. Compare each side in its own currency above.',
@@ -353,7 +353,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                       <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">
                         {t('boq.compare_difference', { defaultValue: 'Difference (B vs A)' })}
                       </div>
-                      <div className={`text-lg font-bold tabular-nums ${diffColor(diff)}`}>
+                      <div className={`text-lg font-semibold tabular-nums ${diffColor(diff)}`}>
                         {fmtDiff(diff, currency)} ({fmtPct(totalA, totalB)})
                       </div>
                     </div>
@@ -1433,7 +1433,7 @@ export function BOQListPage() {
                   to the card bottom, so the breathing room on a short card
                   falls above the rule and reads as deliberate. */}
               <div className="mt-auto border-t border-border-light px-4 pb-2 pt-3">
-                <div className="text-xl font-bold leading-none text-content-primary tabular-nums">
+                <div className="text-xl font-semibold leading-none text-content-primary tabular-nums">
                   {currencyFmt.format(boq.grandTotal)}{' '}
                   <span className="ml-1 text-xs font-medium text-content-tertiary">{boq.currency}</span>
                 </div>

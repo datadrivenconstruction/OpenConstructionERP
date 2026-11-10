@@ -933,7 +933,7 @@ export function InlinePdfAnnotator({
                 <button
                   key={s.name}
                   onClick={() => setSelectedStamp(s.name)}
-                  className={`px-2 py-0.5 rounded text-2xs font-bold border transition-all ${
+                  className={`px-2 py-0.5 rounded text-2xs font-semibold border transition-all ${
                     selectedStamp === s.name
                       ? 'ring-1 ring-offset-1 ring-oe-blue/40 scale-105'
                       : 'opacity-70 hover:opacity-100'

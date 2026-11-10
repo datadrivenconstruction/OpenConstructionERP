@@ -247,7 +247,7 @@ export function ProjectPeopleSelect({
                     : 'cursor-not-allowed opacity-60'
                 }`}
               >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-2xs font-bold text-white">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-white">
                   {option.name?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div className="min-w-0 flex-1">

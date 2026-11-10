@@ -273,7 +273,7 @@ function StepBlock({
           title, "What you do" and "Why" below all share one clean left edge. */}
       <span
         className={clsx(
-          "absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold",
+          "absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
           done
             ? "bg-semantic-success text-white"
             : isCurrent
@@ -635,7 +635,7 @@ function MoreCaseTile({
         )}
         {playbook.region && (
           <span
-            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-[9px] font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
+            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-2xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
             title={regionDisplayName(playbook.region, language)}
             aria-label={regionDisplayName(playbook.region, language)}
           >
@@ -1307,7 +1307,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
                       <StepThumb step={step} className="aspect-[16/9] w-full" />
                       <span
                         className={clsx(
-                          "absolute start-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-2xs font-bold shadow-sm",
+                          "absolute start-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-2xs font-semibold shadow-sm",
                           done
                             ? "bg-semantic-success text-white"
                             : isCurrent

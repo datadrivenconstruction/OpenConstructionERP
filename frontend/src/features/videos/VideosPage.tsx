@@ -520,7 +520,7 @@ function LearningPath({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Aca
                         <span className="relative block h-9 w-16 shrink-0 overflow-hidden rounded bg-slate-900">
                           <VideoCover src={video.cover} width={64} height={36} className="h-full w-full object-cover" />
                           {watched[video.id] && (
-                            <span className="absolute inset-0 flex items-center justify-center bg-emerald-600/60 text-white">
+                            <span className="absolute inset-0 flex items-center justify-center bg-semantic-success/60 text-white">
                               <CheckCircle2 size={14} aria-hidden />
                             </span>
                           )}
@@ -530,7 +530,7 @@ function LearningPath({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Aca
                             {video.title}
                           </span>
                           {video.status !== 'published' && (
-                            <span className="text-[9px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                            <span className="text-2xs font-semibold uppercase tracking-wide text-semantic-warning">
                               {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
                             </span>
                           )}
@@ -626,7 +626,7 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
               <div className="flex items-center gap-3">
                 <div className="w-32" title={t('videos.series_watched', { defaultValue: '{{done}} of {{total}} watched', done, total: videos.length })}>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-secondary">
-                    <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-semantic-success transition-all" style={{ width: `${pct}%` }} />
                   </div>
                   <p className="mt-0.5 text-2xs tabular-nums text-content-tertiary">
                     {t('videos.series_watched', { defaultValue: '{{done}} of {{total}} watched', done, total: videos.length })}
@@ -649,7 +649,7 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
             <Rail>
               {videos.map((video) => (
                 <div key={video.id} className="relative w-56 shrink-0 snap-start sm:w-60">
-                  <span className="absolute -left-1 -top-1 z-10 flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-900 px-1.5 text-2xs font-bold tabular-nums text-white ring-2 ring-surface-primary">
+                  <span className="absolute -left-1 -top-1 z-10 flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-900 px-1.5 text-2xs font-semibold tabular-nums text-white ring-2 ring-surface-primary">
                     {video.seriesOrder}
                   </span>
                   <VideoCard video={video} labels={labels} onOpen={onOpen} compact />

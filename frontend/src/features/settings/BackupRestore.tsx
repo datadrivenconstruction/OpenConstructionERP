@@ -403,7 +403,7 @@ export function BackupRestore() {
             {/* ── Import Section ──────────────────────────────────────────── */}
             <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-5 h-full">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-semantic-warning/10 text-semantic-warning">
                   <Shield size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -599,7 +599,7 @@ export function BackupRestore() {
                                   </button>
                                 </div>
                                 {restoreMode === 'replace' && (
-                                  <p className="mt-1.5 text-[11px] text-semantic-error leading-relaxed">
+                                  <p className="mt-1.5 text-2xs text-semantic-error leading-relaxed">
                                     {t('backup.replace_warning', {
                                       defaultValue:
                                         'This will permanently delete all existing data before restoring. This action cannot be undone.',

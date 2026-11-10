@@ -281,7 +281,7 @@ export default function BIMToolsPanel({
           onClick={() => setMeasureActive(!measureActive)}
           aria-pressed={measureActive}
           data-testid="measure-toggle"
-          className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-medium border ${
+          className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium border ${
             measureActive
               ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/40'
               : 'bg-surface-secondary text-content-secondary border-border-light hover:bg-surface-tertiary'
@@ -292,7 +292,7 @@ export default function BIMToolsPanel({
             ? t('bim.tools_measure_stop', { defaultValue: 'Stop measuring' })
             : t('bim.tools_measure_start', { defaultValue: 'Measure distance (M)' })}
         </button>
-        <p className="text-[10px] text-content-tertiary">
+        <p className="text-2xs text-content-tertiary">
           {t('bim.tools_measure_hint', {
             defaultValue: 'Click two points in the viewport to record a distance.',
           })}
@@ -302,7 +302,7 @@ export default function BIMToolsPanel({
             here until the user deletes them. RFC 19 §UX-9 / §UX-10. */}
         {measurements.length > 0 && (
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-[10px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {t('bim.tools_measure_count', {
                 defaultValue: '{{count}} saved',
                 count: measurements.length,
@@ -311,7 +311,7 @@ export default function BIMToolsPanel({
             <button
               type="button"
               onClick={handleClearMeasurements}
-              className="text-[10px] text-rose-600 hover:underline"
+              className="text-2xs text-rose-600 hover:underline"
               data-testid="measure-clear-all"
             >
               {t('bim.tools_measure_clear_all', {
@@ -346,7 +346,7 @@ export default function BIMToolsPanel({
                         if (e.key === 'Escape') setEditingMeasureId(null);
                       }}
                       autoFocus
-                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[11px]"
+                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
                     />
                     <button
                       type="button"
@@ -377,8 +377,8 @@ export default function BIMToolsPanel({
                       title={t('bim.tools_measure_focus', { defaultValue: 'Focus camera' })}
                     >
                       <Crosshair size={10} className="text-oe-blue shrink-0" />
-                      <span className="truncate text-[11px] text-content-primary">{m.label}</span>
-                      <span className="text-[10px] tabular-nums text-content-tertiary shrink-0">
+                      <span className="truncate text-2xs text-content-primary">{m.label}</span>
+                      <span className="text-2xs tabular-nums text-content-tertiary shrink-0">
                         {(() => {
                           const d = q.convert(m.distance, 'm');
                           return `${fmtFixed(d.value, 2)} ${d.unit}`;
@@ -447,13 +447,13 @@ export default function BIMToolsPanel({
             placeholder={t('bim.tools_view_name_placeholder', {
               defaultValue: 'View name…',
             })}
-            className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
             data-testid="save-view-name"
           />
           <button
             type="button"
             onClick={handleSave}
-            className="shrink-0 inline-flex items-center gap-1 rounded-md bg-oe-blue px-2 py-1 text-[11px] font-medium text-white hover:bg-oe-blue-dark"
+            className="shrink-0 inline-flex items-center gap-1 rounded-md bg-oe-blue px-2 py-1 text-2xs font-medium text-white hover:bg-oe-blue-dark"
             data-testid="save-view-button"
           >
             <Camera size={12} />
@@ -462,7 +462,7 @@ export default function BIMToolsPanel({
         </div>
         {/* Thumbnail toggle - small inline checkbox so the user can opt out
             of the ~50 KB PNG attachment when bookmarking a hundred angles. */}
-        <label className="flex items-center gap-1.5 text-[10px] text-content-tertiary select-none cursor-pointer">
+        <label className="flex items-center gap-1.5 text-2xs text-content-tertiary select-none cursor-pointer">
           <input
             type="checkbox"
             checked={includeScreenshot}
@@ -478,7 +478,7 @@ export default function BIMToolsPanel({
         {quotaWarning && (
           <div
             role="alert"
-            className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-2 py-1 text-[10px] text-amber-700 dark:text-amber-200"
+            className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-2 py-1 text-2xs text-amber-700 dark:text-amber-200"
           >
             {t('bim.tools_views_quota', {
               defaultValue:
@@ -488,7 +488,7 @@ export default function BIMToolsPanel({
         )}
         <ul className="flex flex-col gap-1" data-testid="saved-views-list">
           {views.length === 0 && (
-            <li className="text-[11px] text-content-tertiary italic">
+            <li className="text-2xs text-content-tertiary italic">
               {t('bim.tools_views_empty', {
                 defaultValue: 'No saved views yet.',
               })}
@@ -513,7 +513,7 @@ export default function BIMToolsPanel({
                         if (e.key === 'Escape') handleCancelRename();
                       }}
                       autoFocus
-                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[11px]"
+                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
                       data-testid="rename-view-input"
                     />
                     <button
@@ -538,7 +538,7 @@ export default function BIMToolsPanel({
                     <button
                       type="button"
                       onClick={() => onApplyViewpoint(v)}
-                      className="flex flex-1 min-w-0 items-center gap-2 text-left text-[11px] text-content-primary hover:text-oe-blue"
+                      className="flex flex-1 min-w-0 items-center gap-2 text-left text-2xs text-content-primary hover:text-oe-blue"
                       data-testid={`apply-view-${v.name}`}
                       title={new Date(v.createdAt).toLocaleString(getIntlLocale())}
                     >
@@ -559,7 +559,7 @@ export default function BIMToolsPanel({
                       {/* Tiny badges hint at what the view captured. */}
                       {v.clipState && v.clipState.mode !== 'none' && (
                         <span
-                          className="ms-1 shrink-0 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1 py-px text-[8px] font-semibold uppercase"
+                          className="ms-1 shrink-0 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1 py-px text-2xs font-semibold uppercase"
                           title={t('bim.tools_views_has_clip', {
                             defaultValue: 'Has section clip',
                           })}
@@ -573,7 +573,7 @@ export default function BIMToolsPanel({
                         !!v.filterState.search
                       ) && (
                         <span
-                          className="ms-1 shrink-0 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1 py-px text-[8px] font-semibold uppercase"
+                          className="ms-1 shrink-0 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1 py-px text-2xs font-semibold uppercase"
                           title={t('bim.tools_views_has_filter', {
                             defaultValue: 'Has filter',
                           })}
@@ -618,19 +618,19 @@ export default function BIMToolsPanel({
         <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
           {t('bim.tools_export_title', { defaultValue: 'Export' })}
         </h3>
-        <p className="text-[10px] text-content-tertiary">
+        <p className="text-2xs text-content-tertiary">
           {t('bim.boq_export_hint', {
             defaultValue:
               'Roll the model quantities (area, volume, length, weight) into one Excel Bill of Quantities.',
           })}
         </p>
-        <label className="flex flex-col gap-1 text-[10px] text-content-tertiary">
+        <label className="flex flex-col gap-1 text-2xs text-content-tertiary">
           {t('bim.boq_export_scope', { defaultValue: 'Elements' })}
           <select
             value={exportScope}
             onChange={(e) => setExportScope(e.target.value as BoqExportScope)}
             data-testid="boq-export-scope"
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-primary"
+            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary"
           >
             <option value="all">{t('bim.boq_export_scope_all', { defaultValue: 'Whole model' })}</option>
             <option value="filter">
@@ -641,13 +641,13 @@ export default function BIMToolsPanel({
             </option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[10px] text-content-tertiary">
+        <label className="flex flex-col gap-1 text-2xs text-content-tertiary">
           {t('bim.boq_export_group_by', { defaultValue: 'Group by' })}
           <select
             value={exportGroupBy}
             onChange={(e) => setExportGroupBy(e.target.value as BoqGroupBy)}
             data-testid="boq-export-group-by"
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-primary"
+            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary"
           >
             <option value="element_type">
               {t('bim.boq_export_by_type', { defaultValue: 'Element type' })}
@@ -666,7 +666,7 @@ export default function BIMToolsPanel({
           onClick={handleExportBoq}
           disabled={exporting}
           data-testid="boq-export-button"
-          className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
         >
           <FileSpreadsheet size={12} />
           {exporting
@@ -678,7 +678,7 @@ export default function BIMToolsPanel({
             type="button"
             onClick={() => onOpenReport(exportScope, exportGroupBy)}
             data-testid="boq-report-button"
-            className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-medium border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary"
           >
             <FileBarChart size={12} />
             {t('bim.boq_report_button', { defaultValue: 'View summary report' })}

@@ -94,21 +94,21 @@ interface ForecastInsightsPanelProps {
 
 const BAND_STYLE: Record<string, { ring: string; text: string; chip: string; label: string }> = {
   green: {
-    ring: 'text-emerald-500',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    chip: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300',
+    ring: 'text-semantic-success',
+    text: 'text-semantic-success',
+    chip: 'bg-semantic-success-bg text-semantic-success',
     label: 'Low',
   },
   amber: {
-    ring: 'text-amber-500',
-    text: 'text-amber-600 dark:text-amber-400',
-    chip: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300',
+    ring: 'text-semantic-warning',
+    text: 'text-semantic-warning',
+    chip: 'bg-semantic-warning-bg text-semantic-warning',
     label: 'Moderate',
   },
   red: {
-    ring: 'text-rose-500',
-    text: 'text-rose-600 dark:text-rose-400',
-    chip: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300',
+    ring: 'text-semantic-error',
+    text: 'text-semantic-error',
+    chip: 'bg-semantic-error-bg text-semantic-error',
     label: 'High',
   },
 };
@@ -116,9 +116,9 @@ const BAND_STYLE: Record<string, { ring: string; text: string; chip: string; lab
 /** Classify a performance index: >=1.0 healthy, >=0.95 caution, else red. */
 function indexColor(value: number | null): string {
   if (value === null) return 'text-content-tertiary';
-  if (value >= 1.0) return 'text-emerald-500';
-  if (value >= 0.95) return 'text-amber-500';
-  return 'text-rose-500';
+  if (value >= 1.0) return 'text-semantic-success';
+  if (value >= 0.95) return 'text-semantic-warning';
+  return 'text-semantic-error';
 }
 
 function num(value: string | number | null | undefined): number {
@@ -169,7 +169,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
   if (error) {
     return (
       <div className="py-10 text-center space-y-3" data-testid="forecast-insights-error">
-        <AlertTriangle size={24} className="mx-auto text-amber-500" />
+        <AlertTriangle size={24} className="mx-auto text-semantic-warning" />
         <p className="text-sm text-content-secondary">{error}</p>
         <button
           onClick={() => {
@@ -214,7 +214,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
       {cost.available ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" data-testid="forecast-insights-cost-tiles">
           {/* CPI */}
-          <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
             <div className="flex items-center justify-between">
               <h4 className="text-2xs font-medium text-content-secondary">
                 {t('project_intelligence.insights.cpi', { defaultValue: 'CPI' })}
@@ -226,7 +226,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
               )}
             </div>
             <span
-              className={`mt-1 block text-xl font-bold tabular-nums ${indexColor(cost.cpi)}`}
+              className={`mt-1 block text-xl font-semibold tabular-nums ${indexColor(cost.cpi)}`}
               data-testid="forecast-insights-cpi"
             >
               {cost.cpi !== null ? fmtFixed(cost.cpi, 2) : '—'}
@@ -234,7 +234,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           </div>
 
           {/* SPI */}
-          <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
             <div className="flex items-center justify-between">
               <h4 className="text-2xs font-medium text-content-secondary">
                 {t('project_intelligence.insights.spi', { defaultValue: 'SPI' })}
@@ -246,7 +246,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
               )}
             </div>
             <span
-              className={`mt-1 block text-xl font-bold tabular-nums ${indexColor(cost.spi)}`}
+              className={`mt-1 block text-xl font-semibold tabular-nums ${indexColor(cost.spi)}`}
               data-testid="forecast-insights-spi"
             >
               {cost.spi !== null ? fmtFixed(cost.spi, 2) : '—'}
@@ -254,7 +254,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           </div>
 
           {/* EAC */}
-          <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
             <h4 className="text-2xs font-medium text-content-secondary">
               {t('project_intelligence.insights.eac', {
                 defaultValue: 'EAC (forecast)',
@@ -264,13 +264,13 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
               <MoneyDisplay
                 amount={num(cost.eac)}
                 currency={currency}
-                className="text-xl font-bold tabular-nums"
+                className="text-xl font-semibold tabular-nums"
               />
             </div>
           </div>
 
           {/* VAC */}
-          <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
             <h4 className="text-2xs font-medium text-content-secondary">
               {t('project_intelligence.insights.vac', {
                 defaultValue: 'VAC (variance)',
@@ -281,7 +281,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
                 amount={num(cost.vac)}
                 currency={currency}
                 colorize
-                className="text-xl font-bold tabular-nums"
+                className="text-xl font-semibold tabular-nums"
               />
             </div>
           </div>
@@ -309,7 +309,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
       {/* Schedule slip + Risk gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Schedule slip */}
-        <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
           <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
             <CalendarClock size={15} className="text-oe-blue" />
             {t('project_intelligence.insights.schedule_title', {
@@ -328,9 +328,9 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
                   <span
                     className={`font-semibold tabular-nums ${
                       lateFinish
-                        ? 'text-rose-500'
+                        ? 'text-semantic-error'
                         : schedule.finish_variance_days < 0
-                          ? 'text-emerald-500'
+                          ? 'text-semantic-success'
                           : 'text-content-secondary'
                     }`}
                     data-testid="forecast-insights-finish-variance"
@@ -368,7 +368,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
                 </span>
                 <span
                   className={`font-semibold tabular-nums ${
-                    schedule.at_risk_task_count > 0 ? 'text-amber-500' : 'text-content-secondary'
+                    schedule.at_risk_task_count > 0 ? 'text-semantic-warning' : 'text-content-secondary'
                   }`}
                   data-testid="forecast-insights-at-risk"
                 >
@@ -390,7 +390,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
         </div>
 
         {/* Risk gauge */}
-        <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
           <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
             <Gauge size={15} className="text-oe-blue" />
             {t('project_intelligence.insights.risk_title', {
@@ -400,7 +400,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           <div className="flex items-center gap-4">
             <div className="shrink-0 text-center">
               <span
-                className={`block text-3xl font-bold tabular-nums ${band.text}`}
+                className={`block text-3xl font-semibold tabular-nums ${band.text}`}
                 data-testid="forecast-insights-risk-score"
               >
                 {scorePct}

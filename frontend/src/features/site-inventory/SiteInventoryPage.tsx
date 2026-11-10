@@ -263,7 +263,7 @@ function CreateLocationModal({
           placeholder={t('site_inventory.name_placeholder', {
             defaultValue: 'e.g. Main yard, Container B, Level 2 store',
           })}
-          className={clsx(inputCls, nameError && 'border-semantic-error focus:ring-red-300')}
+          className={clsx(inputCls, nameError && 'border-semantic-error focus:ring-semantic-error/30')}
         />
         {nameError && (
           <p className="mt-1 text-xs text-semantic-error">
@@ -617,7 +617,7 @@ function CreateItemModal({
           placeholder={t('site_inventory.item_name_placeholder', {
             defaultValue: 'e.g. Ready-mix concrete C30/37',
           })}
-          className={clsx(inputCls, nameError && 'border-semantic-error focus:ring-red-300')}
+          className={clsx(inputCls, nameError && 'border-semantic-error focus:ring-semantic-error/30')}
         />
         {nameError && (
           <p className="mt-1 text-xs text-semantic-error">
@@ -833,7 +833,7 @@ function RecordMovementModal({
         <select
           value={itemId}
           onChange={(e) => onItemChange(e.target.value)}
-          className={clsx(inputCls, itemError && 'border-semantic-error focus:ring-red-300')}
+          className={clsx(inputCls, itemError && 'border-semantic-error focus:ring-semantic-error/30')}
         >
           <option value="">{t('site_inventory.select_item', { defaultValue: 'Select an item' })}</option>
           {items.map((it) => (
@@ -857,7 +857,7 @@ function RecordMovementModal({
             onChange={(e) => setQuantity(e.target.value)}
             inputMode="decimal"
             placeholder={t('site_inventory.quantity_placeholder', { defaultValue: 'e.g. 12.5' })}
-            className={clsx(inputCls, qtyError && 'border-semantic-error focus:ring-red-300')}
+            className={clsx(inputCls, qtyError && 'border-semantic-error focus:ring-semantic-error/30')}
           />
           {qtyError && (
             <p className="mt-1 text-xs text-semantic-error">
@@ -902,7 +902,7 @@ function RecordMovementModal({
         <select
           value={locationId}
           onChange={(e) => setLocationId(e.target.value)}
-          className={clsx(inputCls, transferError && 'border-semantic-error focus:ring-red-300')}
+          className={clsx(inputCls, transferError && 'border-semantic-error focus:ring-semantic-error/30')}
         >
           <option value="">{t('site_inventory.none_option', { defaultValue: 'None' })}</option>
           {locations.map((loc) => (
@@ -918,7 +918,7 @@ function RecordMovementModal({
           <select
             value={toLocationId}
             onChange={(e) => setToLocationId(e.target.value)}
-            className={clsx(inputCls, transferError && 'border-semantic-error focus:ring-red-300')}
+            className={clsx(inputCls, transferError && 'border-semantic-error focus:ring-semantic-error/30')}
           >
             <option value="">{t('site_inventory.none_option', { defaultValue: 'None' })}</option>
             {locations.map((loc) => (
@@ -1607,7 +1607,7 @@ function StockPanel({
 
   const chips: { key: string; def: string; value: number; tone: string }[] = [
     { key: 'site_inventory.stat_tracked', def: 'Items tracked', value: summary.tracked, tone: 'text-content-primary' },
-    { key: 'site_inventory.stat_low', def: 'Low stock', value: summary.low, tone: 'text-amber-500' },
+    { key: 'site_inventory.stat_low', def: 'Low stock', value: summary.low, tone: 'text-semantic-warning' },
     { key: 'site_inventory.stat_negative', def: 'Negative', value: summary.negative, tone: 'text-semantic-error' },
   ];
 

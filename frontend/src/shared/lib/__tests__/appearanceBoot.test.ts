@@ -71,7 +71,8 @@ describe('index.html appearance boot script', () => {
   it('paints the platform default with nothing stored', () => {
     boot();
     expect(attrs()).toEqual(PLATFORM_APPEARANCE);
-    expect(document.head.querySelector('link[data-oe-font]')).toBeNull();
+    // Inter is the platform font, so its stylesheet is linked before first paint.
+    expect(document.head.querySelector('link[data-oe-font]')?.getAttribute('data-oe-font')).toBe('inter');
   });
 
   it('follows the workspace default when the user has no choice', () => {

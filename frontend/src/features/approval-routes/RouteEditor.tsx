@@ -722,7 +722,7 @@ function StepEditorRow({
             ))}
           </select>
           {!userMode && (
-            <p className="mt-1 flex items-start gap-1 rounded-md border border-amber-300/60 bg-amber-50/60 px-1.5 py-1 text-2xs text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
+            <p className="mt-1 flex items-start gap-1 rounded-md border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-1 text-2xs text-semantic-warning">
               <AlertTriangle size={11} className="mt-0.5 shrink-0" />
               <span>
                 {t('approvalRoutes.mode_role_warning', {

@@ -133,7 +133,7 @@ function matrixColor(prob: string, impact: string) {
   // score range: 0.1*1=0.1 .. 0.9*5=4.5
   const score = probValid * impactNum;
   if (score === 0) return 'bg-surface-secondary text-content-quaternary';
-  if (score >= 2.7) return 'bg-red-500/80 text-white';
+  if (score >= 2.7) return 'bg-semantic-error/80 text-white';
   if (score >= 1.5) return 'bg-orange-400/80 text-white';
   if (score >= 0.6) return 'bg-yellow-400/80 text-gray-900';
   return 'bg-green-400/70 text-gray-900';
@@ -166,7 +166,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
                 <td className="p-1 text-content-secondary font-medium">{getProbLabels(t)[p]}</td>
                 {IMPACT_LEVELS.map((i) => {
                   const c = map[`${p}|${i}`]?.count || 0;
-                  return <td key={i} className="p-1"><div className={`flex items-center justify-center h-10 rounded-md text-sm font-bold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
+                  return <td key={i} className="p-1"><div className={`flex items-center justify-center h-10 rounded-md text-sm font-semibold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
                 })}
               </tr>
             ))}
@@ -174,7 +174,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
         </table>
       </div>
       <div className="mt-2 flex items-center gap-4 text-2xs text-content-tertiary">
-        {[['bg-green-400/70', t('risk.legend_low', { defaultValue: 'Low' })], ['bg-yellow-400/80', t('risk.legend_medium', { defaultValue: 'Medium' })], ['bg-orange-400/80', t('risk.legend_high', { defaultValue: 'High' })], ['bg-red-500/80', t('risk.legend_critical', { defaultValue: 'Critical' })]].map(([bg, l]) => (
+        {[['bg-green-400/70', t('risk.legend_low', { defaultValue: 'Low' })], ['bg-yellow-400/80', t('risk.legend_medium', { defaultValue: 'Medium' })], ['bg-orange-400/80', t('risk.legend_high', { defaultValue: 'High' })], ['bg-semantic-error/80', t('risk.legend_critical', { defaultValue: 'Critical' })]].map(([bg, l]) => (
           <span key={l} className="flex items-center gap-1"><span className={`inline-block w-3 h-3 rounded ${bg}`} />{l}</span>
         ))}
       </div>
@@ -185,10 +185,10 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
 /* ── 5x5 Risk Heatmap ────────────────────────────────────────────────── */
 
 function heatmapColor(score: number): string {
-  if (score >= 16) return 'bg-red-500 text-white';
+  if (score >= 16) return 'bg-semantic-error text-white';
   if (score >= 11) return 'bg-orange-500 text-white';
   if (score >= 6) return 'bg-yellow-400 text-gray-900';
-  if (score >= 1) return 'bg-green-500 text-white';
+  if (score >= 1) return 'bg-semantic-success text-white';
   return 'bg-surface-secondary text-content-quaternary';
 }
 
@@ -241,7 +241,7 @@ function RiskMatrixHeatmap({ risks }: { risks: RiskItem[] }) {
                   return (
                     <td key={il} className="p-1">
                       <div
-                        className={`flex items-center justify-center h-10 w-12 rounded-md text-sm font-bold ${
+                        className={`flex items-center justify-center h-10 w-12 rounded-md text-sm font-semibold ${
                           count > 0 ? heatmapColor(score) : 'bg-surface-secondary text-content-quaternary'
                         }`}
                         title={`P=${p} x I=${i} = ${score}${count > 0 ? `, ${count} ${t('risk.risks_count', { defaultValue: 'risk(s)' })}` : ''}`}
@@ -265,10 +265,10 @@ function RiskMatrixHeatmap({ risks }: { risks: RiskItem[] }) {
         </table>
       </div>
       <div className="flex gap-4 mt-2 text-2xs text-content-tertiary justify-center">
-        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-500" /> {t('risk.low', { defaultValue: 'Low (1-5)' })}</span>
+        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-semantic-success" /> {t('risk.low', { defaultValue: 'Low (1-5)' })}</span>
         <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-400" /> {t('risk.medium', { defaultValue: 'Medium (6-10)' })}</span>
         <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-orange-500" /> {t('risk.high', { defaultValue: 'High (11-15)' })}</span>
-        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> {t('risk.critical', { defaultValue: 'Critical (16-25)' })}</span>
+        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-semantic-error" /> {t('risk.critical', { defaultValue: 'Critical (16-25)' })}</span>
       </div>
     </Card>
   );
@@ -606,7 +606,7 @@ function HowRiskWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -859,9 +859,9 @@ export function RiskRegisterPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { icon: ShieldAlert, label: t('risk.total', { defaultValue: 'Total Risks' }), value: summary.total_risks, cls: 'text-content-primary', bg: 'bg-surface-secondary' },
-            { icon: AlertTriangle, label: t('risk.high_critical', { defaultValue: 'High / Critical' }), value: summary.high_critical_count, cls: 'text-semantic-error', bg: 'bg-red-50 dark:bg-red-950/30' },
+            { icon: AlertTriangle, label: t('risk.high_critical', { defaultValue: 'High / Critical' }), value: summary.high_critical_count, cls: 'text-semantic-error', bg: 'bg-semantic-error-bg' },
             { icon: DollarSign, label: t('risk.exposure', { defaultValue: 'Total Exposure' }), value: exposureNode, cls: 'text-semantic-error', bg: 'bg-surface-secondary' },
-            { icon: Shield, label: t('risk.mitigated', { defaultValue: 'Mitigated' }), value: summary.mitigated_count, cls: 'text-semantic-success', bg: 'bg-green-50 dark:bg-green-950/30' },
+            { icon: Shield, label: t('risk.mitigated', { defaultValue: 'Mitigated' }), value: summary.mitigated_count, cls: 'text-semantic-success', bg: 'bg-semantic-success-bg' },
           ].map(({ icon: Icon, label, value, cls, bg }) => (
             <Card key={label} className="p-4">
               <div className="flex items-center gap-2">

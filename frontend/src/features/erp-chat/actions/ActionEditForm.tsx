@@ -38,7 +38,7 @@ export interface ActionEditFormProps {
 }
 
 const INPUT_CLASS = clsx(
-  'w-full min-w-0 rounded-md border bg-[var(--act-bg)] px-2 py-1 text-[13px] text-[var(--act-text)]',
+  'w-full min-w-0 rounded-md border bg-[var(--act-bg)] px-2 py-1 text-sm text-[var(--act-text)]',
   'placeholder:text-[var(--act-text-3)]',
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)] focus:border-[var(--act-accent)]',
 );
@@ -218,7 +218,7 @@ export function ActionEditForm({ action, busy, serverFieldErrors = {}, onSubmit,
         const label = fieldLabel(field, t);
         if (!isEditable) {
           return (
-            <div key={field.key} className="grid grid-cols-[minmax(84px,36%)_1fr] gap-x-3 text-[13px]">
+            <div key={field.key} className="grid grid-cols-[minmax(84px,36%)_1fr] gap-x-3 text-sm">
               <span className="text-xs text-[var(--act-text-3)]">{label}</span>
               <span className="min-w-0 break-words text-[var(--act-text-2)]">
                 {formatFieldValue(field, field.value, t, i18n.language ?? 'en')}
@@ -245,7 +245,7 @@ export function ActionEditForm({ action, busy, serverFieldErrors = {}, onSubmit,
             <div className="min-w-0">
               {renderInput(field, inputId, errorText ? errorId : undefined, Boolean(errorText))}
               {errorText && (
-                <p id={errorId} className="mt-0.5 text-[11px] text-[var(--act-error)]">
+                <p id={errorId} className="mt-0.5 text-2xs text-[var(--act-error)]">
                   {errorText}
                 </p>
               )}
@@ -266,7 +266,7 @@ export function ActionEditForm({ action, busy, serverFieldErrors = {}, onSubmit,
         <ActionButton tone="ghost" onClick={onCancel} disabled={busy} icon={<X size={13} />}>
           {t('erp_chat.action.form.cancel', { defaultValue: 'Cancel' })}
         </ActionButton>
-        <span className="text-[11px] text-[var(--act-text-3)]">
+        <span className="text-2xs text-[var(--act-text-3)]">
           {t('erp_chat.action.form.hint', { defaultValue: 'Saving updates the proposal. Nothing is written until you apply it.' })}
         </span>
       </div>

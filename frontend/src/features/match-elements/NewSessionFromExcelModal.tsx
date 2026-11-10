@@ -71,7 +71,7 @@ export function NewSessionFromExcelModal({
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
           <div className="flex items-center gap-2">
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <FileSpreadsheet className="w-4 h-4 text-semantic-success" />
             <h2 className="text-sm font-semibold text-content-primary">
               {t(
                 'match_elements.new_excel.title',
@@ -172,7 +172,7 @@ export function NewSessionFromExcelModal({
           </div>
 
           {mut.isError && (
-            <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-200">
+            <div className="rounded border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-xs text-semantic-error">
               {String((mut.error as Error)?.message ?? mut.error)}
             </div>
           )}

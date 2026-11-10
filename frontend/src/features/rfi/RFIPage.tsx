@@ -133,10 +133,10 @@ export const STATUS_CONFIG: Record<
   RFIStatus,
   { variant: 'neutral' | 'blue' | 'success' | 'error' | 'warning'; cls: string }
 > = {
-  draft: { variant: 'neutral', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  draft: { variant: 'neutral', cls: 'bg-surface-secondary text-content-secondary' },
   open: { variant: 'blue', cls: '' },
   answered: { variant: 'success', cls: '' },
-  closed: { variant: 'neutral', cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
+  closed: { variant: 'neutral', cls: 'bg-surface-secondary text-content-secondary' },
   void: { variant: 'error', cls: '' },
 };
 
@@ -152,8 +152,8 @@ export const STATUS_CONFIG: Record<
 export const PRIORITY_DOT: Record<RFIPriority, string> = {
   low: 'bg-gray-400',
   normal: 'bg-blue-500',
-  high: 'bg-amber-500',
-  critical: 'bg-red-500',
+  high: 'bg-semantic-warning',
+  critical: 'bg-semantic-error',
 };
 
 /** Ordered list — keeps the chip row and the filter dropdown in sync. */
@@ -216,7 +216,7 @@ export const BIC_SIDE_CFG: Record<
   { cls: string; key: string; fallback: string }
 > = {
   you: {
-    cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+    cls: 'bg-semantic-warning-bg text-semantic-warning border border-semantic-warning/30',
     key: 'rfi.bic_with_you',
     fallback: 'With you',
   },
@@ -226,12 +226,12 @@ export const BIC_SIDE_CFG: Record<
     fallback: 'With them',
   },
   answered: {
-    cls: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+    cls: 'bg-semantic-success-bg text-semantic-success border border-semantic-success/30',
     key: 'rfi.bic_answered',
     fallback: 'Answered',
   },
   closed: {
-    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-border-light',
+    cls: 'bg-surface-secondary text-content-secondary border border-border-light',
     key: 'rfi.bic_closed',
     fallback: 'Closed',
   },
@@ -996,7 +996,7 @@ export function CreateRFIModal({
             className={clsx(
               'h-12 w-full rounded-lg border border-border bg-surface-primary px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
               errors.subject &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -1016,7 +1016,7 @@ export function CreateRFIModal({
             className={clsx(
               textareaCls,
               errors.question &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
             placeholder={t('rfi.question_placeholder', {
               defaultValue: 'Describe the information you need...',
@@ -1176,7 +1176,7 @@ export function CreateRFIModal({
             className={clsx(
               'flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all text-left w-full',
               form.cost_impact
-                ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-600'
+                ? 'border-semantic-warning/60 bg-semantic-warning-bg'
                 : 'border-border bg-surface-primary hover:bg-surface-secondary',
             )}
           >
@@ -1184,7 +1184,7 @@ export function CreateRFIModal({
               className={clsx(
                 'flex h-8 w-8 items-center justify-center rounded-full shrink-0',
                 form.cost_impact
-                  ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400'
+                  ? 'bg-semantic-warning-bg text-semantic-warning'
                   : 'bg-surface-tertiary text-content-quaternary',
               )}
             >
@@ -1194,7 +1194,7 @@ export function CreateRFIModal({
               <p
                 className={clsx(
                   'text-sm font-medium',
-                  form.cost_impact ? 'text-amber-700 dark:text-amber-400' : 'text-content-secondary',
+                  form.cost_impact ? 'text-semantic-warning' : 'text-content-secondary',
                 )}
               >
                 {t('rfi.cost_impact', { defaultValue: 'Cost Impact' })}
@@ -1661,7 +1661,7 @@ const RFIRow = React.memo(function RFIRow({
           {showOverduePill && (
             <span
               role="status"
-              className="inline-flex items-center rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 px-1.5 py-0.5 text-2xs font-bold"
+              className="inline-flex items-center rounded-full bg-semantic-error-bg text-semantic-error px-1.5 py-0.5 text-2xs font-semibold"
               aria-label={t('rfi.overdue_by_days', {
                 defaultValue: 'Overdue by {{count}} days',
                 count: overdueDelta!,
@@ -1692,7 +1692,7 @@ const RFIRow = React.memo(function RFIRow({
         <div className="flex items-center gap-1.5 w-14 shrink-0 justify-end">
           {rfi.cost_impact && (
             <span title={t('rfi.cost_impact', { defaultValue: 'Cost Impact' })}>
-              <DollarSign size={13} className="text-amber-500" />
+              <DollarSign size={13} className="text-semantic-warning" />
             </span>
           )}
           {rfi.schedule_impact && (
@@ -1716,8 +1716,8 @@ const RFIRow = React.memo(function RFIRow({
 
           {/* Response */}
           {rfi.official_response && (
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3">
-              <p className="text-xs text-green-700 dark:text-green-400 mb-1 font-medium uppercase tracking-wide">
+            <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3">
+              <p className="text-xs text-semantic-success mb-1 font-medium uppercase tracking-wide">
                 {t('rfi.label_response', { defaultValue: 'Response' })}
               </p>
               <p className="text-sm text-content-primary whitespace-pre-wrap">{rfi.official_response}</p>
@@ -2541,7 +2541,7 @@ export function RFIPage() {
                   <span className="tabular-nums font-semibold text-content-primary">{counts.total}</span>
                   {counts.overdue > 0 && (
                     <span
-                      className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-2xs font-semibold tabular-nums bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                      className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-2xs font-semibold tabular-nums bg-semantic-error-bg text-semantic-error"
                       title={t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
                     >
                       {counts.overdue}
@@ -2596,7 +2596,7 @@ export function RFIPage() {
                     active
                       ? 'bg-oe-blue text-white'
                       : chip.key === 'overdue'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                        ? 'bg-semantic-error-bg text-semantic-error'
                         : 'bg-surface-tertiary text-content-secondary',
                   )}
                 >
@@ -2895,7 +2895,7 @@ export function RFIPage() {
                           raw ball_in_court UUID here was unreadable to operators,
                           so it is intentionally omitted. */}
                       {isOverdue && overdueDelta !== null && overdueDelta > 0 && (
-                        <div className="inline-flex items-center rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 px-1.5 py-0.5 text-2xs font-bold">
+                        <div className="inline-flex items-center rounded-full bg-semantic-error-bg text-semantic-error px-1.5 py-0.5 text-2xs font-semibold">
                           {t('rfi.overdue_by_days', { defaultValue: 'Overdue by {{count}} days', count: overdueDelta })}
                         </div>
                       )}
@@ -2909,7 +2909,7 @@ export function RFIPage() {
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         {rfi.cost_impact && (
-                          <span className="flex items-center gap-0.5 text-amber-500"><DollarSign size={12} /> {t('rfi.cost_impact_short', { defaultValue: 'Cost' })}</span>
+                          <span className="flex items-center gap-0.5 text-semantic-warning"><DollarSign size={12} /> {t('rfi.cost_impact_short', { defaultValue: 'Cost' })}</span>
                         )}
                         {rfi.schedule_impact && (
                           <span className="flex items-center gap-0.5 text-orange-500"><Clock size={12} /> {t('rfi.schedule_impact_short', { defaultValue: 'Schedule' })}</span>

@@ -11,7 +11,7 @@ export const inputCls =
 export const compactInputCls =
   'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 export const warnInputCls =
-  'h-8 w-full rounded-md border border-amber-400 bg-amber-50 px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-amber-300 dark:bg-amber-950/30';
+  'h-8 w-full rounded-md border border-semantic-warning/60 bg-semantic-warning-bg px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-semantic-warning/30';
 
 export function Money({ value, currency }: { value: string | null | undefined; currency: string }) {
   if (value === null || value === undefined || value === '') return <span>—</span>;

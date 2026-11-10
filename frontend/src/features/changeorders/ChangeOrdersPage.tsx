@@ -1317,7 +1317,7 @@ function ApprovalChainBuilderDialog({
                     key={u.id}
                     className="flex items-center gap-2 rounded-lg border border-border bg-surface-secondary/40 px-3 py-2"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                       {idx + 1}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -1416,7 +1416,7 @@ function WorkflowStepper({ status, t }: { status: string; t: (key: string, opts?
         return (
           <div key={step.key} className="flex items-center" role="listitem">
             <div className="flex flex-col items-center">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors ${
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors ${
                 showRejected
                   ? 'border-semantic-error bg-semantic-error-bg text-semantic-error'
                   : isCompleted
@@ -1983,13 +1983,13 @@ function DetailView({
               ) : (
                 // Non-admin/manager: show clear "awaiting approval" state instead
                 // of an Approve button that would just return 403.
-                <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-1.5">
-                  <CheckCircle2 size={14} className="text-amber-600 dark:text-amber-400" />
+                <div className="flex items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-1.5">
+                  <CheckCircle2 size={14} className="text-semantic-warning" />
                   <div className="text-xs">
-                    <p className="font-medium text-amber-900 dark:text-amber-200">
+                    <p className="font-medium text-semantic-warning">
                       {t('changeorders.pending_approval', { defaultValue: 'Awaiting approval' })}
                     </p>
-                    <p className="text-amber-800 dark:text-amber-300">
+                    <p className="text-semantic-warning">
                       {t('changeorders.pending_approval_hint', {
                         defaultValue: 'Only managers and admins can approve.',
                       })}

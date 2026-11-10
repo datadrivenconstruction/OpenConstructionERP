@@ -97,7 +97,7 @@ export function ImportSourcePanel({ scheduleId, canEdit, compact = false, onOpen
     if (!pending || data.deviating_count === 0) return null;
     return (
       <div
-        className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+        className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
         data-testid="import-source-banner"
       >
         <FileText size={14} />

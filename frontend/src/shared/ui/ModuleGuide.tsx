@@ -467,10 +467,10 @@ export function ModuleGuide({ open, onClose, content, onCta }: ModuleGuideProps)
                 <SectionIcon size={19} strokeWidth={2} />
               </span>
               <div className="min-w-0">
-                <h3 className="mb-1.5 text-[15px] font-semibold leading-snug text-content-primary">
+                <h3 className="mb-1.5 text-base font-semibold leading-snug text-content-primary">
                   {sectionTitle}
                 </h3>
-                <p className="text-[13px] leading-relaxed text-content-secondary">
+                <p className="text-sm leading-relaxed text-content-secondary">
                   {sectionBody}
                 </p>
               </div>

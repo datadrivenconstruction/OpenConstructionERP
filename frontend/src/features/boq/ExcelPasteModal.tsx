@@ -244,7 +244,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
   const reviewSet = useMemo(() => new Set(reviewCells), [reviewCells]);
   const reviewClass = (i: number, field: string) =>
     reviewSet.has(`${i}:${field}`)
-      ? 'px-3 py-1.5 text-right tabular-nums bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+      ? 'px-3 py-1.5 text-right tabular-nums bg-semantic-warning-bg text-semantic-warning'
       : 'px-3 py-1.5 text-right tabular-nums';
   const reviewTitle = (i: number, field: string) =>
     reviewSet.has(`${i}:${field}`)
@@ -320,7 +320,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
           {/* Detection feedback */}
           {rows.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <CheckCircle2 size={14} className="text-emerald-500" />
+              <CheckCircle2 size={14} className="text-semantic-success" />
               <span className="text-xs text-content-secondary">
                 {t('boq.paste_detected', { defaultValue: '{{count}} rows detected', count: rows.length })}
               </span>
@@ -333,7 +333,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
           )}
 
           {rows.length === 0 && raw.trim().length > 0 && (
-            <div className="flex items-center gap-2 text-amber-600">
+            <div className="flex items-center gap-2 text-semantic-warning">
               <AlertTriangle size={14} />
               <span className="text-xs">{t('boq.paste_no_data', { defaultValue: 'No valid rows detected. Make sure data is tab-separated.' })}</span>
             </div>
@@ -341,9 +341,9 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
 
           {/* Nothing is dropped in silence: tell the user what could not be read. */}
           {(skippedEmpty > 0 || invalidNumbers > 0 || reviewCells.length > 0) && (
-            <div className="space-y-1 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2">
+            <div className="space-y-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2">
               {skippedEmpty > 0 && (
-                <div className="flex items-center gap-2 text-amber-700">
+                <div className="flex items-center gap-2 text-semantic-warning">
                   <AlertTriangle size={14} />
                   <span className="text-xs">
                     {t('boq.paste_skipped_rows', { defaultValue: '{{count}} rows had no description and were skipped', count: skippedEmpty })}
@@ -351,7 +351,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                 </div>
               )}
               {invalidNumbers > 0 && (
-                <div className="flex items-center gap-2 text-amber-700">
+                <div className="flex items-center gap-2 text-semantic-warning">
                   <AlertTriangle size={14} />
                   <span className="text-xs">
                     {t('boq.paste_invalid_numbers', { defaultValue: '{{count}} number cells could not be read and kept their default (qty 1, rate 0)', count: invalidNumbers })}
@@ -359,7 +359,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                 </div>
               )}
               {reviewCells.length > 0 && (
-                <div className="flex items-center gap-2 text-amber-700">
+                <div className="flex items-center gap-2 text-semantic-warning">
                   <AlertTriangle size={14} />
                   <span className="text-xs">
                     {t('boq.paste_ambiguous_numbers', { defaultValue: '{{count}} number cells could be read two ways (for example 1,250) and are marked below: check them before importing', count: reviewCells.length })}

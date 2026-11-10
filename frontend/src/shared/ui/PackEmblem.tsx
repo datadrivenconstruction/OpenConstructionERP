@@ -91,7 +91,7 @@ function subdivisionCode(pack: PackEmblemPack): string | null {
 }
 
 export function PackEmblem({ pack, size, className = '' }: PackEmblemProps) {
-  const radius = size <= 24 ? 'rounded-[5px]' : 'rounded-xl';
+  const radius = size <= 24 ? 'rounded-sm' : 'rounded-xl';
   const country = flagCodeFor(pack);
   const subdivision = country ? subdivisionCode(pack) : null;
   // Below this the plate is too small to hold a legible code, and the pack's
@@ -133,7 +133,7 @@ export function PackEmblem({ pack, size, className = '' }: PackEmblemProps) {
 
   return (
     <span
-      className={`flex shrink-0 items-center justify-center font-bold tracking-tight text-white shadow-sm ${radius} ${className}`}
+      className={`flex shrink-0 items-center justify-center font-semibold tracking-tight text-white shadow-sm ${radius} ${className}`}
       style={{
         width: size,
         height: size,

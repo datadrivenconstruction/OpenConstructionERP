@@ -690,11 +690,11 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
 
               {/* Warnings */}
               {preview.warnings.length > 0 && (
-                <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 overflow-hidden">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setWarningsExpanded((v) => !v)}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-amber-800 dark:text-amber-300 font-medium"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-semantic-warning font-medium"
                   >
                     {warningsExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                     <AlertTriangle size={12} />
@@ -706,7 +706,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
                   {warningsExpanded && (
                     <div className="px-3 pb-2 space-y-1">
                       {preview.warnings.map((w, i) => (
-                        <p key={i} className="text-2xs text-amber-700 dark:text-amber-400">
+                        <p key={i} className="text-2xs text-semantic-warning">
                           {importIssueText(w, t, fmtNumber)}
                         </p>
                       ))}
@@ -717,11 +717,11 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
 
               {/* Errors */}
               {preview.errors.length > 0 && (
-                <div className="rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 overflow-hidden">
+                <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setErrorsExpanded((v) => !v)}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-800 dark:text-red-300 font-medium"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-semantic-error font-medium"
                   >
                     {errorsExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                     <AlertTriangle size={12} />
@@ -733,7 +733,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
                   {errorsExpanded && (
                     <div className="px-3 pb-2 space-y-1">
                       {preview.errors.map((e, i) => (
-                        <p key={i} className="text-2xs text-red-700 dark:text-red-400">
+                        <p key={i} className="text-2xs text-semantic-error">
                           {importIssueText(e, t, fmtNumber)}
                         </p>
                       ))}
@@ -838,7 +838,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
               </p>
 
               {preview.warnings.length > 0 && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300">
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 text-xs text-semantic-warning">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>
                     {t('boq.import_preview.confirm_warnings', {

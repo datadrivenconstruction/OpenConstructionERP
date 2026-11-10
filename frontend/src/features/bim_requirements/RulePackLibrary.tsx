@@ -157,7 +157,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
           type="button"
           onClick={handleOpenCustom}
           data-testid={`${testId}-paste-custom`}
-          className="flex items-center gap-1.5 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3 py-1.5 text-[12px] font-medium text-oe-blue hover:bg-oe-blue/10"
+          className="flex items-center gap-1.5 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3 py-1.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/10"
         >
           <ClipboardEdit size={14} />
           {t('rulePacks.paste_custom', { defaultValue: 'Paste your own YAML' })}
@@ -188,7 +188,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
       {/* Model-format switch — swaps the whole library between the IFC and
           Revit flavours of the same templates. */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-content-secondary">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-content-secondary">
           <Boxes size={14} className="text-content-tertiary" />
           {t('rulePacks.format_label', { defaultValue: 'Model format' })}
         </span>
@@ -210,7 +210,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
                 onClick={() => setFormat(f.value)}
                 data-testid={`${testId}-format-${f.value}`}
                 className={clsx(
-                  'rounded-md px-3 py-1 text-[12px] font-semibold transition-colors',
+                  'rounded-md px-3 py-1 text-xs font-semibold transition-colors',
                   active
                     ? 'bg-oe-blue text-white shadow-sm'
                     : 'text-content-secondary hover:text-content-primary',
@@ -222,7 +222,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
           })}
         </div>
         <span
-          className="text-[11px] text-content-tertiary"
+          className="text-2xs text-content-tertiary"
           data-testid={`${testId}-format-hint`}
         >
           {t(activeFormatHint.hintKey, { defaultValue: activeFormatHint.hintDefault })}
@@ -255,7 +255,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
                 onClick={() => setCategory(f.value)}
                 data-testid={`${testId}-filter-${slug}`}
                 className={clsx(
-                  'rounded-full border px-3 py-1 text-[11px] font-medium transition-colors',
+                  'rounded-full border px-3 py-1 text-2xs font-medium transition-colors',
                   active
                     ? 'border-oe-blue bg-oe-blue text-white shadow-sm'
                     : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
@@ -279,7 +279,7 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
               defaultValue: 'Search packs…',
             })}
             data-testid={`${testId}-search`}
-            className="h-9 w-full rounded-lg border border-border-light bg-surface-primary ps-8 pe-3 text-[12px] text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="h-9 w-full rounded-lg border border-border-light bg-surface-primary ps-8 pe-3 text-xs text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
           />
         </div>
       </div>

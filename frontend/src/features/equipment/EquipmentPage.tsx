@@ -251,7 +251,7 @@ function HowEquipmentWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -919,7 +919,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               type="button"
               onClick={() => setDeleteOpen(true)}
               disabled={!eq}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               title={t('equipment.delete_hint', {
                 defaultValue: 'Permanently remove this asset',
@@ -1259,7 +1259,7 @@ function RowActions({
             e.stopPropagation();
             onDelete();
           }}
-          className="rounded p-1 text-content-tertiary hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+          className="rounded p-1 text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg"
           aria-label={deleteLabel}
           title={deleteLabel}
         >
@@ -1686,7 +1686,7 @@ function CostSummaryTab({
           <h3 className="text-sm font-semibold text-content-primary">
             {t('equipment.cost_breakdown', { defaultValue: 'Cost breakdown' })}
           </h3>
-          <span className="text-lg font-bold tabular-nums text-content-primary">
+          <span className="text-lg font-semibold tabular-nums text-content-primary">
             {fmtFixed(parseFloat(data.total_cost), 2)}
           </span>
         </div>
@@ -1859,7 +1859,7 @@ function MaintenanceTab({
                             e.stopPropagation();
                             void handleComplete(r.id);
                           }}
-                          className="rounded p-1 text-content-tertiary hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                          className="rounded p-1 text-content-tertiary hover:text-semantic-success hover:bg-semantic-success-bg"
                           aria-label={t('equipment.workorder.complete', {
                             defaultValue: 'Mark complete',
                           })}
@@ -1888,7 +1888,7 @@ function MaintenanceTab({
                           e.stopPropagation();
                           setConfirmDeleteId(r.id);
                         }}
-                        className="rounded p-1 text-content-tertiary hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                        className="rounded p-1 text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg"
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         title={t('common.delete', { defaultValue: 'Delete' })}
                       >
@@ -2044,7 +2044,7 @@ function CertificationsTab({
                     >
                       <DateDisplay value={r.valid_until} />
                       {expired && (
-                        <span className="ml-1 text-[10px] uppercase">
+                        <span className="ml-1 text-2xs uppercase">
                           {t('equipment.expired', { defaultValue: 'expired' })}
                         </span>
                       )}
@@ -2255,7 +2255,7 @@ function DamageTab({
 function KV({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm text-content-primary">{value}</p>
@@ -2731,7 +2731,7 @@ function EquipmentFormModal({
               <div>
                 <label className={labelCls}>
                   {t('equipment.col_code', { defaultValue: 'Code' })}{' '}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-semantic-error">*</span>
                 </label>
                 <input
                   value={form.code}
@@ -2766,7 +2766,7 @@ function EquipmentFormModal({
               <div className="sm:col-span-2">
                 <label className={labelCls}>
                   {t('equipment.col_name', { defaultValue: 'Name' })}{' '}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-semantic-error">*</span>
                 </label>
                 <input
                   value={form.name}

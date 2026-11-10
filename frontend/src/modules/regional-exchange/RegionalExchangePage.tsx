@@ -679,7 +679,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   </button>
                 </div>
                 {parsedPositions && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-semantic-success">
                     <CheckCircle2 size={14} />
                     {t('regional.positions_found_count', {
                       count: parsedPositions.length,
@@ -705,7 +705,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   </div>
                 )}
                 {parseError && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-rose-600">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-semantic-error">
                     <AlertTriangle size={14} />
                     {parseError}
                   </div>
@@ -877,15 +877,15 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
             <div
               className={`rounded-xl border p-4 ${
                 importResult.errors.length > 0
-                  ? 'border-amber-300 bg-amber-50/50 dark:bg-amber-950/20'
-                  : 'border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20'
+                  ? 'border-semantic-warning/30 bg-semantic-warning/10'
+                  : 'border-semantic-success/30 bg-semantic-success/10'
               }`}
             >
               <div className="flex items-center gap-2 text-sm font-medium">
                 {importResult.errors.length > 0 ? (
-                  <AlertTriangle size={16} className="text-amber-600" />
+                  <AlertTriangle size={16} className="text-semantic-warning" />
                 ) : (
-                  <CheckCircle2 size={16} className="text-emerald-600" />
+                  <CheckCircle2 size={16} className="text-semantic-success" />
                 )}
                 <span className="text-content-primary">
                   {importResult.imported === null ? (
@@ -1029,7 +1029,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   <div className="text-2xs text-content-tertiary uppercase">
                     {t('regional.positions', { defaultValue: 'Positions' })}
                   </div>
-                  <div className="text-lg font-bold text-content-primary">
+                  <div className="text-lg font-semibold text-content-primary">
                     {exportablePositions.filter((p) => !p.isSection).length}
                   </div>
                 </div>
@@ -1037,7 +1037,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   <div className="text-2xs text-content-tertiary uppercase">
                     {t('regional.sections', { defaultValue: 'Sections' })}
                   </div>
-                  <div className="text-lg font-bold text-content-primary">
+                  <div className="text-lg font-semibold text-content-primary">
                     {exportablePositions.filter((p) => p.isSection).length}
                   </div>
                 </div>
@@ -1045,7 +1045,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   <div className="text-2xs text-content-tertiary uppercase">
                     {t('regional.format_label', { defaultValue: 'Format' })}
                   </div>
-                  <div className="text-lg font-bold text-content-primary">
+                  <div className="text-lg font-semibold text-content-primary">
                     {exportFormat === 'detailed'
                       ? t('regional.detailed_short', { defaultValue: 'Detailed' })
                       : t('regional.summary_short', { defaultValue: 'Summary' })}
@@ -1055,7 +1055,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   <div className="text-2xs text-content-tertiary uppercase">
                     {t('regional.prices_label', { defaultValue: 'Prices' })}
                   </div>
-                  <div className="text-lg font-bold text-content-primary">
+                  <div className="text-lg font-semibold text-content-primary">
                     {includePrices
                       ? t('common.yes', { defaultValue: 'Yes' })
                       : t('common.no', { defaultValue: 'No' })}

@@ -156,7 +156,7 @@ function ConnectionCard({ c, selected, onSelect }: { c: Connection; selected: bo
       </div>
       <div className="mt-1 text-2xs text-content-tertiary">
         {needsAuthorisation(c) ? (
-          <span className="text-amber-700 dark:text-amber-400">{t('accountingSync.card.not_authorised', { defaultValue: 'Not authorised yet' })}</span>
+          <span className="text-semantic-warning">{t('accountingSync.card.not_authorised', { defaultValue: 'Not authorised yet' })}</span>
         ) : c.last_sync_at ? (
           <>
             {t('accountingSync.card.last_sync', { defaultValue: 'Last sync' })}: <DateDisplay value={c.last_sync_at} />

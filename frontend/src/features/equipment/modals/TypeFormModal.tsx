@@ -181,7 +181,7 @@ export function TypeFormModal({
           <div>
             <label className={labelCls}>
               {t('equipment.type.code', { defaultValue: 'Code' })}{' '}
-              <span className="text-rose-500">*</span>
+              <span className="text-semantic-error">*</span>
             </label>
             <input
               value={code}
@@ -202,7 +202,7 @@ export function TypeFormModal({
           <div>
             <label className={labelCls}>
               {t('equipment.type.name', { defaultValue: 'Name' })}{' '}
-              <span className="text-rose-500">*</span>
+              <span className="text-semantic-error">*</span>
             </label>
             <input
               value={name}

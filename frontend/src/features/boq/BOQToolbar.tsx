@@ -331,7 +331,7 @@ export function BOQToolbar({
   };
 
   const scoreColor = (s: number) =>
-    s >= 80 ? 'text-emerald-600' : s >= 50 ? 'text-amber-600' : 'text-red-600';
+    s >= 80 ? 'text-semantic-success' : s >= 50 ? 'text-semantic-warning' : 'text-semantic-error';
 
   // Bug 7: stick BELOW the app header (52px / --oe-header-height) — using top-0 collides
   // with the sticky header (z-30), pushing the toolbar out of view when scrolling.
@@ -412,7 +412,7 @@ export function BOQToolbar({
             >
               {isValidating ? t('boq.validating', { defaultValue: 'Checking...' }) : t('boq.validate', { defaultValue: 'Validate' })}
               {lastValidationScore != null && !isValidating && (
-                <span className={`ml-1 text-2xs font-bold tabular-nums ${scoreColor(lastValidationScore)}`}>
+                <span className={`ml-1 text-2xs font-semibold tabular-nums ${scoreColor(lastValidationScore)}`}>
                   {lastValidationScore}%
                 </span>
               )}
@@ -657,7 +657,7 @@ export function BOQToolbar({
           />
           {onCarbonFootprint && (
             <IconBtn
-              icon={<Leaf size={15} className="text-emerald-600" />}
+              icon={<Leaf size={15} className="text-semantic-success" />}
               title={t('boq.carbon_footprint_tip', { defaultValue: 'Analyse the embodied carbon of this BOQ from EPD material factors' })}
               onClick={onCarbonFootprint}
             />
@@ -808,7 +808,7 @@ export function BOQToolbar({
           {/* The number */}
           <span
             data-testid="boq-grand-total"
-            className="text-2xl font-bold leading-none text-content-primary"
+            className="text-2xl font-semibold leading-none text-content-primary"
             title={
               summary.displayRate != null && summary.displayCurrency
                 ? t('boq.grand_total_conversion_tooltip_v2', {
@@ -1035,7 +1035,7 @@ function QualityAiMenu(props: QualityAiMenuProps) {
           >
             {/* Quality section */}
             <div className="px-3 pt-2.5 pb-1 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-content-quaternary">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
                 {t('boq.toolbar_quality', { defaultValue: 'Quality' })}
               </span>
             </div>
@@ -1049,7 +1049,7 @@ function QualityAiMenu(props: QualityAiMenuProps) {
               />
               {onCheckAnomalies && (
                 <MenuRow
-                  icon={<AlertTriangle size={14} className={anomalyCount ? 'text-amber-500' : isCheckingAnomalies ? 'animate-pulse text-amber-500' : 'text-content-tertiary'} />}
+                  icon={<AlertTriangle size={14} className={anomalyCount ? 'text-semantic-warning' : isCheckingAnomalies ? 'animate-pulse text-semantic-warning' : 'text-content-tertiary'} />}
                   label={isCheckingAnomalies
                     ? t('boq.checking_anomalies', { defaultValue: 'Checking...' })
                     : anomalyCount
@@ -1058,13 +1058,13 @@ function QualityAiMenu(props: QualityAiMenuProps) {
                   hint={t('boq.anomaly_tip', { defaultValue: 'Compares each unit rate against median market rates from the cost database. Flags overpriced and underpriced positions.' })}
                   onClick={isCheckingAnomalies && onCancelAnomalies ? fire(onCancelAnomalies) : fire(onCheckAnomalies ?? (() => {}))}
                   trailing={isCheckingAnomalies && onCancelAnomalies ? (
-                    <span className="text-2xs font-medium text-red-500">{t('common.cancel', { defaultValue: 'Cancel' })}</span>
+                    <span className="text-2xs font-medium text-semantic-error">{t('common.cancel', { defaultValue: 'Cancel' })}</span>
                   ) : null}
                 />
               )}
               {anomalyCount !== undefined && anomalyCount > 0 && onAcceptAllAnomalies && (
                 <MenuRow
-                  icon={<Check size={14} className="text-green-500" />}
+                  icon={<Check size={14} className="text-semantic-success" />}
                   label={t('boq.accept_all_anomaly_suggestions', { defaultValue: 'Accept All Suggested Rates ({{count}})', count: anomalyCount })}
                   onClick={fire(onAcceptAllAnomalies)}
                 />
@@ -1073,7 +1073,7 @@ function QualityAiMenu(props: QualityAiMenuProps) {
 
             {/* AI section */}
             <div className="px-3 pt-2.5 pb-1 border-b border-t border-border-light dark:border-border-dark bg-gradient-to-r from-violet-50/40 to-blue-50/40 dark:from-violet-950/20 dark:to-blue-950/20">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300 inline-flex items-center gap-1">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300 inline-flex items-center gap-1">
                 <Sparkles size={10} /> AI
               </span>
             </div>
@@ -1132,7 +1132,7 @@ function MenuRow({ icon, label, hint, active, disabled, trailing, onClick }: Men
           {trailing}
         </div>
         {hint && (
-          <div className="text-[10px] text-content-tertiary leading-snug mt-0.5 line-clamp-2">
+          <div className="text-2xs text-content-tertiary leading-snug mt-0.5 line-clamp-2">
             {hint}
           </div>
         )}
@@ -1181,7 +1181,7 @@ function IconBtn({
     >
       {icon}
       {badge != null && badge > 0 && (
-        <span className="absolute -right-1 -top-1 inline-flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-oe-blue px-0.5 text-[9px] font-bold leading-none text-white tabular-nums">
+        <span className="absolute -right-1 -top-1 inline-flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-oe-blue px-0.5 text-2xs font-semibold leading-none text-white tabular-nums">
           {badge > 99 ? '99+' : badge}
         </span>
       )}

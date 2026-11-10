@@ -194,12 +194,12 @@ export function PresenceTooltip({ user, onClose }: PresenceTooltipProps) {
       {/* Status */}
       <p className={clsx(
         'mt-1.5 flex items-center gap-1.5 text-xs',
-        isIdle ? 'text-content-quaternary' : 'text-emerald-600 dark:text-emerald-400',
+        isIdle ? 'text-content-quaternary' : 'text-semantic-success',
       )}>
         <span
           className={clsx(
             'inline-block h-1.5 w-1.5 rounded-full',
-            isIdle ? 'bg-content-quaternary' : 'bg-emerald-500',
+            isIdle ? 'bg-content-quaternary' : 'bg-semantic-success',
           )}
         />
         {statusLabel}

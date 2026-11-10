@@ -36,14 +36,14 @@ export function PortalBrandHeader() {
         />
       ) : (
         <span
-          className="block max-w-full truncate text-center text-2xl font-extrabold leading-none text-content-primary"
+          className="block max-w-full truncate text-center text-2xl font-semibold leading-none text-content-primary"
           title={companyName}
         >
           {companyName}
         </span>
       )}
       {/* Subordinate attribution stays visible (AGPL-3.0), as on the login page. */}
-      <span className="mt-2 block text-[11px] leading-none text-content-tertiary">
+      <span className="mt-2 block text-2xs leading-none text-content-tertiary">
         by{' '}
         <span className="font-semibold tracking-tight">
           Open<span className="text-oe-blue/80">Construction</span>

@@ -31,7 +31,7 @@ export function FailureForecastCard({ equipmentId }: { equipmentId: string }) {
     return (
       <Card padding="sm">
         <p className="flex items-center gap-1.5 text-xs text-content-secondary">
-          <AlertTriangle size={13} className="text-amber-500" />
+          <AlertTriangle size={13} className="text-semantic-warning" />
           {fcQ.error
             ? getErrorMessage(fcQ.error)
             : t('equipment.forecast.unavailable', {
@@ -48,10 +48,10 @@ export function FailureForecastCard({ equipmentId }: { equipmentId: string }) {
     confidencePct >= 66 ? 'high' : confidencePct >= 33 ? 'medium' : 'low';
   const confidenceColor =
     confidenceBand === 'high'
-      ? 'bg-emerald-500'
+      ? 'bg-semantic-success'
       : confidenceBand === 'medium'
-        ? 'bg-amber-500'
-        : 'bg-rose-500';
+        ? 'bg-semantic-warning'
+        : 'bg-semantic-error';
   const confidenceLabel =
     confidenceBand === 'high'
       ? t('equipment.forecast.confidence_high', { defaultValue: 'High' })

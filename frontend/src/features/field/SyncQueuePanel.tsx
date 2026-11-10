@@ -129,7 +129,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
           data-testid="sync-queue-connectivity"
           data-state={online ? 'online' : 'offline'}
           className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-            online ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+            online ? 'bg-semantic-success-bg text-semantic-success' : 'bg-semantic-warning-bg text-semantic-warning'
           }`}
         >
           {online ? (
@@ -169,7 +169,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
           void syncNow();
         }}
         disabled={summary.isEmpty || syncing || !online}
-        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-semantic-info px-4 text-sm font-semibold text-white disabled:opacity-50"
       >
         <RefreshCw size={18} aria-hidden="true" className={syncing ? 'animate-spin' : ''} />
         {syncing
@@ -177,7 +177,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
           : t('field.sync_queue.sync_now', { defaultValue: 'Sync now' })}
       </button>
       {!online && !summary.isEmpty && (
-        <p className="-mt-1 text-xs text-amber-700">
+        <p className="-mt-1 text-xs text-semantic-warning">
           {t('field.sync_queue.offline_hint', {
             defaultValue: 'You are offline. These will sync automatically when you reconnect.',
           })}
@@ -185,11 +185,11 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
       )}
 
       {refused.length > 0 && (
-        <ul data-testid="sync-queue-refused" className="flex flex-col gap-1 rounded-xl border border-rose-200 bg-rose-50/60 p-3">
+        <ul data-testid="sync-queue-refused" className="flex flex-col gap-1 rounded-xl border border-semantic-error/30 bg-semantic-error/10 p-3">
           {refused.map((r) => {
             const key = reasonKey(r.detail);
             return (
-              <li key={r.clientOpId} className="text-xs text-rose-700">
+              <li key={r.clientOpId} className="text-xs text-semantic-error">
                 <span className="font-medium">
                   {t(kindLabelKey(r.kind) ?? `field.sync_queue.kind.${r.kind}`, { defaultValue: kindLabel(r.kind) })}
                 </span>
@@ -213,7 +213,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
           data-testid="sync-queue-empty"
           className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-200 py-8 text-center"
         >
-          <CheckCircle2 size={28} className="text-emerald-500" aria-hidden="true" />
+          <CheckCircle2 size={28} className="text-semantic-success" aria-hidden="true" />
           <p className="text-sm font-medium text-slate-700">
             {t('field.sync_queue.empty_title', { defaultValue: 'Everything is synced' })}
           </p>
@@ -270,14 +270,14 @@ function HeldSection({
   };
 
   return (
-    <div data-testid="sync-queue-held" className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
-      <p className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+    <div data-testid="sync-queue-held" className="flex flex-col gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-3">
+      <p className="flex items-center gap-2 text-sm font-semibold text-semantic-warning">
         <Lock size={16} aria-hidden="true" />
         {t('field.sync_queue.held_title', { defaultValue: 'Captures of other users' })}
       </p>
       <ul className="flex flex-col gap-0.5">
         {[...who.entries()].map(([name, count]) => (
-          <li key={name} data-testid="sync-queue-held-owner" className="text-xs text-amber-800">
+          <li key={name} data-testid="sync-queue-held-owner" className="text-xs text-semantic-warning">
             {name
               ? t('field.sync_queue.held_waiting', {
                   defaultValue: '{{n}} waiting for {{name}} to sign in',
@@ -291,14 +291,14 @@ function HeldSection({
           </li>
         ))}
       </ul>
-      <p className="text-xs text-amber-800">
+      <p className="text-xs text-semantic-warning">
         {t('field.sync_queue.held_hint', {
           defaultValue: 'They are never sent under your sign-in. Export them or discard them on this device.',
         })}
       </p>
       {confirming ? (
         <div className="flex flex-col gap-2" data-testid="sync-queue-held-confirm">
-          <p className="text-xs font-medium text-rose-700">
+          <p className="text-xs font-medium text-semantic-error">
             {t('field.sync_queue.held_confirm', {
               defaultValue: 'Discard {{n}} captures of other users? This cannot be undone.',
               n: ops.length,
@@ -312,7 +312,7 @@ function HeldSection({
                 setConfirming(false);
                 void discardHeld?.();
               }}
-              className="flex h-11 flex-1 items-center justify-center rounded-xl bg-rose-600 px-3 text-sm font-semibold text-white"
+              className="flex h-11 flex-1 items-center justify-center rounded-xl bg-semantic-error px-3 text-sm font-semibold text-white"
             >
               {t('field.sync_queue.held_discard', { defaultValue: 'Discard' })}
             </button>
@@ -332,7 +332,7 @@ function HeldSection({
               type="button"
               data-testid="sync-queue-held-export"
               onClick={() => void onExport()}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 text-sm font-semibold text-amber-900"
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-semantic-warning/30 px-3 text-sm font-semibold text-semantic-warning"
             >
               <Download size={16} aria-hidden="true" />
               {t('field.sync_queue.held_export', { defaultValue: 'Export' })}
@@ -343,7 +343,7 @@ function HeldSection({
               type="button"
               data-testid="sync-queue-held-discard"
               onClick={() => setConfirming(true)}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-rose-300 px-3 text-sm font-semibold text-rose-700"
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-semantic-error/30 px-3 text-sm font-semibold text-semantic-error"
             >
               <Trash2 size={16} aria-hidden="true" />
               {t('field.sync_queue.held_discard', { defaultValue: 'Discard' })}
@@ -376,13 +376,13 @@ function SyncQueueRow({
       data-testid="sync-queue-row"
       data-status={row.status}
       className={`flex items-start gap-3 rounded-xl border p-3 ${
-        failing ? 'border-rose-200 bg-rose-50/60' : 'border-slate-200'
+        failing ? 'border-semantic-error/30 bg-semantic-error/10' : 'border-slate-200'
       }`}
     >
       {/* Status icon. */}
       <div className="mt-0.5 shrink-0">
         {failing ? (
-          <AlertTriangle size={18} className="text-rose-500" aria-hidden="true" />
+          <AlertTriangle size={18} className="text-semantic-error" aria-hidden="true" />
         ) : (
           <Clock size={18} className="text-slate-400" aria-hidden="true" />
         )}
@@ -394,7 +394,7 @@ function SyncQueueRow({
           <p className="truncate text-sm font-medium text-slate-900">
             {t(kindLabelKey(row.kind) ?? `field.sync_queue.kind.${row.kind}`, { defaultValue: kindLabel(row.kind) })}
           </p>
-          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-slate-500">
             {row.method}
           </span>
         </div>
@@ -402,7 +402,7 @@ function SyncQueueRow({
           <span>{formatRelativeTime(row.queuedAt, now)}</span>
           <span aria-hidden="true">·</span>
           {failing ? (
-            <span data-testid="sync-queue-row-status" className="font-medium text-rose-600">
+            <span data-testid="sync-queue-row-status" className="font-medium text-semantic-error">
               {t('field.sync_queue.status_failing', {
                 defaultValue: 'Retry {{count}}',
                 count: row.retries,
@@ -425,7 +425,7 @@ function SyncQueueRow({
         disabled={dismissing}
         aria-label={t('field.sync_queue.dismiss', { defaultValue: 'Dismiss' })}
         title={t('field.sync_queue.dismiss', { defaultValue: 'Dismiss' })}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-rose-600 disabled:opacity-50"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-semantic-error disabled:opacity-50"
       >
         <Trash2 size={16} aria-hidden="true" />
       </button>

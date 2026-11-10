@@ -66,7 +66,7 @@ export function OutlierBadge({ className }: { className?: string }) {
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+        'inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning',
         className,
       )}
       title={t('aiest.map.outlier_tooltip', {
@@ -93,7 +93,7 @@ function PassRow({ pass }: { pass: MappingPass }) {
       <Icon
         className={clsx(
           'mt-0.5 h-3.5 w-3.5 shrink-0',
-          hasOutliers ? 'text-amber-500' : 'text-content-tertiary',
+          hasOutliers ? 'text-semantic-warning' : 'text-content-tertiary',
         )}
       />
       <div className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ function PassRow({ pass }: { pass: MappingPass }) {
               ? t(meta.labelKey, { defaultValue: meta.labelFallback })
               : meta.labelFallback}
           </span>
-          <span className="text-[11px] text-content-tertiary">
+          <span className="text-2xs text-content-tertiary">
             {t('aiest.map.kept_dropped', {
               defaultValue: '{{kept}} kept, {{dropped}} demoted',
               kept: pass.kept,
@@ -112,20 +112,20 @@ function PassRow({ pass }: { pass: MappingPass }) {
           </span>
         </div>
         {pass.notes && (
-          <div className="mt-0.5 text-[11px] leading-snug text-content-secondary">{pass.notes}</div>
+          <div className="mt-0.5 text-2xs leading-snug text-content-secondary">{pass.notes}</div>
         )}
         {/* Rate-sanity benchmark band: the catalogue-relative bounds used to
             flag outliers. Shown as median-relative multipliers so the band is
             currency- and catalogue-agnostic (e.g. "0.5x to 8x of the median").*/}
         {bench && bench.band_low != null && bench.band_high != null && (
-          <div className="mt-0.5 text-[11px] text-content-tertiary">
+          <div className="mt-0.5 text-2xs text-content-tertiary">
             {t('aiest.map.band', {
               defaultValue: 'Plausible band: {{low}}x to {{high}}x of the median rate',
               low: bench.band_low,
               high: bench.band_high,
             })}
             {hasOutliers && (
-              <span className="ml-1.5 inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+              <span className="ml-1.5 inline-flex items-center gap-1 font-medium text-semantic-warning">
                 <AlertTriangle className="h-3 w-3" />
                 {t('aiest.map.band_outliers', {
                   defaultValue: '{{n}} flagged',
@@ -176,7 +176,7 @@ export function MappingTrace({ trace, defaultOpen = false }: MappingTraceProps) 
         <span className="text-xs font-medium text-content-secondary">
           {t('aiest.map.why_this_rate', { defaultValue: 'Why this rate' })}
         </span>
-        <span className="ml-auto text-[11px] text-content-tertiary">
+        <span className="ml-auto text-2xs text-content-tertiary">
           {t('aiest.map.n_passes', { defaultValue: '{{n}} passes', n: passes.length })}
         </span>
       </button>
@@ -189,7 +189,7 @@ export function MappingTrace({ trace, defaultOpen = false }: MappingTraceProps) 
             ))}
           </ol>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-border-light pt-2 text-[11px] text-content-tertiary">
+          <div className="flex flex-wrap items-center gap-2 border-t border-border-light pt-2 text-2xs text-content-tertiary">
             {trace?.final_method && (
               <span>
                 {t('aiest.map.final_method', {
@@ -201,7 +201,7 @@ export function MappingTrace({ trace, defaultOpen = false }: MappingTraceProps) 
               </span>
             )}
             {trace?.needs_human_reason && (
-              <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+              <span className="inline-flex items-center gap-1 rounded bg-semantic-warning-bg px-1.5 py-0.5 font-medium text-semantic-warning">
                 <AlertTriangle className="h-3 w-3" />
                 {t('aiest.map.needs_human', {
                   defaultValue: 'Parked for review: every rate is an outlier',

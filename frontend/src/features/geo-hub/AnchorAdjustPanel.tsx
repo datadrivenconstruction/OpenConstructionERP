@@ -59,11 +59,11 @@ const PRECISION_LABEL: Record<Precision, string> = {
 };
 
 const PRECISION_TONE: Record<Precision, string> = {
-  address: 'bg-emerald-500/15 text-emerald-200 ring-emerald-400/30',
+  address: 'bg-semantic-success/15 text-emerald-200 ring-emerald-400/30',
   street: 'bg-lime-500/15 text-lime-200 ring-lime-400/30',
-  city: 'bg-amber-500/15 text-amber-200 ring-amber-400/30',
+  city: 'bg-semantic-warning/15 text-amber-200 ring-amber-400/30',
   region: 'bg-orange-500/15 text-orange-200 ring-orange-400/30',
-  country: 'bg-red-500/15 text-red-200 ring-red-400/30',
+  country: 'bg-semantic-error/15 text-red-200 ring-red-400/30',
 };
 
 // Persisted across reloads so the user's preferred chrome density survives
@@ -232,13 +232,13 @@ export function AnchorAdjustPanel({
         <span
           className={[
             'inline-flex h-7 w-7 items-center justify-center rounded-md',
-            'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30',
+            'bg-semantic-success/15 text-emerald-300 ring-1 ring-emerald-400/30',
           ].join(' ')}
         >
           <MapPinned size={13} strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-2xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <div className="text-2xs font-semibold uppercase tracking-wider text-slate-400">
             {t('geo_hub.adjust.title', { defaultValue: 'Project anchor' })}
           </div>
           <div className="font-mono text-2xs text-slate-200 tabular-nums">
@@ -314,7 +314,7 @@ export function AnchorAdjustPanel({
             'inline-flex items-center gap-1 rounded-md',
             'px-2 py-1 text-2xs font-medium ring-1',
             dragMode
-              ? 'bg-emerald-500 text-white ring-emerald-400'
+              ? 'bg-semantic-success text-white ring-semantic-success/60'
               : 'border border-white/15 bg-white/5 hover:bg-white/10 ring-transparent',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}

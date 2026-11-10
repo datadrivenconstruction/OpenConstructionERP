@@ -42,7 +42,7 @@ export function MenuBottomNav({ onMore }: { onMore: () => void }) {
               end={route === '/'}
               className={({ isActive }) =>
                 clsx(
-                  'flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px]',
+                  'flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-2xs',
                   isActive ? 'text-oe-blue' : 'text-content-tertiary',
                 )
               }
@@ -55,7 +55,7 @@ export function MenuBottomNav({ onMore }: { onMore: () => void }) {
         <button
           type="button"
           onClick={onMore}
-          className="flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] text-content-tertiary"
+          className="flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-2xs text-content-tertiary"
         >
           <Menu size={18} strokeWidth={1.75} aria-hidden />
           <span>{t('menu_layout.more', { defaultValue: 'More' })}</span>

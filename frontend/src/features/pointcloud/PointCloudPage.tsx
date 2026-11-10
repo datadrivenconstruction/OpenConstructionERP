@@ -210,7 +210,7 @@ function ScanDetails({ scan }: { scan: ScanDataset }) {
 
   if (status === 'unreadable') {
     return (
-      <div className="mt-1.5 flex items-start gap-1.5 text-2xs text-amber-600 dark:text-amber-400">
+      <div className="mt-1.5 flex items-start gap-1.5 text-2xs text-semantic-warning">
         <AlertCircle size={11} className="mt-px shrink-0" />
         <span>
           {t('pointcloud.meta_unreadable', {
@@ -789,9 +789,9 @@ export function PointCloudPage() {
       )}
 
       {uploadError && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950/20">
-          <AlertCircle size={14} className="mt-0.5 shrink-0 text-red-500" />
-          <p className="text-2xs text-red-700 dark:text-red-300">{uploadError}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3">
+          <AlertCircle size={14} className="mt-0.5 shrink-0 text-semantic-error" />
+          <p className="text-2xs text-semantic-error">{uploadError}</p>
         </div>
       )}
 

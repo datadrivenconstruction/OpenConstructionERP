@@ -93,7 +93,7 @@ export function LinkedFormulaPanel({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 text-[11px]" data-testid="linked-formula-panel">
+    <div className="flex flex-col gap-2 p-3 text-2xs" data-testid="linked-formula-panel">
       <label className="text-content-secondary">
         {t('boq.formula_per_element', { defaultValue: 'Formula per element' })}
         <input
@@ -121,7 +121,7 @@ export function LinkedFormulaPanel({
             type="button"
             onClick={() => insertChip(c.name)}
             title={`${c.label} (${c.count}/${elements.length})`}
-            className="rounded border border-border-light px-1.5 py-0.5 font-mono text-[10px] hover:bg-emerald-500 hover:text-white"
+            className="rounded border border-border-light px-1.5 py-0.5 font-mono text-2xs hover:bg-semantic-success hover:text-white"
           >
             {c.name}
           </button>
@@ -148,7 +148,7 @@ export function LinkedFormulaPanel({
 
       <div className="rounded border border-border-light/60 p-2" data-testid="formula-preview">
         {preview.error ? (
-          <div className="text-red-600">{preview.error}</div>
+          <div className="text-semantic-error">{preview.error}</div>
         ) : formula.trim() === '' ? (
           <div className="text-content-tertiary">
             {t('boq.formula_enter_hint', { defaultValue: 'Enter a formula to see the result' })}
@@ -159,7 +159,7 @@ export function LinkedFormulaPanel({
               {t('boq.formula_total', { defaultValue: 'Total' })}:{' '}
               <span data-testid="formula-total">{preview.total === null ? '-' : fmt(preview.total)}</span>
             </div>
-            <ul className="max-h-24 overflow-y-auto font-mono text-[10px]">
+            <ul className="max-h-24 overflow-y-auto font-mono text-2xs">
               {preview.rows.map((r) => (
                 <li key={r.id} className="flex justify-between gap-2">
                   <span className="truncate">{r.label}</span>
@@ -168,12 +168,12 @@ export function LinkedFormulaPanel({
               ))}
             </ul>
             {preview.skipped.length > 0 && (
-              <div className="mt-1 text-amber-700" data-testid="formula-skipped">
+              <div className="mt-1 text-semantic-warning" data-testid="formula-skipped">
                 {t('boq.formula_skipped', {
                   defaultValue: '{{n}} element(s) skipped, not counted as 0:',
                   n: preview.skipped.length,
                 })}
-                <ul className="font-mono text-[10px]">
+                <ul className="font-mono text-2xs">
                   {preview.skipped.map((s) => (
                     <li key={s.id} className="truncate">
                       {s.label}
@@ -188,7 +188,7 @@ export function LinkedFormulaPanel({
       </div>
 
       {pending && canWrite && preview.total !== null && (
-        <div className="rounded border border-amber-300 bg-amber-50 p-2 dark:bg-amber-950/20" data-testid="formula-confirm">
+        <div className="rounded border border-semantic-warning/30 bg-semantic-warning-bg p-2" data-testid="formula-confirm">
           {pending === 'set'
             ? t('boq.formula_confirm_set', {
                 defaultValue: 'Quantity changes from {{from}} to {{to}}; the formula is saved on the position.',
@@ -205,7 +205,7 @@ export function LinkedFormulaPanel({
               type="button"
               disabled={busy}
               onClick={confirm}
-              className="inline-flex items-center gap-1 rounded bg-emerald-600 px-2 py-1 text-white"
+              className="inline-flex items-center gap-1 rounded bg-semantic-success px-2 py-1 text-white"
               data-testid="formula-confirm-btn"
             >
               {busy && <Loader2 size={10} className="animate-spin" />}
@@ -217,14 +217,14 @@ export function LinkedFormulaPanel({
           </div>
         </div>
       )}
-      {error && <div className="text-red-600">{error}</div>}
+      {error && <div className="text-semantic-error">{error}</div>}
 
       <div className="flex gap-2">
         <button
           type="button"
           disabled={!canWrite}
           onClick={() => setPending('set')}
-          className="flex-1 rounded bg-emerald-600 px-2 py-1 text-white disabled:opacity-40"
+          className="flex-1 rounded bg-semantic-success px-2 py-1 text-white disabled:opacity-40"
           data-testid="formula-set"
         >
           {t('boq.bim_qty_use_as_quantity', { defaultValue: 'Set as quantity' })}
@@ -233,7 +233,7 @@ export function LinkedFormulaPanel({
           type="button"
           disabled={!canWrite || !boqId}
           onClick={() => setPending('link')}
-          className="flex-1 rounded border border-emerald-600 px-2 py-1 text-emerald-700 disabled:opacity-40"
+          className="flex-1 rounded border border-semantic-success/60 px-2 py-1 text-semantic-success disabled:opacity-40"
           data-testid="formula-link"
         >
           {t('boq.formula_link_to_model', { defaultValue: 'Link to model' })}

@@ -44,7 +44,7 @@ const KIND_LABEL_FALLBACK: Record<ReportKind, string> = {
 function Saved() {
   const { t } = useTranslation();
   return (
-    <p role="status" data-testid="report-saved" className="flex items-center gap-2 text-sm text-emerald-700">
+    <p role="status" data-testid="report-saved" className="flex items-center gap-2 text-sm text-semantic-success">
       <Check size={16} aria-hidden="true" />
       {t('field.report.saved', { defaultValue: 'Saved on this device. It will sync when there is signal.' })}
     </p>
@@ -58,7 +58,7 @@ function SaveButton({ disabled }: { disabled: boolean }) {
       type="submit"
       disabled={disabled}
       data-testid="report-save"
-      className="h-14 rounded-xl bg-sky-600 text-base font-semibold text-white disabled:opacity-50"
+      className="h-14 rounded-xl bg-semantic-info text-base font-semibold text-white disabled:opacity-50"
     >
       {t('field.report.save', { defaultValue: 'Save' })}
     </button>
@@ -78,7 +78,7 @@ function LevelPicker({ value, onChange, label }: { value: Level; onChange: (v: L
             aria-pressed={value === l.value}
             onClick={() => onChange(l.value)}
             className={`h-12 flex-1 rounded-xl border text-sm font-medium ${
-              value === l.value ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700'
+              value === l.value ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-slate-300 bg-white text-slate-700'
             }`}
           >
             {t(`field.report.level_${l.key}`, { defaultValue: l.fallback })}
@@ -241,7 +241,7 @@ function HaulForm({ enqueue }: { enqueue: Enqueue }) {
       <label className={labelCls}>
         {t('field.report.haul_net_t', { defaultValue: 'Net weight (t)' })}
         <input
-          className={`${inputCls} ${netInvalid ? 'border-rose-500' : ''}`}
+          className={`${inputCls} ${netInvalid ? 'border-semantic-error/60' : ''}`}
           inputMode="decimal"
           aria-invalid={netInvalid}
           value={net}
@@ -277,7 +277,7 @@ export function FieldReportTab(props: RaiseProps) {
             data-testid={`report-kind-${k}`}
             onClick={() => setKind(k)}
             className={`min-h-[44px] rounded-xl border px-2 text-sm font-medium ${
-              kind === k ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700'
+              kind === k ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-slate-300 bg-white text-slate-700'
             }`}
           >
             {t(`field.report.kind_${k}`, { defaultValue: KIND_LABEL_FALLBACK[k] })}

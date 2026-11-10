@@ -147,7 +147,7 @@ function IndexTile({
   return (
     <div className="rounded-md border border-border bg-surface-primary p-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] uppercase tracking-wide text-content-tertiary">{label}</span>
+        <span className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</span>
         <Badge variant={indexTone(band) as Tone} size="sm">
           {bandLabel(band, t)}
         </Badge>
@@ -155,7 +155,7 @@ function IndexTile({
       <div className="mt-0.5 text-sm text-content-primary">
         <Figure value={value} />
       </div>
-      {hint && <p className="mt-0.5 text-[11px] text-content-tertiary">{hint}</p>}
+      {hint && <p className="mt-0.5 text-2xs text-content-tertiary">{hint}</p>}
     </div>
   );
 }
@@ -191,13 +191,13 @@ function MoneyTile({
   return (
     <div className="rounded-md border border-border bg-surface-primary p-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] uppercase tracking-wide text-content-tertiary">{label}</span>
+        <span className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</span>
         {tone && <span className={`h-1.5 w-1.5 rounded-full ${TONE_DOT[tone]}`} />}
       </div>
       <div className="mt-0.5 text-sm text-content-primary">
         <Figure value={value} currency={currency} />
       </div>
-      {hint && <p className="mt-0.5 text-[11px] text-content-tertiary">{hint}</p>}
+      {hint && <p className="mt-0.5 text-2xs text-content-tertiary">{hint}</p>}
     </div>
   );
 }

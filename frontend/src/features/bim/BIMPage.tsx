@@ -222,8 +222,8 @@ function StatPill({ label, value, icon: Icon }: { label: string; value: string |
   return (
     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-secondary border border-border-light">
       <Icon size={13} className="text-content-tertiary" />
-      <span className="text-[11px] font-medium text-content-tertiary">{label}</span>
-      <span className="text-[11px] font-bold text-content-primary tabular-nums">{value}</span>
+      <span className="text-2xs font-medium text-content-tertiary">{label}</span>
+      <span className="text-2xs font-semibold text-content-primary tabular-nums">{value}</span>
     </div>
   );
 }
@@ -269,10 +269,10 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
               className="text-content-tertiary group-hover:text-content-secondary transition-colors"
             />
             <Layers size={12} className="text-content-tertiary shrink-0" />
-            <span className="text-[10px] font-medium text-content-secondary">
+            <span className="text-2xs font-medium text-content-secondary">
               {t('bim.models_label', { defaultValue: 'Models' })}
             </span>
-            <span className="text-[10px] text-content-tertiary tabular-nums">
+            <span className="text-2xs text-content-tertiary tabular-nums">
               ({models.length})
             </span>
           </button>
@@ -306,7 +306,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
         <span className="text-xs font-semibold text-content-primary">
           {t('bim.models_label', { defaultValue: 'Models' })}
         </span>
-        <span className="text-[11px] text-content-tertiary ml-1.5">({models.length})</span>
+        <span className="text-2xs text-content-tertiary ml-1.5">({models.length})</span>
 
         {/* Collapse chevron - chevron-down icon rotates so the visual cue
             (arrow points DOWN to collapse, UP to expand) matches the
@@ -333,7 +333,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
                 onDelete={() => onDeleteModel(m.id, m.name)} />
             ))
           ) : (
-            <span className="text-[11px] text-content-quaternary">
+            <span className="text-2xs text-content-quaternary">
               {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
             </span>
           )}
@@ -430,17 +430,17 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
             <p className="text-xs font-semibold text-content-primary truncate">{model.name}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
-              <span className="text-[10px] text-content-tertiary">{statusLabel}</span>
+              <span className="text-2xs text-content-tertiary">{statusLabel}</span>
               {fmt && (
                 <>
                   <span className="text-content-quaternary">·</span>
-                  <span className="text-[10px] text-content-quaternary font-mono">{fmt}</span>
+                  <span className="text-2xs text-content-quaternary font-mono">{fmt}</span>
                 </>
               )}
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between text-[10px]">
+        <div className="flex items-center justify-between text-2xs">
           <div className="flex items-center gap-2 text-content-quaternary tabular-nums">
             {isProcessing && (model.element_count ?? 0) === 0 ? (
               <span className="inline-block w-16 h-3 rounded bg-surface-tertiary animate-pulse" />
@@ -503,7 +503,7 @@ function ConverterVersionBadge({
       });
   return (
     <div
-      className="flex items-center gap-1 text-[9px] font-medium text-content-tertiary"
+      className="flex items-center gap-1 text-2xs font-medium text-content-tertiary"
       title={tooltip}
       data-testid="ddc-converter-version-badge"
     >
@@ -908,8 +908,8 @@ function UploadPanel({
             <Upload size={16} className="text-oe-blue" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-content-primary">{t('bim.upload_panel_title')}</h2>
-            <p className="text-[10px] text-content-quaternary">{t('bim.upload_panel_subtitle')}</p>
+            <h2 className="text-sm font-semibold text-content-primary">{t('bim.upload_panel_title')}</h2>
+            <p className="text-2xs text-content-quaternary">{t('bim.upload_panel_subtitle')}</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors" aria-label={t('common.close', { defaultValue: 'Close' })}>
@@ -929,7 +929,7 @@ function UploadPanel({
               <BIMUploadJobRow key={job.id} job={job} />
             ))}
             {activeUploads.some((j) => j.status !== 'ready') && (
-              <p className="text-[10px] text-content-tertiary text-center py-1">
+              <p className="text-2xs text-content-tertiary text-center py-1">
                 {t('bim.upload_continue_working', {
                   defaultValue: 'Processing in background - you can continue working or upload another file.',
                 })}
@@ -968,8 +968,8 @@ function UploadPanel({
               <>
                 <div className="w-10 h-10 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={20} className="text-oe-blue" /></div>
                 <p className="text-sm font-medium text-content-primary">{file.name}</p>
-                <p className="text-[10px] text-content-quaternary">{formatFileSize(file.size)}</p>
-                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-[10px] text-content-tertiary hover:text-red-500 underline">{t('bim.upload_remove_file')}</button>
+                <p className="text-2xs text-content-quaternary">{formatFileSize(file.size)}</p>
+                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-2xs text-content-tertiary hover:text-red-500 underline">{t('bim.upload_remove_file')}</button>
               </>
             ) : (
               <>
@@ -991,7 +991,7 @@ function UploadPanel({
                     nobody has checked whether the proxy or the ASGI layer caps
                     the request body, and swapping a false limit for a false
                     absence of one is not an improvement. */}
-                <p className="text-[10px] text-content-quaternary">{t('bim.upload_size_hint')}</p>
+                <p className="text-2xs text-content-quaternary">{t('bim.upload_size_hint')}</p>
                 {/* Every accepted extension, not a sample. The row this
                     replaced showed six of fifteen and hid the rest behind a
                     "+ more" span with no handler, which read as a control and
@@ -1004,14 +1004,14 @@ function UploadPanel({
                        whole row is announced as one run-on token. */
                     <Fragment key={fmt.ext}>
                       <span
-                        className={`text-[9px] font-mono px-1 py-0.5 rounded border ${TIER_BADGE_CLASS[fmt.tier]}`}
+                        className={`text-2xs font-mono px-1 py-0.5 rounded border ${TIER_BADGE_CLASS[fmt.tier]}`}
                       >
                         {fmt.ext}
                       </span>{' '}
                     </Fragment>
                   ))}
                 </div>
-                <p className="text-[10px] text-content-quaternary leading-relaxed max-w-[17rem]">
+                <p className="text-2xs text-content-quaternary leading-relaxed max-w-[17rem]">
                   {t('bim.upload_format_note', {
                     defaultValue:
                       'IFC and RVT import with full properties, quantities and classifications. Mesh formats (glTF, OBJ, STL, DAE, FBX, PLY, 3DS) are geometry only - view and measure, no BIM data.',
@@ -1025,15 +1025,15 @@ function UploadPanel({
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border-medium rounded-xl p-4 text-center cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary transition-all">
               <Database size={20} className="text-content-quaternary" />
-              <span className="text-[11px] font-medium text-content-primary">{t('bim.upload_advanced_element_data')}</span>
-              <span className="text-[9px] text-content-quaternary">{t('bim.upload_advanced_element_data_hint')}</span>
+              <span className="text-2xs font-medium text-content-primary">{t('bim.upload_advanced_element_data')}</span>
+              <span className="text-2xs text-content-quaternary">{t('bim.upload_advanced_element_data_hint')}</span>
               {dataFile && <Badge variant="blue" size="sm">{dataFile.name}</Badge>}
               <input ref={dataInputRef} type="file" accept={DATA_ACCEPT} className="hidden" onChange={(e) => { setDataFile(e.target.files?.[0] ?? null); if (e.target.files?.[0] && !modelName) setModelName(e.target.files[0].name.replace(/\.\w+$/, '')); }} />
             </label>
             <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border-medium rounded-xl p-4 text-center cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary transition-all">
               <FileBox size={20} className="text-content-quaternary" />
-              <span className="text-[11px] font-medium text-content-primary">{t('bim.upload_advanced_geometry')}</span>
-              <span className="text-[9px] text-content-quaternary">{t('bim.upload_advanced_geometry_hint')}</span>
+              <span className="text-2xs font-medium text-content-primary">{t('bim.upload_advanced_geometry')}</span>
+              <span className="text-2xs text-content-quaternary">{t('bim.upload_advanced_geometry_hint')}</span>
               {geometryFile && <Badge variant="blue" size="sm">{geometryFile.name}</Badge>}
               <input ref={geoInputRef} type="file" accept={MESH_ACCEPT} className="hidden" onChange={(e) => {
                 const f = e.target.files?.[0] ?? null;
@@ -1083,18 +1083,18 @@ function UploadPanel({
         />
 
         <div>
-          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_model_name_label')}</label>
+          <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_model_name_label')}</label>
           <input type="text" className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder={t('bim.upload_model_name_placeholder')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
         </div>
         <div>
-          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_discipline_label')}</label>
+          <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_discipline_label')}</label>
           <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
             {disciplines.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
           </select>
         </div>
         {versionParents.length > 0 && (
           <div>
-            <label htmlFor="bim-upload-version-of" className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_version_of_label', { defaultValue: 'New version of' })}</label>
+            <label htmlFor="bim-upload-version-of" className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_version_of_label', { defaultValue: 'New version of' })}</label>
             <select
               id="bim-upload-version-of"
               data-testid="bim-upload-version-of"
@@ -1114,7 +1114,7 @@ function UploadPanel({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">{t('bim.upload_version_of_hint', { defaultValue: 'Quantity rules that priced the earlier version can then be re-applied to this one, after you review the changed quantities.' })}</p>
+            <p className="mt-1 text-2xs text-content-quaternary leading-relaxed">{t('bim.upload_version_of_hint', { defaultValue: 'Quantity rules that priced the earlier version can then be re-applied to this one, after you review the changed quantities.' })}</p>
           </div>
         )}
         {/* Conversion depth and PDF-sheet export are RVT-only - the options
@@ -1123,13 +1123,13 @@ function UploadPanel({
         {file && getFileExtension(file.name) === '.rvt' && (
           <>
             <div>
-              <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
+              <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
               <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
                 <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
                 <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
                 <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
               </select>
-              <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">{t('bim.upload_depth_help', { defaultValue: 'Controls how many RVT categories are extracted. Element IDs and full properties are always preserved.' })}</p>
+              <p className="mt-1 text-2xs text-content-quaternary leading-relaxed">{t('bim.upload_depth_help', { defaultValue: 'Controls how many RVT categories are extracted. Element IDs and full properties are always preserved.' })}</p>
             </div>
             <div>
               <label className="flex items-start gap-2 cursor-pointer group">
@@ -1140,10 +1140,10 @@ function UploadPanel({
                   className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
+                  <span className="block text-2xs font-medium text-content-primary group-hover:text-oe-blue transition-colors">
                     {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
                   </span>
-                  <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
+                  <span className="block text-2xs text-content-quaternary leading-relaxed mt-0.5">
                     {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready - upload is not delayed.' })}
                   </span>
                 </div>
@@ -1160,17 +1160,17 @@ function UploadPanel({
 
         {uploading && (
           <div className="space-y-2">
-            <div className="flex justify-between text-[11px]"><span className="text-content-secondary">{uploadStage}</span><span className="text-content-quaternary tabular-nums">{uploadProgress}%</span></div>
+            <div className="flex justify-between text-2xs"><span className="text-content-secondary">{uploadStage}</span><span className="text-content-quaternary tabular-nums">{uploadProgress}%</span></div>
             <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>
           </div>
         )}
         {uploadError && (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
             <AlertCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-red-700 dark:text-red-300">{uploadError}</p>
+            <p className="text-2xs text-red-700 dark:text-red-300">{uploadError}</p>
           </div>
         )}
-        <button type="button" onClick={() => { setAdvancedMode((p) => !p); setFile(null); setDataFile(null); setGeometryFile(null); }} className="flex items-center gap-1.5 text-[11px] text-content-tertiary hover:text-content-secondary transition-colors">
+        <button type="button" onClick={() => { setAdvancedMode((p) => !p); setFile(null); setDataFile(null); setGeometryFile(null); }} className="flex items-center gap-1.5 text-2xs text-content-tertiary hover:text-content-secondary transition-colors">
           {advancedMode ? <ChevronUp size={12} /> : <ChevronRight size={12} />}
           {advancedMode ? t('bim.upload_simple_mode_toggle') : t('bim.upload_advanced_mode_toggle')}
         </button>
@@ -1245,7 +1245,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
           <div className="mx-auto w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 flex items-center justify-center mb-5">
             <Loader2 size={32} className="text-blue-500 animate-spin" />
           </div>
-          <h2 className="text-lg font-bold text-content-primary mb-2">
+          <h2 className="text-lg font-semibold text-content-primary mb-2">
             {t('bim.overlay_loading_model_title', { defaultValue: 'Loading model…' })}
           </h2>
           <p className="text-sm text-content-secondary">
@@ -1487,7 +1487,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role={isProcessing ? 'status' : 'alert'}>
       <div className="text-center max-w-md px-6 w-full">
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
-        <h2 className="text-lg font-bold text-content-primary mb-2">{headlineTitle}</h2>
+        <h2 className="text-lg font-semibold text-content-primary mb-2">{headlineTitle}</h2>
         <p className="text-sm text-content-secondary mb-2 whitespace-pre-line">{description}</p>
         {technicalDetails && (
           <div className="mb-3 mx-auto max-w-sm">
@@ -1501,7 +1501,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
               onClick={() => setDetailsExpanded((v) => !v)}
               aria-expanded={detailsExpanded}
               data-testid="bim-overlay-error-details-toggle"
-              className="inline-flex items-center gap-1 text-[11px] text-content-tertiary hover:text-content-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded"
+              className="inline-flex items-center gap-1 text-2xs text-content-tertiary hover:text-content-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded"
             >
               {detailsExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
               {detailsExpanded
@@ -1511,13 +1511,13 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
                   })}
             </button>
             {detailsExpanded && (
-              <pre className="mt-2 p-2 text-left text-[10px] bg-surface-secondary border border-border-light rounded-md text-content-tertiary whitespace-pre-wrap font-mono">
+              <pre className="mt-2 p-2 text-left text-2xs bg-surface-secondary border border-border-light rounded-md text-content-tertiary whitespace-pre-wrap font-mono">
                 {technicalDetails}
               </pre>
             )}
           </div>
         )}
-        <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
+        <p className="text-2xs text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
 
         {isProcessing && (
           <div className="mx-auto max-w-sm mb-6" data-testid="bim-overlay-processing">
@@ -1814,7 +1814,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                              ignores CSS gap. See the modal row. */
                           <Fragment key={fmt.ext}>
                             <span
-                              className={`text-[10px] font-mono px-2 py-1 rounded-md border font-semibold ${TIER_BADGE_CLASS[fmt.tier]}`}
+                              className={`text-2xs font-mono px-2 py-1 rounded-md border font-semibold ${TIER_BADGE_CLASS[fmt.tier]}`}
                             >
                               {fmt.ext}
                             </span>{' '}
@@ -1827,11 +1827,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           the version numbers stay put but the separator and
                           the order around them are a translator's call. */}
                       {converterRanges && (
-                        <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
+                        <p className="text-2xs text-content-quaternary leading-relaxed mt-1 text-center">
                           {converterRanges}
                         </p>
                       )}
-                      <p className="text-[10px] text-content-quaternary leading-relaxed max-w-[20rem] text-center">
+                      <p className="text-2xs text-content-quaternary leading-relaxed max-w-[20rem] text-center">
                         {t('bim.upload_format_note', {
                           defaultValue:
                             'IFC and RVT import with full properties, quantities and classifications. Mesh formats (glTF, OBJ, STL, DAE, FBX, PLY, 3DS) are geometry only - view and measure, no BIM data.',
@@ -1849,7 +1849,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     {getFileExtension(file.name) === '.rvt' && (
                       <>
                         <div>
-                          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">
+                          <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">
                             {t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}
                           </label>
                           <select
@@ -1861,7 +1861,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                             <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
                             <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
                           </select>
-                          <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">
+                          <p className="mt-1 text-2xs text-content-quaternary leading-relaxed">
                             {t('bim.upload_depth_help', { defaultValue: 'Controls how many RVT categories are extracted. Element IDs and full properties are always preserved.' })}
                           </p>
                         </div>
@@ -1873,10 +1873,10 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                             className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
                           />
                           <div className="flex-1 min-w-0">
-                            <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
+                            <span className="block text-2xs font-medium text-content-primary group-hover:text-oe-blue transition-colors">
                               {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
                             </span>
-                            <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
+                            <span className="block text-2xs text-content-quaternary leading-relaxed mt-0.5">
                               {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready - upload is not delayed.' })}
                             </span>
                           </div>
@@ -1889,7 +1889,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <AutoInstallConverterNotice state={autoInstall} />
                     {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
                     {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
-                    <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">
+                    <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">
                       {uploading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                       {uploading ? t('bim.landing_processing') : t('bim.landing_upload_process')}
                     </button>
@@ -1919,7 +1919,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 background carry the visual weight. */}
             <div className="flex flex-col justify-center gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
                 <p className="text-base text-content-secondary mt-3 leading-relaxed">
                   {t('bim.landing_hero_subtitle')}
                 </p>
@@ -1946,12 +1946,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <span className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium">
                       {t('common.local_processing', { defaultValue: '100% Local Processing \u00B7 Your files never leave your computer' })}
                     </span>
-                    <span className="text-[10px] text-emerald-500/40">|</span>
+                    <span className="text-2xs text-emerald-500/40">|</span>
                     <a
                       href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
+                      className="text-2xs text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
                     >
                       {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                     </a>
@@ -1963,7 +1963,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
           {/* Row 2: Feature cards - 3x2 grid */}
           <div>
-            <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
+            <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-widest mb-3">
               {t('bim.landing_what_you_get', { defaultValue: 'What you get' })}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1972,7 +1972,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
                   <div className="min-w-0">
                     <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                    <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                    <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
                   </div>
                 </div>
               ))}
@@ -2062,13 +2062,13 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           <p className="text-sm font-semibold text-content-primary truncate pe-6" title={m.name}>{m.name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             {fmt && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-oe-blue/10 text-oe-blue border border-oe-blue/15 font-semibold leading-none">
+                              <span className="text-2xs font-mono px-1.5 py-0.5 rounded-md bg-oe-blue/10 text-oe-blue border border-oe-blue/15 font-semibold leading-none">
                                 .{fmt.toLowerCase()}
                               </span>
                             )}
                             <div className="flex items-center gap-1">
                               <span className={`w-1.5 h-1.5 rounded-full ${statusColor}`} />
-                              <span className={`text-[10px] font-medium ${statusTextColor}`}>{statusLabel}</span>
+                              <span className={`text-2xs font-medium ${statusTextColor}`}>{statusLabel}</span>
                             </div>
                           </div>
                         </div>
@@ -2076,7 +2076,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
                       {/* Footer stats */}
                       <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-border-light/60">
-                        <div className="flex items-center gap-3 text-[11px] text-content-quaternary tabular-nums">
+                        <div className="flex items-center gap-3 text-2xs text-content-quaternary tabular-nums">
                           {isProcessing && (m.element_count ?? 0) === 0 ? (
                             <span className="inline-block w-20 h-3 rounded bg-surface-tertiary animate-pulse" />
                           ) : (
@@ -2095,7 +2095,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           )}
                         </div>
                         {timeAgo && (
-                          <span className="flex items-center gap-1 text-[10px] text-content-quaternary">
+                          <span className="flex items-center gap-1 text-2xs text-content-quaternary">
                             <CalendarDays size={10} />
                             {timeAgo}
                           </span>
@@ -2124,11 +2124,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             <span className="text-xs font-semibold text-content-primary">
               {t('bim.your_models', { defaultValue: 'Your Models' })}
             </span>
-            <span className="text-[11px] text-content-quaternary ml-1.5">({(landingModels ?? []).length})</span>
+            <span className="text-2xs text-content-quaternary ml-1.5">({(landingModels ?? []).length})</span>
           </div>
           <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
             {(!landingModels || landingModels.length === 0) && (
-              <span className="text-[11px] text-content-quaternary italic py-1">
+              <span className="text-2xs text-content-quaternary italic py-1">
                 {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
               </span>
             )}
@@ -2173,12 +2173,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   <div className="px-3 py-2.5">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Cuboid size={12} className="shrink-0 text-content-tertiary" />
-                      <span className="text-[11px] font-semibold text-content-primary truncate">{m.name}</span>
+                      <span className="text-2xs font-semibold text-content-primary truncate">{m.name}</span>
                       {fmt && (
-                        <span className="text-[9px] font-mono font-bold px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/15 shrink-0">.{fmt.toLowerCase()}</span>
+                        <span className="text-2xs font-mono font-semibold px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/15 shrink-0">.{fmt.toLowerCase()}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-content-quaternary">
+                    <div className="flex items-center gap-2 text-2xs text-content-quaternary">
                       <span className="flex items-center gap-1">
                         <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
                         {statusText}
@@ -3637,10 +3637,10 @@ export function BIMPage() {
               <Cuboid size={18} className="text-oe-blue" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
+              <h1 className="text-sm font-semibold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
               {activeModel && (
                 <p
-                  className="text-[10px] text-content-tertiary truncate max-w-[160px] lg:max-w-[280px] cursor-help"
+                  className="text-2xs text-content-tertiary truncate max-w-[160px] lg:max-w-[280px] cursor-help"
                   title={(() => {
                     // Disk-usage info now surfaces here on hover instead of as
                     // an always-visible chip in the header - chip ate space and
@@ -3701,7 +3701,7 @@ export function BIMPage() {
           <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             onClick={() => setUploadOpen((p) => !p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
             data-testid="bim-add-model-top"
           >
             <Plus size={13} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
@@ -3733,7 +3733,7 @@ export function BIMPage() {
                 onClick={() => navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId }))}
                 disabled={elements.length === 0}
                 data-testid="bim-rules-link-top"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
@@ -3743,7 +3743,7 @@ export function BIMPage() {
             <>
               <button
                 onClick={() => setFilterPanelOpen((p) => !p)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   filterPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3756,7 +3756,7 @@ export function BIMPage() {
                 <Filter size={13} />
                 {t('bim.filter_button', { defaultValue: 'Filter' })}
                 {visibleElementCount !== null && visibleElementCount < elements.length && (
-                  <span className="text-[10px] bg-oe-blue text-white rounded-full px-1.5 py-0 tabular-nums">
+                  <span className="text-2xs bg-oe-blue text-white rounded-full px-1.5 py-0 tabular-nums">
                     {visibleElementCount}
                   </span>
                 )}
@@ -3764,7 +3764,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setSummaryPanelOpen(!summaryPanelOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   summaryPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3788,7 +3788,7 @@ export function BIMPage() {
                   user sees only the queried elements (v3.12.0 / Stream D). */}
               <button
                 onClick={() => setPropertySearchOpen((p) => !p)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   propertySearchOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3811,7 +3811,7 @@ export function BIMPage() {
               {projectId && (
                 <button
                   onClick={() => setSnapshotsOpen((p) => !p)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                     snapshotsOpen
                       ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                       : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3841,7 +3841,7 @@ export function BIMPage() {
                       : `/projects/${projectId}/geo`;
                     navigate(url);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
                   title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   data-testid="bim-view-on-map"
@@ -3862,7 +3862,7 @@ export function BIMPage() {
                   onClick={() => {
                     navigate(`/data-explorer?bimModel=${encodeURIComponent(activeModelId)}`);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
                   title={t('bim.open_in_data_explorer_title', {
                     defaultValue: 'Explore extracted data tables',
                   })}
@@ -3888,7 +3888,7 @@ export function BIMPage() {
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button
                 onClick={() => setDimensionsVisible(!dimensionsVisible)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   dimensionsVisible
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3915,7 +3915,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setAssetCardEnabled(!assetCardEnabled)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   assetCardEnabled
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3941,7 +3941,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setBoqPanelOpen(!boqPanelOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   boqPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3957,7 +3957,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setDiffPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   diffPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3977,7 +3977,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setSmartViewsPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                   smartViewsPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -4016,7 +4016,7 @@ export function BIMPage() {
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 aria-label={t('bim.color_by', { defaultValue: 'Color by' })}
                 data-testid="bim-color-mode-select"
-                className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="text-2xs py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               >
                 <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
                   <option value="default">{t('bim.color_default', { defaultValue: 'Default' })}</option>
@@ -4111,7 +4111,7 @@ export function BIMPage() {
                       onClick={() => setQualityMode(mode)}
                       data-testid={`bim-quality-${mode}`}
                       className={clsx(
-                        'flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors',
+                        'flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium transition-colors',
                         isActive
                           ? 'bg-oe-blue text-white shadow-sm'
                           : 'text-content-secondary hover:bg-surface-tertiary',
@@ -4130,7 +4130,7 @@ export function BIMPage() {
                   onClick={() =>
                     setIsolatedIds((cur) => (cur ? null : [selectedElementId]))
                   }
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                     isolatedIds
                       ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'
                       : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -4268,19 +4268,19 @@ export function BIMPage() {
           >
             <div className="flex items-center gap-1.5 mb-1.5">
               <Maximize2 size={12} className="text-oe-blue shrink-0" />
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
                 {t('bim.dimensions_title', { defaultValue: 'BBox dimensions' })}
               </span>
             </div>
-            <div className="text-[11px] font-medium text-content-primary truncate mb-1.5" title={selectedDimensions.name}>
+            <div className="text-2xs font-medium text-content-primary truncate mb-1.5" title={selectedDimensions.name}>
               {selectedDimensions.name}
               {selectedDimensions.type && (
-                <span className="ml-1 text-content-tertiary text-[10px]">
+                <span className="ml-1 text-content-tertiary text-2xs">
                   · {selectedDimensions.type}
                 </span>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-2 text-[11px] tabular-nums">
+            <div className="grid grid-cols-3 gap-2 text-2xs tabular-nums">
               {(() => {
                 // Convert L/W/H + BBox volume at the DISPLAY boundary only -
                 // selectedDimensions stays metric-canonical (#270).
@@ -4290,28 +4290,28 @@ export function BIMPage() {
                 return (
                   <>
                     <div>
-                      <div className="text-[9px] uppercase text-content-tertiary">L</div>
+                      <div className="text-2xs uppercase text-content-tertiary">L</div>
                       <div className="font-semibold text-content-primary">
-                        {fmtFixed(dimL.value, 2)}<span className="text-[9px] text-content-tertiary ml-0.5">{dimL.unit}</span>
+                        {fmtFixed(dimL.value, 2)}<span className="text-2xs text-content-tertiary ml-0.5">{dimL.unit}</span>
                       </div>
                     </div>
                     <div>
-                      <div className="text-[9px] uppercase text-content-tertiary">W</div>
+                      <div className="text-2xs uppercase text-content-tertiary">W</div>
                       <div className="font-semibold text-content-primary">
-                        {fmtFixed(dimW.value, 2)}<span className="text-[9px] text-content-tertiary ml-0.5">{dimW.unit}</span>
+                        {fmtFixed(dimW.value, 2)}<span className="text-2xs text-content-tertiary ml-0.5">{dimW.unit}</span>
                       </div>
                     </div>
                     <div>
-                      <div className="text-[9px] uppercase text-content-tertiary">H</div>
+                      <div className="text-2xs uppercase text-content-tertiary">H</div>
                       <div className="font-semibold text-content-primary">
-                        {fmtFixed(dimH.value, 2)}<span className="text-[9px] text-content-tertiary ml-0.5">{dimH.unit}</span>
+                        {fmtFixed(dimH.value, 2)}<span className="text-2xs text-content-tertiary ml-0.5">{dimH.unit}</span>
                       </div>
                     </div>
                   </>
                 );
               })()}
             </div>
-            <div className="mt-1.5 pt-1.5 border-t border-border-light text-[10px] text-content-tertiary flex items-center justify-between">
+            <div className="mt-1.5 pt-1.5 border-t border-border-light text-2xs text-content-tertiary flex items-center justify-between">
               <span>{t('bim.bbox_volume', { defaultValue: 'BBox volume' })}</span>
               <span className="tabular-nums font-medium text-content-secondary">
                 {(() => {
@@ -4406,7 +4406,7 @@ export function BIMPage() {
                     : t('bim.pdf_status_generating', { defaultValue: 'Generating PDF sheets in background…' })}
                 </span>
                 {failed && pdfJob.pdfError && (
-                  <span className="text-[10px] text-red-500/80 max-w-xs truncate">
+                  <span className="text-2xs text-red-500/80 max-w-xs truncate">
                     {pdfJob.pdfError}
                   </span>
                 )}

@@ -193,7 +193,7 @@ export function ElementCostMatchPanel({
   return (
     <div className={clsx('flex flex-col h-full', className)}>
       <div className="px-3 py-2 border-b border-border-light bg-surface-secondary">
-        <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+        <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
           {t('match.target_boq', { defaultValue: 'Target BOQ' })}
         </label>
         <select

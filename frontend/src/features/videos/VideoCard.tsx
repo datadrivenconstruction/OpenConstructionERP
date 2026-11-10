@@ -87,7 +87,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
           </span>
         )}
         {watched && (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-2 py-0.5 text-2xs font-semibold text-white">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-semantic-success/90 px-2 py-0.5 text-2xs font-semibold text-white">
             <CheckCircle2 size={11} strokeWidth={2.4} aria-hidden />
             {t('videos.watched', { defaultValue: 'Watched' })}
           </span>

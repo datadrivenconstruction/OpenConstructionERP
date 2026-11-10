@@ -145,7 +145,7 @@ function PanelBody() {
         </div>
       )}
       {statsQuery.isError && !statsQuery.isLoading && (
-        <p className="mt-3 text-xs text-red-600">
+        <p className="mt-3 text-xs text-semantic-error">
           {t('geo_hub.cache_admin.stats_error', {
             defaultValue: 'Could not load cache stats',
           })}
@@ -154,7 +154,7 @@ function PanelBody() {
       {stats && (
         <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-4">
           <div>
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.total', { defaultValue: 'Total' })}
             </dt>
             <dd className="font-mono tabular-nums text-content-primary">
@@ -162,23 +162,23 @@ function PanelBody() {
             </dd>
           </div>
           <div>
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.fresh', { defaultValue: 'Fresh' })}
             </dt>
-            <dd className="font-mono tabular-nums text-emerald-600">
+            <dd className="font-mono tabular-nums text-semantic-success">
               {stats.fresh}
             </dd>
           </div>
           <div>
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.stale', { defaultValue: 'Stale' })}
             </dt>
-            <dd className="font-mono tabular-nums text-amber-600">
+            <dd className="font-mono tabular-nums text-semantic-warning">
               {stats.stale}
             </dd>
           </div>
           <div>
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.hits', { defaultValue: 'Total hits' })}
             </dt>
             <dd className="font-mono tabular-nums text-content-primary">
@@ -186,7 +186,7 @@ function PanelBody() {
             </dd>
           </div>
           <div className="col-span-2">
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.oldest', { defaultValue: 'Oldest entry' })}
             </dt>
             <dd className="text-xs text-content-secondary">
@@ -194,7 +194,7 @@ function PanelBody() {
             </dd>
           </div>
           <div className="col-span-2">
-            <dt className="text-2xs uppercase tracking-[0.12em] text-content-tertiary">
+            <dt className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.cache_admin.newest', { defaultValue: 'Newest entry' })}
             </dt>
             <dd className="text-xs text-content-secondary">
@@ -244,8 +244,8 @@ function PanelBody() {
           disabled={isPurging}
           className={[
             'inline-flex items-center gap-1 rounded-md',
-            'border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700',
-            'hover:bg-red-50 disabled:cursor-wait disabled:opacity-70',
+            'border border-semantic-error/30 px-3 py-1.5 text-xs font-medium text-semantic-error',
+            'hover:bg-semantic-error-bg disabled:cursor-wait disabled:opacity-70',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300',
           ].join(' ')}
           data-testid="geo-cache-admin-purge-all"

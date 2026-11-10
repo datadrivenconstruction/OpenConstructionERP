@@ -221,7 +221,7 @@ export function MediaLightbox({
             onClick={handleDownload}
             disabled={downloading}
             data-testid="media-lightbox-download"
-            className="inline-flex h-8 items-center gap-1 rounded-md border border-white/30 px-2 text-[11px] font-medium text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-1 rounded-md border border-white/30 px-2 text-2xs font-medium text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {downloading ? (
               <Loader2 size={13} className="animate-spin" />

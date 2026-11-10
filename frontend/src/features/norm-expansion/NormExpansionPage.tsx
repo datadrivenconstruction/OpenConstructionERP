@@ -152,7 +152,7 @@ function HowNormsWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -322,7 +322,7 @@ function ResourceTile({
         {icon}
         {label}
       </div>
-      <div className="mt-1 text-lg font-bold tabular-nums text-content-primary">
+      <div className="mt-1 text-lg font-semibold tabular-nums text-content-primary">
         {fmtNumber(value, 2)}
         <span className="ml-1 text-xs font-normal text-content-tertiary">{unit}</span>
       </div>
@@ -916,7 +916,7 @@ function BuildAssemblyResultView({ result }: { result: BuildAssemblyResult }) {
             {t('normExpansion.build_unit_rate', { defaultValue: 'Unit rate' })}
           </div>
           <div
-            className="text-lg font-bold tabular-nums text-content-primary"
+            className="text-lg font-semibold tabular-nums text-content-primary"
             data-testid="norm-build-total-rate"
           >
             {withCurrency(result.total_rate, result.currency)}
@@ -1234,7 +1234,7 @@ function MaterialEditor({ norm, onChanged }: { norm: ProductionNorm; onChanged: 
                 <button
                   type="button"
                   onClick={() => deleteMut.mutate(m.id)}
-                  className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                  className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('normExpansion.delete_material', { defaultValue: 'Delete material' })}
                 >
                   <Trash2 size={13} />
@@ -1452,7 +1452,7 @@ function NormLibrary({
                     <button
                       type="button"
                       onClick={() => deleteMut.mutate(n.id)}
-                      className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                      className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                       aria-label={t('normExpansion.delete_norm', { defaultValue: 'Delete norm' })}
                     >
                       <Trash2 size={14} />

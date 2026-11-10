@@ -110,7 +110,7 @@ export function FeedbackSummaryPanel({ summary, loading }: FeedbackSummaryPanelP
       {!loading && hasFeedback && summary && (
         <>
           <div className="mt-3 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold tabular-nums text-content-primary">
+            <span className="text-2xl font-semibold tabular-nums text-content-primary">
               {overall === null ? '—' : `${overall}%`}
             </span>
             <span className="text-xs text-content-tertiary">

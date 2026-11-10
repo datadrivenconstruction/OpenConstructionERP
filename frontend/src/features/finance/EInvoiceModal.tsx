@@ -506,7 +506,7 @@ export function EInvoiceModal({
                   <code className="font-mono text-xs font-semibold text-semantic-error">{v.rule_id}</code>
                   <span className="text-sm text-content-primary">{ruleText(v)}</span>
                   {v.term && (
-                    <code className="font-mono text-[11px] text-content-tertiary">{v.term}</code>
+                    <code className="font-mono text-2xs text-content-tertiary">{v.term}</code>
                   )}
                   {jumpButton(v)}
                 </li>

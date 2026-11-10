@@ -30,7 +30,7 @@ export function MenuModeBar({
         value={mode}
         onChange={(e) => onMode(e.target.value as MenuModeId)}
         title={t('menu_layout.mode_hint', { defaultValue: 'Show only the screens for your job' })}
-        className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-secondary/60 px-2 py-1 text-[12px] text-content-secondary"
+        className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-secondary/60 px-2 py-1 text-xs text-content-secondary"
       >
         {MENU_MODE_IDS.map((m) => (
           <option key={m} value={m}>
@@ -69,7 +69,7 @@ export function MenuSuggestionCard({
     <div
       role="status"
       data-testid="menu-suggestion"
-      className="mx-3 mb-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 p-2 text-[12px]"
+      className="mx-3 mb-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 p-2 text-xs"
     >
       <div className="flex items-start gap-1.5">
         <Lightbulb size={13} className="mt-0.5 shrink-0 text-oe-blue" aria-hidden />
@@ -145,7 +145,7 @@ export function RailFlyoutGroup({
       </button>
       {open && (
         <div className="absolute start-full top-0 z-50 ms-1 w-56 rounded-lg border border-border-light bg-surface-primary p-1.5 shadow-lg">
-          <div className="px-2 pb-1 text-[11px] font-medium text-content-tertiary">{label}</div>
+          <div className="px-2 pb-1 text-2xs font-medium text-content-tertiary">{label}</div>
           {children}
         </div>
       )}

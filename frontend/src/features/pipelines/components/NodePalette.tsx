@@ -122,7 +122,7 @@ function PaletteItem({ def }: { def: NodeTypeDef }) {
           )}
           {def.side_effecting && (
             <span
-              className="shrink-0 rounded bg-amber-200 px-1 text-2xs font-semibold text-amber-800 dark:bg-amber-800 dark:text-amber-100"
+              className="shrink-0 rounded bg-amber-200 px-1 text-2xs font-semibold text-semantic-warning dark:bg-amber-800 dark:text-amber-100"
               title={t('pipeline.palette.writes_chip', {
                 defaultValue: 'This step writes data - needs a gate before it',
               })}

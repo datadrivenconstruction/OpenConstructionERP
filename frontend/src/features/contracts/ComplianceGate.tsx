@@ -161,9 +161,9 @@ export function ComplianceGate({
     }
     if (gateQ.isError) {
       return (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
-          <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />
-          <p className="text-sm text-amber-800 dark:text-amber-300">
+        <div className="flex items-center gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+          <AlertTriangle size={18} className="text-semantic-warning" />
+          <p className="text-sm text-semantic-warning">
             {t('contracts.compliance.check_failed', {
               defaultValue:
                 'Could not run the compliance check. Try again before signing.',
@@ -174,15 +174,15 @@ export function ComplianceGate({
     }
     if (blocked) {
       return (
-        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900 dark:bg-red-950/40">
-          <ShieldX size={20} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-4 py-3">
+          <ShieldX size={20} className="mt-0.5 shrink-0 text-semantic-error" />
           <div>
-            <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+            <p className="text-sm font-semibold text-semantic-error">
               {t('contracts.compliance.blocked_title', {
                 defaultValue: 'Signature blocked by compliance',
               })}
             </p>
-            <p className="mt-0.5 text-sm text-red-700 dark:text-red-400">
+            <p className="mt-0.5 text-sm text-semantic-error">
               {t('contracts.compliance.blocked_desc', {
                 defaultValue:
                   'Resolve the {{count}} blocking issue(s) below, then re-check to sign.',
@@ -195,15 +195,15 @@ export function ComplianceGate({
     }
     if (warnings.length > 0) {
       return (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
-          <ShieldAlert size={20} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className="flex items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+          <ShieldAlert size={20} className="mt-0.5 shrink-0 text-semantic-warning" />
           <div>
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <p className="text-sm font-semibold text-semantic-warning">
               {t('contracts.compliance.warnings_title', {
                 defaultValue: 'Compliance passed with warnings',
               })}
             </p>
-            <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
+            <p className="mt-0.5 text-sm text-semantic-warning">
               {t('contracts.compliance.warnings_desc', {
                 defaultValue:
                   'No blocking issues - you can sign, but review the {{count}} warning(s) first.',
@@ -215,15 +215,15 @@ export function ComplianceGate({
       );
     }
     return (
-      <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900 dark:bg-emerald-950/40">
-        <ShieldCheck size={20} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      <div className="flex items-start gap-3 rounded-lg border border-semantic-success/30 bg-semantic-success-bg px-4 py-3">
+        <ShieldCheck size={20} className="mt-0.5 shrink-0 text-semantic-success" />
         <div>
-          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+          <p className="text-sm font-semibold text-semantic-success">
             {t('contracts.compliance.passed_title', {
               defaultValue: 'Compliance checks passed',
             })}
           </p>
-          <p className="mt-0.5 text-sm text-emerald-700 dark:text-emerald-400">
+          <p className="mt-0.5 text-sm text-semantic-success">
             {t('contracts.compliance.passed_desc', {
               defaultValue:
                 'No blocking issues found. This contract is clear to sign.',
@@ -310,7 +310,7 @@ export function ComplianceGate({
             </div>
             <span className="hidden h-4 w-px bg-border-light sm:block" />
             <div className="flex items-center gap-3 text-sm">
-              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1 text-semantic-success">
                 <CheckCircle2 size={14} />{' '}
                 {t('contracts.compliance.passed_count', {
                   count: passedCount,
@@ -318,7 +318,7 @@ export function ComplianceGate({
                   defaultValue_other: '{{count}} passed',
                 })}
               </span>
-              <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 text-semantic-warning">
                 <ShieldAlert size={14} />{' '}
                 {t('contracts.compliance.warnings_count', {
                   count: warnings.length,
@@ -326,7 +326,7 @@ export function ComplianceGate({
                   defaultValue_other: '{{count}} warnings',
                 })}
               </span>
-              <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+              <span className="inline-flex items-center gap-1 text-semantic-error">
                 <ShieldX size={14} />{' '}
                 {t('contracts.compliance.errors_count', {
                   count: errors.length,
@@ -422,8 +422,8 @@ function ViolationGroup({
         className={clsx(
           'mb-1.5 text-xs font-semibold uppercase tracking-wide',
           isError
-            ? 'text-red-700 dark:text-red-400'
-            : 'text-amber-700 dark:text-amber-400',
+            ? 'text-semantic-error'
+            : 'text-semantic-warning',
         )}
       >
         {title} ({violations.length})
@@ -435,20 +435,20 @@ function ViolationGroup({
             className={clsx(
               'rounded-lg border px-3 py-2 text-sm',
               isError
-                ? 'border-red-200 bg-red-50/60 dark:border-red-900 dark:bg-red-950/30'
-                : 'border-amber-200 bg-amber-50/60 dark:border-amber-800 dark:bg-amber-950/30',
+                ? 'border-semantic-error/30 bg-semantic-error/10'
+                : 'border-semantic-warning/30 bg-semantic-warning/10',
             )}
           >
             <div className="flex items-start gap-2">
               {isError ? (
                 <ShieldX
                   size={15}
-                  className="mt-0.5 shrink-0 text-red-600 dark:text-red-400"
+                  className="mt-0.5 shrink-0 text-semantic-error"
                 />
               ) : (
                 <AlertTriangle
                   size={15}
-                  className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                  className="mt-0.5 shrink-0 text-semantic-warning"
                 />
               )}
               <div className="min-w-0">

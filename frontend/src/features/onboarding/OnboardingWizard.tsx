@@ -1178,7 +1178,7 @@ function ToggleSwitch({
         'group relative inline-flex h-[26px] w-[48px] shrink-0 cursor-pointer rounded-full p-[3px] transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50',
         enabled
           ? 'bg-gradient-to-r from-oe-blue to-blue-500 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]'
-          : 'bg-gray-200 dark:bg-gray-700 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
+          : 'bg-surface-secondary shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
     >
@@ -1264,7 +1264,7 @@ function StepWelcome({
         {t('onboarding.welcome_eyebrow', { defaultValue: 'Construction estimation, reimagined' })}
       </Badge>
 
-      <h1 className="text-2xl sm:text-3xl font-bold text-content-primary tracking-tight">
+      <h1 className="text-2xl sm:text-3xl font-semibold text-content-primary tracking-tight">
         {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
       </h1>
 
@@ -1373,7 +1373,7 @@ function StepStartChoice({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold text-content-primary">
+      <h2 className="text-2xl font-semibold text-content-primary">
         {t('onboarding.start_choice_title', { defaultValue: 'How would you like to start?' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
@@ -1404,7 +1404,7 @@ function StepStartChoice({
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
             <Sparkles size={26} />
           </div>
-          <h3 className="text-xl font-bold text-content-primary">
+          <h3 className="text-xl font-semibold text-content-primary">
             {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
           </h3>
           <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
@@ -1434,7 +1434,7 @@ function StepStartChoice({
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
             <Boxes size={26} />
           </div>
-          <h3 className="text-xl font-bold text-content-primary">
+          <h3 className="text-xl font-semibold text-content-primary">
             {t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })}
           </h3>
           <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
@@ -1460,7 +1460,7 @@ function StepStartChoice({
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
             <Settings2 size={26} />
           </div>
-          <h3 className="text-xl font-bold text-content-primary">
+          <h3 className="text-xl font-semibold text-content-primary">
             {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
           </h3>
           <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
@@ -1815,7 +1815,7 @@ export function ReadyPackPicker({
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-4">
         <Boxes size={24} />
       </div>
-      <h2 className="text-2xl font-bold text-content-primary">
+      <h2 className="text-2xl font-semibold text-content-primary">
         {t('onboarding.ready_pack_title', { defaultValue: 'Pick a ready-made pack' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
@@ -1838,7 +1838,7 @@ export function ReadyPackPicker({
         <div
           role="alert"
           data-testid="ready-pack-load-error"
-          className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-4 py-3 text-xs text-amber-700 dark:text-amber-400"
+          className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-semantic-warning-bg px-4 py-3 text-xs text-semantic-warning"
         >
           <AlertTriangle size={15} className="shrink-0" />
           <span className="flex-1">
@@ -2190,7 +2190,7 @@ function ReadyPackProgressPanel({
                 })}
           </span>
         </div>
-        <span className="shrink-0 text-2xl font-bold tabular-nums text-content-primary">
+        <span className="shrink-0 text-2xl font-semibold tabular-nums text-content-primary">
           {pct}%
         </span>
       </div>
@@ -2395,7 +2395,7 @@ function ProfileCard({
 
       <h3
         className={clsx(
-          'text-base font-bold break-words transition-colors',
+          'text-base font-semibold break-words transition-colors',
           selected ? 'text-oe-blue' : 'text-content-primary',
         )}
       >
@@ -2478,7 +2478,7 @@ function StepCompanyProfile({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-center text-2xl font-bold text-content-primary">
+      <h2 className="text-center text-2xl font-semibold text-content-primary">
         {t('onboarding.bizprofile_title', { defaultValue: 'What does your company do?' })}
       </h2>
       <p className="mt-2 max-w-lg text-center text-sm text-content-secondary">
@@ -2527,7 +2527,7 @@ function StepCompanyProfile({
               <div className="flex items-center gap-2">
                 <h3
                   className={clsx(
-                    'text-base font-bold break-words transition-colors',
+                    'text-base font-semibold break-words transition-colors',
                     isSelected ? 'text-oe-blue' : 'text-content-primary',
                   )}
                 >
@@ -2749,7 +2749,7 @@ function StepModuleConfig({
         <Package size={24} className="text-oe-blue" />
       </div>
 
-      <h2 className="text-2xl font-bold text-content-primary">
+      <h2 className="text-2xl font-semibold text-content-primary">
         {t('onboarding.modules_title', { defaultValue: 'Your Modules' })}
       </h2>
       {/* Say what this step actually changes. These toggles set which entries
@@ -3271,7 +3271,7 @@ function PartnerPackInstaller({
           <Globe size={20} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-base font-bold text-content-primary">
+          <h3 className="text-base font-semibold text-content-primary">
             {t('onboarding.country_pack_title', { defaultValue: 'Set up by country' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -3290,7 +3290,7 @@ function PartnerPackInstaller({
       )}
 
       {!isLoading && isError && (
-        <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-3 py-3 text-xs text-amber-700 dark:text-amber-400">
+        <div className="flex items-center gap-2 rounded-xl bg-semantic-warning-bg px-3 py-3 text-xs text-semantic-warning">
           <AlertTriangle size={15} className="shrink-0" />
           <span className="flex-1">
             {t('onboarding.pp_load_error', {
@@ -3594,7 +3594,7 @@ function CountryPackCard({
           <Globe size={20} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-base font-bold text-content-primary">
+          <h3 className="text-base font-semibold text-content-primary">
             {t('onboarding.other_countries_title', { defaultValue: 'Other countries' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -4305,7 +4305,7 @@ export function StepDataSetup({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold text-content-primary">
+      <h2 className="text-2xl font-semibold text-content-primary">
         {t('onboarding.data_setup_title', { defaultValue: 'Data Setup' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
@@ -4326,7 +4326,7 @@ export function StepDataSetup({
               <Database size={20} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-content-primary">
+              <h3 className="text-base font-semibold text-content-primary">
                 {t('onboarding.load_cost_db', { defaultValue: 'Load Cost Database' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -4467,7 +4467,7 @@ export function StepDataSetup({
                 <FolderOpen size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-content-primary">
+                <h3 className="text-base font-semibold text-content-primary">
                   {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
                 </h3>
                 <p className="text-xs text-content-tertiary">
@@ -4520,7 +4520,7 @@ export function StepDataSetup({
                 <Sparkles size={20} />
               </div>
               <div className="text-start">
-                <h3 className="text-base font-bold text-content-primary">
+                <h3 className="text-base font-semibold text-content-primary">
                   {t('onboarding.connect_ai', { defaultValue: 'Connect AI Provider' })}
                 </h3>
                 <p className="text-xs text-content-tertiary">
@@ -4831,7 +4831,7 @@ export function StepFinish({
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold text-content-primary">
+      <h2 className="text-3xl font-semibold text-content-primary">
         {t('onboarding.finish_title', { defaultValue: "You're All Set!" })}
       </h2>
 
@@ -5298,7 +5298,7 @@ export function OnboardingWizard() {
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 shrink-0">
               <Logo size="sm" />
-              <span className="text-[11px] font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
+              <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
                 {t('onboarding.setup_label', { defaultValue: 'Setup wizard' })}
               </span>
             </div>
@@ -5437,7 +5437,7 @@ export function OnboardingWizard() {
           </div>
 
           {/* Trust footer — small line directly below the card. */}
-          <p className="mt-3 text-center text-[11px] text-content-tertiary">
+          <p className="mt-3 text-center text-2xs text-content-tertiary">
             {t('onboarding.footer_trust', {
               defaultValue:
                 'Free and open-source · Your data stays on your server · AGPL-3.0',

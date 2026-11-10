@@ -37,9 +37,9 @@ interface ServiceLogPanelProps {
 }
 
 const MAINT_TONE: Record<MaintenanceStatus, string> = {
-  ok: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  due: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  overdue: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  ok: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
+  due: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
+  overdue: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
   unknown: 'bg-neutral-700/40 text-neutral-300 border-neutral-600/50',
 };
 
@@ -86,11 +86,11 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
   return (
     <section data-testid="service-log-panel">
       <header className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+        <div className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
           <Wrench size={13} className="text-amber-400" />
           <span>{t('assets.service.title', { defaultValue: 'Maintenance & service log' })}</span>
         </div>
-        <span className={`rounded-md border px-2 py-0.5 text-[11px] ${MAINT_TONE[maint]}`}>
+        <span className={`rounded-md border px-2 py-0.5 text-2xs ${MAINT_TONE[maint]}`}>
           {t(`assets.maint.${maint}`, { defaultValue: ASSETS_MAINT_LABELS[maint] ?? maint })}
           {health?.next_maintenance_due
             ? ` · ${t('assets.service.next_due', {
@@ -104,13 +104,13 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
       {/* Add entry */}
       <div className="mb-3 flex flex-wrap items-end gap-2 rounded-md border border-border-light bg-surface-secondary/40 p-2">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-content-tertiary">
+          <label className="text-2xs text-content-tertiary">
             {t('assets.service.date', { defaultValue: 'Date' })}
           </label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} data-testid="service-date" />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-content-tertiary">
+          <label className="text-2xs text-content-tertiary">
             {t('assets.service.kind', { defaultValue: 'Type' })}
           </label>
           <select
@@ -126,7 +126,7 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
           </select>
         </div>
         <div className="flex flex-1 flex-col gap-1" style={{ minWidth: 180 }}>
-          <label className="text-[10px] text-content-tertiary">
+          <label className="text-2xs text-content-tertiary">
             {t('assets.service.note', { defaultValue: 'What was done' })}
           </label>
           <Input
@@ -158,7 +158,7 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
             .map((entry, i) => (
               <li
                 key={`${String(entry.date)}-${i}`}
-                className="flex items-start justify-between gap-3 rounded border border-border-light bg-surface-secondary/50 px-2 py-1 text-[12px]"
+                className="flex items-start justify-between gap-3 rounded border border-border-light bg-surface-secondary/50 px-2 py-1 text-xs"
               >
                 <div className="min-w-0">
                   <span className="font-medium text-content-primary">{String(entry.note ?? '')}</span>
@@ -167,7 +167,7 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
                   ) : null}
                 </div>
                 <div className="shrink-0 text-right text-content-tertiary">
-                  <span className="mr-1 rounded bg-surface-tertiary px-1 py-0.5 text-[10px] uppercase">
+                  <span className="mr-1 rounded bg-surface-tertiary px-1 py-0.5 text-2xs uppercase">
                     {String(entry.kind ?? 'service')}
                   </span>
                   {String(entry.date ?? '')}

@@ -709,7 +709,7 @@ export const FormulaCellEditor = forwardRef(
           {/* fx badge — purple when in formula mode, faint otherwise */}
           <span
             aria-hidden="true"
-            className={`shrink-0 pl-1.5 pr-1 text-[11px] font-bold tracking-wide ${
+            className={`shrink-0 pl-1.5 pr-1 text-2xs font-semibold tracking-wide ${
               isFormulaMode ? 'text-violet-600 dark:text-violet-300' : 'text-content-quaternary'
             }`}
             title={t('boq.formula_hint', { defaultValue: 'Type = to enter a formula. Click ? for help.' })}
@@ -731,7 +731,7 @@ export const FormulaCellEditor = forwardRef(
             type="button"
             tabIndex={-1}
             onMouseDown={(e) => { e.preventDefault(); setShowHelp((v) => !v); }}
-            className="shrink-0 px-1.5 h-full text-[10px] font-bold text-content-quaternary hover:text-violet-600 transition-colors"
+            className="shrink-0 px-1.5 h-full text-2xs font-semibold text-content-quaternary hover:text-violet-600 transition-colors"
             aria-label={t('boq.formula_help', { defaultValue: 'Formula help' })}
             title={t('boq.formula_help', { defaultValue: 'Formula help' })}
           >
@@ -741,9 +741,9 @@ export const FormulaCellEditor = forwardRef(
 
         {/* Live preview row — anchors below the cell, doesn't shift layout */}
         {preview.kind !== 'idle' && (
-          <div className="absolute right-0 top-full mt-0.5 text-[10px] leading-tight tabular-nums pointer-events-none whitespace-nowrap z-10 px-1.5 py-0.5 rounded shadow-sm bg-surface-elevated border border-border-light">
+          <div className="absolute right-0 top-full mt-0.5 text-2xs leading-tight tabular-nums pointer-events-none whitespace-nowrap z-10 px-1.5 py-0.5 rounded shadow-sm bg-surface-elevated border border-border-light">
             {preview.kind === 'ok' && (
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+              <span className="text-semantic-success font-semibold">
                 = {preview.v.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
               </span>
             )}
@@ -751,7 +751,7 @@ export const FormulaCellEditor = forwardRef(
               <span className="text-content-tertiary">{t('boq.formula_numeric_input', { defaultValue: 'numeric input' })}</span>
             )}
             {preview.kind === 'err' && (
-              <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400">
+              <span className="inline-flex items-center gap-1 text-semantic-error">
                 <AlertTriangle size={11} strokeWidth={2} />{' '}
                 {preview.m === 'not_number'
                   ? t('boq.formula_err_not_number', { defaultValue: 'Not a number' })
@@ -764,7 +764,7 @@ export const FormulaCellEditor = forwardRef(
         {/* Help popover — Excel-style cheat sheet */}
         {showHelp && (
           <div
-            className="absolute right-0 top-full mt-7 z-20 w-[320px] rounded-lg border border-border-light bg-surface-elevated shadow-lg p-3 text-[11px] text-content-secondary pointer-events-auto"
+            className="absolute right-0 top-full mt-7 z-20 w-[320px] rounded-lg border border-border-light bg-surface-elevated shadow-lg p-3 text-2xs text-content-secondary pointer-events-auto"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
@@ -778,7 +778,7 @@ export const FormulaCellEditor = forwardRef(
                 <XIcon size={12} strokeWidth={2.25} />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-[10px]">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-2xs">
               <span className="text-violet-600 dark:text-violet-300">+ − * /</span><span>{t('boq.formula_help_basic_math', { defaultValue: 'basic math' })}</span>
               <span className="text-violet-600 dark:text-violet-300">^ or **</span><span>{t('boq.formula_help_exponent', { defaultValue: 'exponent' })}</span>
               <span className="text-violet-600 dark:text-violet-300">( )</span><span>{t('boq.formula_help_grouping', { defaultValue: 'grouping' })}</span>
@@ -792,13 +792,13 @@ export const FormulaCellEditor = forwardRef(
             </div>
             <div className="mt-2.5 pt-2 border-t border-border-light/70">
               <div className="font-semibold text-content-primary mb-1">{t('boq.formula_help_examples', { defaultValue: 'Examples' })}</div>
-              <ul className="font-mono text-[10px] space-y-0.5">
+              <ul className="font-mono text-2xs space-y-0.5">
                 <li><span className="text-violet-600 dark:text-violet-300">=2*PI()^2*3</span><span className="text-content-tertiary"> → 59.22</span></li>
                 <li><span className="text-violet-600 dark:text-violet-300">=sqrt(144) + 5</span><span className="text-content-tertiary"> → 17</span></li>
                 <li><span className="text-violet-600 dark:text-violet-300">12.5 x 4</span><span className="text-content-tertiary"> → 50</span></li>
               </ul>
             </div>
-            <div className="mt-2 text-[10px] text-content-tertiary">
+            <div className="mt-2 text-2xs text-content-tertiary">
               <Trans
                 i18nKey="boq.formula_help_footer"
                 defaults="Prefix with <eq>=</eq> or just type the expression. Press <esc>Esc</esc> to close."

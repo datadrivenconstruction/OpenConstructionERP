@@ -249,8 +249,8 @@ export function ModelLinkReviewPanel({
                               className={clsx(
                                 'ml-1 font-medium',
                                 deltaNum > 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-red-600 dark:text-red-400',
+                                  ? 'text-semantic-success'
+                                  : 'text-semantic-error',
                               )}
                             >
                               {deltaNum > 0 ? '+' : ''}
@@ -272,7 +272,7 @@ export function ModelLinkReviewPanel({
                             : ''}
                         </p>
                         {r.message && (
-                          <p className="text-2xs text-amber-600 dark:text-amber-400 mt-0.5">
+                          <p className="text-2xs text-semantic-warning mt-0.5">
                             {r.message}
                           </p>
                         )}

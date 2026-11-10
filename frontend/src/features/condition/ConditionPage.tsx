@@ -105,7 +105,7 @@ function HowItWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -486,7 +486,7 @@ export function ConditionPage() {
                     </div>
                   </div>
                   {plan.totals.unpriced_actions > 0 && (
-                    <p className="mb-2 text-xs text-amber-600">
+                    <p className="mb-2 text-xs text-semantic-warning">
                       {t('condition.unpriced_note', {
                         defaultValue: '{{count}} actions have no unit cost and are not in the totals.',
                         count: plan.totals.unpriced_actions,
@@ -494,7 +494,7 @@ export function ConditionPage() {
                     </p>
                   )}
                   {plan.currencies.length > 1 && (
-                    <p className="mb-2 text-xs text-amber-600">
+                    <p className="mb-2 text-xs text-semantic-warning">
                       {t('condition.mixed_currencies', { defaultValue: 'Actions are priced in more than one currency; totals add them as plain numbers.' })}
                     </p>
                   )}

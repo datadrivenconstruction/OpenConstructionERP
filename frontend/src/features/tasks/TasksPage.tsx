@@ -88,20 +88,20 @@ const BUILTIN_TYPE_COLOR: Record<string, string> = {
   task: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   topic: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   information: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
-  decision: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  personal: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  decision: 'bg-semantic-warning-bg text-semantic-warning',
+  personal: 'bg-semantic-success-bg text-semantic-success',
 };
 
 /* ── Custom Category Palette ──────────────────────────────────────────── */
 
 const CUSTOM_CATEGORY_COLORS = [
-  { bg: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300', hex: '#f43f5e' },
+  { bg: 'bg-semantic-error-bg text-semantic-error', hex: '#f43f5e' },
   { bg: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', hex: '#f97316' },
   { bg: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300', hex: '#14b8a6' },
   { bg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300', hex: '#6366f1' },
   { bg: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300', hex: '#ec4899' },
   { bg: 'bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300', hex: '#84cc16' },
-  { bg: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300', hex: '#0ea5e9' },
+  { bg: 'bg-semantic-info-bg text-semantic-info', hex: '#0ea5e9' },
   { bg: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300', hex: '#d946ef' },
 ];
 
@@ -188,7 +188,7 @@ function getTypeColor(taskType: string, customCategories: CustomCategory[]): str
   const custom = customCategories.find((c) => c.name === taskType);
   if (custom) return CUSTOM_CATEGORY_COLORS[custom.colorIdx % CUSTOM_CATEGORY_COLORS.length]!.bg;
   // Fallback for unknown types
-  return 'bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300';
+  return 'bg-surface-secondary text-content-secondary';
 }
 
 
@@ -200,10 +200,10 @@ const PRIORITY_BADGE: Record<TaskPriority, { variant: 'neutral' | 'blue' | 'warn
 };
 
 const STATUS_HEADER_CLS: Record<TaskStatus, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400',
-  open: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  in_progress: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  draft: 'bg-surface-secondary text-content-secondary',
+  open: 'bg-semantic-error-bg text-semantic-error',
+  in_progress: 'bg-semantic-warning-bg text-semantic-warning',
+  completed: 'bg-semantic-success-bg text-semantic-success',
 };
 
 const inputCls =
@@ -420,7 +420,7 @@ function AddTaskModal({
               className={clsx(
                 'h-12 w-full rounded-lg border border-border bg-surface-primary px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
                 errors.title &&
-                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
               autoFocus
             />
@@ -456,10 +456,10 @@ function AddTaskModal({
               {(['low', 'normal', 'high', 'urgent'] as TaskPriority[]).map((p) => {
                 const selected = form.priority === p;
                 const colorMap: Record<string, string> = {
-                  low: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+                  low: 'text-content-secondary bg-surface-secondary border-border-light',
                   normal: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
-                  high: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
-                  urgent: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+                  high: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
+                  urgent: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
                 };
                 return (
                   <button
@@ -596,7 +596,7 @@ const TaskCard = React.memo(function TaskCard({
         'px-2.5 py-2 mb-1.5 hover:shadow-md transition-all group cursor-grab active:cursor-grabbing',
         'hover:border-border hover:-translate-y-px',
         isDragging && 'opacity-40 scale-[0.97] shadow-none',
-        isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
+        isOverdue && 'bg-semantic-error/10',
       )}
     >
       {/* Top row: type icon + title + priority */}
@@ -626,7 +626,7 @@ const TaskCard = React.memo(function TaskCard({
             {task.title}
           </h4>
         </div>
-        <Badge variant={pb.variant} size="sm" className="shrink-0 text-[9px] px-1 py-0">
+        <Badge variant={pb.variant} size="sm" className="shrink-0 text-2xs px-1 py-0">
           {t(`tasks.priority_${task.priority}`, {
             defaultValue: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
           })}
@@ -671,7 +671,7 @@ const TaskCard = React.memo(function TaskCard({
                       : null
                   : null;
               const chip = (
-                <span className="inline-flex items-center gap-0.5 text-[9px] text-content-quaternary">
+                <span className="inline-flex items-center gap-0.5 text-2xs text-content-quaternary">
                   <Link2 size={8} className="shrink-0" />
                   {label}
                 </span>
@@ -687,7 +687,7 @@ const TaskCard = React.memo(function TaskCard({
           <ViewInBIMButton
             elementIds={task.bim_element_ids ?? []}
             iconSize={8}
-            className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 dark:text-emerald-400 hover:underline"
+            className="inline-flex items-center gap-0.5 text-2xs text-semantic-success hover:underline"
           />
         </div>
       )}
@@ -704,17 +704,17 @@ const TaskCard = React.memo(function TaskCard({
             const display = task.assigned_to_name || metaName;
             if (!display) {
               return (
-                <span className="text-[10px] text-content-quaternary flex items-center gap-0.5">
+                <span className="text-2xs text-content-quaternary flex items-center gap-0.5">
                   <User size={9} />
                 </span>
               );
             }
             return (
               <div className="flex items-center gap-1 min-w-0">
-                <div className="h-4 w-4 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-[8px] font-bold shrink-0">
+                <div className="h-4 w-4 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-2xs font-semibold shrink-0">
                   {display.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-[10px] text-content-tertiary truncate max-w-[70px]">
+                <span className="text-2xs text-content-tertiary truncate max-w-[70px]">
                   {display}
                 </span>
               </div>
@@ -724,7 +724,7 @@ const TaskCard = React.memo(function TaskCard({
           {task.due_date && (
             <div
               className={clsx(
-                'flex items-center gap-0.5 text-[10px]',
+                'flex items-center gap-0.5 text-2xs',
                 isOverdue ? 'text-semantic-error font-medium' : 'text-content-quaternary',
               )}
             >
@@ -738,7 +738,7 @@ const TaskCard = React.memo(function TaskCard({
         <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
           {task.status !== 'completed' ? (
             <>
-              <Button variant="ghost" size="sm" onClick={() => onComplete(task.id)} className="!p-0.5 text-green-600 hover:text-green-700 h-auto" title={t('tasks.mark_complete', { defaultValue: 'Complete' })} aria-label={t('tasks.mark_complete', { defaultValue: 'Complete' })}>
+              <Button variant="ghost" size="sm" onClick={() => onComplete(task.id)} className="!p-0.5 text-semantic-success hover:text-semantic-success h-auto" title={t('tasks.mark_complete', { defaultValue: 'Complete' })} aria-label={t('tasks.mark_complete', { defaultValue: 'Complete' })}>
                 <CheckCircle2 size={10} />
               </Button>
               {/* Only offer transitions the backend state machine accepts
@@ -751,7 +751,7 @@ const TaskCard = React.memo(function TaskCard({
                 onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={t('tasks.change_status', { defaultValue: 'Change status' })}
-                className="text-[9px] py-0 px-0.5 rounded border border-border-light bg-surface-secondary text-content-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue h-4"
+                className="text-2xs py-0 px-0.5 rounded border border-border-light bg-surface-secondary text-content-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue h-4"
               >
                 {STATUS_OPTIONS_FOR(task.status).map((s) => (
                   <option key={s} value={s}>
@@ -769,14 +769,14 @@ const TaskCard = React.memo(function TaskCard({
               </select>
             </>
           ) : (
-            <CheckCircle2 size={10} className="text-green-500" />
+            <CheckCircle2 size={10} className="text-semantic-success" />
           )}
           {task.status !== 'completed' && (
             <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="!p-0.5 text-content-quaternary hover:text-oe-blue h-auto" title={t('common.edit', { defaultValue: 'Edit' })} aria-label={t('common.edit', { defaultValue: 'Edit' })}>
               <Pencil size={10} />
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="!p-0.5 text-content-quaternary hover:text-red-500 h-auto" title={t('common.delete', { defaultValue: 'Delete' })} aria-label={t('common.delete', { defaultValue: 'Delete' })}>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="!p-0.5 text-content-quaternary hover:text-semantic-error h-auto" title={t('common.delete', { defaultValue: 'Delete' })} aria-label={t('common.delete', { defaultValue: 'Delete' })}>
             <Trash2 size={10} />
           </Button>
         </div>
@@ -791,7 +791,7 @@ const TaskCard = React.memo(function TaskCard({
               style={{ width: `${checklistPercent}%` }}
             />
           </div>
-          <span className="text-[9px] text-content-quaternary tabular-nums shrink-0">
+          <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
             {checklistDone}/{checklistTotal}
           </span>
         </div>
@@ -1578,11 +1578,11 @@ export function TasksPage() {
       {/* No-project warning — suppressed in "My Tasks" mode, which is
           cross-project and doesn't require a selected project. */}
       {!projectId && !myTasksOnly && (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
-          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+        <div className="flex items-center gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+          <AlertTriangle size={18} className="text-semantic-warning shrink-0" />
           <div>
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('requiresProject.title')}</p>
-            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+            <p className="text-sm font-medium text-semantic-warning">{t('requiresProject.title')}</p>
+            <p className="text-xs text-semantic-warning">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
           </div>
         </div>
       )}
@@ -1641,7 +1641,7 @@ export function TasksPage() {
             </button>
             <button
               onClick={() => handleRemoveCategory(cat.name)}
-              className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-full bg-surface-tertiary text-content-tertiary hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors -ml-1"
+              className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-full bg-surface-tertiary text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors -ml-1"
               title={t('tasks.remove_category', { defaultValue: 'Remove category' })}
               aria-label={t('tasks.remove_category_named', { defaultValue: 'Remove {{name}} category', name: cat.label })}
             >
@@ -1816,7 +1816,7 @@ export function TasksPage() {
               const isBuiltin = BUILTIN_STATUSES.includes(status as TaskStatus);
               const customStatus = customStatuses.find((s) => s.name === status);
               const headerCls = STATUS_HEADER_CLS[status as TaskStatus]
-                ?? (customStatus ? CUSTOM_CATEGORY_COLORS[customStatus.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400');
+                ?? (customStatus ? CUSTOM_CATEGORY_COLORS[customStatus.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? 'bg-gray-100 text-gray-700' : 'bg-surface-secondary text-content-secondary');
               const displayLabel = isBuiltin
                 ? t(`tasks.status_${status}`, { defaultValue: status.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') })
                 : customStatus?.label ?? status;
@@ -1875,7 +1875,7 @@ export function TasksPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <span
-                        className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums"
+                        className="text-2xs font-semibold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums"
                         aria-label={t('tasks.task_count', { defaultValue: '{{count}} tasks', count: colItems.length })}
                       >
                         {colItems.length}
@@ -1904,7 +1904,7 @@ export function TasksPage() {
                   >
                     {colItems.length === 0 ? (
                       <div className={clsx(
-                        'flex items-center justify-center py-6 text-[10px]',
+                        'flex items-center justify-center py-6 text-2xs',
                         isDropTarget ? 'text-oe-blue font-medium' : 'text-content-quaternary',
                       )}>
                         {isDropTarget
@@ -1960,10 +1960,10 @@ export function TasksPage() {
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={handleAddStatus} className="flex-1 text-[10px] font-semibold py-1.5 rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors">
+                    <button onClick={handleAddStatus} className="flex-1 text-2xs font-semibold py-1.5 rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors">
                       {t('common.add', { defaultValue: 'Add' })}
                     </button>
-                    <button onClick={() => setShowAddStatus(false)} className="flex-1 text-[10px] font-semibold py-1.5 rounded-md bg-surface-secondary text-content-secondary hover:bg-surface-tertiary transition-colors">
+                    <button onClick={() => setShowAddStatus(false)} className="flex-1 text-2xs font-semibold py-1.5 rounded-md bg-surface-secondary text-content-secondary hover:bg-surface-tertiary transition-colors">
                       {t('common.cancel', { defaultValue: 'Cancel' })}
                     </button>
                   </div>
@@ -2071,12 +2071,12 @@ export function TasksPage() {
               </div>
 
               {importError && (
-                <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+                <div className="rounded-lg bg-semantic-error-bg border border-semantic-error/30 p-3 text-sm text-semantic-error">
                   {importError}
                 </div>
               )}
               {importResult && (
-                <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+                <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 text-sm text-content-primary space-y-1">
                   <p>
                     {t('tasks.import_result', {
                       defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',

@@ -1732,8 +1732,8 @@ function ModuleToggleCard({
         </span>
         {hasBlockers && enabled && (
           <div className="flex items-center gap-1 mt-0.5">
-            <AlertTriangle size={9} className="text-amber-500 shrink-0" />
-            <span className="text-2xs text-amber-600 dark:text-amber-400 truncate">
+            <AlertTriangle size={9} className="text-semantic-warning shrink-0" />
+            <span className="text-2xs text-semantic-warning truncate">
               {t('modules.required_by_short', {
                 defaultValue: 'Required by {{deps}}',
                 deps: fmtList((dependents ?? [])),
@@ -1813,7 +1813,7 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
                     : mod.category === 'converter'
                       ? 'bg-semantic-warning-bg text-semantic-warning'
                       : mod.category === 'analytics'
-                        ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                        ? 'bg-semantic-info-bg text-semantic-info'
                         : 'bg-surface-secondary text-content-secondary',
           )}
         >
@@ -1837,9 +1837,9 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
               <Info size={12} className="text-purple-500 shrink-0 mt-0.5" />
               <div className="text-2xs text-purple-700 dark:text-purple-300 leading-relaxed">
                 <strong>{t('marketplace.vector_option_a', { defaultValue: 'Option A' })}:</strong> Qdrant + Snapshot (3072d):<br />
-                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">docker run -p 6333:6333 qdrant/qdrant</code><br />
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-2xs">docker run -p 6333:6333 qdrant/qdrant</code><br />
                 <strong>{t('marketplace.vector_option_b', { defaultValue: 'Option B' })}:</strong> LanceDB (384d):<br />
-                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">pip install lancedb sentence-transformers</code>
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-2xs">pip install lancedb sentence-transformers</code>
               </div>
             </div>
           )}
@@ -1898,7 +1898,7 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
                     icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                     onClick={onUninstallDemo}
                     disabled={isInstalling}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                    className="text-semantic-error hover:text-semantic-error hover:bg-semantic-error-bg"
                   >
                     {t('marketplace.uninstall', { defaultValue: 'Uninstall' })}
                   </Button>

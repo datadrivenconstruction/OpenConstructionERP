@@ -237,7 +237,7 @@ export function SideDrawer({
           `sm:${widthClass}`,
           widthClass, // also apply unprefixed so the panel never exceeds it
           'overflow-y-auto bg-surface-elevated shadow-xl',
-          'transform transition-transform duration-250 ease-out',
+          'transform transition-transform duration-200 ease-out',
           isShown ? 'translate-x-0' : 'translate-x-full',
           // Safe-area inset on the right matters on iOS notch landscape;
           // the bottom inset is reserved for body padding so the close

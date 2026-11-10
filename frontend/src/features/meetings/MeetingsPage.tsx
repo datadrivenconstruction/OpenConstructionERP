@@ -172,25 +172,25 @@ const MEETING_TYPE_CARD_CONFIG: Record<
   safety: {
     icon: HardHat,
     color:
-      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+      'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
     description: 'Safety toolbox talk / review',
   },
   subcontractor: {
     icon: Users,
     color:
-      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+      'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
     description: 'Subcontractor coordination',
   },
   kickoff: {
     icon: Rocket,
     color:
-      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+      'text-semantic-success bg-semantic-success-bg border-semantic-success/30',
     description: 'Project kickoff',
   },
   closeout: {
     icon: CheckCircle2,
     color:
-      'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+      'text-content-secondary bg-surface-secondary border-border-light',
     description: 'Project closeout / handover',
   },
   commercial: {
@@ -525,7 +525,7 @@ function AttachmentDropzone({
                   e.stopPropagation();
                   onRemove(att.id);
                 }}
-                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors shrink-0"
                 aria-label={t('common.remove', { defaultValue: 'Remove' })}
                 data-testid="meeting-attachment-remove"
               >
@@ -664,7 +664,7 @@ function CreateMeetingModal({
             className={clsx(
               inputCls,
               titleError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -688,7 +688,7 @@ function CreateMeetingModal({
             className={clsx(
               inputCls,
               dateError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -978,7 +978,7 @@ function EditMeetingModal({
             className={clsx(
               inputCls,
               titleError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
             data-testid="edit-meeting-title"
           />
@@ -1003,7 +1003,7 @@ function EditMeetingModal({
             className={clsx(
               inputCls,
               dateError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -1081,15 +1081,15 @@ const SOURCE_LABELS: Record<string, { label: string; cls: string }> = {
   },
   zoom: {
     label: 'Zoom',
-    cls: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+    cls: 'bg-semantic-info-bg text-semantic-info',
   },
   webex: {
     label: 'Cisco Webex',
-    cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    cls: 'bg-semantic-success-bg text-semantic-success',
   },
   other: {
     label: 'Other',
-    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    cls: 'bg-surface-secondary text-content-secondary',
   },
 };
 
@@ -1262,7 +1262,7 @@ function ImportSummaryModal({
                   dragOver
                     ? 'border-oe-blue bg-oe-blue-subtle'
                     : selectedFile
-                      ? 'border-semantic-success bg-green-50 dark:bg-green-950/20'
+                      ? 'border-semantic-success bg-semantic-success-bg'
                       : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
                 )}
                 onClick={() => document.getElementById('transcript-file-input')?.click()}
@@ -1307,7 +1307,7 @@ function ImportSummaryModal({
 
               {/* Error display */}
               {previewError && (
-                <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-3">
+                <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3">
                   <AlertCircle size={16} className="text-semantic-error mt-0.5 shrink-0" />
                   <p className="text-sm text-semantic-error">{previewError}</p>
                 </div>
@@ -1557,7 +1557,7 @@ function ImportSummaryModal({
                         </div>
                         <button
                           onClick={() => handleRemoveActionItem(idx)}
-                          className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0 mt-0.5"
+                          className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors shrink-0 mt-0.5"
                           aria-label={t('common.remove', { defaultValue: 'Remove' })}
                         >
                           <Trash2 size={12} />
@@ -1574,7 +1574,7 @@ function ImportSummaryModal({
                   <label className="block text-xs font-medium text-content-tertiary mb-1.5 uppercase tracking-wide">
                     {t('meetings.label_decisions', { defaultValue: 'Decisions' })}
                   </label>
-                  <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 space-y-1.5">
+                  <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 space-y-1.5">
                     {previewData.decisions.map((d, idx) => (
                       <div key={`decision-${d.decision.slice(0, 30)}-${idx}`} className="flex items-start gap-2 text-sm">
                         <CheckCircle2 size={14} className="text-semantic-success mt-0.5 shrink-0" />
@@ -2505,7 +2505,7 @@ export function MeetingsPage() {
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('meetings.stat_in_progress', { defaultValue: 'In Progress' })}
           </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-amber-500">{stats.inProgress}</p>
+          <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-warning">{stats.inProgress}</p>
         </div>
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">

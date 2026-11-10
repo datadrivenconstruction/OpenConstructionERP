@@ -1294,7 +1294,7 @@ function DetailDrawer({
               <button
                 type="button"
                 onClick={() => setDeleteOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg transition-colors"
                 aria-label={t('common.delete', { defaultValue: 'Delete' })}
               >
                 <Trash2 size={12} />

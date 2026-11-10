@@ -102,12 +102,12 @@ export default function SimilarItemsPanel({
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
-          <Sparkles size={12} className="text-amber-500" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <Sparkles size={12} className="text-semantic-warning" />
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('similar.title', { defaultValue: 'Similar items' })}
           </span>
           {query.data && (
-            <span className="text-[10px] text-content-quaternary tabular-nums">
+            <span className="text-2xs text-content-quaternary tabular-nums">
               {hits.length}
             </span>
           )}
@@ -124,7 +124,7 @@ export default function SimilarItemsPanel({
                   defaultValue: 'Searching current project only - click to expand',
                 })
           }
-          className="inline-flex items-center gap-1 text-[10px] text-content-tertiary hover:text-content-primary"
+          className="inline-flex items-center gap-1 text-2xs text-content-tertiary hover:text-content-primary"
         >
           {crossProjectState ? (
             <>
@@ -141,14 +141,14 @@ export default function SimilarItemsPanel({
       </div>
 
       {query.isLoading && (
-        <div className="flex items-center gap-2 text-[11px] text-content-tertiary py-2">
+        <div className="flex items-center gap-2 text-2xs text-content-tertiary py-2">
           <Loader2 size={11} className="animate-spin" />
           {t('similar.loading', { defaultValue: 'Searching…' })}
         </div>
       )}
 
       {!query.isLoading && query.isError && (
-        <div className="text-[11px] text-rose-600 py-1.5">
+        <div className="text-2xs text-semantic-error py-1.5">
           {t('similar.error', {
             defaultValue: 'Could not load similar items',
           })}
@@ -156,7 +156,7 @@ export default function SimilarItemsPanel({
       )}
 
       {!query.isLoading && !query.isError && hits.length === 0 && (
-        <div className="text-[11px] text-content-tertiary italic py-1.5">
+        <div className="text-2xs text-content-tertiary italic py-1.5">
           {t('similar.empty', { defaultValue: 'No similar items found yet' })}
         </div>
       )}
@@ -172,15 +172,15 @@ export default function SimilarItemsPanel({
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-medium text-content-primary truncate">
+                    <span className="text-2xs font-medium text-content-primary truncate">
                       {hit.title || hit.id}
                     </span>
-                    <span className="text-[9px] text-content-quaternary tabular-nums shrink-0">
+                    <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
                       {Math.round(hit.score * 100)}%
                     </span>
                   </div>
                   {hit.snippet && (
-                    <div className="text-[10px] text-content-tertiary line-clamp-2 mt-0.5">
+                    <div className="text-2xs text-content-tertiary line-clamp-2 mt-0.5">
                       {hit.snippet}
                     </div>
                   )}

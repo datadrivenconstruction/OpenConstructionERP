@@ -29,9 +29,9 @@ const FORMAT_LABEL: Record<SeedPackFormat, { key: string; fallback: string }> = 
 
 const CATEGORY_COLOR: Record<SeedPackCategory, string> = {
   Accessibility: 'bg-blue-50 text-blue-700 border-blue-100',
-  'Cost Classification': 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  'Fire Safety': 'bg-red-50 text-red-700 border-red-100',
-  MEP: 'bg-amber-50 text-amber-700 border-amber-100',
+  'Cost Classification': 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  'Fire Safety': 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
+  MEP: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   Naming: 'bg-purple-50 text-purple-700 border-purple-100',
 };
 
@@ -88,7 +88,7 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
         </h3>
         <div className="flex flex-shrink-0 items-center gap-1">
           <span
-            className="rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-content-secondary"
+            className="rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary"
             data-testid={`${testIdRoot}-format`}
           >
             {t(FORMAT_LABEL[pack.format].key, {
@@ -97,7 +97,7 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
           </span>
           <span
             className={clsx(
-              'rounded-full border px-2 py-0.5 text-[10px] font-medium',
+              'rounded-full border px-2 py-0.5 text-2xs font-medium',
               CATEGORY_COLOR[pack.category],
             )}
             data-testid={`${testIdRoot}-category`}
@@ -125,7 +125,7 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
         {pack.classifications.map((cls) => (
           <span
             key={cls}
-            className="rounded-md border border-border-light bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-content-secondary"
+            className="rounded-md border border-border-light bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-secondary"
             data-testid={`${testIdRoot}-classification-${cls}`}
           >
             {cls}
@@ -135,14 +135,14 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
 
       <div className="flex flex-wrap items-center gap-1">
         {pack.regions.length === 0 ? (
-          <span className="rounded-md bg-surface-tertiary px-1.5 py-0.5 text-[10px] font-medium uppercase text-content-tertiary">
+          <span className="rounded-md bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium uppercase text-content-tertiary">
             INT
           </span>
         ) : (
           pack.regions.map((region) => (
             <span
               key={region}
-              className="rounded-md bg-surface-tertiary px-1.5 py-0.5 text-[10px] font-medium uppercase text-content-secondary"
+              className="rounded-md bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium uppercase text-content-secondary"
               data-testid={`${testIdRoot}-region-${region}`}
             >
               {region}
@@ -152,7 +152,7 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
       </div>
 
       <div className="mt-auto flex items-center justify-end pt-2">
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-oe-blue group-hover:underline">
+        <span className="inline-flex items-center gap-1 text-2xs font-semibold text-oe-blue group-hover:underline">
           <Eye size={12} />
           {t('rulePacks.preview', { defaultValue: 'Preview & install' })}
         </span>

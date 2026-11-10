@@ -214,7 +214,7 @@ function LineCard({
       <div className="flex items-start gap-3">
         <span className="mt-0.5 shrink-0">
           {line.needs_evidence && !line.documented ? (
-            <AlertTriangle size={16} className="text-amber-500" />
+            <AlertTriangle size={16} className="text-semantic-warning" />
           ) : line.documented ? (
             <CheckCircle2 size={16} className="text-semantic-success" />
           ) : (
@@ -371,7 +371,7 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
                 <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
                   {t('cost_control.col_forecast', { defaultValue: 'Forecast' })}
                 </div>
-                <div className="text-2xl font-bold tabular-nums text-content-primary">
+                <div className="text-2xl font-semibold tabular-nums text-content-primary">
                   {fmtCurrency(data.totals.forecast, currency)}
                 </div>
                 {data.previous && (
@@ -387,7 +387,7 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
               <span
                 className={`flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ${
                   isDraft
-                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                    ? 'bg-semantic-warning-bg text-semantic-warning'
                     : 'bg-surface-secondary text-content-secondary'
                 }`}
               >
@@ -438,7 +438,7 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
                   {t('cost_control.draft_refresh', { defaultValue: "Take in today's figures" })}
                 </Button>
                 {missing.length > 0 && (
-                  <span className="text-xs text-amber-700 dark:text-amber-300">
+                  <span className="text-xs text-semantic-warning">
                     {t('cost_control.draft_missing', {
                       defaultValue: 'Lines still waiting for a reason: {{n}}',
                       n: missing.length,

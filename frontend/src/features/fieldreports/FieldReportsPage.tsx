@@ -1168,14 +1168,14 @@ function ImportFieldReportsModal({
 
           {/* Error */}
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+            <div className="rounded-lg bg-semantic-error-bg border border-semantic-error/30 p-3 text-sm text-semantic-error">
               {error}
             </div>
           )}
 
           {/* Result */}
           {result && (
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+            <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 text-sm text-content-primary space-y-1">
               <p>
                 {t('fieldreports.import_result', {
                   defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',
@@ -1250,8 +1250,8 @@ function StatCard({
     default: 'text-content-primary',
     gray: 'text-gray-500',
     blue: 'text-blue-600 dark:text-blue-400',
-    green: 'text-green-600 dark:text-green-400',
-    amber: 'text-amber-600 dark:text-amber-400',
+    green: 'text-semantic-success',
+    amber: 'text-semantic-warning',
   };
 
   return (
@@ -1259,7 +1259,7 @@ function StatCard({
       <div className="flex items-center gap-3 p-4">
         <Icon size={20} className={clsx('shrink-0', colorCls[color])} />
         <div>
-          <p className="text-2xl font-bold text-content-primary">{value}</p>
+          <p className="text-2xl font-semibold text-content-primary">{value}</p>
           <p className="text-xs text-content-tertiary">{label}</p>
         </div>
       </div>

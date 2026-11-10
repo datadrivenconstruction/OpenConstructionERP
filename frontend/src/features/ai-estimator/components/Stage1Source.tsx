@@ -243,7 +243,7 @@ export function Stage1Intake(props: Stage1IntakeProps) {
                     <button
                       type="button"
                       onClick={() => onFiles(files.filter((_, idx) => idx !== i))}
-                      className="ml-2 shrink-0 text-content-tertiary hover:text-rose-500"
+                      className="ml-2 shrink-0 text-content-tertiary hover:text-semantic-error"
                       aria-label={t('common.remove', { defaultValue: 'Remove' })}
                     >
                       <X className="h-3.5 w-3.5" />
@@ -400,9 +400,9 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
   return (
     <div className="space-y-5">
       {/* Detected source card */}
-      <Card padding="md" className="border-emerald-200/60 bg-emerald-50/40 dark:border-emerald-900/40 dark:bg-emerald-900/10">
+      <Card padding="md" className="border-semantic-success/30 bg-semantic-success/10">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-semantic-success" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold text-content-primary">
@@ -411,7 +411,7 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
               </span>
               <span
                 className={clsx(
-                  'rounded px-1.5 py-0.5 text-[10px] font-bold',
+                  'rounded px-1.5 py-0.5 text-2xs font-semibold',
                   scoreColor(detected.confidence, thresholds),
                 )}
               >
@@ -451,7 +451,7 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
             ))}
           </select>
           {catalogues.length === 0 && (
-            <p className="mt-1 text-xs text-amber-600">
+            <p className="mt-1 text-xs text-semantic-warning">
               {t('aiest.confirm1.no_catalogue', {
                 defaultValue:
                   'No catalogues loaded. Install one from CAD-BIM Match → Cost to ground rates.',

@@ -279,8 +279,8 @@ export function BOQCompareDrawer({
                     className={clsx(
                       'ml-1 font-medium',
                       d > 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-red-600 dark:text-red-400',
+                        ? 'text-semantic-success'
+                        : 'text-semantic-error',
                     )}
                   >
                     {d > 0 ? '+' : ''}
@@ -408,9 +408,9 @@ export function BOQCompareDrawer({
                         className={clsx(
                           'px-2 py-2 align-top text-right font-mono text-2xs font-medium',
                           Number.isFinite(d) && d > 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
+                            ? 'text-semantic-success'
                             : Number.isFinite(d) && d < 0
-                              ? 'text-red-600 dark:text-red-400'
+                              ? 'text-semantic-error'
                               : 'text-content-tertiary',
                         )}
                       >

@@ -890,7 +890,7 @@ export function PdfComparePage() {
         {/* Doc A picker */}
         <div className="flex items-center gap-1.5">
           <span
-            className="text-xs font-bold text-semantic-error uppercase"
+            className="text-xs font-semibold text-semantic-error uppercase"
             title={t('pdf_compare.doc_a_old', { defaultValue: 'Old revision (A)' })}
           >
             A
@@ -940,7 +940,7 @@ export function PdfComparePage() {
         {/* Doc B picker */}
         <div className="flex items-center gap-1.5">
           <span
-            className="text-xs font-bold text-oe-blue uppercase"
+            className="text-xs font-semibold text-oe-blue uppercase"
             title={t('pdf_compare.doc_b_new', { defaultValue: 'New revision (B)' })}
           >
             B

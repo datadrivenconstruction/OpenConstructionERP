@@ -71,7 +71,7 @@ function ToolbarButton({ label, testId, icon, onClick, disabled, variant = 'defa
         variant === 'primary' &&
           'border-oe-blue bg-oe-blue text-white hover:bg-oe-blue/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
         variant === 'success' &&
-          'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600',
+          'border-semantic-success/60 bg-semantic-success text-white hover:bg-semantic-success',
         variant === 'default' &&
           'border-border bg-surface-primary text-content-primary hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30',
       )}

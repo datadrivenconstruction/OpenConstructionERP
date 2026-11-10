@@ -75,7 +75,7 @@ export function DocumentPane({ quote, anchor }: { quote: Quote; anchor: Anchor |
           {box && (
             <div
               data-testid="quote-anchor-box"
-              className="pointer-events-none absolute rounded-sm border-2 border-amber-500 bg-amber-300/25"
+              className="pointer-events-none absolute rounded-sm border-2 border-semantic-warning/60 bg-amber-300/25"
               style={{
                 left: `${(box[0] / size.width) * 100}%`,
                 top: `${(box[1] / size.height) * 100}%`,
@@ -100,7 +100,7 @@ export function DocumentPane({ quote, anchor }: { quote: Quote; anchor: Anchor |
             key={i}
             ref={on ? highlighted : undefined}
             data-active={on || undefined}
-            className={`whitespace-pre-wrap px-1 ${on ? 'rounded bg-amber-200/70 dark:bg-amber-700/50' : ''}`}
+            className={`whitespace-pre-wrap px-1 ${on ? 'rounded bg-semantic-warning/10' : ''}`}
           >
             <span className="mr-2 select-none text-content-tertiary">
               {ln.anchor.sheet ? `${ln.anchor.sheet}!${ln.anchor.row}` : ln.anchor.line ?? i + 1}

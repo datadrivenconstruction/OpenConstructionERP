@@ -99,11 +99,11 @@ const SEVERITY_CONFIG: Record<
   major: { variant: 'warning', cls: '' },
   minor: {
     variant: 'warning',
-    cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+    cls: 'bg-semantic-warning-bg text-semantic-warning',
   },
   observation: {
     variant: 'neutral',
-    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    cls: 'bg-surface-secondary text-content-secondary',
   },
 };
 
@@ -118,7 +118,7 @@ const STATUS_CONFIG: Record<
   closed: { variant: 'success', cls: '' },
   void: {
     variant: 'neutral',
-    cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    cls: 'bg-surface-secondary text-content-secondary',
   },
 };
 
@@ -133,17 +133,17 @@ const NCR_SEVERITIES: NCRSeverity[] = ['critical', 'major', 'minor', 'observatio
 
 const NCR_TYPE_CARD_CONFIG: Record<NCRType, { icon: React.ElementType; color: string }> = {
   material: { icon: Package, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
-  workmanship: { icon: Wrench, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
+  workmanship: { icon: Wrench, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
   design: { icon: PenTool, color: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800' },
-  documentation: { icon: FileText, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
-  safety: { icon: ShieldAlert, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
+  documentation: { icon: FileText, color: 'text-content-secondary bg-surface-secondary border-border-light' },
+  safety: { icon: ShieldAlert, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30' },
 };
 
 const SEVERITY_CARD_CONFIG: Record<NCRSeverity, { icon: React.ElementType; color: string; ringColor: string }> = {
-  critical: { icon: AlertOctagon, color: 'text-red-700 bg-red-50 border-red-300 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800', ringColor: 'ring-red-300' },
+  critical: { icon: AlertOctagon, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30', ringColor: 'ring-semantic-error/30' },
   major: { icon: AlertCircle, color: 'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800', ringColor: 'ring-orange-300' },
-  minor: { icon: AlertTriangle, color: 'text-yellow-600 bg-yellow-50 border-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/30 dark:border-yellow-800', ringColor: 'ring-yellow-300' },
-  observation: { icon: Info, color: 'text-gray-500 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700', ringColor: 'ring-gray-300' },
+  minor: { icon: AlertTriangle, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30', ringColor: 'ring-semantic-warning/30' },
+  observation: { icon: Info, color: 'text-content-tertiary bg-surface-secondary border-border-light', ringColor: 'ring-gray-300' },
 };
 
 const NCR_STATUSES: NCRStatus[] = [
@@ -335,7 +335,7 @@ function CreateNCRModal({
               className={clsx(
                 inputCls,
                 titleError &&
-                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
               autoFocus
             />
@@ -363,7 +363,7 @@ function CreateNCRModal({
               className={clsx(
                 textareaCls,
                 descError &&
-                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
               placeholder={t('ncr.description_placeholder', {
                 defaultValue: 'Describe the non-conformance in detail: what was observed, where, and what specification was not met...',
@@ -587,7 +587,7 @@ const NCRRow = React.memo(function NCRRow({
               amount={ncr.cost_impact}
               currency={currency}
               compact
-              className="text-amber-500 font-medium"
+              className="text-semantic-warning font-medium"
             />
           ) : (
             '\u2014'
@@ -637,8 +637,8 @@ const NCRRow = React.memo(function NCRRow({
 
           {/* Preventive Action */}
           {ncr.preventive_action && (
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3">
-              <p className="text-xs text-green-700 dark:text-green-400 mb-1 font-medium uppercase tracking-wide">
+            <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3">
+              <p className="text-xs text-semantic-success mb-1 font-medium uppercase tracking-wide">
                 {t('ncr.label_preventive_action', { defaultValue: 'Preventive Action' })}
               </p>
               <p className="text-sm text-content-primary whitespace-pre-wrap">
@@ -734,8 +734,8 @@ const NCRRow = React.memo(function NCRRow({
             </p>
             {ncr.status === 'void' ? (
               <div className="flex items-center gap-1.5">
-                <Ban size={14} className="text-red-500" />
-                <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                <Ban size={14} className="text-semantic-error" />
+                <span className="text-sm font-medium text-semantic-error">
                   {t('ncr.status_void', { defaultValue: 'Void' })}
                 </span>
               </div>
@@ -753,7 +753,7 @@ const NCRRow = React.memo(function NCRRow({
                         className={clsx(
                           'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium whitespace-nowrap',
                           current && 'bg-oe-blue/15 text-oe-blue-text ring-1 ring-inset ring-oe-blue/30',
-                          done && 'text-emerald-600 dark:text-emerald-400',
+                          done && 'text-semantic-success',
                           !done && !current && 'text-content-quaternary',
                         )}
                       >
@@ -944,7 +944,7 @@ const NCRRow = React.memo(function NCRRow({
                   variant="ghost"
                   size="sm"
                   disabled={busy}
-                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  className="text-semantic-error hover:bg-semantic-error-bg"
                   onClick={(e) => {
                     e.stopPropagation();
                     onVoid(ncr.id);
@@ -974,7 +974,7 @@ const NCRRow = React.memo(function NCRRow({
           {/* Closure gate hint - the Close button above is disabled until a
               corrective action exists; spell out why. */}
           {!isTerminal && ncr.status === 'verification' && !ncr.corrective_action && (
-            <p className="text-2xs text-amber-600 dark:text-amber-400">
+            <p className="text-2xs text-semantic-warning">
               {t('ncr.corrective_action_required_hint', {
                 defaultValue: 'Record a corrective action before this NCR can be closed.',
               })}
@@ -1546,7 +1546,7 @@ export function NCRPage() {
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('ncr.stat_under_review', { defaultValue: 'Under Review' })}
           </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-amber-500">{stats.underReview}</p>
+          <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-warning">{stats.underReview}</p>
         </div>
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">

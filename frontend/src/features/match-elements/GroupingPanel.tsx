@@ -597,7 +597,7 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
             {t('match.wizard.buildingGroups', { defaultValue: 'Building groups…' })}
           </div>
         ) : groupsQ.isError ? (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-200">
+          <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-4 text-sm text-semantic-error">
             <div className="font-medium">
               {t('match.wizard.groupsError', {
                 defaultValue: 'Could not build groups',
@@ -608,7 +608,7 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
             </p>
           </div>
         ) : groups.length === 0 ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+          <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
             {t('match.wizard.noGroups', {
               defaultValue: 'No estimable groups for the current key.',
             })}
@@ -684,7 +684,7 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
 
             {tooGranular && (
               <div
-                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200"
+                className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-sm text-semantic-warning"
                 data-testid="grouping-warn-too-granular"
               >
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -698,7 +698,7 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
             )}
             {highMissingness && !tooGranular && (
               <div
-                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200"
+                className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-sm text-semantic-warning"
                 data-testid="grouping-warn-missingness"
               >
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -730,7 +730,7 @@ function SummaryTile({
       className={clsx(
         'rounded-lg border px-4 py-3',
         tone === 'warn'
-          ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20'
+          ? 'border-semantic-warning/30 bg-semantic-warning-bg'
           : 'border-border-light bg-surface-secondary',
       )}
     >

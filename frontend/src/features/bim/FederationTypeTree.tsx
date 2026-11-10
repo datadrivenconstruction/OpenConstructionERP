@@ -258,7 +258,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
                       data-testid={`federation-type-tree-member-${cls.ifc_class}-${m.model_id}`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-600">
+                        <span className="rounded bg-slate-200 px-1.5 py-0.5 text-2xs uppercase tracking-wide text-slate-600">
                           {m.discipline}
                         </span>
                         <span className="truncate">{m.model_name}</span>
@@ -269,7 +269,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
                     </li>
                   ))}
                   {cls.sample_properties.length > 0 ? (
-                    <li className="pt-2 text-[11px] text-slate-400">
+                    <li className="pt-2 text-2xs text-slate-400">
                       {/* The label is i18n'd but the property list is
                           interpolated manually — that keeps the test
                           mock (which returns ``defaultValue`` verbatim,

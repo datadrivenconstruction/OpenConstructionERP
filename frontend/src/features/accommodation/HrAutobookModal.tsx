@@ -255,7 +255,7 @@ export function HrAutobookModal({ onClose }: HrAutobookModalProps) {
       )}
 
       {confirmed && (
-        <div className="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <div className="mt-4 rounded-xl border border-semantic-success/30 bg-semantic-success-bg p-4 text-sm text-semantic-success">
           <CheckCircle2 className="mr-2 inline h-4 w-4" />
           {t('accommodation.hr_autobook.success_message', {
             defaultValue:
@@ -265,7 +265,7 @@ export function HrAutobookModal({ onClose }: HrAutobookModalProps) {
       )}
 
       {suggestMutation.isError && !suggestion && (
-        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="mt-4 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           <AlertTriangle className="mr-2 inline h-4 w-4" />
           {t('accommodation.hr_autobook.no_rooms', {
             defaultValue: 'No available room across your worker camps.',

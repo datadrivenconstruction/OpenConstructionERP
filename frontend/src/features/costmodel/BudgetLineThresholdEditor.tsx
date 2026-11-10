@@ -93,13 +93,13 @@ export function BudgetLineThresholdEditor({
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-content-secondary">
           {armed ? (
-            <BellRing size={13} className="text-amber-500" />
+            <BellRing size={13} className="text-semantic-warning" />
           ) : (
             <BellOff size={13} className="text-content-tertiary" />
           )}
           {t('costmodel.overrun_threshold_label', { defaultValue: 'Cost-overrun alert' })}
         </span>
-        <span className="text-xs font-bold tabular-nums text-content-primary">
+        <span className="text-xs font-semibold tabular-nums text-content-primary">
           {armed
             ? t('costmodel.overrun_threshold_value', {
                 defaultValue: 'Alert @ +{{pct}}%',

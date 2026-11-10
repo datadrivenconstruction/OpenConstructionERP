@@ -123,9 +123,9 @@ export function toneOf(k: KpiResult): DotTone {
 }
 
 export const DOT_CLASS: Record<DotTone, string> = {
-  normal: 'bg-emerald-500',
+  normal: 'bg-semantic-success',
   suspect: 'bg-amber-400',
-  warning: 'bg-red-500',
+  warning: 'bg-semantic-error',
   no_data: 'bg-gray-300 dark:bg-gray-600',
   accepted: 'bg-gray-400 dark:bg-gray-500',
 };

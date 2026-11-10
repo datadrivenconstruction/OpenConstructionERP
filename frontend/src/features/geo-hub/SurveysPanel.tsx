@@ -195,14 +195,14 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
       data-testid="geo-surveys-panel"
       className={[
         'absolute top-3 right-[21rem] z-20 flex max-h-[calc(100%-1.5rem)] w-[26rem] max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         'hidden md:flex',
       ].join(' ')}
       aria-label={t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
           {t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
         </h2>
         <button
@@ -310,7 +310,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
             </label>
           </div>
           {formErrors.length > 0 && (
-            <ul role="alert" className="space-y-0.5 text-red-600 dark:text-red-400">
+            <ul role="alert" className="space-y-0.5 text-semantic-error">
               {formErrors.map((code) => (
                 <li key={code}>{t(`geo_hub.surveys.upload.error.${code}`, { defaultValue: UPLOAD_ERROR_DEFAULT[code] ?? code })}</li>
               ))}
@@ -348,12 +348,12 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
                 )}
               </div>
               {lastAdded.warnings.map((w) => (
-                <p key={w} className="text-amber-700 dark:text-amber-300">
+                <p key={w} className="text-semantic-warning">
                   {t(`geo_hub.surveys.warning.${w}`, { defaultValue: WARNING_DEFAULT[w] ?? w })}
                 </p>
               ))}
               {lastAdded.findings.map((f) => (
-                <p key={f.rule_id} className={f.severity === 'info' ? 'text-content-tertiary' : 'text-amber-700 dark:text-amber-300'}>
+                <p key={f.rule_id} className={f.severity === 'info' ? 'text-content-tertiary' : 'text-semantic-warning'}>
                   {f.message}
                 </p>
               ))}
@@ -369,7 +369,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
           </div>
         )}
         {surveysQuery.isError && (
-          <p role="alert" className="text-red-600 dark:text-red-400">
+          <p role="alert" className="text-semantic-error">
             {t('geo_hub.surveys.load_failed', { defaultValue: 'Could not load surveys.' })}
           </p>
         )}
@@ -428,7 +428,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
                         });
                         if (ok) deleteMutation.mutate(s.id);
                       }}
-                      className="rounded-md p-1 text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:text-red-300 dark:hover:bg-red-950/30"
+                      className="rounded-md p-1 text-semantic-error hover:bg-semantic-error-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -536,7 +536,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
       </p>
       {loading && <Loader2 size={14} className="animate-spin text-content-tertiary" />}
       {failed && (
-        <p role="alert" className="text-red-600 dark:text-red-400">
+        <p role="alert" className="text-semantic-error">
           {t('geo_hub.surveys.progress.load_failed', { defaultValue: 'Could not load the progress table.' })}
         </p>
       )}
@@ -580,7 +580,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
                       title={invalid[row.activity_id] ? t('geo_hub.surveys.progress.invalid', { defaultValue: 'Enter a number from 0 to 100.' }) : undefined}
                       className={[
                         'w-14 rounded border bg-transparent px-1 py-0.5 text-right tabular-nums',
-                        invalid[row.activity_id] ? 'border-red-500' : 'border-black/15 dark:border-white/20',
+                        invalid[row.activity_id] ? 'border-semantic-error/60' : 'border-black/15 dark:border-white/20',
                       ].join(' ')}
                     />
                   </td>

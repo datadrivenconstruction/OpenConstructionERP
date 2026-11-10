@@ -440,7 +440,7 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
                       onClick={() => handleDelete(w.id)}
                       className={clsx(
                         'inline-flex items-center justify-center rounded p-1 text-content-tertiary',
-                        'hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30',
+                        'hover:bg-semantic-error-bg hover:text-semantic-error',
                       )}
                       aria-label={t('subcontractors.delete_waiver', {
                         defaultValue: 'Delete lien waiver',

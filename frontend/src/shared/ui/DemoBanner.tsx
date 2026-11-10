@@ -65,7 +65,7 @@ export function DemoBanner() {
       {/* Persistent strip at the very top */}
       <div
         role="alert"
-        className="relative z-30 flex items-center justify-center gap-x-3 gap-y-1.5 px-3 py-1.5 text-[13px] md:sticky md:top-0 md:z-50 md:flex-wrap md:px-4 md:py-2.5 font-medium text-amber-950 bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 border-b border-amber-500/40 shadow-sm dark:text-amber-100 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-900/40 dark:border-amber-500/30"
+        className="relative z-30 flex items-center justify-center gap-x-3 gap-y-1.5 px-3 py-1.5 text-sm md:sticky md:top-0 md:z-50 md:flex-wrap md:px-4 md:py-2.5 font-medium text-amber-950 bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 border-b border-amber-500/40 shadow-sm dark:text-amber-100 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-900/40 dark:border-amber-500/30"
       >
         <span className="flex min-w-0 items-center gap-2">
           <AlertTriangle size={14} className="shrink-0" />
@@ -74,23 +74,23 @@ export function DemoBanner() {
           </span>
         </span>
         {/* Performance / sample-data caveat — always visible, not just in the modal */}
-        <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px] md:flex">
-          <Gauge size={12} className="shrink-0 text-amber-700 dark:text-amber-300" />
-          <span className="text-amber-900 dark:text-amber-200">
+        <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-xs md:flex">
+          <Gauge size={12} className="shrink-0 text-semantic-warning" />
+          <span className="text-semantic-warning">
             {t('demo_banner.strip_perf_caveat')}
           </span>
         </span>
         {uploadsDisabled && (
-          <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px] md:flex">
-            <UploadCloud size={12} className="shrink-0 text-amber-700 dark:text-amber-300" />
-            <span className="text-amber-900 dark:text-amber-200">
+          <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-xs md:flex">
+            <UploadCloud size={12} className="shrink-0 text-semantic-warning" />
+            <span className="text-semantic-warning">
               {t('demo_banner.strip_uploads_off', {
                 defaultValue: 'Uploads are off here: please use the demo data only',
               })}
             </span>
           </span>
         )}
-        <code className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-900/15 text-amber-950 font-mono text-[11px] dark:bg-amber-100/10 dark:text-amber-100">
+        <code className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-900/15 text-amber-950 font-mono text-2xs dark:bg-amber-100/10 dark:text-amber-100">
           pip install openconstructionerp
         </code>
         <span className="hidden items-center gap-2.5 md:flex">
@@ -99,7 +99,7 @@ export function DemoBanner() {
             href="https://openconstructionerp.com/download"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+            className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-semantic-warning"
           >
             <Download size={12} className="shrink-0" />
             Windows
@@ -108,7 +108,7 @@ export function DemoBanner() {
             href="https://openconstructionerp.com/download"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+            className="underline underline-offset-2 hover:text-semantic-warning"
           >
             macOS
           </a>
@@ -116,7 +116,7 @@ export function DemoBanner() {
             href="https://openconstructionerp.com/download"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+            className="underline underline-offset-2 hover:text-semantic-warning"
           >
             Linux
           </a>
@@ -124,7 +124,7 @@ export function DemoBanner() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="shrink-0 underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+          className="shrink-0 underline underline-offset-2 hover:text-semantic-warning"
         >
           {t('demo_banner.strip_why')}
         </button>
@@ -142,11 +142,11 @@ export function DemoBanner() {
           >
             {/* Header */}
             <div className="flex items-start gap-3 px-6 pt-6 pb-3">
-              <div className="shrink-0 w-11 h-11 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center">
-                <AlertTriangle size={22} className="text-amber-600 dark:text-amber-400" />
+              <div className="shrink-0 w-11 h-11 rounded-full bg-semantic-warning-bg flex items-center justify-center">
+                <AlertTriangle size={22} className="text-semantic-warning" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-content-primary leading-tight">
+                <h2 className="text-lg font-semibold text-content-primary leading-tight">
                   {t('demo_banner.modal_title')}
                 </h2>
                 <p className="text-xs text-content-tertiary mt-0.5">
@@ -167,7 +167,7 @@ export function DemoBanner() {
             <div className="px-6 pb-2 space-y-3 text-sm text-content-secondary leading-relaxed">
               {/* Sample-data callout — prominent, above the bullet list */}
               <div className="flex items-start gap-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-500/20 px-3 py-2.5">
-                <span className="shrink-0 mt-0.5 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">
+                <span className="shrink-0 mt-0.5 text-blue-600 dark:text-blue-400 font-semibold text-xs uppercase tracking-wider">
                   {t('demo_banner.modal_sample_data_label')}
                 </span>
                 <span className="text-xs text-blue-800 dark:text-blue-300">
@@ -192,7 +192,7 @@ export function DemoBanner() {
               </p>
               <ul className="space-y-2 pl-1">
                 <li className="flex gap-2.5">
-                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5" />
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-semantic-error mt-1.5" />
                   <span>
                     <strong className="text-content-primary">
                       {t('demo_banner.modal_bullet_no_data_heading')}
@@ -201,7 +201,7 @@ export function DemoBanner() {
                   </span>
                 </li>
                 <li className="flex gap-2.5">
-                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5" />
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-semantic-warning mt-1.5" />
                   <span>
                     <strong className="text-content-primary">
                       {t('demo_banner.modal_bullet_perf_heading')}
@@ -210,7 +210,7 @@ export function DemoBanner() {
                   </span>
                 </li>
                 <li className="flex gap-2.5">
-                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5" />
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-semantic-success mt-1.5" />
                   <span>
                     <strong className="text-content-primary">
                       {t('demo_banner.modal_bullet_install_heading')}
@@ -221,10 +221,10 @@ export function DemoBanner() {
               </ul>
 
               <div className="mt-4 rounded-lg bg-surface-secondary border border-border-light p-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-content-quaternary mb-1.5">
+                <div className="text-2xs font-semibold uppercase tracking-wider text-content-quaternary mb-1.5">
                   {t('demo_banner.modal_install_box_label')}
                 </div>
-                <code className="block font-mono text-[12px] text-content-primary leading-relaxed">
+                <code className="block font-mono text-xs text-content-primary leading-relaxed">
                   pip install openconstructionerp
                   <br />
                   openestimate init-db

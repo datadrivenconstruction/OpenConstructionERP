@@ -451,7 +451,7 @@ export function ProjectFilePicker(props: ProjectFilePickerProps) {
                     store, translated everywhere, rather than a second name for
                     the same thing. */}
                 {federated && (
-                  <p className="px-1 text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+                  <p className="px-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                     {t(`files.category.${group.kind}`, { defaultValue: group.kind })}
                   </p>
                 )}
@@ -476,7 +476,7 @@ export function ProjectFilePicker(props: ProjectFilePickerProps) {
                           <p className="truncate text-sm font-semibold text-content-primary">
                             {row.name}
                           </p>
-                          <p className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-content-tertiary">
+                          <p className="flex flex-wrap items-center gap-x-1.5 text-2xs text-content-tertiary">
                             <span className="font-mono uppercase">
                               {row.match.ext.replace(/^\./, '')}
                             </span>
@@ -494,20 +494,20 @@ export function ProjectFilePicker(props: ProjectFilePickerProps) {
                             than implying every format opens instantly in this
                             module. */}
                         {row.match.handoff ? (
-                          <span className="shrink-0 rounded-md border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                          <span className="shrink-0 rounded-md border border-amber-500/20 bg-semantic-warning/10 px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning dark:text-amber-400">
                             {t('project_files.picker_opens_elsewhere', {
                               defaultValue: 'Opens in another module',
                             })}
                           </span>
                         ) : row.match.needsConversion ? (
-                          <span className="flex shrink-0 items-center gap-1 rounded-md border border-violet-500/20 bg-violet-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400">
+                          <span className="flex shrink-0 items-center gap-1 rounded-md border border-violet-500/20 bg-violet-500/10 px-1.5 py-0.5 text-2xs font-semibold text-violet-600 dark:text-violet-400">
                             <Wand2 size={10} />
                             {t('project_files.picker_needs_conversion', {
                               defaultValue: 'Converts first',
                             })}
                           </span>
                         ) : row.alreadyHere ? (
-                          <span className="shrink-0 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <span className="shrink-0 rounded-md border border-emerald-500/20 bg-semantic-success/10 px-1.5 py-0.5 text-2xs font-semibold text-semantic-success dark:text-emerald-400">
                             {t('project_files.picker_already_open_here', {
                               defaultValue: 'Already in this module',
                             })}

@@ -90,7 +90,7 @@ export function SemanticModelCard({
             <Sparkles size={20} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-content-primary">
+            <h3 className="text-base font-semibold text-content-primary">
               {t('onboarding.semantic_model_title', {
                 defaultValue: 'Semantic search model',
               })}
@@ -220,7 +220,7 @@ function SwitchControl({ enabled, onToggle }: { enabled: boolean; onToggle: () =
         'group relative inline-flex h-[26px] w-[48px] shrink-0 cursor-pointer rounded-full p-[3px] transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50',
         enabled
           ? 'bg-gradient-to-r from-oe-blue to-blue-500 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]'
-          : 'bg-gray-200 dark:bg-gray-700 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
+          : 'bg-surface-secondary shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
       )}
     >
       <span

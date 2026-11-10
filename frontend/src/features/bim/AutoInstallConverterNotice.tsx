@@ -59,7 +59,7 @@ export function AutoInstallConverterNotice({
   if (errored) {
     return (
       <div
-        className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-[11px] text-amber-900 dark:text-amber-200"
+        className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-2xs text-amber-900 dark:text-amber-200"
         data-testid={`auto-install-error-${converterId}`}
         role="status"
       >
@@ -81,7 +81,7 @@ export function AutoInstallConverterNotice({
             <button
               type="button"
               onClick={retry}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors"
             >
               <RefreshCw size={11} />
               {t('bim.auto_install_retry', { defaultValue: 'Retry install' })}
@@ -90,7 +90,7 @@ export function AutoInstallConverterNotice({
               href={DDC_REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
             >
               <ExternalLink size={11} />
               {t('bim.auto_install_manual_link', {
@@ -119,7 +119,7 @@ export function AutoInstallConverterNotice({
       data-testid={`auto-install-progress-${converterId}`}
       role="status"
     >
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold">
+      <p className="flex items-center gap-1.5 text-2xs font-semibold">
         <Loader2 size={12} className="animate-spin shrink-0" />
         {sizeHint !== null
           ? t('bim.auto_install_preparing_sized', {
@@ -132,7 +132,7 @@ export function AutoInstallConverterNotice({
               format: formatLabel,
             })}
       </p>
-      <p className="text-[10px] opacity-80 leading-relaxed flex items-start gap-1">
+      <p className="text-2xs opacity-80 leading-relaxed flex items-start gap-1">
         <Download size={10} className="shrink-0 mt-0.5" />
         <span>
           {hasFallback

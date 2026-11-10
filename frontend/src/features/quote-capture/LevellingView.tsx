@@ -28,7 +28,7 @@ export function LevellingView({ packageId }: { packageId: string }) {
   return (
     <div className="flex flex-col gap-3" data-testid="quote-levelling">
       {q.data.excluded_off_currency.length > 0 && (
-        <p className="text-sm text-amber-700">
+        <p className="text-sm text-semantic-warning">
           {t('quote_capture.off_currency', '{{count}} quote(s) in another currency are left out.', {
             count: q.data.excluded_off_currency.length,
           })}
@@ -54,11 +54,11 @@ export function LevellingView({ packageId }: { packageId: string }) {
                   <td
                     key={c.quote_id}
                     data-testid={`cell-${c.status}`}
-                    className={`text-right ${c.status === 'gap' ? 'bg-amber-50 italic dark:bg-amber-950/30' : ''} ${c.lowest ? 'font-semibold text-emerald-700' : ''}`}
+                    className={`text-right ${c.status === 'gap' ? 'bg-semantic-warning-bg italic' : ''} ${c.lowest ? 'font-semibold text-semantic-success' : ''}`}
                   >
                     {money(c.adjusted_total)}
                     {c.status === 'gap' && c.plug_source && (
-                      <div className="text-2xs text-amber-700">{plugLabel[c.plug_source]}</div>
+                      <div className="text-2xs text-semantic-warning">{plugLabel[c.plug_source]}</div>
                     )}
                   </td>
                 ))}

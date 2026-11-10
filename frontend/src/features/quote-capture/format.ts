@@ -15,9 +15,9 @@ export function confidenceBand(value: number | null | undefined): ConfidenceBand
 }
 
 export const BAND_CLASS: Record<ConfidenceBand, string> = {
-  high: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
-  medium: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
-  low: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
+  high: 'bg-semantic-success-bg text-semantic-success',
+  medium: 'bg-semantic-warning-bg text-semantic-warning',
+  low: 'bg-semantic-error-bg text-semantic-error',
 };
 
 /** Format a wire decimal ("1234.5") in the user's number locale; non-numbers pass through. */

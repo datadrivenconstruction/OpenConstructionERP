@@ -201,7 +201,7 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
                         <div className="truncate text-xs text-content-tertiary">{r.description}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-base font-bold tabular-nums">{fmtFactorPct(r.productivity_factor, lang)}</div>
+                        <div className="text-base font-semibold tabular-nums">{fmtFactorPct(r.productivity_factor, lang)}</div>
                         <StatusBadge row={r} />
                       </div>
                     </div>
@@ -435,7 +435,7 @@ function WeekTrend({ weeks, lang }: { weeks: ProductivityWeek[]; lang: string })
         <div className="flex h-32 items-end gap-2 overflow-x-auto">
           {weeks.map((w) => (
             <div key={w.week_start} className="flex min-w-[44px] flex-1 flex-col items-center gap-1">
-              <div className="text-[11px] font-semibold tabular-nums">{fmtFactorPct(w.productivity_factor, lang)}</div>
+              <div className="text-2xs font-semibold tabular-nums">{fmtFactorPct(w.productivity_factor, lang)}</div>
               <div className="flex h-20 w-full items-end justify-center gap-0.5">
                 <div
                   className="w-3 rounded-t bg-oe-blue"
@@ -448,7 +448,7 @@ function WeekTrend({ weeks, lang }: { weeks: ProductivityWeek[]; lang: string })
                   title={`${fmtNum(w.earned_hours, 1, lang)} h`}
                 />
               </div>
-              <div className="text-[10px] text-content-tertiary">{w.week_start.slice(5)}</div>
+              <div className="text-2xs text-content-tertiary">{w.week_start.slice(5)}</div>
             </div>
           ))}
         </div>

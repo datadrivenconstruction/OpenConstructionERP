@@ -160,7 +160,7 @@ export default function BIMDiffPanel({
       <div className="px-3 py-2 border-b border-border-light">
         <label
           htmlFor="bim-diff-old-model"
-          className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1"
+          className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1"
         >
           {t('bim.diff_compare_against', {
             defaultValue: 'Compare against (older version)',
@@ -193,20 +193,20 @@ export default function BIMDiffPanel({
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {!oldModelId ? (
-          <p className="px-3 py-4 text-[11px] text-content-tertiary italic">
+          <p className="px-3 py-4 text-2xs text-content-tertiary italic">
             {t('bim.diff_prompt', {
               defaultValue:
                 'Pick an older version above to see what changed. Added elements turn green, modified amber, deleted red.',
             })}
           </p>
         ) : diffQuery.isLoading ? (
-          <div className="flex items-center gap-2 px-3 py-4 text-[11px] text-content-tertiary">
+          <div className="flex items-center gap-2 px-3 py-4 text-2xs text-content-tertiary">
             <Loader2 size={13} className="animate-spin text-oe-blue" />
             {t('bim.diff_loading', { defaultValue: 'Computing diff…' })}
           </div>
         ) : diffQuery.error ? (
           <p
-            className="px-3 py-4 text-[11px] text-rose-600"
+            className="px-3 py-4 text-2xs text-rose-600"
             data-testid="bim-diff-error"
           >
             {t('bim.diff_error', {
@@ -216,7 +216,7 @@ export default function BIMDiffPanel({
         ) : grouped ? (
           <>
             {/* Summary strip */}
-            <div className="flex items-center gap-3 px-3 py-2 border-b border-border-light text-[11px]">
+            <div className="flex items-center gap-3 px-3 py-2 border-b border-border-light text-2xs">
               <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <Plus size={11} />
                 {grouped.totals.added}
@@ -232,7 +232,7 @@ export default function BIMDiffPanel({
             </div>
 
             {grouped.groups.length === 0 ? (
-              <p className="px-3 py-4 text-[11px] text-content-tertiary italic">
+              <p className="px-3 py-4 text-2xs text-content-tertiary italic">
                 {t('bim.diff_no_changes', {
                   defaultValue:
                     'No element-level changes between these versions.',
@@ -256,10 +256,10 @@ export default function BIMDiffPanel({
                         ) : (
                           <ChevronRight size={13} className="shrink-0 text-content-tertiary" />
                         )}
-                        <span className="flex-1 min-w-0 truncate text-[11px] font-medium text-content-primary">
+                        <span className="flex-1 min-w-0 truncate text-2xs font-medium text-content-primary">
                           {g.category}
                         </span>
-                        <span className="flex items-center gap-1.5 text-[10px] tabular-nums shrink-0">
+                        <span className="flex items-center gap-1.5 text-2xs tabular-nums shrink-0">
                           {g.added > 0 && (
                             <span className="text-emerald-600 dark:text-emerald-400">
                               +{g.added}
@@ -306,10 +306,10 @@ export default function BIMDiffPanel({
                                     className={`mt-0.5 shrink-0 ${meta.cls}`}
                                   />
                                   <span className="flex-1 min-w-0">
-                                    <span className="block truncate text-[11px] text-content-primary">
+                                    <span className="block truncate text-2xs text-content-primary">
                                       {row.name ?? row.stableId}
                                     </span>
-                                    <span className="text-[9px] uppercase tracking-wider text-content-tertiary">
+                                    <span className="text-2xs uppercase tracking-wider text-content-tertiary">
                                       {t(meta.key, { defaultValue: meta.fallback })}
                                     </span>
                                   </span>
@@ -319,12 +319,12 @@ export default function BIMDiffPanel({
                                     {row.fieldDeltas.map((d) => (
                                       <div key={d.field} className="contents">
                                         <dt
-                                          className="text-[10px] text-content-tertiary truncate"
+                                          className="text-2xs text-content-tertiary truncate"
                                           title={d.field}
                                         >
                                           {d.field}
                                         </dt>
-                                        <dd className="text-[10px] text-content-secondary min-w-0">
+                                        <dd className="text-2xs text-content-secondary min-w-0">
                                           <span
                                             className="line-through text-rose-500/80 break-words"
                                             title={d.oldText}

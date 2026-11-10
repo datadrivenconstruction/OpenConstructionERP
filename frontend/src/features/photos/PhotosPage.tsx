@@ -240,7 +240,7 @@ function Thumb({
           {t(`photos.cat_${photo.category}`, { defaultValue: photo.category })}
         </span>
         {field && (
-          <span className="shrink-0 rounded bg-emerald-100 px-1 text-2xs text-emerald-800">{t('photoArchive.field_badge')}</span>
+          <span className="shrink-0 rounded bg-semantic-success-bg px-1 text-2xs text-semantic-success">{t('photoArchive.field_badge')}</span>
         )}
       </div>
       {suggestion && (

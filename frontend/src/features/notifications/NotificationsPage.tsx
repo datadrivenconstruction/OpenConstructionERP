@@ -82,10 +82,10 @@ const ICON_MAP: Record<IconCategory, { icon: typeof CheckCircle2; color: string;
   success: {
     icon: CheckCircle2,
     color: 'text-semantic-success',
-    bg: 'bg-emerald-50 dark:bg-emerald-900/30',
+    bg: 'bg-semantic-success-bg',
   },
-  error: { icon: XCircle, color: 'text-semantic-error', bg: 'bg-rose-50 dark:bg-rose-900/30' },
-  warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/30' },
+  error: { icon: XCircle, color: 'text-semantic-error', bg: 'bg-semantic-error-bg' },
+  warning: { icon: AlertTriangle, color: 'text-semantic-warning', bg: 'bg-semantic-warning-bg' },
   info: { icon: Info, color: 'text-oe-blue-text', bg: 'bg-oe-blue-subtle' },
   import: { icon: Upload, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
   validation: { icon: Shield, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/30' },
@@ -458,7 +458,7 @@ export function NotificationsPage() {
               };
               return (
                 <div key={bucket}>
-                  <div className="sticky top-0 z-10 bg-surface-elevated/95 backdrop-blur px-4 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-content-quaternary border-b border-border-light/60">
+                  <div className="sticky top-0 z-10 bg-surface-elevated/95 backdrop-blur px-4 py-1.5 text-2xs uppercase tracking-wider font-semibold text-content-quaternary border-b border-border-light/60">
                     {bucketLabels[bucket]}
                   </div>
                   <ul role="list" className="divide-y divide-border-light">
@@ -518,7 +518,7 @@ export function NotificationsPage() {
                               {body && (
                                 <p className="text-xs text-content-secondary mt-0.5">{body}</p>
                               )}
-                              <p className="text-[11px] text-content-quaternary mt-1 tabular-nums">
+                              <p className="text-2xs text-content-quaternary mt-1 tabular-nums">
                                 <DateDisplay value={n.created_at} format="datetime" />
                               </p>
                             </div>
@@ -530,7 +530,7 @@ export function NotificationsPage() {
                               'shrink-0 flex h-7 w-7 items-center justify-center rounded-md',
                               'text-content-quaternary',
                               'opacity-0 group-hover:opacity-100 focus:opacity-100',
-                              'hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/30',
+                              'hover:bg-semantic-error-bg hover:text-semantic-error',
                               'transition-all',
                             )}
                             title={t('common.delete', { defaultValue: 'Delete' })}

@@ -141,7 +141,7 @@ export function AddendumChanges({ addendum }: { addendum: Addendum }) {
       {boq.length > 0 && (
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-content-tertiary">
+            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
               {t('tendering.addendum.boq_changes', { defaultValue: 'Bill of quantities changes' })}
             </span>
             {addendum.boq_revision_no != null && (
@@ -592,7 +592,7 @@ function AddendumRow({
                 return (
                   <span
                     key={`${entry.bidder_id}-${entry.acknowledged_at}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg/40 px-2 py-0.5 text-[10px] font-medium text-semantic-success"
+                    className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg/40 px-2 py-0.5 text-2xs font-medium text-semantic-success"
                   >
                     <CheckCircle2 size={10} />
                     {company || entry.bidder_id.slice(0, 8)}
@@ -620,7 +620,7 @@ function AddendumRow({
                 </Button>
               ) : (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] text-content-tertiary">
+                  <span className="text-2xs text-content-tertiary">
                     {t('tendering.addendum.acknowledge_as', {
                       defaultValue: 'Acknowledge as:',
                     })}

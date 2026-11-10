@@ -216,7 +216,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
           </div>
           {(change.old_text || change.new_text) && (
             <p className="mt-0.5 truncate text-xs">
-              <span className="text-red-600 line-through">{change.old_text}</span>
+              <span className="text-semantic-error line-through">{change.old_text}</span>
               {change.old_text && change.new_text ? ' ' : ''}
               <span className="text-blue-600">{change.new_text}</span>
             </p>
@@ -231,7 +231,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
               <span className="text-content-secondary">{t('drawing_compare.has_markup', { defaultValue: 'Clouded' })}</span>
             )}
             {change.flagged_at && (
-              <span className="text-amber-700">
+              <span className="text-semantic-warning">
                 {t('drawing_compare.flagged_summary', {
                   defaultValue: '{{items}} quantities and {{positions}} BOQ positions flagged for re-measure',
                   items: flaggedCount,
@@ -348,7 +348,7 @@ export function RemeasureDialog({ change, comparisonId, onClose }: RemeasureDial
         </p>
         <div className="mt-3 max-h-72 overflow-y-auto text-sm">
           {!preview && !error && <Loader2 className="animate-spin" size={18} />}
-          {error && <p className="text-red-600">{error}</p>}
+          {error && <p className="text-semantic-error">{error}</p>}
           {empty && <p className="text-content-secondary">{t('drawing_compare.remeasure_none', { defaultValue: 'Nothing measured inside this change.' })}</p>}
           {preview && preview.items.length > 0 && (
             <ul className="space-y-1">

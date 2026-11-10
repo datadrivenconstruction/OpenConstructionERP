@@ -17,22 +17,22 @@ export interface KindTone {
 
 export const KIND_TONE: Record<FileKind, KindTone> = {
   document: {
-    tile: 'bg-sky-50 dark:bg-sky-950/30',
-    icon: 'text-sky-600 dark:text-sky-400',
+    tile: 'bg-semantic-info-bg',
+    icon: 'text-semantic-info',
     ring: 'group-hover:ring-sky-500/30',
-    bar: 'bg-sky-500',
+    bar: 'bg-semantic-info',
   },
   photo: {
-    tile: 'bg-emerald-50 dark:bg-emerald-950/30',
-    icon: 'text-emerald-600 dark:text-emerald-400',
+    tile: 'bg-semantic-success-bg',
+    icon: 'text-semantic-success',
     ring: 'group-hover:ring-emerald-500/30',
-    bar: 'bg-emerald-500',
+    bar: 'bg-semantic-success',
   },
   sheet: {
-    tile: 'bg-amber-50 dark:bg-amber-950/30',
-    icon: 'text-amber-600 dark:text-amber-400',
+    tile: 'bg-semantic-warning-bg',
+    icon: 'text-semantic-warning',
     ring: 'group-hover:ring-amber-500/30',
-    bar: 'bg-amber-500',
+    bar: 'bg-semantic-warning',
   },
   bim_model: {
     tile: 'bg-violet-50 dark:bg-violet-950/30',
@@ -59,10 +59,10 @@ export const KIND_TONE: Record<FileKind, KindTone> = {
     bar: 'bg-pink-500',
   },
   markup: {
-    tile: 'bg-rose-50 dark:bg-rose-950/30',
-    icon: 'text-rose-600 dark:text-rose-400',
+    tile: 'bg-semantic-error-bg',
+    icon: 'text-semantic-error',
     ring: 'group-hover:ring-rose-500/30',
-    bar: 'bg-rose-500',
+    bar: 'bg-semantic-error',
   },
 };
 

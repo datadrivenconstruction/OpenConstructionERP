@@ -234,7 +234,7 @@ export default function BIMGroupByPanel({
   }, [tree, exportLabels, nested, fileBase, t]);
 
   const selectClass =
-    'w-full min-w-0 text-[11px] py-1 px-1.5 rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
+    'w-full min-w-0 text-2xs py-1 px-1.5 rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
 
   const keyOptions = (
     <>
@@ -298,16 +298,16 @@ export default function BIMGroupByPanel({
               <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: colour }} aria-hidden />
             )}
             <span
-              className={`text-[11px] truncate ${node.value ? 'text-content-primary font-medium' : 'text-content-tertiary italic'}`}
+              className={`text-2xs truncate ${node.value ? 'text-content-primary font-medium' : 'text-content-tertiary italic'}`}
             >
               {node.value || notSet}
             </span>
-            <span className="ms-auto shrink-0 text-[10px] tabular-nums text-content-secondary">
+            <span className="ms-auto shrink-0 text-2xs tabular-nums text-content-secondary">
               {node.count.toLocaleString(getNumberLocale())}
             </span>
           </span>
           {quantities.length > 0 && (
-            <span className="block text-[10px] tabular-nums text-content-tertiary truncate">{quantities.join(' · ')}</span>
+            <span className="block text-2xs tabular-nums text-content-tertiary truncate">{quantities.join(' · ')}</span>
           )}
         </button>
       </div>
@@ -322,10 +322,10 @@ export default function BIMGroupByPanel({
     >
       <div className="px-3 pt-2.5 pb-2 space-y-1.5 bg-surface-secondary">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <h3 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('bim.groupby.title', { defaultValue: 'Group by' })}
           </h3>
-          <span className="text-[10px] text-content-tertiary tabular-nums">
+          <span className="text-2xs text-content-tertiary tabular-nums">
             {t('bim.groupby.of_filtered', {
               defaultValue: 'Filtered: {{n}}',
               n: elements.length.toLocaleString(getNumberLocale()),
@@ -368,7 +368,7 @@ export default function BIMGroupByPanel({
             type="button"
             onClick={onLoadProperties}
             disabled={propertiesLoading}
-            className="w-full text-start text-[10px] text-oe-blue hover:underline disabled:opacity-60"
+            className="w-full text-start text-2xs text-oe-blue hover:underline disabled:opacity-60"
             data-testid="bim-groupby-load-props"
           >
             {propertiesLoading
@@ -381,7 +381,7 @@ export default function BIMGroupByPanel({
             type="button"
             onClick={() => setColourOn((v) => !v)}
             aria-pressed={colourOn}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border transition-colors ${
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border transition-colors ${
               colourOn
                 ? 'bg-oe-blue text-white border-oe-blue'
                 : 'border-border-light text-content-secondary hover:bg-surface-tertiary'
@@ -395,7 +395,7 @@ export default function BIMGroupByPanel({
             type="button"
             onClick={exportCsv}
             disabled={tree.length === 0}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
           >
             <Download size={11} />
             CSV
@@ -404,7 +404,7 @@ export default function BIMGroupByPanel({
             type="button"
             onClick={() => void exportXlsx()}
             disabled={tree.length === 0}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
           >
             <FileSpreadsheet size={11} />
             Excel
@@ -417,7 +417,7 @@ export default function BIMGroupByPanel({
                 onIsolate([]);
                 onSelect([]);
               }}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-oe-blue hover:bg-oe-blue/10"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
             >
               <Eye size={11} />
               {t('bim.groupby.show_all', { defaultValue: 'Show all' })}
@@ -428,11 +428,11 @@ export default function BIMGroupByPanel({
 
       <div className="overflow-y-auto max-h-[45vh] divide-y divide-border-light/50" role="list">
         {isLoading ? (
-          <p className="px-3 py-4 text-[11px] text-content-tertiary text-center" role="status">
+          <p className="px-3 py-4 text-2xs text-content-tertiary text-center" role="status">
             {t('bim.groupby.loading', { defaultValue: 'Loading elements...' })}
           </p>
         ) : tree.length === 0 ? (
-          <p className="px-3 py-4 text-[11px] text-content-tertiary text-center" data-testid="bim-groupby-empty">
+          <p className="px-3 py-4 text-2xs text-content-tertiary text-center" data-testid="bim-groupby-empty">
             {t('bim.groupby.empty', { defaultValue: 'No elements match the filters. Clear a filter to see groups.' })}
           </p>
         ) : (
@@ -446,7 +446,7 @@ export default function BIMGroupByPanel({
       </div>
 
       {tree.length > 0 && (
-        <div className="px-3 py-1.5 flex items-center justify-between gap-2 text-[10px] bg-surface-secondary border-t border-border-light">
+        <div className="px-3 py-1.5 flex items-center justify-between gap-2 text-2xs bg-surface-secondary border-t border-border-light">
           <span className="font-semibold text-content-secondary">
             {t('bim.groupby.total', { defaultValue: 'Total' })} · {totals.count.toLocaleString(getNumberLocale())}
           </span>
@@ -454,7 +454,7 @@ export default function BIMGroupByPanel({
         </div>
       )}
       {tree.length > 0 && (
-        <p className="px-3 pb-2 pt-1 text-[10px] text-content-quaternary flex items-center gap-1">
+        <p className="px-3 pb-2 pt-1 text-2xs text-content-quaternary flex items-center gap-1">
           <MousePointerClick size={10} />
           {t('bim.groupby.hint', { defaultValue: 'Click a group to show it alone in 3D. Click again to show all.' })}
         </p>

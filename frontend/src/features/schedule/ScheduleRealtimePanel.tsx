@@ -345,7 +345,7 @@ function GuardedEdit({
                 {t('schedule.realtime.revision', { defaultValue: 'Revision' })}
               </div>
               <div
-                className="mt-0.5 text-lg font-bold tabular-nums text-content-primary"
+                className="mt-0.5 text-lg font-semibold tabular-nums text-content-primary"
                 data-testid="realtime-revision"
               >
                 {revisionQ.isLoading ? (

@@ -122,7 +122,7 @@ function SavedViewsExplainer() {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>
@@ -305,7 +305,7 @@ export function SavedViewsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-4 text-sm text-semantic-error">
           {t('saved_views.load_error', { defaultValue: 'Could not load saved views.' })}
         </div>
       )}

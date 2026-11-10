@@ -157,14 +157,14 @@ export function InstallConverterPrompt({
             <div>
               <h2
                 id="install-converter-prompt-title"
-                className="text-sm font-bold text-content-primary"
+                className="text-sm font-semibold text-content-primary"
               >
                 {t('bim.install_prompt_title', {
                   defaultValue: 'Install {{format}} converter',
                   format: formatLabel,
                 })}
               </h2>
-              <p className="text-[10px] text-content-quaternary mt-0.5">
+              <p className="text-2xs text-content-quaternary mt-0.5">
                 {t('bim.install_prompt_subtitle', {
                   defaultValue: 'One-time download from GitHub releases',
                 })}
@@ -196,7 +196,7 @@ export function InstallConverterPrompt({
               converterSize: converterSizeMb,
             })}
           </p>
-          <p className="text-[11px] text-content-quaternary">
+          <p className="text-2xs text-content-quaternary">
             {t('bim.install_prompt_duration_hint', {
               defaultValue:
                 'The install typically takes 1–2 minutes. Your file will be retried automatically once the converter is ready.',
@@ -208,7 +208,7 @@ export function InstallConverterPrompt({
               className="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/30 px-3 py-2.5"
               data-testid="install-prompt-progress"
             >
-              <p className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 mb-1.5">
+              <p className="text-2xs font-semibold text-sky-700 dark:text-sky-300 mb-1.5">
                 {t('bim.install_prompt_in_progress', {
                   defaultValue: 'Installing {{converterName}}…',
                   converterName,
@@ -228,7 +228,7 @@ export function InstallConverterPrompt({
                 size={14}
                 className="text-red-500 mt-0.5 shrink-0"
               />
-              <p className="text-[11px] text-red-700 dark:text-red-300">
+              <p className="text-2xs text-red-700 dark:text-red-300">
                 {localError}
               </p>
             </div>

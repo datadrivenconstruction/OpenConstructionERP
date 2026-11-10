@@ -143,9 +143,9 @@ export function BuyerAccessLinkPanel({
       {freshIssued && (
         <div
           data-testid="fresh-link-banner"
-          className="rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 px-2.5 py-2 text-2xs space-y-1.5"
+          className="rounded-md bg-semantic-warning-bg border border-semantic-warning/30 px-2.5 py-2 text-2xs space-y-1.5"
         >
-          <p className="font-medium text-amber-900 dark:text-amber-200">
+          <p className="font-medium text-semantic-warning">
             {t('buyer_portal_panel.copy_now', {
               defaultValue:
                 'Copy this URL now - it will not be shown again.',

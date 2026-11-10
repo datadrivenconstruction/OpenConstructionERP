@@ -413,7 +413,7 @@ export default function MeshImportDialog({
             <h2 className="text-sm font-semibold text-content-primary truncate">
               {t('bim.mesh_import.title', { defaultValue: 'Import 3D geometry' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary uppercase font-mono shrink-0">
+            <span className="text-2xs text-content-tertiary uppercase font-mono shrink-0">
               {format ?? ''}
             </span>
           </div>
@@ -429,7 +429,7 @@ export default function MeshImportDialog({
 
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto">
-          <p className="text-[11px] text-content-tertiary truncate">{file.name}</p>
+          <p className="text-2xs text-content-tertiary truncate">{file.name}</p>
 
           {loading && (
             <div className="flex flex-col items-center gap-2 py-10 text-content-tertiary">
@@ -441,7 +441,7 @@ export default function MeshImportDialog({
           )}
 
           {!loading && loadError && (
-            <div className="rounded-lg border border-red-300/50 bg-red-50/60 dark:bg-red-950/20 px-3 py-2.5 text-[12px] text-red-700 dark:text-red-300">
+            <div className="rounded-lg border border-red-300/50 bg-red-50/60 dark:bg-red-950/20 px-3 py-2.5 text-xs text-red-700 dark:text-red-300">
               <div className="flex items-start gap-2">
                 <AlertTriangle size={13} className="shrink-0 mt-0.5" />
                 <span>{loadError}</span>
@@ -450,7 +450,7 @@ export default function MeshImportDialog({
           )}
 
           {!loading && !loadError && experimental && (
-            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-2xs text-amber-700 dark:text-amber-300">
               <div className="flex items-start gap-2">
                 <Info size={12} className="shrink-0 mt-0.5" />
                 <span>
@@ -464,7 +464,7 @@ export default function MeshImportDialog({
           )}
 
           {!loading && !loadError && display && !hasObjects && (
-            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2.5 text-[12px] text-amber-700 dark:text-amber-300">
+            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
               <div className="flex items-start gap-2">
                 <AlertTriangle size={13} className="shrink-0 mt-0.5" />
                 <span>
@@ -482,7 +482,7 @@ export default function MeshImportDialog({
               {/* Honest expectation-setting: a mesh is geometry only. The
                   quantities below are measured from the shape; there are no
                   BIM properties / classifications to extract (unlike IFC/RVT). */}
-              <div className="rounded-lg border border-blue-300/40 bg-blue-50/50 dark:bg-blue-950/20 px-3 py-2 text-[11px] text-blue-700 dark:text-blue-300">
+              <div className="rounded-lg border border-blue-300/40 bg-blue-50/50 dark:bg-blue-950/20 px-3 py-2 text-2xs text-blue-700 dark:text-blue-300">
                 <div className="flex items-start gap-2">
                   <Info size={12} className="shrink-0 mt-0.5" />
                   <span>
@@ -503,7 +503,7 @@ export default function MeshImportDialog({
               {/* The real wrong-unit check. Sits immediately above the unit
                   control so the report and the fix are the same glance. */}
               {scaleSuspect && (
-                <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+                <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-2xs text-amber-700 dark:text-amber-300">
                   <div className="flex items-start gap-2">
                     <AlertTriangle size={12} className="shrink-0 mt-0.5" />
                     <div className="space-y-1">
@@ -536,7 +536,7 @@ export default function MeshImportDialog({
               {/* Unit + up-axis controls */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                     {t('bim.mesh_import.source_unit', { defaultValue: 'Source unit' })}
                   </label>
                   <select
@@ -552,7 +552,7 @@ export default function MeshImportDialog({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                     {t('bim.mesh_import.up_axis', { defaultValue: 'Up axis' })}
                   </label>
                   <select
@@ -572,7 +572,7 @@ export default function MeshImportDialog({
 
               {/* Summary */}
               <div className="rounded-lg border border-border-light bg-surface-secondary/50 p-3 space-y-2">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px]">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
                   <Metric
                     label={t('bim.mesh_import.objects', { defaultValue: 'Objects' })}
                     value={fmtNum(objectCount, 0)}
@@ -596,18 +596,18 @@ export default function MeshImportDialog({
                     value={`${fmtNum(totals?.area_m2 ?? 0, 2)} m2`}
                   />
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider text-content-tertiary">
+                    <span className="text-2xs uppercase tracking-wider text-content-tertiary">
                       {t('bim.mesh_import.volume', { defaultValue: 'Volume' })}
                     </span>
                     <span className="text-content-primary font-medium flex items-center gap-1.5">
                       {`${fmtNum(totals?.volume_m3 ?? 0, 3)} m3`}
                       {allWatertight ? (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] text-green-600 dark:text-green-400">
+                        <span className="inline-flex items-center gap-0.5 text-2xs text-green-600 dark:text-green-400">
                           <CheckCircle2 size={10} />
                           {t('bim.mesh_import.exact', { defaultValue: 'exact' })}
                         </span>
                       ) : (
-                        <span className="text-[9px] px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300/40">
+                        <span className="text-2xs px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300/40">
                           {t('bim.mesh_import.approximate', { defaultValue: 'approximate' })}
                         </span>
                       )}
@@ -615,7 +615,7 @@ export default function MeshImportDialog({
                   </div>
                 </div>
                 {!allWatertight && (
-                  <p className="text-[10px] text-content-tertiary leading-relaxed">
+                  <p className="text-2xs text-content-tertiary leading-relaxed">
                     {t('bim.mesh_import.volume_note', {
                       defaultValue:
                         'Volume is exact only for closed (watertight) meshes. {{closed}} of {{total}} objects are closed; open meshes contribute surface area but no volume.',
@@ -629,7 +629,7 @@ export default function MeshImportDialog({
               {/* Model name + discipline */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                     {t('bim.upload_model_name_label', { defaultValue: 'Model name' })}
                   </label>
                   <input
@@ -640,7 +640,7 @@ export default function MeshImportDialog({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                     {t('bim.upload_discipline_label', { defaultValue: 'Discipline' })}
                   </label>
                   <select
@@ -698,7 +698,7 @@ const UNIT_LABELS: Record<UnitCode, string> = {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[10px] uppercase tracking-wider text-content-tertiary">{label}</span>
+      <span className="text-2xs uppercase tracking-wider text-content-tertiary">{label}</span>
       <span className="text-content-primary font-medium">{value}</span>
     </div>
   );

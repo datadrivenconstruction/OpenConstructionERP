@@ -243,7 +243,7 @@ export function RenumberDialog({
             <div className="flex-1 min-w-0">
               <h2
                 id="renumber-dialog-title"
-                className="text-base font-bold text-content-primary"
+                className="text-base font-semibold text-content-primary"
               >
                 {t('boq.renumber_dialog_title', { defaultValue: 'Renumber positions' })}
               </h2>
@@ -279,8 +279,8 @@ export function RenumberDialog({
                   disabled={isApplying}
                   className={`relative text-left rounded-xl border-2 px-3 py-3 transition-all disabled:opacity-50 ${
                     isSelected
-                      ? 'border-sky-500 bg-sky-50/60 dark:bg-sky-950/40 shadow-sm shadow-sky-500/20'
-                      : 'border-border bg-surface-primary hover:border-sky-300 dark:hover:border-sky-700 hover:bg-surface-secondary/40'
+                      ? 'border-semantic-info/60 bg-semantic-info/10 shadow-sm shadow-sky-500/20'
+                      : 'border-border bg-surface-primary hover:border-semantic-info/30 hover:bg-surface-secondary/40'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
@@ -305,19 +305,19 @@ export function RenumberDialog({
                           {t(s.titleKey, { defaultValue: s.titleDefault })}
                         </span>
                         {s.recommended && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-500/15 px-1.5 py-0.5 rounded">
+                          <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-info bg-semantic-info/15 px-1.5 py-0.5 rounded">
                             {t('common.recommended', { defaultValue: 'Recommended' })}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-content-secondary leading-snug mt-0.5 line-clamp-2">
+                      <p className="text-2xs text-content-secondary leading-snug mt-0.5 line-clamp-2">
                         {t(s.descKey, { defaultValue: s.descDefault })}
                       </p>
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {s.example.slice(0, 4).map((ex, i) => (
                           <span
                             key={i}
-                            className="text-[10px] tabular-nums font-mono text-content-secondary bg-surface-secondary px-1.5 py-0.5 rounded"
+                            className="text-2xs tabular-nums font-mono text-content-secondary bg-surface-secondary px-1.5 py-0.5 rounded"
                           >
                             {ex}
                           </span>
@@ -325,7 +325,7 @@ export function RenumberDialog({
                       </div>
                     </div>
                     {isSelected && (
-                      <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white shadow-sm">
+                      <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-semantic-info text-white shadow-sm">
                         <Check size={11} strokeWidth={3} />
                       </div>
                     )}
@@ -339,7 +339,7 @@ export function RenumberDialog({
           {scheme === 'custom' && (
             <div className="grid grid-cols-2 gap-2.5">
               <label className="rounded-xl border border-border bg-surface-primary px-3 py-2.5 block">
-                <div className="text-[11px] font-medium text-content-secondary mb-1">
+                <div className="text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.renumber_custom_start', { defaultValue: 'Start number' })}
                 </div>
                 <input
@@ -352,7 +352,7 @@ export function RenumberDialog({
                 />
               </label>
               <label className="rounded-xl border border-border bg-surface-primary px-3 py-2.5 block">
-                <div className="text-[11px] font-medium text-content-secondary mb-1">
+                <div className="text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.renumber_custom_step', { defaultValue: 'Step' })}
                 </div>
                 <input
@@ -373,7 +373,7 @@ export function RenumberDialog({
               <div className="text-sm font-medium text-content-primary">
                 {t('boq.renumber_pad', { defaultValue: 'Zero-pad section numbers' })}
               </div>
-              <div className="text-[11px] text-content-tertiary">
+              <div className="text-2xs text-content-tertiary">
                 {pad
                   ? t('boq.renumber_pad_on', { defaultValue: 'Sections will be 01, 02, 03 (two-digit padded)' })
                   : t('boq.renumber_pad_off', { defaultValue: 'Sections will be 1, 2, 3 (no padding)' })}
@@ -386,7 +386,7 @@ export function RenumberDialog({
               onClick={() => setPad(!pad)}
               disabled={isApplying}
               className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                pad ? 'bg-sky-500' : 'bg-surface-secondary border border-border'
+                pad ? 'bg-semantic-info' : 'bg-surface-secondary border border-border'
               }`}
             >
               <span
@@ -400,7 +400,7 @@ export function RenumberDialog({
           {/* Live preview */}
           <div className="rounded-xl border border-border bg-surface-primary overflow-hidden">
             <div className="px-3 py-2 border-b border-border bg-surface-secondary/40">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+              <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                 {t('boq.renumber_preview', { defaultValue: 'Preview (first 5 positions)' })}
               </div>
             </div>
@@ -413,7 +413,7 @@ export function RenumberDialog({
                 {preview.map((row) => (
                   <div
                     key={`${row.before}-${row.after}`}
-                    className="grid grid-cols-[80px_20px_80px_1fr] items-center gap-2 px-3 py-1.5 text-[11px]"
+                    className="grid grid-cols-[80px_20px_80px_1fr] items-center gap-2 px-3 py-1.5 text-2xs"
                   >
                     <span className="font-mono tabular-nums text-content-tertiary line-through">
                       {row.before}
@@ -430,12 +430,12 @@ export function RenumberDialog({
           </div>
 
           {/* Warning */}
-          <div className="flex items-start gap-2 rounded-lg border border-amber-300/50 bg-amber-50/50 dark:border-amber-700/40 dark:bg-amber-950/20 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2">
             <AlertTriangle
               size={14}
-              className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400"
+              className="shrink-0 mt-0.5 text-semantic-warning"
             />
-            <p className="text-[11px] leading-snug text-amber-800/90 dark:text-amber-200/90">
+            <p className="text-2xs leading-snug text-amber-800/90 dark:text-amber-200/90">
               {t('boq.renumber_warning', {
                 defaultValue:
                   'This overwrites any manually edited position numbers. The current display order is preserved - only ordinals change.',

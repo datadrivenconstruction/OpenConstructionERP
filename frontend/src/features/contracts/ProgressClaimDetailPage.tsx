@@ -558,7 +558,7 @@ export function ProgressClaimDetailPage() {
 function KPI({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm font-semibold text-content-primary">{value}</p>

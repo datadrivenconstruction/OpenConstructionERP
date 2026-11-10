@@ -274,7 +274,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
               <span className="text-xs font-medium text-content-secondary">
                 {t('assets.custom.title', { defaultValue: 'Custom fields' })}
               </span>
-              <span className="text-[10px] text-content-tertiary">
+              <span className="text-2xs text-content-tertiary">
                 {t('assets.custom.hint', {
                   defaultValue: 'Stored in asset_info - snake_case keys.',
                 })}
@@ -335,7 +335,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
             </div>
             {suggestions.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                <span className="text-[10px] text-content-tertiary mr-1">
+                <span className="text-2xs text-content-tertiary mr-1">
                   {t('assets.custom.suggestions', { defaultValue: 'Recently used:' })}
                 </span>
                 {suggestions
@@ -348,7 +348,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
                       onClick={() => {
                         setForm((prev) => ({ ...prev, [k]: '' }));
                       }}
-                      className="inline-flex items-center gap-0.5 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-[10px] text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
+                      className="inline-flex items-center gap-0.5 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
                     >
                       <Plus size={9} />
                       {k.replace(/_/g, ' ')}

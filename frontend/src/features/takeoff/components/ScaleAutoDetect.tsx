@@ -136,7 +136,7 @@ export function ScaleAutoDetect({
         </p>
         {candidate.evidence && (
           <p
-            className="mt-0.5 truncate text-[10px] text-content-tertiary"
+            className="mt-0.5 truncate text-2xs text-content-tertiary"
             title={candidate.evidence}
             data-testid="scale-autodetect-evidence"
           >

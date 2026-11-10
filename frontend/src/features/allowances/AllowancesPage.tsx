@@ -104,7 +104,7 @@ function CurrencySummary({ row }: { row: CurrencyRollup }) {
             <div className="text-2xs uppercase tracking-wide text-content-tertiary">{tile.label}</div>
             <div
               className={
-                'mt-1 font-bold tabular-nums ' +
+                'mt-1 font-semibold tabular-nums ' +
                 (tile.emphasis ? 'text-lg ' : 'text-base ') +
                 (tile.bad ? 'text-semantic-error' : 'text-content-primary')
               }
@@ -351,7 +351,7 @@ function RegisterTable({
                           {a.label || '-'}
                           {a.overdrawn && (
                             <span title={t('allowances.overdrawn', { defaultValue: 'Over-drawn' })}>
-                              <AlertTriangle size={13} className="text-amber-500" />
+                              <AlertTriangle size={13} className="text-semantic-warning" />
                             </span>
                           )}
                         </span>
@@ -383,7 +383,7 @@ function RegisterTable({
                           <button
                             type="button"
                             onClick={() => onDelete(a.id)}
-                            className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                            className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                             aria-label={t('allowances.delete', { defaultValue: 'Delete allowance' })}
                           >
                             <Trash2 size={14} />

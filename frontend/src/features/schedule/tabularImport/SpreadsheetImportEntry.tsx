@@ -55,7 +55,7 @@ export function SpreadsheetImportEntry({ projectId, schedule, variant }: Spreads
           title={canImport ? undefined : t('errors.forbidden', { defaultValue: "You don't have permission to perform this action." })}
           className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110 dark:bg-emerald-950/30 dark:text-emerald-400">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-semantic-success-bg text-semantic-success transition-transform group-hover:scale-110">
             <FileSpreadsheet size={24} />
           </div>
           <div>

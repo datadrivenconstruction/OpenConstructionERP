@@ -940,7 +940,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                 </div>
                 <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-secondary">
                   <div
-                    className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                    className={`h-full rounded-full transition-all duration-500 ease-out ${
                       result
                         ? 'bg-semantic-success'
                         : 'bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue bg-[length:200%_100%] animate-shimmer'
@@ -976,19 +976,19 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
               {result && (
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <div className="rounded-lg bg-semantic-success-bg/50 px-3 py-2 text-center">
-                    <div className="text-lg font-bold text-semantic-success tabular-nums">
+                    <div className="text-lg font-semibold text-semantic-success tabular-nums">
                       {result.imported.toLocaleString(getNumberLocale())}
                     </div>
                     <div className="text-2xs text-semantic-success">{t('costs.items_installed', { defaultValue: 'items installed' })}</div>
                   </div>
                   <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                    <div className="text-lg font-bold text-content-secondary tabular-nums">
+                    <div className="text-lg font-semibold text-content-secondary tabular-nums">
                       {result.skipped.toLocaleString(getNumberLocale())}
                     </div>
                     <div className="text-2xs text-content-tertiary">{t('costs.duplicates_skipped', { defaultValue: 'duplicates skipped' })}</div>
                   </div>
                   <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                    <div className="text-lg font-bold text-content-secondary tabular-nums">
+                    <div className="text-lg font-semibold text-content-secondary tabular-nums">
                       {loadingDb?.currency ?? '—'}
                     </div>
                     <div className="text-2xs text-content-tertiary">{t('costs.currency', { defaultValue: 'currency' })}</div>
@@ -1892,8 +1892,8 @@ export function VectorDatabaseSection() {
 
         {/* Not connected state */}
         {!isConnected ? (
-          <div className="rounded-xl border border-amber-200/40 bg-amber-50/30 dark:bg-amber-500/5 dark:border-amber-500/10 p-4">
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+          <div className="rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-4">
+            <p className="text-sm font-medium text-semantic-warning mb-2">
               Vector search not available
             </p>
             <div className="space-y-2 text-xs text-content-tertiary">
@@ -1996,7 +1996,7 @@ export function VectorDatabaseSection() {
                 "ready" number here is always wrong for one of them. */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <div className="rounded-lg bg-surface-secondary p-3 text-center">
-                <div className="text-lg font-bold tabular-nums text-content-primary">
+                <div className="text-lg font-semibold tabular-nums text-content-primary">
                   {totalItems.toLocaleString(getNumberLocale())}
                 </div>
                 <div className="text-2xs text-content-tertiary">Cost items</div>
@@ -2004,7 +2004,7 @@ export function VectorDatabaseSection() {
               <div className="rounded-lg bg-surface-secondary p-3 text-center">
                 <div
                   data-testid="tile-ai-vectors"
-                  className={`text-lg font-bold tabular-nums ${indexedCount > 0 ? 'text-purple-600' : 'text-content-tertiary'}`}
+                  className={`text-lg font-semibold tabular-nums ${indexedCount > 0 ? 'text-purple-600' : 'text-content-tertiary'}`}
                 >
                   {indexedCount.toLocaleString(getNumberLocale())}
                 </div>
@@ -2015,7 +2015,7 @@ export function VectorDatabaseSection() {
               <div className="rounded-lg bg-surface-secondary p-3 text-center">
                 <div
                   data-testid="tile-ai-coverage"
-                  className={`text-lg font-bold ${isFullyIndexed ? 'text-semantic-success' : 'text-content-tertiary'}`}
+                  className={`text-lg font-semibold ${isFullyIndexed ? 'text-semantic-success' : 'text-content-tertiary'}`}
                 >
                   {isFullyIndexed ? '100%' : indexedCount > 0 ? `${Math.round((indexedCount / Math.max(totalItems, 1)) * 100)}%` : '0%'}
                 </div>
@@ -2038,11 +2038,11 @@ export function VectorDatabaseSection() {
                     to close. */}
                 <div
                   data-testid="tile-matching-catalogues"
-                  className={`text-lg font-bold tabular-nums ${
+                  className={`text-lg font-semibold tabular-nums ${
                     !cataloguesReachable
                       ? 'text-content-tertiary'
                       : loadedCatalogues > 0
-                        ? 'text-emerald-600'
+                        ? 'text-semantic-success'
                         : 'text-content-tertiary'
                   }`}
                 >
@@ -2148,7 +2148,7 @@ export function VectorDatabaseSection() {
                       </div>
                       <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
                         <div
-                          className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 bg-[length:200%_100%] animate-shimmer"
+                          className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 bg-[length:200%_100%] animate-shimmer"
                           style={{ width: `${progressPct}%` }}
                         />
                       </div>
@@ -2463,7 +2463,7 @@ function ColumnMappingPanel({
         {duplicateHeaders.length > 0 && (
           <div className="mt-2 space-y-0.5">
             {duplicateHeaders.map((name) => (
-              <p key={name} className="text-2xs text-amber-700 dark:text-amber-400">
+              <p key={name} className="text-2xs text-semantic-warning">
                 {t('costs_import.duplicate_header', {
                   defaultValue:
                     'Duplicate column name "{{name}}" - only the first occurrence is used.',
@@ -3078,19 +3078,19 @@ export function ImportDatabasePage() {
 
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-semantic-success-bg/50 px-4 py-3 text-center">
-                <div className="text-2xl font-bold text-semantic-success">{result.imported}</div>
+                <div className="text-2xl font-semibold text-semantic-success">{result.imported}</div>
                 <div className="text-xs text-content-secondary mt-0.5">
                   {t('costs.import_imported', { defaultValue: 'Imported' })}
                 </div>
               </div>
               <div className="rounded-xl bg-surface-secondary px-4 py-3 text-center">
-                <div className="text-2xl font-bold text-content-secondary">{result.skipped}</div>
+                <div className="text-2xl font-semibold text-content-secondary">{result.skipped}</div>
                 <div className="text-xs text-content-secondary mt-0.5">
                   {t('costs.import_skipped', { defaultValue: 'Skipped' })}
                 </div>
               </div>
               <div className="rounded-xl bg-semantic-error-bg/50 px-4 py-3 text-center">
-                <div className="text-2xl font-bold text-semantic-error">
+                <div className="text-2xl font-semibold text-semantic-error">
                   {result.errors.length}
                 </div>
                 <div className="text-xs text-content-secondary mt-0.5">
@@ -3113,7 +3113,7 @@ export function ImportDatabasePage() {
 
             {/* Mixed-currency warning - rows kept their own currency */}
             {(result.mixed_currency_count ?? 0) > 0 && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200">
+              <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>
                   <span className="font-semibold block mb-0.5">
@@ -3234,7 +3234,7 @@ export function ImportDatabasePage() {
                     {t('costs.import_template_recipes', { defaultValue: 'Recipes JSON (6 assemblies)' })}
                   </a>
                 </div>
-                <p className="mt-2 text-[11px] text-content-tertiary">
+                <p className="mt-2 text-2xs text-content-tertiary">
                   {t('costs.import_template_help', {
                     defaultValue: 'See docs/cost-database-import.md for the full resource-based costing guide.',
                   })}

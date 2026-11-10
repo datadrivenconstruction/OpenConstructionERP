@@ -203,10 +203,10 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
       {data?.mixed_currency && (
         <div
           role="alert"
-          className="flex items-start gap-2 border-b border-amber-200 bg-amber-50/70 px-5 py-2.5 dark:border-amber-800/50 dark:bg-amber-950/20"
+          className="flex items-start gap-2 border-b border-semantic-warning/30 bg-semantic-warning/10 px-5 py-2.5"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="text-xs text-amber-800 dark:text-amber-300">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <p className="text-xs text-semantic-warning">
             {t('costmodel.spine.mixed_currency', {
               defaultValue:
                 'This spine contains cost lines in more than one currency. Totals are not summed across currencies, compare lines within the same currency only.',
@@ -345,7 +345,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`px-4 py-2 text-right text-xs font-bold tabular-nums ${
+                        className={`px-4 py-2 text-right text-xs font-semibold tabular-nums ${
                           col.key === 'variance_estimate_vs_budget'
                             ? varianceColor(totals[col.key])
                             : 'text-content-primary'

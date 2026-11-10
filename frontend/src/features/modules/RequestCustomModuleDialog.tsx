@@ -179,14 +179,14 @@ export function RequestCustomModuleDialog({ open, onClose }: Props) {
                 height="96"
               />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-600 dark:text-purple-300 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-300 mb-2">
               {t('modules.request_eyebrow', {
                 defaultValue: 'Missing a module?',
               })}
             </p>
             <h2
               id="request-module-title"
-              className="text-2xl sm:text-3xl font-bold text-content-primary leading-tight"
+              className="text-2xl sm:text-3xl font-semibold text-content-primary leading-tight"
             >
               {t('modules.request_hero_title', {
                 defaultValue: 'Tell us what your team needs.',

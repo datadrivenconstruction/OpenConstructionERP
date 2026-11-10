@@ -187,7 +187,7 @@ function HowCredentialsWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -375,7 +375,7 @@ function HolderCard({
           )}
         </div>
         {row.is_blocked ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error px-2.5 py-1 text-2xs font-bold uppercase tracking-wide text-white">
+          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-white">
             <Ban size={12} />
             {t('credentials.holder_blocked', { defaultValue: 'May not work today' })}
           </span>

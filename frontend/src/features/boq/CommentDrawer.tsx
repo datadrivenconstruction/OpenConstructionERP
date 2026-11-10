@@ -170,7 +170,7 @@ export function CommentDrawer({
       >
         {/* ── Header ─────────────────────────────────────────────────── */}
         <div className="flex items-start gap-3 px-5 py-4 border-b border-border-light shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-warning-bg text-semantic-warning shrink-0">
             <MessageSquare size={17} />
           </div>
           <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ export function CommentDrawer({
                   {/* Author row */}
                   <div className="flex items-center gap-2 mb-1.5">
                     <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 ${
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-2xs font-semibold text-white shrink-0 ${
                         isOwn ? 'bg-oe-blue' : 'bg-content-tertiary'
                       }`}
                     >
@@ -223,7 +223,7 @@ export function CommentDrawer({
                     <span className="text-xs font-medium text-content-primary">
                       {authorDisplay(comment.author)}
                     </span>
-                    <span className="flex items-center gap-0.5 text-[10px] text-content-quaternary ml-auto">
+                    <span className="flex items-center gap-0.5 text-2xs text-content-quaternary ml-auto">
                       <Clock size={9} />
                       {formatRelativeTime(comment.created_at, t)}
                     </span>
@@ -281,7 +281,7 @@ export function CommentDrawer({
               <Send size={14} />
             </button>
           </div>
-          <p className="text-[10px] text-content-quaternary mt-1.5">
+          <p className="text-2xs text-content-quaternary mt-1.5">
             {t('comments.shortcut_hint', { defaultValue: 'Enter to send · Shift+Enter for new line · Esc to close' })}
           </p>
         </div>

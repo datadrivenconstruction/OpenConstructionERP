@@ -85,7 +85,7 @@ export function TextDisplayControl({ value, onChange }: Props) {
       <span
         data-testid="dwg-text-size"
         className={clsx(
-          'w-10 text-center text-[11px] font-semibold tabular-nums',
+          'w-10 text-center text-2xs font-semibold tabular-nums',
           visible ? 'text-slate-700' : 'text-slate-300',
         )}
       >

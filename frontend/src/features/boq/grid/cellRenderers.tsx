@@ -112,9 +112,9 @@ function stripVariantSuffix(s: string | null | undefined): string {
 /* ── Validation Status Dot ────────────────────────────────────────── */
 
 const VALIDATION_DOT_STYLES: Record<string, string> = {
-  passed: 'bg-emerald-500',
-  warnings: 'bg-amber-500',
-  errors: 'bg-red-500',
+  passed: 'bg-semantic-success',
+  warnings: 'bg-semantic-warning',
+  errors: 'bg-semantic-error',
   pending: 'bg-gray-300 dark:bg-gray-600',
 };
 
@@ -586,7 +586,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           </span>
         )}
 
-      <span className="shrink-0 text-xs font-bold text-content-primary tabular-nums pl-2">
+      <span className="shrink-0 text-xs font-semibold text-content-primary tabular-nums pl-2">
         {formattedSubtotal}
       </span>
     </div>
@@ -810,8 +810,8 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
         <span
           className={`flex h-4 items-center px-1 rounded shrink-0 ${
             anomaly.severity === 'error'
-              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-              : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+              ? 'bg-semantic-error-bg text-semantic-error'
+              : 'bg-semantic-warning-bg text-semantic-warning'
           }`}
           title={anomaly.message}
         >
@@ -834,7 +834,7 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
           title={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
           aria-label={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
         >
-          <span className="text-[9px] font-bold tabular-nums">{commentCount}</span>
+          <span className="text-2xs font-semibold tabular-nums">{commentCount}</span>
         </button>
       )}
       {/* More actions button — triggers context menu */}
@@ -1011,7 +1011,7 @@ function ScopeOfWorkHint({
           style={{ top: pos.top, left: pos.left }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {label}
           </div>
           <ul className="list-disc pl-4 space-y-1 leading-relaxed max-h-[280px] overflow-auto">
@@ -1256,7 +1256,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   const breakdownPill =
     breakdownEntries.length > 0 && ctx?.showResourceSplitPill ? (
       <span
-        className="shrink-0 inline-flex items-center gap-0.5 rounded text-[10px] font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-help"
+        className="shrink-0 inline-flex items-center gap-0.5 rounded text-2xs font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-help"
         title={t('boq.resource_breakdown_tip', {
           defaultValue: 'Cost driver split - sourced from the linked assembly',
         })}
@@ -1500,10 +1500,10 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
   const confidencePct = confidence !== null ? Math.round(confidence * 100) : 0;
   const confidenceTone =
     confidencePct >= 80
-      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+      ? 'bg-semantic-success/15 text-semantic-success'
       : confidencePct >= 50
-        ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-        : 'bg-red-500/15 text-red-600 dark:text-red-400';
+        ? 'bg-semantic-warning/15 text-semantic-warning'
+        : 'bg-semantic-error/15 text-semantic-error';
   const confidenceTooltip = t('boq.ai_confidence_tooltip', {
     defaultValue:
       'AI suggested this line with {{pct}}% confidence. Review the quantity and rate, then confirm.',
@@ -1514,9 +1514,9 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
     <div className="flex items-center justify-end gap-1 overflow-hidden w-full">
       {(linkRole === 'master' || linkRole === 'instance') && (
         <span
-          className={`inline-flex h-4 shrink-0 items-center gap-0.5 rounded px-1 text-[9px] font-semibold ${
+          className={`inline-flex h-4 shrink-0 items-center gap-0.5 rounded px-1 text-2xs font-semibold ${
             linkRole === 'master'
-              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+              ? 'bg-semantic-warning/15 text-semantic-warning'
               : 'bg-oe-blue/10 text-oe-blue'
           } cursor-help`}
           title={linkTooltip}
@@ -1529,7 +1529,7 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       {showConfidence && (
         <span
-          className={`inline-flex h-4 shrink-0 items-center rounded px-1 text-[9px] font-semibold tabular-nums ${confidenceTone} cursor-help`}
+          className={`inline-flex h-4 shrink-0 items-center rounded px-1 text-2xs font-semibold tabular-nums ${confidenceTone} cursor-help`}
           title={confidenceTooltip}
           aria-label={confidenceTooltip}
           data-testid="boq-ai-confidence-badge"
@@ -1546,13 +1546,13 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
         const tone = !badge.traced
           ? 'border border-dashed border-border text-content-tertiary'
           : badge.kind === 'removed'
-            ? 'bg-red-500/15 text-red-600 dark:text-red-400'
+            ? 'bg-semantic-error/15 text-semantic-error'
             : badge.kind === 'modified'
-              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
+              ? 'bg-semantic-warning/15 text-semantic-warning'
+              : 'bg-semantic-success/15 text-semantic-success';
         return (
           <span
-            className={`inline-flex h-4 shrink-0 items-center rounded px-1 text-[9px] font-semibold ${tone} cursor-help`}
+            className={`inline-flex h-4 shrink-0 items-center rounded px-1 text-2xs font-semibold ${tone} cursor-help`}
             title={badge.title}
             aria-label={badge.title}
             data-testid="boq-variation-trace-badge"
@@ -2131,7 +2131,7 @@ const BimLinkPopover = forwardRef<
           <span className="text-xs font-semibold text-content-primary">
             {t('boq.linked_geometry', { defaultValue: 'Linked Geometry' })}
           </span>
-          <span className="text-[10px] text-content-tertiary tabular-nums">
+          <span className="text-2xs text-content-tertiary tabular-nums">
             ({t('boq.element_count', { defaultValue: '{{count}} element(s)', count: elementIds.length })})
           </span>
         </div>
@@ -2174,13 +2174,13 @@ const BimLinkPopover = forwardRef<
           <div className="w-[260px] shrink-0 flex flex-col border-r border-border-light dark:border-border-dark">
             <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
               <Info size={11} className="text-blue-600 shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
                 {t('boq.bim_properties', { defaultValue: 'Properties' })}
               </span>
               <button
                 type="button"
                 onClick={() => setShowAllProps((v) => !v)}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold transition-colors ${
                   showAllProps
                     ? 'bg-oe-blue text-white hover:bg-oe-blue-hover'
                     : 'bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/60'
@@ -2209,7 +2209,7 @@ const BimLinkPopover = forwardRef<
                 return (
                   <div key={el.id} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0">
                     {elements.length > 1 && (
-                      <div className="text-[9px] font-medium text-content-tertiary mb-0.5 truncate">{el.name || el.element_type}</div>
+                      <div className="text-2xs font-medium text-content-tertiary mb-0.5 truncate">{el.name || el.element_type}</div>
                     )}
                     {numericEntries.map(({ key, value, source }) => {
                       const isCurrent = canApply && Math.abs(value - currentQuantity) < 0.001;
@@ -2220,11 +2220,11 @@ const BimLinkPopover = forwardRef<
                           className="group/prow flex items-center justify-between gap-1.5 py-0.5 rounded-sm hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-colors"
                         >
                           <span
-                            className={`text-[10px] truncate ${
+                            className={`text-2xs truncate ${
                               source === 'qty'
                                 ? 'text-content-secondary'
                                 : source === 'parquet'
-                                  ? 'text-emerald-700 dark:text-emerald-400'
+                                  ? 'text-semantic-success'
                                   : 'text-content-tertiary italic'
                             }`}
                             title={source === 'parquet' ? 'From Parquet row (DDC export)' : source === 'prop' ? 'From element properties' : 'From element quantities'}
@@ -2232,13 +2232,13 @@ const BimLinkPopover = forwardRef<
                             {paramLabel}
                           </span>
                           <div className="flex items-center gap-1 shrink-0">
-                            <span className="text-[10px] font-mono text-content-primary tabular-nums font-medium">
+                            <span className="text-2xs font-mono text-content-primary tabular-nums font-medium">
                               {value.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                             </span>
                             {canApply && (
                               isCurrent ? (
                                 <span
-                                  className="text-[8px] font-semibold uppercase text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-1 py-0.5 rounded"
+                                  className="text-2xs font-semibold uppercase text-semantic-success bg-semantic-success-bg px-1 py-0.5 rounded"
                                   title={t('boq.bim_qty_current_title', { defaultValue: 'Already the position quantity' })}
                                 >
                                   {t('boq.bim_qty_current', { defaultValue: 'current' })}
@@ -2270,14 +2270,14 @@ const BimLinkPopover = forwardRef<
                 );
               })}
               {!isLoading && !isEnriching && elements.every((el) => extractNumerics(el, showAllProps).length === 0) && (
-                <div className="py-3 text-center text-[10px] text-content-tertiary">
+                <div className="py-3 text-center text-2xs text-content-tertiary">
                   {!showAllProps
                     ? t('boq.no_quantities_hint_button', { defaultValue: 'No quantities - press "Show all" above to surface every BIM property' })
                     : t('boq.no_numeric_found', { defaultValue: 'No numeric values in this element' })}
                 </div>
               )}
               {isEnriching && !isLoading && (
-                <div className="flex items-center justify-center gap-2 py-2 text-[10px] text-content-tertiary">
+                <div className="flex items-center justify-center gap-2 py-2 text-2xs text-content-tertiary">
                   <Loader2 size={10} className="animate-spin" />
                   {t('boq.loading_full_properties', { defaultValue: 'Loading full properties…' })}
                 </div>
@@ -2302,7 +2302,7 @@ const BimLinkPopover = forwardRef<
               elementIds={elementIds}
               width={380}
               height={220}
-              className="bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
+              className="bg-surface-secondary border-b border-border-light dark:border-border-dark"
               onError={() => setGlbOk(false)}
             />
           ) : (
@@ -2312,13 +2312,13 @@ const BimLinkPopover = forwardRef<
               style={{ width: canApply ? 380 : '100%', height: 220 }}
               data-testid="bim-link-no-geometry"
             >
-              <AlertTriangle size={22} className="text-amber-500" />
+              <AlertTriangle size={22} className="text-semantic-warning" />
               <p className="text-xs font-medium text-content-secondary">
                 {t('boq.linked_geometry_unavailable', {
                   defaultValue: 'No 3D geometry to preview',
                 })}
               </p>
-              <p className="text-[10px] leading-snug text-content-tertiary max-w-[300px]">
+              <p className="text-2xs leading-snug text-content-tertiary max-w-[300px]">
                 {t('boq.linked_geometry_unavailable_hint', {
                   defaultValue:
                     'The linked element belongs to a model that has no displayable mesh yet (for example a data-only drawing still waiting on the CAD converter). The link and its quantities are intact.',
@@ -2355,10 +2355,10 @@ const BimLinkPopover = forwardRef<
                 <div className="flex items-center gap-2">
                   <Cuboid size={11} className="text-oe-blue/60 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-medium text-content-primary truncate">
+                    <div className="text-2xs font-medium text-content-primary truncate">
                       {el.name || el.element_type}
                     </div>
-                    <div className="text-[9px] text-content-tertiary font-mono">{el.element_type}</div>
+                    <div className="text-2xs text-content-tertiary font-mono">{el.element_type}</div>
                   </div>
                 </div>
               </div>
@@ -2374,9 +2374,9 @@ const BimLinkPopover = forwardRef<
             numeric is summed (vs only the headline area/volume/length). */}
         {canApply && (
           <div className="w-[260px] shrink-0 flex flex-col">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
-              <Ruler size={11} className="text-emerald-600 shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex-1 text-left">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-semantic-success/10 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
+              <Ruler size={11} className="text-semantic-success shrink-0" />
+              <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-success flex-1 text-left">
                 {t('boq.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
               </span>
               {isEnriching && (
@@ -2385,10 +2385,10 @@ const BimLinkPopover = forwardRef<
               <button
                 type="button"
                 onClick={() => setShowAllSums((v) => !v)}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold transition-colors ${
                   showAllSums
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-white dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                    ? 'bg-semantic-success text-white hover:bg-semantic-success'
+                    : 'bg-white text-semantic-success border border-semantic-success/30 hover:bg-semantic-success-bg'
                 }`}
                 title={
                   showAllSums
@@ -2402,13 +2402,13 @@ const BimLinkPopover = forwardRef<
                 <ChevronDown size={10} className={`transition-transform ${showAllSums ? 'rotate-180' : ''}`} />
               </button>
             </div>
-            <div className="flex shrink-0 border-b border-border-light/50 text-[10px] font-semibold">
+            <div className="flex shrink-0 border-b border-border-light/50 text-2xs font-semibold">
               {(['sums', 'formula'] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setApplyTab(tab)}
-                  className={`flex-1 px-2 py-1 ${applyTab === tab ? 'border-b-2 border-emerald-600 text-emerald-700' : 'text-content-tertiary'}`}
+                  className={`flex-1 px-2 py-1 ${applyTab === tab ? 'border-b-2 border-semantic-success/60 text-semantic-success' : 'text-content-tertiary'}`}
                   data-testid={`apply-tab-${tab}`}
                 >
                   {tab === 'sums'
@@ -2440,7 +2440,7 @@ const BimLinkPopover = forwardRef<
                 </div>
               )}
               {!isLoading && quantitySums.length === 0 && (
-                <div className="py-3 text-center text-[10px] text-content-tertiary">
+                <div className="py-3 text-center text-2xs text-content-tertiary">
                   {t('boq.no_numeric_quantities', { defaultValue: 'No numeric quantities' })}
                 </div>
               )}
@@ -2456,30 +2456,30 @@ const BimLinkPopover = forwardRef<
                       key={s.key}
                       className={`flex items-center gap-1 px-3 py-1.5 group/qrow transition-colors ${
                         isCurrent
-                          ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
-                          : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/30'
+                          ? 'bg-semantic-success/10'
+                          : 'hover:bg-semantic-success/10'
                       }`}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1">
-                          <span className="text-[11px] text-content-secondary truncate">{s.label}</span>
+                          <span className="text-2xs text-content-secondary truncate">{s.label}</span>
                           <span
-                            className="text-[8px] font-bold uppercase text-emerald-600/80 tracking-wider shrink-0"
+                            className="text-2xs font-semibold uppercase text-emerald-600/80 tracking-wider shrink-0"
                             title={t('boq.bim_agg_sum_title', { defaultValue: 'Summed across all linked elements' })}
                           >
                             Σ
                           </span>
                         </div>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-[12px] tabular-nums text-content-primary font-semibold">{fmt}</span>
-                          {s.unit && <span className="text-[9px] text-content-quaternary font-mono">{s.unit}</span>}
+                          <span className="text-xs tabular-nums text-content-primary font-semibold">{fmt}</span>
+                          {s.unit && <span className="text-2xs text-content-quaternary font-mono">{s.unit}</span>}
                           {elements.length > 1 && s.count > 1 && (
-                            <span className="text-[8px] text-content-quaternary">({s.count} el.)</span>
+                            <span className="text-2xs text-content-quaternary">({s.count} el.)</span>
                           )}
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
+                        <span className="text-2xs text-semantic-success font-semibold shrink-0 bg-semantic-success-bg px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
                           <CheckCircle2 size={9} />
                           {t('boq.bim_qty_current', { defaultValue: 'current' })}
                         </span>
@@ -2514,11 +2514,11 @@ const BimLinkPopover = forwardRef<
                     ? n.toLocaleString(getNumberLocale())
                     : n.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 });
                 return (
-                  <div key={s.key} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 transition-colors">
+                  <div key={s.key} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0 hover:bg-semantic-info/10 transition-colors">
                     <div className="flex items-center gap-1 mb-0.5">
-                      <span className="text-[11px] text-content-secondary truncate">{s.label}</span>
+                      <span className="text-2xs text-content-secondary truncate">{s.label}</span>
                       <span
-                        className="text-[8px] font-bold uppercase text-sky-600/80 tracking-wider shrink-0"
+                        className="text-2xs font-semibold uppercase text-sky-600/80 tracking-wider shrink-0"
                         title={t('boq.bim_agg_distinct_title', {
                           defaultValue:
                             'Per-element value - summing is meaningless, so each unique value is listed. Click one to apply it.',
@@ -2543,10 +2543,10 @@ const BimLinkPopover = forwardRef<
                               if (!isCurrent) handleUseQuantity(v, `BIM: ${s.label} = ${fmtVal(v)}`);
                             }}
                             disabled={isCurrent}
-                            className={`group/chip inline-flex items-center gap-0.5 px-2 py-1 rounded-md border text-[10px] tabular-nums font-mono transition-all ${
+                            className={`group/chip inline-flex items-center gap-0.5 px-2 py-1 rounded-md border text-2xs tabular-nums font-mono transition-all ${
                               isCurrent
-                                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 cursor-default'
-                                : 'bg-surface-primary text-content-primary border-border-light hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-sm active:scale-[0.97]'
+                                ? 'bg-semantic-success-bg text-semantic-success border-semantic-success/30 cursor-default'
+                                : 'bg-surface-primary text-content-primary border-border-light hover:bg-semantic-success hover:text-white hover:border-semantic-success/60 hover:shadow-sm active:scale-[0.97]'
                             }`}
                             title={
                               isCurrent
@@ -2555,7 +2555,7 @@ const BimLinkPopover = forwardRef<
                             }
                           >
                             <span className="font-semibold">{fmtVal(v)}</span>
-                            {s.unit && <span className="text-[8px] opacity-70 group-hover/chip:opacity-100">{s.unit}</span>}
+                            {s.unit && <span className="text-2xs opacity-70 group-hover/chip:opacity-100">{s.unit}</span>}
                             {!isCurrent && (
                               <ArrowRight size={8} className="opacity-0 group-hover/chip:opacity-100 transition-opacity -mr-0.5" />
                             )}
@@ -2726,8 +2726,8 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
     ? 'from-rose-500 to-rose-600 ring-rose-500/20'
     : 'from-amber-500 to-amber-600 ring-amber-500/20';
   const accentBg = kind === 'pdf'
-    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+    ? 'bg-semantic-error/10 text-semantic-error'
+    : 'bg-semantic-warning/10 text-semantic-warning';
 
   return (
     <div
@@ -2746,7 +2746,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
           <span className={`h-5 w-5 inline-flex items-center justify-center rounded ${accentBg}`}>
             {kind === 'pdf' ? <FileText size={12} /> : <FileBox size={12} />}
           </span>
-          <span className="text-[11px] font-semibold text-content-primary uppercase tracking-wide">
+          <span className="text-2xs font-semibold text-content-primary uppercase tracking-wide">
             {kind === 'pdf'
               ? t('boq.source_pdf', { defaultValue: 'PDF takeoff' })
               : t('boq.source_dwg', { defaultValue: 'DWG drawing' })}
@@ -2767,19 +2767,19 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
       <div className="px-3.5 py-3 space-y-2.5">
         {/* Source document name */}
         <div>
-          <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
             {t('boq.source_doc_label', { defaultValue: 'Source document' })}
           </div>
-          <div className="text-[12px] font-medium text-content-primary truncate" title={sourceName || ''}>
+          <div className="text-xs font-medium text-content-primary truncate" title={sourceName || ''}>
             {sourceName || t('boq.source_doc_unknown', { defaultValue: 'Unknown document' })}
           </div>
           {kind === 'pdf' && page && (
-            <div className="text-[10px] text-content-tertiary mt-0.5">
+            <div className="text-2xs text-content-tertiary mt-0.5">
               {t('boq.source_pdf_page', { defaultValue: 'Page {{page}}', page })}
             </div>
           )}
           {kind === 'dwg' && drawingId && (
-            <div className="text-[10px] text-content-tertiary font-mono mt-0.5 truncate">
+            <div className="text-2xs text-content-tertiary font-mono mt-0.5 truncate">
               {drawingId.slice(0, 8)}…
             </div>
           )}
@@ -2787,7 +2787,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
 
         {/* Measurement value(s) */}
         <div>
-          <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
             {t('boq.source_measurement_label', { defaultValue: 'Measurement' })}
           </div>
           {measurementValue !== null ? (
@@ -2796,16 +2796,16 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
                 {(displayMeasurementValue ?? measurementValue).toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
               </span>
               {displayMeasurementUnit && (
-                <span className="text-[11px] text-content-secondary font-medium">{displayMeasurementUnit}</span>
+                <span className="text-2xs text-content-secondary font-medium">{displayMeasurementUnit}</span>
               )}
               {measurementType && (
-                <span className="ml-auto text-[9px] uppercase tracking-wide text-content-tertiary bg-surface-secondary/60 px-1.5 py-0.5 rounded">
+                <span className="ml-auto text-2xs uppercase tracking-wide text-content-tertiary bg-surface-secondary/60 px-1.5 py-0.5 rounded">
                   {measurementType}
                 </span>
               )}
             </div>
           ) : (
-            <div className="text-[11px] text-content-tertiary italic">
+            <div className="text-2xs text-content-tertiary italic">
               {t('boq.source_no_measurement', { defaultValue: 'Measurement data not stored locally - open the source to view details.' })}
             </div>
           )}
@@ -2814,10 +2814,10 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
         {/* Identifier (debug-friendly but readable) */}
         {(measurementId || annotationId) && (
           <div>
-            <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+            <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
               {t('boq.source_id_label', { defaultValue: 'Item id' })}
             </div>
-            <div className="text-[10px] font-mono text-content-tertiary truncate">
+            <div className="text-2xs font-mono text-content-tertiary truncate">
               {(measurementId || annotationId || '').slice(0, 12)}…
             </div>
           </div>
@@ -2830,7 +2830,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
           <button
             type="button"
             onClick={applyQuantity}
-            className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-white bg-gradient-to-r ${accent} ring-1 shadow-sm hover:shadow-md active:scale-[0.98] transition-all`}
+            className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-md text-2xs font-semibold text-white bg-gradient-to-r ${accent} ring-1 shadow-sm hover:shadow-md active:scale-[0.98] transition-all`}
             title={t('boq.source_apply_qty_title', { defaultValue: 'Set this value as the BOQ position quantity' })}
           >
             <ArrowRight size={12} />
@@ -2840,7 +2840,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
         <button
           type="button"
           onClick={onNavigate}
-          className={`${canApply ? 'h-8 px-3' : 'flex-1 h-8'} flex items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-oe-blue bg-oe-blue/10 hover:bg-oe-blue/20 transition-colors`}
+          className={`${canApply ? 'h-8 px-3' : 'flex-1 h-8'} flex items-center justify-center gap-1.5 rounded-md text-2xs font-semibold text-oe-blue bg-oe-blue/10 hover:bg-oe-blue/20 transition-colors`}
           title={t('boq.source_open_title', { defaultValue: 'Open the source document in its viewer, focused on this item' })}
         >
           <ExternalLink size={12} />
@@ -2932,10 +2932,10 @@ function InlineNumberInput({
         />
         {livePreview !== null && (
           <span
-            className={`absolute right-0 top-full mt-0.5 text-[10px] tabular-nums pointer-events-none whitespace-nowrap z-10 px-1 rounded shadow-sm bg-surface-elevated border ${
+            className={`absolute right-0 top-full mt-0.5 text-2xs tabular-nums pointer-events-none whitespace-nowrap z-10 px-1 rounded shadow-sm bg-surface-elevated border ${
               isNaN(livePreview)
-                ? 'border-rose-300 text-rose-600 dark:text-rose-400'
-                : 'border-emerald-300 text-emerald-600 dark:text-emerald-400 font-semibold'
+                ? 'border-semantic-error/30 text-semantic-error'
+                : 'border-semantic-success/30 text-semantic-success font-semibold'
             }`}
           >
             {isNaN(livePreview) ? <AlertTriangle size={10} strokeWidth={2} /> : '= ' + fmt.format(livePreview)}
@@ -3451,7 +3451,7 @@ function ResourceTypePicker({
         type="button"
         onClick={togglePicker}
         className={`shrink-0 inline-flex items-center justify-center h-4 px-1.5 rounded
-                    text-[9px] font-bold uppercase tracking-wider whitespace-nowrap
+                    text-2xs font-semibold uppercase tracking-wider whitespace-nowrap
                     cursor-pointer outline-none border-0 focus:ring-1 focus:ring-oe-blue ${badge.bg}`}
         title={
           isVariant
@@ -3498,12 +3498,12 @@ function ResourceTypePicker({
                   onChange(rt.value);
                   setOpen(false);
                 }}
-                className={`flex items-center gap-2 w-full px-2 py-1.5 text-[11px] text-left
+                className={`flex items-center gap-2 w-full px-2 py-1.5 text-2xs text-left
                             hover:bg-surface-secondary transition-colors
                             ${selected ? 'bg-oe-blue-subtle/30' : ''}`}
               >
                 <span className={`inline-flex items-center justify-center h-4 w-4 rounded
-                                  text-[9px] font-bold ${b.bg}`}>
+                                  text-2xs font-semibold ${b.bg}`}>
                   {b.label}
                 </span>
                 <span className="text-content-primary uppercase tracking-wider font-medium">
@@ -3632,11 +3632,11 @@ function ResourceCurrencyCombobox({
         ref={btnRef}
         type="button"
         onClick={togglePopover}
-        className={`shrink-0 h-4 px-1 rounded text-[9px] font-mono uppercase tracking-wide
+        className={`shrink-0 h-4 px-1 rounded text-2xs font-mono uppercase tracking-wide
                     text-center cursor-pointer outline-none focus:ring-1 focus:ring-oe-blue
                     inline-flex items-center justify-center gap-0.5
                     ${isUserDefined
-                      ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-400 text-amber-800 dark:text-amber-200 font-bold'
+                      ? 'bg-semantic-warning-bg border border-semantic-warning/60 text-semantic-warning font-semibold'
                       : 'bg-surface-primary border border-border-light text-content-secondary'}`}
         style={{ minWidth: '36px' }}
         title={isUserDefined
@@ -3705,10 +3705,10 @@ function ResourceCurrencyCombobox({
                 here; the global localStorage rate is editable. */}
             {isForeign && baseCode && onCommitFxRate && (
               <div className="mt-2 pt-2 border-t border-border-light/60">
-                <div className="text-[9px] uppercase tracking-wider text-content-tertiary mb-1">
+                <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
                   {t('boq.fx_rate_label', { defaultValue: 'FX rate' })}
                   {fxSource === 'project' ? (
-                    <span className="ml-1 px-1 rounded bg-oe-blue-subtle text-oe-blue-text text-[8px] font-bold">
+                    <span className="ml-1 px-1 rounded bg-oe-blue-subtle text-oe-blue-text text-2xs font-semibold">
                       {t('boq.fx_rate_project_badge', { defaultValue: 'PROJECT' })}
                     </span>
                   ) : (
@@ -3717,7 +3717,7 @@ function ResourceCurrencyCombobox({
                     // reads project rates. So anything that isn't a project
                     // rate must prompt the estimator to set one, otherwise the
                     // section sum silently stays unconverted.
-                    <span className="ml-1 px-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-[8px] font-bold">
+                    <span className="ml-1 px-1 rounded bg-semantic-warning-bg text-semantic-warning text-2xs font-semibold">
                       {t('boq.fx_rate_missing_badge', { defaultValue: 'SET RATE' })}
                     </span>
                   )}
@@ -3733,7 +3733,7 @@ function ResourceCurrencyCombobox({
                   autoFocus={fxSource !== 'project'}
                 />
                 {fxSource !== 'project' && (
-                  <p className="mt-1 text-[9px] text-amber-700 dark:text-amber-300 leading-tight">
+                  <p className="mt-1 text-2xs text-semantic-warning leading-tight">
                     {fxSource === 'global'
                       ? t('boq.fx_rate_confirm_hint', {
                           defaultValue:
@@ -3750,7 +3750,7 @@ function ResourceCurrencyCombobox({
           </div>
           <div className="overflow-auto flex-1 py-1">
             {matchProject.length > 0 && (
-              <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-content-tertiary">
+              <div className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                 {t('boq.currency_group_project', { defaultValue: 'Project' })}
               </div>
             )}
@@ -3764,7 +3764,7 @@ function ResourceCurrencyCombobox({
               />
             ))}
             {matchOther.length > 0 && (
-              <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-content-tertiary border-t border-border-light/60">
+              <div className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary border-t border-border-light/60">
                 {t('boq.currency_group_world', { defaultValue: 'World currencies' })}
               </div>
             )}
@@ -3781,7 +3781,7 @@ function ResourceCurrencyCombobox({
                 the user can confirm it's persisted. */}
             {isUserDefined && (!q || value.includes(q)) && (
               <>
-                <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 border-t border-border-light/60">
+                <div className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-semantic-warning border-t border-border-light/60">
                   {t('boq.currency_group_custom', { defaultValue: 'Custom (saved)' })}
                 </div>
                 <CurrencyOption
@@ -3793,7 +3793,7 @@ function ResourceCurrencyCombobox({
               </>
             )}
             {matchProject.length === 0 && matchOther.length === 0 && !canAddCustom && (
-              <div className="px-2 py-3 text-[10px] text-center text-content-quaternary">
+              <div className="px-2 py-3 text-2xs text-center text-content-quaternary">
                 {t('boq.resource_currency_no_match', { defaultValue: 'No matches - type at least 2 letters to add a custom code.' })}
               </div>
             )}
@@ -3881,7 +3881,7 @@ function PopoverFxRateRow({
   };
 
   return (
-    <div className="flex items-center gap-1 text-[10px] font-mono">
+    <div className="flex items-center gap-1 text-2xs font-mono">
       <span className="text-content-secondary">1 {foreignCode} =</span>
       <input
         ref={inputRef}
@@ -3906,7 +3906,7 @@ function PopoverFxRateRow({
                     ${readOnly
                       ? 'bg-surface-secondary/40 border border-border-light/60 text-content-tertiary cursor-not-allowed'
                       : rate == null
-                      ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-400 text-amber-800 dark:text-amber-200 cursor-text'
+                      ? 'bg-semantic-warning-bg border border-semantic-warning/60 text-semantic-warning cursor-text'
                       : 'bg-surface-primary border border-border-light text-content-primary cursor-text'}`}
         aria-label={t('boq.fx_rate_input', { defaultValue: 'FX rate {{from}}→{{to}}', from: foreignCode, to: baseCode })}
       />
@@ -3932,14 +3932,14 @@ function CurrencyOption({
       role="option"
       aria-selected={selected}
       onClick={(e) => { e.stopPropagation(); onPick(); }}
-      className={`flex items-center gap-2 w-full px-2 py-1.5 text-[11px] text-left
+      className={`flex items-center gap-2 w-full px-2 py-1.5 text-2xs text-left
                   hover:bg-surface-secondary transition-colors
-                  ${selected ? (custom ? 'bg-amber-100/40 dark:bg-amber-900/20' : 'bg-oe-blue-subtle/30') : ''}`}
+                  ${selected ? (custom ? 'bg-semantic-warning/10' : 'bg-oe-blue-subtle/30') : ''}`}
     >
-      <span className={`inline-flex items-center justify-center w-7 text-[10px] font-mono ${custom ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-content-secondary'}`}>
+      <span className={`inline-flex items-center justify-center w-7 text-2xs font-mono ${custom ? 'text-semantic-warning font-semibold' : 'text-content-secondary'}`}>
         {CURRENCY_SYMBOL[code] ?? '·'}
       </span>
-      <span className={`font-mono uppercase tracking-wide ${custom ? 'text-amber-800 dark:text-amber-200 font-bold' : 'text-content-primary'}`}>
+      <span className={`font-mono uppercase tracking-wide ${custom ? 'text-semantic-warning font-semibold' : 'text-content-primary'}`}>
         {code}
       </span>
       {selected && <Check size={11} strokeWidth={2.5} className="ml-auto text-oe-blue" />}
@@ -4413,7 +4413,7 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
   const renderOrdinalSlot = (width: number) => (
     <span
       key="ordinal"
-      className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-[9px] font-mono whitespace-nowrap overflow-hidden"
+      className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-2xs font-mono whitespace-nowrap overflow-hidden"
       style={{ width: `${width}px` }}
       title={resourceCode
         ? ctx.t('boq.resource_catalog_code', { defaultValue: 'Catalogue code: {{code}}', code: resourceCode })
@@ -4545,12 +4545,12 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
               setVariantPickerOpen((open) => !open);
             }}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-semibold
+            className={`shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-2xs font-semibold
                         transition-colors cursor-pointer ${
                           resourceVariant
                             ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
                             : resourceVariantDefault
-                            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                            ? 'bg-semantic-warning-bg dark:bg-amber-900/40 text-semantic-warning dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
                             : 'bg-surface-tertiary/60 text-content-secondary hover:bg-surface-tertiary'
                         }`}
             title={variantPillTooltip}
@@ -4924,13 +4924,13 @@ function VariantHeaderResourceRow({
   const renderOrdinalSlot = (width: number) => (
     <span
       key="ordinal"
-      className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-[8px] font-mono whitespace-nowrap overflow-hidden"
+      className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-2xs font-mono whitespace-nowrap overflow-hidden"
       style={{ width: `${width}px` }}
       title={ctx.t('boq.variant_header_code_tooltip', {
         defaultValue: 'Abstract variant resource - inherits the position quantity',
       })}
     >
-      <span className="px-1 py-0.5 rounded bg-violet-200/60 dark:bg-violet-800/40 text-violet-800 dark:text-violet-200 font-bold tracking-wider">
+      <span className="px-1 py-0.5 rounded bg-violet-200/60 dark:bg-violet-800/40 text-violet-800 dark:text-violet-200 font-semibold tracking-wider">
         VAR
       </span>
     </span>
@@ -4985,7 +4985,7 @@ function VariantHeaderResourceRow({
   const renderUnitSlot = (width: number) => (
     <span
       key="unit"
-      className="shrink-0 text-center text-content-secondary font-mono uppercase self-center px-2 text-[11px]"
+      className="shrink-0 text-center text-content-secondary font-mono uppercase self-center px-2 text-2xs"
       style={{ width: `${width}px` }}
     >
       {displayUnitLabel || '—'}
@@ -5045,7 +5045,7 @@ function VariantHeaderResourceRow({
       </button>
       {showNumbers && (
         <>
-          <span className="shrink-0 inline-flex items-center justify-center w-7 text-[10px] font-mono text-content-secondary">
+          <span className="shrink-0 inline-flex items-center justify-center w-7 text-2xs font-mono text-content-secondary">
             {currency}
           </span>
           <span className="flex-1 min-w-0 text-right tabular-nums text-content-primary text-xs font-semibold">
@@ -5236,7 +5236,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
       return (
         <span
           key={key}
-          className="shrink-0 self-center text-right tabular-nums text-[10px] font-medium text-content-tertiary pr-2 pl-2"
+          className="shrink-0 self-center text-right tabular-nums text-2xs font-medium text-content-tertiary pr-2 pl-2"
           style={{ width: `${width}px` }}
           title={title}
         >
@@ -5449,13 +5449,13 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   let colorClass = '';
   let titleText: string | undefined;
   if (hasPdfSource) {
-    colorClass = 'font-semibold text-rose-700 dark:text-rose-400';
+    colorClass = 'font-semibold text-semantic-error';
     titleText = String(meta.pdf_measurement_source);
   } else if (hasDwgSource) {
-    colorClass = 'font-semibold text-amber-700 dark:text-amber-400';
+    colorClass = 'font-semibold text-semantic-warning';
     titleText = String(meta.dwg_annotation_source);
   } else if (hasBimSource) {
-    colorClass = 'font-semibold text-emerald-700 dark:text-emerald-400';
+    colorClass = 'font-semibold text-semantic-success';
     titleText = String(meta.bim_qty_source);
   } else if (formulaSource) {
     // Issue #90: cells with a stored formula get a violet accent + the
@@ -5477,7 +5477,7 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
       >
         <span
           aria-hidden="true"
-          className="inline-flex items-center px-1 h-[16px] rounded text-[9px] font-bold leading-none tracking-tight bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-300/60 dark:border-violet-700/50"
+          className="inline-flex items-center px-1 h-[16px] rounded text-2xs font-semibold leading-none tracking-tight bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-300/60 dark:border-violet-700/50"
         >
           ƒx
         </span>
@@ -5783,11 +5783,11 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
             setPickerOpen((open) => !open);
           }}
           onMouseDown={(e) => e.stopPropagation()}
-          className={`shrink-0 inline-flex items-center gap-0.5 h-5 px-1.5 rounded text-[10px] font-semibold
+          className={`shrink-0 inline-flex items-center gap-0.5 h-5 px-1.5 rounded text-2xs font-semibold
                       transition-colors cursor-pointer disabled:cursor-default ${
                         variant
                           ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
-                          : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                          : 'bg-semantic-warning-bg dark:bg-amber-900/40 text-semantic-warning dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
                       }`}
           title={tooltip}
           aria-label={tooltip}
@@ -5878,7 +5878,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
       <div className="flex flex-col items-center justify-center h-full w-full gap-0">
         <span className="text-xs font-mono leading-tight">{displayUnit}</span>
         <span
-          className="text-[7px] leading-none font-medium text-rose-600 dark:text-rose-400 truncate max-w-full"
+          className="text-[7px] leading-none font-medium text-semantic-error truncate max-w-full"
           title={pdfSource}
         >
           {shortLabel}
@@ -5895,7 +5895,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
       <div className="flex flex-col items-center justify-center h-full w-full gap-0">
         <span className="text-xs font-mono leading-tight">{displayUnit}</span>
         <span
-          className="text-[7px] leading-none font-medium text-amber-600 dark:text-amber-400 truncate max-w-full"
+          className="text-[7px] leading-none font-medium text-semantic-warning truncate max-w-full"
           title={dwgSource}
         >
           {shortLabel}
@@ -5913,7 +5913,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
     <div className="flex flex-col items-center justify-center h-full w-full gap-0">
       <span className="text-xs font-mono leading-tight">{displayUnit}</span>
       <span
-        className="text-[7px] leading-none font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-full"
+        className="text-[7px] leading-none font-medium text-semantic-success truncate max-w-full"
         title={bimSource}
       >
         {paramName}

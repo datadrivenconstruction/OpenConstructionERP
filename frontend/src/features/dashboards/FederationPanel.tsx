@@ -200,7 +200,7 @@ export function FederationPanel({
           {selected.map((id) => (
             <span
               key={id}
-              className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300"
+              className="inline-flex items-center gap-1 rounded bg-semantic-success/10 px-2 py-0.5 text-xs text-emerald-300"
               data-testid={`federation-chip-${id}`}
             >
               <span className="max-w-[140px] truncate">
@@ -212,7 +212,7 @@ export function FederationPanel({
                 aria-label={t('dashboards.federation.remove_snapshot', {
                   defaultValue: 'Remove snapshot',
                 })}
-                className="rounded hover:bg-emerald-500/20"
+                className="rounded hover:bg-semantic-success/20"
                 data-testid={`federation-chip-remove-${id}`}
               >
                 <X className="h-3 w-3" />
@@ -245,7 +245,7 @@ export function FederationPanel({
                   onClick={() => toggleSnapshot(opt.id)}
                   data-testid={`federation-snapshot-option-${opt.id}`}
                   className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-surface-secondary ${
-                    isSelected ? 'bg-emerald-500/5 text-emerald-200' : 'text-content-primary'
+                    isSelected ? 'bg-semantic-success/5 text-emerald-200' : 'text-content-primary'
                   }`}
                 >
                   <span className="flex h-3 w-3 flex-shrink-0 items-center justify-center">
@@ -253,7 +253,7 @@ export function FederationPanel({
                   </span>
                   <span className="flex-1 truncate">{opt.label}</span>
                   {opt.projectLabel && (
-                    <span className="flex-shrink-0 text-[10px] text-content-tertiary">
+                    <span className="flex-shrink-0 text-2xs text-content-tertiary">
                       {opt.projectLabel}
                     </span>
                   )}
@@ -403,7 +403,7 @@ export function FederationPanel({
 
       {errorMsg && (
         <div
-          className="rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"
+          className="rounded border border-rose-500/40 bg-semantic-error/10 px-3 py-2 text-xs text-rose-300"
           role="alert"
           data-testid="federation-error"
         >

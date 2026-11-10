@@ -470,9 +470,9 @@ export function VariantPicker({
             <span
               className={
                 delta.tone === 'pos'
-                  ? 'inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-2xs font-semibold text-amber-700 dark:text-amber-300 tabular-nums'
+                  ? 'inline-flex items-center rounded-full bg-semantic-warning/15 px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning tabular-nums'
                   : delta.tone === 'neg'
-                  ? 'inline-flex items-center rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-2xs font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums'
+                  ? 'inline-flex items-center rounded-full bg-semantic-success/15 px-1.5 py-0.5 text-2xs font-semibold text-semantic-success tabular-nums'
                   : 'inline-flex items-center rounded-full bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium text-content-secondary tabular-nums'
               }
               title={t('costs.variant_delta_tooltip', {

@@ -62,7 +62,7 @@ export function DesktopPortBanner() {
       role="status"
       aria-live="polite"
       data-testid="desktop-port-banner"
-      className="oe-dock-aware sticky top-0 z-50 flex items-center justify-center gap-2 bg-oe-blue px-4 py-2 text-[13px] font-medium text-white shadow-sm"
+      className="oe-dock-aware sticky top-0 z-50 flex items-center justify-center gap-2 bg-oe-blue px-4 py-2 text-sm font-medium text-white shadow-sm"
     >
       <Info size={14} strokeWidth={2.25} className="shrink-0" />
       <span className="text-center">

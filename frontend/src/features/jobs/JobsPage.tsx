@@ -126,7 +126,7 @@ function JobsExplainer() {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>
@@ -316,7 +316,7 @@ export function JobsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-4 text-sm text-semantic-error">
           {t('jobs.load_error', { defaultValue: 'Could not load background jobs' })}
         </div>
       )}
@@ -334,9 +334,9 @@ export function JobsPage() {
 
       {/* Table */}
       {!isLoading && filtered.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="overflow-x-auto rounded-lg border border-border-light">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-xs font-medium uppercase text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+            <thead className="border-b border-border-light bg-surface-secondary text-xs font-medium uppercase text-content-tertiary">
               <tr>
                 <th className="px-4 py-3">{t('jobs.col_kind', { defaultValue: 'Kind' })}</th>
                 <th className="px-4 py-3">{t('jobs.col_status', { defaultValue: 'Status' })}</th>
@@ -346,7 +346,7 @@ export function JobsPage() {
                 <th className="px-4 py-3">{t('jobs.col_actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-y divide-border-light">
               {filtered.map((job) => (
                 <tr
                   key={job.id}
@@ -354,9 +354,9 @@ export function JobsPage() {
                   className={`cursor-pointer transition-colors
                     ${selectedId === job.id
                       ? 'bg-blue-50 dark:bg-blue-950/30'
-                      : 'bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/50'}`}
+                      : 'bg-surface-primary hover:bg-surface-secondary'}`}
                 >
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+                  <td className="px-4 py-3 font-medium text-content-primary">
                     {job.kind}
                   </td>
                   <td className="px-4 py-3">
@@ -369,10 +369,10 @@ export function JobsPage() {
                   <td className="px-4 py-3">
                     <ProgressCell job={job} />
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-content-tertiary">
                     {fullDateTime(job.created_at)}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3 text-content-tertiary">
                     {durationLabel(job.started_at, job.finished_at)}
                   </td>
                   <td className="px-4 py-3">
@@ -441,7 +441,7 @@ export function JobsPage() {
             <button
               onClick={() => setOffset(Math.max(0, offset - LIMIT))}
               disabled={offset === 0}
-              className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+              className="rounded p-1.5 hover:bg-surface-secondary disabled:opacity-30"
               aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
             >
               <ChevronLeft className="h-4 w-4" aria-hidden />
@@ -450,7 +450,7 @@ export function JobsPage() {
             <button
               onClick={() => setOffset(offset + LIMIT)}
               disabled={offset + LIMIT >= total}
-              className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+              className="rounded p-1.5 hover:bg-surface-secondary disabled:opacity-30"
               aria-label={t('common.next_page', { defaultValue: 'Next page' })}
             >
               <ChevronRight className="h-4 w-4" aria-hidden />
@@ -476,13 +476,13 @@ function ProgressCell({ job }: { job: JobRun }) {
   const pct = job.progress_pct ?? 0;
   return (
     <div className="flex items-center gap-2">
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-2 w-24 overflow-hidden rounded-full bg-surface-secondary">
         <div
           className="h-full rounded-full bg-blue-500 transition-all duration-300"
           style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
         />
       </div>
-      <span className="text-xs text-gray-500 dark:text-gray-400">
+      <span className="text-xs text-content-tertiary">
         {pct > 0 ? `${pct}%` : t('jobs.waiting', { defaultValue: 'Waiting' })}
       </span>
     </div>
@@ -507,7 +507,7 @@ function JobDetailPanel({
   return (
     <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-sm font-semibold text-content-primary">
           {t('jobs.detail_title', { defaultValue: 'Job Details' })}
         </h3>
         <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
@@ -570,7 +570,7 @@ function JobDetailPanel({
         {job.result_jsonb && Object.keys(job.result_jsonb).length > 0 && (
           <div className="sm:col-span-2">
             <p className="mb-1 text-gray-500">{t('jobs.detail_result', { defaultValue: 'Result' })}:</p>
-            <pre className="max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <pre className="max-h-48 overflow-auto rounded bg-surface-secondary p-2 text-xs text-content-secondary">
               {JSON.stringify(job.result_jsonb, null, 2)}
             </pre>
           </div>
@@ -579,8 +579,8 @@ function JobDetailPanel({
         {/* Error data */}
         {job.error_jsonb && Object.keys(job.error_jsonb).length > 0 && (
           <div className="sm:col-span-2">
-            <p className="mb-1 text-red-600 dark:text-red-400">{t('jobs.detail_error', { defaultValue: 'Error' })}:</p>
-            <pre className="max-h-48 overflow-auto rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-950/50 dark:text-red-300">
+            <p className="mb-1 text-semantic-error">{t('jobs.detail_error', { defaultValue: 'Error' })}:</p>
+            <pre className="max-h-48 overflow-auto rounded bg-semantic-error-bg p-2 text-xs text-semantic-error">
               {JSON.stringify(job.error_jsonb, null, 2)}
             </pre>
           </div>
@@ -592,7 +592,7 @@ function JobDetailPanel({
             <button
               onClick={() => onCancel(job.id)}
               disabled={cancelPending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-error px-3 py-1.5 text-xs font-medium text-white hover:bg-semantic-error disabled:opacity-50"
             >
               {cancelPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
@@ -605,7 +605,7 @@ function JobDetailPanel({
           {(job.result_jsonb || job.error_jsonb) && (
             <button
               onClick={() => onExport(job)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
             >
               <Download className="h-3.5 w-3.5" aria-hidden />
               {t('jobs.export_result', { defaultValue: 'Download JSON' })}

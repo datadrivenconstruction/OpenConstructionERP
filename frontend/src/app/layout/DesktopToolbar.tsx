@@ -287,7 +287,7 @@ export function DesktopToolbar() {
                         fill="currentColor"
                       />
                       <span className="flex min-w-0 flex-col">
-                        <span className="truncate text-[13px] font-medium text-content-primary">
+                        <span className="truncate text-sm font-medium text-content-primary">
                           {f.label}
                         </span>
                         <span className="truncate text-2xs text-content-tertiary">{f.path}</span>

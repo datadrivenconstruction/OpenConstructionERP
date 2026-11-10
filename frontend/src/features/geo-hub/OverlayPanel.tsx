@@ -173,7 +173,7 @@ export function OverlayPanel({
       data-testid="geo-overlay-panel"
       className={[
         'absolute top-3 right-3 z-20 flex w-80 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         'hidden md:flex',
       ].join(' ')}
@@ -183,7 +183,7 @@ export function OverlayPanel({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('geo.overlays.title', { defaultValue: 'Overlays' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -276,7 +276,7 @@ export function OverlayPanel({
                   className={[
                     'rounded-md border px-2 py-2 transition-colors',
                     isActive
-                      ? 'border-sky-400/60 bg-sky-50 dark:bg-sky-950/30'
+                      ? 'border-sky-400/60 bg-semantic-info-bg dark:bg-sky-950/30'
                       : 'border-transparent hover:border-border hover:bg-surface-secondary',
                   ].join(' ')}
                 >
@@ -310,7 +310,7 @@ export function OverlayPanel({
                       className={[
                         'inline-flex h-7 w-7 items-center justify-center rounded-md',
                         o.visible
-                          ? 'text-sky-600 hover:bg-sky-100 dark:text-sky-300 dark:hover:bg-sky-950/50'
+                          ? 'text-semantic-info hover:bg-semantic-info-bg'
                           : 'text-content-tertiary hover:bg-surface-secondary',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                       ].join(' ')}
@@ -370,7 +370,7 @@ export function OverlayPanel({
                       data-testid="geo-overlay-needs-corners"
                     >
                       <span
-                        className="inline-flex items-center gap-1 rounded-full border border-amber-300/70 bg-amber-50 px-1.5 py-0.5 text-2xs font-medium text-amber-800 dark:border-amber-400/40 dark:bg-amber-950/30 dark:text-amber-200"
+                        className="inline-flex items-center gap-1 rounded-full border border-semantic-warning/30 bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning"
                         role="status"
                         title={t('geo.overlays.needs_corners_hint', {
                           defaultValue:
@@ -388,7 +388,7 @@ export function OverlayPanel({
                           onChangeEditMode('corners');
                         }}
                         data-testid="geo-overlay-fix-corners-cta"
-                        className="inline-flex items-center gap-1 rounded-md border border-amber-300/70 px-1.5 py-0.5 text-2xs font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-400/40 dark:text-amber-200 dark:hover:bg-amber-950/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                        className="inline-flex items-center gap-1 rounded-md border border-semantic-warning/30 px-1.5 py-0.5 text-2xs font-medium text-semantic-warning hover:bg-semantic-warning-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                       >
                         {t('geo.overlays.edit_corners', {
                           defaultValue: 'Edit corners',
@@ -410,7 +410,7 @@ export function OverlayPanel({
                         className={[
                           'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-2xs font-medium',
                           editMode === 'corners'
-                            ? 'border-sky-400 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200'
+                            ? 'border-semantic-info/60 bg-semantic-info-bg text-semantic-info'
                             : 'border-border text-content-secondary hover:bg-surface-secondary',
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                         ].join(' ')}
@@ -432,7 +432,7 @@ export function OverlayPanel({
                         className={[
                           'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-2xs font-medium',
                           editMode === 'crop'
-                            ? 'border-amber-400 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200'
+                            ? 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning'
                             : 'border-border text-content-secondary hover:bg-surface-secondary',
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                         ].join(' ')}
@@ -462,7 +462,7 @@ export function OverlayPanel({
                           }
                         }}
                         data-testid="geo-overlay-delete"
-                        className="inline-flex items-center gap-1 rounded-md border border-red-300/50 px-1.5 py-0.5 text-2xs font-medium text-red-700 hover:bg-red-50 dark:border-red-400/40 dark:text-red-300 dark:hover:bg-red-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                        className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-1.5 py-0.5 text-2xs font-medium text-semantic-error hover:bg-semantic-error-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                       >
                         <Trash2 size={11} />
                         {t('common.delete', { defaultValue: 'Delete' })}
@@ -565,7 +565,7 @@ function OverlayUploadModal({
               className={[
                 'flex-1 rounded px-3 py-1.5 text-xs font-medium transition',
                 tab === k
-                  ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100'
+                  ? 'bg-surface-primary text-content-primary shadow-sm'
                   : 'text-content-secondary hover:text-content-primary',
               ].join(' ')}
             >

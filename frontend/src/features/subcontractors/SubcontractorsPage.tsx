@@ -287,7 +287,7 @@ function HowSubcontractorsWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -917,8 +917,8 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               className={clsx(
                 'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                 sub?.is_blocked
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/40 dark:text-emerald-200'
-                  : 'border-border-light bg-surface-primary text-content-secondary hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30',
+                  ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success hover:bg-semantic-success-bg'
+                  : 'border-border-light bg-surface-primary text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg',
               )}
             >
               {sub?.is_blocked ? <CheckCircle2 size={12} /> : <Ban size={12} />}
@@ -940,7 +940,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               type="button"
               onClick={() => setDeleteOpen(true)}
               disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
             >
               <Trash2 size={12} />
@@ -966,8 +966,8 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             className={clsx(
               'border-b px-5 py-2.5 flex items-start gap-2 text-xs',
               dashboard.blocked || dashboard.expired_certificates > 0
-                ? 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200'
-                : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200',
+                ? 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error'
+                : 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
             )}
           >
             <ShieldAlert size={14} className="mt-0.5 shrink-0" />
@@ -1070,7 +1070,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               />
             </div>
             {sub.is_blocked && sub.blocked_reason && (
-              <div className="border-b border-rose-200 bg-rose-50 px-5 py-2.5 text-xs text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200">
+              <div className="border-b border-semantic-error/30 bg-semantic-error-bg px-5 py-2.5 text-xs text-semantic-error">
                 <span className="font-semibold">
                   {t('subcontractors.blocked_label', {
                     defaultValue: 'Blocked:',
@@ -2004,7 +2004,7 @@ function RetentionTab({
 function KV({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm text-content-primary">{value}</p>

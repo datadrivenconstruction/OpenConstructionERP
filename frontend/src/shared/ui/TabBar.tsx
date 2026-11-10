@@ -101,7 +101,7 @@ const VARIANT_CLASSES: Record<TabBarVariant, { container: string }> = {
 };
 
 const SIZE_CLASSES: Record<TabBarSize, string> = {
-  sm: 'px-2 py-1.5 text-[11px]',
+  sm: 'px-2 py-1.5 text-2xs',
   md: 'px-3 py-2 text-sm',
 };
 

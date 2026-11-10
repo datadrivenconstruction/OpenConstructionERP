@@ -266,7 +266,7 @@ export function GuaranteesExposurePage() {
                   </div>
                   <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-secondary">
                     <div
-                      className={pct !== null && pct >= 90 ? 'h-full bg-rose-500' : pct !== null && pct >= 70 ? 'h-full bg-amber-500' : 'h-full bg-emerald-500'}
+                      className={pct !== null && pct >= 90 ? 'h-full bg-semantic-error' : pct !== null && pct >= 70 ? 'h-full bg-semantic-warning' : 'h-full bg-semantic-success'}
                       style={{ width: `${Math.min(100, pct ?? 0)}%` }}
                     />
                   </div>

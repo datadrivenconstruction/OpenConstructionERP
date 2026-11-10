@@ -151,7 +151,7 @@ function ActionRow({
         onClick={() => onDelete(action.id)}
         disabled={busy}
         aria-label={t('common.delete', { defaultValue: 'Delete' })}
-        className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+        className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
       >
         <Trash2 size={13} />
       </button>
@@ -273,7 +273,7 @@ export function ActionRegisterPanel({ meetingId, seriesId }: ActionRegisterPanel
           {/* Brought forward from earlier meetings in the series */}
           {brought.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-2xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+              <p className="text-2xs font-medium text-semantic-warning uppercase tracking-wide">
                 {t('meetings.brought_forward_heading', {
                   defaultValue: 'Brought forward ({{count}})',
                   count: brought.length,

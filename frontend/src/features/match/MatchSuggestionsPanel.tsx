@@ -102,17 +102,17 @@ const CONFIDENCE_CLASSES: Record<
   { pill: string; ariaKey: string; defaultLabel: string }
 > = {
   high: {
-    pill: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/40 dark:text-green-200',
+    pill: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
     ariaKey: 'match.confidence.high_aria',
     defaultLabel: 'High confidence',
   },
   medium: {
-    pill: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-200',
+    pill: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
     ariaKey: 'match.confidence.medium_aria',
     defaultLabel: 'Medium confidence',
   },
   low: {
-    pill: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-700/40 dark:text-slate-200',
+    pill: 'bg-surface-secondary text-content-secondary border-border',
     ariaKey: 'match.confidence.low_aria',
     defaultLabel: 'Low confidence',
   },
@@ -353,7 +353,7 @@ export function MatchSuggestionsPanel({
           deep-link added in Phase 3. */}
       {response?.translation_used?.tier_used === 'fallback' && !compact && (
         <div
-          className="flex items-start gap-2 px-3 py-2 border-b border-border-light bg-amber-50 text-amber-900 text-[11px] dark:bg-amber-900/20 dark:text-amber-200"
+          className="flex items-start gap-2 px-3 py-2 border-b border-border-light bg-semantic-warning-bg text-semantic-warning text-2xs"
           role="status"
           data-testid="match-fallback-hint"
         >
@@ -462,7 +462,7 @@ function Header({
       <h2
         className={clsx(
           'font-semibold text-content-primary truncate',
-          compact ? 'text-[11px]' : 'text-xs',
+          compact ? 'text-2xs' : 'text-xs',
         )}
       >
         {t('match.title', { defaultValue: 'Match suggestions' })}
@@ -470,7 +470,7 @@ function Header({
 
       {hasAutoLink && (
         <span
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/40 dark:text-green-200"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-semantic-success-bg text-semantic-success border border-semantic-success/30"
           aria-label={t('match.auto_linked_aria', {
             defaultValue: 'A high-confidence match was auto-linked',
           })}
@@ -483,7 +483,7 @@ function Header({
 
       {showTranslation && (
         <span
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-tertiary text-content-secondary border border-border-light"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-surface-tertiary text-content-secondary border border-border-light"
           title={t('match.translated_via_tooltip', {
             defaultValue: 'Description translated before matching',
           })}
@@ -502,7 +502,7 @@ function Header({
       <label
         className={clsx(
           'inline-flex items-center gap-1.5 cursor-pointer select-none',
-          compact ? 'text-[10px]' : 'text-[11px]',
+          compact ? 'text-2xs' : 'text-2xs',
           'text-content-secondary',
         )}
         title={t('match.use_rerank_tooltip', {
@@ -707,10 +707,10 @@ function CatalogBindingBar({
   const ready = status === 'ok';
   const labelClass = clsx(
     'inline-flex items-center gap-1.5 rounded border px-1.5 py-0.5 font-mono',
-    compact ? 'text-[10px]' : 'text-[11px]',
+    compact ? 'text-2xs' : 'text-2xs',
     ready
-      ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
-      : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200',
+      ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
+      : 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
   );
 
   return (
@@ -730,7 +730,7 @@ function CatalogBindingBar({
       {catalogId ? (
         <span className={labelClass} data-testid="match-catalog-badge">
           {catalogId}
-          <span className="font-sans text-[10px] text-content-secondary">
+          <span className="font-sans text-2xs text-content-secondary">
             · {catalogCount.toLocaleString(getNumberLocale())}
             {vectorizedCount > 0 && (
               <> / {vectorizedCount.toLocaleString(getNumberLocale())} vec</>
@@ -738,7 +738,7 @@ function CatalogBindingBar({
           </span>
         </span>
       ) : (
-        <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+        <span className="text-2xs text-semantic-warning font-medium">
           {t('match.no_catalog_picked', {
             defaultValue: 'No catalogue selected',
           })}
@@ -753,7 +753,7 @@ function CatalogBindingBar({
         disabled={saving}
         className={clsx(
           'rounded px-2 py-0.5 hover:bg-surface-secondary text-content-secondary hover:text-content-primary disabled:opacity-40',
-          compact ? 'text-[10px]' : 'text-[11px]',
+          compact ? 'text-2xs' : 'text-2xs',
         )}
         data-testid="match-catalog-change"
       >
@@ -772,7 +772,7 @@ function CatalogBindingBar({
           })}
         >
           {loaded.length === 0 ? (
-            <div className="text-[11px] text-content-secondary px-2 py-2">
+            <div className="text-2xs text-content-secondary px-2 py-2">
               {t('match.no_catalogs_loaded_short', {
                 defaultValue: 'No catalogues loaded.',
               })}
@@ -797,18 +797,18 @@ function CatalogBindingBar({
                     )}
                     data-testid={`match-catalog-option-${db.id}`}
                   >
-                    <span className="font-mono text-[11px] text-content-primary">
+                    <span className="font-mono text-2xs text-content-primary">
                       {db.id}
                     </span>
-                    <span className="text-[10px] text-content-secondary">
+                    <span className="text-2xs text-content-secondary">
                       {db.count.toLocaleString(getNumberLocale())}
                     </span>
                     {db.vectorized_count > 0 ? (
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-300">
+                      <span className="ml-auto inline-flex items-center gap-1 text-2xs text-semantic-success">
                         <Check size={10} strokeWidth={2.5} /> {db.vectorized_count.toLocaleString(getNumberLocale())} vec
                       </span>
                     ) : (
-                      <span className="ml-auto text-[10px] text-amber-700 dark:text-amber-300">
+                      <span className="ml-auto text-2xs text-semantic-warning">
                         not vectorised
                       </span>
                     )}
@@ -840,7 +840,7 @@ function CatalogBlockedState({
         className="flex flex-col items-center justify-center text-center px-6 py-10"
         data-testid="match-state-no-catalogs-loaded"
       >
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
           <Database size={18} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-semibold text-content-primary">
@@ -873,7 +873,7 @@ function CatalogBlockedState({
         className="flex flex-col items-center justify-center text-center px-6 py-10"
         data-testid="match-state-no-catalog-selected"
       >
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
           <AlertTriangle size={18} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-semibold text-content-primary">
@@ -897,7 +897,7 @@ function CatalogBlockedState({
         className="flex flex-col items-center justify-center text-center px-6 py-10"
         data-testid="match-state-not-vectorized"
       >
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
           <Loader2 size={18} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-semibold text-content-primary">
@@ -967,12 +967,12 @@ const CandidateCard = memo(function CandidateCard({
         )}
         data-testid={`match-candidate-${candidate.code}`}
       >
-        <span className="font-mono text-[10px] font-semibold text-content-primary truncate">
+        <span className="font-mono text-2xs font-semibold text-content-primary truncate">
           {candidate.code}
         </span>
         <span
           className={clsx(
-            'inline-flex items-center px-1 rounded text-[9px] font-semibold border',
+            'inline-flex items-center px-1 rounded text-2xs font-semibold border',
             conf.pill,
           )}
           aria-label={confidenceAriaLabel}
@@ -988,7 +988,7 @@ const CandidateCard = memo(function CandidateCard({
             defaultValue: 'Accept match',
             code: candidate.code,
           })}
-          className="p-1 rounded hover:bg-green-100 text-green-700"
+          className="p-1 rounded hover:bg-semantic-success-bg text-semantic-success"
           data-testid={`match-accept-${candidate.code}`}
         >
           <Check size={11} aria-hidden="true" />
@@ -1036,7 +1036,7 @@ const CandidateCard = memo(function CandidateCard({
         <ScoreBadge candidate={candidate} ariaLabel={confidenceAriaLabel} />
         <span
           className={clsx(
-            'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0',
+            'inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border shrink-0',
             conf.pill,
           )}
           aria-label={confidenceAriaLabel}
@@ -1048,7 +1048,7 @@ const CandidateCard = memo(function CandidateCard({
       </div>
 
       {/* Mid row: unit / unit-rate / region */}
-      <div className="flex items-center gap-2 text-[11px] text-content-secondary">
+      <div className="flex items-center gap-2 text-2xs text-content-secondary">
         <span className="font-medium text-content-primary">
           {fmtFixed(Number(candidate.unit_rate), 2)} {candidate.currency}
         </span>
@@ -1062,7 +1062,7 @@ const CandidateCard = memo(function CandidateCard({
         {candidate.region_code && (
           <>
             <span>·</span>
-            <span className="inline-flex items-center px-1 rounded bg-surface-tertiary border border-border-light text-[10px]">
+            <span className="inline-flex items-center px-1 rounded bg-surface-tertiary border border-border-light text-2xs">
               {candidate.region_code}
             </span>
           </>
@@ -1072,7 +1072,7 @@ const CandidateCard = memo(function CandidateCard({
       {/* Reasoning (rerank only) */}
       {candidate.reasoning && (
         <p
-          className="text-[11px] italic text-content-tertiary leading-snug"
+          className="text-2xs italic text-content-tertiary leading-snug"
           data-testid={`match-reasoning-${candidate.code}`}
         >
           {candidate.reasoning}
@@ -1087,7 +1087,7 @@ const CandidateCard = memo(function CandidateCard({
             e.stopPropagation();
             onAccept();
           }}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-oe-blue text-content-inverse hover:bg-oe-blue-hover"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium bg-oe-blue text-content-inverse hover:bg-oe-blue-hover"
           data-testid={`match-accept-${candidate.code}`}
         >
           <Check size={11} aria-hidden="true" />
@@ -1099,7 +1099,7 @@ const CandidateCard = memo(function CandidateCard({
             e.stopPropagation();
             onReject();
           }}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border border-border text-content-secondary hover:bg-surface-tertiary"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border text-content-secondary hover:bg-surface-tertiary"
           data-testid={`match-reject-${candidate.code}`}
         >
           <XIcon size={11} aria-hidden="true" />
@@ -1142,7 +1142,7 @@ function ScoreBadge({
         onClick={() => setOpen((prev) => !prev)}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-tertiary border border-border-light text-content-secondary"
+        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-2xs font-mono font-semibold bg-surface-tertiary border border-border-light text-content-secondary"
         data-testid={`match-score-badge-${candidate.code}`}
       >
         <Info size={9} aria-hidden="true" />
@@ -1153,7 +1153,7 @@ function ScoreBadge({
           id={tooltipId}
           role="tooltip"
           data-testid={`match-boosts-tooltip-${candidate.code}`}
-          className="absolute right-0 top-full mt-1 z-10 min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-[10px]"
+          className="absolute right-0 top-full mt-1 z-10 min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-2xs"
         >
           <div className="flex items-center justify-between mb-1 font-semibold text-content-primary">
             <span>
@@ -1187,7 +1187,7 @@ function ScoreBadge({
                   <span
                     className={clsx(
                       'font-mono ml-2',
-                      delta >= 0 ? 'text-green-700' : 'text-red-700',
+                      delta >= 0 ? 'text-semantic-success' : 'text-semantic-error',
                     )}
                   >
                     {formatBoostDelta(delta)}
@@ -1216,7 +1216,7 @@ function MatchModelsOffHint({ ids }: { ids: ReadonlyArray<string> }) {
   const names = fmtList(ids.map((id) => t(`processes.${id}.name`, { defaultValue: id.replace(/_/g, ' ') })));
   return (
     <div
-      className="flex flex-wrap items-start gap-x-2 gap-y-1 px-3 py-2 border-b border-border-light bg-sky-50 text-sky-900 text-[11px] dark:bg-sky-900/20 dark:text-sky-200"
+      className="flex flex-wrap items-start gap-x-2 gap-y-1 px-3 py-2 border-b border-border-light bg-semantic-info-bg text-semantic-info text-2xs"
       role="status"
       data-testid="match-models-off-hint"
     >

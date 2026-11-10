@@ -191,7 +191,7 @@ export function GeoModePicker({
               {it.softDisabled && (
                 <span
                   aria-hidden
-                  className="ml-0.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-400/20 text-[9px] font-bold leading-none text-amber-700 ring-1 ring-amber-400/40 dark:text-amber-300"
+                  className="ml-0.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-400/20 text-2xs font-semibold leading-none text-semantic-warning ring-1 ring-amber-400/40 dark:text-amber-300"
                   title={it.description}
                 >
                   ?

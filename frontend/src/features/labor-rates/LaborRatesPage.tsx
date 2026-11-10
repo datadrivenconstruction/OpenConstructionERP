@@ -449,19 +449,19 @@ export function LaborRatesPage() {
         actions={
         <div className="flex items-center gap-4 rounded-xl border border-border bg-surface-elevated px-4 py-2.5 shadow-sm">
           <div className="text-right">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+            <div className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('laborRates.all_in_rate', { defaultValue: 'All-in hourly rate' })}
             </div>
-            <div className="text-xl font-bold text-oe-blue-text">
+            <div className="text-xl font-semibold text-oe-blue-text">
               {formatCurrency(allInRate, currency)}
             </div>
           </div>
           {burdenPct !== null && (
             <div className="border-l border-border pl-4 text-right">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+              <div className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                 {t('laborRates.burden', { defaultValue: 'Labor burden' })}
               </div>
-              <div className="text-xl font-bold text-content-primary">
+              <div className="text-xl font-semibold text-content-primary">
                 +{fmtPercent(burdenPct, 0)}
               </div>
             </div>
@@ -474,7 +474,7 @@ export function LaborRatesPage() {
       <div className={cardClass}>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-gray-700 dark:text-gray-300">
+            <span className="font-medium text-content-secondary">
               {t('laborRates.load_template', { defaultValue: 'Load a saved template' })}
             </span>
             <select
@@ -526,7 +526,7 @@ export function LaborRatesPage() {
               </Button>
             </div>
           )}
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-content-quaternary">
             {editingTemplate
               ? t('laborRates.editing_hint', {
                   defaultValue: 'Editing "{{name}}". Save changes to write your corrections back.',
@@ -546,7 +546,7 @@ export function LaborRatesPage() {
           <div className={cardClass}>
             <div className="flex flex-wrap gap-4">
               <label className="flex flex-1 flex-col gap-1 text-sm">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
+                <span className="font-medium text-content-secondary">
                   {t('laborRates.base_wage', { defaultValue: 'Base hourly wage' })}
                 </span>
                 <input
@@ -559,7 +559,7 @@ export function LaborRatesPage() {
                 />
               </label>
               <label className="flex w-28 flex-col gap-1 text-sm">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
+                <span className="font-medium text-content-secondary">
                   {t('laborRates.currency', { defaultValue: 'Currency' })}
                 </span>
                 <input
@@ -577,7 +577,7 @@ export function LaborRatesPage() {
           {/* On-cost list */}
           <div className={cardClass}>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-sm font-semibold text-content-primary">
                 {t('laborRates.oncosts', { defaultValue: 'On-costs' })}
               </h2>
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addOnCost}>
@@ -591,7 +591,7 @@ export function LaborRatesPage() {
                 know that the left cell wants the name of a payroll cost
                 (founder report). The heading, the hint and the visible column
                 titles all answer the same question in different places. */}
-            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mb-3 text-xs text-content-tertiary">
               {t('laborRates.oncosts_hint', {
                 defaultValue:
                   'Everything the employer pays on top of the bare wage: social insurance, holiday pay, site allowances.',
@@ -600,7 +600,7 @@ export function LaborRatesPage() {
 
             <div className="space-y-2">
               {onCosts.length === 0 && (
-                <p className="py-2 text-sm text-gray-400 dark:text-gray-500">
+                <p className="py-2 text-sm text-content-quaternary">
                   {t('laborRates.no_oncosts', {
                     defaultValue: 'No on-costs yet. The base wage is the all-in rate.',
                   })}
@@ -610,7 +610,7 @@ export function LaborRatesPage() {
                 // Widths mirror the row below exactly (flex-1 / w-32 / w-28 plus
                 // the delete button's footprint), so the titles stay over their
                 // own cells at every viewport.
-                <div className="flex items-center gap-2 px-1 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                <div className="flex items-center gap-2 px-1 text-2xs font-medium uppercase tracking-wide text-content-quaternary">
                   <span className="flex-1">
                     {t('laborRates.oncost_col_what', { defaultValue: 'What it covers' })}
                   </span>
@@ -665,7 +665,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => removeOnCost(row.key)}
-                    className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800"
+                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
                     aria-label={t('laborRates.remove', { defaultValue: 'Remove' })}
                   >
                     <Trash2 size={16} />
@@ -678,7 +678,7 @@ export function LaborRatesPage() {
           {/* Crew composer */}
           <div className={cardClass}>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
                 <Users size={16} className="text-gray-500" />
                 {t('laborRates.crew', { defaultValue: 'Crew composer' })}
               </h2>
@@ -719,7 +719,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => useAllInFor(row.key)}
-                    className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-800"
+                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-blue-600"
                     title={t('laborRates.use_all_in', {
                       defaultValue: 'Use the all-in rate above',
                     })}
@@ -732,7 +732,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => removeCrew(row.key)}
-                    className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800"
+                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
                     aria-label={t('laborRates.remove', { defaultValue: 'Remove' })}
                   >
                     <Trash2 size={16} />
@@ -742,15 +742,15 @@ export function LaborRatesPage() {
             </div>
 
             {crewBreakdown && crewBreakdown.headcount > 0 && (
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm dark:bg-gray-800/60">
-                <span className="text-gray-600 dark:text-gray-300">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm">
+                <span className="text-content-secondary">
                   {t('laborRates.crew_summary', {
                     defaultValue: '{{count}} people · {{total}}/h total',
                     count: crewBreakdown.headcount,
                     total: formatCurrency(crewBreakdown.total_cost_per_hour, currency),
                   })}
                 </span>
-                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                <span className="font-semibold text-content-primary">
                   {t('laborRates.blended', { defaultValue: 'Blended: {{rate}}/h', rate: formatCurrency(crewBreakdown.blended_hourly_rate, currency) })}
                 </span>
               </div>
@@ -761,16 +761,16 @@ export function LaborRatesPage() {
         {/* Breakdown column */}
         <div className="lg:col-span-2">
           <div className={`${cardClass} lg:sticky lg:top-4`}>
-            <h2 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="mb-3 text-sm font-semibold text-content-primary">
               {t('laborRates.breakdown', { defaultValue: 'Rate build-up' })}
             </h2>
 
             <dl className="space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
-                <dt className="text-gray-600 dark:text-gray-300">
+                <dt className="text-content-secondary">
                   {t('laborRates.base_wage', { defaultValue: 'Base hourly wage' })}
                 </dt>
-                <dd className="font-medium text-gray-900 dark:text-gray-100">
+                <dd className="font-medium text-content-primary">
                   {formatCurrency(breakdown?.base_wage ?? baseWage, currency)}
                 </dd>
               </div>
@@ -778,7 +778,7 @@ export function LaborRatesPage() {
               {(breakdown?.lines ?? []).map((line, i) => (
                 <div
                   key={`${line.label}-${i}`}
-                  className="flex items-center justify-between text-gray-500 dark:text-gray-400"
+                  className="flex items-center justify-between text-content-tertiary"
                 >
                   <dt className="truncate pr-2">
                     {line.label}
@@ -790,11 +790,11 @@ export function LaborRatesPage() {
                 </div>
               ))}
 
-              <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-800">
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">
+              <div className="mt-2 flex items-center justify-between border-t border-border-light pt-3">
+                <dt className="font-semibold text-content-primary">
                   {t('laborRates.all_in_rate', { defaultValue: 'All-in hourly rate' })}
                 </dt>
-                <dd className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                <dd className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                   {formatCurrency(allInRate, currency)}
                 </dd>
               </div>
@@ -824,7 +824,7 @@ export function LaborRatesPage() {
                     );
                   })}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-content-tertiary">
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-2xs text-content-tertiary">
                   {[
                     { label: t('laborRates.base_wage', { defaultValue: 'Base hourly wage' }), color: BASE_COLOR },
                     ...(breakdown.lines ?? []).map((line, i) => ({
@@ -842,7 +842,7 @@ export function LaborRatesPage() {
             )}
 
             {computeQuery.isError && (
-              <p className="mt-3 text-xs text-red-600 dark:text-red-400">
+              <p className="mt-3 text-xs text-semantic-error">
                 {t('laborRates.compute_error', {
                   defaultValue: 'Could not compute the rate. Check your inputs.',
                 })}
@@ -850,7 +850,7 @@ export function LaborRatesPage() {
             )}
 
             {/* Save as template */}
-            <div className="mt-4 space-y-2 border-t border-gray-200 pt-4 dark:border-gray-800">
+            <div className="mt-4 space-y-2 border-t border-border-light pt-4">
               <input
                 className={inputClass}
                 value={templateName}
@@ -916,7 +916,7 @@ export function LaborRatesPage() {
                 )}
               </div>
               {!baseWageOk && (
-                <p className="text-xs text-red-600 dark:text-red-400">
+                <p className="text-xs text-semantic-error">
                   {t('laborRates.base_wage_required', {
                     defaultValue:
                       'Enter a base hourly wage above zero to save this build-up as a template.',
@@ -927,8 +927,8 @@ export function LaborRatesPage() {
 
             {/* Save as cost item: publish the computed rate(s) into the cost
                 catalogue so they flow into BOQ / assemblies via costs to BOQ. */}
-            <div className="mt-4 space-y-2 border-t border-gray-200 pt-4 dark:border-gray-800">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="mt-4 space-y-2 border-t border-border-light pt-4">
+              <p className="text-xs text-content-tertiary">
                 {t('laborRates.publish_hint', {
                   defaultValue:
                     'Publish this rate to the cost catalogue so it can be applied in a BOQ or assembly.',

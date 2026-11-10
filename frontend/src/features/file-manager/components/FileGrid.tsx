@@ -29,13 +29,13 @@ const KIND_ICON: Record<FileKind, typeof FileText> = {
 
 const KIND_TINT: Record<FileKind, string> = {
   document: 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400',
-  photo: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400',
-  sheet: 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400',
+  photo: 'bg-semantic-success-bg text-semantic-success',
+  sheet: 'bg-semantic-warning-bg text-semantic-warning',
   bim_model: 'bg-violet-50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400',
   dwg_drawing: 'bg-orange-50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400',
   takeoff: 'bg-cyan-50 dark:bg-cyan-950/20 text-cyan-600 dark:text-cyan-400',
   report: 'bg-pink-50 dark:bg-pink-950/20 text-pink-600 dark:text-pink-400',
-  markup: 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400',
+  markup: 'bg-semantic-error-bg text-semantic-error',
 };
 
 interface FileGridProps {
@@ -94,7 +94,7 @@ function FileGridTagsRow({
         <TagPill key={tag.id} tag={tag} size="sm" />
       ))}
       {tags.length > 3 && (
-        <span className="text-[9px] text-content-tertiary tabular-nums self-center">
+        <span className="text-2xs text-content-tertiary tabular-nums self-center">
           +{tags.length - 3}
         </span>
       )}
@@ -303,14 +303,14 @@ export function FileGrid({
                   <Icon size={32} strokeWidth={1.5} />
                 )}
                 {row.extension && (
-                  <span className="absolute bottom-1.5 left-1.5 px-1.5 py-px rounded bg-black/60 text-white text-[9px] font-mono uppercase tracking-wide">
+                  <span className="absolute bottom-1.5 left-1.5 px-1.5 py-px rounded bg-black/60 text-white text-2xs font-mono uppercase tracking-wide">
                     {row.extension.replace(/^\./, '')}
                   </span>
                 )}
               </div>
               <div className="px-2.5 py-2 min-w-0">
                 {typeof row.extra?.drawing_number === 'string' && row.extra.drawing_number && (
-                  <p className="font-mono text-[10px] text-content-tertiary truncate" title={t('files.drawing_number', { defaultValue: 'Drawing number' })}>
+                  <p className="font-mono text-2xs text-content-tertiary truncate" title={t('files.drawing_number', { defaultValue: 'Drawing number' })}>
                     {row.extra.drawing_number}
                   </p>
                 )}
@@ -319,19 +319,19 @@ export function FileGrid({
                 </p>
                 <div className="mt-1 flex items-center gap-1 flex-wrap">
                   {typeof row.extra?.revision_code === 'string' && row.extra.revision_code && (
-                    <span className="inline-flex items-center rounded-md border border-border-light px-1 py-px text-[9px] font-medium text-content-secondary">
+                    <span className="inline-flex items-center rounded-md border border-border-light px-1 py-px text-2xs font-medium text-content-secondary">
                       Rev {row.extra.revision_code}
                     </span>
                   )}
                   <CDEBadge state={row.extra?.cde_state as string | undefined} size="xs" />
                   {row.discipline && (
-                    <span className="inline-flex items-center rounded-md bg-surface-secondary px-1 py-px text-[9px] font-medium text-content-secondary truncate max-w-[80px]">
+                    <span className="inline-flex items-center rounded-md bg-surface-secondary px-1 py-px text-2xs font-medium text-content-secondary truncate max-w-[80px]">
                       {row.discipline}
                     </span>
                   )}
                 </div>
                 {typeof row.extra?.snippet === 'string' && row.extra.snippet && (
-                  <p className="mt-1 text-[10px] leading-snug text-content-secondary line-clamp-2">
+                  <p className="mt-1 text-2xs leading-snug text-content-secondary line-clamp-2">
                     <SnippetHighlight text={row.extra.snippet} query={searchQuery ?? ''} />
                   </p>
                 )}
@@ -341,12 +341,12 @@ export function FileGrid({
                     so the hit shows how much text was searched instead. */}
                 {typeof row.extra?.snippet === 'string' && row.extra.snippet ? (
                   typeof row.extra?.page_count === 'number' && (
-                    <div className="mt-1 text-[10px] text-content-tertiary tabular-nums">
+                    <div className="mt-1 text-2xs text-content-tertiary tabular-nums">
                       {t('files.search.pages', { count: row.extra.page_count })}
                     </div>
                   )
                 ) : (
-                  <div className="mt-1 flex items-center justify-between text-[10px] text-content-tertiary tabular-nums">
+                  <div className="mt-1 flex items-center justify-between text-2xs text-content-tertiary tabular-nums">
                     <span>{fmtBytes(row.size_bytes)}</span>
                     {row.modified_at && (
                       <DateDisplay value={row.modified_at} format="relative" className="ms-2 shrink-0" />
@@ -370,7 +370,7 @@ export function FileGrid({
               className={clsx(
                 'absolute top-1.5 right-1.5 inline-flex items-center gap-1 h-6 px-2 rounded-md',
                 'bg-surface-elevated/95 backdrop-blur-sm shadow-sm border border-border-light',
-                'text-[10px] font-medium text-content-secondary',
+                'text-2xs font-medium text-content-secondary',
                 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity',
                 'hover:text-oe-blue hover:border-oe-blue/40',
               )}
@@ -396,8 +396,8 @@ export function FileGrid({
                   'bg-surface-elevated/95 backdrop-blur-sm shadow-sm border border-border-light',
                   'transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
                   isFavorite
-                    ? 'opacity-100 text-amber-500 hover:text-amber-600'
-                    : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-content-tertiary hover:text-amber-500',
+                    ? 'opacity-100 text-semantic-warning hover:text-semantic-warning'
+                    : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-content-tertiary hover:text-semantic-warning',
                 )}
                 title={
                   isFavorite

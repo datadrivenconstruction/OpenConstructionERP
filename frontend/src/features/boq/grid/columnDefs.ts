@@ -430,7 +430,7 @@ export function needsPrice(d: Record<string, unknown> | undefined): boolean {
 }
 
 /** Faint amber tint marking a cell that needs a value. Subtle, not alarming. */
-const NEEDS_VALUE_CLASS = 'bg-amber-50/70 dark:bg-amber-950/30';
+const NEEDS_VALUE_CLASS = 'bg-semantic-warning/10';
 
 /**
  * Tint marking a derived share that cannot be true - a resource buildup worth
@@ -440,7 +440,7 @@ const NEEDS_VALUE_CLASS = 'bg-amber-50/70 dark:bg-amber-950/30';
  * estimator has not filled yet, while this one is a contradiction between two
  * numbers already stored on the same position.
  */
-const IMPOSSIBLE_SHARE_CLASS = 'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400';
+const IMPOSSIBLE_SHARE_CLASS = 'bg-semantic-error-bg text-semantic-error';
 
 /** Localised resource-type labels for the unit-rate build-up tooltip. */
 const RATE_BUILDUP_TYPES: ReadonlyArray<readonly [string, string, string]> = [
@@ -647,7 +647,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         const base = 'font-mono text-xs text-right !pr-2';
         const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
         const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
-        return isExpanded ? `${base} font-bold` : base;
+        return isExpanded ? `${base} font-semibold` : base;
       },
       headerClass: 'ag-right-aligned-header',
     },
@@ -695,10 +695,10 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       // so the position description sits flush-left within the column
       // (per UX request: remove the big empty indent on position rows).
       cellClass: (params) => {
-        if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs !pl-1 !pr-1';
+        if (params.data?._isSection) return 'font-semibold uppercase tracking-wide text-xs !pl-1 !pr-1';
         const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
         const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
-        return isExpanded ? 'text-xs font-bold !pl-1 !pr-1' : 'text-xs !pl-1 !pr-1';
+        return isExpanded ? 'text-xs font-semibold !pl-1 !pr-1' : 'text-xs !pl-1 !pr-1';
       },
       // Issue #136 — positions nested under a SUB-section get a left
       // indent proportional to their depth so the hierarchy is legible.
@@ -1024,11 +1024,11 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       tooltipValueGetter: totalTooltip,
       cellClass: (params) => {
         const base = 'text-right tabular-nums text-xs !pr-2 !pl-2';
-        if (params.data?._isSection) return `${base} font-bold`;
-        if (params.data?._isFooter) return `${base} font-bold`;
+        if (params.data?._isSection) return `${base} font-semibold`;
+        if (params.data?._isFooter) return `${base} font-semibold`;
         const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
         const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
-        return isExpanded ? `${base} font-bold` : `${base} font-semibold`;
+        return isExpanded ? `${base} font-semibold` : `${base} font-semibold`;
       },
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',

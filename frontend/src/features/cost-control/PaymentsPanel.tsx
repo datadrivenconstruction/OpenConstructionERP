@@ -187,7 +187,7 @@ function ContractBlock({
                         <td className="py-2 pe-2">
                           <span className="flex items-center gap-1.5 font-medium text-content-primary">
                             {worst === 'error' && <AlertOctagon size={14} className="text-semantic-error" />}
-                            {worst === 'warning' && <AlertTriangle size={14} className="text-amber-500" />}
+                            {worst === 'warning' && <AlertTriangle size={14} className="text-semantic-warning" />}
                             {inv.number}
                           </span>
                           {inv.invoice_date && <span className="text-2xs text-content-tertiary">{fmtDate(inv.invoice_date)}</span>}
@@ -623,7 +623,7 @@ function ChecksTab({ findings, loading }: { findings: ReleaseFinding[]; loading:
     <ul className="space-y-2" data-testid="payment-checks">
       {findings.map((f, i) => {
         const Icon = f.severity === 'error' ? AlertOctagon : f.severity === 'warning' ? AlertTriangle : Info;
-        const tone = f.severity === 'error' ? 'text-semantic-error' : f.severity === 'warning' ? 'text-amber-500' : 'text-sky-500';
+        const tone = f.severity === 'error' ? 'text-semantic-error' : f.severity === 'warning' ? 'text-semantic-warning' : 'text-semantic-info';
         return (
           <li key={`${f.rule_id}-${f.element_ref ?? ''}-${i}`} className="flex items-start gap-3 rounded-lg px-2 py-1.5">
             <Icon size={16} className={`mt-0.5 shrink-0 ${tone}`} />

@@ -78,7 +78,7 @@ const KIND_ICON: Record<CardKind, ReactNode> = {
   crew: <Users size={14} />,
   worker: <User size={14} />,
   equipment: <Truck size={14} />,
-  rental: <Truck size={14} className="text-amber-600" />,
+  rental: <Truck size={14} className="text-semantic-warning" />,
 };
 
 function useLabels() {
@@ -341,15 +341,15 @@ function ConflictStrip({ conflicts, labels }: { conflicts: { kind: ConflictKind;
   const [open, setOpen] = useState(false);
   if (!conflicts.length) {
     return (
-      <p className="text-sm text-emerald-700 dark:text-emerald-400">
+      <p className="text-sm text-semantic-success">
         {t('dispatch.no_conflicts', { defaultValue: 'No conflicts on this day.' })}
       </p>
     );
   }
   return (
-    <Card className="border-amber-300 p-3">
+    <Card className="border-semantic-warning/30 p-3">
       <button type="button" className="flex w-full flex-wrap items-center gap-2 text-left" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        <AlertTriangle size={16} className="text-amber-600" />
+        <AlertTriangle size={16} className="text-semantic-warning" />
         <span className="text-sm font-medium">
           {t('dispatch.conflicts_count', { defaultValue: '{{count}} conflicts need a look', count: conflicts.length })}
         </span>
@@ -362,7 +362,7 @@ function ConflictStrip({ conflicts, labels }: { conflicts: { kind: ConflictKind;
       {open && (
         <ul className="mt-2 space-y-1 text-sm">
           {conflicts.map((c, i) => (
-            <li key={`${c.kind}-${c.card_ref}-${i}`} className={c.severity === 'error' ? 'text-red-700 dark:text-red-400' : 'text-amber-800 dark:text-amber-300'}>
+            <li key={`${c.kind}-${c.card_ref}-${i}`} className={c.severity === 'error' ? 'text-semantic-error' : 'text-semantic-warning'}>
               {c.message}
             </li>
           ))}
@@ -671,7 +671,7 @@ function PlacementCard({
       className={clsx(
         'rounded border border-l-4 bg-surface-primary px-2 py-1.5 text-xs shadow-sm',
         p.status ? STATUS_CLASS[p.status] : 'border-l-border',
-        hasError ? 'border-red-400' : p.conflict_kinds.length ? 'border-amber-400' : 'border-border',
+        hasError ? 'border-semantic-error/60' : p.conflict_kinds.length ? 'border-semantic-warning/60' : 'border-border',
         isDragging && 'opacity-50',
       )}
     >
@@ -690,7 +690,7 @@ function PlacementCard({
       </div>
       {p.status && density === 'detailed' && <p className="mt-0.5 text-content-tertiary">{labels.status[p.status]}</p>}
       {p.conflict_kinds.length > 0 && (
-        <p className={clsx('mt-0.5 flex items-center gap-1', hasError ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-300')}>
+        <p className={clsx('mt-0.5 flex items-center gap-1', hasError ? 'text-semantic-error' : 'text-semantic-warning')}>
           <AlertTriangle size={12} />
           {p.conflict_kinds.map((k) => labels.conflict[k]).join(' · ')}
         </p>
@@ -1012,7 +1012,7 @@ function UtilisationView({ day }: { day: string }) {
               {r.label}
             </span>
             <div className="h-3 flex-1 overflow-hidden rounded bg-surface-secondary" role="img" aria-label={`${r.percent}%`}>
-              <div className={clsx('h-full', r.percent < 50 ? 'bg-amber-500' : 'bg-oe-blue')} style={{ width: `${r.percent}%` }} />
+              <div className={clsx('h-full', r.percent < 50 ? 'bg-semantic-warning' : 'bg-oe-blue')} style={{ width: `${r.percent}%` }} />
             </div>
             <span className="w-40 text-right text-content-secondary">
               {t('dispatch.util_days', {

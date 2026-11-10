@@ -26,7 +26,7 @@ export function DependencyWarnings({ warnings }: DependencyWarningsProps) {
   return (
     <div
       role="note"
-      className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 dark:border-amber-500/30 dark:bg-amber-500/10"
+      className="rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3"
     >
       <div className="flex items-center gap-2 text-sm font-medium text-[#b45309] dark:text-amber-300">
         <AlertTriangle size={15} />

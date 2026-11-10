@@ -70,8 +70,8 @@ interface BIMModelsResponse {
 }
 
 const SEVERITY_CHIP: Record<RuleSeverity, string> = {
-  error: 'bg-red-50 text-red-700 border-red-200',
-  warning: 'bg-amber-50 text-amber-700 border-amber-200',
+  error: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
+  warning: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   info: 'bg-blue-50 text-blue-700 border-blue-200',
 };
 
@@ -116,17 +116,17 @@ function FailingElementsList({
             className="flex items-baseline gap-2 px-1 py-0.5"
             data-testid="failing-element-row"
           >
-            <code className="shrink-0 font-mono text-[10px] text-content-primary">
+            <code className="shrink-0 font-mono text-2xs text-content-primary">
               {r.element_id}
             </code>
             {r.message && (
-              <span className="truncate text-[10px] text-content-tertiary">{r.message}</span>
+              <span className="truncate text-2xs text-content-tertiary">{r.message}</span>
             )}
           </li>
         ))}
       </ul>
       {total > shown.length && (
-        <p className="mt-1 text-[10px] text-content-tertiary">
+        <p className="mt-1 text-2xs text-content-tertiary">
           {t('bim_requirements.failing_elements_truncated', {
             defaultValue: 'Showing first {{shown}} of {{total}} failing elements.',
             shown: shown.length,
@@ -372,7 +372,7 @@ export function RulePackPreviewModal({
         type="button"
         onClick={onClose}
         data-testid={`${testId}-cancel`}
-        className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-[12px] font-medium text-content-secondary hover:bg-surface-secondary"
+        className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
       >
         {t('rulePacks.cancel', { defaultValue: 'Cancel' })}
       </button>
@@ -382,7 +382,7 @@ export function RulePackPreviewModal({
         disabled={!canInstall}
         data-testid={`${testId}-install`}
         className={clsx(
-          'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold shadow-sm',
+          'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm',
           canInstall
             ? 'bg-oe-blue text-white hover:bg-oe-blue-dark'
             : 'cursor-not-allowed bg-surface-secondary text-content-tertiary',
@@ -413,7 +413,7 @@ export function RulePackPreviewModal({
         <div className="flex flex-col gap-4" data-testid={testId}>
           {/* Plain-language reminder of what installing does at import time. */}
           <p
-            className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-[11px] leading-relaxed text-content-secondary"
+            className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-2xs leading-relaxed text-content-secondary"
             data-testid={`${testId}-explainer`}
           >
             <Info size={13} className="mt-0.5 flex-shrink-0 text-oe-blue" />
@@ -434,7 +434,7 @@ export function RulePackPreviewModal({
                 data-testid={`${testId}-readonly-toggle`}
                 aria-pressed={!readonly}
                 className={clsx(
-                  'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-medium',
+                  'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-2xs font-medium',
                   readonly
                     ? 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary'
                     : 'border-oe-blue/40 bg-oe-blue/10 text-oe-blue',
@@ -449,7 +449,7 @@ export function RulePackPreviewModal({
             <div className="ml-auto flex items-center gap-2">
               <label
                 htmlFor={`${testId}-model`}
-                className="text-[11px] font-medium text-content-secondary"
+                className="text-2xs font-medium text-content-secondary"
               >
                 {t('rulePacks.select_model', { defaultValue: 'Dry-run against model' })}
               </label>
@@ -459,7 +459,7 @@ export function RulePackPreviewModal({
                 onChange={(e) => setModelId(e.target.value)}
                 disabled={models.length === 0}
                 data-testid={`${testId}-model-select`}
-                className="rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-[11px] text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-50"
+                className="rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-50"
               >
                 <option value="">
                   {t('rulePacks.dry_run', { defaultValue: '- no dry run -' })}
@@ -490,7 +490,7 @@ export function RulePackPreviewModal({
           />
 
           {/* Live preview status */}
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-2xs">
             <span
               className="text-content-tertiary"
               data-testid={`${testId}-preview-status`}
@@ -501,7 +501,7 @@ export function RulePackPreviewModal({
                   {t('rulePacks.preview', { defaultValue: 'Preview & install' })}…
                 </span>
               ) : previewSucceeded ? (
-                <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                <span className="inline-flex items-center gap-1.5 text-semantic-success">
                   <CheckCircle2 size={12} />
                   {t('rulePacks.rules_count', {
                     defaultValue: '{{count}} rules',
@@ -509,7 +509,7 @@ export function RulePackPreviewModal({
                   })}
                 </span>
               ) : previewError ? (
-                <span className="inline-flex items-center gap-1.5 text-red-700">
+                <span className="inline-flex items-center gap-1.5 text-semantic-error">
                   <XCircle size={12} />
                   {t('rulePacks.preview_error', { defaultValue: 'Preview failed' })}
                 </span>
@@ -534,11 +534,11 @@ export function RulePackPreviewModal({
                     data-testid={`${testId}-rule-${rule.id}`}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-medium text-content-primary">
+                      <p className="text-xs font-medium text-content-primary">
                         {rule.name}
                       </p>
                       {rule.rationale && (
-                        <p className="mt-0.5 line-clamp-2 text-[11px] text-content-tertiary">
+                        <p className="mt-0.5 line-clamp-2 text-2xs text-content-tertiary">
                           {rule.rationale}
                         </p>
                       )}
@@ -546,7 +546,7 @@ export function RulePackPreviewModal({
                     <div className="flex flex-shrink-0 items-center gap-1.5">
                       {dr && (
                         <span
-                          className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-content-secondary"
+                          className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-secondary"
                           data-testid={`${testId}-rule-${rule.id}-dryrun`}
                         >
                           {dr.pass} / {dr.pass + dr.fail}
@@ -554,7 +554,7 @@ export function RulePackPreviewModal({
                       )}
                       <span
                         className={clsx(
-                          'rounded-full border px-1.5 py-0.5 text-[10px] font-medium',
+                          'rounded-full border px-1.5 py-0.5 text-2xs font-medium',
                           SEVERITY_CHIP[rule.severity],
                         )}
                         data-testid={`${testId}-rule-${rule.id}-severity`}
@@ -575,7 +575,7 @@ export function RulePackPreviewModal({
               className="rounded-lg border border-border-light bg-surface-primary p-3"
             >
               <header className="mb-2 flex items-center justify-between">
-                <h3 className="text-[12px] font-semibold text-content-primary">
+                <h3 className="text-xs font-semibold text-content-primary">
                   {t('rulePacks.test_mode_title', {
                     defaultValue: 'Test against current model',
                   })}
@@ -585,7 +585,7 @@ export function RulePackPreviewModal({
                   data-testid={`${testId}-test-mode-summary`}
                 >
                   <span
-                    className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700"
+                    className="rounded-full bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success"
                     data-testid={`${testId}-test-mode-pass-count`}
                     data-count={ruleStatusCounts.pass}
                   >
@@ -593,7 +593,7 @@ export function RulePackPreviewModal({
                     {t('rulePacks.test_mode_pass_label', { defaultValue: 'pass' })}
                   </span>
                   <span
-                    className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700"
+                    className="rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning"
                     data-testid={`${testId}-test-mode-warn-count`}
                     data-count={ruleStatusCounts.warn}
                   >
@@ -601,7 +601,7 @@ export function RulePackPreviewModal({
                     {t('rulePacks.test_mode_warn_label', { defaultValue: 'warn' })}
                   </span>
                   <span
-                    className="rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-700"
+                    className="rounded-full bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-error"
                     data-testid={`${testId}-test-mode-fail-count`}
                     data-count={ruleStatusCounts.fail}
                   >
@@ -618,10 +618,10 @@ export function RulePackPreviewModal({
                 {ruleStatuses.map(({ rule, status, fail }) => {
                   const statusChip =
                     status === 'pass'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      ? 'bg-semantic-success-bg text-semantic-success border-semantic-success/30'
                       : status === 'warn'
-                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-red-50 text-red-700 border-red-200';
+                        ? 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30'
+                        : 'bg-semantic-error-bg text-semantic-error border-semantic-error/30';
                   const StatusIcon =
                     status === 'pass'
                       ? CheckCircle2
@@ -647,7 +647,7 @@ export function RulePackPreviewModal({
                         <span className="flex min-w-0 flex-1 items-center gap-2">
                           <span
                             className={clsx(
-                              'inline-flex h-5 items-center gap-1 rounded-full border px-1.5 text-[10px] font-medium',
+                              'inline-flex h-5 items-center gap-1 rounded-full border px-1.5 text-2xs font-medium',
                               statusChip,
                             )}
                             data-testid={`${testId}-test-mode-rule-${rule.id}-status`}
@@ -657,13 +657,13 @@ export function RulePackPreviewModal({
                               defaultValue: status,
                             })}
                           </span>
-                          <span className="truncate text-[12px] font-medium text-content-primary">
+                          <span className="truncate text-xs font-medium text-content-primary">
                             {rule.name}
                           </span>
                         </span>
                         <span className="flex flex-shrink-0 items-center gap-1.5">
                           <span
-                            className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-content-secondary"
+                            className="rounded-full bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-secondary"
                             data-testid={`${testId}-test-mode-rule-${rule.id}-fail-count`}
                             data-count={fail}
                           >
@@ -683,7 +683,7 @@ export function RulePackPreviewModal({
                         <div
                           data-testid={`${testId}-test-mode-rule-${rule.id}-elements`}
                           data-fail-count={fail}
-                          className="border-t border-border-light bg-surface-secondary px-3 py-2 text-[11px] text-content-secondary"
+                          className="border-t border-border-light bg-surface-secondary px-3 py-2 text-2xs text-content-secondary"
                         >
                           {fail === 0 ? (
                             <p>

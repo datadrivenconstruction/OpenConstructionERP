@@ -506,7 +506,7 @@ function ComplianceRulePacksCard({ project }: { project: Project }) {
                       // print the engine identifiers, so a pack advertised
                       // itself as `boq_quality · din276` to someone choosing
                       // between packs.
-                      <p className="mt-1 text-[11px] text-content-tertiary">
+                      <p className="mt-1 text-2xs text-content-tertiary">
                         {pack.rule_sets.map((rs) => ruleSetLabel(rs, t)).join(' · ')}
                       </p>
                     )}

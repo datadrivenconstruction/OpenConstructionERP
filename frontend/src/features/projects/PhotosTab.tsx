@@ -351,7 +351,7 @@ export function PhotosTab({ projectId }: PhotosTabProps): React.ReactElement {
                   >
                     {row.name}
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-content-tertiary">
+                  <div className="flex items-center justify-between text-2xs text-content-tertiary">
                     <span>{fmtDate(captured, locale)}</span>
                     <span className="tabular-nums">{fmtBytes(row.size_bytes ?? 0)}</span>
                   </div>

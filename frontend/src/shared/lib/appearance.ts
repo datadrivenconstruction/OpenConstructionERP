@@ -65,7 +65,7 @@ export const AXIS_VALUES: { [K in AppearanceAxis]: readonly Appearance[K][] } = 
 
 export const PLATFORM_APPEARANCE: Appearance = {
   accent: 'blue',
-  font: 'system',
+  font: 'inter',
   density: 'comfortable',
   radius: 'standard',
   look: 'standard',

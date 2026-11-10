@@ -152,7 +152,7 @@ export function OnboardingStepper({
                 >
                   <span
                     className={clsx(
-                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe',
+                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold transition-all duration-500 ease-oe',
                       here
                         ? 'bg-white dark:bg-surface-elevated text-oe-blue ring-2 ring-oe-blue shadow-[0_0_0_4px_rgba(37,99,235,0.18)] scale-110'
                         : enabled
@@ -164,7 +164,7 @@ export function OnboardingStepper({
                   </span>
                   <span
                     className={clsx(
-                      'hidden whitespace-nowrap text-[10px] font-medium transition-colors sm:block',
+                      'hidden whitespace-nowrap text-2xs font-medium transition-colors sm:block',
                       here
                         ? 'text-oe-blue'
                         : enabled

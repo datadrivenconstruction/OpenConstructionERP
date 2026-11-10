@@ -1107,7 +1107,7 @@ function InterfaceModeCard() {
           >
             <span className="text-sm font-semibold">{t('nav.mode_simple', { defaultValue: 'Simple' })}</span>
             <span className="text-xs text-center leading-snug">{t('settings.mode_simple_detail', { defaultValue: 'Essential estimation tools. Clean interface for focused work.' })}</span>
-            <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-bold tracking-wide ${
+            <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-semibold tracking-wide ${
               !isAdvanced ? 'bg-oe-blue/15 text-oe-blue' : 'bg-surface-tertiary text-content-tertiary'
             }`}>STD</span>
           </button>
@@ -1123,7 +1123,7 @@ function InterfaceModeCard() {
           >
             <span className="text-sm font-semibold">{t('nav.mode_advanced', { defaultValue: 'Advanced' })}</span>
             <span className="text-xs text-center leading-snug">{t('settings.mode_advanced_detail', { defaultValue: 'Full professional toolset with all modules and features visible.' })}</span>
-            <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-bold tracking-wide ${
+            <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-semibold tracking-wide ${
               isAdvanced ? 'bg-oe-blue/15 text-oe-blue' : 'bg-surface-tertiary text-content-tertiary'
             }`}>PRO</span>
           </button>
@@ -2562,7 +2562,7 @@ function ConverterStatusPanel() {
         )}
 
         {!isLoading && isError && (
-          <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-3 text-xs text-red-900 dark:bg-red-950/40 dark:text-red-100">
+          <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-3 text-xs text-semantic-error">
             <div className="flex items-start gap-2">
               <AlertCircle size={14} className="mt-0.5 shrink-0" />
               <div className="space-y-1">
@@ -2585,7 +2585,7 @@ function ConverterStatusPanel() {
         {!isLoading && !isError && data && (
           <>
             {!data.network_ok && (
-              <div className="mb-3 rounded-md border border-amber-300/40 bg-amber-50 px-3 py-2 text-2xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+              <div className="mb-3 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning">
                 {t('settings.converters_offline_hint', {
                   defaultValue:
                     'GitHub is not reachable from the server right now. Showing installed-only status; the up-to-date check is skipped.',
@@ -2607,10 +2607,10 @@ function ConverterStatusPanel() {
                       : t('settings.converter_status_current', { defaultValue: 'Up to date' });
                 const statusClass =
                   status === 'missing'
-                    ? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300/60 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'
+                    ? 'bg-surface-secondary text-content-secondary ring-1 ring-slate-300/60 dark:ring-slate-700'
                     : status === 'outdated'
-                      ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-300/60 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-700/60'
-                      : 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300/60 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-700/60';
+                      ? 'bg-semantic-warning-bg text-semantic-warning ring-1 ring-semantic-warning/30'
+                      : 'bg-semantic-success-bg text-semantic-success ring-1 ring-semantic-success/30';
                 const StatusIcon = status === 'current' ? CheckCircle2 : status === 'outdated' ? AlertCircle : XCircle;
                 return (
                   <li

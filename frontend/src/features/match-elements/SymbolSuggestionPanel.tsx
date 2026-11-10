@@ -40,9 +40,9 @@ interface Props {
 }
 
 function bandClasses(band: SymbolSuggestion['confidence_band']): string {
-  if (band === 'high') return 'bg-emerald-500';
-  if (band === 'medium') return 'bg-amber-500';
-  return 'bg-rose-500';
+  if (band === 'high') return 'bg-semantic-success';
+  if (band === 'medium') return 'bg-semantic-warning';
+  return 'bg-semantic-error';
 }
 
 function ConfidenceChip({
@@ -104,13 +104,13 @@ export function SymbolSuggestionPanel({
   return (
     <section
       data-testid="symbol-suggestion-panel"
-      className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
+      className="rounded-lg border border-border-light bg-surface-primary p-3"
       aria-label={t('match_elements.symbols.title', {
         defaultValue: 'Symbol suggestions',
       })}
     >
       <header className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+        <h3 className="text-sm font-semibold text-content-primary">
           {t('match_elements.symbols.title', {
             defaultValue: 'Symbol suggestions',
           })}
@@ -120,7 +120,7 @@ export function SymbolSuggestionPanel({
       {/* Honesty note: deterministic heuristic, not computer vision. */}
       <p
         data-testid="symbol-honesty-note"
-        className="mb-3 text-xs leading-snug text-slate-500 dark:text-slate-400"
+        className="mb-3 text-xs leading-snug text-content-tertiary"
       >
         {t('match_elements.symbols.note', {
           defaultValue:
@@ -135,7 +135,7 @@ export function SymbolSuggestionPanel({
       )}
 
       {q.isError && (
-        <p className="text-xs text-rose-600" data-testid="symbol-error">
+        <p className="text-xs text-semantic-error" data-testid="symbol-error">
           {t('match_elements.symbols.error', {
             defaultValue: 'Could not compute symbol suggestions.',
           })}
@@ -164,14 +164,14 @@ export function SymbolSuggestionPanel({
               <li
                 key={s.symbol}
                 data-testid={`symbol-suggestion-${s.symbol}`}
-                className="rounded border border-slate-100 p-2 dark:border-slate-800"
+                className="rounded border border-border-light p-2"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-400">
                       #{s.rank + 1}
                     </span>
-                    <span className="text-sm font-medium capitalize text-slate-800 dark:text-slate-100">
+                    <span className="text-sm font-medium capitalize text-content-primary">
                       {t(`match_elements.symbols.kind.${s.symbol}`, {
                         defaultValue: s.symbol,
                       })}
@@ -197,7 +197,7 @@ export function SymbolSuggestionPanel({
                       <button
                         type="button"
                         data-testid={`symbol-apply-${s.symbol}`}
-                        className="rounded bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700"
+                        className="rounded bg-semantic-info px-2 py-1 text-xs font-medium text-white hover:bg-semantic-info"
                         onClick={() => onApplyForReview(s)}
                       >
                         {t('match_elements.symbols.apply_review', {
@@ -211,7 +211,7 @@ export function SymbolSuggestionPanel({
                 {isOpen && (
                   <ul
                     data-testid={`symbol-factors-${s.symbol}`}
-                    className="mt-2 space-y-1 border-t border-slate-100 pt-2 dark:border-slate-800"
+                    className="mt-2 space-y-1 border-t border-border-light pt-2"
                   >
                     {s.factors.length === 0 && (
                       <li className="text-xs text-slate-400">
@@ -223,7 +223,7 @@ export function SymbolSuggestionPanel({
                     {s.factors.map((f, i) => (
                       <li
                         key={`${s.symbol}-${f.name}-${i}`}
-                        className="text-xs text-slate-600 dark:text-slate-300"
+                        className="text-xs text-content-secondary"
                       >
                         <span className="font-mono text-slate-400">
                           {f.name}

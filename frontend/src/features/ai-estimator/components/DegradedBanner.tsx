@@ -60,14 +60,14 @@ export function DegradedBanner({ reason }: { reason: DegradedReason | null | und
   return (
     <div
       role="status"
-      className="flex flex-wrap items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2.5 text-xs text-amber-900 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-100"
+      className="flex flex-wrap items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5 text-xs text-semantic-warning"
     >
       <Info className="mt-0.5 h-4 w-4 shrink-0" />
       <p className="min-w-0 flex-1 leading-snug">{body}</p>
       {cta && (
         <Link
           to={cta.to}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/40 bg-surface-primary px-2.5 py-1 font-semibold text-amber-800 transition-colors hover:bg-amber-500 hover:text-white dark:text-amber-100"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/40 bg-surface-primary px-2.5 py-1 font-semibold text-semantic-warning transition-colors hover:bg-semantic-warning hover:text-white dark:text-amber-100"
         >
           {cta.label}
           <ArrowRight className="h-3 w-3" />

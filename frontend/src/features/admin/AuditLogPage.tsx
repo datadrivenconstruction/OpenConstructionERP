@@ -300,7 +300,7 @@ function FilterBar({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-sm dark:border-white/5 dark:bg-slate-900/40">
+    <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-sm">
       <div className="p-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         {/* Free-text search — first column, spans two on wide screens */}
         <div className="xl:col-span-2">
@@ -585,7 +585,7 @@ function TimelineRow({ entry, user, onOpen }: TimelineRowProps) {
             <div className="text-xs text-content-tertiary truncate">{user.email}</div>
           )}
           {entry.ip_address && (
-            <div className="font-mono text-[11px] text-content-tertiary">{entry.ip_address}</div>
+            <div className="font-mono text-2xs text-content-tertiary">{entry.ip_address}</div>
           )}
         </div>
       </td>
@@ -596,7 +596,7 @@ function TimelineRow({ entry, user, onOpen }: TimelineRowProps) {
         <div className="min-w-0">
           <div className="text-sm text-content-primary">{entry.entity_type}</div>
           {entry.entity_id && (
-            <div className="font-mono text-[11px] text-content-tertiary truncate">
+            <div className="font-mono text-2xs text-content-tertiary truncate">
               #{entry.entity_id.slice(0, 12)}
             </div>
           )}
@@ -1112,7 +1112,7 @@ export function AuditLogPage() {
 
         {PageControls}
 
-        <div className="overflow-hidden rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl shadow-sm dark:border-white/5 dark:bg-slate-900/40">
+        <div className="overflow-hidden rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl shadow-sm">
           {entriesQuery.isLoading ? (
             <div className="divide-y divide-border-light" aria-busy="true">
               {Array.from({ length: 6 }).map((_, i) => (

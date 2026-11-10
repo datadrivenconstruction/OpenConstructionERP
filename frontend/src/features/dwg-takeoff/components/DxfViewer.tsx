@@ -1405,7 +1405,7 @@ function TextPinPopup({
 
           {/* Color picker */}
           <div>
-            <label className="block text-[10px] font-medium text-white/50 uppercase tracking-wider mb-1.5">
+            <label className="block text-2xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
               {t('dwg_takeoff.color', 'Color')}
             </label>
             <div className="flex items-center gap-1.5">
@@ -1430,7 +1430,7 @@ function TextPinPopup({
 
           {/* Font size selector */}
           <div>
-            <label className="block text-[10px] font-medium text-white/50 uppercase tracking-wider mb-1.5">
+            <label className="block text-2xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
               {t('dwg_takeoff.font_size', 'Font Size')}
             </label>
             <select
@@ -1451,7 +1451,7 @@ function TextPinPopup({
 
           {/* Preview */}
           <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 min-h-[28px]">
-            <span className="text-[10px] text-white/40 flex-shrink-0">
+            <span className="text-2xs text-white/40 flex-shrink-0">
               {t('dwg_takeoff.preview', 'Preview')}:
             </span>
             <span

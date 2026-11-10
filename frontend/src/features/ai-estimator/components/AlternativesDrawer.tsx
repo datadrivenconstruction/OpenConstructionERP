@@ -96,14 +96,14 @@ export function AlternativesDrawer({
                   className={clsx(
                     'rounded-lg border px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-oe-blue/40',
                     isChosen
-                      ? 'border-emerald-300 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/10'
+                      ? 'border-semantic-success/30 bg-semantic-success/10'
                       : 'border-border-light',
                   )}
                 >
                   <div className="flex items-start gap-2.5">
                     <span
                       className={clsx(
-                        'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold',
+                        'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-2xs font-semibold',
                         scoreColor(c.score, thresholds),
                       )}
                     >
@@ -115,7 +115,7 @@ export function AlternativesDrawer({
                           {c.description}
                         </span>
                         {isChosen && (
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-semantic-success" />
                         )}
                       </div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
@@ -125,7 +125,7 @@ export function AlternativesDrawer({
                             {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
                           </span>
                         ) : (
-                          <span className="text-amber-600 dark:text-amber-400">
+                          <span className="text-semantic-warning">
                             {t('aiest.match.no_price', {
                               defaultValue: 'matched, no price in catalogue',
                             })}
@@ -154,7 +154,7 @@ export function AlternativesDrawer({
           </ul>
         )}
 
-        <p className="mt-4 text-[11px] text-content-tertiary">
+        <p className="mt-4 text-2xs text-content-tertiary">
           {t('aiest.alts.grounded_note', {
             defaultValue:
               'Every option is a real catalogue rate. The AI orders the shortlist but never invents a code or a price.',

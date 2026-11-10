@@ -487,7 +487,7 @@ const CONNECTORS: ConnectorDef[] = [
     descKey: 'integrations.calendar_desc',
     defaultDesc: 'Subscribe in Google/Outlook Calendar (iCal feed)',
     icon: Calendar,
-    color: 'bg-green-600',
+    color: 'bg-semantic-success',
     category: 'data',
     status: 'available',
     fields: [],
@@ -567,7 +567,7 @@ const CATEGORY_LABELS: Record<ConnectorCategory, { key: string; defaultLabel: st
 const CATEGORY_ICON_STYLES: Record<ConnectorCategory, string> = {
   notifications: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
   automation: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400',
-  data: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
+  data: 'bg-semantic-success-bg text-semantic-success',
 };
 
 const CATEGORY_ORDER: ConnectorCategory[] = ['notifications', 'automation', 'data'];
@@ -858,7 +858,7 @@ function ConnectModal({
             <ol className="space-y-1.5">
               {connector.setupSteps.map((step, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-content-secondary">
-                  <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-bold text-oe-blue mt-0.5">
+                  <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue mt-0.5">
                     {i + 1}
                   </span>
                   <span className="leading-relaxed">{step.text}</span>
@@ -1122,7 +1122,7 @@ export function IntegrationsPage() {
 
         return (
           <div key={category}>
-            <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-3">
+            <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-3">
               {t(catLabel.key, catLabel.defaultLabel)}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1194,7 +1194,7 @@ export function IntegrationsPage() {
                       >
                         <div className="flex items-center gap-2 truncate">
                           {cfg.is_active ? (
-                            <CheckCircle2 size={14} className="shrink-0 text-green-500" />
+                            <CheckCircle2 size={14} className="shrink-0 text-semantic-success" />
                           ) : (
                             <XCircle size={14} className="shrink-0 text-red-400" />
                           )}
@@ -1222,7 +1222,7 @@ export function IntegrationsPage() {
                               });
                               if (ok) deleteMut.mutate(cfg.id);
                             }}
-                            className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                            className="rounded p-1 text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error"
                             title={t('integrations.disconnect', 'Disconnect')}
                           >
                             <Trash2 size={14} />

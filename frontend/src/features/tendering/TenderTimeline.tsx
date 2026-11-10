@@ -77,12 +77,12 @@ export function TimelineView({ events, rules }: { events: TenderTimelineEvent[];
               ))}
           </dl>
           {(rules.source || rules.statute_reference) && (
-            <p className="mt-2 text-[11px] text-content-tertiary">
+            <p className="mt-2 text-2xs text-content-tertiary">
               {[rules.source, rules.statute_reference].filter(Boolean).join(' · ')}
             </p>
           )}
           {rules.confidence !== '' && rules.confidence != null && (
-            <p className="text-[11px] text-content-tertiary">
+            <p className="text-2xs text-content-tertiary">
               {t('tendering.timeline.confidence', {
                 defaultValue: 'Confidence: {{value}}',
                 value: String(rules.confidence),

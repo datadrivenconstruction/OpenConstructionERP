@@ -211,7 +211,7 @@ function MatchCard({
         )}
         <span
           className={clsx(
-            'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold',
+            'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-2xs font-semibold',
             scoreColor(group.score, thresholds),
           )}
         >
@@ -234,20 +234,20 @@ function MatchCard({
                     {group.chosen_unit ?? ''}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                  <span className="inline-flex items-center gap-1 text-semantic-warning">
                     <AlertTriangle className="h-3 w-3" />
                     {t('aiest.match.no_price', { defaultValue: 'matched, no price in catalogue' })}
                   </span>
                 )}
                 {group.match_method && (
-                  <span className="rounded bg-surface-secondary px-1 py-0.5 text-[10px] uppercase">
+                  <span className="rounded bg-surface-secondary px-1 py-0.5 text-2xs uppercase">
                     {t(`aiest.method.${group.match_method}`, { defaultValue: group.match_method })}
                   </span>
                 )}
                 {chosenOutlier && <OutlierBadge />}
               </>
             ) : (
-              <span className="inline-flex items-center gap-1 text-rose-500">
+              <span className="inline-flex items-center gap-1 text-semantic-error">
                 <AlertTriangle className="h-3 w-3" />
                 {t('aiest.match.no_rate', { defaultValue: 'No rate found' })}
               </span>
@@ -332,7 +332,7 @@ function MatchCard({
                         >
                           <span
                             className={clsx(
-                              'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold',
+                              'shrink-0 rounded px-1.5 py-0.5 text-2xs font-semibold',
                               scoreColor(c.score, thresholds),
                             )}
                           >
@@ -345,14 +345,14 @@ function MatchCard({
                               </span>
                               {c.rate_outlier === true && <OutlierBadge className="shrink-0" />}
                             </div>
-                            <div className="text-[11px] text-content-tertiary">
+                            <div className="text-2xs text-content-tertiary">
                               <span className="font-mono">{c.code}</span> ·{' '}
                               {c.unit_rate != null && Number(c.unit_rate) > 0 ? (
                                 <>
                                   {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
                                 </>
                               ) : (
-                                <span className="text-amber-600 dark:text-amber-400">
+                                <span className="text-semantic-warning">
                                   {t('aiest.match.no_price', {
                                     defaultValue: 'matched, no price in catalogue',
                                   })}
@@ -581,7 +581,7 @@ export function Stage3Match(props: Stage3MatchProps) {
           })}
         </span>
         {stats.noRate > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700 dark:bg-rose-900/40 dark:text-rose-200">
+          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error-bg px-2 py-0.5 text-xs text-semantic-error">
             <AlertTriangle className="h-3 w-3" />
             {t('aiest.match.no_rate_n', {
               defaultValue: '{{n}} with no rate',
@@ -702,7 +702,7 @@ export function Stage3Match(props: Stage3MatchProps) {
                       {section.groups.length}
                     </span>
                     {section.attention > 0 && (
-                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-medium text-semantic-warning">
                         <AlertTriangle className="h-3 w-3" />
                         {t('aiest.match.attention_n', {
                           defaultValue: '{{n}} to review',

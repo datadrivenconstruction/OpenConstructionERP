@@ -73,7 +73,7 @@ export function SearchResultCard({ hit }: SearchResultCardProps) {
         <span className="flex-1 truncate font-medium text-content-primary">
           {hit.canonical_name || t('files.global_search.unnamed', { defaultValue: '(unnamed)' })}
         </span>
-        <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-content-tertiary">
+        <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs uppercase tracking-wide text-content-tertiary">
           {hit.kind}
         </span>
       </div>
@@ -288,7 +288,7 @@ export function GlobalSearchPage() {
           <button
             type="button"
             onClick={clearRecent}
-            className="ml-1 text-[11px] text-content-tertiary underline-offset-2 hover:text-content-secondary hover:underline"
+            className="ml-1 text-2xs text-content-tertiary underline-offset-2 hover:text-content-secondary hover:underline"
           >
             {t('files.global_search.clear_recent', { defaultValue: 'Clear' })}
           </button>
@@ -392,7 +392,7 @@ export function GlobalSearchPage() {
           {data && !data.used_content_index && (
             <div
               role="note"
-              className="flex items-start gap-1.5 rounded-md border border-border-light bg-surface-secondary px-2.5 py-2 text-[11px] text-content-secondary"
+              className="flex items-start gap-1.5 rounded-md border border-border-light bg-surface-secondary px-2.5 py-2 text-2xs text-content-secondary"
             >
               <Info className="mt-0.5 h-3 w-3 shrink-0 text-content-tertiary" />
               <span>
@@ -423,7 +423,7 @@ export function GlobalSearchPage() {
                 })}
               </p>
               {data?.used_content_index && (
-                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-emerald-600">
+                <span className="rounded-full bg-semantic-success/10 px-2 py-0.5 text-2xs uppercase tracking-wide text-semantic-success">
                   {t('files.global_search.content_index_badge', {
                     defaultValue: 'Full-text index',
                   })}

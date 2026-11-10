@@ -76,12 +76,12 @@ function Chart({ points, currency }: { points: SnapshotSummary[]; currency: stri
                   // Below the plan the dashed line runs just above the point, so the amount goes underneath.
                   y={v < plans[i]! ? y(v) + 18 : y(v) - 10}
                   textAnchor="middle"
-                  className="fill-content-primary text-[11px] font-semibold tabular-nums"
+                  className="fill-content-primary text-2xs font-semibold tabular-nums"
                 >
                   {fmtCurrency(v, currency)}
                 </text>
               )}
-              <text x={x(i)} y={H - 10} textAnchor="middle" className="fill-content-tertiary text-[11px]">
+              <text x={x(i)} y={H - 10} textAnchor="middle" className="fill-content-tertiary text-2xs">
                 {fmtDate(points[i]!.taken_on, { day: '2-digit', month: 'short', year: 'numeric' })}
               </text>
             </g>
@@ -149,7 +149,7 @@ export function ForecastHistory({ snapshots, currency, canDelete, onDelete, onOp
                 <span
                   className={`flex shrink-0 items-center gap-1 rounded px-1.5 py-px text-2xs font-medium ${
                     s.status === 'draft'
-                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                      ? 'bg-semantic-warning-bg text-semantic-warning'
                       : 'bg-surface-secondary text-content-tertiary'
                   }`}
                 >

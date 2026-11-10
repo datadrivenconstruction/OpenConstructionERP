@@ -158,7 +158,7 @@ const methods: MethodCard[] = [
     route: '/data-explorer',
     badgeKey: 'quantities.badge_cad',
     badgeColor:
-      'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      'bg-semantic-success-bg text-semantic-success',
     available: true,
   },
 ];
@@ -188,7 +188,7 @@ const steps = [
 const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: string }> = {
   dwg: {
     bg: 'from-red-500/10 to-orange-500/10',
-    border: 'border-red-200 dark:border-red-900/30',
+    border: 'border-semantic-error/30',
     icon: 'bg-gradient-to-br from-red-500 to-orange-500',
   },
   rvt: {
@@ -198,7 +198,7 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
   },
   ifc: {
     bg: 'from-emerald-500/10 to-green-500/10',
-    border: 'border-emerald-200 dark:border-emerald-900/30',
+    border: 'border-semantic-success/30',
     icon: 'bg-gradient-to-br from-emerald-500 to-green-500',
   },
 };
@@ -243,7 +243,7 @@ function ConverterCard({
       className={clsx(
         'group relative flex flex-col rounded-xl border p-5 transition-all duration-200',
         installed
-          ? 'border-emerald-300 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-500/5 to-teal-500/5'
+          ? 'border-semantic-success/30 bg-gradient-to-br from-emerald-500/5 to-teal-500/5'
           : clsx(
               'bg-gradient-to-br',
               colors.bg,
@@ -256,7 +256,7 @@ function ConverterCard({
       {/* Recommended badge for uninstalled converters */}
       {!installed && !installing && (
         <div className="absolute -top-2.5 left-4 z-10">
-          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 py-0.5 text-2xs font-bold text-white shadow-sm">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 py-0.5 text-2xs font-semibold text-white shadow-sm">
             <Star size={10} />
             {t('quantities.recommended', { defaultValue: 'Recommended' })}
           </span>
@@ -272,7 +272,7 @@ function ConverterCard({
           </span>
         ) : installed && updateAvailable ? (
           <span
-            className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-2xs font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
+            className="inline-flex items-center gap-1 rounded-full bg-semantic-info-bg px-2 py-0.5 text-2xs font-semibold text-semantic-info"
             title={t('quantities.converter_update_tooltip', {
               defaultValue:
                 'A newer build is available on GitHub (installed: {{installed}}, latest: {{latest}}).',
@@ -286,12 +286,12 @@ function ConverterCard({
             })}
           </span>
         ) : installed ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-2xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-semibold text-semantic-success">
             <CheckCircle2 size={10} />
             {t('quantities.converter_installed', { defaultValue: 'Installed' })}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-2xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning">
             <Download size={10} />
             {t('quantities.converter_available', { defaultValue: 'Available' })}
           </span>
@@ -340,7 +340,7 @@ function ConverterCard({
         <span className="text-2xs text-content-quaternary font-mono">
           {installed ? converterVersionLabel(versionEntry?.installed_version, converter.version) : `v${converter.version}`}
           {installed && updateAvailable && latestVersion && (
-            <span className="text-sky-600 dark:text-sky-400">
+            <span className="text-semantic-info">
               {' '}→ v{latestVersion}
             </span>
           )}{' '}
@@ -363,7 +363,7 @@ function ConverterCard({
                   defaultValue:
                     'Re-download the converter from GitHub and overwrite the installed binary.',
                 })}
-                className="inline-flex items-center gap-1 rounded bg-sky-50 dark:bg-sky-900/20 px-2 py-1 text-2xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 rounded bg-semantic-info-bg px-2 py-1 text-2xs font-medium text-semantic-info hover:bg-semantic-info-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {installing ? (
                   <Loader2 size={10} className="animate-spin" />
@@ -382,7 +382,7 @@ function ConverterCard({
                 disabled={installing || disabled}
                 aria-label={t('quantities.uninstall', { defaultValue: 'Uninstall' })}
                 title={t('quantities.uninstall', { defaultValue: 'Uninstall' })}
-                className="inline-flex items-center gap-1 rounded bg-red-50 dark:bg-red-900/20 px-2 py-1 text-2xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                className="inline-flex items-center gap-1 rounded bg-semantic-error-bg px-2 py-1 text-2xs font-medium text-semantic-error hover:bg-semantic-error-bg transition-colors"
               >
                 <Trash2 size={10} />
               </button>
@@ -394,7 +394,7 @@ function ConverterCard({
                 onUninstall();
               }}
               disabled={installing || disabled}
-              className="inline-flex items-center gap-1 rounded bg-red-50 dark:bg-red-900/20 px-2 py-1 text-2xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+              className="inline-flex items-center gap-1 rounded bg-semantic-error-bg px-2 py-1 text-2xs font-medium text-semantic-error hover:bg-semantic-error-bg transition-colors"
             >
               <Trash2 size={10} />
               {t('quantities.uninstall', { defaultValue: 'Uninstall' })}
@@ -419,7 +419,7 @@ function ConverterCard({
               })}
             </button>
           )}
-          <span className="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
+          <span className="inline-flex items-center gap-1 rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
             {t('quantities.module_label', { defaultValue: 'Module' })}
           </span>
         </div>
@@ -475,8 +475,8 @@ function InstallProgressPanel({
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3 mb-4">
           {error ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
-              <XCircle size={22} className="text-red-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error-bg">
+              <XCircle size={22} className="text-semantic-error" />
             </div>
           ) : result ? (
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-success-bg">
@@ -548,7 +548,7 @@ function InstallProgressPanel({
             <span
               className={clsx(
                 'text-xs font-semibold tabular-nums',
-                error ? 'text-red-500' : 'text-oe-blue',
+                error ? 'text-semantic-error' : 'text-oe-blue',
               )}
             >
               {Math.round(progressPct)}%
@@ -557,9 +557,9 @@ function InstallProgressPanel({
           <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-secondary">
             <div
               className={clsx(
-                'h-full rounded-full transition-all duration-1000 ease-out',
+                'h-full rounded-full transition-all duration-500 ease-out',
                 error
-                  ? 'bg-red-500'
+                  ? 'bg-semantic-error'
                   : result
                     ? 'bg-semantic-success'
                     : 'bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue bg-[length:200%_100%] animate-shimmer',
@@ -608,13 +608,13 @@ function InstallProgressPanel({
         {result && (
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="rounded-lg bg-semantic-success-bg/50 px-3 py-2 text-center">
-              <div className="text-sm font-bold text-semantic-success">{converterName}</div>
+              <div className="text-sm font-semibold text-semantic-success">{converterName}</div>
               <div className="text-2xs text-semantic-success">
                 {t('quantities.result_installed', { defaultValue: 'installed' })}
               </div>
             </div>
             <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-              <div className="text-sm font-bold text-content-primary">
+              <div className="text-sm font-semibold text-content-primary">
                 {t('quantities.result_ready', { defaultValue: 'Ready' })}
               </div>
               <div className="text-2xs text-content-tertiary">
@@ -715,7 +715,7 @@ function InstalledConvertersTable({
                   </div>
                 </td>
                 <td className="py-2.5 pr-4">
-                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1 text-semantic-success">
                     <CheckCircle2 size={12} />
                     <span className="text-xs">
                       {t('quantities.status_loaded', { defaultValue: 'Loaded' })}
@@ -731,7 +731,7 @@ function InstalledConvertersTable({
                     disabled={uninstalling === c.id}
                     aria-label={t('quantities.uninstall', { defaultValue: 'Uninstall' })}
                     title={t('quantities.uninstall', { defaultValue: 'Uninstall' })}
-                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-2xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-2xs text-semantic-error hover:bg-semantic-error-bg transition-colors"
                   >
                     {uninstalling === c.id ? (
                       <Loader2 size={10} className="animate-spin" />
@@ -1058,7 +1058,7 @@ export function QuantitiesPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           {steps.map((step) => (
             <div key={step.num} className="flex gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-sm font-bold text-oe-blue">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-sm font-semibold text-oe-blue">
                 {step.num}
               </div>
               <div>
@@ -1090,7 +1090,7 @@ export function QuantitiesPage() {
                     defaultValue: 'CAD/BIM Converter Modules',
                   })}
                 </h2>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-2xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-semibold text-semantic-success">
                   {installedCount}/{totalCount} {t('quantities.installed_label', { defaultValue: 'installed' })}
                 </span>
               </div>

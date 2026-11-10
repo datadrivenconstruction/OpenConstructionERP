@@ -128,7 +128,7 @@ export function DrawingRefCellRenderer(params: ICellRendererParams) {
             rev: (entry.refs.find((r) => r.outdated) ?? ref)?.current_revision ?? '',
           })}
           data-testid={`drawing-ref-revised-${id}`}
-          className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-2xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+          className="shrink-0 rounded bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning"
         >
           {t('boq.drawing_ref.revised', { defaultValue: 'Revised' })}
         </button>

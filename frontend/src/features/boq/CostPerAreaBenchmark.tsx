@@ -84,7 +84,7 @@ export function CostPerAreaBenchmark({
             <Ruler size={16} strokeWidth={1.75} />
           </span>
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-content-tertiary">
+            <p className="text-2xs uppercase tracking-wide text-content-tertiary">
               {t('boq.cost_per_area_label', { defaultValue: 'Cost per m2' })}
             </p>
             <p className="text-lg font-semibold text-content-primary tabular-nums">
@@ -101,7 +101,7 @@ export function CostPerAreaBenchmark({
 
         {portfolio && median !== null && (
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-content-tertiary">
+            <p className="text-2xs uppercase tracking-wide text-content-tertiary">
               {t('boq.cost_per_area_portfolio', { defaultValue: 'Your portfolio' })}
             </p>
             <p className="text-sm text-content-secondary">
@@ -111,12 +111,12 @@ export function CostPerAreaBenchmark({
               })}
               {percentile !== null && (
                 <span
-                  className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
+                  className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold tabular-nums ${
                     percentile <= 50
-                      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-semantic-success/15 text-semantic-success'
                       : percentile <= 75
-                        ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                        : 'bg-red-500/15 text-red-600 dark:text-red-400'
+                        ? 'bg-semantic-warning/15 text-semantic-warning'
+                        : 'bg-semantic-error/15 text-semantic-error'
                   }`}
                   title={data?.explanation || undefined}
                 >

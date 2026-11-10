@@ -106,7 +106,7 @@ function ConfidenceChip({ confidence }: { confidence: string }) {
   });
   return (
     <span
-      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium capitalize ${cls}`}
+      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-2xs font-medium capitalize ${cls}`}
       data-testid="clash-cost-confidence"
     >
       {label}
@@ -197,7 +197,7 @@ function AffectedPositionsPopover({
                   {label}
                 </div>
                 {p.description && (
-                  <div className="truncate text-[11px] text-content-tertiary">
+                  <div className="truncate text-2xs text-content-tertiary">
                     {p.description}
                   </div>
                 )}
@@ -206,7 +206,7 @@ function AffectedPositionsPopover({
                 <MoneyDisplay
                   amount={p.total}
                   currency={currency}
-                  className="text-[11px] tabular-nums text-content-secondary"
+                  className="text-2xs tabular-nums text-content-secondary"
                 />
                 {p.boq_id && (
                   <ExternalLink className="h-3 w-3 text-oe-blue" aria-hidden />

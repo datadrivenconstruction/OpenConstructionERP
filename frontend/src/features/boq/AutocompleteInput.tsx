@@ -316,10 +316,10 @@ export function AutocompleteInput({
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-violet-500 shrink-0">
               <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5L8 1z" fill="currentColor" />
             </svg>
-            <span className="text-[10px] font-medium text-violet-600 dark:text-violet-400">
+            <span className="text-2xs font-medium text-violet-600 dark:text-violet-400">
               AI Semantic Search
             </span>
-            <span className="text-[10px] text-content-tertiary ml-auto">
+            <span className="text-2xs text-content-tertiary ml-auto">
               {suggestions.length} matches
             </span>
           </div>
@@ -354,7 +354,7 @@ export function AutocompleteInput({
                 <div className="mt-0.5 flex items-center gap-1.5">
                   <span className="text-2xs text-content-tertiary font-mono">{item.code}</span>
                   {item.classification && Object.keys(item.classification).length > 0 && (
-                    <span className="text-[9px] px-1 py-0 rounded bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 font-medium">
+                    <span className="text-2xs px-1 py-0 rounded bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 font-medium">
                       {Object.values(item.classification)[0]}
                     </span>
                   )}

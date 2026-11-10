@@ -109,7 +109,7 @@ export function GeocodingConsentPrompt() {
   const { data } = useConsent();
   if (!data || data.state !== 'unanswered') return null;
   return (
-    <div className="mb-2 space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+    <div className="mb-2 space-y-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3">
       <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
         <MapPin size={14} aria-hidden />
         {t('geo_hub.consent.title', { defaultValue: 'May addresses be sent to a map service?' })}

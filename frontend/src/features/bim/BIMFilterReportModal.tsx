@@ -47,7 +47,7 @@ function SummaryTable({ summary, groupHeader }: { summary: QuantitySummary; grou
   const conv = (value: number, i: number) =>
     dq.convert(value, QUANTITY_FIELDS[i]?.unit ?? '').value;
   return (
-    <table className="w-full text-[11px] border-collapse">
+    <table className="w-full text-2xs border-collapse">
       <thead>
         <tr className="bg-surface-secondary">
           <th className="border border-border-light px-2 py-1 text-left">{groupHeader}</th>
@@ -203,7 +203,7 @@ export default function BIMFilterReportModal({
       }
     >
       {elements.length === 0 ? (
-        <p className="text-[12px] text-content-tertiary italic" data-testid="bim-report-empty">
+        <p className="text-xs text-content-tertiary italic" data-testid="bim-report-empty">
           {t('bim.report.empty', {
             defaultValue: 'No elements in the current scope. Adjust the filter or selection and try again.',
           })}

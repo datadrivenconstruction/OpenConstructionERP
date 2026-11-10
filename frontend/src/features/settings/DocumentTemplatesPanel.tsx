@@ -335,7 +335,7 @@ function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: Doc
         )}
         <span
           className={clsx(
-            'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium',
+            'shrink-0 rounded-full px-2 py-0.5 text-2xs font-medium',
             ownLook ? 'bg-oe-blue/10 text-oe-blue' : 'bg-surface-secondary text-content-secondary',
           )}
           data-testid={`doc-type-status-${entry.key}`}
@@ -500,7 +500,7 @@ function SectionsEditor({ entry, canEdit, onStored }: SectionsEditorProps) {
       <h3 className="text-xs font-semibold text-content-primary">
         {t('settings.document_templates.sections_title', { defaultValue: 'What the document includes' })}
       </h3>
-      <p className="mt-0.5 text-[11px] text-content-tertiary">
+      <p className="mt-0.5 text-2xs text-content-tertiary">
         {t('settings.document_templates.sections_hint', {
           defaultValue: 'Switch a section off to leave it out of every new document of this kind.',
         })}
@@ -671,7 +671,7 @@ function FieldEditor({
               className="h-8 w-12 cursor-pointer rounded border border-border bg-surface-primary disabled:cursor-not-allowed disabled:opacity-60"
               aria-labelledby={labelId}
             />
-            <code className="text-[11px] text-content-secondary">{String(value)}</code>
+            <code className="text-2xs text-content-secondary">{String(value)}</code>
           </div>
         );
       case 'footer_text':
@@ -700,7 +700,7 @@ function FieldEditor({
               className="w-full disabled:opacity-60"
               aria-labelledby={labelId}
             />
-            <code className="w-8 shrink-0 text-right text-[11px] text-content-secondary">{Number(value)}</code>
+            <code className="w-8 shrink-0 text-right text-2xs text-content-secondary">{Number(value)}</code>
           </div>
         );
       case 'watermark_layout':
@@ -786,7 +786,7 @@ function FieldEditor({
       </div>
       {control}
       {!pinned && (
-        <p className="mt-1 text-[11px] text-content-tertiary">
+        <p className="mt-1 text-2xs text-content-tertiary">
           {t('settings.document_templates.inherited', { defaultValue: 'Follows the look above' })}
         </p>
       )}

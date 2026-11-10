@@ -259,7 +259,7 @@ function Explainer({ t }: { t: TFn }) {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>
@@ -961,7 +961,7 @@ function StocksTable({
           </thead>
           <tbody>
             {stocks.map((s, i) => (
-              <tr key={i} className={s.is_offcut ? 'bg-emerald-500/5' : undefined}>
+              <tr key={i} className={s.is_offcut ? 'bg-semantic-success/5' : undefined}>
                 <td className="w-24 px-1 py-0.5">{cellInput(s.ref, (v) => set(i, { ref: v }), t('cutting.col_ref', { defaultValue: 'Mark' }), !canEdit)}</td>
                 <td className="w-28 px-1 py-0.5">
                   {cellInput(s.length_mm, (v) => set(i, { length_mm: v }), t('cutting.col_length', { defaultValue: 'Length (mm)' }), !canEdit || s.is_offcut, !positiveDecimal(s.length_mm))}
@@ -973,7 +973,7 @@ function StocksTable({
                 )}
                 <td className="w-28 px-1 py-0.5">
                   {s.is_offcut ? (
-                    <span className="text-2xs text-emerald-700 dark:text-emerald-300">{t('cutting.from_inventory', { defaultValue: 'From inventory' })}</span>
+                    <span className="text-2xs text-semantic-success">{t('cutting.from_inventory', { defaultValue: 'From inventory' })}</span>
                   ) : (
                     cellInput(s.unit_cost, (v) => set(i, { unit_cost: v }), t('cutting.col_unit_cost', { defaultValue: 'Cost per piece' }), !canEdit)
                   )}

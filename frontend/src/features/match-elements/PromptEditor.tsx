@@ -130,7 +130,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
 
   if (listQ.isError) {
     return (
-      <div className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/40 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+      <div className="text-xs text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
         <span className="break-words">
           {(listQ.error as Error)?.message ??
             t(
@@ -170,7 +170,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
     <div className="space-y-2.5">
       {/* Template selector */}
       <div className="flex items-center gap-2 flex-wrap">
-        <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+        <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
           {t('match_elements.pipeline.prompt', 'Prompt')}
         </label>
         <select
@@ -191,7 +191,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
       </div>
 
       {isSystem && (
-        <div className="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-lg px-2 py-1.5">
+        <div className="flex items-center gap-1.5 text-2xs text-semantic-warning bg-semantic-warning-bg border border-semantic-warning/30 rounded-lg px-2 py-1.5">
           <Sparkles className="w-3 h-3 shrink-0" />
           {t(
             'match_elements.pipeline.system_readonly',
@@ -202,7 +202,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
 
       {/* System prompt */}
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+        <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
           {t('match_elements.pipeline.system_prompt', 'System prompt')}
         </div>
         <textarea
@@ -225,7 +225,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
 
       {/* User template */}
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+        <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
           {t('match_elements.pipeline.user_template', 'User template')}
         </div>
         <textarea
@@ -248,7 +248,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
 
       {/* Variables contract */}
       {vars.length > 0 && (
-        <div className="flex items-start gap-1.5 flex-wrap text-[11px] text-content-tertiary">
+        <div className="flex items-start gap-1.5 flex-wrap text-2xs text-content-tertiary">
           <span className="font-semibold">
             {t('match_elements.pipeline.variables', 'Variables the stage fills:')}
           </span>
@@ -323,7 +323,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
       {mutError && (
         <div
           role="alert"
-          className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/40 rounded-lg px-2.5 py-1.5 break-words"
+          className="text-xs text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-2.5 py-1.5 break-words"
         >
           {mutError}
         </div>

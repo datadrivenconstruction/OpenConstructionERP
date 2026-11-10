@@ -312,7 +312,7 @@ function HowCrmWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -919,11 +919,11 @@ function StageColumn({
           <p className="truncate text-sm font-semibold text-content-primary">
             {stage.name}
           </p>
-          <p className="text-[11px] text-content-tertiary">
+          <p className="text-2xs text-content-tertiary">
             {count} · <MultiCurrencyTotal variant="inline" items={totalItems} compact />
           </p>
         </div>
-        <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-surface-primary px-1.5 text-[11px] font-medium text-content-secondary">
+        <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-surface-primary px-1.5 text-2xs font-medium text-content-secondary">
           {count}
         </span>
       </div>
@@ -994,7 +994,7 @@ function DealCard({
                 currency={opp.currency || undefined}
               />
             </span>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {opp.probability_percent}%
             </span>
           </div>
@@ -1500,7 +1500,7 @@ function DealDrawer({
                 {t('crm.pipeline', { defaultValue: 'Pipeline' })}
               </p>
               <span
-                className="inline-flex items-center gap-1 text-[11px] text-content-tertiary"
+                className="inline-flex items-center gap-1 text-2xs text-content-tertiary"
                 title={t('crm.stepper_hint', {
                   defaultValue:
                     'Click a stage to move the deal. Won / lost stages are closed via the Win / Lose buttons below.',
@@ -1520,9 +1520,9 @@ function DealDrawer({
                   s.is_final && (s.is_won || s.is_lost);
                 const bg = isCurrent
                   ? s.is_won
-                    ? 'bg-emerald-500 text-white ring-emerald-500'
+                    ? 'bg-semantic-success text-white ring-semantic-success/60'
                     : s.is_lost
-                      ? 'bg-rose-500 text-white ring-rose-500'
+                      ? 'bg-semantic-error text-white ring-semantic-error/60'
                       : 'bg-oe-blue text-white ring-oe-blue'
                   : isPast
                     ? 'bg-surface-secondary text-content-secondary ring-border-light'
@@ -1570,7 +1570,7 @@ function DealDrawer({
               <div className="flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
                 <User size={15} className="mt-0.5 text-content-tertiary" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] uppercase tracking-wide text-content-tertiary">
+                  <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                     {t('crm.contact', { defaultValue: 'Contact' })}
                   </p>
                   {opp.primary_contact_id ? (
@@ -1633,7 +1633,7 @@ function DealDrawer({
                   className="mt-0.5 text-content-tertiary"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] uppercase tracking-wide text-content-tertiary">
+                  <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                     {t('crm.project', { defaultValue: 'Project' })}
                   </p>
                   {opp.project_id ? (
@@ -1692,7 +1692,7 @@ function DealDrawer({
               </p>
               <div className="flex flex-wrap items-end gap-2">
                 <div className="flex flex-1 flex-col gap-1 max-w-[12rem]">
-                  <label className="text-[11px] uppercase tracking-wide text-content-tertiary">
+                  <label className="text-2xs uppercase tracking-wide text-content-tertiary">
                     {t('crm.win_reason_optional', {
                       defaultValue: 'Win reason (optional)',
                     })}
@@ -1840,7 +1840,7 @@ function DealDrawer({
                     key={a.id}
                     className="flex gap-3 border-b border-border-light pb-2 last:border-0"
                   >
-                    <span className="mt-0.5 w-16 shrink-0 text-[10px] font-semibold uppercase text-content-tertiary">
+                    <span className="mt-0.5 w-16 shrink-0 text-2xs font-semibold uppercase text-content-tertiary">
                       {a.kind}
                     </span>
                     <div className="flex-1">
@@ -1852,7 +1852,7 @@ function DealDrawer({
                           {a.body}
                         </p>
                       )}
-                      <p className="mt-0.5 text-[10px] text-content-tertiary">
+                      <p className="mt-0.5 text-2xs text-content-tertiary">
                         <DateDisplay value={a.created_at} />
                         {a.outcome && ` · ${a.outcome}`}
                       </p>
@@ -1916,7 +1916,7 @@ function DealDrawer({
                             {to}
                           </span>
                         </p>
-                        <p className="mt-0.5 flex items-center gap-2 text-[10px] text-content-tertiary">
+                        <p className="mt-0.5 flex items-center gap-2 text-2xs text-content-tertiary">
                           {h.changed_at && <DateDisplay value={h.changed_at} />}
                           {h.duration_in_previous_seconds != null &&
                             h.duration_in_previous_seconds > 0 && (
@@ -1997,7 +1997,7 @@ function LinkRecordsForm({
   return (
     <div className="space-y-2 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
       <div>
-        <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+        <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
           {t('crm.contact', { defaultValue: 'Contact' })}
         </p>
         <select
@@ -2017,7 +2017,7 @@ function LinkRecordsForm({
         {contactsQ.data && <TruncationNotice page={contactsQ.data} className="mt-1" />}
       </div>
       <div>
-        <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+        <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
           {t('crm.project', { defaultValue: 'Project' })}
         </p>
         <select
@@ -2320,7 +2320,7 @@ function LeadDrawer({
               ) : (
                 <div className="space-y-2">
                   <div>
-                    <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                    <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                       {t('crm.title_col', { defaultValue: 'Title' })}
                     </p>
                     <input
@@ -2332,7 +2332,7 @@ function LeadDrawer({
                     />
                   </div>
                   <div>
-                    <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                    <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                       {t('crm.account', { defaultValue: 'Account' })}
                     </p>
                     <select
@@ -2356,7 +2356,7 @@ function LeadDrawer({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                      <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('crm.value', { defaultValue: 'Value' })}
                       </p>
                       <input
@@ -2372,7 +2372,7 @@ function LeadDrawer({
                       />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                      <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('crm.currency', { defaultValue: 'Currency' })}
                       </p>
                       <select
@@ -2392,7 +2392,7 @@ function LeadDrawer({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                      <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('crm.stage', { defaultValue: 'Stage' })}
                       </p>
                       <select
@@ -2413,7 +2413,7 @@ function LeadDrawer({
                       </select>
                     </div>
                     <div>
-                      <p className="mb-1 text-[11px] uppercase tracking-wide text-content-tertiary">
+                      <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('crm.probability', { defaultValue: 'Probability %' })}
                       </p>
                       <input
@@ -2602,7 +2602,7 @@ function KPI({
 }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm font-semibold text-content-primary">
@@ -2644,7 +2644,7 @@ function InsightsCard({
 }) {
   return (
     <div className="rounded-xl border border-border-light bg-surface-primary p-4">
-      <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-content-tertiary">
+      <div className="flex items-center gap-1.5 text-2xs uppercase tracking-wide text-content-tertiary">
         {icon}
         {label}
       </div>

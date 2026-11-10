@@ -159,7 +159,7 @@ function ReviewTrayBar({ waiting, onReview }: { waiting: ChatAction[]; onReview:
       className="oe-act oe-act-enter flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[var(--act-radius)] border border-[var(--act-border-subtle)] bg-[var(--act-accent-subtle)] px-3 py-2"
       data-testid="actions-review-tray"
     >
-      <p className="flex min-w-0 flex-1 items-center gap-2 text-[13px] font-medium text-[var(--act-text)]" aria-live="polite">
+      <p className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-[var(--act-text)]" aria-live="polite">
         <Inbox size={15} className="shrink-0 text-[var(--act-accent)]" aria-hidden="true" />
         <span data-testid="actions-review-tray-count">
           {t('erp_chat.tray.waiting', {

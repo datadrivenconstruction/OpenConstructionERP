@@ -64,11 +64,11 @@ export const CATEGORY_META: CategoryMeta[] = [
     labelDefault: 'Estimating & costing',
     icon: Calculator,
     tint: {
-      tile: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 dark:text-emerald-400',
-      chip: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+      tile: 'bg-semantic-success/10 text-semantic-success ring-emerald-500/20 dark:text-emerald-400',
+      chip: 'border-emerald-500/40 bg-semantic-success/10 text-semantic-success dark:text-emerald-300',
       accent: 'border-l-emerald-400/60',
       softBg: 'bg-emerald-400/5 dark:bg-emerald-400/10',
-      text: 'text-emerald-600 dark:text-emerald-400',
+      text: 'text-semantic-success',
     },
   },
   {
@@ -90,11 +90,11 @@ export const CATEGORY_META: CategoryMeta[] = [
     labelDefault: 'Planning & controls',
     icon: CalendarClock,
     tint: {
-      tile: 'bg-sky-500/10 text-sky-600 ring-sky-500/20 dark:text-sky-400',
-      chip: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+      tile: 'bg-semantic-info/10 text-semantic-info ring-sky-500/20 dark:text-sky-400',
+      chip: 'border-sky-500/40 bg-semantic-info/10 text-semantic-info dark:text-sky-300',
       accent: 'border-l-sky-400/60',
       softBg: 'bg-sky-400/5 dark:bg-sky-400/10',
-      text: 'text-sky-600 dark:text-sky-400',
+      text: 'text-semantic-info',
     },
   },
   {
@@ -116,11 +116,11 @@ export const CATEGORY_META: CategoryMeta[] = [
     labelDefault: 'Site & field',
     icon: HardHat,
     tint: {
-      tile: 'bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400',
-      chip: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+      tile: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/20 dark:text-amber-400',
+      chip: 'border-amber-500/40 bg-semantic-warning/10 text-semantic-warning dark:text-amber-300',
       accent: 'border-l-amber-400/60',
       softBg: 'bg-amber-400/5 dark:bg-amber-400/10',
-      text: 'text-amber-600 dark:text-amber-400',
+      text: 'text-semantic-warning',
     },
   },
   {
@@ -142,11 +142,11 @@ export const CATEGORY_META: CategoryMeta[] = [
     labelDefault: 'Commercial & contracts',
     icon: FileSignature,
     tint: {
-      tile: 'bg-rose-500/10 text-rose-600 ring-rose-500/20 dark:text-rose-400',
-      chip: 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300',
+      tile: 'bg-semantic-error/10 text-semantic-error ring-rose-500/20 dark:text-rose-400',
+      chip: 'border-rose-500/40 bg-semantic-error/10 text-semantic-error dark:text-rose-300',
       accent: 'border-l-rose-400/60',
       softBg: 'bg-rose-400/5 dark:bg-rose-400/10',
-      text: 'text-rose-600 dark:text-rose-400',
+      text: 'text-semantic-error',
     },
   },
   {

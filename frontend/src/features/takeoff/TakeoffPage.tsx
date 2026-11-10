@@ -332,11 +332,11 @@ function DropZone({
         <p className="text-sm font-semibold text-content-primary">
           {t('takeoff.drop_file_here', 'Drop your PDF here')}
         </p>
-        <p className="text-[11px] text-content-quaternary">
+        <p className="text-2xs text-content-quaternary">
           {t('takeoff.file_limit', 'PDF')}
         </p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.pdf</span>
+          <span className="text-2xs font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.pdf</span>
         </div>
         <input
           ref={fileInputRef}
@@ -348,7 +348,7 @@ function DropZone({
           aria-label={t('takeoff.upload_pdf', 'Upload PDF')}
         />
       </div>
-      <p className="text-[11px] text-content-tertiary mt-3">
+      <p className="text-2xs text-content-tertiary mt-3">
         {t('takeoff.formats_detailed', {
           defaultValue: 'PDF construction drawings \u2014 vector floor plans, sections and scans. AI will extract walls, slabs, doors, and other elements with quantities.',
         })}
@@ -882,7 +882,7 @@ function TakeoffDocFilmstrip({
         <span className="text-xs font-semibold text-content-primary">
           {t('takeoff.documents_panel', { defaultValue: 'Documents' })}
         </span>
-        <span className="text-[11px] text-content-quaternary ml-1.5">
+        <span className="text-2xs text-content-quaternary ml-1.5">
           ({documents.length})
         </span>
         <ChevronDown
@@ -903,7 +903,7 @@ function TakeoffDocFilmstrip({
           {/* Sort selector — sticky-left so it stays visible while the
               filmstrip scrolls horizontally on small viewports. */}
           {documents.length > 1 && (
-            <label className="shrink-0 flex items-center gap-1 text-[10px] text-content-tertiary">
+            <label className="shrink-0 flex items-center gap-1 text-2xs text-content-tertiary">
               <span className="sr-only">
                 {t('takeoff.sort_by', { defaultValue: 'Sort by' })}
               </span>
@@ -911,7 +911,7 @@ function TakeoffDocFilmstrip({
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as FilmstripSort)}
                 aria-label={t('takeoff.sort_by', { defaultValue: 'Sort by' })}
-                className="h-6 rounded border border-border-light bg-surface-primary px-1 text-[10px] text-content-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                className="h-6 rounded border border-border-light bg-surface-primary px-1 text-2xs text-content-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 data-testid="takeoff-filmstrip-sort"
               >
                 <option value="recent">
@@ -970,7 +970,7 @@ function TakeoffDocFilmstrip({
                       )}
                       <span
                         className={clsx(
-                          'text-[11px] font-semibold truncate',
+                          'text-2xs font-semibold truncate',
                           isActive ? 'text-oe-blue' : 'text-content-primary',
                         )}
                       >
@@ -984,7 +984,7 @@ function TakeoffDocFilmstrip({
                         />
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-content-quaternary">
+                    <div className="flex items-center gap-1.5 text-2xs text-content-quaternary">
                       {doc.pages > 0 && (
                         <>
                           <span>
@@ -1059,7 +1059,7 @@ function TakeoffDocFilmstrip({
               );
             })
           ) : (
-            <span className="text-[11px] text-content-quaternary">
+            <span className="text-2xs text-content-quaternary">
               {t('takeoff.no_documents_filmstrip', {
                 defaultValue: 'No documents uploaded yet',
               })}
@@ -1157,7 +1157,7 @@ function AiTakeoffNotice({ connected }: { connected: boolean }) {
               <li key={i} className="flex items-start gap-2 text-xs text-content-secondary">
                 <span
                   className={clsx(
-                    'mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-2xs font-bold',
+                    'mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-2xs font-semibold',
                     connected
                       ? 'bg-emerald-200/70 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200'
                       : 'bg-oe-blue/15 text-oe-blue',
@@ -2319,7 +2319,7 @@ export function TakeoffPage() {
                   : 'border-border-light bg-surface-secondary/30 text-content-tertiary',
               )}>
                 <div className={clsx(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
                   step.done ? 'bg-semantic-success text-white' : 'bg-content-tertiary/20 text-content-tertiary',
                 )}>
                   {step.done ? <CheckCircle2 size={14} /> : step.num}

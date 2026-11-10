@@ -56,11 +56,11 @@ export function AdvancedModeNotice() {
 
   return (
     <div
-      className="animate-card-in rounded-xl border border-amber-500/30 bg-amber-500/5 p-4"
+      className="animate-card-in rounded-xl border border-amber-500/30 bg-semantic-warning/5 p-4"
       style={{ animationDelay: '10ms' }}
     >
       <div className="flex flex-wrap items-start gap-3">
-        <span className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400">
+        <span className="mt-0.5 shrink-0 text-semantic-warning">
           <EyeOff size={18} />
         </span>
         <div className="min-w-56 flex-1">

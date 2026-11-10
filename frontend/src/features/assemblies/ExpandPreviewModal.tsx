@@ -119,7 +119,7 @@ export function ExpandPreviewModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {inputParams.map((p) => (
               <label key={p.name} className="block">
-                <div className="text-[11px] font-medium text-content-secondary mb-1 flex items-center gap-1">
+                <div className="text-2xs font-medium text-content-secondary mb-1 flex items-center gap-1">
                   <span className="font-mono">{p.name}</span>
                   {p.unit && <span className="text-content-tertiary">({p.unit})</span>}
                 </div>
@@ -138,7 +138,7 @@ export function ExpandPreviewModal({
                   className="w-full h-9 px-2.5 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary text-right tabular-nums focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
                 />
                 {p.description && (
-                  <div className="text-[10px] text-content-tertiary mt-1 leading-snug">
+                  <div className="text-2xs text-content-tertiary mt-1 leading-snug">
                     {p.description}
                   </div>
                 )}
@@ -176,14 +176,14 @@ export function ExpandPreviewModal({
       {/* Resolved parameters */}
       {resolvedEntries.length > 0 && (
         <section className="mb-4">
-          <div className="text-[10px] uppercase tracking-wider text-content-tertiary font-semibold mb-1.5">
+          <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1.5">
             {t('assembly.preview.resolved_title', { defaultValue: 'Resolved parameters' })}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {resolvedEntries.map(([name, value]) => (
               <span
                 key={name}
-                className="inline-flex items-center gap-1 rounded-md bg-surface-tertiary px-2 py-0.5 text-[11px]"
+                className="inline-flex items-center gap-1 rounded-md bg-surface-tertiary px-2 py-0.5 text-2xs"
               >
                 <span className="font-mono text-content-secondary">{name}</span>
                 <span className="tabular-nums font-semibold text-content-primary">{value}</span>

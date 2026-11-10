@@ -95,7 +95,7 @@ export function ChangeReviewButton({ boqId, onClick }: ChangeReviewButtonProps) 
       {t('boq.changes_btn', { defaultValue: 'Changes' })}
       {open > 0 && (
         <span
-          className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-amber-500 px-1 text-2xs font-semibold leading-[18px] text-white"
+          className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-semantic-warning px-1 text-2xs font-semibold leading-[18px] text-white"
           aria-label={t('boq.changes_open_count', {
             defaultValue: 'Open flags: {{count}}',
             count: open,
@@ -554,7 +554,7 @@ export function ChangeReviewPanel({
                 </div>
                 {selectedUnconverted > 0 && (
                   <p
-                    className="text-2xs text-amber-600 dark:text-amber-400"
+                    className="text-2xs text-semantic-warning"
                     data-testid="bim-proposal-unconverted"
                   >
                     {t('boq.changes_qty_total_unconverted', {
@@ -564,7 +564,7 @@ export function ChangeReviewPanel({
                   </p>
                 )}
                 {isLocked && (
-                  <p className="text-2xs text-amber-600 dark:text-amber-400">
+                  <p className="text-2xs text-semantic-warning">
                     {t('boq.changes_qty_locked', {
                       defaultValue: 'This estimate is locked. Create a revision to change quantities.',
                     })}
@@ -634,7 +634,7 @@ function FlagRow({
     <li className="px-4 py-3" data-testid="change-flag-row">
       <div className="flex items-start gap-2">
         {isDoc ? (
-          <FileText size={14} className="mt-0.5 shrink-0 text-amber-500" />
+          <FileText size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
         ) : (
           <Box size={14} className="mt-0.5 shrink-0 text-oe-blue" />
         )}
@@ -779,7 +779,7 @@ function ProposalRow({
                 <span
                   className={clsx(
                     'ml-1 font-medium',
-                    deltaNum > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400',
+                    deltaNum > 0 ? 'text-semantic-success' : 'text-semantic-error',
                   )}
                 >
                   {fmtSignedQty(row.delta)}
@@ -787,7 +787,7 @@ function ProposalRow({
               )}
             </div>
           ) : (
-            <p className="mt-1 flex items-start gap-1 text-2xs text-amber-600 dark:text-amber-400">
+            <p className="mt-1 flex items-start gap-1 text-2xs text-semantic-warning">
               <AlertTriangle size={12} className="mt-px shrink-0" />
               {row.status === 'elements_missing'
                 ? t('boq.changes_qty_status_elements_missing', {
@@ -825,7 +825,7 @@ function ProposalRow({
             </p>
           )}
           {row.appliable && row.manual_override && (
-            <p className="mt-0.5 flex items-start gap-1 text-2xs text-amber-600 dark:text-amber-400">
+            <p className="mt-0.5 flex items-start gap-1 text-2xs text-semantic-warning">
               <AlertTriangle size={12} className="mt-px shrink-0" />
               {t('boq.changes_qty_manual_override', {
                 defaultValue: 'This quantity was edited by hand. Accepting replaces it.',

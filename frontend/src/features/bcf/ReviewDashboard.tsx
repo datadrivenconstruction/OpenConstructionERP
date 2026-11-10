@@ -43,7 +43,7 @@ function StatTile({
       >
         {icon}
       </div>
-      <span className="mt-1 text-lg font-bold leading-none text-content-primary tabular-nums">
+      <span className="mt-1 text-lg font-semibold leading-none text-content-primary tabular-nums">
         {value}
       </span>
       <span className="mt-0.5 text-2xs uppercase tracking-wide text-content-quaternary">

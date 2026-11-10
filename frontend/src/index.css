@@ -123,8 +123,10 @@
        after:  #5b5e66  6.30:1 on white, 5.75:1 on #f0f7ff (pass),
                          5.78:1 on #eff9fe, 5.86:1 on #ecfdf3,
                          5.91:1 on #fff8ec, 5.83:1 on #fef2f2 */
-  --oe-text-secondary: #5b5e66;
-  --oe-text-tertiary: #666b78;
+  /* Four visibly distinct steps (16.8 / 9.5 / 6.0 / 5.2 :1 on white); all clear
+     AA on every tinted surface listed above. */
+  --oe-text-secondary: #424550;
+  --oe-text-tertiary: #5f6370;
   --oe-text-quaternary: #696c78;
   --oe-text-inverse: #ffffff;
 
@@ -187,13 +189,13 @@
   --oe-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
   --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
 
-  /* Radius — Apple-current scale (iOS 17+ / macOS Sequoia / WWDC25 Liquid Glass).
-     Reduced 2026-05-11 to match styles-lab tighter values:
-       xs 4 (unchanged)  sm 8→6   md 12→8   lg 16→10   xl 20→12. */
+  /* Radius: three working steps. 4-6 small parts, 8 every control (button,
+     input, select, segment group), 12 cards, panels and modals. `rounded`,
+     `rounded-2xl` and `rounded-3xl` are mapped onto this ladder in tailwind.config.js. */
   --oe-radius-xs: 4px;
   --oe-radius-sm: 6px;
-  --oe-radius-md: 8px;
-  --oe-radius-lg: 10px;
+  --oe-radius-md: 6px;
+  --oe-radius-lg: 8px;
   --oe-radius-xl: 12px;
   --oe-radius-full: 9999px;
 
@@ -299,9 +301,9 @@
      Now: tertiary #9499a8 → 5.61:1 on #1e2130 (worst dark surface).
           quaternary #8b8e9d → 4.91:1 on #1e2130 (just over AA). */
   --oe-text-primary: #f0f0f5;
-  --oe-text-secondary: #a0a3b5;
-  --oe-text-tertiary: #9499a8;
-  --oe-text-quaternary: #8b8e9d;
+  --oe-text-secondary: #c4c7d4;
+  --oe-text-tertiary: #9ca0b0;
+  --oe-text-quaternary: #878b9b;
   --oe-text-inverse: #0f1117;
 
   /* Semantic — adjusted for dark backgrounds. WCAG-AA contrast bump
@@ -616,16 +618,34 @@ h4 {
 /* ── Focus — accessible, Apple-style ring ────────────────────────────────── */
 
 :focus-visible {
-  outline: 3px solid var(--oe-blue);
+  /* The outline follows the element's own radius; never set border-radius here,
+     it squared every rounded control the moment it took keyboard focus. */
+  outline: 2px solid rgb(var(--oe-blue-ch) / 0.7);
   outline-offset: 2px;
-  border-radius: var(--oe-radius-xs);
 }
 
 /* ── Selection ─────────────────────────────────────────────────────────── */
 
 ::selection {
-  background: var(--oe-blue);
-  color: white;
+  background: rgb(var(--oe-blue-ch) / 0.22);
+  color: inherit;
+}
+
+/* Figures line up in every table, number field and money/quantity cell. */
+td,
+th,
+input[type='number'],
+.tabular,
+[data-oe-number] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Multi-line headings break into even lines instead of leaving one orphan word. */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
 }
 
 /* ── AG Grid premium overrides ─────────────────────────────────────────── */
@@ -2873,5 +2893,172 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
   html[data-look='classic'] *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Design-system primitives (rules: .claude/rules/frontend.md "Система") ──
+   Class-level twins of the shared React controls, so raw markup gets the same
+   height, radius, border, focus and invalid state as <Input>/<Button>. Layout
+   classes (w-*, flex-*) go next to them; colours, radius and height never do. */
+@layer components {
+  .oe-input,
+  .oe-select,
+  .oe-textarea {
+    width: 100%;
+    border: 1px solid var(--oe-border);
+    border-radius: var(--oe-radius-lg);
+    background-color: var(--oe-bg);
+    color: var(--oe-text-primary);
+    font-size: 13px;
+    line-height: 20px;
+    padding-inline: 10px;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  .oe-input,
+  .oe-select {
+    height: 32px;
+  }
+  .oe-input-sm {
+    height: 28px;
+    font-size: 12px;
+    padding-inline: 8px;
+  }
+  .oe-input-lg {
+    height: 40px;
+    padding-inline: 12px;
+  }
+  .oe-textarea {
+    padding-block: 6px;
+    min-height: 72px;
+  }
+  .oe-select {
+    appearance: none;
+    padding-inline-end: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a8e99' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  [dir='rtl'] .oe-select {
+    background-position: left 8px center;
+  }
+  .oe-input::placeholder,
+  .oe-textarea::placeholder {
+    color: var(--oe-text-quaternary);
+  }
+  .oe-input:hover,
+  .oe-select:hover,
+  .oe-textarea:hover {
+    border-color: var(--oe-text-quaternary);
+  }
+  .oe-input:focus,
+  .oe-select:focus,
+  .oe-textarea:focus {
+    outline: none;
+    border-color: var(--oe-blue);
+    box-shadow: 0 0 0 3px rgb(var(--oe-blue-ch) / 0.18);
+  }
+  .oe-input[aria-invalid='true'],
+  .oe-select[aria-invalid='true'],
+  .oe-textarea[aria-invalid='true'] {
+    border-color: var(--oe-error);
+  }
+  .oe-input[aria-invalid='true']:focus,
+  .oe-select[aria-invalid='true']:focus,
+  .oe-textarea[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px rgb(var(--oe-error-ch) / 0.18);
+  }
+  .oe-input:disabled,
+  .oe-select:disabled,
+  .oe-textarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--oe-bg-secondary);
+  }
+
+  /* Field label above a control, and the small caps line over a group. */
+  .oe-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--oe-text-secondary);
+  }
+  .oe-overline {
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--oe-text-tertiary);
+  }
+
+  /* Three heading levels inside a page (the page title lives in the top bar). */
+  .oe-section-title {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    color: var(--oe-text-primary);
+  }
+  .oe-card-title {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--oe-text-primary);
+  }
+  .oe-subtitle {
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--oe-text-tertiary);
+  }
+
+  /* Plain data table: sticky caps header, 40px rows, numbers right. */
+  .oe-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    line-height: 20px;
+  }
+  .oe-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: 36px;
+    padding: 0 12px;
+    background: var(--oe-bg-secondary);
+    border-bottom: 1px solid var(--oe-border-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: start;
+    color: var(--oe-text-tertiary);
+    white-space: nowrap;
+  }
+  .oe-table td {
+    height: 40px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--oe-border-light);
+    color: var(--oe-text-primary);
+  }
+  .oe-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .oe-table tbody tr:hover td {
+    background: rgb(var(--oe-bg-secondary-ch) / 0.6);
+  }
+  .oe-table .num,
+  .oe-table [data-oe-number] {
+    text-align: end;
+  }
+  .oe-table-compact td {
+    height: 32px;
+    padding: 0 8px;
+  }
+  .oe-table-compact th {
+    height: 32px;
+    padding: 0 8px;
   }
 }

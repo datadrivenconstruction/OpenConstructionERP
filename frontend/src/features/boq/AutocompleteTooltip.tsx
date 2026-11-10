@@ -180,12 +180,12 @@ export function AutocompleteTooltip({
           {item.description}
         </p>
         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-secondary">
+          <span className="text-2xs font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-secondary">
             {item.code}
           </span>
           {item.region && (
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-medium"
+              className="text-2xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-medium"
               data-testid="autocomplete-tooltip-region"
             >
               {item.region}
@@ -197,12 +197,12 @@ export function AutocompleteTooltip({
       {/* ── Body: rate + cost breakdown ─────────────────────────────── */}
       <div className="px-3 py-2.5 space-y-2">
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] uppercase tracking-wider text-content-tertiary">
+          <span className="text-2xs uppercase tracking-wider text-content-tertiary">
             {t('boq.autocomplete_tooltip_rate_per_unit', { defaultValue: 'Rate per unit' })}
           </span>
           <span className="text-sm font-semibold tabular-nums">
             {formatNumber(item.rate)} {currencySymbol}
-            <span className="ml-1 text-[10px] text-content-tertiary uppercase">
+            <span className="ml-1 text-2xs text-content-tertiary uppercase">
               {t('boq.autocomplete_tooltip_unit', { defaultValue: '/' })}
               {item.unit}
             </span>
@@ -216,21 +216,21 @@ export function AutocompleteTooltip({
           >
             {(breakdown?.labor_cost ?? 0) > 0 && (
               <BreakdownRow
-                icon={<HardHat size={12} className="text-amber-600" />}
+                icon={<HardHat size={12} className="text-semantic-warning" />}
                 label={t('boq.autocomplete_tooltip_labor', { defaultValue: 'Labor' })}
                 value={`${formatNumber(breakdown!.labor_cost!)} ${currencySymbol}`}
               />
             )}
             {(breakdown?.material_cost ?? 0) > 0 && (
               <BreakdownRow
-                icon={<Package size={12} className="text-emerald-600" />}
+                icon={<Package size={12} className="text-semantic-success" />}
                 label={t('boq.autocomplete_tooltip_material', { defaultValue: 'Material' })}
                 value={`${formatNumber(breakdown!.material_cost!)} ${currencySymbol}`}
               />
             )}
             {(breakdown?.equipment_cost ?? 0) > 0 && (
               <BreakdownRow
-                icon={<Wrench size={12} className="text-sky-600" />}
+                icon={<Wrench size={12} className="text-semantic-info" />}
                 label={t('boq.autocomplete_tooltip_equipment', { defaultValue: 'Equipment' })}
                 value={`${formatNumber(breakdown!.equipment_cost!)} ${currencySymbol}`}
               />
@@ -244,12 +244,12 @@ export function AutocompleteTooltip({
         <div className="px-3 py-2 border-t border-border-light dark:border-border-dark space-y-1.5">
           {classificationPath.length > 0 && (
             <div
-              className="flex items-start gap-1.5 text-[11px] text-content-secondary"
+              className="flex items-start gap-1.5 text-2xs text-content-secondary"
               data-testid="autocomplete-tooltip-classification"
             >
               <Layers size={11} className="mt-0.5 shrink-0 text-content-tertiary" />
               <span className="leading-snug">
-                <span className="text-[9px] uppercase tracking-wider text-content-tertiary mr-1">
+                <span className="text-2xs uppercase tracking-wider text-content-tertiary mr-1">
                   {t('boq.autocomplete_tooltip_classification', {
                     defaultValue: 'Classification',
                   })}
@@ -260,7 +260,7 @@ export function AutocompleteTooltip({
           )}
           {hasVariants && (
             <div
-              className="flex items-center gap-1.5 text-[11px] text-violet-600 dark:text-violet-400"
+              className="flex items-center gap-1.5 text-2xs text-violet-600 dark:text-violet-400"
               data-testid="autocomplete-tooltip-variants"
             >
               <Sparkles size={11} className="shrink-0" />
@@ -275,7 +275,7 @@ export function AutocompleteTooltip({
         </div>
       )}
 
-      <div className="px-3 py-1.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/40 rounded-b-lg flex items-center gap-1.5 text-[10px] text-content-tertiary">
+      <div className="px-3 py-1.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/40 rounded-b-lg flex items-center gap-1.5 text-2xs text-content-tertiary">
         <CornerDownLeft size={11} className="shrink-0" />
         <span>
           {t('boq.autocomplete_tooltip_tab_to_insert', {
@@ -298,7 +298,7 @@ interface BreakdownRowProps {
 
 function BreakdownRow({ icon, label, value }: BreakdownRowProps) {
   return (
-    <div className="flex items-center justify-between text-[11px]">
+    <div className="flex items-center justify-between text-2xs">
       <span className="flex items-center gap-1.5 text-content-secondary">
         {icon}
         {label}

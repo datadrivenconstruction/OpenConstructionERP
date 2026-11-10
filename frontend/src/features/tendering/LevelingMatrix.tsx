@@ -287,7 +287,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                       {bs.company_name}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-[11px]">
+                  <div className="mt-1 flex items-center gap-3 text-2xs">
                     <span className="text-content-secondary">
                       {t('tendering.leveling.raw', 'Raw')}:{' '}
                       <span className="tabular-nums text-content-primary">
@@ -304,7 +304,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-[10px] text-content-tertiary">
+                  <div className="mt-1 flex items-center gap-1.5 text-2xs text-content-tertiary">
                     <span>{bs.matched_lines}m</span>
                     <span>·</span>
                     <span>{bs.scaled_lines}s</span>
@@ -405,10 +405,10 @@ export function LevelingMatrix({ packageId, currency }: Props) {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border bg-surface-secondary/30">
-                  <td className="px-3 py-3 font-bold text-content-primary sticky left-0 bg-surface-secondary">
+                  <td className="px-3 py-3 font-semibold text-content-primary sticky left-0 bg-surface-secondary">
                     {t('tendering.leveling.total_leveled', 'TOTAL LEVELED')}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary">
                     {/* Reference total */}
                     {formatCurrency(
                       matrix.rows.reduce(
@@ -420,7 +420,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                   {matrix.bid_summaries.map((bs) => (
                     <td
                       key={`total-${bs.bid_id}`}
-                      className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary"
+                      className="whitespace-nowrap px-3 py-3 text-right font-semibold tabular-nums text-content-primary"
                     >
                       {formatCurrency(
                         Number(bs.leveled_amount),

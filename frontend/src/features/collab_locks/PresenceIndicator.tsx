@@ -103,8 +103,8 @@ export function PresenceIndicator({
 
   if (iAmHolder) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-semantic-success-bg px-2 py-0.5 text-xs font-medium text-semantic-success">
+        <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
         {t('collab_locks.lock_held_by_you', {
           defaultValue: 'You are editing',
         })}
@@ -114,14 +114,14 @@ export function PresenceIndicator({
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+      className="inline-flex items-center gap-1.5 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-xs font-medium text-semantic-warning"
       title={t('collab_locks.lock_held_by_other_tooltip', {
         defaultValue: 'Locked by {{name}} - {{seconds}}s remaining',
         name: holder.user_name,
         seconds: holder.remaining_seconds,
       })}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+      <span className="h-1.5 w-1.5 rounded-full bg-semantic-warning" />
       {t('collab_locks.lock_held_by_other', {
         defaultValue: 'Locked by {{name}}',
         name: holder.user_name,

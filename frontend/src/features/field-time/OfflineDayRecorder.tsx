@@ -184,7 +184,7 @@ export function OfflineDayRecorder({ projectId, onRecorded }: OfflineDayRecorder
         online ? (
           <Cloud size={15} className="text-oe-blue" />
         ) : (
-          <CloudOff size={15} className="text-amber-500" />
+          <CloudOff size={15} className="text-semantic-warning" />
         )
       }
       title={t('field_time.offline.title', { defaultValue: 'Record a day on site' })}
@@ -345,10 +345,10 @@ function PendingList({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+    <div className="mt-3 rounded-lg border border-amber-500/40 bg-semantic-warning/5 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-content-primary">
-          <Clock size={13} className="text-amber-500" />
+          <Clock size={13} className="text-semantic-warning" />
           {t('field_time.offline.pending_title', {
             defaultValue: 'Still on this device: {{n}}',
             n: pending.length,
@@ -377,7 +377,7 @@ function PendingList({
                 : workDateOf(op) || entryKeyOf(op)}
             </span>
             {op.retries > 0 && (
-              <span className="shrink-0 text-2xs text-amber-600">
+              <span className="shrink-0 text-2xs text-semantic-warning">
                 {t('field_time.offline.pending_retries', {
                   defaultValue: 'Attempts: {{n}}',
                   n: op.retries,
@@ -428,7 +428,7 @@ function SyncSummary({
       )}
       {summary.retry > 0 && (
         <span className="inline-flex items-center gap-1.5 text-content-secondary">
-          <Clock size={13} className="text-amber-500" />
+          <Clock size={13} className="text-semantic-warning" />
           {t('field_time.offline.summary_retry', {
             defaultValue: 'Not sent yet: {{n}}',
             n: summary.retry,

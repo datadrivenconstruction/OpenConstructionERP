@@ -65,7 +65,7 @@ export function ChipBar<T extends string>({
           >
             <span className="truncate max-w-[16ch]">{chip.label}</span>
             {chip.count !== undefined && (
-              <span className="text-[10px] tabular-nums opacity-70">{chip.count}</span>
+              <span className="text-2xs tabular-nums opacity-70">{chip.count}</span>
             )}
             {mode === 'tag' && isOn && <X className="w-3 h-3" />}
           </button>

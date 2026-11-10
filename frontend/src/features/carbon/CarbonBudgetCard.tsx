@@ -17,9 +17,9 @@ import { getCarbonWidget } from './lifecycleApi';
 import { budgetTone, kgToTonnes } from './lifecycle';
 
 const TONE_CLS = {
-  success: 'text-emerald-600',
-  warning: 'text-amber-600',
-  error: 'text-rose-600',
+  success: 'text-semantic-success',
+  warning: 'text-semantic-warning',
+  error: 'text-semantic-error',
   neutral: 'text-content-secondary',
 } as const;
 

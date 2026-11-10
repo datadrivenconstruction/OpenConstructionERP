@@ -194,7 +194,7 @@ export function CountryCombobox({
   if (isCustom) {
     triggerInner = (
       <span className="flex items-center gap-2 min-w-0">
-        <span className="inline-flex h-4 w-6 items-center justify-center rounded-[2px] bg-oe-blue/15 text-[10px] font-semibold text-oe-blue">
+        <span className="inline-flex h-4 w-6 items-center justify-center rounded-xs bg-oe-blue/15 text-2xs font-semibold text-oe-blue">
           ✱
         </span>
         <span className="truncate text-content-primary">
@@ -321,7 +321,7 @@ export function CountryCombobox({
                         isHi && 'bg-oe-blue/10',
                       )}
                     >
-                      <span className="inline-flex h-4 w-6 items-center justify-center rounded-[2px] bg-content-tertiary/15 text-[10px] text-content-tertiary">
+                      <span className="inline-flex h-4 w-6 items-center justify-center rounded-xs bg-content-tertiary/15 text-2xs text-content-tertiary">
                         ×
                       </span>
                       <span className="flex-1 text-content-secondary italic">
@@ -348,7 +348,7 @@ export function CountryCombobox({
                         isHi && 'bg-oe-blue/10',
                       )}
                     >
-                      <span className="inline-flex h-4 w-6 items-center justify-center rounded-[2px] bg-oe-blue/15 text-[10px] font-semibold text-oe-blue">
+                      <span className="inline-flex h-4 w-6 items-center justify-center rounded-xs bg-oe-blue/15 text-2xs font-semibold text-oe-blue">
                         ✱
                       </span>
                       <span className="flex-1 text-content-primary">
@@ -382,7 +382,7 @@ export function CountryCombobox({
                         {c.nameLocal}
                       </span>
                     )}
-                    <span className="ml-1 font-mono text-[10px] uppercase text-content-tertiary">
+                    <span className="ml-1 font-mono text-2xs uppercase text-content-tertiary">
                       {c.code}
                     </span>
                     {selected && <Check size={14} className="text-oe-blue" />}
@@ -391,7 +391,7 @@ export function CountryCombobox({
               })
             )}
           </ul>
-          <div className="border-t border-border-light/60 bg-surface-secondary px-3 py-1.5 text-[10px] text-content-tertiary">
+          <div className="border-t border-border-light/60 bg-surface-secondary px-3 py-1.5 text-2xs text-content-tertiary">
             {t('country_combobox.footer_hint', {
               defaultValue: '{{count}} countries · ↑↓ to navigate · ↵ to pick',
               count: sortedCountries().length,

@@ -1069,7 +1069,7 @@ export default function BIMFilterPanel({
             {t('bim.filter_title', { defaultValue: 'Filter & Group' })}
           </h2>
           {format !== 'other' && (
-            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-secondary text-content-tertiary border border-border-light">
+            <span className="text-2xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-secondary text-content-tertiary border border-border-light">
               {format}
             </span>
           )}
@@ -1097,10 +1097,10 @@ export default function BIMFilterPanel({
           <div className="flex items-center gap-2">
             <Focus size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-200">
+              <div className="text-2xs font-semibold text-amber-800 dark:text-amber-200">
                 {t('bim.isolation_active', { defaultValue: 'Isolation active' })}
               </div>
-              <div className="text-[10px] text-amber-700/90 dark:text-amber-300/80 tabular-nums">
+              <div className="text-2xs text-amber-700/90 dark:text-amber-300/80 tabular-nums">
                 {t('bim.isolation_scope', {
                   defaultValue: '{{n}} of {{total}} elements visible in viewport',
                   n: isolatedIds.length,
@@ -1112,7 +1112,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={onClearIsolation}
-                className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold bg-white dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/70 transition-colors"
+                className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-semibold bg-white dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/70 transition-colors"
                 title={t('bim.isolation_clear_title', {
                   defaultValue: 'Exit isolation - show all model elements again',
                 })}
@@ -1157,7 +1157,7 @@ export default function BIMFilterPanel({
 
         {/* Natural language summary - "Showing 72 Walls on Entry Level" */}
         {hasActiveFilters && visibleElements.length > 0 && (
-          <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-[11px] font-medium text-oe-blue">
+          <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-2xs font-medium text-oe-blue">
             {(() => {
               const parts: string[] = [];
               parts.push(t('bim.filter_summary_showing', { defaultValue: 'Showing {{count}}', count: visibleElements.length }));
@@ -1197,11 +1197,11 @@ export default function BIMFilterPanel({
         />
 
         {/* Visible count + clear */}
-        <div className="flex items-center justify-between mt-2 text-[11px] text-content-tertiary">
+        <div className="flex items-center justify-between mt-2 text-2xs text-content-tertiary">
           <span>
             {isolationSet ? (
               <>
-                <span className="inline-flex items-center gap-1 mr-1 px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue text-[10px] font-semibold">
+                <span className="inline-flex items-center gap-1 mr-1 px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue text-2xs font-semibold">
                   {t('bim.isolated', { defaultValue: 'Isolated' })}
                 </span>
                 {t('bim.filter_visible_in_isolation', {
@@ -1236,7 +1236,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onQuickTakeoff(visibleElements)}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-2xs font-medium rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors"
                 title={t('bim.quick_takeoff_title', {
                   defaultValue: 'Create a BOQ position from the current filter',
                 })}
@@ -1252,7 +1252,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSaveAsGroup(state, visibleElements)}
-                className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md border border-oe-blue/40 text-oe-blue bg-oe-blue/5 hover:bg-oe-blue/10 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-2xs font-medium rounded-md border border-oe-blue/40 text-oe-blue bg-oe-blue/5 hover:bg-oe-blue/10 transition-colors"
                 title={t('bim.save_as_group_title', {
                   defaultValue: 'Save the current filter as a named group',
                 })}
@@ -1296,7 +1296,7 @@ export default function BIMFilterPanel({
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-2xs font-medium rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary transition-colors"
               title={t('bim.export_csv_title', {
                 defaultValue: 'Export {{count}} filtered elements as CSV',
                 count: visibleElements.length,
@@ -1318,7 +1318,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('errors')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
                 title={t('bim.smart_filter_errors_title', {
                   defaultValue: 'Show only elements with validation errors',
                 })}
@@ -1334,7 +1334,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('warnings')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
                 title={t('bim.smart_filter_warnings_title', {
                   defaultValue: 'Show only elements with validation warnings',
                 })}
@@ -1350,7 +1350,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('unlinked_boq')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title={t('bim.smart_filter_unlinked_boq_title', {
                   defaultValue: 'Show only elements not linked to any BOQ position',
                 })}
@@ -1366,7 +1366,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('has_tasks')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
                 title={t('bim.smart_filter_has_tasks_title', {
                   defaultValue: 'Show only elements that have linked tasks',
                 })}
@@ -1382,7 +1382,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('has_docs')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
                 title={t('bim.smart_filter_has_docs_title', {
                   defaultValue: 'Show only elements with linked documents',
                 })}
@@ -1398,7 +1398,7 @@ export default function BIMFilterPanel({
         )}
 
         {/* Buildings-only toggle - hides annotation/analytical noise */}
-        <label className="flex items-center justify-between mt-2 text-[11px] text-content-secondary cursor-pointer select-none">
+        <label className="flex items-center justify-between mt-2 text-2xs text-content-secondary cursor-pointer select-none">
           <span className="flex items-center gap-1.5">
             <Package size={11} className="text-content-tertiary" />
             {t('bim.filter_buildings_only', {
@@ -1440,10 +1440,10 @@ export default function BIMFilterPanel({
             >
               <div className="flex items-center gap-1.5">
                 <Bookmark size={12} className="text-oe-blue" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                   {t('bim.saved_groups', { defaultValue: 'Saved groups' })}
                 </span>
-                <span className="text-[10px] text-content-quaternary tabular-nums">
+                <span className="text-2xs text-content-quaternary tabular-nums">
                   {savedGroups.length}
                 </span>
               </div>
@@ -1482,13 +1482,13 @@ export default function BIMFilterPanel({
                           style={{ background: g.color || '#2979ff' }}
                         />
                         <span
-                          className={`text-[11px] truncate ${
+                          className={`text-2xs truncate ${
                             active ? 'font-medium text-oe-blue' : 'text-content-primary'
                           }`}
                         >
                           {g.name}
                         </span>
-                        <span className="text-[10px] text-content-quaternary tabular-nums shrink-0 ms-auto">
+                        <span className="text-2xs text-content-quaternary tabular-nums shrink-0 ms-auto">
                           {g.element_count.toLocaleString(getNumberLocale())}
                         </span>
                       </button>
@@ -1538,7 +1538,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => setState((p) => ({ ...p, storeys: new Set() }))}
-                className="text-[10px] text-content-tertiary hover:text-oe-blue"
+                className="text-2xs text-content-tertiary hover:text-oe-blue"
               >
                 {t('bim.filter_all_levels', { defaultValue: 'All levels' })}
               </button>
@@ -1553,7 +1553,7 @@ export default function BIMFilterPanel({
                 key={s.raw}
                 type="button"
                 onClick={() => toggleSet('storeys', s.raw)}
-                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-[11px] transition-colors ${
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-2xs transition-colors ${
                   active
                     ? 'bg-oe-blue/10 text-oe-blue font-medium'
                     : 'text-content-secondary hover:bg-surface-secondary'
@@ -1561,7 +1561,7 @@ export default function BIMFilterPanel({
                 title={s.raw}
               >
                 <span
-                  className={`inline-flex items-center justify-center min-w-[22px] h-[18px] px-1 rounded text-[9px] font-bold tabular-nums ${
+                  className={`inline-flex items-center justify-center min-w-[22px] h-[18px] px-1 rounded text-2xs font-semibold tabular-nums ${
                     active
                       ? 'bg-oe-blue text-white'
                       : 'bg-surface-secondary text-content-tertiary border border-border-light'
@@ -1570,7 +1570,7 @@ export default function BIMFilterPanel({
                   {badge || '·'}
                 </span>
                 <span className="flex-1 truncate text-left">{s.label}</span>
-                <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+                <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
                   {s.count.toLocaleString(getNumberLocale())}
                 </span>
               </button>
@@ -1578,7 +1578,7 @@ export default function BIMFilterPanel({
           })}
           {/* fallback message tweaked for the renamed "Levels" label */}
           {counts.storeys.length === 0 && (
-            <div className="text-[10px] text-content-quaternary italic">
+            <div className="text-2xs text-content-quaternary italic">
               {t('bim.filter_no_levels', { defaultValue: 'No levels detected in this model' })}
             </div>
           )}
@@ -1597,7 +1597,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => setState((p) => ({ ...p, types: new Set() }))}
-                className="text-[10px] text-content-tertiary hover:text-oe-blue"
+                className="text-2xs text-content-tertiary hover:text-oe-blue"
               >
                 {t('bim.filter_clear_types', { defaultValue: 'Clear types' })}
               </button>
@@ -1637,7 +1637,7 @@ export default function BIMFilterPanel({
                 type="button"
                 onClick={() => setGroupingMode(opt.id)}
                 title={opt.title}
-                className={`flex-1 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                className={`flex-1 py-0.5 text-2xs font-medium rounded transition-colors ${
                   groupingMode === opt.id
                     ? 'bg-oe-blue text-white'
                     : 'text-content-tertiary hover:text-content-primary'
@@ -1670,7 +1670,7 @@ export default function BIMFilterPanel({
           {groupingMode === 'typename' && (
             <div className="space-y-1">
               {counts.categoriesWithTypes.length === 0 ? (
-                <div className="text-[10px] text-content-quaternary italic px-1">
+                <div className="text-2xs text-content-quaternary italic px-1">
                   {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
                 </div>
               ) : (
@@ -1701,21 +1701,21 @@ export default function BIMFilterPanel({
                             <ChevronRight size={11} className="text-content-tertiary shrink-0" />
                           )}
                           <span
-                            className={`text-[11px] font-semibold truncate ${
+                            className={`text-2xs font-semibold truncate ${
                               active ? 'text-oe-blue' : 'text-content-primary'
                             }`}
                             title={category}
                           >
                             {prettifyCategoryName(category)}
                           </span>
-                          <span className="text-[10px] text-content-quaternary tabular-nums shrink-0 ms-auto">
+                          <span className="text-2xs text-content-quaternary tabular-nums shrink-0 ms-auto">
                             {total.toLocaleString(getNumberLocale())}
                           </span>
                         </button>
                         <button
                           type="button"
                           onClick={() => toggleSet('types', category)}
-                          className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
+                          className={`text-2xs px-1.5 py-0.5 rounded shrink-0 ${
                             active
                               ? 'bg-oe-blue text-white'
                               : 'text-content-tertiary hover:text-oe-blue hover:bg-surface-primary'
@@ -1738,7 +1738,7 @@ export default function BIMFilterPanel({
                                 <button
                                   type="button"
                                   onClick={() => toggleSet('types', typeName)}
-                                  className={`w-full flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-[10px] text-left transition-colors ${
+                                  className={`w-full flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-2xs text-left transition-colors ${
                                     typeActive
                                       ? 'bg-oe-blue/10 text-oe-blue font-medium'
                                       : 'text-content-secondary hover:bg-surface-primary'
@@ -1792,17 +1792,17 @@ export default function BIMFilterPanel({
                           ) : (
                             <ChevronRight size={11} className="text-content-tertiary shrink-0" />
                           )}
-                          <span className={`text-[11px] font-semibold ${meta.color} truncate`}>
+                          <span className={`text-2xs font-semibold ${meta.color} truncate`}>
                             {meta.label}
                           </span>
-                          <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+                          <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
                             {total.toLocaleString(getNumberLocale())}
                           </span>
                         </button>
                         <button
                           type="button"
                           onClick={() => toggleBucketSelection(typeNames)}
-                          className="text-[10px] px-1.5 py-0.5 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
+                          className="text-2xs px-1.5 py-0.5 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
                           title={
                             allOn
                               ? t('bim.filter_bucket_clear', { defaultValue: 'Clear bucket' })
@@ -1834,7 +1834,7 @@ export default function BIMFilterPanel({
                   );
                 })}
               {counts.buckets.length === 0 && (
-                <div className="text-[10px] text-content-quaternary italic px-1">
+                <div className="text-2xs text-content-quaternary italic px-1">
                   {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
                 </div>
               )}
@@ -1845,7 +1845,7 @@ export default function BIMFilterPanel({
         {/* Element explorer (grouped) */}
         <div className="border-t border-border-light">
           <div className="px-4 py-2.5 flex items-center justify-between bg-surface-secondary">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('bim.filter_explorer', { defaultValue: 'Element Explorer' })}
             </span>
             <select
@@ -1853,7 +1853,7 @@ export default function BIMFilterPanel({
               onChange={(e) =>
                 setState((p) => ({ ...p, groupBy: e.target.value as GroupBy }))
               }
-              className="text-[10px] py-0.5 px-1.5 rounded border border-border-light bg-surface-primary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="text-2xs py-0.5 px-1.5 rounded border border-border-light bg-surface-primary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
             >
               <option value="storey">
                 {t('bim.filter_group_level', { defaultValue: 'by Level' })}
@@ -1888,7 +1888,7 @@ export default function BIMFilterPanel({
                         {groupName}
                       </span>
                     </div>
-                    <span className="text-[10px] text-content-tertiary tabular-nums shrink-0 ms-2">
+                    <span className="text-2xs text-content-tertiary tabular-nums shrink-0 ms-2">
                       {items.length}
                     </span>
                   </button>
@@ -1899,7 +1899,7 @@ export default function BIMFilterPanel({
                         <li key={el.id}>
                           <button
                             onClick={() => onElementClick?.(el.id)}
-                            className="w-full text-left ps-9 pe-3 py-0.5 text-[11px] text-content-secondary hover:text-content-primary hover:bg-surface-secondary truncate block"
+                            className="w-full text-left ps-9 pe-3 py-0.5 text-2xs text-content-secondary hover:text-content-primary hover:bg-surface-secondary truncate block"
                             title={el.name}
                           >
                             {el.name || el.element_type || '—'}
@@ -1907,7 +1907,7 @@ export default function BIMFilterPanel({
                         </li>
                       ))}
                       {items.length > 200 && (
-                        <li className="ps-9 py-0.5 text-[10px] text-content-quaternary italic">
+                        <li className="ps-9 py-0.5 text-2xs text-content-quaternary italic">
                           + {items.length - 200} more…
                         </li>
                       )}
@@ -1917,7 +1917,7 @@ export default function BIMFilterPanel({
               );
             })}
             {groupedElements.length === 0 && (
-              <div className="px-4 py-4 text-[11px] text-content-quaternary text-center">
+              <div className="px-4 py-4 text-2xs text-content-quaternary text-center">
                 {t('bim.filter_no_results', {
                   defaultValue: 'No elements match filters',
                 })}
@@ -1980,7 +1980,7 @@ function CategoryFlatList({
 
   if (types.length === 0) {
     return (
-      <div className="text-[10px] text-content-quaternary italic px-1">
+      <div className="text-2xs text-content-quaternary italic px-1">
         {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
       </div>
     );
@@ -2039,13 +2039,13 @@ function CategoryFlatList({
               ) : (
                 <ChevronRight size={11} className="text-content-tertiary" />
               )}
-              <span className="text-[10px] font-medium text-content-tertiary uppercase tracking-wider">
+              <span className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('bim.category_annotations_analytical', {
                   defaultValue: 'Annotations & analytical',
                 })}
               </span>
             </div>
-            <span className="text-[10px] text-content-quaternary tabular-nums">
+            <span className="text-2xs text-content-quaternary tabular-nums">
               {other.reduce((s, [, c]) => s + c, 0).toLocaleString(getNumberLocale())}
             </span>
           </button>
@@ -2087,7 +2087,7 @@ function FilterSection({
       <div className="flex items-center justify-between gap-1.5 mb-2">
         <div className="flex items-center gap-1.5">
           <span className="text-content-tertiary">{icon}</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {title}
           </span>
         </div>
@@ -2117,7 +2117,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between gap-2 px-2 py-1 rounded text-[11px] transition-colors ${
+      className={`w-full flex items-center justify-between gap-2 px-2 py-1 rounded text-2xs transition-colors ${
         active
           ? 'bg-oe-blue/10 text-oe-blue font-medium'
           : 'text-content-secondary hover:bg-surface-secondary'
@@ -2142,13 +2142,13 @@ function FilterChip({
         <div className="min-w-0 flex-1 text-left">
           <span className="truncate block text-left">{label}</span>
           {subtitle && (
-            <span className="block text-[9px] text-content-quaternary truncate">
+            <span className="block text-2xs text-content-quaternary truncate">
               {subtitle}
             </span>
           )}
         </div>
       </div>
-      <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+      <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
         {count.toLocaleString(getNumberLocale())}
       </span>
     </button>

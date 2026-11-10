@@ -118,7 +118,7 @@ export function FloatingChatButton() {
       {unreadCount > 0 && !isOpen && (
         <span
           aria-label={badgeLabel}
-          className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-xs font-semibold flex items-center justify-center border-2 border-white"
+          className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-semantic-error text-white text-xs font-semibold flex items-center justify-center border-2 border-white"
         >
           {unreadCount > 9 ? '9+' : unreadCount}
         </span>

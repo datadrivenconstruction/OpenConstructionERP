@@ -18,9 +18,9 @@ export function InlineErrorRetry({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-4 dark:border-rose-900/50 dark:bg-rose-900/20">
+    <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-4 py-4">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-semantic-error" />
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-content-primary">
             {t('aiest.error.title', { defaultValue: 'Something went wrong' })}

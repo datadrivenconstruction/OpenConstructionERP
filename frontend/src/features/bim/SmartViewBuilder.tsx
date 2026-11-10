@@ -427,7 +427,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
         aria-label={t('bim.smartview.pick_property', {
           defaultValue: 'Pick a property…',
         })}
-        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[11px] ${
+        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-2xs ${
           disabled
             ? 'border-border-light bg-surface-tertiary text-content-quaternary'
             : 'border-border-light bg-surface-secondary text-content-primary hover:bg-surface-tertiary'
@@ -436,12 +436,12 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
       >
         {selected ? (
           <>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-content-tertiary">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {selected.group.slice(0, 3)}
             </span>
             <span className="font-medium">{selected.label}</span>
             {selected.source_formats[0] && (
-              <span className="text-[8px] font-bold uppercase tracking-wider px-1 rounded bg-oe-blue/10 text-oe-blue">
+              <span className="text-2xs font-semibold uppercase tracking-wider px-1 rounded bg-oe-blue/10 text-oe-blue">
                 {selected.source_formats[0]}
               </span>
             )}
@@ -473,10 +473,10 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
                 placeholder={t('bim.smartview.search_properties', {
                   defaultValue: 'Search properties…',
                 })}
-                className="w-full ps-7 pe-2 py-1 text-[11px] rounded border border-border-light bg-surface-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="w-full ps-7 pe-2 py-1 text-2xs rounded border border-border-light bg-surface-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               />
             </div>
-            <div className="flex items-center justify-between mt-1 text-[9px] text-content-tertiary uppercase tracking-wider">
+            <div className="flex items-center justify-between mt-1 text-2xs text-content-tertiary uppercase tracking-wider">
               <span>
                 {t('bim.smartview.props_shown', {
                   defaultValue: '{{n}} of {{total}}',
@@ -485,7 +485,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
                 })}
               </span>
               {catalog?.source_format && (
-                <span className="font-bold px-1 rounded bg-oe-blue/10 text-oe-blue">
+                <span className="font-semibold px-1 rounded bg-oe-blue/10 text-oe-blue">
                   {catalog.source_format}
                 </span>
               )}
@@ -497,7 +497,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
               if (!list || list.length === 0) return null;
               return (
                 <div key={g} className="py-1">
-                  <div className="sticky top-[60px] z-10 px-2 pt-1 pb-0.5 text-[9px] font-bold uppercase tracking-wider text-content-tertiary bg-surface-primary border-b border-border-light/60">
+                  <div className="sticky top-[60px] z-10 px-2 pt-1 pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary bg-surface-primary border-b border-border-light/60">
                     {groupTitles[g]}{' '}
                     <span className="text-content-quaternary normal-case font-normal">
                       ({list.length})
@@ -514,7 +514,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
                         setOpen(false);
                         setQuery('');
                       }}
-                      className={`w-full flex items-center gap-1.5 px-2 py-1 text-[11px] text-start hover:bg-surface-secondary ${
+                      className={`w-full flex items-center gap-1.5 px-2 py-1 text-2xs text-start hover:bg-surface-secondary ${
                         value === entry.field
                           ? 'bg-oe-blue/10 text-oe-blue'
                           : 'text-content-primary'
@@ -523,11 +523,11 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
                       <span className="font-medium truncate flex-1">
                         {entry.label}
                       </span>
-                      <span className="text-[9px] text-content-quaternary tabular-nums shrink-0">
+                      <span className="text-2xs text-content-quaternary tabular-nums shrink-0">
                         {entry.distinct_count}
                       </span>
                       {entry.source_formats[0] && (
-                        <span className="text-[8px] font-bold uppercase px-1 rounded bg-surface-secondary text-content-tertiary">
+                        <span className="text-2xs font-semibold uppercase px-1 rounded bg-surface-secondary text-content-tertiary">
                           {entry.source_formats[0]}
                         </span>
                       )}
@@ -538,14 +538,14 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
             },
           )}
           {entries.length === 0 && (
-            <div className="px-3 py-4 text-[11px] text-content-tertiary italic text-center">
+            <div className="px-3 py-4 text-2xs text-content-tertiary italic text-center">
               {t('bim.smartview.no_properties', {
                 defaultValue: 'No properties discovered for this model yet.',
               })}
             </div>
           )}
           {entries.length > 0 && totalShown === 0 && (
-            <div className="px-3 py-4 text-[11px] text-content-tertiary italic text-center">
+            <div className="px-3 py-4 text-2xs text-content-tertiary italic text-center">
               {t('bim.smartview.no_match', {
                 defaultValue: 'No property matches your search.',
               })}
@@ -580,7 +580,7 @@ function OperatorPicker({ dataType, value, onChange, disabled }: OperatorPickerP
         value={value}
         onChange={(e) => onChange(e.target.value as SmartViewOp)}
         aria-label={t('bim.smartview.operator', { defaultValue: 'Operator' })}
-        className="px-2 py-1 rounded border border-border-light bg-surface-secondary text-[11px] text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+        className="px-2 py-1 rounded border border-border-light bg-surface-secondary text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
       >
         {ops.map((op) => (
           <option key={op} value={op}>
@@ -615,7 +615,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
   const { t } = useTranslation();
 
   const baseInputCls =
-    `px-1.5 py-1 rounded border bg-surface-secondary text-[11px] focus:outline-none focus:ring-1 ${
+    `px-1.5 py-1 rounded border bg-surface-secondary text-2xs focus:outline-none focus:ring-1 ${
       invalid
         ? 'border-rose-400 focus:ring-rose-500'
         : 'border-border-light focus:ring-oe-blue'
@@ -623,7 +623,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
 
   // No value needed for empty checks.
   if (op === 'is_empty' || op === 'is_not_empty') {
-    return <span className="text-[11px] text-content-quaternary italic">—</span>;
+    return <span className="text-2xs text-content-quaternary italic">—</span>;
   }
 
   // between → two numeric inputs.
@@ -640,7 +640,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
           className={`w-16 ${baseInputCls}`}
           placeholder="min"
         />
-        <span className="text-[10px] text-content-tertiary">…</span>
+        <span className="text-2xs text-content-tertiary">…</span>
         <input
           type="number"
           value={(tuple[1] as number | undefined) ?? ''}
@@ -667,7 +667,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
         {arr.map((v, i) => (
           <span
             key={`${String(v)}-${i}`}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-oe-blue/10 text-oe-blue"
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs bg-oe-blue/10 text-oe-blue"
           >
             {String(v)}
             <button
@@ -686,7 +686,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
             const next = e.target.value;
             if (next && !arr.includes(next)) onChange([...arr, next]);
           }}
-          className="px-1 py-0.5 rounded border border-border-light bg-surface-secondary text-[11px] focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="px-1 py-0.5 rounded border border-border-light bg-surface-secondary text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
         >
           <option value="">
             {t('bim.smartview.add_value', { defaultValue: '+ add' })}
@@ -835,7 +835,7 @@ function GroupRenderer({
           aria-label={t('bim.smartview.toggle_andor', {
             defaultValue: 'Click to switch AND ↔ OR',
           })}
-          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+          className={`px-2 py-0.5 rounded text-2xs font-semibold uppercase tracking-wider ${
             group.op === 'AND'
               ? 'bg-oe-blue text-white'
               : 'bg-amber-500 text-white'
@@ -846,7 +846,7 @@ function GroupRenderer({
         >
           {group.op}
         </button>
-        <span className="text-[10px] text-content-tertiary">
+        <span className="text-2xs text-content-tertiary">
           {group.rules.length === 0
             ? t('bim.smartview.empty_group', {
                 defaultValue: 'No rules yet - add one →',
@@ -860,7 +860,7 @@ function GroupRenderer({
           <button
             type="button"
             onClick={addLeaf}
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-tertiary"
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-2xs text-content-secondary hover:bg-surface-tertiary"
           >
             <Plus size={9} />
             {t('bim.smartview.add_rule', { defaultValue: 'Rule' })}
@@ -869,7 +869,7 @@ function GroupRenderer({
             <button
               type="button"
               onClick={addGroup}
-              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-tertiary"
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-2xs text-content-secondary hover:bg-surface-tertiary"
             >
               <Plus size={9} />
               {t('bim.smartview.add_group', { defaultValue: 'Group' })}
@@ -878,7 +878,7 @@ function GroupRenderer({
         </div>
       </div>
       {groupError && (
-        <div className="flex items-center gap-1 text-[10px] text-rose-700 dark:text-rose-300">
+        <div className="flex items-center gap-1 text-2xs text-rose-700 dark:text-rose-300">
           <AlertCircle size={10} />
           <span>{groupError}</span>
         </div>
@@ -922,7 +922,7 @@ function GroupRenderer({
                 aria-invalid={Boolean(childError) || undefined}
                 className="flex flex-col gap-0.5"
               >
-                <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                <div className="flex items-center gap-1.5 flex-wrap text-2xs">
                   <PropertyPicker
                     catalog={catalog}
                     value={child.field}
@@ -962,7 +962,7 @@ function GroupRenderer({
                   </button>
                 </div>
                 {childError && (
-                  <div className="flex items-center gap-1 ps-1 text-[10px] text-rose-700 dark:text-rose-300">
+                  <div className="flex items-center gap-1 ps-1 text-2xs text-rose-700 dark:text-rose-300">
                     <AlertCircle size={10} />
                     <span>{childError}</span>
                   </div>
@@ -999,7 +999,7 @@ function SamplePreview({ modelId, sampleIds }: SamplePreviewProps) {
   const rows: BIMElementData[] = samplesQuery.data?.items ?? [];
   return (
     <div className="space-y-1">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+      <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
         {t('bim.smartview.sample_title', {
           defaultValue: 'Sample matches ({{n}})',
           n: rows.length,
@@ -1016,7 +1016,7 @@ function SamplePreview({ modelId, sampleIds }: SamplePreviewProps) {
           : rows.map((row) => (
               <div
                 key={row.id}
-                className="rounded border border-border-light bg-surface-secondary px-2 py-1 text-[10px]"
+                className="rounded border border-border-light bg-surface-secondary px-2 py-1 text-2xs"
                 title={`${row.element_type} • ${row.id}`}
               >
                 <div className="font-medium text-content-primary truncate">
@@ -1025,7 +1025,7 @@ function SamplePreview({ modelId, sampleIds }: SamplePreviewProps) {
                 <div className="flex items-center gap-1 text-content-tertiary">
                   <span className="truncate">{row.element_type}</span>
                   {row.storey && (
-                    <span className="text-[8px] uppercase font-bold px-1 rounded bg-surface-tertiary">
+                    <span className="text-2xs uppercase font-semibold px-1 rounded bg-surface-tertiary">
                       {row.storey}
                     </span>
                   )}
@@ -1176,7 +1176,7 @@ export default function SmartViewBuilder({
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <Star size={11} className="text-amber-500 fill-amber-500" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                   {t('bim.smartview.starred', { defaultValue: 'Starred' })}
                 </span>
               </div>
@@ -1197,7 +1197,7 @@ export default function SmartViewBuilder({
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <Clock size={11} className="text-content-tertiary" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                   {t('bim.smartview.recent', { defaultValue: 'Recent' })}
                 </span>
               </div>
@@ -1221,7 +1221,7 @@ export default function SmartViewBuilder({
       <div>
         <div className="flex items-center gap-1.5 mb-1.5">
           <Zap size={12} className="text-amber-500" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('bim.smartview.presets', { defaultValue: 'Quick presets' })}
           </span>
         </div>
@@ -1231,7 +1231,7 @@ export default function SmartViewBuilder({
               key={p.id}
               type="button"
               onClick={() => applyPreset(p)}
-              className="px-2 py-1 rounded-md border border-border-light bg-surface-secondary text-[10px] text-content-secondary hover:bg-oe-blue/5 hover:border-oe-blue/30 hover:text-oe-blue transition-colors"
+              className="px-2 py-1 rounded-md border border-border-light bg-surface-secondary text-2xs text-content-secondary hover:bg-oe-blue/5 hover:border-oe-blue/30 hover:text-oe-blue transition-colors"
             >
               {p.label}
             </button>
@@ -1243,7 +1243,7 @@ export default function SmartViewBuilder({
       {report.treeErrors.length > 0 && (
         <div
           role="alert"
-          className="rounded border border-rose-300 bg-rose-50 dark:bg-rose-950/30 px-2 py-1.5 text-[11px] text-rose-700 dark:text-rose-300"
+          className="rounded border border-rose-300 bg-rose-50 dark:bg-rose-950/30 px-2 py-1.5 text-2xs text-rose-700 dark:text-rose-300"
         >
           <div className="flex items-center gap-1 font-semibold">
             <AlertCircle size={11} />
@@ -1274,7 +1274,7 @@ export default function SmartViewBuilder({
       {/* Live count pill + actions */}
       <div className="flex items-center gap-2 flex-wrap">
         {report.errors.size > 0 ? (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
             <AlertCircle size={11} />
             {t('bim.smartview.fix_errors', {
               defaultValue: '{{n}} rule errors',
@@ -1283,17 +1283,17 @@ export default function SmartViewBuilder({
           </span>
         ) : matched === null ? (
           previewQuery.isFetching ? (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] bg-surface-secondary text-content-tertiary">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs bg-surface-secondary text-content-tertiary">
               {t('bim.smartview.calculating', { defaultValue: 'Calculating…' })}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] bg-surface-secondary text-content-tertiary">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs bg-surface-secondary text-content-tertiary">
               —
             </span>
           )
         ) : (
           <span
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold ${
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs font-semibold ${
               matched === 0
                 ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
                 : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
@@ -1307,13 +1307,13 @@ export default function SmartViewBuilder({
           </span>
         )}
         {previewQuery.data?.truncated && (
-          <span className="text-[10px] text-amber-600">
+          <span className="text-2xs text-amber-600">
             {t('bim.smartview.truncated', {
               defaultValue: 'Scan capped at 50K elements',
             })}
           </span>
         )}
-        <span className="text-[10px] text-content-quaternary">
+        <span className="text-2xs text-content-quaternary">
           {t('bim.smartview.leaf_count', {
             defaultValue: '{{n}} of {{max}} rules',
             n: report.leafCount,
@@ -1326,7 +1326,7 @@ export default function SmartViewBuilder({
             type="button"
             onClick={() => setSaveOpen(true)}
             disabled={report.errors.size > 0 || report.treeErrors.length > 0}
-            className="ms-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-oe-blue text-white text-[11px] font-semibold hover:bg-oe-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ms-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-oe-blue text-white text-2xs font-semibold hover:bg-oe-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="smart-view-save-button"
           >
             <Save size={11} />
@@ -1376,7 +1376,7 @@ function SavedViewChip({
 }: SavedViewChipProps) {
   return (
     <div
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border border-border-light bg-surface-secondary text-[10px] hover:border-oe-blue/30"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border border-border-light bg-surface-secondary text-2xs hover:border-oe-blue/30"
       style={
         group.color
           ? { borderInlineStartWidth: 3, borderInlineStartColor: group.color }

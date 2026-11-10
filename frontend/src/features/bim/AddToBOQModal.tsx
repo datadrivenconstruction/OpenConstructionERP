@@ -484,7 +484,7 @@ export default function AddToBOQModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('bim.add_to_boq_title', { defaultValue: 'Add to BOQ' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {elements.length === 1
                 ? elements[0]!.name || elements[0]!.element_type
                 : t('bim.add_to_boq_bulk', {
@@ -507,8 +507,8 @@ export default function AddToBOQModal({
             Highlighted with an oe-blue ring so it reads as the primary
             active field on modal open. */}
         <div className="px-5 py-3 border-b border-border-light shrink-0 bg-oe-blue/[0.04]">
-          <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-oe-blue mb-1">
-            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-[9px] font-bold text-white">
+          <label className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-oe-blue mb-1">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-white">
               1
             </span>
             {t('bim.target_boq', { defaultValue: 'Target BOQ' })}
@@ -534,7 +534,7 @@ export default function AddToBOQModal({
           </select>
           {boqs.length === 0 && !boqsQuery.isLoading && (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <p className="text-[11px] text-content-secondary">
+              <p className="text-2xs text-content-secondary">
                 {t('bim.no_boqs_create_hint', {
                   defaultValue: 'This project has no bid schedule yet. Create one to link these elements.',
                 })}
@@ -544,7 +544,7 @@ export default function AddToBOQModal({
                 data-testid="add-to-boq-create-boq"
                 onClick={() => createBoqMut.mutate()}
                 disabled={createBoqMut.isPending}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-50"
               >
                 {createBoqMut.isPending ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />}
                 {t('bim.create_boq_here', { defaultValue: 'Create bid schedule' })}
@@ -582,7 +582,7 @@ export default function AddToBOQModal({
                   className="mb-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-start bg-oe-blue/5 border border-oe-blue/40 hover:bg-oe-blue/10 disabled:opacity-50 transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="text-[10px] font-semibold uppercase tracking-wide text-oe-blue">
+                    <div className="text-2xs font-semibold uppercase tracking-wide text-oe-blue">
                       {t('bim.link_target_position', { defaultValue: 'Link to the position you came from' })}
                     </div>
                     <div className="text-xs text-content-primary truncate">
@@ -616,7 +616,7 @@ export default function AddToBOQModal({
                   {t('common.loading', { defaultValue: 'Loading…' })}
                 </div>
               ) : pickablePositions.length === 0 ? (
-                <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+                <div className="text-center py-8 text-2xs text-content-tertiary italic">
                   {positions.length === 0
                     ? t('bim.boq_empty', { defaultValue: 'This BOQ has no positions yet' })
                     : t('bim.no_match', { defaultValue: 'No positions match your search' })}
@@ -633,10 +633,10 @@ export default function AddToBOQModal({
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono font-semibold text-content-primary tabular-nums">
+                            <span className="text-2xs font-mono font-semibold text-content-primary tabular-nums">
                               {p.ordinal}
                             </span>
-                            <span className="text-[10px] text-content-tertiary">
+                            <span className="text-2xs text-content-tertiary">
                               {(() => {
                                 // Display-only conversion; unmapped units pass through.
                                 const dq = displayQty.convert(p.quantity, p.unit ?? '');
@@ -720,7 +720,7 @@ export default function AddToBOQModal({
                           setUserPickedUnit(true);
                           setUserEditedQty(false);
                         }}
-                        className={`px-2 py-0.5 text-[11px] rounded-md border transition-colors ${
+                        className={`px-2 py-0.5 text-2xs rounded-md border transition-colors ${
                           active
                             ? 'border-oe-blue bg-oe-blue/10 text-oe-blue font-semibold'
                             : 'border-border-light text-content-secondary hover:bg-surface-secondary'
@@ -755,7 +755,7 @@ export default function AddToBOQModal({
                 <div className="flex items-center justify-between mb-0.5">
                   <Label>{t('bim.form_unit_rate', { defaultValue: 'Unit rate' })}</Label>
                   {suggestionsQuery.isLoading && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-content-tertiary">
+                    <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
                       <Loader2 size={9} className="animate-spin" />
                       {t('bim.suggesting_costs', {
                         defaultValue: 'Suggesting…',
@@ -777,7 +777,7 @@ export default function AddToBOQModal({
                   <div className="mt-2">
                     <div className="flex items-center gap-1 mb-1">
                       <Sparkles size={10} className="text-amber-500" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                      <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                         {t('bim.cost_suggestions', {
                           defaultValue: 'Suggested rates',
                         })}
@@ -820,14 +820,14 @@ export default function AddToBOQModal({
                                     className={`inline-block h-1.5 w-1.5 rounded-full ${confColor}`}
                                     aria-hidden
                                   />
-                                  <span className="text-[10px] font-mono font-semibold text-content-primary">
+                                  <span className="text-2xs font-mono font-semibold text-content-primary">
                                     {s.code}
                                   </span>
-                                  <span className="text-[9px] text-content-quaternary tabular-nums">
+                                  <span className="text-2xs text-content-quaternary tabular-nums">
                                     {confidencePct}%
                                   </span>
                                 </div>
-                                <div className="text-[11px] text-content-secondary truncate">
+                                <div className="text-2xs text-content-secondary truncate">
                                   {s.description}
                                 </div>
                               </div>
@@ -835,7 +835,7 @@ export default function AddToBOQModal({
                                 <div className="text-xs font-semibold text-content-primary tabular-nums">
                                   {rateLabel}
                                 </div>
-                                <div className="text-[9px] text-content-tertiary">
+                                <div className="text-2xs text-content-tertiary">
                                   / {s.unit}
                                 </div>
                               </div>
@@ -848,7 +848,7 @@ export default function AddToBOQModal({
                 )}
               </div>
 
-              <div className="rounded-md border border-oe-blue/20 bg-oe-blue/5 p-2 text-[11px] text-content-secondary">
+              <div className="rounded-md border border-oe-blue/20 bg-oe-blue/5 p-2 text-2xs text-content-secondary">
                 <div className="flex items-start gap-1.5">
                   <CheckCircle2 size={11} className="text-oe-blue shrink-0 mt-0.5" />
                   <span>
@@ -920,7 +920,7 @@ function buildAutoOrdinal(positions: Position[]): string {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+    <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
       {children}
     </label>
   );
@@ -1019,7 +1019,7 @@ function BIMQuantitySuggestionBadge({
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border text-[11px] ${tone} ${userEdited ? 'opacity-60' : ''}`}
+      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border text-2xs ${tone} ${userEdited ? 'opacity-60' : ''}`}
       role="status"
       aria-live="polite"
     >
@@ -1031,7 +1031,7 @@ function BIMQuantitySuggestionBadge({
           {label}
         </span>
         {userEdited && (
-          <span className="text-[10px] italic text-content-tertiary shrink-0">
+          <span className="text-2xs italic text-content-tertiary shrink-0">
             {t('bim.qty_edited_marker', { defaultValue: '(edited)' })}
           </span>
         )}
@@ -1040,7 +1040,7 @@ function BIMQuantitySuggestionBadge({
         <button
           type="button"
           onClick={onResetToSuggestion}
-          className="text-[10px] font-medium underline hover:no-underline shrink-0"
+          className="text-2xs font-medium underline hover:no-underline shrink-0"
         >
           {t('bim.qty_use_suggestion', { defaultValue: 'Use suggestion' })}
         </button>

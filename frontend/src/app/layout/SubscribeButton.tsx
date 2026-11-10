@@ -95,8 +95,8 @@ export function SubscribeButton() {
           'inline-flex h-8 w-8 items-center justify-center rounded-lg',
           'transition-colors',
           subscribed
-            ? 'text-emerald-600 hover:bg-surface-secondary'
-            : 'text-sky-600 hover:bg-surface-secondary',
+            ? 'text-semantic-success hover:bg-surface-secondary'
+            : 'text-semantic-info hover:bg-surface-secondary',
         )}
       >
         {subscribed ? (

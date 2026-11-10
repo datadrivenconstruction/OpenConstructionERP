@@ -326,7 +326,7 @@ function CreateSubmissionModal({
               spellCheck={false}
               className={clsx(
                 textareaCls,
-                payloadError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                payloadError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
             />
           </div>
@@ -347,17 +347,17 @@ function ValidationReportCard({ report }: { report: Submission['validation_repor
       className={clsx(
         'rounded-lg border p-3 text-xs space-y-2',
         passed
-          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30'
-          : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30',
+          ? 'border-semantic-success/30 bg-semantic-success-bg'
+          : 'border-semantic-error/30 bg-semantic-error-bg',
       )}
     >
       <div className="flex items-center gap-1.5 font-semibold">
         {passed ? (
-          <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2 size={13} className="text-semantic-success" />
         ) : (
-          <AlertTriangle size={13} className="text-red-600 dark:text-red-400" />
+          <AlertTriangle size={13} className="text-semantic-error" />
         )}
-        <span className={passed ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}>
+        <span className={passed ? 'text-semantic-success' : 'text-semantic-error'}>
           {passed
             ? t('authority_submission.validation_passed', { defaultValue: 'Validation passed' })
             : t('authority_submission.validation_failed', {
@@ -608,7 +608,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             <Button
               variant="secondary"
               size="sm"
-              className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="text-semantic-error hover:bg-semantic-error-bg"
               icon={<Trash2 size={13} />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -992,7 +992,7 @@ export function AuthoritySubmissionPage() {
       <HowAuthoritySubmissionWorks />
 
       {!projectId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
         </div>
       )}

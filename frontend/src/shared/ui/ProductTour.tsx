@@ -1454,7 +1454,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
               className={clsx(
                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
                 isLast
-                  ? 'bg-emerald-500/10 text-emerald-600'
+                  ? 'bg-semantic-success/10 text-semantic-success'
                   : 'bg-violet-500/10 text-violet-600 dark:text-violet-300',
               )}
             >
@@ -1533,7 +1533,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
               className={clsx(
                 'flex h-7 items-center gap-1.5 rounded-lg px-3',
                 isLast
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  ? 'bg-semantic-success text-white hover:bg-semantic-success'
                   : 'bg-violet-600 text-white hover:bg-violet-700',
                 'text-xs font-medium transition-colors',
               )}

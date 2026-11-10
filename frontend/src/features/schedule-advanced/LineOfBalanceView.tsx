@@ -111,7 +111,7 @@ export function LineOfBalanceView({ lob }: Props) {
         ))}
         {lob.critical_path.length > 0 && (
           <span className="inline-flex items-center gap-1.5 text-content-secondary">
-            <span className="inline-block h-1 w-5 rounded-sm bg-rose-500" aria-hidden />
+            <span className="inline-block h-1 w-5 rounded-sm bg-semantic-error" aria-hidden />
             {t('takt.critical_path', { defaultValue: 'Critical trade' })}
           </span>
         )}
@@ -141,7 +141,7 @@ export function LineOfBalanceView({ lob }: Props) {
                 x={dayToX(d)}
                 y={chartH - padBottom + 16}
                 textAnchor="middle"
-                className="fill-content-tertiary text-[10px]"
+                className="fill-content-tertiary text-2xs"
               >
                 {fmtDay(d)}
               </text>
@@ -166,7 +166,7 @@ export function LineOfBalanceView({ lob }: Props) {
                   x={padLeft - 10}
                   y={y + rowH / 2 + 4}
                   textAnchor="end"
-                  className="fill-content-secondary text-[11px] font-medium"
+                  className="fill-content-secondary text-2xs font-medium"
                 >
                   {loc.name}
                 </text>
@@ -237,7 +237,7 @@ export function LineOfBalanceView({ lob }: Props) {
               {t('takt.crew_size', { defaultValue: 'Crew' })}: {hover.crew_size}
             </div>
             {hover.has_rhythm_break && (
-              <div className="mt-1 inline-flex items-center gap-1 text-amber-600">
+              <div className="mt-1 inline-flex items-center gap-1 text-semantic-warning">
                 <AlertTriangle size={11} />
                 {t('takt.rhythmBreak', { defaultValue: 'Takt rhythm break' })}
               </div>

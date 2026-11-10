@@ -278,7 +278,7 @@ export function MeshPreview({ object, upAxis, unitScale }: MeshPreviewProps) {
 
   if (webglFailed) {
     return (
-      <div className="rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-4 text-[11px] text-content-tertiary text-center">
+      <div className="rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-4 text-2xs text-content-tertiary text-center">
         {t('bim.mesh_import.preview_unavailable', {
           defaultValue:
             '3D preview is unavailable in this browser. The measured quantities below are unaffected.',
@@ -292,7 +292,7 @@ export function MeshPreview({ object, upAxis, unitScale }: MeshPreviewProps) {
       <div ref={containerRef} className="w-full h-52" />
 
       {/* Scale legend: the fastest way to catch a wrong source unit. */}
-      <div className="absolute bottom-1.5 left-2 flex items-center gap-1.5 text-[10px] text-content-tertiary bg-surface-primary/75 rounded px-1.5 py-0.5 pointer-events-none">
+      <div className="absolute bottom-1.5 left-2 flex items-center gap-1.5 text-2xs text-content-tertiary bg-surface-primary/75 rounded px-1.5 py-0.5 pointer-events-none">
         <span className="inline-block w-3 h-px bg-content-tertiary" />
         {t('bim.mesh_import.preview_grid', {
           defaultValue: 'Grid {{step}}',
@@ -301,7 +301,7 @@ export function MeshPreview({ object, upAxis, unitScale }: MeshPreviewProps) {
       </div>
 
       {/* Up-axis indicator: confirms which way the model will stand. */}
-      <div className="absolute top-1.5 left-2 text-[10px] font-mono text-content-tertiary bg-surface-primary/75 rounded px-1.5 py-0.5 pointer-events-none">
+      <div className="absolute top-1.5 left-2 text-2xs font-mono text-content-tertiary bg-surface-primary/75 rounded px-1.5 py-0.5 pointer-events-none">
         {upAxis === 'z' ? 'Z' : 'Y'} &uarr;
       </div>
 

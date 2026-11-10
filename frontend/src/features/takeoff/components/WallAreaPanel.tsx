@@ -91,7 +91,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
       className="space-y-1.5 rounded border border-border/60 bg-surface-secondary/30 p-2"
       data-testid="wall-area-panel"
     >
-      <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between">
+      <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between">
         <span>{t('takeoff_wall.height', { defaultValue: 'Wall height' })}</span>
         {measurement.wallHeight != null && (
           <button
@@ -100,7 +100,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               setHeightDraft('');
               onChange({ wallHeight: undefined });
             }}
-            className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+            className="text-2xs text-content-tertiary hover:text-content-primary underline"
             data-testid="wall-height-reset"
           >
             {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -124,11 +124,11 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
           className="w-24 rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary tabular-nums"
           data-testid="wall-height-input"
         />
-        <span className="text-[10px] text-content-tertiary">{lengthUnitLabel}</span>
+        <span className="text-2xs text-content-tertiary">{lengthUnitLabel}</span>
       </div>
 
       {!breakdown ? (
-        <p className="text-[10px] text-content-tertiary" data-testid="wall-height-hint">
+        <p className="text-2xs text-content-tertiary" data-testid="wall-height-hint">
           {t('takeoff_wall.height_hint', {
             defaultValue: 'Enter the wall height to report wall area (length x height) instead of length.',
           })}
@@ -136,7 +136,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
       ) : (
         <>
           <p
-            className="font-mono tabular-nums text-[11px] text-content-primary"
+            className="font-mono tabular-nums text-2xs text-content-primary"
             data-testid="wall-area-formula"
           >
             {`${fmt(breakdown.length)} ${unit(breakdown.lengthUnit)} × ${fmt(breakdown.height)} ${unit(
@@ -144,7 +144,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
             )} = ${fmt(breakdown.gross)} ${unit(breakdown.areaUnit)}`}
           </p>
 
-          <p className="text-[10px] font-semibold text-content-tertiary pt-1">
+          <p className="text-2xs font-semibold text-content-tertiary pt-1">
             {t('takeoff_wall.openings', { defaultValue: 'Openings (doors, windows)' })}
           </p>
           {openings.length > 0 && (
@@ -156,7 +156,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
                 return (
                   <li
                     key={idx}
-                    className="flex items-center gap-1.5 text-[10px] font-mono tabular-nums text-content-secondary"
+                    className="flex items-center gap-1.5 text-2xs font-mono tabular-nums text-content-secondary"
                     data-testid="wall-opening-row"
                   >
                     <span className="flex-1">
@@ -189,10 +189,10 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               placeholder={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
               aria-label={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
               title={t('takeoff_wall.opening_width', { defaultValue: 'Width' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-[11px] tabular-nums"
+              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
               data-testid="wall-opening-width"
             />
-            <span className="text-[10px] text-content-tertiary">×</span>
+            <span className="text-2xs text-content-tertiary">×</span>
             <input
               type="text"
               inputMode="decimal"
@@ -201,10 +201,10 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               placeholder={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
               aria-label={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
               title={t('takeoff_wall.opening_height', { defaultValue: 'Height' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-[11px] tabular-nums"
+              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
               data-testid="wall-opening-height"
             />
-            <span className="text-[10px] text-content-tertiary">{lengthUnitLabel} ×</span>
+            <span className="text-2xs text-content-tertiary">{lengthUnitLabel} ×</span>
             <input
               type="text"
               inputMode="numeric"
@@ -215,7 +215,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
               }}
               aria-label={t('takeoff_wall.opening_count', { defaultValue: 'Count' })}
               title={t('takeoff_wall.opening_count', { defaultValue: 'Count' })}
-              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-[11px] tabular-nums"
+              className="min-w-0 rounded border border-border bg-surface-primary px-1.5 py-0.5 text-2xs tabular-nums"
               data-testid="wall-opening-count"
             />
             <button
@@ -233,7 +233,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
 
           {openingsExceedGross(measurement) && (
             <p
-              className="flex items-center gap-1 text-[10px] text-semantic-error"
+              className="flex items-center gap-1 text-2xs text-semantic-error"
               data-testid="wall-openings-exceed"
             >
               <AlertTriangle size={11} className="shrink-0" />
@@ -246,7 +246,7 @@ export function WallAreaPanel({ measurement, measurementSystem, onChange }: Wall
           )}
 
           <div
-            className="flex items-center justify-between border-t border-border/50 pt-1 text-[11px]"
+            className="flex items-center justify-between border-t border-border/50 pt-1 text-2xs"
             data-testid="wall-area-net"
           >
             <span className="text-content-tertiary">

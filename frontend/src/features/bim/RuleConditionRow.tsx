@@ -195,25 +195,25 @@ export function RuleConditionRow({
           disabled={values.loading}
           onClick={values.loadMore}
           data-testid={`rule-prop-values-more-${index}`}
-          className="mt-1 text-[11px] text-oe-blue disabled:opacity-50"
+          className="mt-1 text-2xs text-oe-blue disabled:opacity-50"
         >
           {t('boq.load_more', { defaultValue: 'Load more' })} ({values.items.length} / {values.total})
         </button>
       )}
       {problem && (
-        <p data-testid={`rule-prop-problem-${index}`} role="alert" className="mt-1 text-[11px] text-red-600">
+        <p data-testid={`rule-prop-problem-${index}`} role="alert" className="mt-1 text-2xs text-red-600">
           {problem}
         </p>
       )}
       {!problem && checked.ambiguous && (
-        <p data-testid={`rule-prop-read-as-${index}`} className="mt-1 text-[11px] text-content-tertiary">
+        <p data-testid={`rule-prop-read-as-${index}`} className="mt-1 text-2xs text-content-tertiary">
           {t('bim_rules.cond_read_as', { defaultValue: 'Read as {{value}}', value: checked.value })}
         </p>
       )}
       {wantsValues && isWildcardSample(row.value, valueChoices) && (
         <p
           data-testid={`rule-prop-wildcard-hint-${index}`}
-          className="mt-1 text-[11px] text-amber-700 dark:text-amber-400"
+          className="mt-1 text-2xs text-amber-700 dark:text-amber-400"
         >
           {t('bim_rules.value_has_wildcard', {
             defaultValue:

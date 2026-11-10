@@ -830,7 +830,7 @@ function StatTile({ label, value, tone }: { label: string; value: number; tone: 
       <div className="text-2xs uppercase tracking-wide text-content-tertiary" title={label}>
         {label}
       </div>
-      <div className={`mt-0.5 text-lg font-bold tabular-nums ${toneCls[tone]}`}>{value}</div>
+      <div className={`mt-0.5 text-lg font-semibold tabular-nums ${toneCls[tone]}`}>{value}</div>
     </div>
   );
 }

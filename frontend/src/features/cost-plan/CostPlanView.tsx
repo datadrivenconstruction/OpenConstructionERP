@@ -261,7 +261,7 @@ function PlanTable({ plan, showEmpty, t }: { plan: Nrm1CostPlan; showEmpty: bool
           )}
           <PlanRow
             label={
-              <span className={clsx(plan.unallocated.position_count > 0 && 'text-amber-700 dark:text-amber-300')}>
+              <span className={clsx(plan.unallocated.position_count > 0 && 'text-semantic-warning')}>
                 {t('cost_plan.unallocated', { defaultValue: 'Not allocated to an element' })}
               </span>
             }
@@ -334,7 +334,7 @@ function UnallocatedList({ plan, t }: { plan: Nrm1CostPlan; t: TFn }) {
   const block = plan.unallocated;
   if (block.position_count === 0) return null;
   return (
-    <details className="rounded-lg border border-amber-300/70 bg-amber-50/60 p-3 dark:border-amber-700/60 dark:bg-amber-950/30">
+    <details className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 p-3">
       <summary className="cursor-pointer text-sm font-medium">
         {t('cost_plan.unallocated_heading', {
           defaultValue: 'Positions not allocated to an element: {{n}}',
@@ -357,7 +357,7 @@ function UnallocatedList({ plan, t }: { plan: Nrm1CostPlan; t: TFn }) {
         </thead>
         <tbody>
           {block.positions.map((position) => (
-            <tr key={position.id} className="border-t border-amber-200/70 dark:border-amber-800/50">
+            <tr key={position.id} className="border-t border-semantic-warning/30">
               <td className="px-2 py-1 font-mono">{position.ordinal}</td>
               <td className="px-2 py-1">{position.description}</td>
               <td className="px-2 py-1 font-mono">{position.code ?? ''}</td>
@@ -557,7 +557,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
           {plan.warnings.length > 0 && (
             <ul className="space-y-1" data-testid="cost-plan-warnings">
               {plan.warnings.map((warning) => (
-                <li key={warning} className="flex items-start gap-2 text-xs text-amber-800 dark:text-amber-200">
+                <li key={warning} className="flex items-start gap-2 text-xs text-semantic-warning">
                   <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                   <span>
                     {t(`cost_plan.warning_${warning}`, { defaultValue: WARNING_DEFAULTS[warning] ?? warning })}

@@ -166,7 +166,7 @@ export function EstimateAuditPanel({
             {/* Score + delta strip */}
             <div className="mb-4 flex flex-wrap items-center gap-4">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-bold tabular-nums text-content-primary">{pct}</span>
+                <span className="text-2xl font-semibold tabular-nums text-content-primary">{pct}</span>
                 <span className="text-sm font-medium text-content-secondary">%</span>
                 <span className="ml-1 text-xs text-content-tertiary">
                   {t('validation.audit_quality_score', { defaultValue: 'quality score' })}

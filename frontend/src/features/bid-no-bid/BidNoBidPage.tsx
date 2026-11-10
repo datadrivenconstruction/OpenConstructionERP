@@ -129,7 +129,7 @@ export function BidNoBidPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('bid_no_bid.score', { defaultValue: 'Score' })}</div>
-            <div className="text-4xl font-bold tabular-nums text-content-primary" data-testid="bid-no-bid-score">
+            <div className="text-4xl font-semibold tabular-nums text-content-primary" data-testid="bid-no-bid-score">
               {score == null ? '–' : fmtFixed(score, 1)}
               <span className="text-base font-normal text-content-tertiary"> / 100</span>
             </div>

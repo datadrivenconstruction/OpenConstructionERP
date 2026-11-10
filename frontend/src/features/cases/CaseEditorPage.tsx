@@ -599,7 +599,7 @@ export function CaseEditorPage() {
                                 })}
                           </span>
                           {step.to && (
-                            <span className="block truncate font-mono text-[11px] text-content-tertiary">
+                            <span className="block truncate font-mono text-2xs text-content-tertiary">
                               {step.to}
                             </span>
                           )}
@@ -785,17 +785,17 @@ export function CaseEditorPage() {
                   })}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <span className={clsx('rounded-full border px-2 py-0.5 text-[11px]', draftTint.chip)}>
+                <span className={clsx('rounded-full border px-2 py-0.5 text-2xs', draftTint.chip)}>
                   {t(draftMeta.labelKey, { defaultValue: draftMeta.labelDefault })}
                 </span>
-                <span className="flex items-center gap-1 rounded-full border border-border-light px-2 py-0.5 text-[11px] text-content-secondary">
+                <span className="flex items-center gap-1 rounded-full border border-border-light px-2 py-0.5 text-2xs text-content-secondary">
                   <Clock className="h-3 w-3" />
                   {t('cases.card.minutes_short', {
                     defaultValue: '{{count}} min',
                     count: draft.estMinutes,
                   })}
                 </span>
-                <span className="rounded-full border border-border-light px-2 py-0.5 text-[11px] text-content-secondary">
+                <span className="rounded-full border border-border-light px-2 py-0.5 text-2xs text-content-secondary">
                   {t('cases.card.steps', {
                     defaultValue: '{{count}} steps',
                     count: draft.steps.length,
@@ -822,7 +822,7 @@ export function CaseEditorPage() {
                   const Icon = step.to ? getRouteIcon(step.to.split('?')[0] ?? step.to) : null;
                   return (
                     <li key={step.id} className="flex items-center gap-2.5 rounded-md p-1.5">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-[11px] font-medium text-content-secondary">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-2xs font-medium text-content-secondary">
                         {index + 1}
                       </span>
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-secondary ring-1 ring-border-light">
@@ -833,7 +833,7 @@ export function CaseEditorPage() {
                           {step.title.trim() ||
                             t('cases.editor.route_step_untitled', { defaultValue: 'Untitled step' })}
                         </span>
-                        <span className="block truncate font-mono text-[10px] text-content-tertiary">
+                        <span className="block truncate font-mono text-2xs text-content-tertiary">
                           {step.to || '-'}
                         </span>
                       </span>

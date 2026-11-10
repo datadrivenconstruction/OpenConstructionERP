@@ -181,22 +181,22 @@ export function BIMContextMenu({ menu, actions, onClose }: BIMContextMenuProps) 
       <div className="px-3 py-2 border-b border-border-light bg-surface-secondary/60">
         {isMulti ? (
           <>
-            <div className="text-xs font-bold text-content-primary">
+            <div className="text-xs font-semibold text-content-primary">
               {t('bim.ctx_multi_header', {
                 defaultValue: '{{count}} elements selected',
                 count,
               })}
             </div>
-            <div className="text-[10px] text-content-tertiary truncate mt-0.5">
+            <div className="text-2xs text-content-tertiary truncate mt-0.5">
               {categorySummary(menu.selectedElements)}
             </div>
           </>
         ) : menu.element ? (
           <>
-            <div className="text-xs font-bold text-content-primary truncate">
+            <div className="text-xs font-semibold text-content-primary truncate">
               {menu.element.name || menu.element.element_type}
             </div>
-            <div className="text-[10px] text-content-tertiary truncate mt-0.5">
+            <div className="text-2xs text-content-tertiary truncate mt-0.5">
               {menu.element.element_type}
               {menu.element.storey && (
                 <span className="mx-1">{menu.element.storey}</span>
@@ -405,7 +405,7 @@ function MenuDivider() {
  *  the menu reads as one design language. */
 function MenuGroupHeader({ label }: { label: string }) {
   return (
-    <div className="px-3 pt-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wider text-content-tertiary">
+    <div className="px-3 pt-1.5 pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
       {label}
     </div>
   );

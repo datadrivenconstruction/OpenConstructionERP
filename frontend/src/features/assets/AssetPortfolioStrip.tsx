@@ -55,7 +55,7 @@ function Tile({
       <span className="shrink-0">{icon}</span>
       <span className="min-w-0">
         <span className="block text-lg font-semibold leading-none">{value}</span>
-        <span className="block truncate text-[11px] opacity-80">{label}</span>
+        <span className="block truncate text-2xs opacity-80">{label}</span>
       </span>
     </button>
   );
@@ -88,7 +88,7 @@ export function AssetPortfolioStrip({ projectId, onFilter }: AssetPortfolioStrip
           icon={<ShieldAlert size={18} />}
           label={t('assets.kpi.warranty_expired', { defaultValue: 'Warranty expired' })}
           value={s.warranties_expired}
-          tone="border-rose-500/30 bg-rose-500/10 text-rose-300"
+          tone="border-rose-500/30 bg-semantic-error/10 text-rose-300"
           onClick={onFilter ? () => onFilter({ warrantyStatus: 'expired' }) : undefined}
           testId="asset-kpi-warranty-expired"
         />
@@ -96,7 +96,7 @@ export function AssetPortfolioStrip({ projectId, onFilter }: AssetPortfolioStrip
           icon={<CalendarClock size={18} />}
           label={t('assets.kpi.warranty_expiring', { defaultValue: 'Expiring soon' })}
           value={s.warranties_expiring_soon}
-          tone="border-amber-500/30 bg-amber-500/10 text-amber-300"
+          tone="border-amber-500/30 bg-semantic-warning/10 text-amber-300"
           onClick={onFilter ? () => onFilter({ warrantyStatus: 'expiring' }) : undefined}
           testId="asset-kpi-warranty-expiring"
         />
@@ -104,7 +104,7 @@ export function AssetPortfolioStrip({ projectId, onFilter }: AssetPortfolioStrip
           icon={<Wrench size={18} />}
           label={t('assets.kpi.maintenance_overdue', { defaultValue: 'Maintenance overdue' })}
           value={s.maintenance_overdue}
-          tone="border-rose-500/30 bg-rose-500/10 text-rose-300"
+          tone="border-rose-500/30 bg-semantic-error/10 text-rose-300"
           onClick={onFilter ? () => onFilter({ maintenanceStatus: 'overdue' }) : undefined}
           testId="asset-kpi-maint-overdue"
         />

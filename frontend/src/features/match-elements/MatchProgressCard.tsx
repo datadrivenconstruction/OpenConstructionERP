@@ -433,9 +433,9 @@ export function MatchProgressCard({
       className={clsx(
         'rounded-2xl border bg-surface-primary shadow-sm p-5 sm:p-7 max-w-3xl mx-auto mt-4 transition-opacity duration-500',
         isError
-          ? 'border-rose-200 dark:border-rose-800/60'
+          ? 'border-semantic-error/30'
           : isEmpty
-            ? 'border-amber-200 dark:border-amber-800/60'
+            ? 'border-semantic-warning/30'
             : 'border-border',
       )}
       data-testid="match-progress-card"
@@ -449,14 +449,14 @@ export function MatchProgressCard({
           <h3 className="text-lg font-semibold tracking-tight text-content-primary inline-flex items-center gap-2">
             {isError ? (
               <>
-                <TriangleAlert className="w-5 h-5 text-rose-600" />
+                <TriangleAlert className="w-5 h-5 text-semantic-error" />
                 {t('match_progress.title_error', {
                   defaultValue: 'Match failed',
                 })}
               </>
             ) : isEmpty ? (
               <>
-                <span className="w-6 h-6 rounded-full bg-amber-500 text-white inline-flex items-center justify-center shadow-sm shadow-amber-500/40">
+                <span className="w-6 h-6 rounded-full bg-semantic-warning text-white inline-flex items-center justify-center shadow-sm shadow-amber-500/40">
                   <PackageOpen className="w-4 h-4" strokeWidth={2.5} />
                 </span>
                 {t('match_progress.title_empty', {
@@ -465,7 +465,7 @@ export function MatchProgressCard({
               </>
             ) : isDone ? (
               <>
-                <span className="w-6 h-6 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center shadow-sm shadow-emerald-500/40">
+                <span className="w-6 h-6 rounded-full bg-semantic-success text-white inline-flex items-center justify-center shadow-sm shadow-emerald-500/40">
                   <Check className="w-4 h-4" strokeWidth={3} />
                 </span>
                 {t('match_progress.title_done', {
@@ -505,7 +505,7 @@ export function MatchProgressCard({
           </p>
         </div>
         <div className="shrink-0 text-right tabular-nums">
-          <div className="text-[11px] uppercase tracking-[0.14em] text-content-tertiary font-semibold">
+          <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
             {t('match_progress.elapsed', { defaultValue: 'Elapsed' })}
           </div>
           <div className="text-sm font-semibold text-content-primary">
@@ -521,21 +521,21 @@ export function MatchProgressCard({
         className={clsx(
           'h-1.5 rounded-full mb-5 overflow-hidden',
           isError
-            ? 'bg-rose-100 dark:bg-rose-950/40'
+            ? 'bg-semantic-error-bg'
             : isEmpty
-              ? 'bg-amber-100 dark:bg-amber-950/40'
+              ? 'bg-semantic-warning-bg'
               : 'bg-surface-secondary',
         )}
       >
         <div
           className={clsx(
-            'h-full rounded-full transition-all duration-700 ease-out',
+            'h-full rounded-full transition-all duration-500 ease-out',
             isError
-              ? 'bg-rose-500'
+              ? 'bg-semantic-error'
               : isEmpty
-              ? 'bg-amber-500'
+              ? 'bg-semantic-warning'
               : isDone
-              ? 'bg-emerald-500'
+              ? 'bg-semantic-success'
               : 'bg-gradient-to-r from-indigo-500 to-indigo-700',
           )}
           style={{ width: `${overallPct}%` }}
@@ -555,11 +555,11 @@ export function MatchProgressCard({
         className={clsx(
           'text-sm font-semibold mb-5 transition-colors',
           isError
-            ? 'text-rose-700 dark:text-rose-300'
+            ? 'text-semantic-error'
             : isEmpty
-            ? 'text-amber-700 dark:text-amber-300'
+            ? 'text-semantic-warning'
             : isDone
-            ? 'text-emerald-700 dark:text-emerald-300'
+            ? 'text-semantic-success'
             : 'text-content-primary',
         )}
         aria-live="polite"
@@ -580,7 +580,7 @@ export function MatchProgressCard({
           const badge = (() => {
             if (isErrorRow) {
               return (
-                <span className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 inline-flex items-center justify-center ring-2 ring-rose-200 dark:ring-rose-800/40">
+                <span className="w-7 h-7 rounded-full bg-semantic-error-bg text-semantic-error inline-flex items-center justify-center ring-2 ring-semantic-error/30">
                   <X className="w-4 h-4" strokeWidth={3} />
                 </span>
               );
@@ -589,14 +589,14 @@ export function MatchProgressCard({
               // Every stage ran — show an amber check, not the emerald
               // "success" tick, because the outcome was barren.
               return (
-                <span className="w-7 h-7 rounded-full bg-amber-500 text-white inline-flex items-center justify-center shadow-sm shadow-amber-500/40">
+                <span className="w-7 h-7 rounded-full bg-semantic-warning text-white inline-flex items-center justify-center shadow-sm shadow-amber-500/40">
                   <Check className="w-4 h-4" strokeWidth={3} />
                 </span>
               );
             }
             if (isPast || isFinalGreen) {
               return (
-                <span className="w-7 h-7 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center shadow-sm shadow-emerald-500/40">
+                <span className="w-7 h-7 rounded-full bg-semantic-success text-white inline-flex items-center justify-center shadow-sm shadow-emerald-500/40">
                   <Check className="w-4 h-4" strokeWidth={3} />
                 </span>
               );
@@ -632,7 +632,7 @@ export function MatchProgressCard({
                 className={clsx(
                   'text-sm transition-colors',
                   isErrorRow
-                    ? 'font-semibold text-rose-700 dark:text-rose-300'
+                    ? 'font-semibold text-semantic-error'
                     : isCurrent
                     ? 'font-semibold text-content-primary'
                     : isPast || isFinalGreen
@@ -655,14 +655,14 @@ export function MatchProgressCard({
       {/* Error footer — message + Try again button. Only mounts on
           error so it doesn't add weight to the running / done states. */}
       {isError && (
-        <div className="mt-6 rounded-xl border border-rose-200 dark:border-rose-800/60 bg-rose-50/60 dark:bg-rose-950/20 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="mt-6 rounded-xl border border-semantic-error/30 bg-semantic-error/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold text-rose-900 dark:text-rose-100 mb-0.5">
+            <div className="text-xs font-semibold text-semantic-error mb-0.5">
               {t('match_progress.error_label', {
                 defaultValue: 'Error details',
               })}
             </div>
-            <div className="text-xs text-rose-700 dark:text-rose-300 break-words">
+            <div className="text-xs text-semantic-error break-words">
               {errorMessage ||
                 t('match_progress.error_fallback', {
                   defaultValue: 'Unknown error',
@@ -690,9 +690,9 @@ export function MatchProgressCard({
       {isEmpty && (
         <div
           data-testid="match-progress-empty"
-          className="mt-6 rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/60 dark:bg-amber-950/20 p-4"
+          className="mt-6 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-4"
         >
-          <div className="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">
+          <div className="text-xs font-semibold text-semantic-warning mb-1">
             {t('match_progress.empty_label', {
               defaultValue: 'Why am I seeing this?',
             })}
@@ -702,7 +702,7 @@ export function MatchProgressCard({
               the run already settled. Without a named cause we keep the
               original pair, which is honest about not knowing. */}
           <ul
-            className="text-xs text-amber-800 dark:text-amber-200 list-disc pl-4 space-y-0.5"
+            className="text-xs text-semantic-warning list-disc pl-4 space-y-0.5"
             data-reason={reason ?? undefined}
           >
             {reason === 'no_catalogue_rows' ? (
@@ -755,7 +755,7 @@ export function MatchProgressCard({
                 type="button"
                 data-testid="match-progress-empty-retry"
                 onClick={onRetry}
-                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-amber-300 dark:border-amber-700 bg-surface-primary text-amber-900 dark:text-amber-100 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-semantic-warning/30 bg-surface-primary text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
                 {t('match_progress.empty_retry', { defaultValue: 'Match again' })}
@@ -793,7 +793,7 @@ export function MatchProgressCard({
       {/* Hint — running state only. Tells the user what to do if it
           really does take a long time. */}
       {isRunning && elapsedSec >= 45 && (
-        <p className="text-[11px] text-content-tertiary mt-5 leading-snug">
+        <p className="text-2xs text-content-tertiary mt-5 leading-snug">
           {t('match_progress.long_hint', {
             defaultValue:
               'Still working - first runs on large BIM models take longer because vectors are warming up. Subsequent runs on the same project are much faster.',

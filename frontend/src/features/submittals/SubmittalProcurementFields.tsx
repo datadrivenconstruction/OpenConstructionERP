@@ -348,7 +348,7 @@ export function SubmittalProcurementFields({
           maxLength={255}
           className={clsx(
             inputCls,
-            isMaterial && form.manufacturer.trim() === '' && 'border-amber-400 dark:border-amber-600',
+            isMaterial && form.manufacturer.trim() === '' && 'border-semantic-warning/60',
           )}
         />
       </WideModalField>

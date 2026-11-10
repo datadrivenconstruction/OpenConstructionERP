@@ -123,7 +123,7 @@ export function AvatarEditor({ name, avatarUrl }: AvatarEditorProps) {
   return (
     <div className="flex shrink-0 flex-col items-center gap-2 sm:items-start">
       <div
-        className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-oe-blue to-oe-blue-hover text-3xl font-bold text-oe-on-accent shadow-sm"
+        className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-oe-blue to-oe-blue-hover text-3xl font-semibold text-oe-on-accent shadow-sm"
         data-testid="avatar-frame"
       >
         {previewUrl ? (

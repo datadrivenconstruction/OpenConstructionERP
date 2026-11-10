@@ -169,7 +169,7 @@ export function SubRollupPanel({ claimId, contractId, currency, editable }: SubR
     if (status === 404 || status === 403) return null;
     return (
       <Card padding="sm">
-        <p className="text-xs text-rose-600" role="alert">
+        <p className="text-xs text-semantic-error" role="alert">
           {getErrorMessage(rollupQ.error)}
         </p>
       </Card>
@@ -772,7 +772,7 @@ function PayAppRow({
         pendingPayment={payApp.certificates_pending_payment}
       />
       {lapsed && (
-        <span className="text-rose-600" title={lapsed}>
+        <span className="text-semantic-error" title={lapsed}>
           {lapsed}
         </span>
       )}
@@ -820,11 +820,11 @@ function UnmappedLines({
 
   return (
     <section
-      className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/40"
+      className="mt-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2"
       aria-label={t('subcontractors.rollup_unmapped_title', { defaultValue: 'Lines not on the schedule of values' })}
       data-testid="sub-rollup-unmapped"
     >
-      <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-300">
+      <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-semantic-warning">
         <AlertTriangle size={12} aria-hidden />
         {t('subcontractors.rollup_unmapped_title', { defaultValue: 'Lines not on the schedule of values' })}
       </p>

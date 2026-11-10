@@ -365,7 +365,7 @@ export function DistributionListModal({
                   )}
                 </div>
                 {m.role && (
-                  <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-content-tertiary">
+                  <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs uppercase tracking-wide text-content-tertiary">
                     {m.role}
                   </span>
                 )}

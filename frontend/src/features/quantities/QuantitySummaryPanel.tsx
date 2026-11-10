@@ -86,7 +86,7 @@ function SourceBadge({ source, label }: { source: QuantitySource; label: string 
         'inline-flex items-center rounded px-1.5 py-0.5 text-2xs font-medium',
         source === 'takeoff'
           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+          : 'bg-semantic-success-bg text-semantic-success',
       )}
     >
       {label}
@@ -108,7 +108,7 @@ function FlowStrip() {
     <div className="flex flex-wrap items-center gap-2">
       <span className="inline-flex items-center gap-1.5">
         {node(<Ruler size={13} className="text-blue-500" />, t('quantities.flow_takeoff', { defaultValue: 'Takeoff' }))}
-        {node(<Box size={13} className="text-emerald-500" />, t('quantities.flow_cad', { defaultValue: 'CAD / BIM' }))}
+        {node(<Box size={13} className="text-semantic-success" />, t('quantities.flow_cad', { defaultValue: 'CAD / BIM' }))}
         {node(<Sparkles size={13} className="text-violet-500" />, t('quantities.flow_ai', { defaultValue: 'AI' }))}
       </span>
       <ArrowRight size={14} className="text-content-quaternary" />

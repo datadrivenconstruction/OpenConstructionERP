@@ -206,7 +206,7 @@ export default function BIMLinkedBOQPanel({
         </div>
 
         {/* Summary */}
-        <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-[11px] font-medium text-oe-blue">
+        <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-2xs font-medium text-oe-blue">
           {t('bim.linked_boq_summary', {
             defaultValue: '{{positions}} positions linked to {{elements}} elements',
             positions: positions.length,
@@ -254,11 +254,11 @@ export default function BIMLinkedBOQPanel({
                     {pos.ordinal && (
                       <div className="flex items-center gap-1 mb-0.5">
                         <Hash size={10} className="text-content-quaternary shrink-0" />
-                        <span className="text-[11px] font-bold text-content-primary tabular-nums">
+                        <span className="text-2xs font-semibold text-content-primary tabular-nums">
                           {pos.ordinal}
                         </span>
                         <span
-                          className={`inline-flex items-center justify-center min-w-[18px] h-[14px] px-0.5 rounded text-[8px] font-bold tabular-nums ${
+                          className={`inline-flex items-center justify-center min-w-[18px] h-[14px] px-0.5 rounded text-2xs font-semibold tabular-nums ${
                             isActive
                               ? 'bg-oe-blue text-white'
                               : 'bg-surface-secondary text-content-tertiary'
@@ -268,7 +268,7 @@ export default function BIMLinkedBOQPanel({
                         </span>
                       </div>
                     )}
-                    <p className="text-[11px] text-content-secondary truncate">
+                    <p className="text-2xs text-content-secondary truncate">
                       {pos.description || t('bim.linked_boq_no_desc', { defaultValue: '(no description)' })}
                     </p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -277,14 +277,14 @@ export default function BIMLinkedBOQPanel({
                         // Unmapped units (pcs, lsum, blank) pass through.
                         const dq = q.convert(pos.quantity, pos.unit ?? '');
                         return (
-                          <span className="text-[10px] tabular-nums font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded">
+                          <span className="text-2xs tabular-nums font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded">
                             {dq.value.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                             {dq.unit ? ` ${dq.unit}` : ''}
                           </span>
                         );
                       })()}
                       {pos.total != null && (
-                        <span className="text-[10px] tabular-nums font-medium text-content-primary bg-surface-secondary px-1.5 py-0.5 rounded">
+                        <span className="text-2xs tabular-nums font-medium text-content-primary bg-surface-secondary px-1.5 py-0.5 rounded">
                           {pos.total.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       )}
@@ -292,7 +292,7 @@ export default function BIMLinkedBOQPanel({
                         <a
                           href={`/boq/${pos.boq_id || derivedBoqId}?highlight=${pos.boq_position_id}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="text-[9px] text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
+                          className="text-2xs text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
                           title={t('bim.linked_boq_open_in_boq', { defaultValue: 'Open in BOQ' })}
                           aria-label={t('bim.linked_boq_open_in_boq', { defaultValue: 'Open in BOQ' })}
                         >

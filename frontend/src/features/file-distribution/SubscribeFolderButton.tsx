@@ -101,7 +101,7 @@ export function SubscribeFolderButton({
           : t('files.distribution.subscribe', { defaultValue: 'Subscribe' })}
       </Button>
       {error && (
-        <span role="alert" className="text-[10px] text-semantic-error">
+        <span role="alert" className="text-2xs text-semantic-error">
           {error}
         </span>
       )}

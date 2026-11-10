@@ -614,7 +614,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
                 >
                   <span
                     className={clsx(
-                      'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+                      'inline-flex items-center rounded-md px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wider',
                       CDE_BADGE[state]?.cls,
                     )}
                   >

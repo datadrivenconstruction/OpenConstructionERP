@@ -182,7 +182,7 @@ export default function LinkRequirementToDwgModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('dwg_takeoff.link_req_title', { defaultValue: 'Link a requirement' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {entityIds.length === 1
                 ? '→ ' + (entityLabel || t('dwg_takeoff.entity', { defaultValue: 'Entity' }))
                 : t('dwg_takeoff.link_req_bulk', {
@@ -228,7 +228,7 @@ export default function LinkRequirementToDwgModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {sets.length === 0
                 ? t('dwg_takeoff.no_req_sets', {
                     defaultValue:
@@ -266,7 +266,7 @@ export default function LinkRequirementToDwgModal({
                             )}
                           </span>
                           <span
-                            className={`shrink-0 inline-flex items-center px-1 py-0.5 text-[8px] font-bold uppercase rounded border ${priorityClass}`}
+                            className={`shrink-0 inline-flex items-center px-1 py-0.5 text-2xs font-semibold uppercase rounded border ${priorityClass}`}
                           >
                             {req.priority}
                           </span>
@@ -289,7 +289,7 @@ export default function LinkRequirementToDwgModal({
                             />
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-content-tertiary tabular-nums">
+                        <div className="flex items-center gap-2 text-2xs text-content-tertiary tabular-nums">
                           <span className="font-mono">
                             {req.constraint_type} {req.constraint_value}
                             {req.unit ? ` ${req.unit}` : ''}
@@ -311,7 +311,7 @@ export default function LinkRequirementToDwgModal({
                     onClick={() =>
                       setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))
                     }
-                    className="w-full text-center text-[11px] text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
+                    className="w-full text-center text-2xs text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
                   >
                     {t('dwg_takeoff.load_more', {
                       defaultValue: 'Load more ({{remaining}} remaining)',

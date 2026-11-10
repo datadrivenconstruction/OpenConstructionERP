@@ -151,33 +151,33 @@ export function ProjectControlsPage() {
               <span className="text-content-tertiary">
                 {t('controls.chip_domains', { defaultValue: 'Domains' })}
               </span>
-              <span className="font-bold text-content-primary">{domainCount}</span>
+              <span className="font-semibold text-content-primary">{domainCount}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary/70 px-3 py-1 text-xs backdrop-blur">
               <span className="text-content-tertiary">
                 {t('controls.chip_kpis', { defaultValue: 'KPIs tracked' })}
               </span>
-              <span className="font-bold text-content-primary">{kpiCount}</span>
+              <span className="font-semibold text-content-primary">{kpiCount}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary/70 px-3 py-1 text-xs backdrop-blur">
               <span className="text-content-tertiary">
                 {t('controls.chip_on_track', { defaultValue: 'On track' })}
               </span>
-              <span className="font-bold text-semantic-success">{greenCount}</span>
+              <span className="font-semibold text-semantic-success">{greenCount}</span>
             </span>
             {redCount > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary/70 px-3 py-1 text-xs backdrop-blur">
                 <span className="text-content-tertiary">
                   {t('controls.chip_critical', { defaultValue: 'Critical' })}
                 </span>
-                <span className="font-bold text-semantic-error">{redCount}</span>
+                <span className="font-semibold text-semantic-error">{redCount}</span>
               </span>
             )}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary/70 px-3 py-1 text-xs backdrop-blur">
               <span className="text-content-tertiary">
                 {t('controls.chip_currency', { defaultValue: 'Currency' })}
               </span>
-              <span className="font-bold text-content-primary">
+              <span className="font-semibold text-content-primary">
                 {snapshot?.multi_currency
                   ? t('controls.currency_mixed', { defaultValue: 'Mixed' })
                   : (snapshot?.currency ?? '—')}
@@ -191,8 +191,8 @@ export function ProjectControlsPage() {
         <div
           className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
             criticalCount > 0
-              ? 'border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200'
-              : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200'
+              ? 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error'
+              : 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning'
           }`}
         >
           {criticalCount > 0 ? (

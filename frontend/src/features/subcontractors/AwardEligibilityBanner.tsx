@@ -37,11 +37,11 @@ type Tone = 'success' | 'warning' | 'error';
 
 const TONE_CLS: Record<Tone, string> = {
   success:
-    'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200',
+    'border-semantic-success/30 bg-semantic-success-bg text-semantic-success',
   warning:
-    'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200',
+    'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
   error:
-    'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200',
+    'border-semantic-error/30 bg-semantic-error-bg text-semantic-error',
 };
 
 export function AwardEligibilityBanner({

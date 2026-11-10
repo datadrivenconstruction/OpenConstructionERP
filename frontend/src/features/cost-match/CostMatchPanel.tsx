@@ -184,7 +184,7 @@ function CountsStrip({ run }: { run: MatchRun }) {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] uppercase tracking-wide text-content-tertiary">
+        <span className="text-2xs uppercase tracking-wide text-content-tertiary">
           {t('cost_match.counts_machine', { defaultValue: 'What the matcher found' })}
         </span>
         {cells.map((cell) => (
@@ -194,7 +194,7 @@ function CountsStrip({ run }: { run: MatchRun }) {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] uppercase tracking-wide text-content-tertiary">
+        <span className="text-2xs uppercase tracking-wide text-content-tertiary">
           {t('cost_match.counts_human', { defaultValue: 'What people ruled' })}
         </span>
         {rulings.map((cell) => (
@@ -341,7 +341,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
               defaultValue: 'the platform default',
             })}
           />
-          <span className="mt-0.5 block text-[11px] text-content-tertiary">
+          <span className="mt-0.5 block text-2xs text-content-tertiary">
             {t('cost_match.field_cost_source_hint', {
               defaultValue:
                 'The base is pinned to the run together with the region, so a line ruled on today cannot later refer to a catalogue that has moved on.',
@@ -376,7 +376,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             value={sourceLocale}
             onChange={(e) => setSourceLocale(e.target.value)}
           />
-          <span className="mt-0.5 block text-[11px] text-content-tertiary">
+          <span className="mt-0.5 block text-2xs text-content-tertiary">
             {t('cost_match.field_source_locale_hint', {
               defaultValue:
                 'The language the descriptions are written in, which decides how they are scored. Not the language you are reading in.',
@@ -629,7 +629,7 @@ function ResultRow({ run, result, onDecide, pendingId, locked }: ResultRowProps)
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] tabular-nums text-content-tertiary">
+            <span className="text-2xs tabular-nums text-content-tertiary">
               {result.line_no}
             </span>
             <span className="truncate text-sm text-content-primary">

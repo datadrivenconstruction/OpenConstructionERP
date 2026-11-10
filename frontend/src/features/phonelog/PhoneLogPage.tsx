@@ -218,7 +218,7 @@ function PhoneLogCard({
         <button
           type="button"
           onClick={onDelete}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
         >
           <Trash2 className="h-3.5 w-3.5" />
           {t('phonelog.delete', { defaultValue: 'Delete' })}
@@ -444,7 +444,7 @@ export function PhoneLogPage() {
         </label>
 
         {createMutation.isError && (
-          <p className="text-sm text-red-600">{getErrorMessage(createMutation.error)}</p>
+          <p className="text-sm text-semantic-error">{getErrorMessage(createMutation.error)}</p>
         )}
 
         <div className="flex items-center gap-2">

@@ -42,7 +42,7 @@ const SEVERITY_CONFIG: Record<
 > = {
   blocker: {
     color: 'text-red-400',
-    bg: 'bg-red-500/10',
+    bg: 'bg-semantic-error/10',
     border: 'border-l-red-500',
     icon: AlertOctagon,
     label: 'BLOCKER',
@@ -56,7 +56,7 @@ const SEVERITY_CONFIG: Record<
   },
   warning: {
     color: 'text-yellow-400',
-    bg: 'bg-yellow-500/10',
+    bg: 'bg-semantic-warning/10',
     border: 'border-l-yellow-500',
     icon: AlertCircle,
     label: 'WARNING',
@@ -93,7 +93,7 @@ export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: Ga
           <div className="flex items-center gap-2 mb-0.5">
             <span
               className={clsx(
-                'text-2xs font-bold uppercase tracking-wider px-1 py-0.5 rounded',
+                'text-2xs font-semibold uppercase tracking-wider px-1 py-0.5 rounded',
                 config?.bg,
                 config?.color
               )}

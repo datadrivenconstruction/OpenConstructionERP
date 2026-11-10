@@ -171,7 +171,7 @@ export function ModuleBuilderPage() {
 
       {assistantAvailable === false && (
         <div
-          className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200"
+          className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
           data-testid="module-builder-ai-missing"
         >
           <AlertTriangle size={13} strokeWidth={1.9} className="shrink-0" />
@@ -318,7 +318,7 @@ export function ModuleBuilderPage() {
               {isQuarantined(module) ? (
                 <QuarantineMessage problem={module.problem} testId={`module-builder-quarantined-${module.key}`} />
               ) : (
-                <p className="break-all font-mono text-[11px] leading-relaxed text-content-quaternary">
+                <p className="break-all font-mono text-2xs leading-relaxed text-content-quaternary">
                   {module.base_path}
                 </p>
               )}
@@ -533,7 +533,7 @@ function BuilderSteps() {
     <ol className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5" data-testid="module-builder-steps">
       {steps.map((step, i) => (
         <li key={i} className="flex items-start gap-2.5">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-[11px] font-semibold text-white">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-white">
             {i + 1}
           </span>
           <span className="min-w-0">

@@ -401,7 +401,7 @@ export function InboxPanel({
           <ClipboardCheck size={15} className="text-semantic-warning" />
         </span>
         <span className="min-w-0">
-          <span className="block text-lg font-bold leading-none tabular-nums text-content-primary">
+          <span className="block text-lg font-semibold leading-none tabular-nums text-content-primary">
             {approvalsCount}
           </span>
           <span className="mt-0.5 block text-2xs text-content-tertiary">
@@ -418,7 +418,7 @@ export function InboxPanel({
           <Bell size={15} className="text-oe-blue" />
         </span>
         <span className="min-w-0">
-          <span className="block text-lg font-bold leading-none tabular-nums text-content-primary">
+          <span className="block text-lg font-semibold leading-none tabular-nums text-content-primary">
             {alertsCount}
           </span>
           <span className="mt-0.5 block text-2xs text-content-tertiary">

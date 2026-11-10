@@ -144,7 +144,7 @@ export function StepTable({ steps, currency, testId }: { steps: Step[]; currency
 function FindingLine({ finding }: { finding: ReleaseFinding }) {
   const Icon = finding.severity === 'error' ? AlertOctagon : finding.severity === 'warning' ? AlertTriangle : Info;
   const tone =
-    finding.severity === 'error' ? 'text-semantic-error' : finding.severity === 'warning' ? 'text-amber-500' : 'text-sky-500';
+    finding.severity === 'error' ? 'text-semantic-error' : finding.severity === 'warning' ? 'text-semantic-warning' : 'text-semantic-info';
   return (
     <li className="flex items-start gap-2 text-sm">
       <Icon size={15} className={`mt-0.5 shrink-0 ${tone}`} />
@@ -284,7 +284,7 @@ export function ReleaseDrawer({
         </section>
 
         {invoice.differs && (
-          <section className="rounded-lg border border-amber-300/60 bg-amber-50/60 px-3 py-2 dark:bg-amber-500/10">
+          <section className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2">
             <p className="text-sm text-content-primary">
               {t('cost_control.pay.differs', {
                 defaultValue:

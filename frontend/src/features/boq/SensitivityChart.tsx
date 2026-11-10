@@ -180,11 +180,11 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                             {/* Left bar (savings / green) */}
                             <div className="flex-1 flex justify-end">
                               <div
-                                className="h-5 rounded-l-sm bg-emerald-500/70 group-hover:bg-emerald-500 transition-colors relative"
+                                className="h-5 rounded-l-sm bg-semantic-success/70 group-hover:bg-semantic-success transition-colors relative"
                                 style={{ width: `${lowPct}%`, minWidth: lowPct > 0 ? '2px' : '0' }}
                               >
                                 {lowPct > 15 && (
-                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white tabular-nums">
+                                  <span className="absolute inset-0 flex items-center justify-center text-2xs font-medium text-white tabular-nums">
                                     {fmtCompact(lowVal, fmt)}
                                   </span>
                                 )}
@@ -197,11 +197,11 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                             {/* Right bar (overrun / red) */}
                             <div className="flex-1 flex justify-start">
                               <div
-                                className="h-5 rounded-r-sm bg-rose-500/70 group-hover:bg-rose-500 transition-colors relative"
+                                className="h-5 rounded-r-sm bg-semantic-error/70 group-hover:bg-semantic-error transition-colors relative"
                                 style={{ width: `${highPct}%`, minWidth: highPct > 0 ? '2px' : '0' }}
                               >
                                 {highPct > 15 && (
-                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white tabular-nums">
+                                  <span className="absolute inset-0 flex items-center justify-center text-2xs font-medium text-white tabular-nums">
                                     +{fmtCompact(highVal, fmt)}
                                   </span>
                                 )}
@@ -216,7 +216,7 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                                 <span className="block text-2xs font-semibold text-content-secondary tabular-nums">
                                   {fmt.format(item.variance_contribution_pct)}%
                                 </span>
-                                <span className="block text-[9px] text-content-quaternary">
+                                <span className="block text-2xs text-content-quaternary">
                                   {t('boq.sensitivity_variance', { defaultValue: 'variance' })}
                                 </span>
                               </>
@@ -235,13 +235,13 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                 {/* Legend */}
                 <div className="flex items-center justify-center gap-6 mt-4 pt-3 border-t border-border-light">
                   <div className="flex items-center gap-1.5">
-                    <div className="h-2.5 w-5 rounded-sm bg-emerald-500/70" />
+                    <div className="h-2.5 w-5 rounded-sm bg-semantic-success/70" />
                     <span className="text-2xs text-content-tertiary">
                       {t('boq.sensitivity_savings', { defaultValue: 'Cost decrease' })}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="h-2.5 w-5 rounded-sm bg-rose-500/70" />
+                    <div className="h-2.5 w-5 rounded-sm bg-semantic-error/70" />
                     <span className="text-2xs text-content-tertiary">
                       {t('boq.sensitivity_overrun', { defaultValue: 'Cost increase' })}
                     </span>
@@ -302,10 +302,10 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                             ? `${fmt.format(item.variance_contribution_pct)}%`
                             : '-'}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-emerald-600 font-medium">
+                        <td className="px-4 py-2 text-right tabular-nums text-semantic-success font-medium">
                           {fmtCompact(item.impact_low, fmt)}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-rose-600 font-medium">
+                        <td className="px-4 py-2 text-right tabular-nums text-semantic-error font-medium">
                           +{fmtCompact(item.impact_high, fmt)}
                         </td>
                       </tr>

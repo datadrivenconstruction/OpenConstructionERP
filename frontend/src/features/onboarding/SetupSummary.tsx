@@ -37,7 +37,7 @@ function Row({
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[11px] font-medium uppercase tracking-wide text-content-tertiary">{label}</span>
+        <span className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary">{label}</span>
         <span className="block truncate text-sm text-content-primary">{value}</span>
       </span>
       {action}

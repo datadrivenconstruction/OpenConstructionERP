@@ -158,7 +158,7 @@ export function ThirdPartyLicenses({ className }: { className?: string }) {
           )}
 
           {failedStatus !== null && !loading && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed">
+            <p className="text-xs text-semantic-warning leading-relaxed">
               {failedStatus === 503
                 ? t('about.third_party_error_missing', {
                     defaultValue:
@@ -202,7 +202,7 @@ export function ThirdPartyLicenses({ className }: { className?: string }) {
                   {openName === item.name && (
                     <div className="border-t border-border-light bg-surface-secondary">
                       {bodyFailed && (
-                        <p className="px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+                        <p className="px-3 py-2 text-xs text-semantic-warning">
                           {t('about.third_party_text_error', {
                             defaultValue: 'This text could not be read from the installation.',
                           })}

@@ -16,10 +16,10 @@ import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
 const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low'] as const;
 const SEVERITY_COLOR: Record<string, string> = {
-  critical: 'bg-rose-500',
+  critical: 'bg-semantic-error',
   high: 'bg-orange-500',
   medium: 'bg-amber-400',
-  low: 'bg-emerald-500',
+  low: 'bg-semantic-success',
 };
 
 function SeverityBar({ by }: { by: Record<string, number> }) {

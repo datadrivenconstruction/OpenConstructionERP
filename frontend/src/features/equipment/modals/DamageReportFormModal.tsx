@@ -224,7 +224,7 @@ export function DamageReportFormModal({
                   {t('equipment.damage.occurred_at', {
                     defaultValue: 'Occurred at',
                   })}{' '}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-semantic-error">*</span>
                 </label>
                 <input
                   type="date"

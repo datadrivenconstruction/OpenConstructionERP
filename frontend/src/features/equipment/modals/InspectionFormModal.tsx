@@ -278,7 +278,7 @@ export function InspectionFormModal({
                   {t('equipment.inspection.performed_at', {
                     defaultValue: 'Performed at',
                   })}{' '}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-semantic-error">*</span>
                 </label>
                 <input
                   type="date"
@@ -292,7 +292,7 @@ export function InspectionFormModal({
                   {t('equipment.inspection.expiry_date', {
                     defaultValue: 'Expiry date',
                   })}{' '}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-semantic-error">*</span>
                 </label>
                 <input
                   type="date"

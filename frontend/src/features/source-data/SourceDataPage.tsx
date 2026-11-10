@@ -283,7 +283,7 @@ function DocumentModal({
             })}
             className={clsx(
               inputCls,
-              nameError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              nameError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -544,7 +544,7 @@ function DocumentRow({
         <Button
           variant="ghost"
           size="sm"
-          className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+          className="text-semantic-error hover:bg-semantic-error-bg"
           icon={<Trash2 size={13} />}
           onClick={() => onDelete(item)}
           aria-label={t('common.delete', { defaultValue: 'Delete' })}

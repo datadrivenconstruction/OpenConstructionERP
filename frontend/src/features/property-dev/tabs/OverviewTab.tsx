@@ -531,16 +531,16 @@ function KpiTile({
   const accentRing: Record<NonNullable<typeof accent>, string> = {
     neutral: 'hover:border-content-secondary',
     blue: 'hover:border-oe-blue',
-    success: 'hover:border-emerald-500',
-    warning: 'hover:border-amber-500',
-    error: 'hover:border-rose-500',
+    success: 'hover:border-semantic-success/60',
+    warning: 'hover:border-semantic-warning/60',
+    error: 'hover:border-semantic-error/60',
   };
   const iconColor: Record<NonNullable<typeof accent>, string> = {
     neutral: 'text-content-secondary',
     blue: 'text-oe-blue',
-    success: 'text-emerald-600',
-    warning: 'text-amber-600',
-    error: 'text-rose-600',
+    success: 'text-semantic-success',
+    warning: 'text-semantic-warning',
+    error: 'text-semantic-error',
   };
   return (
     <button
@@ -569,7 +569,7 @@ function KpiTile({
         {error && (
           <AlertOctagon
             size={11}
-            className="text-rose-500 shrink-0"
+            className="text-semantic-error shrink-0"
             aria-label="error"
           />
         )}

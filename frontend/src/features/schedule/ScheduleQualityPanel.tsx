@@ -366,7 +366,7 @@ function Stat({
       <dt className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</dt>
       <dd
         className={
-          'mt-0.5 text-xl font-bold tabular-nums ' +
+          'mt-0.5 text-xl font-semibold tabular-nums ' +
           (tone === 'warning' ? 'text-semantic-warning' : 'text-content-primary')
         }
       >

@@ -70,7 +70,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
       <div className="relative shrink-0 mt-0.5">
         <Icon size={18} className={styles.icon} />
         {(toast.count ?? 1) > 1 && (
-          <span className="absolute -top-1.5 -end-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-oe-blue px-1 text-[10px] font-bold text-white tabular-nums">
+          <span className="absolute -top-1.5 -end-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-oe-blue px-1 text-2xs font-semibold text-white tabular-nums">
             {toast.count}
           </span>
         )}

@@ -205,7 +205,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
             {/* Desktop / tablet: full table */}
             <div className="hidden overflow-x-auto rounded-lg border border-border-light sm:block">
               <table className="w-full text-right text-xs">
-                <thead className="bg-surface-secondary text-[10px] uppercase tracking-wide text-content-tertiary">
+                <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
                   <tr>
                     <th className="px-2 py-2 text-left">
                       {t('contracts.aia.col_item', { defaultValue: 'Item' })}
@@ -273,7 +273,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
                     <span className="text-xs font-semibold text-content-primary">
                       {ln.item_number}
                     </span>
-                    <span className="text-[10px] text-content-tertiary">
+                    <span className="text-2xs text-content-tertiary">
                       {percentOrBlank(ln.percent_complete)}
                     </span>
                   </div>
@@ -398,7 +398,7 @@ function SummaryRow({
 function MobileCell({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[10px] uppercase tracking-wide text-content-tertiary">{label}</dt>
+      <dt className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</dt>
       <dd className="font-medium text-content-primary">{children}</dd>
     </div>
   );

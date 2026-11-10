@@ -34,11 +34,11 @@ const CLASS_STYLES: Record<number, ClassStyle> = {
     barColor: 'bg-semantic-warning',
   },
   3: {
-    bg: 'bg-amber-50 dark:bg-amber-950/30',
-    text: 'text-amber-700 dark:text-amber-400',
-    border: 'border-amber-300/40',
-    ring: 'ring-amber-200/30',
-    barColor: 'bg-amber-500',
+    bg: 'bg-semantic-warning-bg',
+    text: 'text-semantic-warning',
+    border: 'border-semantic-warning/30',
+    ring: 'ring-semantic-warning/30',
+    barColor: 'bg-semantic-warning',
   },
   2: {
     bg: 'bg-oe-blue-subtle',
@@ -124,7 +124,7 @@ function AccuracyBar({
       />
       {/* Bottom tick labels */}
       <span
-        className="absolute bottom-0 text-[9px] text-content-tertiary font-mono"
+        className="absolute bottom-0 text-2xs text-content-tertiary font-mono"
         style={{ left: `${centerPct}%`, transform: 'translateX(-50%)' }}
       >
         0%
@@ -236,7 +236,7 @@ export function EstimateClassification({ boqId }: { boqId: string }) {
           <div
             className={`flex items-center justify-center w-12 h-12 rounded-xl ${style.bg} ${style.border} border ring-1 ${style.ring}`}
           >
-            <span className={`text-2xl font-bold tabular-nums ${style.text}`}>
+            <span className={`text-2xl font-semibold tabular-nums ${style.text}`}>
               {classification.estimate_class}
             </span>
           </div>
@@ -357,7 +357,7 @@ export function EstimateClassification({ boqId }: { boqId: string }) {
           </div>
 
           {/* AACE reference note */}
-          <p className="text-[10px] text-content-tertiary leading-relaxed">
+          <p className="text-2xs text-content-tertiary leading-relaxed">
             {t('boq.aace_reference', {
               defaultValue:
                 'Based on AACE International Recommended Practice 18R-97. Classification is auto-detected from BOQ completeness metrics.',

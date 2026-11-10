@@ -354,7 +354,7 @@ function RegionImportGrid({
               key={region.id}
               className={`relative flex items-center gap-3 rounded-xl border p-3.5 transition-all ${
                 isLoaded
-                  ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/10'
+                  ? 'border-semantic-success/30 bg-semantic-success/10'
                   : 'border-border hover:border-oe-blue/40 hover:bg-surface-secondary/50'
               }`}
             >
@@ -704,8 +704,8 @@ function ResourceRow({
   const converted = convertedPrice(Number(resource.base_price), resource.currency, fxView);
   const typeColors: Record<string, string> = {
     material: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    equipment: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    labor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    equipment: 'bg-semantic-warning-bg text-semantic-warning',
+    labor: 'bg-semantic-success-bg text-semantic-success',
     operator: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   };
 
@@ -805,7 +805,7 @@ function ResourceRow({
             </div>
           ) : converted.kind === 'unpriced' ? (
             <div
-              className="text-2xs font-normal text-amber-600"
+              className="text-2xs font-normal text-semantic-warning"
               data-testid="catalog-no-rate"
               title={translate('catalog.fx_no_rate_hint', {
                 defaultValue: 'No exchange rate to {{currency}} is on file. Add one in the project currency settings.',
@@ -972,17 +972,17 @@ function ResourceDetailPanel({
         <div className="flex gap-4 mb-4">
           {/* Price cards */}
           <div className="flex gap-2 shrink-0">
-            <div className="rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-green-600 dark:text-green-400 font-medium mb-0.5">{t('common.min', { defaultValue: 'Min' })}</div>
-              <div className="text-sm font-bold text-green-700 dark:text-green-300 tabular-nums">{fmt(minPrice, resource.currency)}</div>
+            <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 px-3 py-2 text-center min-w-[80px]">
+              <div className="text-2xs text-semantic-success font-medium mb-0.5">{t('common.min', { defaultValue: 'Min' })}</div>
+              <div className="text-sm font-semibold text-semantic-success tabular-nums">{fmt(minPrice, resource.currency)}</div>
             </div>
-            <div className="rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-amber-600 dark:text-amber-400 font-medium mb-0.5">{t('common.avg', { defaultValue: 'Avg' })}</div>
-              <div className="text-sm font-bold text-amber-700 dark:text-amber-300 tabular-nums">{fmt(basePrice, resource.currency)}</div>
+            <div className="rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 px-3 py-2 text-center min-w-[80px]">
+              <div className="text-2xs text-semantic-warning font-medium mb-0.5">{t('common.avg', { defaultValue: 'Avg' })}</div>
+              <div className="text-sm font-semibold text-semantic-warning tabular-nums">{fmt(basePrice, resource.currency)}</div>
             </div>
-            <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-red-600 dark:text-red-400 font-medium mb-0.5">{t('common.max', { defaultValue: 'Max' })}</div>
-              <div className="text-sm font-bold text-red-700 dark:text-red-300 tabular-nums">{fmt(maxPrice, resource.currency)}</div>
+            <div className="rounded-lg bg-semantic-error-bg border border-semantic-error/30 px-3 py-2 text-center min-w-[80px]">
+              <div className="text-2xs text-semantic-error font-medium mb-0.5">{t('common.max', { defaultValue: 'Max' })}</div>
+              <div className="text-sm font-semibold text-semantic-error tabular-nums">{fmt(maxPrice, resource.currency)}</div>
             </div>
           </div>
 
@@ -1369,7 +1369,7 @@ function BuildAssemblyModal({
                     <td
                       className={`px-3 py-2 text-center font-medium tabular-nums ${
                         isMultiCurrency
-                          ? 'text-amber-600 dark:text-amber-400'
+                          ? 'text-semantic-warning'
                           : 'text-content-tertiary'
                       }`}
                     >
@@ -1393,7 +1393,7 @@ function BuildAssemblyModal({
                       <button
                         onClick={() => handleRemoveEntry(idx)}
                         aria-label={t('catalog.remove_resource', { defaultValue: 'Remove resource' })}
-                        className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 transition-colors"
+                        className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
                       >
                         <X size={12} />
                       </button>
@@ -1433,13 +1433,13 @@ function BuildAssemblyModal({
               there is no rate table here to convert across currencies, so we
               block creation until the selection shares a single currency. */}
           {isMultiCurrency && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/10 px-4 py-3">
-              <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+              <AlertTriangle size={16} className="text-semantic-warning shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                <p className="text-xs font-medium text-semantic-warning">
                   {t('catalog.mixed_currency_title', { defaultValue: 'Mixed currencies' })}
                 </p>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                <p className="text-xs text-semantic-warning mt-0.5">
                   {t('catalog.mixed_currency_warning', {
                     defaultValue:
                       'Selected resources use {{codes}}. An assembly has a single currency, so amounts cannot be combined. Remove rows until one currency remains.',
@@ -2541,7 +2541,7 @@ function PriceAdjustModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-warning-bg text-semantic-warning">
               <TrendingUp size={18} />
             </div>
             <div>
@@ -2584,8 +2584,8 @@ function PriceAdjustModal({
 
           {/* Published Index selector */}
           {useIndex && (
-            <div className="rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+            <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-medium text-semantic-warning">
                 <TrendingUp size={14} />
                 {t('catalog.inflation_index', { defaultValue: 'Published Construction Cost Indices' })}
               </div>
@@ -2616,11 +2616,11 @@ function PriceAdjustModal({
                     const items = [];
                     for (let y = baseYear; y < targetYear; y++) {
                       const rate = idx?.rates[String(y)] ?? idx?.rates[String(Math.min(y, 2026))] ?? 3.0;
-                      items.push(<span key={y} className="inline-flex items-center gap-1 rounded bg-surface-secondary px-2 py-0.5 text-2xs"><span className="text-content-tertiary">{y}</span><span className="font-medium text-amber-600">+{fmtPercent(rate)}</span></span>);
+                      items.push(<span key={y} className="inline-flex items-center gap-1 rounded bg-surface-secondary px-2 py-0.5 text-2xs"><span className="text-content-tertiary">{y}</span><span className="font-medium text-semantic-warning">+{fmtPercent(rate)}</span></span>);
                     }
                     return items;
                   })()}
-                  <span className="inline-flex items-center gap-1 rounded bg-amber-100 dark:bg-amber-900/20 px-2 py-0.5 text-2xs font-bold text-amber-700 dark:text-amber-300">
+                  <span className="inline-flex items-center gap-1 rounded bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning">
                     = ×{fmtFixed(factor, 4)} (+{percentage}%)
                   </span>
                 </div>
@@ -2671,9 +2671,9 @@ function PriceAdjustModal({
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
                   isIncrease
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                    ? 'bg-semantic-error-bg text-semantic-error'
                     : isDecrease
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                      ? 'bg-semantic-success-bg text-semantic-success'
                       : 'bg-surface-secondary text-content-secondary'
                 }`}
               >
@@ -2790,15 +2790,15 @@ function PriceAdjustModal({
 
           {/* Warning for large changes */}
           {isLargeChange && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/10 px-4 py-3">
-              <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+              <AlertTriangle size={16} className="text-semantic-warning shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                <p className="text-xs font-medium text-semantic-warning">
                   {t('catalog.large_change_warning', {
                     defaultValue: 'Large price change detected (>20%)',
                   })}
                 </p>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                <p className="text-xs text-semantic-warning mt-0.5">
                   {t('catalog.large_change_hint', {
                     defaultValue:
                       'Please confirm this is intentional. This operation cannot be undone.',

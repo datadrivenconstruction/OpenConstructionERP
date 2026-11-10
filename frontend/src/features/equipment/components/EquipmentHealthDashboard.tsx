@@ -31,15 +31,15 @@ import { fmtFixed } from '@/shared/lib/formatters';
  */
 
 const BAND_RING: Record<HealthBand, string> = {
-  green: 'text-emerald-500',
-  amber: 'text-amber-500',
-  red: 'text-rose-500',
+  green: 'text-semantic-success',
+  amber: 'text-semantic-warning',
+  red: 'text-semantic-error',
 };
 
 const BAND_TEXT: Record<HealthBand, string> = {
-  green: 'text-emerald-600 dark:text-emerald-400',
-  amber: 'text-amber-600 dark:text-amber-400',
-  red: 'text-rose-600 dark:text-rose-400',
+  green: 'text-semantic-success',
+  amber: 'text-semantic-warning',
+  red: 'text-semantic-error',
 };
 
 const TREND_ICON: Record<MaintenanceTrend, React.ElementType> = {
@@ -49,9 +49,9 @@ const TREND_ICON: Record<MaintenanceTrend, React.ElementType> = {
 };
 
 const TREND_COLOR: Record<MaintenanceTrend, string> = {
-  improving: 'text-emerald-600 dark:text-emerald-400',
+  improving: 'text-semantic-success',
   stable: 'text-content-secondary',
-  deteriorating: 'text-rose-600 dark:text-rose-400',
+  deteriorating: 'text-semantic-error',
 };
 
 function RiskGauge({ score, band }: { score: number; band: HealthBand }) {
@@ -79,13 +79,13 @@ function RiskGauge({ score, band }: { score: number; band: HealthBand }) {
           strokeWidth="10"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`}
-          className={clsx('transition-all duration-700', BAND_RING[band])}
+          className={clsx('transition-all duration-500', BAND_RING[band])}
           stroke="currentColor"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className={clsx('text-3xl font-bold tabular-nums', BAND_TEXT[band])}
+          className={clsx('text-3xl font-semibold tabular-nums', BAND_TEXT[band])}
         >
           {fmtFixed(clamped, 0)}
         </span>
@@ -179,11 +179,11 @@ export function EquipmentHealthDashboard({
                 className={clsx(
                   'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
                   h.band === 'green' &&
-                    'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+                    'bg-semantic-success-bg text-semantic-success',
                   h.band === 'amber' &&
-                    'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+                    'bg-semantic-warning-bg text-semantic-warning',
                   h.band === 'red' &&
-                    'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300',
+                    'bg-semantic-error-bg text-semantic-error',
                 )}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -264,7 +264,7 @@ export function EquipmentHealthDashboard({
                       <DateDisplay value={a.recorded_at} />
                     </td>
                     <td className="px-3 py-2">
-                      <span className="inline-flex items-center gap-1.5 font-medium text-rose-600 dark:text-rose-400">
+                      <span className="inline-flex items-center gap-1.5 font-medium text-semantic-error">
                         <AlertTriangle size={11} />
                         {a.metric}
                       </span>

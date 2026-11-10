@@ -2209,7 +2209,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         'bg-surface-secondary/70',
         'border-t-2',
         'border-border',
-        'font-bold',
+        'font-semibold',
       );
     }
     if (params.data?._isFooter) {
@@ -3588,7 +3588,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 {(() => {
                   const cur = (meta?.currency as string | undefined) || currencyCode;
                   return (
-                    <CtxItem icon={<Banknote size={14} className="text-amber-600"/>}
+                    <CtxItem icon={<Banknote size={14} className="text-semantic-warning"/>}
                       label={t('boq.set_position_currency', {
                         defaultValue: 'Currency: {{code}}',
                         code: cur,
@@ -3614,7 +3614,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 {anomalyMap?.has(d.id as string) && (() => {
                   const anomaly = anomalyMap.get(d.id as string)!;
                   return (
-                    <CtxItem icon={<AlertTriangle size={14} className="text-amber-500"/>}
+                    <CtxItem icon={<AlertTriangle size={14} className="text-semantic-warning"/>}
                       label={`${anomaly.message.slice(0, 35)}... → Apply ${anomaly.suggestion}`}
                       onClick={() => {
                         onApplyAnomalySuggestion?.(d.id as string, anomaly.suggestion);
@@ -3748,14 +3748,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             {/* Issue #133 — code-collision prompt: insert the existing
                 resource, or change the code and create a new one. */}
             {manualResourceDialog.collision && (
-              <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-700/60 dark:bg-amber-900/20 p-3">
-                <p className="text-[11px] text-content-primary mb-1 font-medium">
+              <div className="mb-4 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg p-3">
+                <p className="text-2xs text-content-primary mb-1 font-medium">
                   {t('boq.resource_code_in_use', {
                     defaultValue: "Code '{{code}}' is already in use",
                     code: manualResourceDialog.collision.code,
                   })}
                 </p>
-                <p className="text-[11px] text-content-secondary mb-2">
+                <p className="text-2xs text-content-secondary mb-2">
                   <span className="font-medium text-content-primary">
                     {manualResourceDialog.collision.name || manualResourceDialog.collision.code}
                   </span>
@@ -3775,13 +3775,13 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 <div className="flex gap-2">
                   <button
                     onClick={handleInsertExistingResource}
-                    className="h-7 px-3 rounded-md text-[11px] font-medium text-white bg-oe-blue hover:bg-oe-blue-hover transition-colors"
+                    className="h-7 px-3 rounded-md text-2xs font-medium text-white bg-oe-blue hover:bg-oe-blue-hover transition-colors"
                   >
                     {t('boq.resource_insert_existing', { defaultValue: 'Insert existing' })}
                   </button>
                   <button
                     onClick={handleChangeResourceCode}
-                    className="h-7 px-3 rounded-md text-[11px] font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
+                    className="h-7 px-3 rounded-md text-2xs font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
                   >
                     {t('boq.resource_change_code', { defaultValue: 'Change code' })}
                   </button>
@@ -3790,7 +3790,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             )}
 
             {/* Name */}
-            <label className="block text-[11px] font-medium text-content-secondary mb-1">
+            <label className="block text-2xs font-medium text-content-secondary mb-1">
               {t('boq.resource_name', { defaultValue: 'Name' })} *
             </label>
             <input
@@ -3805,7 +3805,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
             {/* Code (Issue #133) — reusable resource code. Typing a code
                 already used in the project triggers the reuse prompt. */}
-            <label className="block text-[11px] font-medium text-content-secondary mb-1">
+            <label className="block text-2xs font-medium text-content-secondary mb-1">
               {t('boq.resource_code', { defaultValue: 'Code' })}
               <span className="text-content-tertiary font-normal ml-1">
                 ({t('common.optional', { defaultValue: 'optional' })})
@@ -3836,7 +3836,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             {/* Type + Unit row */}
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
-                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                <label className="block text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.resource_type', { defaultValue: 'Type' })}
                 </label>
                 <select
@@ -3852,7 +3852,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 </select>
               </div>
               <div className="w-24">
-                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                <label className="block text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.unit', { defaultValue: 'Unit' })}
                 </label>
                 <input
@@ -3871,7 +3871,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             {/* Quantity + Rate + Currency row */}
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
-                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                <label className="block text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.quantity', { defaultValue: 'Quantity' })}
                 </label>
                 <input
@@ -3882,7 +3882,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                <label className="block text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.unit_rate', { defaultValue: 'Unit Rate' })}
                 </label>
                 <input
@@ -3894,7 +3894,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 />
               </div>
               <div className="w-24">
-                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                <label className="block text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.resource_currency', { defaultValue: 'Currency' })}
                 </label>
                 <select
@@ -3937,8 +3937,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
             {/* Total preview */}
             <div className="flex items-center justify-between mb-4 px-1">
-              <span className="text-[11px] text-content-tertiary">{t('boq.total', { defaultValue: 'Total' })}</span>
-              <span className="text-sm font-bold text-content-primary tabular-nums">
+              <span className="text-2xs text-content-tertiary">{t('boq.total', { defaultValue: 'Total' })}</span>
+              <span className="text-sm font-semibold text-content-primary tabular-nums">
                 {fmtWithCurrency(
                   parseTypedAmount(manualResourceDialog.quantity, 0) *
                   parseTypedAmount(manualResourceDialog.unitRate, 0),
@@ -4031,17 +4031,17 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               id="boq-position-currency-title"
               className="text-sm font-semibold text-content-primary mb-1 flex items-center gap-2"
             >
-              <Banknote size={16} className="text-amber-600" />
+              <Banknote size={16} className="text-semantic-warning" />
               {t('boq.position_currency_title', { defaultValue: 'Position currency' })}
             </h3>
-            <p className="text-[11px] text-content-tertiary mb-4">
+            <p className="text-2xs text-content-tertiary mb-4">
               {t('boq.position_currency_desc', {
                 defaultValue:
                   'Price this position in a currency other than the project base. The total is converted back to {{base}} for the grand total.',
                 base: currencyCode,
               } as Record<string, unknown>)}
             </p>
-            <label className="block text-[11px] font-medium text-content-secondary mb-1">
+            <label className="block text-2xs font-medium text-content-secondary mb-1">
               {t('boq.resource_currency', { defaultValue: 'Currency' })}
             </label>
             <select
@@ -4137,7 +4137,7 @@ function CtxGroupLabel({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-1 select-none">
       <Sparkles size={10} className="text-violet-500" />
-      <span className="text-[10px] font-semibold text-violet-500 uppercase tracking-wider">{label}</span>
+      <span className="text-2xs font-semibold text-violet-500 uppercase tracking-wider">{label}</span>
     </div>
   );
 }

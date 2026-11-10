@@ -157,7 +157,7 @@ export default function ColorByPropertyPanel({
       </div>
 
       {/* Property picker */}
-      <label className="flex flex-col gap-1 text-[11px] text-content-secondary">
+      <label className="flex flex-col gap-1 text-2xs text-content-secondary">
         <span>
           {t('bim.color_property_label', { defaultValue: 'Property' })}
         </span>
@@ -182,7 +182,7 @@ export default function ColorByPropertyPanel({
       </label>
 
       {/* Palette picker */}
-      <label className="flex flex-col gap-1 text-[11px] text-content-secondary">
+      <label className="flex flex-col gap-1 text-2xs text-content-secondary">
         <span>
           {t('bim.color_palette_label', { defaultValue: 'Palette' })}
         </span>
@@ -203,7 +203,7 @@ export default function ColorByPropertyPanel({
       {/* Numeric range inputs for sequential palettes */}
       {showRangeInputs && (
         <div className="flex items-end gap-2">
-          <label className="flex flex-1 flex-col gap-1 text-[11px] text-content-secondary">
+          <label className="flex flex-1 flex-col gap-1 text-2xs text-content-secondary">
             <span>{t('bim.color_range_min', { defaultValue: 'Min' })}</span>
             <input
               type="number"
@@ -213,7 +213,7 @@ export default function ColorByPropertyPanel({
               className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
             />
           </label>
-          <label className="flex flex-1 flex-col gap-1 text-[11px] text-content-secondary">
+          <label className="flex flex-1 flex-col gap-1 text-2xs text-content-secondary">
             <span>{t('bim.color_range_max', { defaultValue: 'Max' })}</span>
             <input
               type="number"
@@ -250,7 +250,7 @@ export default function ColorByPropertyPanel({
 
       {/* Legend */}
       <div className="flex flex-col gap-1">
-        <div className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+        <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
           {t('bim.color_legend', { defaultValue: 'Legend' })}
         </div>
         {palette === 'categorical-12' || palette === 'fire-rating' ? (
@@ -291,7 +291,7 @@ function CategoricalLegend({
         {rows.map((r) => (
           <li
             key={r.value}
-            className="flex items-center gap-2 text-[11px] text-content-secondary"
+            className="flex items-center gap-2 text-2xs text-content-secondary"
           >
             <span
               className="inline-block h-3 w-3 rounded-sm border border-border-light"
@@ -310,12 +310,12 @@ function CategoricalLegend({
   return (
     <ul className="flex flex-col gap-0.5">
       {top.length === 0 ? (
-        <li className="text-[11px] text-content-tertiary italic">—</li>
+        <li className="text-2xs text-content-tertiary italic">—</li>
       ) : (
         top.map((row, i) => (
           <li
             key={String(row.value)}
-            className="flex items-center gap-2 text-[11px] text-content-secondary"
+            className="flex items-center gap-2 text-2xs text-content-secondary"
           >
             <span
               className="inline-block h-3 w-3 rounded-sm border border-border-light"
@@ -362,7 +362,7 @@ function GradientLegend({ config }: { config: ColorByPropertyConfig }) {
           />
         ))}
       </div>
-      <div className="flex justify-between text-[10px] tabular-nums text-content-tertiary">
+      <div className="flex justify-between text-2xs tabular-nums text-content-tertiary">
         <span>{lo}</span>
         <span>{hi}</span>
       </div>

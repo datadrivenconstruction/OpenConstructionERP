@@ -551,7 +551,7 @@ function SnapshotCard({
             type="button"
             onClick={onDelete}
             disabled={deleting}
-            className="rounded p-1 text-neutral-500 hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-40"
+            className="rounded p-1 text-neutral-500 hover:bg-semantic-error/10 hover:text-rose-300 disabled:opacity-40"
             aria-label="delete"
             data-testid={`snapshot-delete-${snapshot.id}`}
           >

@@ -790,7 +790,7 @@ export function ProjectGeoPage() {
             <h1 className="text-base font-semibold leading-tight text-content-primary">
               {t('geo_hub.project_title', { defaultValue: 'Project map' })}
             </h1>
-            <p className="text-2xs uppercase tracking-[0.14em] text-content-tertiary">
+            <p className="text-2xs uppercase tracking-wider text-content-tertiary">
               {data?.anchor
                 ? t('geo_hub.anchor_set', { defaultValue: 'Anchored' })
                 : t('geo_hub.anchor_missing', { defaultValue: 'Not yet anchored' })}
@@ -853,7 +853,7 @@ export function ProjectGeoPage() {
         {error && (
           <div className="absolute inset-0 z-30 flex items-center justify-center p-6">
             {isStaleBackend ? (
-              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-amber-300/40 bg-amber-950/60 px-4 py-3 text-sm text-amber-100 shadow-md backdrop-blur-md">
+              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-semantic-warning/30 bg-amber-950/60 px-4 py-3 text-sm text-amber-100 shadow-md backdrop-blur-md">
                 <ServerCrash size={16} className="mt-0.5 shrink-0 text-amber-300" />
                 <span>
                   {t('geo_hub.project_stale_backend', {
@@ -863,7 +863,7 @@ export function ProjectGeoPage() {
                 </span>
               </div>
             ) : (
-              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-red-300/40 bg-red-950/60 px-4 py-3 text-sm text-red-100 shadow-md backdrop-blur-md">
+              <div className="inline-flex max-w-md items-start gap-3 rounded-lg border border-semantic-error/30 bg-red-950/60 px-4 py-3 text-sm text-red-100 shadow-md backdrop-blur-md">
                 <AlertTriangle size={16} className="mt-0.5 shrink-0 text-red-300" />
                 <span>
                   {t('geo_hub.load_failed', {

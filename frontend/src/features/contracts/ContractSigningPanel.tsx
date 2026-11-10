@@ -231,18 +231,18 @@ export function ContractSigningPanel({
           <>
             {/* The banner that is the reason the session carries a hash at all. */}
             {staleNames.length > 0 && (
-              <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 dark:border-amber-800 dark:bg-amber-950/40">
+              <div className="flex items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5">
                 <AlertTriangle
                   size={18}
-                  className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                  className="mt-0.5 shrink-0 text-semantic-warning"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                  <p className="text-sm font-semibold text-semantic-warning">
                     {t('contracts.esign.stale_title', {
                       defaultValue: 'The contract changed after these signatures',
                     })}
                   </p>
-                  <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
+                  <p className="mt-0.5 text-sm text-semantic-warning">
                     {t('contracts.esign.stale_body', {
                       defaultValue:
                         '{{names}} signed an earlier version. Ask them to sign again before the contract is activated.',
@@ -272,7 +272,7 @@ export function ContractSigningPanel({
                       className={clsx(
                         'inline-flex shrink-0 items-center gap-1 text-xs',
                         hasSigned
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-semantic-success'
                           : 'text-content-tertiary',
                       )}
                     >

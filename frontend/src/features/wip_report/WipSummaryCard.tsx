@@ -41,11 +41,11 @@ export function WipSummaryCard() {
             <div key={tot.currency} className="grid grid-cols-3 gap-2 text-xs" data-testid="wip-card-total">
               <div>
                 <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('wip_report.col_over', { defaultValue: 'Over-billing' })}</div>
-                <div className="tabular-nums font-semibold text-amber-700 dark:text-amber-400">{formatCurrency(tot.over_billing, tot.currency)}</div>
+                <div className="tabular-nums font-semibold text-semantic-warning">{formatCurrency(tot.over_billing, tot.currency)}</div>
               </div>
               <div>
                 <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('wip_report.col_under', { defaultValue: 'Under-billing' })}</div>
-                <div className="tabular-nums font-semibold text-sky-700 dark:text-sky-400">{formatCurrency(tot.under_billing, tot.currency)}</div>
+                <div className="tabular-nums font-semibold text-semantic-info">{formatCurrency(tot.under_billing, tot.currency)}</div>
               </div>
               <div>
                 <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('wip_report.col_fade', { defaultValue: 'Fade / gain' })}</div>

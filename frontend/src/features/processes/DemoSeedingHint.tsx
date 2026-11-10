@@ -19,9 +19,9 @@ export function DemoSeedingHint() {
     <div
       role="status"
       data-testid="demo-seeding-hint"
-      className="mb-3 flex items-center gap-2 rounded-xl border border-sky-500/25 bg-sky-500/5 px-3 py-2 text-xs text-content-secondary"
+      className="mb-3 flex items-center gap-2 rounded-xl border border-sky-500/25 bg-semantic-info/5 px-3 py-2 text-xs text-content-secondary"
     >
-      <Loader2 size={14} className="shrink-0 animate-spin text-sky-600" aria-hidden />
+      <Loader2 size={14} className="shrink-0 animate-spin text-semantic-info" aria-hidden />
       {t('processes.demo_seeding', {
         defaultValue: 'The demo projects are still being installed. They appear here in about a minute.',
       })}

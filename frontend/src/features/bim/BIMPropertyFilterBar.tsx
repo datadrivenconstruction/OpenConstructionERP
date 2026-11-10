@@ -161,7 +161,7 @@ export default function BIMPropertyFilterBar({
   ];
 
   const inputClass =
-    'w-full min-w-0 text-[11px] py-1 px-1.5 rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
+    'w-full min-w-0 text-2xs py-1 px-1.5 rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
 
   return (
     <div className="mt-2 space-y-1.5" data-testid="bim-pfilter">
@@ -170,7 +170,7 @@ export default function BIMPropertyFilterBar({
           {chips.map((chip) => (
             <span
               key={chip.id}
-              className="inline-flex items-center gap-1 max-w-full ps-2 pe-1 py-0.5 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-medium"
+              className="inline-flex items-center gap-1 max-w-full ps-2 pe-1 py-0.5 rounded-full bg-oe-blue/10 text-oe-blue text-2xs font-medium"
               data-testid="bim-pfilter-chip"
             >
               <span className="truncate">{chip.label}</span>
@@ -187,7 +187,7 @@ export default function BIMPropertyFilterBar({
           <button
             type="button"
             onClick={onClearAll}
-            className="text-[10px] text-content-tertiary hover:text-oe-blue underline-offset-2 hover:underline"
+            className="text-2xs text-content-tertiary hover:text-oe-blue underline-offset-2 hover:underline"
             data-testid="bim-pfilter-clear-all"
           >
             {t('bim.filter_clear', { defaultValue: 'Clear all' })}
@@ -199,7 +199,7 @@ export default function BIMPropertyFilterBar({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 text-[11px] font-medium text-oe-blue hover:underline"
+          className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
           data-testid="bim-pfilter-open"
         >
           <Plus size={12} />
@@ -314,7 +314,7 @@ export default function BIMPropertyFilterBar({
               type="button"
               onClick={onLoadProperties}
               disabled={propertiesLoading}
-              className="text-[10px] text-oe-blue hover:underline disabled:opacity-60"
+              className="text-2xs text-oe-blue hover:underline disabled:opacity-60"
             >
               {propertiesLoading
                 ? t('bim.groupby.loading_params', { defaultValue: 'Loading all parameters...' })
@@ -325,14 +325,14 @@ export default function BIMPropertyFilterBar({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="px-2 py-1 rounded text-[11px] text-content-secondary hover:bg-surface-tertiary"
+              className="px-2 py-1 rounded text-2xs text-content-secondary hover:bg-surface-tertiary"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
             <button
               type="submit"
               disabled={!canAdd}
-              className="px-2.5 py-1 rounded text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-40"
+              className="px-2.5 py-1 rounded text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-40"
               data-testid="bim-pfilter-add"
             >
               {t('bim.pfilter.apply', { defaultValue: 'Add filter' })}

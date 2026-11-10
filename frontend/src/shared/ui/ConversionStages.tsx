@@ -57,7 +57,7 @@ export function ConversionStages({
   const longStep = current === 'convert' || current === 'model3d' || current === 'table' || current === 'entities';
 
   const timeLine = startedAt && !isUpload ? (
-    <p className="text-[11px] text-content-tertiary tabular-nums" data-testid="conversion-elapsed">
+    <p className="text-2xs text-content-tertiary tabular-nums" data-testid="conversion-elapsed">
       {t('conv.elapsed_of_limit', {
         defaultValue: 'Running for {{elapsed}}. One conversion may take up to {{minutes}} minutes.',
         elapsed,
@@ -80,8 +80,8 @@ export function ConversionStages({
       ) : (
         <div
           className={clsx(
-            'h-full rounded-full transition-all duration-1000',
-            share > 80 ? 'bg-amber-500' : 'bg-oe-blue/70',
+            'h-full rounded-full transition-all duration-500',
+            share > 80 ? 'bg-semantic-warning' : 'bg-oe-blue/70',
           )}
           style={{ width: `${Math.max(4, share)}%` }}
         />
@@ -94,14 +94,14 @@ export function ConversionStages({
     return (
       <div className="space-y-1" data-testid="conversion-stages-compact">
         {bar}
-        <p className="text-[10px] font-medium text-content-secondary">
+        <p className="text-2xs font-medium text-content-secondary">
           {t('conv.step_of', { defaultValue: 'Step {{step}} of {{total}}', step: at + 1, total: stages.length })}
           {' · '}
           {text.label}
           {isUpload ? ` · ${percent}%` : ''}
         </p>
         {startedAt && !isUpload && (
-          <p className="text-[10px] text-content-quaternary tabular-nums">
+          <p className="text-2xs text-content-quaternary tabular-nums">
             {t('conv.elapsed_short', { defaultValue: '{{elapsed}} of up to {{minutes}} min', elapsed, minutes })}
           </p>
         )}
@@ -127,8 +127,8 @@ export function ConversionStages({
             >
               <span
                 className={clsx(
-                  'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                  state === 'done' && 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+                  'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-2xs font-semibold',
+                  state === 'done' && 'bg-semantic-success/15 text-semantic-success',
                   state === 'current' && 'bg-oe-blue/15 text-oe-blue',
                   state === 'pending' && 'bg-surface-secondary text-content-quaternary',
                 )}
@@ -163,7 +163,7 @@ export function ConversionStages({
                 </span>
                 {state === 'current' && (
                   <span className="mt-1 block space-y-1.5">
-                    <span className="block text-[11px] leading-snug text-content-tertiary">{text.hint}</span>
+                    <span className="block text-2xs leading-snug text-content-tertiary">{text.hint}</span>
                     {(isUpload || longStep) && bar}
                     {timeLine}
                   </span>
@@ -174,7 +174,7 @@ export function ConversionStages({
         })}
       </ol>
       <p
-        className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-[11px] leading-relaxed text-content-secondary"
+        className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-2xs leading-relaxed text-content-secondary"
         data-testid="conversion-note"
       >
         {isUpload

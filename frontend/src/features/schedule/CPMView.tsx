@@ -266,7 +266,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
               {activities.map((a) => (
                 <tr
                   key={a.id}
-                  className={a.is_critical ? 'bg-red-50' : 'hover:bg-gray-50'}
+                  className={a.is_critical ? 'bg-semantic-error-bg' : 'hover:bg-gray-50'}
                 >
                   <td className="px-3 py-2 font-mono text-xs">{a.wbs_code}</td>
                   <td className="px-3 py-2">{a.name}</td>
@@ -402,7 +402,7 @@ export function CPMView({ scheduleId }: CPMViewProps) {
                 </p>
                 {levelResult.unresolvable && levelResult.unresolvable.length > 0 && (
                   <div
-                    className="mb-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+                    className="mb-3 rounded border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
                     data-testid="level-unresolvable"
                   >
                     <p className="font-medium">

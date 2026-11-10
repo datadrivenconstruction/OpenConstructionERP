@@ -1236,7 +1236,7 @@ export function CreateProjectModal({
             >
               {Array.from({ length: STEP_COUNT }, (_, i) => i + 1).map((s) => {
                 const navigable = s <= maxStep && s !== step;
-                const dotCls = `flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ring-4 ring-surface-elevated transition-colors ${
+                const dotCls = `flex h-6 w-6 items-center justify-center rounded-full text-2xs font-semibold ring-4 ring-surface-elevated transition-colors ${
                   s < step
                     ? 'bg-oe-blue text-white'
                     : s === step
@@ -1263,7 +1263,7 @@ export function CreateProjectModal({
                       </div>
                     )}
                     <span
-                      className={`hidden sm:block text-[10px] leading-tight text-center truncate max-w-[88px] ${
+                      className={`hidden sm:block text-2xs leading-tight text-center truncate max-w-[88px] ${
                         s === step
                           ? 'text-content-secondary font-medium'
                           : 'text-content-quaternary'
@@ -1369,8 +1369,8 @@ export function CreateProjectModal({
                     className="text-sm font-medium text-content-primary block mb-1.5"
                   >
                     {t('projects.project_name')}
-                    <span aria-hidden className="ml-0.5 text-red-600 dark:text-red-400">*</span>
-                    <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-600 dark:bg-red-900/30 dark:text-red-300">
+                    <span aria-hidden className="ml-0.5 text-semantic-error">*</span>
+                    <span className="ml-1.5 rounded-full bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-semantic-error">
                       {t('projects.create.required_badge', { defaultValue: 'Required' })}
                     </span>
                   </label>
@@ -1384,13 +1384,13 @@ export function CreateProjectModal({
                   />
                 </div>
                 {duplicateExists && (
-                  <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 -mt-2">
-                    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 -mt-2">
+                    <AlertTriangle size={16} className="text-semantic-warning shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <p className="font-medium text-amber-900 dark:text-amber-200">
+                      <p className="font-medium text-semantic-warning">
                         {t('projects.duplicate_name_warning', { defaultValue: 'A project with this name already exists.' })}
                       </p>
-                      <p className="text-amber-800 dark:text-amber-300 mt-0.5">
+                      <p className="text-semantic-warning mt-0.5">
                         {duplicateConfirmed
                           ? t('projects.duplicate_name_confirm_again_create', { defaultValue: 'Click Create again to proceed anyway.' })
                           : t('projects.duplicate_name_confirm_hint_create', { defaultValue: 'Change the name, or click Create again to proceed anyway.' })}
@@ -1414,7 +1414,7 @@ export function CreateProjectModal({
                   <span className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
                     {t('projects.create.optional_section', { defaultValue: 'Optional details' })}
                   </span>
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-content-tertiary">
+                  <span className="flex items-center gap-1 text-2xs font-medium text-content-tertiary">
                     {optionalOpen
                       ? t('projects.create.optional_hide', { defaultValue: 'Hide' })
                       : t('projects.create.optional_show', { defaultValue: 'Show' })}
@@ -1440,7 +1440,7 @@ export function CreateProjectModal({
                       <p className="text-sm font-semibold text-content-primary">
                         {t('projects.create.grp_description_title', { defaultValue: 'Description & notes' })}
                       </p>
-                      <p className="text-[11px] text-content-tertiary">
+                      <p className="text-2xs text-content-tertiary">
                         {t('projects.create.grp_description_sub', { defaultValue: 'Scope, context - anything useful later. Optional.' })}
                       </p>
                     </div>
@@ -1465,7 +1465,7 @@ export function CreateProjectModal({
                       <p className="text-sm font-semibold text-content-primary">
                         {t('projects.create.grp_localization_title', { defaultValue: 'Classification & localization' })}
                       </p>
-                      <p className="text-[11px] text-content-tertiary">
+                      <p className="text-2xs text-content-tertiary">
                         {t('projects.create.grp_localization_sub', { defaultValue: 'Region, standard, currency and language. Optional - editable later.' })}
                       </p>
                     </div>
@@ -1530,7 +1530,7 @@ export function CreateProjectModal({
                     )}
                     {effectiveCurrency
                       ? (
-                        <p className="mt-1 text-[11px] text-content-tertiary">
+                        <p className="mt-1 text-2xs text-content-tertiary">
                           {t('projects.currency_drives_totals', {
                             defaultValue: 'All amounts in this project use {{currency}}. You can change it here or later in Project Settings.',
                             currency: effectiveCurrency,
@@ -1538,7 +1538,7 @@ export function CreateProjectModal({
                         </p>
                       )
                       : (
-                        <p className="mt-1 text-[11px] text-content-tertiary">
+                        <p className="mt-1 text-2xs text-content-tertiary">
                           {t('projects.currency_pick_hint', {
                             defaultValue: 'Pick the currency for this project. Left blank, amounts have no currency until you set one.',
                           })}
@@ -1587,7 +1587,7 @@ export function CreateProjectModal({
                       <p className="text-sm font-semibold text-content-primary">
                         {t('projects.create.grp_identification_title', { defaultValue: 'Identification' })}
                       </p>
-                      <p className="text-[11px] text-content-tertiary">
+                      <p className="text-2xs text-content-tertiary">
                         {t('projects.create.grp_identification_sub', { defaultValue: 'Code, type and client. Optional - auto-filled where possible.' })}
                       </p>
                     </div>
@@ -1657,7 +1657,7 @@ export function CreateProjectModal({
                       <p className="text-sm font-semibold text-content-primary">
                         {t('projects.address', { defaultValue: 'Site address' })}
                       </p>
-                      <p className="text-[11px] text-content-tertiary">
+                      <p className="text-2xs text-content-tertiary">
                         {t('projects.address_hint', { defaultValue: 'Optional - enables the location map and weather forecast' })}
                       </p>
                     </div>
@@ -1704,7 +1704,7 @@ export function CreateProjectModal({
                       <p className="text-sm font-semibold text-content-primary">
                         {t('projects.create.grp_schedule_title', { defaultValue: 'Schedule & budget' })}
                       </p>
-                      <p className="text-[11px] text-content-tertiary">
+                      <p className="text-2xs text-content-tertiary">
                         {t('projects.create.grp_schedule_sub', { defaultValue: 'Dates, budget, contract value and the regional cost factor. Optional.' })}
                       </p>
                     </div>
@@ -1816,7 +1816,7 @@ export function CreateProjectModal({
                 </div>
               </div>
 
-              <p className="text-[11px] text-content-quaternary">
+              <p className="text-2xs text-content-quaternary">
                 {t('project_wizard.classic_defaults_note', {
                   defaultValue:
                     'Modules and lifecycle scope use the full-lifecycle default. Switch to the guided setup to tailor them, or change everything later in Project Settings.',
@@ -1838,13 +1838,13 @@ export function CreateProjectModal({
                 autoFocus
               />
               {duplicateExists && (
-                <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 -mt-2">
-                  <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 -mt-2">
+                  <AlertTriangle size={16} className="text-semantic-warning shrink-0 mt-0.5" />
                   <div className="text-xs">
-                    <p className="font-medium text-amber-900 dark:text-amber-200">
+                    <p className="font-medium text-semantic-warning">
                       {t('projects.duplicate_name_warning', { defaultValue: 'A project with this name already exists.' })}
                     </p>
-                    <p className="text-amber-800 dark:text-amber-300 mt-0.5">
+                    <p className="text-semantic-warning mt-0.5">
                       {duplicateConfirmed
                         ? t('projects.duplicate_name_confirm_again', { defaultValue: 'Click Next again to proceed anyway.' })
                         : t('projects.duplicate_name_confirm_hint', { defaultValue: 'Change the name, or click Next again to proceed anyway.' })}
@@ -1926,7 +1926,7 @@ export function CreateProjectModal({
                     />
                   )}
                   {effectiveCurrency && (
-                    <p className="mt-1 text-[11px] text-content-tertiary">
+                    <p className="mt-1 text-2xs text-content-tertiary">
                       {t('projects.currency_drives_totals', {
                         defaultValue: 'All amounts in this project use {{currency}}. You can change it here or later in Project Settings.',
                         currency: effectiveCurrency,
@@ -1985,9 +1985,9 @@ export function CreateProjectModal({
                 </div>
               )}
               {presetsError && !presetsLoading && (
-                <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 text-xs">
-                  <AlertTriangle size={15} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <span className="text-amber-800 dark:text-amber-300">
+                <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs">
+                  <AlertTriangle size={15} className="text-semantic-warning shrink-0 mt-0.5" />
+                  <span className="text-semantic-warning">
                     {t('project_wizard.presets_error', { defaultValue: 'Couldn’t load project types. You can still continue with the default and refine modules later in Project Settings.' })}
                   </span>
                 </div>
@@ -2021,7 +2021,7 @@ export function CreateProjectModal({
                           defaultValue: p.blurb_en,
                         })}
                       </p>
-                      <p className="text-[11px] text-content-quaternary mt-1.5 flex items-center gap-1">
+                      <p className="text-2xs text-content-quaternary mt-1.5 flex items-center gap-1">
                         <Layers size={11} />
                         {t('project_wizard.module_count', {
                           defaultValue: '{{n}} modules',
@@ -2117,7 +2117,7 @@ export function CreateProjectModal({
                   <label className="text-sm font-semibold text-content-primary">
                     {t('projects.address', { defaultValue: 'Site address' })}
                   </label>
-                  <span className="text-[10px] text-content-quaternary">
+                  <span className="text-2xs text-content-quaternary">
                     {t('projects.address_hint', { defaultValue: 'Optional - enables the location map and weather forecast' })}
                   </span>
                 </div>
@@ -2258,7 +2258,7 @@ export function CreateProjectModal({
           {mode === 'choose' ? null : mode === 'classic' || isLast ? (
             <div className="flex items-center gap-3 min-w-0">
               {!canSubmit && submitBlockReason && (
-                <span className="hidden sm:flex items-center gap-1 text-xs text-amber-700 dark:text-amber-300 min-w-0">
+                <span className="hidden sm:flex items-center gap-1 text-xs text-semantic-warning min-w-0">
                   <AlertTriangle size={13} className="shrink-0" />
                   <span className="truncate">{submitBlockReason}</span>
                 </span>
@@ -2317,8 +2317,8 @@ export function CreateProjectModal({
               aria-labelledby="cpw-discard-title"
               className="mx-6 max-w-sm rounded-xl border border-border-light bg-surface-elevated p-5 shadow-xl text-center"
             >
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-semantic-warning-bg">
+                <AlertTriangle size={18} className="text-semantic-warning" />
               </div>
               <p
                 id="cpw-discard-title"
@@ -2421,12 +2421,12 @@ function CustomValueInput({
         aria-invalid={invalid}
         className={`mt-2 h-10 w-full rounded-lg border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:border-transparent ${
           invalid
-            ? 'border-amber-400 focus:ring-amber-400'
+            ? 'border-semantic-warning/60 focus:ring-semantic-warning/60'
             : 'border-border focus:ring-oe-blue'
         }`}
       />
       {invalid && (
-        <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
+        <p className="mt-1 text-2xs text-semantic-warning">
           {emptyHint}
         </p>
       )}
@@ -2451,7 +2451,7 @@ function OptionalLabel({
       className="text-sm font-medium text-content-primary block mb-1.5"
     >
       {text}
-      <span className="ml-1.5 text-[11px] font-normal text-content-tertiary">
+      <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
         ({optionalText})
       </span>
     </label>
@@ -2507,7 +2507,7 @@ function GroupedSelectField({
       <label className="text-sm font-medium text-content-primary">
         {label}
         {optional && (
-          <span className="ml-1.5 text-[11px] font-normal text-content-tertiary">
+          <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
             ({optionalText})
           </span>
         )}
@@ -2553,7 +2553,7 @@ function SelectField({
       <label className="text-sm font-medium text-content-primary">
         {label}
         {optional && (
-          <span className="ml-1.5 text-[11px] font-normal text-content-tertiary">
+          <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
             ({optionalText})
           </span>
         )}

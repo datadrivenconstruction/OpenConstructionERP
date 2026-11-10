@@ -34,10 +34,10 @@ type ResourceTypeFilter = (typeof RESOURCE_TYPE_FILTERS)[number];
 
 const TYPE_BADGE_STYLES: Record<string, string> = {
   material: 'bg-blue-500/10 text-blue-600',
-  labor: 'bg-amber-500/10 text-amber-600',
+  labor: 'bg-semantic-warning/10 text-semantic-warning',
   machinery: 'bg-teal-500/10 text-teal-600',
   equipment: 'bg-violet-500/10 text-violet-600',
-  subcontractor: 'bg-rose-500/10 text-rose-600',
+  subcontractor: 'bg-semantic-error/10 text-semantic-error',
   other: 'bg-gray-500/10 text-gray-600',
 };
 
@@ -350,7 +350,7 @@ export function ResourceSummary({
               {Object.entries(summary.by_type).map(([type, info]) => (
                 <span
                   key={type}
-                  className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${TYPE_BADGE_STYLES[type] || TYPE_BADGE_STYLES.other}`}
+                  className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-medium ${TYPE_BADGE_STYLES[type] || TYPE_BADGE_STYLES.other}`}
                 >
                   {info.count} {typeFilterLabel(type as ResourceTypeFilter).toLowerCase()}
                 </span>
@@ -368,7 +368,7 @@ export function ResourceSummary({
       {!collapsed && (
         <div className="border-t border-border-light">
           {Object.keys(summary.unconverted ?? {}).length > 0 && (
-            <div role="status" className="px-4 py-2 text-xs text-amber-700">
+            <div role="status" className="px-4 py-2 text-xs text-semantic-warning">
               {Object.entries(summary.unconverted ?? {}).map(([code, amount]) => (
                 <div key={code} data-testid={`unconverted-${code}`}>
                   {t('boq.rs_unconverted', {
@@ -600,12 +600,12 @@ export function ResourceSummary({
                             <td />
                             <td />
                             <td />
-                            <td className="px-3 py-2 text-right text-xs font-bold text-content-primary tabular-nums">
+                            <td className="px-3 py-2 text-right text-xs font-semibold text-content-primary tabular-nums">
                               {fmtMoney.format(
                                 filteredResources.reduce((sum, r) => sum + toNum(r.total_cost), 0),
                               )}
                             </td>
-                            <td className="px-3 py-2 text-right text-xs font-bold text-content-primary tabular-nums">
+                            <td className="px-3 py-2 text-right text-xs font-semibold text-content-primary tabular-nums">
                               {/* Σ ABC% should be 100 when nothing is filtered;
                                   when typeFilter or search excludes rows the
                                   remaining sum is shown so the user can see how
@@ -732,7 +732,7 @@ function ResourceRow({
     pillTone === 'blue'
       ? 'bg-oe-blue-subtle/50 text-oe-blue-text ring-1 ring-oe-blue/30 hover:bg-oe-blue-subtle'
       : pillTone === 'amber'
-      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 hover:bg-amber-500/25'
+      ? 'bg-semantic-warning/15 text-semantic-warning dark:text-amber-300 ring-1 ring-amber-500/30 hover:bg-semantic-warning/25'
       : 'bg-surface-tertiary text-content-secondary ring-1 ring-border-light hover:bg-surface-tertiary/80';
 
   const pillLabel = (() => {
@@ -760,11 +760,11 @@ function ResourceRow({
   const abcPct = resource.abc_percentage ?? 0;
   const abcBadgeClass =
     abcClass === 'A'
-      ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500/30'
+      ? 'bg-semantic-error/15 text-semantic-error dark:text-rose-300 ring-1 ring-rose-500/30'
       : abcClass === 'B'
-      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30'
+      ? 'bg-semantic-warning/15 text-semantic-warning dark:text-amber-300 ring-1 ring-amber-500/30'
       : abcClass === 'C'
-      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/30'
+      ? 'bg-semantic-success/15 text-semantic-success dark:text-emerald-300 ring-1 ring-emerald-500/30'
       : 'bg-surface-tertiary text-content-tertiary ring-1 ring-border-light';
 
   return (
@@ -792,7 +792,7 @@ function ResourceRow({
           </span>
         ) : (
           <span
-            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeStyle}`}
+            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-medium ${badgeStyle}`}
           >
             {TYPE_ICONS[resource.type] || TYPE_ICONS.other}
             {getResourceTypeLabel(resource.type, t)}
@@ -817,7 +817,7 @@ function ResourceRow({
                   e.stopPropagation();
                   setPickerOpen((open) => !open);
                 }}
-                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium transition-colors ${pillClass}`}
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-2xs font-medium transition-colors ${pillClass}`}
                 title={
                   isMixed
                     ? t('boq.rs_variant_pill_mixed_tooltip', {
@@ -860,7 +860,7 @@ function ResourceRow({
       </td>
       <td className="px-3 py-2 text-right tabular-nums">
         <span
-          className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${abcBadgeClass}`}
+          className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-semibold ${abcBadgeClass}`}
           title={
             abcClass
               ? t('boq.rs_abc_pill_tooltip', {
@@ -872,7 +872,7 @@ function ResourceRow({
               : ''
           }
         >
-          {abcClass && <span className="font-bold">{abcClass}</span>}
+          {abcClass && <span className="font-semibold">{abcClass}</span>}
           <span>{fmtPercent(abcPct)}</span>
         </span>
       </td>
@@ -881,7 +881,7 @@ function ResourceRow({
       </td>
       <td className="px-2 py-2 text-center">
         {isSaved ? (
-          <span className="inline-flex items-center gap-0.5 text-semantic-success text-[10px] font-medium">
+          <span className="inline-flex items-center gap-0.5 text-semantic-success text-2xs font-medium">
             <Check size={12} />
           </span>
         ) : (

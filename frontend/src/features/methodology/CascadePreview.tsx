@@ -287,7 +287,7 @@ function PreviewBreakdown({ preview, currency }: { preview: PreviewResult; curre
                   <MoneyDisplay amount={preview.markupTotal} currency={cur} signDisplay="always" />
                 </span>
               </td>
-              <td className="px-2.5 py-2 text-right text-sm font-bold tabular-nums text-content-primary">
+              <td className="px-2.5 py-2 text-right text-sm font-semibold tabular-nums text-content-primary">
                 <MoneyDisplay amount={preview.grandTotal} currency={cur} />
               </td>
             </tr>

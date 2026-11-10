@@ -394,7 +394,7 @@ function WeekDetail({ weekId }: { weekId: string }) {
           <div className="flex items-center gap-2 text-sm">
             {errors.length === 0 ? (
               <>
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 text-semantic-success" />
                 <span>{t('certified_payroll.validation.clean')}</span>
               </>
             ) : (
@@ -418,7 +418,7 @@ function WeekDetail({ weekId }: { weekId: string }) {
                 'rounded-md border p-3 text-xs',
                 f.severity === 'error'
                   ? 'border-destructive/40 bg-destructive/5'
-                  : 'border-amber-500/40 bg-amber-500/5',
+                  : 'border-amber-500/40 bg-semantic-warning/5',
               )}
             >
               <p className="font-medium">{f.rule_name}</p>
@@ -479,7 +479,7 @@ function WeekDetail({ weekId }: { weekId: string }) {
                       <td key={d} className="p-2 text-right tabular-nums">
                         {hoursOf(cell?.straight)}
                         {Number(cell?.overtime ?? 0) > 0 && (
-                          <span className="ml-1 text-amber-600">
+                          <span className="ml-1 text-semantic-warning">
                             +{hoursOf(cell?.overtime)}
                           </span>
                         )}

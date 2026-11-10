@@ -229,7 +229,7 @@ export function RiskContingencyApply({
       </div>
 
       {previewMessage && !s && (
-        <div className="text-xs text-amber-700 dark:text-amber-400" role="alert">
+        <div className="text-xs text-semantic-warning" role="alert">
           {previewMessage}
         </div>
       )}
@@ -237,7 +237,7 @@ export function RiskContingencyApply({
       {s && (
         <div className="text-xs text-content-secondary space-y-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-base font-bold text-content-primary tabular-nums">{money(s.amount, fmt)}</span>
+            <span className="text-base font-semibold text-content-primary tabular-nums">{money(s.amount, fmt)}</span>
             <span className="tabular-nums">(+{fmtPercent(s.pct_of_base)})</span>
             <span
               className="tabular-nums"
@@ -331,13 +331,13 @@ export function RiskContingencyApply({
       {applied && (
         <div
           className={`rounded border px-3 py-2 text-xs space-y-1 ${
-            data?.stale ? 'border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20' : 'border-border-light'
+            data?.stale ? 'border-amber-400/60 bg-semantic-warning/10 dark:bg-amber-950/20' : 'border-border-light'
           }`}
           data-testid="risk-contingency-applied"
         >
           <div className="flex flex-wrap items-center gap-2">
             {data?.stale ? (
-              <AlertTriangle size={13} className="text-amber-500" aria-hidden />
+              <AlertTriangle size={13} className="text-semantic-warning" aria-hidden />
             ) : (
               <CheckCircle2 size={13} className="text-semantic-success" aria-hidden />
             )}
@@ -379,7 +379,7 @@ export function RiskContingencyApply({
             })}
           </div>
           {data?.stale && (
-            <div className="text-2xs text-amber-700 dark:text-amber-400">
+            <div className="text-2xs text-semantic-warning">
               {t(applied.source === 'register' ? 'boq.risk_contingency_stale_register' : 'boq.risk_contingency_stale', {
                 defaultValue:
                   applied.source === 'register'

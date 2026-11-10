@@ -54,11 +54,11 @@ function cellClasses(cell: PortfolioCell | undefined): string {
   }
   const a = cell.allocation_percent;
   if (cell.over_allocated) {
-    return 'bg-rose-500/90 text-white font-semibold';
+    return 'bg-semantic-error/90 text-white font-semibold';
   }
   if (a > 80) return 'bg-amber-400/80 text-amber-950';
-  if (a > 50) return 'bg-emerald-500/70 text-emerald-950';
-  return 'bg-emerald-300/50 text-emerald-900';
+  if (a > 50) return 'bg-semantic-success/70 text-emerald-950';
+  return 'bg-emerald-300/50 text-semantic-success';
 }
 
 export function CapacityPlanningPage() {
@@ -260,7 +260,7 @@ export function CapacityPlanningPage() {
                   {buckets.map((b) => (
                     <div
                       key={b.index}
-                      className="text-center text-[11px] font-medium text-content-tertiary"
+                      className="text-center text-2xs font-medium text-content-tertiary"
                       title={`${b.start.slice(0, 10)} → ${b.end.slice(0, 10)}`}
                     >
                       {b.label}
@@ -311,7 +311,7 @@ export function CapacityPlanningPage() {
                                 </Badge>
                               )}
                             </div>
-                            <span className="block truncate text-[11px] text-content-tertiary">
+                            <span className="block truncate text-2xs text-content-tertiary">
                               {row.code}
                             </span>
                           </div>
@@ -332,9 +332,9 @@ export function CapacityPlanningPage() {
                             cell && cell.allocation_percent > 0
                               ? `${cell.allocation_percent}%`
                               : '';
-                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${cellClasses(
+                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${cellClasses(
                             cell,
-                          )} ${cell?.cross_project ? 'ring-2 ring-inset ring-rose-700' : ''}`;
+                          )} ${cell?.cross_project ? 'ring-2 ring-inset ring-semantic-error/60' : ''}`;
                           if (cell?.over_allocated) {
                             return (
                               <button
@@ -371,11 +371,11 @@ export function CapacityPlanningPage() {
           {data && !isLoading && resources.length > 0 && (
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4 text-xs text-content-tertiary">
               <LegendSwatch className="bg-emerald-300/50" label={t('capacity.legend_low', { defaultValue: '≤ 50%' })} />
-              <LegendSwatch className="bg-emerald-500/70" label={t('capacity.legend_mid', { defaultValue: '51-80%' })} />
+              <LegendSwatch className="bg-semantic-success/70" label={t('capacity.legend_mid', { defaultValue: '51-80%' })} />
               <LegendSwatch className="bg-amber-400/80" label={t('capacity.legend_high', { defaultValue: '81-100%' })} />
-              <LegendSwatch className="bg-rose-500/90" label={t('capacity.legend_over', { defaultValue: 'Over 100%' })} />
+              <LegendSwatch className="bg-semantic-error/90" label={t('capacity.legend_over', { defaultValue: 'Over 100%' })} />
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-rose-700" />
+                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-semantic-error/60" />
                 {t('capacity.legend_cross', { defaultValue: 'Two or more projects compete' })}
               </span>
             </div>
@@ -398,13 +398,13 @@ function SummaryChip({
 }) {
   const toneClass =
     tone === 'danger'
-      ? 'text-rose-600 dark:text-rose-400'
+      ? 'text-semantic-error'
       : tone === 'ok'
-        ? 'text-emerald-600 dark:text-emerald-400'
+        ? 'text-semantic-success'
         : 'text-content-primary';
   return (
     <div className="rounded-xl border border-border bg-surface-primary px-4 py-2.5">
-      <div className={`text-xl font-bold tabular-nums ${toneClass}`}>{value}</div>
+      <div className={`text-xl font-semibold tabular-nums ${toneClass}`}>{value}</div>
       <div className="text-xs text-content-tertiary">{label}</div>
     </div>
   );

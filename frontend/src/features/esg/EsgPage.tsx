@@ -66,9 +66,9 @@ const CATEGORY_META: Record<
   environmental: {
     label: 'Environmental',
     icon: Leaf,
-    accent: 'text-emerald-600 dark:text-emerald-400',
+    accent: 'text-semantic-success',
   },
-  social: { label: 'Social', icon: Users, accent: 'text-sky-600 dark:text-sky-400' },
+  social: { label: 'Social', icon: Users, accent: 'text-semantic-info' },
   governance: {
     label: 'Governance',
     icon: ShieldCheck,
@@ -76,8 +76,8 @@ const CATEGORY_META: Record<
   },
 };
 
-const CHIP_GOOD = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
-const CHIP_BAD = 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+const CHIP_GOOD = 'bg-semantic-success-bg text-semantic-success';
+const CHIP_BAD = 'bg-semantic-error-bg text-semantic-error';
 const CHIP_NEUTRAL = 'bg-surface-tertiary text-content-tertiary';
 
 const inputCls =
@@ -309,9 +309,9 @@ function Sparkline({ values, onTrack }: { values: number[]; onTrack: boolean | n
   const lastPoint = coords[coords.length - 1];
   const tone =
     onTrack === true
-      ? 'text-emerald-500'
+      ? 'text-semantic-success'
       : onTrack === false
-        ? 'text-red-500'
+        ? 'text-semantic-error'
         : 'text-content-tertiary';
   return (
     <svg
@@ -387,7 +387,7 @@ function MetricCard({
           {/* Value + delta */}
           <div className="mt-3 flex items-end justify-between gap-2">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold tabular-nums text-content-primary">
+              <span className="text-2xl font-semibold tabular-nums text-content-primary">
                 {fmtNum(latest)}
               </span>
               <span className="text-xs text-content-tertiary">{unit}</span>
@@ -652,7 +652,7 @@ function ReadingModal({
                 }}
                 className={clsx(
                   inputCls,
-                  valueError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  valueError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
                 )}
                 autoFocus
               />
@@ -814,7 +814,7 @@ function RecentReadings({
                 <button
                   onClick={() => onDelete(entry)}
                   aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                  className="p-1.5 rounded-lg text-content-tertiary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition-colors"
+                  className="p-1.5 rounded-lg text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -1262,7 +1262,7 @@ export function EsgPage() {
                 )}
                 {trackedCount > 0 &&
                   (offTrackMetrics.length > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 font-medium text-red-600 dark:text-red-400">
+                    <span className="inline-flex items-center gap-1.5 font-medium text-semantic-error">
                       <AlertTriangle size={14} className="shrink-0" />
                       {t('esg.n_off_target', {
                         defaultValue: '{{count}} off target',
@@ -1270,7 +1270,7 @@ export function EsgPage() {
                       })}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 font-medium text-semantic-success">
                       <CheckCircle2 size={14} className="shrink-0" />
                       {t('esg.all_on_track', { defaultValue: 'All metrics on track' })}
                     </span>

@@ -405,7 +405,7 @@ export function ChangeOrdersPulseWidget({
             <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
               {t('project.widget.change-orders.pending', { defaultValue: 'Pending' })}
             </div>
-            <div className="text-xl font-semibold tabular-nums text-amber-600">
+            <div className="text-xl font-semibold tabular-nums text-semantic-warning">
               {data.pending_count ?? data.open_count ?? 0}
             </div>
           </div>
@@ -614,7 +614,7 @@ export function HSEIncidentsWidget({ projectId }: { projectId: string }) {
       ) : (
         <div className="space-y-2">
           <div className="flex items-center gap-4">
-            <span className="text-3xl font-bold tabular-nums text-content-primary leading-none">
+            <span className="text-3xl font-semibold tabular-nums text-content-primary leading-none">
               {severityCounts.total}
             </span>
             <span className="text-xs text-content-tertiary">
@@ -629,13 +629,13 @@ export function HSEIncidentsWidget({ projectId }: { projectId: string }) {
               </span>
             </span>
             <span className="inline-flex items-center gap-1 text-2xs">
-              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              <span className="h-2 w-2 rounded-full bg-semantic-warning" />
               <span className="text-content-secondary">
                 {severityCounts.medium} {t('project.widget.hse-incidents.med', { defaultValue: 'med' })}
               </span>
             </span>
             <span className="inline-flex items-center gap-1 text-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="h-2 w-2 rounded-full bg-semantic-success" />
               <span className="text-content-secondary">
                 {severityCounts.low} {t('project.widget.hse-incidents.low', { defaultValue: 'low' })}
               </span>
@@ -745,7 +745,7 @@ export function VariationsWidget({
                 defaultValue: 'Disputed',
               })}
             </div>
-            <div className="text-xl font-semibold tabular-nums text-amber-600">
+            <div className="text-xl font-semibold tabular-nums text-semantic-warning">
               {fmtMoney(stats.disputedValue, currency)}
             </div>
           </div>
@@ -801,9 +801,9 @@ export function AIInsightsWidget({ projectId }: { projectId: string }) {
             const confPct = Math.round(((insight.confidence ?? 0) * 100));
             const dotColor =
               confPct >= 80
-                ? 'bg-emerald-500'
+                ? 'bg-semantic-success'
                 : confPct >= 60
-                ? 'bg-amber-500'
+                ? 'bg-semantic-warning'
                 : 'bg-content-quaternary';
             return (
               <li
@@ -1246,7 +1246,7 @@ export function QualityNCRWidget({ projectId }: { projectId: string }) {
             <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
               {t('project.widget.quality-ncr.minor', { defaultValue: 'Minor' })}
             </div>
-            <div className="text-xl font-semibold tabular-nums text-amber-600">
+            <div className="text-xl font-semibold tabular-nums text-semantic-warning">
               {counts.minor}
             </div>
           </div>
@@ -1581,7 +1581,7 @@ export function ComplianceSummaryWidget({ projectId }: { projectId: string }) {
             <div className="text-2xs uppercase tracking-wider text-content-tertiary mb-1">
               {t('project.widget.compliance-summary.active', { defaultValue: 'Active' })}
             </div>
-            <div className="text-xl font-semibold tabular-nums text-emerald-600">
+            <div className="text-xl font-semibold tabular-nums text-semantic-success">
               {counts.active}
             </div>
           </div>
@@ -1591,7 +1591,7 @@ export function ComplianceSummaryWidget({ projectId }: { projectId: string }) {
                 defaultValue: 'Expiring',
               })}
             </div>
-            <div className="text-xl font-semibold tabular-nums text-amber-600">
+            <div className="text-xl font-semibold tabular-nums text-semantic-warning">
               {counts.expiring}
             </div>
           </div>
@@ -1661,7 +1661,7 @@ export function ScheduleStripWidget({ projectId }: { projectId: string }) {
       ) : (
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-bold tabular-nums text-content-primary leading-none">
+            <span className="text-2xl font-semibold tabular-nums text-content-primary leading-none">
               {Number.isFinite(pct) ? fmtFixed(pct, 0) : 0}%
             </span>
             <div className="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">

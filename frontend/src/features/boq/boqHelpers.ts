@@ -940,9 +940,9 @@ export interface UndoEntry {
 /* ── Validation Status Styles ────────────────────────────────────────── */
 
 export const VALIDATION_DOT_STYLES: Record<string, string> = {
-  passed: 'bg-green-500',
+  passed: 'bg-semantic-success',
   warnings: 'bg-yellow-400',
-  errors: 'bg-red-500',
+  errors: 'bg-semantic-error',
   pending: 'bg-gray-300 dark:bg-gray-600',
 };
 
@@ -957,12 +957,12 @@ export const VALIDATION_DOT_LABELS: Record<string, string> = {
 
 export const RESOURCE_TYPE_BADGE: Record<string, { bg: string; label: string }> = {
   material:      { bg: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',    label: 'M' },
-  labor:         { bg: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', label: 'L' },
+  labor:         { bg: 'bg-semantic-warning-bg text-semantic-warning', label: 'L' },
   equipment:     { bg: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300', label: 'E' },
-  operator:      { bg: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', label: 'O' },
+  operator:      { bg: 'bg-semantic-success-bg text-semantic-success', label: 'O' },
   subcontractor: { bg: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',    label: 'S' },
-  electricity:   { bg: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300', label: 'W' },
-  other:         { bg: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',       label: '?' },
+  electricity:   { bg: 'bg-semantic-warning-bg text-semantic-warning', label: 'W' },
+  other:         { bg: 'bg-surface-secondary text-content-secondary',       label: '?' },
 };
 
 /* ── International currency catalogue ────────────────────────────────────

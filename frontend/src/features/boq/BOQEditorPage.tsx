@@ -5612,8 +5612,8 @@ export function BOQEditorPage() {
           <div
             role="status"
             data-testid="boq-locked-banner"
-            className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3
-                       text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-100"
+            className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3
+                       text-semantic-warning"
           >
             <Lock size={16} className="shrink-0" />
             <div className="min-w-0 flex-1">
@@ -6185,8 +6185,8 @@ export function BOQEditorPage() {
                 <p>{t('boq.recalc_confirm_step2', { defaultValue: '2. Attach resource breakdowns (materials, labor, equipment)' })}</p>
                 <p>{t('boq.recalc_confirm_step3', { defaultValue: '3. Recalculate unit rates from resource components' })}</p>
               </div>
-              <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 px-3 py-2">
-                <p className="text-xs text-amber-700 dark:text-amber-300">
+              <div className="mt-3 rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 px-3 py-2">
+                <p className="text-xs text-semantic-warning">
                   {t('boq.recalc_confirm_warning', { defaultValue: 'Positions with manual rates that have no match in the cost database will not be changed.' })}
                 </p>
               </div>
@@ -6486,7 +6486,7 @@ export function BOQEditorPage() {
             {/* Issue #136 — explicit parent picker so a sub-section at any
                 level (up to the {{max}} cap) can be created right here,
                 without hunting for the row right-click menu. */}
-            <label className="block text-[11px] font-medium text-content-secondary mt-3 mb-1">
+            <label className="block text-2xs font-medium text-content-secondary mt-3 mb-1">
               {t('boq.section_parent', { defaultValue: 'Parent section' })}
               <span className="text-content-tertiary font-normal ml-1">
                 ({t('common.optional', { defaultValue: 'optional' })})
@@ -6509,7 +6509,7 @@ export function BOQEditorPage() {
                 </option>
               ))}
             </select>
-            <p className="text-[11px] text-content-tertiary mt-1">
+            <p className="text-2xs text-content-tertiary mt-1">
               {t('boq.section_parent_hint', {
                 defaultValue:
                   'Leave empty for a top-level section, or pick a parent to nest it (up to {{max}} levels).',
@@ -6813,8 +6813,8 @@ export function BOQEditorPage() {
                   disabled={vectorIndexing}
                   className="flex w-full items-center gap-3 rounded-xl border border-border-light px-4 py-3 text-left hover:bg-surface-secondary transition-colors group disabled:opacity-60"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
-                    <Database size={16} className="text-emerald-500" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success/10 group-hover:bg-semantic-success/20 transition-colors">
+                    <Database size={16} className="text-semantic-success" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-content-primary">
@@ -6828,7 +6828,7 @@ export function BOQEditorPage() {
                     </div>
                   </div>
                   {vectorIndexing && (
-                    <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                    <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-semantic-success/60 border-t-transparent" />
                   )}
                 </button>
 
@@ -6854,7 +6854,7 @@ export function BOQEditorPage() {
 
               {/* Status info */}
               <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-secondary/80 px-3 py-2">
-                <WarnTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
+                <WarnTriangle size={13} className="text-semantic-warning shrink-0 mt-0.5" />
                 <p className="text-xs text-content-tertiary leading-relaxed">
                   {vectorStatus?.cost_collection
                     ? t('boq.vector_status_partial', {

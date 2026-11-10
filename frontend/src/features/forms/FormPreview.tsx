@@ -68,7 +68,7 @@ export function FormPreview({ fields }: FormPreviewProps) {
               {required && <span className="text-semantic-error">*</span>}
             </label>
             {field.help_text && (
-              <p className="mb-1 text-[11px] text-content-tertiary">{field.help_text}</p>
+              <p className="mb-1 text-2xs text-content-tertiary">{field.help_text}</p>
             )}
             <FieldControl field={field} value={value} onChange={(v) => setAnswer(field.key, v)} />
           </div>

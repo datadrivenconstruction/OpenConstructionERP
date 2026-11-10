@@ -33,9 +33,9 @@ interface DiscoverAssetsModalProps {
 }
 
 function scoreTone(score: number): string {
-  if (score >= 70) return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
-  if (score >= 50) return 'bg-sky-500/15 text-sky-300 border-sky-500/30';
-  return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+  if (score >= 70) return 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30';
+  if (score >= 50) return 'bg-semantic-info/15 text-sky-300 border-sky-500/30';
+  return 'bg-semantic-warning/15 text-amber-300 border-amber-500/30';
 }
 
 export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: DiscoverAssetsModalProps) {
@@ -233,7 +233,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                         {c.storey ? ` · ${c.storey}` : ''} · {c.model_name}
                       </div>
                       {Object.keys(c.suggested_asset_info).length > 0 && (
-                        <div className="mt-0.5 text-[11px] text-content-secondary">
+                        <div className="mt-0.5 text-2xs text-content-secondary">
                           {Object.entries(c.suggested_asset_info)
                             .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`)
                             .join(' · ')}
@@ -245,7 +245,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                         {c.reasons.slice(0, 3).map((r) => (
                           <span
                             key={r}
-                            className="rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-[10px] text-content-tertiary"
+                            className="rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-2xs text-content-tertiary"
                           >
                             {r.split(':').slice(-1)[0]}
                           </span>

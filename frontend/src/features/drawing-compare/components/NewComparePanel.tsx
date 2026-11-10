@@ -220,7 +220,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               ['new', newId, setNewId, newPage, setNewPage],
             ] as const).map(([side, value, setValue, page, setPage]) => (
               <fieldset key={side} className="rounded-lg border border-border p-2">
-                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-red-600' : 'text-blue-600')}>
+                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-blue-600')}>
                   {side === 'old'
                     ? t('drawing_compare.old_revision', { defaultValue: 'Older revision' })
                     : t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}
@@ -280,7 +280,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               {t('drawing_compare.run', { defaultValue: 'Compare' })}
             </Button>
           </div>
-          {samePdf && <p className="text-sm text-amber-700">{t('drawing_compare.same_revision', { defaultValue: 'Choose two different revisions or pages.' })}</p>}
+          {samePdf && <p className="text-sm text-semantic-warning">{t('drawing_compare.same_revision', { defaultValue: 'Choose two different revisions or pages.' })}</p>}
           {align === 'manual' && pickSide && (
             <p className="flex items-center gap-1 text-sm text-oe-blue">
               <Crosshair size={14} />
@@ -296,7 +296,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               {t('drawing_compare.rendering', { defaultValue: 'Rendering both sheets...' })}
             </p>
           )}
-          {pair.error && <p className="text-sm text-red-600">{pair.error}</p>}
+          {pair.error && <p className="text-sm text-semantic-error">{pair.error}</p>}
 
           {pair.old && pair.new && (
             <>
@@ -348,7 +348,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               ['new', newDrawing, setNewDrawing, newVersion, setNewVersion, newVersions.data],
             ] as const).map(([side, drawing, setDrawing, version, setVersion, versions]) => (
               <fieldset key={side} className="rounded-lg border border-border p-2">
-                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-red-600' : 'text-blue-600')}>
+                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-blue-600')}>
                   {side === 'old'
                     ? t('drawing_compare.old_revision', { defaultValue: 'Older revision' })
                     : t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}
@@ -374,7 +374,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               </fieldset>
             ))}
           </div>
-          {dwgSame && <p className="text-sm text-amber-700">{t('drawing_compare.same_revision', { defaultValue: 'Choose two different revisions or pages.' })}</p>}
+          {dwgSame && <p className="text-sm text-semantic-warning">{t('drawing_compare.same_revision', { defaultValue: 'Choose two different revisions or pages.' })}</p>}
           <div>
             <Button
               variant="primary"

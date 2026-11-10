@@ -60,10 +60,10 @@ export function BetaBanner({
       role="status"
       // NO own margin (same family as audit S1/S2): the page root's space-y-5
       // owns the vertical rhythm; a built-in mb-5 stacked a double gap on it.
-      className={`flex items-start gap-3 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-100 ${className}`}
+      className={`flex items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-semantic-warning ${className}`}
       data-testid={`beta-banner-${moduleKey}`}
     >
-      <Sparkles size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+      <Sparkles size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
       <div className="flex-1 text-sm">
         <p className="font-medium">{resolvedTitle}</p>
         <p className="mt-0.5 text-xs opacity-90">
@@ -72,7 +72,7 @@ export function BetaBanner({
             href={feedbackUrl}
             target="_blank"
             rel="noreferrer"
-            className="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"
+            className="underline underline-offset-2 hover:text-semantic-warning"
           >
             {t('common.beta_module.feedback_link', {
               defaultValue: 'Send feedback',
@@ -83,7 +83,7 @@ export function BetaBanner({
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="rounded p-1 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900/40"
+        className="rounded p-1 text-semantic-warning hover:bg-semantic-warning-bg"
         aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
       >
         <X size={14} />

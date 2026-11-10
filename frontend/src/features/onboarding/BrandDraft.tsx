@@ -150,7 +150,7 @@ export function BrandDraftSection({ draft, onChange }: { draft: BrandDraft; onCh
                 <span className="block truncate text-xs font-medium text-content-primary">
                   {t('branding.logo_drop', { defaultValue: 'Drop your logo here, or click to browse' })}
                 </span>
-                <span className="block truncate text-[11px] text-content-tertiary">
+                <span className="block truncate text-2xs text-content-tertiary">
                   {t('branding.logo_hint', { defaultValue: 'PNG, JPG, SVG, or WebP - up to 2 MB' })}
                 </span>
               </span>

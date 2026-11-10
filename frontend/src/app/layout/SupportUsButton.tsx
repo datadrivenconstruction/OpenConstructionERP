@@ -207,10 +207,10 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
           'border border-amber-400/60 dark:border-amber-500/40',
           'bg-gradient-to-r from-amber-100/80 via-yellow-100/60 to-orange-100/80',
           'dark:from-amber-900/40 dark:via-yellow-900/30 dark:to-orange-900/40',
-          'text-amber-800 dark:text-amber-200',
+          'text-semantic-warning',
           'hover:from-amber-200 hover:via-yellow-200 hover:to-orange-200',
           'dark:hover:from-amber-800/60 dark:hover:via-yellow-800/50 dark:hover:to-orange-800/60',
-          'hover:border-amber-500 dark:hover:border-amber-400/60',
+          'hover:border-semantic-warning/60',
           'hover:shadow-md hover:shadow-amber-400/30',
           'transition-all duration-300 ease-out',
         )}
@@ -222,12 +222,12 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
         {/* Animated shine sweep on hover */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-out"
+          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent group-hover:translate-x-full transition-transform duration-500 ease-out"
         />
         <Star
           size={14}
           strokeWidth={2}
-          className="relative fill-amber-400 text-amber-500 drop-shadow-[0_0_3px_rgba(251,191,36,0.6)] group-hover:rotate-12 group-hover:scale-125 transition-transform duration-300"
+          className="relative fill-amber-400 text-semantic-warning drop-shadow-[0_0_3px_rgba(251,191,36,0.6)] group-hover:rotate-12 group-hover:scale-125 transition-transform duration-300"
         />
         <span className="relative text-xs font-semibold whitespace-nowrap tracking-wide">
           {t('support.button_label', { defaultValue: 'Support us' })}
@@ -243,14 +243,14 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
         className={clsx(
           condensed ? 'inline-flex' : '2xl:hidden inline-flex',
           'h-8 w-8 items-center justify-center rounded-lg',
-          'text-amber-500 hover:bg-surface-secondary transition-colors',
+          'text-semantic-warning hover:bg-surface-secondary transition-colors',
         )}
         title={t('support.button_tooltip', {
           defaultValue: 'Support the project',
         })}
         aria-label={t('support.button_aria', { defaultValue: 'Support us' })}
       >
-        <Star size={16} strokeWidth={1.75} className="fill-amber-400 text-amber-500" />
+        <Star size={16} strokeWidth={1.75} className="fill-amber-400 text-semantic-warning" />
       </button>
 
       {open && (
@@ -352,7 +352,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             </div>
             <h2
               id="support-us-title"
-              className="text-xl sm:text-2xl font-bold text-content-primary leading-tight"
+              className="text-xl sm:text-2xl font-semibold text-content-primary leading-tight"
             >
               {t('support.modal_title', {
                 defaultValue: 'Help OpenConstructionERP grow',
@@ -377,12 +377,12 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             data-firstfocus="true"
             className={clsx(
               'group flex items-start gap-3 rounded-xl border-2 p-4',
-              'border-amber-300/50 bg-gradient-to-br from-amber-50/60 to-orange-50/30',
+              'border-semantic-warning/30 bg-gradient-to-br from-amber-50/60 to-orange-50/30',
               'dark:border-amber-500/30 dark:from-amber-950/30 dark:to-orange-950/20',
-              'hover:border-amber-500 hover:shadow-md hover:-translate-y-0.5 transition-all',
+              'hover:border-semantic-warning/60 hover:shadow-md hover:-translate-y-0.5 transition-all',
             )}
           >
-            <div className="shrink-0 h-11 w-11 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+            <div className="shrink-0 h-11 w-11 rounded-xl bg-semantic-warning/15 text-semantic-warning flex items-center justify-center group-hover:bg-semantic-warning group-hover:text-white transition-colors">
               <Star size={20} strokeWidth={1.75} className="fill-current" />
             </div>
             <div className="min-w-0 flex-1">
@@ -401,7 +401,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             </div>
             <ExternalLink
               size={14}
-              className="shrink-0 mt-1 text-content-quaternary group-hover:text-amber-600 transition-colors"
+              className="shrink-0 mt-1 text-content-quaternary group-hover:text-semantic-warning transition-colors"
               aria-hidden
             />
           </a>
@@ -413,12 +413,12 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             rel="noopener noreferrer"
             className={clsx(
               'group flex items-start gap-3 rounded-xl border-2 p-4',
-              'border-rose-300/50 bg-gradient-to-br from-rose-50/60 to-orange-50/30',
+              'border-semantic-error/30 bg-gradient-to-br from-rose-50/60 to-orange-50/30',
               'dark:border-rose-500/30 dark:from-rose-950/30 dark:to-orange-950/20',
-              'hover:border-rose-500 hover:shadow-md hover:-translate-y-0.5 transition-all',
+              'hover:border-semantic-error/60 hover:shadow-md hover:-translate-y-0.5 transition-all',
             )}
           >
-            <div className="shrink-0 h-11 w-11 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-300 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-colors">
+            <div className="shrink-0 h-11 w-11 rounded-xl bg-semantic-error/15 text-semantic-error flex items-center justify-center group-hover:bg-semantic-error group-hover:text-white transition-colors">
               <MessageSquareQuote size={20} strokeWidth={1.75} />
             </div>
             <div className="min-w-0 flex-1">
@@ -426,7 +426,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 {t('support.action_review_title', {
                   defaultValue: 'Review us on G2',
                 })}
-                <span className="text-2xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-300 px-1.5 py-0.5 rounded bg-rose-500/10">
+                <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-error px-1.5 py-0.5 rounded bg-semantic-error/10">
                   {t('support.action_review_tag', {
                     defaultValue: 'Means a lot',
                   })}
@@ -441,7 +441,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
             </div>
             <ExternalLink
               size={14}
-              className="shrink-0 mt-1 text-content-quaternary group-hover:text-rose-600 transition-colors"
+              className="shrink-0 mt-1 text-content-quaternary group-hover:text-semantic-error transition-colors"
               aria-hidden
             />
           </a>
@@ -450,12 +450,12 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           <div
             className={clsx(
               'group rounded-xl border-2 p-4',
-              'border-sky-300/50 bg-gradient-to-br from-sky-50/60 to-blue-50/30',
+              'border-semantic-info/30 bg-gradient-to-br from-sky-50/60 to-blue-50/30',
               'dark:border-sky-500/30 dark:from-sky-950/30 dark:to-blue-950/20',
             )}
           >
             <div className="flex items-start gap-3 mb-2">
-              <div className="shrink-0 h-11 w-11 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center">
+              <div className="shrink-0 h-11 w-11 rounded-xl bg-semantic-info/15 text-semantic-info flex items-center justify-center">
                 <Send size={20} strokeWidth={1.75} />
               </div>
               <div className="min-w-0 flex-1">
@@ -477,7 +477,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 href={TWITTER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-sky-50 hover:border-sky-400 dark:hover:bg-sky-950/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-semantic-info-bg hover:border-semantic-info/60 transition-colors"
               >
                 <Twitter size={12} />
                 {t('support.share_twitter', { defaultValue: 'Post on X' })}
@@ -486,7 +486,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 href={LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-sky-50 hover:border-sky-400 dark:hover:bg-sky-950/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-semantic-info-bg hover:border-semantic-info/60 transition-colors"
               >
                 <Linkedin size={12} />
                 {t('support.share_linkedin', { defaultValue: 'Post on LinkedIn' })}
@@ -494,7 +494,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
               <button
                 type="button"
                 onClick={copyShareText}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-sky-50 hover:border-sky-400 dark:hover:bg-sky-950/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-semantic-info-bg hover:border-semantic-info/60 transition-colors"
               >
                 {copied ? <Check size={12} className="text-semantic-success" /> : <Copy size={12} />}
                 {copied
@@ -550,12 +550,12 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           <div
             className={clsx(
               'group rounded-xl border-2 p-4',
-              'border-emerald-300/50 bg-gradient-to-br from-emerald-50/60 to-green-50/30',
+              'border-semantic-success/30 bg-gradient-to-br from-emerald-50/60 to-green-50/30',
               'dark:border-emerald-500/30 dark:from-emerald-950/30 dark:to-green-950/20',
             )}
           >
             <div className="flex items-start gap-3 mb-2">
-              <div className="shrink-0 h-11 w-11 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
+              <div className="shrink-0 h-11 w-11 rounded-xl bg-semantic-success/15 text-semantic-success flex items-center justify-center">
                 <HandCoins size={20} strokeWidth={1.75} />
               </div>
               <div className="min-w-0 flex-1">
@@ -574,7 +574,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                     action_donate_body above; that sentence is reconciled with
                     the rest of en.ts separately). Advertises the "Inside
                     track" backers-only panel this donation unlocks. */}
-                <p className="mt-1.5 flex items-start gap-1.5 text-2xs font-medium text-emerald-700 dark:text-emerald-300">
+                <p className="mt-1.5 flex items-start gap-1.5 text-2xs font-medium text-semantic-success">
                   <Sparkles size={12} className="mt-0.5 shrink-0" />
                   {t('support.donate_perk_line', {
                     defaultValue:
@@ -588,7 +588,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 href={PAYPAL_DONATE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-emerald-50 hover:border-emerald-400 dark:hover:bg-emerald-950/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-semantic-success-bg hover:border-semantic-success/60 transition-colors"
               >
                 <Heart size={12} />
                 {t('support.donate_paypal', { defaultValue: 'Donate with PayPal' })}
@@ -597,7 +597,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 href={GITHUB_SPONSORS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-emerald-50 hover:border-emerald-400 dark:hover:bg-emerald-950/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-semantic-success-bg hover:border-semantic-success/60 transition-colors"
               >
                 <Github size={12} />
                 {t('support.donate_github', { defaultValue: 'Sponsor on GitHub' })}
@@ -608,7 +608,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                   onClose();
                   navigate('/inside');
                 }}
-                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300/60 bg-emerald-50/60 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-900/40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-semantic-success/30 bg-semantic-success/10 px-3 py-1.5 text-xs font-medium text-semantic-success hover:bg-semantic-success-bg transition-colors"
               >
                 <Sparkles size={12} />
                 {t('support.inside_track_link', { defaultValue: 'Backers inside track' })}
@@ -631,7 +631,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
               onClose();
               navigate('/about#community');
             }}
-            className="group mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200 transition-colors"
+            className="group mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-semantic-warning hover:text-semantic-warning transition-colors"
           >
             <Users size={13} strokeWidth={2} />
             {t('support.see_contributors', {

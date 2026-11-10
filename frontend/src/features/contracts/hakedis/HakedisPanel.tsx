@@ -331,7 +331,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
         <section
           className={
             attention.length > 0
-              ? 'mt-3 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 dark:border-amber-900 dark:bg-amber-950/30'
+              ? 'mt-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2'
               : 'mt-3 rounded-lg border border-border-light bg-surface-secondary px-3 py-2'
           }
           aria-label={t('hakedis.attention.title', { defaultValue: 'Needs your attention' })}
@@ -340,7 +340,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
           {attention.length > 0 ? (
             <>
               <p className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-                <AlertTriangle size={15} className="shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                <AlertTriangle size={15} className="shrink-0 text-semantic-warning" aria-hidden="true" />
                 {t('hakedis.attention.title', { defaultValue: 'Needs your attention' })}
                 <span className="font-normal text-content-tertiary">({attention.length})</span>
               </p>
@@ -362,7 +362,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
             </>
           ) : doc.can_certify ? (
             <p className="flex items-center gap-2 text-sm text-content-primary" data-testid="hakedis-ready">
-              <CheckCircle2 size={15} className="shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <CheckCircle2 size={15} className="shrink-0 text-semantic-success" aria-hidden="true" />
               {t('hakedis.attention.ready', { defaultValue: 'Nothing is missing. The certificate is ready to certify.' })}
             </p>
           ) : (
@@ -385,7 +385,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
         <section id={anchorId(source, 'findings')} tabIndex={-1} className="mt-3 space-y-2 focus:outline-none">
           {errors.length > 0 && (
             <div
-              className="rounded-lg border border-red-200 bg-red-50/60 px-3 py-2 dark:border-red-900 dark:bg-red-950/30"
+              className="rounded-lg border border-semantic-error/30 bg-semantic-error/10 px-3 py-2"
               data-testid="hakedis-findings-errors"
             >
               <BlockTitle count={errors.length}>
@@ -396,7 +396,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
           )}
           {warnings.length > 0 && (
             <div
-              className="rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 dark:border-amber-900 dark:bg-amber-950/30"
+              className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2"
               data-testid="hakedis-findings-warnings"
             >
               <BlockTitle count={warnings.length}>
@@ -524,9 +524,9 @@ function FindingList({ findings, blocking }: { findings: HakedisFinding[]; block
       {findings.map((finding, index) => (
         <li key={`${finding.rule_id}|${finding.element_ref ?? ''}|${index}`} className="flex items-start gap-2 text-sm">
           {blocking ? (
-            <ShieldX size={14} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+            <ShieldX size={14} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
           ) : (
-            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           )}
           <span className="min-w-0">
             <span className="block break-words text-content-primary">{finding.message}</span>

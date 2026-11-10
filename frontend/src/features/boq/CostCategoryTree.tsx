@@ -202,7 +202,7 @@ function TreeNodeRow({
           {displayName}
         </span>
         <span
-          className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums ${
+          className={`shrink-0 rounded-full px-1.5 py-0.5 text-2xs font-medium tabular-nums ${
             isSelected
               ? 'bg-white/20 text-white'
               : 'bg-surface-tertiary text-content-tertiary group-hover:bg-surface-primary'

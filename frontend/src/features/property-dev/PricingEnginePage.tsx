@@ -136,7 +136,7 @@ const PRICING_TAB_IDS: readonly Tab[] = ['lists', 'rules', 'sim', 'history'];
 const inputCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const inputErrCls =
-  'h-9 w-full rounded-lg border border-rose-400 bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300';
+  'h-9 w-full rounded-lg border border-semantic-error/60 bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-semantic-error/30';
 const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
 /**
@@ -529,7 +529,7 @@ function TimeWindowPicker({
       </div>
       {validationErr && (
         <p
-          className="flex items-center gap-1.5 text-xs text-rose-600"
+          className="flex items-center gap-1.5 text-xs text-semantic-error"
           role="alert"
         >
           <AlertOctagon className="h-3.5 w-3.5" />
@@ -634,8 +634,8 @@ function RuleTypePreview({
         {fmtMoney(basePrice, currency || 'EUR')}{' '}
         <span
           className={clsx(
-            direction === 'discount' && 'text-emerald-600',
-            direction === 'surcharge' && 'text-amber-700',
+            direction === 'discount' && 'text-semantic-success',
+            direction === 'surcharge' && 'text-semantic-warning',
           )}
         >
           {delta >= 0 ? '+' : '−'}
@@ -772,8 +772,8 @@ function ConflictBadge({
         className={clsx(
           'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium',
           isWinner
-            ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-            : 'border-amber-300 bg-amber-50 text-amber-700',
+            ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
+            : 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
         )}
         aria-expanded={open}
         aria-label={t(
@@ -1546,7 +1546,7 @@ function QuoteWaterfall({
             {fmtMoney(quote.total, quote.currency)}
           </p>
         </div>
-        <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+        <CheckCircle2 className="h-6 w-6 text-semantic-success" />
       </div>
       {!printable && (
         <div className="h-64 w-full">
@@ -1592,9 +1592,9 @@ function QuoteWaterfall({
             const amt = Number(l.amount);
             const isBase = l.rule_type === 'base';
             const arrow = isBase ? null : amt < 0 ? (
-              <ArrowDown className="inline h-3 w-3 text-emerald-600" />
+              <ArrowDown className="inline h-3 w-3 text-semantic-success" />
             ) : amt > 0 ? (
-              <ArrowUp className="inline h-3 w-3 text-amber-700" />
+              <ArrowUp className="inline h-3 w-3 text-semantic-warning" />
             ) : (
               <ArrowRight className="inline h-3 w-3 text-content-tertiary" />
             );
@@ -1607,8 +1607,8 @@ function QuoteWaterfall({
                 <td
                   className={clsx(
                     'px-3 py-2 text-right tabular-nums whitespace-nowrap',
-                    !isBase && amt < 0 && 'text-emerald-600',
-                    !isBase && amt > 0 && 'text-amber-700',
+                    !isBase && amt < 0 && 'text-semantic-success',
+                    !isBase && amt > 0 && 'text-semantic-warning',
                   )}
                 >
                   {arrow} {fmtMoney(l.amount, quote.currency)}
@@ -1772,13 +1772,13 @@ function SimulatorTab({ devId }: { devId: string }): JSX.Element {
           </div>
         </div>
         {err && (
-          <p className="mt-3 text-sm text-rose-600 flex items-center gap-2">
+          <p className="mt-3 text-sm text-semantic-error flex items-center gap-2">
             <AlertOctagon className="h-4 w-4" />
             {err}
           </p>
         )}
         {currencyMismatch && (
-          <p className="mt-3 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <p className="mt-3 flex items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             {t(
               'propdev.pricing.sim.currency_mismatch',
@@ -2416,7 +2416,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
                             )}
                             className="ml-1 inline-flex items-center"
                           >
-                            <Clock className="h-3 w-3 text-amber-600" />
+                            <Clock className="h-3 w-3 text-semantic-warning" />
                           </span>
                         )}
                       </td>

@@ -175,11 +175,11 @@ export function GlobalUploadIndicator() {
         {isActive ? (
           <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
         ) : primary.status === 'ready' ? (
-          <Check size={14} className="text-emerald-500 shrink-0" />
+          <Check size={14} className="text-semantic-success shrink-0" />
         ) : primary.status === 'error' ? (
-          <X size={14} className="text-red-500 shrink-0" />
+          <X size={14} className="text-semantic-error shrink-0" />
         ) : (
-          <AlertTriangle size={14} className="text-amber-500 shrink-0" />
+          <AlertTriangle size={14} className="text-semantic-warning shrink-0" />
         )}
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-content-primary truncate">
@@ -199,7 +199,7 @@ export function GlobalUploadIndicator() {
             </div>
           )}
           {!isActive && primary.status === 'ready' && (
-            <p className="text-[10px] text-emerald-600 mt-0.5">
+            <p className="text-2xs text-semantic-success mt-0.5">
               {t('bim.upload_indicator_ready', {
                 defaultValue: '{{count}} elements',
                 count: primary.elementCount,
@@ -208,7 +208,7 @@ export function GlobalUploadIndicator() {
           )}
         </div>
         {active.length > 1 && (
-          <span className="text-[10px] text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
+          <span className="text-2xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
             +{active.length - 1}
           </span>
         )}
@@ -284,9 +284,9 @@ function JobRow({
       {/* Status icon */}
       <div className="mt-0.5 shrink-0">
         {isActive && <Loader2 size={16} className="text-oe-blue animate-spin" />}
-        {isDone && <Check size={16} className="text-emerald-500" />}
-        {isError && <X size={16} className="text-red-500" />}
-        {isConverterRequired && <AlertTriangle size={16} className="text-amber-500" />}
+        {isDone && <Check size={16} className="text-semantic-success" />}
+        {isError && <X size={16} className="text-semantic-error" />}
+        {isConverterRequired && <AlertTriangle size={16} className="text-semantic-warning" />}
       </div>
 
       {/* Content */}
@@ -294,7 +294,7 @@ function JobRow({
         <p className="text-xs font-medium text-content-primary truncate">
           {job.fileName}
         </p>
-        <p className="text-[10px] text-content-quaternary">
+        <p className="text-2xs text-content-quaternary">
           {formatFileSize(job.fileSize)}
         </p>
 
@@ -311,7 +311,7 @@ function JobRow({
               uploadPercent={job.progress}
             />
             {job.serverConverting && (
-              <p className="text-[10px] text-content-quaternary mt-0.5">
+              <p className="text-2xs text-content-quaternary mt-0.5">
                 {t('conv.dock_may_leave', {
                   defaultValue: 'The file is uploaded. You can keep working: the server continues on its own.',
                 })}
@@ -323,14 +323,14 @@ function JobRow({
         {/* Completed: element count + open button */}
         {isDone && (
           <div className="mt-1 flex items-center gap-2">
-            <span className="text-[10px] text-emerald-600">
+            <span className="text-2xs text-semantic-success">
               {t('bim.upload_indicator_ready', {
                 defaultValue: '{{count}} elements',
                 count: job.elementCount,
               })}
             </span>
             {job.completedAt && (
-              <span className="text-[10px] text-content-quaternary">
+              <span className="text-2xs text-content-quaternary">
                 {timeSince(job.completedAt, t)}
               </span>
             )}
@@ -342,7 +342,7 @@ function JobRow({
           <p
             role="status"
             data-testid="upload-quantities-warning"
-            className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 flex items-start gap-1"
+            className="text-2xs text-semantic-warning mt-0.5 flex items-start gap-1"
           >
             <AlertTriangle size={11} className="shrink-0 mt-px" />
             <span>
@@ -358,11 +358,11 @@ function JobRow({
           <div className="mt-0.5" role="alert">
             {job.errorCode ? (
               <>
-                <p className="text-[10px] font-medium text-red-500">{errText.title}</p>
-                <p className="text-[10px] text-content-tertiary">{errText.body}</p>
+                <p className="text-2xs font-medium text-semantic-error">{errText.title}</p>
+                <p className="text-2xs text-content-tertiary">{errText.body}</p>
               </>
             ) : (
-              <p className="text-[10px] text-red-500 line-clamp-2">
+              <p className="text-2xs text-semantic-error line-clamp-2">
                 {job.errorMessage || t('bim.upload_indicator_error', { defaultValue: 'Upload failed' })}
               </p>
             )}
@@ -371,7 +371,7 @@ function JobRow({
 
         {/* Converter required */}
         {isConverterRequired && (
-          <p className="text-[10px] text-amber-600 mt-0.5 line-clamp-2">
+          <p className="text-2xs text-semantic-warning mt-0.5 line-clamp-2">
             {job.errorMessage ||
               t('bim.upload_indicator_converter', {
                 defaultValue: 'Converter not installed',
@@ -384,7 +384,7 @@ function JobRow({
           {isActive && (
             <button
               onClick={onCancel}
-              className="text-[10px] text-content-tertiary hover:text-red-500 font-medium"
+              className="text-2xs text-content-tertiary hover:text-semantic-error font-medium"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
@@ -392,7 +392,7 @@ function JobRow({
           {isDone && job.modelId && (
             <button
               onClick={onOpen}
-              className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline font-medium"
+              className="inline-flex items-center gap-1 text-2xs text-oe-blue hover:underline font-medium"
             >
               <ExternalLink size={10} />
               {t('bim.upload_indicator_open', { defaultValue: 'Open' })}
@@ -401,7 +401,7 @@ function JobRow({
           {(isError || isConverterRequired) && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline font-medium"
+              className="inline-flex items-center gap-1 text-2xs text-oe-blue hover:underline font-medium"
             >
               <RotateCw size={10} />
               {t('bim.upload_indicator_retry', { defaultValue: 'Retry' })}
@@ -416,7 +416,7 @@ function JobRow({
               screen with no way to dismiss it short of full reload. */}
           <button
             onClick={onDismiss}
-            className="text-[10px] text-content-quaternary hover:text-content-secondary ms-auto"
+            className="text-2xs text-content-quaternary hover:text-content-secondary ms-auto"
             title={
               isActive
                 ? t('bim.upload_indicator_dismiss_active_tip', {

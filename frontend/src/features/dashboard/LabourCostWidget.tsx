@@ -91,7 +91,7 @@ export function LabourCostWidget() {
             {
               label: t('dashboard.labour_used', { defaultValue: 'Used' }),
               value: planned > 0 ? `${usedPct}%` : '-',
-              tone: over ? 'text-rose-600' : 'text-content-secondary',
+              tone: over ? 'text-semantic-error' : 'text-content-secondary',
             },
           ]}
         />
@@ -99,11 +99,11 @@ export function LabourCostWidget() {
           <div className="mt-3">
             <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
               <div
-                className={`h-full rounded-full ${over ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                className={`h-full rounded-full ${over ? 'bg-semantic-error' : 'bg-semantic-success'}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <p className={`mt-1 text-xs ${over ? 'text-rose-600' : 'text-content-tertiary'}`}>
+            <p className={`mt-1 text-xs ${over ? 'text-semantic-error' : 'text-content-tertiary'}`}>
               {over
                 ? t('dashboard.labour_over', {
                     defaultValue: 'Over budget by {{amount}}',

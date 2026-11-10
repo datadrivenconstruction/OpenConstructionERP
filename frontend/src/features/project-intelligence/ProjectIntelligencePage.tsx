@@ -354,8 +354,8 @@ export function ProjectIntelligencePage() {
     return (
       <div className="w-full py-12 px-6">
         <div className="max-w-xl mx-auto rounded-2xl border border-border-light bg-surface-elevated shadow-sm p-8 text-center space-y-5">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto">
-            <PowerOff size={26} className="text-amber-500" />
+          <div className="w-14 h-14 rounded-2xl bg-semantic-warning-bg flex items-center justify-center mx-auto">
+            <PowerOff size={26} className="text-semantic-warning" />
           </div>
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-content-primary">
@@ -372,7 +372,7 @@ export function ProjectIntelligencePage() {
           </div>
 
           {enableError && (
-            <div className="rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2 text-xs text-red-700 dark:text-red-300 text-left">
+            <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-xs text-semantic-error text-left">
               {enableError}
             </div>
           )}
@@ -428,8 +428,8 @@ export function ProjectIntelligencePage() {
     return (
       <div className="w-full py-12">
         <div className="text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto">
-            <AlertTriangle size={28} className="text-amber-500" />
+          <div className="w-14 h-14 rounded-2xl bg-semantic-warning-bg flex items-center justify-center mx-auto">
+            <AlertTriangle size={28} className="text-semantic-warning" />
           </div>
           <h2 className="text-lg font-semibold text-content-primary">
             {isAuth
@@ -615,11 +615,11 @@ export function ProjectIntelligencePage() {
           engine has flagged one or more active alerts for this project. */}
       {forecastAlertCount > 0 && (
         <div
-          className="rounded-xl border border-rose-300/60 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/20 p-3 flex items-center gap-3"
+          className="rounded-xl border border-semantic-error/30 bg-semantic-error/10 p-3 flex items-center gap-3"
           data-testid="pi-forecast-alert-banner"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
-            <AlertTriangle size={16} className="text-rose-500" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-error/10">
+            <AlertTriangle size={16} className="text-semantic-error" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-content-primary">
@@ -638,7 +638,7 @@ export function ProjectIntelligencePage() {
           </div>
           <button
             onClick={scrollToForecasts}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-semantic-error text-white rounded-lg hover:bg-semantic-error transition-colors"
           >
             <TrendingUp size={13} />
             {t('project_intelligence.forecast.banner_cta', {
@@ -654,7 +654,7 @@ export function ProjectIntelligencePage() {
       {/* Section 2 — Readiness + Critical gaps (side-by-side, equal height) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Readiness ring card (compact, fixed width) */}
-        <div className="lg:col-span-3 bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+        <div className="lg:col-span-3 bg-surface-primary rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
           <h3 className="text-xs font-semibold text-content-primary mb-2">
             {t('project_intelligence.readiness_title', {
               defaultValue: 'Estimation readiness',
@@ -678,7 +678,7 @@ export function ProjectIntelligencePage() {
         </div>
 
         {/* Critical gaps card — fills remaining width */}
-        <div className="lg:col-span-9 bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+        <div className="lg:col-span-9 bg-surface-primary rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
           {score.critical_gaps.length > 0 ? (
             <>
               <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-2">
@@ -692,7 +692,7 @@ export function ProjectIntelligencePage() {
               </h3>
               {dollarImpact && (
                 <p
-                  className="text-xs text-amber-600 dark:text-amber-400 mb-2"
+                  className="text-xs text-semantic-warning mb-2"
                   data-testid="pi-dollar-impact"
                 >
                   {dollarImpact}
@@ -751,7 +751,7 @@ export function ProjectIntelligencePage() {
 
       {/* Section 2c — Predictive EVM forecast + alerts (TOP-30 #19) */}
       <div id="pi-forecasts" className="scroll-mt-20">
-        <div className="rounded-xl border border-border-light bg-white dark:bg-gray-800/60 shadow-sm p-4">
+        <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
             <h2 className="text-sm font-semibold text-content-primary">
@@ -760,7 +760,7 @@ export function ProjectIntelligencePage() {
               })}
             </h2>
             {forecastAlertCount > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-rose-500 text-white text-2xs font-semibold">
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-semantic-error text-white text-2xs font-semibold">
                 {forecastAlertCount}
               </span>
             )}
@@ -779,7 +779,7 @@ export function ProjectIntelligencePage() {
 
       {/* Section 2d — Live predictive cost + schedule + risk analytics (#19) */}
       <div>
-        <div className="rounded-xl border border-border-light bg-white dark:bg-gray-800/60 shadow-sm p-4">
+        <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
             <h2 className="text-sm font-semibold text-content-primary">

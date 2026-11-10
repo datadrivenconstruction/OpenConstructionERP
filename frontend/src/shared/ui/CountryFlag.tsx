@@ -407,7 +407,7 @@ export function CountryFlag({ code, size = 16, className = '' }: CountryFlagProp
       width={size}
       height={height}
       alt=""
-      className={`rounded-[2px] shrink-0 ${className}`}
+      className={`rounded-xs shrink-0 ${className}`}
       loading="lazy"
     />
   );

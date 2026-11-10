@@ -1429,13 +1429,13 @@ function InventoryDrawer({
                       label="Scope 2"
                       kg={scope2Kg}
                       pct={scopeTotal > 0 ? (scope2Kg / scopeTotal) * 100 : 0}
-                      color="bg-emerald-500"
+                      color="bg-semantic-success"
                     />
                     <ScopeKpi
                       label="Scope 3"
                       kg={scope3Kg}
                       pct={scopeTotal > 0 ? (scope3Kg / scopeTotal) * 100 : 0}
-                      color="bg-amber-500"
+                      color="bg-semantic-warning"
                     />
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-content-secondary">
@@ -1858,12 +1858,12 @@ function ScopeBar({
     <div className="flex h-4 w-full overflow-hidden rounded-full bg-surface-secondary">
       <div className="bg-oe-blue" style={{ width: `${p1}%` }} title={`Scope 1: ${formatKg(scope1)}`} />
       <div
-        className="bg-emerald-500"
+        className="bg-semantic-success"
         style={{ width: `${p2}%` }}
         title={`Scope 2: ${formatKg(scope2)}`}
       />
       <div
-        className="bg-amber-500"
+        className="bg-semantic-warning"
         style={{ width: `${p3}%` }}
         title={`Scope 3: ${formatKg(scope3)}`}
       />

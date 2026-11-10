@@ -570,7 +570,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
                     })}
                   </dt>
                   <dd
-                    className="truncate font-mono text-[10px] text-slate-500"
+                    className="truncate font-mono text-2xs text-slate-500"
                     title={pick.objectName}
                   >
                     {pick.objectName}

@@ -253,15 +253,15 @@ export function GanttTablePanel({
                 <polygon points="5,0 10,5 5,10 0,5" fill={isCritical ? '#ef4444' : '#3b82f6'} />
               </svg>
             )}
-            {a.isGroup && <span className="shrink-0 text-[10px] font-bold text-content-tertiary">[G]</span>}
+            {a.isGroup && <span className="shrink-0 text-2xs font-semibold text-content-tertiary">[G]</span>}
             <span
-              className={`truncate text-xs ${a.isGroup ? 'font-bold' : 'font-medium'} text-content-primary`}
+              className={`truncate text-xs ${a.isGroup ? 'font-semibold' : 'font-medium'} text-content-primary`}
               title={a.name}
             >
               {a.name}
             </span>
             {isCritical && (
-              <span className="shrink-0 rounded bg-red-500 px-1 py-0.5 text-[8px] font-bold leading-none text-white">
+              <span className="shrink-0 rounded bg-red-500 px-1 py-0.5 text-2xs font-semibold leading-none text-white">
                 CP
               </span>
             )}

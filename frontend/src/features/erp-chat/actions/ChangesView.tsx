@@ -229,7 +229,7 @@ function ChangesRow({ action, showProject }: { action: ChatAction; showProject: 
               onClick={() => setExpanded((v) => !v)}
               className="group flex min-w-0 flex-1 items-start gap-1 rounded text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)]"
             >
-              <span className="min-w-0 text-[13px] font-semibold leading-5 text-[var(--act-text)] group-hover:underline">
+              <span className="min-w-0 text-sm font-semibold leading-5 text-[var(--act-text)] group-hover:underline">
                 {title}
               </span>
               <ChevronDown
@@ -253,7 +253,7 @@ function ChangesRow({ action, showProject }: { action: ChatAction; showProject: 
               {subtitle}
             </p>
           )}
-          <p className="mt-0.5 text-[11px] text-[var(--act-text-3)]" data-testid="changes-row-meta">
+          <p className="mt-0.5 text-2xs text-[var(--act-text-3)]" data-testid="changes-row-meta">
             {actionMetaLine(action, t)}
           </p>
 
@@ -318,7 +318,7 @@ function ChangesRow({ action, showProject }: { action: ChatAction; showProject: 
             </div>
           )}
           {!expanded && requestError && (
-            <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-[11px] text-[var(--act-text)]">
+            <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-2xs text-[var(--act-text)]">
               <AlertTriangle size={12} className="mt-px shrink-0 text-[var(--act-warning)]" aria-hidden="true" />
               <span>{describeRequestError(requestError, t)}</span>
             </p>
@@ -566,7 +566,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
             <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--act-accent-subtle)] text-[var(--act-accent)]" aria-hidden="true">
               <Sparkles size={18} />
             </span>
-            <p className="text-[13px] font-semibold text-[var(--act-text)]">{emptyCopy.title}</p>
+            <p className="text-sm font-semibold text-[var(--act-text)]">{emptyCopy.title}</p>
             {emptyCopy.body && (
               <p className="mt-1 max-w-[340px] text-xs leading-relaxed text-[var(--act-text-2)]">{emptyCopy.body}</p>
             )}
@@ -579,7 +579,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
             <section key={group.key} aria-labelledby={groupHeadingId}>
               <h4
                 id={groupHeadingId}
-                className="sticky top-0 z-[1] border-b border-[var(--act-border-subtle)] bg-[var(--act-surface)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--act-text-3)]"
+                className="sticky top-0 z-[1] border-b border-[var(--act-border-subtle)] bg-[var(--act-surface)] px-3 py-1 text-2xs font-semibold uppercase tracking-wide text-[var(--act-text-3)]"
               >
                 {formatDayHeading(group.iso, t)}
               </h4>
@@ -611,7 +611,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
         )}
 
         {rows.length > 0 && total > rows.length && limit >= MAX_ROWS && (
-          <p className="px-3 py-3 text-center text-[11px] text-[var(--act-text-3)]" data-testid="changes-capped">
+          <p className="px-3 py-3 text-center text-2xs text-[var(--act-text-3)]" data-testid="changes-capped">
             {t('erp_chat.changes.capped', {
               defaultValue: 'The latest {{shown}} of {{total}} are shown. Filter by status to find older ones.',
               shown: rows.length,

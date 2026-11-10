@@ -165,7 +165,7 @@ function Avatar({ label, size = 28 }: { label: string; size?: number }) {
   return (
     <div
       style={{ width: size, height: size }}
-      className="flex shrink-0 items-center justify-center rounded-full bg-oe-blue/15 text-[10px] font-semibold text-oe-blue"
+      className="flex shrink-0 items-center justify-center rounded-full bg-oe-blue/15 text-2xs font-semibold text-oe-blue"
       title={label}
       aria-hidden="true"
     >
@@ -240,12 +240,12 @@ function CommentNode({
           <span>·</span>
           <span>{relativeTime(node.created_at)}</span>
           {node.resolved && (
-            <span className="rounded bg-semantic-success/10 px-1.5 py-0.5 text-[10px] font-medium text-semantic-success">
+            <span className="rounded bg-semantic-success/10 px-1.5 py-0.5 text-2xs font-medium text-semantic-success">
               {t('comments.resolved_chip', { defaultValue: 'Resolved' })}
             </span>
           )}
           {node.page_number !== null && (
-            <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px]">
+            <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs">
               {t('comments.page_chip', {
                 defaultValue: 'p.{{n}}',
                 n: node.page_number,

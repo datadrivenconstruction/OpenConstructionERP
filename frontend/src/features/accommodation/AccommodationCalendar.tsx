@@ -114,11 +114,11 @@ const ROW_HEIGHT_PX = 44;
 const ROOM_LABEL_WIDTH_PX = 200;
 
 const STATE_BLOCK_CLASS: Record<BookingStatus, string> = {
-  reserved: 'bg-amber-200 text-amber-900 border-amber-400',
-  checked_in: 'bg-emerald-300 text-emerald-900 border-emerald-500',
+  reserved: 'bg-amber-200 text-semantic-warning border-semantic-warning/60',
+  checked_in: 'bg-emerald-300 text-semantic-success border-semantic-success/60',
   checked_out:
     'bg-slate-200 text-slate-700 border-slate-300 line-through opacity-70',
-  cancelled: 'bg-rose-200 text-rose-900 border-rose-400 line-through',
+  cancelled: 'bg-rose-200 text-semantic-error border-semantic-error/60 line-through',
 };
 
 /* ── Date helpers ─────────────────────────────────────────────────────── */
@@ -1323,7 +1323,7 @@ function CreateBookingModal({
       }
     >
       {disabled && (
-        <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <div className="mb-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-xs text-semantic-warning">
           <AlertTriangle className="mr-1.5 inline h-3.5 w-3.5" />
           {t('accommodation.assign.disabled', {
             defaultValue:

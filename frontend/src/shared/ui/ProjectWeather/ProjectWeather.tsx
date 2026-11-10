@@ -289,7 +289,7 @@ export function ProjectWeather({
   if (variant === 'summary') {
     if (!days) {
       return loading ? (
-        <div className={clsx('flex items-center gap-1.5 text-[10px] text-content-quaternary', className)}>
+        <div className={clsx('flex items-center gap-1.5 text-2xs text-content-quaternary', className)}>
           <Loader2 size={10} className="animate-spin" />
         </div>
       ) : null;
@@ -308,7 +308,7 @@ export function ProjectWeather({
     return (
       <div
         className={clsx(
-          'flex items-center gap-2 text-[10px] text-content-tertiary',
+          'flex items-center gap-2 text-2xs text-content-tertiary',
           className,
         )}
         title={t('weather.card_summary_hint', {
@@ -390,21 +390,21 @@ export function ProjectWeather({
                   'flex flex-col items-center gap-1 rounded-lg px-1.5 py-2 border transition-colors',
                   i === 0 && 'ring-2 ring-oe-blue/30 ring-offset-1 ring-offset-surface-primary',
                   severity === 'severe'
-                    ? 'border-rose-300/70 bg-rose-50/70 hover:border-rose-400 dark:border-rose-700/60 dark:bg-rose-900/20'
+                    ? 'border-semantic-error/30 bg-semantic-error/10 hover:border-semantic-error/60'
                     : severity === 'rain'
-                      ? 'border-amber-300/70 bg-amber-50/70 hover:border-amber-400 dark:border-amber-700/60 dark:bg-amber-900/20'
+                      ? 'border-semantic-warning/30 bg-semantic-warning/10 hover:border-semantic-warning/60'
                       : 'border-border-light/50 hover:border-border-light',
                 )}
                 title={`${labelFor(d.weatherCode, t)} · ${dateFmt.format(date)}`}
               >
-                <span className="text-[10px] font-semibold text-content-tertiary uppercase tracking-wide">
+                <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wide">
                   {dayFmt.format(date)}
                 </span>
                 <Icon
                   size={18}
                   className={clsx(
                     d.weatherCode === 0
-                      ? 'text-amber-500'
+                      ? 'text-semantic-warning'
                       : d.weatherCode >= 51 && d.weatherCode <= 67
                         ? 'text-blue-500'
                         : d.weatherCode >= 71 && d.weatherCode <= 77
@@ -415,15 +415,15 @@ export function ProjectWeather({
                   )}
                 />
                 <div className="flex flex-col items-center leading-tight">
-                  <span className="text-[11px] font-bold text-content-primary tabular-nums">
+                  <span className="text-2xs font-semibold text-content-primary tabular-nums">
                     {Math.round(d.tMax)}°
                   </span>
-                  <span className="text-[10px] text-content-quaternary tabular-nums">
+                  <span className="text-2xs text-content-quaternary tabular-nums">
                     {Math.round(d.tMin)}°
                   </span>
                 </div>
                 {d.precipMm > 0.1 && (
-                  <span className="text-[9px] text-blue-500 tabular-nums">
+                  <span className="text-2xs text-blue-500 tabular-nums">
                     {fmtFixed(d.precipMm, d.precipMm < 1 ? 1 : 0)}mm
                   </span>
                 )}
@@ -434,7 +434,7 @@ export function ProjectWeather({
         </div>
       )}
 
-      <p className="mt-3 text-[10px] text-content-quaternary">
+      <p className="mt-3 text-2xs text-content-quaternary">
         {t('weather.attribution', { defaultValue: 'Weather data by Open-Meteo · refreshed hourly' })}
       </p>
     </div>

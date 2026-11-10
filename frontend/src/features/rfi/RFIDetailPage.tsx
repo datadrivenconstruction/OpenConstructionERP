@@ -146,7 +146,7 @@ function normaliseAttachment(raw: AttachmentApiRow): AttachmentDoc {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="text-[10px] uppercase tracking-wider text-content-quaternary">
+      <dt className="text-2xs uppercase tracking-wider text-content-quaternary">
         {label}
       </dt>
       <dd className="text-sm text-content-primary break-words">{children}</dd>
@@ -634,7 +634,7 @@ export function RFIDetailPage() {
               {t(bicCfg.key, { defaultValue: bicCfg.fallback })}
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-content-primary break-words">
+          <h1 className="text-2xl font-semibold text-content-primary break-words">
             {rfi.subject}
           </h1>
           <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
@@ -774,7 +774,7 @@ export function RFIDetailPage() {
             className={clsx(
               'p-4',
               rfi.official_response &&
-                'border-green-200 bg-green-50/40 dark:bg-green-950/10 dark:border-green-900',
+                'border-semantic-success/30 bg-semantic-success/10',
             )}
           >
             <div className="flex items-center justify-between gap-2 mb-2">
@@ -783,7 +783,7 @@ export function RFIDetailPage() {
                   size={14}
                   className={
                     rfi.official_response
-                      ? 'text-green-600 dark:text-green-400'
+                      ? 'text-semantic-success'
                       : 'text-content-tertiary'
                   }
                 />
@@ -1117,7 +1117,7 @@ export function RFIDetailPage() {
                       defaultValue: 'Cost exposure',
                     })}
                   >
-                    <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                    <span className="inline-flex items-center gap-1 text-semantic-warning font-medium">
                       <AlertTriangle size={12} />
                       {rfi.cost_impact_value
                         ? `${rfi.cost_impact_value}${projectCurrency ? ` ${projectCurrency}` : ''}`

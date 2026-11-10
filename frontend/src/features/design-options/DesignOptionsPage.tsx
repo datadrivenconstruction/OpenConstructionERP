@@ -283,7 +283,7 @@ function OptionSources({
 
   return (
     <div className="space-y-2.5 rounded-lg border border-border-light bg-surface-secondary/30 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+      <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
         {t('designOptions.source.title', { defaultValue: 'What this option is made of' })}
       </p>
 
@@ -357,7 +357,7 @@ function OptionSources({
 
       {/* Says where a new model comes from, rather than growing a second
           uploader beside the one the BIM hub already owns. */}
-      <p className="text-[11px] leading-relaxed text-content-quaternary">
+      <p className="text-2xs leading-relaxed text-content-quaternary">
         {t('designOptions.source.importHint', {
           defaultValue: 'A model that is not in the project yet is imported in the BIM hub.',
         })}{' '}
@@ -833,7 +833,7 @@ function OptionCard({
                 a bill this module does not own, which the server refuses, so
                 the card withholds the action and says why. */}
             {option.boq_source === 'linked' ? (
-              <p className="text-[11px] leading-relaxed text-content-tertiary">
+              <p className="text-2xs leading-relaxed text-content-tertiary">
                 {t('designOptions.pricedFromLinkedEstimate', {
                   defaultValue:
                     'Priced from an estimate the project already held. Edit it in the bill editor and the figures follow.',
@@ -893,7 +893,7 @@ function OptionCard({
                 action is withheld rather than offered and then refused - and
                 the card says why instead of leaving a gap. */}
             {option.boq_source === 'linked' ? (
-              <p className="text-[11px] leading-relaxed text-content-tertiary">
+              <p className="text-2xs leading-relaxed text-content-tertiary">
                 {t('designOptions.pricedFromLinkedEstimate', {
                   defaultValue:
                     'Priced from an estimate the project already held. Edit it in the bill editor and the figures follow.',

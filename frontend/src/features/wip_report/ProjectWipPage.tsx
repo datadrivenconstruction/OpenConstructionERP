@@ -45,9 +45,9 @@ const RULE_DEFAULTS: Record<string, string> = {
 };
 
 function severityClass(s: WipFinding['severity']): string {
-  if (s === 'error') return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400';
-  if (s === 'warning') return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
-  return 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400';
+  if (s === 'error') return 'bg-semantic-error-bg text-semantic-error';
+  if (s === 'warning') return 'bg-semantic-warning-bg text-semantic-warning';
+  return 'bg-semantic-info-bg text-semantic-info';
 }
 
 function Kpi({ label, value, tone }: { label: string; value: string; tone?: string }) {
@@ -137,11 +137,11 @@ export function ProjectWipPage() {
             <Kpi
               label={pos === 'under' ? t('wip_report.col_under', { defaultValue: 'Under-billing' }) : t('wip_report.col_over', { defaultValue: 'Over-billing' })}
               value={money(pos === 'under' ? row.under_billing : row.over_billing)}
-              tone={pos === 'over' ? 'text-amber-700 dark:text-amber-400' : pos === 'under' ? 'text-sky-700 dark:text-sky-400' : undefined}
+              tone={pos === 'over' ? 'text-semantic-warning' : pos === 'under' ? 'text-semantic-info' : undefined}
             />
             <Kpi label={t('wip_report.col_cost_to_date', { defaultValue: 'Cost to date' })} value={money(row.cost_to_date)} />
             <Kpi label={t('wip_report.col_estimated_cost', { defaultValue: 'Estimated total cost' })} value={money(row.estimated_cost)} />
-            <Kpi label={t('wip_report.col_profit', { defaultValue: 'Projected profit' })} value={`${money(row.projected_gross_profit)} (${row.projected_margin_pct}%)`} tone={row.loss_job ? 'text-rose-600' : undefined} />
+            <Kpi label={t('wip_report.col_profit', { defaultValue: 'Projected profit' })} value={`${money(row.projected_gross_profit)} (${row.projected_margin_pct}%)`} tone={row.loss_job ? 'text-semantic-error' : undefined} />
             <Kpi
               label={t('wip_report.col_fade', { defaultValue: 'Fade / gain' })}
               value={row.fade == null ? '-' : money(row.fade)}

@@ -121,7 +121,7 @@ export function SyncTab({
         {findingsQ.isLoading ? (
           <p className="text-sm text-content-tertiary">{t('accountingSync.loading', { defaultValue: 'Loading...' })}</p>
         ) : findings.length === 0 ? (
-          <p className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400" data-testid="accounting-sync-findings-ok">
+          <p className="flex items-center gap-2 text-sm text-semantic-success" data-testid="accounting-sync-findings-ok">
             <CheckCircle2 size={16} />
             {t('accountingSync.findings.ok', { defaultValue: 'Nothing blocks the next sync' })}
           </p>

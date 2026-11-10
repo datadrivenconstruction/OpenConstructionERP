@@ -238,7 +238,7 @@ export function IsoNameBuilder({
               placeholder={f.placeholder}
               className="rounded-md border border-border bg-surface-primary px-2 py-1 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
             />
-            <span className="text-[10px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {t(f.helpKey, { defaultValue: f.helpDefault })}
             </span>
           </label>

@@ -51,7 +51,7 @@ function OutcomeBlock({ submittal }: { submittal: Submittal }) {
       className={clsx(
         'flex items-start gap-2 rounded-lg border p-3 text-xs',
         submittal.may_proceed
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300'
+          ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
           : 'border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-800 dark:bg-orange-950/20 dark:text-orange-300',
       )}
     >
@@ -143,7 +143,7 @@ function ProcurementBlock({
         {(s.long_lead || s.lead_time_weeks !== null) && (
           <Fact label={t('submittals.field_lead_time_weeks', { defaultValue: 'Lead time (weeks)' })}>
             {s.lead_time_weeks === null ? (
-              <span className="text-amber-700 dark:text-amber-400">
+              <span className="text-semantic-warning">
                 {t('submittals.lead_time_missing', { defaultValue: 'Long-lead item, lead time not recorded' })}
               </span>
             ) : (
@@ -293,8 +293,8 @@ function RevisionChain({ submittal }: { submittal: Submittal }) {
 }
 
 const FINDING_STYLE: Record<ValidationSeverity, string> = {
-  error: 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/20 dark:text-red-300',
-  warning: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-300',
+  error: 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error',
+  warning: 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
   info: 'border-border-light bg-surface-secondary text-content-secondary',
 };
 

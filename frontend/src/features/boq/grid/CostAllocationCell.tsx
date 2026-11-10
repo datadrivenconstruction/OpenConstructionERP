@@ -79,7 +79,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
       defaultValue: 'Its cost line has no account, so the money sits in suspense. Click to move it onto an account.',
     });
     content = (
-      <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-amber-700 dark:text-amber-300">
+      <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-semantic-warning">
         <AlertTriangle size={11} className="shrink-0" />
         <span className="shrink-0 font-medium">{t('boq.cost_allocation.suspense_cell', { defaultValue: 'No account' })}</span>
         <span className="truncate font-mono text-content-tertiary">{view.label}</span>
@@ -101,7 +101,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
             defaultValue: 'Its cost line has no account, so the money sits in suspense. Click to move it onto an account.',
           })
         : t('boq.cost_allocation.split_tip', { defaultValue: 'Split across several cost lines. Click to see the shares.' });
-    const tone = !view.valid ? 'text-semantic-error' : view.suspense ? 'text-amber-700 dark:text-amber-300' : 'text-oe-blue';
+    const tone = !view.valid ? 'text-semantic-error' : view.suspense ? 'text-semantic-warning' : 'text-oe-blue';
     content = (
       <span className={`inline-flex items-center gap-1 text-2xs ${tone}`}>
         {warn ? <AlertTriangle size={11} /> : <GitFork size={11} />}
@@ -113,7 +113,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
       defaultValue: 'Not on any cost line, so its money is missing from cost control. Click to allocate it.',
     });
     content = (
-      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-2xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+      <span className="rounded bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
         {t('boq.cost_allocation.none_cell', { defaultValue: 'Unallocated' })}
       </span>
     );

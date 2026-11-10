@@ -272,7 +272,7 @@ export function ActionProposalCard({
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h4 id={titleId} className="min-w-0 text-[13px] font-semibold leading-5 text-[var(--act-text)]">
+          <h4 id={titleId} className="min-w-0 text-sm font-semibold leading-5 text-[var(--act-text)]">
             {title}
           </h4>
           <ActionStatusPill status={status} busyOp={pendingOp} className="ms-auto" />
@@ -310,7 +310,7 @@ export function ActionProposalCard({
 
       <div className={clsx('space-y-2.5', variant === 'card' && 'mt-2.5')}>
         {action.summary && (
-          <p className="text-[13px] leading-snug text-[var(--act-text-2)]">{action.summary}</p>
+          <p className="text-sm leading-snug text-[var(--act-text-2)]">{action.summary}</p>
         )}
 
         {collapsible && (
@@ -353,7 +353,7 @@ export function ActionProposalCard({
             {action.confidence !== null && <ConfidenceBadge score={action.confidence} showScore />}
             {action.edited && (
               <span
-                className="inline-flex h-5 items-center gap-1 rounded-full bg-[var(--act-surface-2)] px-1.5 text-[11px] font-medium text-[var(--act-text-2)]"
+                className="inline-flex h-5 items-center gap-1 rounded-full bg-[var(--act-surface-2)] px-1.5 text-2xs font-medium text-[var(--act-text-2)]"
                 title={String(
                   t('erp_chat.action.edited_hint', {
                     defaultValue: 'A person changed the values the assistant proposed.',
@@ -494,14 +494,14 @@ export function ActionProposalCard({
               </div>
               {action.can_apply ? (
                 status === 'proposed' && (
-                  <p className="text-[11px] text-[var(--act-text-3)]">
+                  <p className="text-2xs text-[var(--act-text-3)]">
                     {t('erp_chat.action.not_saved_yet', {
                       defaultValue: 'Nothing is saved until you click Apply. Every applied change is logged.',
                     })}
                   </p>
                 )
               ) : (
-                <p className="text-[11px] text-[var(--act-text-2)]" data-testid="action-blocked-reason">
+                <p className="text-2xs text-[var(--act-text-2)]" data-testid="action-blocked-reason">
                   {blockedReason(action, t)}
                 </p>
               )}

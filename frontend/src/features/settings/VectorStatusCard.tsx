@@ -248,12 +248,12 @@ export default function VectorStatusCard() {
                 </span>
               </div>
               {statusQuery.data.connected ? (
-                <div className="inline-flex items-center gap-1 text-emerald-600">
+                <div className="inline-flex items-center gap-1 text-semantic-success">
                   <CheckCircle2 size={11} />
                   {t('vector_status.connected', { defaultValue: 'Connected' })}
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1 text-amber-600">
+                <div className="inline-flex items-center gap-1 text-semantic-warning">
                   <AlertCircle size={11} />
                   {t('vector_status.disconnected', { defaultValue: 'Disconnected' })}
                 </div>
@@ -285,7 +285,7 @@ export default function VectorStatusCard() {
                           {col.ready ? (
                             <CheckCircle2
                               size={11}
-                              className="text-emerald-500"
+                              className="text-semantic-success"
                               aria-label={t('vector_status.collection_ready', { defaultValue: 'ready' })}
                             />
                           ) : (
@@ -295,7 +295,7 @@ export default function VectorStatusCard() {
                             />
                           )}
                         </div>
-                        <div className="text-[11px] text-content-tertiary font-mono">
+                        <div className="text-2xs text-content-tertiary font-mono">
                           {col.collection}
                           {' • '}
                           <span className="tabular-nums">
@@ -304,7 +304,7 @@ export default function VectorStatusCard() {
                           vectors
                         </div>
                         {lastTruncation && (
-                          <div className="mt-1 flex items-start gap-1 text-[11px] text-amber-600">
+                          <div className="mt-1 flex items-start gap-1 text-2xs text-semantic-warning">
                             <AlertCircle size={11} className="mt-0.5 shrink-0" />
                             <span>
                               {t('vector_status.truncated_note', {
@@ -348,7 +348,7 @@ export default function VectorStatusCard() {
             </div>
 
             {/* Purge toggle */}
-            <label className="mt-3 flex items-center gap-2 text-[11px] text-content-tertiary cursor-pointer select-none">
+            <label className="mt-3 flex items-center gap-2 text-2xs text-content-tertiary cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={purgeFirst}
@@ -364,7 +364,7 @@ export default function VectorStatusCard() {
         )}
 
         {statusQuery.isError && (
-          <div className="text-sm text-rose-600 py-2">
+          <div className="text-sm text-semantic-error py-2">
             {t('vector_status.error', {
               defaultValue: 'Could not load vector store status',
             })}

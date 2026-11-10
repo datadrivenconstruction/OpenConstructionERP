@@ -20,10 +20,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 type MapLibreModule = typeof import('react-map-gl/maplibre');
 
 const TONE_CLASS: Record<NonNullable<MapPin['tone']>, string> = {
-  open: 'bg-amber-500',
+  open: 'bg-semantic-warning',
   progress: 'bg-oe-blue',
-  done: 'bg-emerald-600',
-  critical: 'bg-red-600',
+  done: 'bg-semantic-success',
+  critical: 'bg-semantic-error',
 };
 
 interface FieldItemsMapProps {
@@ -140,7 +140,7 @@ export function FieldItemsMap({ pins, total, onSelect, selectedId, className }: 
           <MapIcon size={24} strokeWidth={1.5} />
         </div>
       )}
-      <div className="pointer-events-none absolute left-3 top-3 rounded-md bg-surface-elevated/90 px-2 py-1 text-[11px] font-medium text-content-primary shadow-sm">
+      <div className="pointer-events-none absolute left-3 top-3 rounded-md bg-surface-elevated/90 px-2 py-1 text-2xs font-medium text-content-primary shadow-sm">
         {t('field_evidence.map_legend', {
           defaultValue: '{{pinned}} of {{total}} on the map',
           pinned: pins.length,

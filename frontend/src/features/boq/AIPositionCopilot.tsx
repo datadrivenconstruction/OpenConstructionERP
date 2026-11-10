@@ -453,7 +453,7 @@ export function AIPositionCopilot({
         </div>
         <button
           onClick={onClose}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={16} />
@@ -793,7 +793,7 @@ function ActionCard({
         isFailed
           ? 'border-semantic-error/40 bg-semantic-error-bg/40'
           : isApplied
-            ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800/60 dark:bg-emerald-900/15'
+            ? 'border-semantic-success/30 bg-semantic-success-bg'
             : isDismissed
               ? 'border-border-light bg-surface-secondary/40 opacity-70'
               : 'border-border-light bg-surface-primary'
@@ -819,8 +819,8 @@ function ActionCard({
         <span
           className={`shrink-0 rounded-full px-1.5 py-0.5 text-2xs font-semibold tabular-nums ${
             (action.confidence ?? 0) >= PRESELECT_THRESHOLD
-              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-              : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+              ? 'bg-semantic-success-bg text-semantic-success'
+              : 'bg-semantic-warning-bg text-semantic-warning'
           }`}
           title={t('boq.copilot.confidence', { defaultValue: 'Confidence' })}
         >
@@ -863,7 +863,7 @@ function ActionCard({
       {/* Footer: status / decision */}
       <div className="mt-2 flex items-center gap-2">
         {isApplied && (
-          <span className="inline-flex items-center gap-1 text-2xs font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 text-2xs font-medium text-semantic-success">
             <Check size={12} strokeWidth={3} />
             {autoApplied
               ? t('boq.copilot.auto_applied', { defaultValue: 'Auto-applied' })

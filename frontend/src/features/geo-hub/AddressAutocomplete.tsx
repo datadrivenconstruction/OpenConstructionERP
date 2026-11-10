@@ -306,7 +306,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-500" />
+          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
           <span>
             {t('geo_hub.autocomplete.disabled', {
               defaultValue:
@@ -323,7 +323,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-red-500" />
+          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-error" />
           <span>
             {t('geo_hub.autocomplete.network_error', {
               defaultValue:
@@ -340,7 +340,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-500" />
+          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
           <span>
             {t('geo_hub.autocomplete.rate_limited', {
               defaultValue:

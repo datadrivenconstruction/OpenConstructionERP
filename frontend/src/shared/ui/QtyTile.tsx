@@ -20,10 +20,10 @@ export function QtyTile({
 }) {
   return (
     <div className="rounded border border-border-light bg-surface-secondary/50 px-2 py-1.5">
-      <div className="text-[10px] uppercase tracking-wide text-content-tertiary">{label}</div>
+      <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
       <div className="font-mono text-sm font-semibold text-content-primary">
         {value.toLocaleString(getNumberLocale(), { maximumFractionDigits: 3 })}
-        <span className="ml-1 text-[10px] font-normal text-content-secondary">{unit}</span>
+        <span className="ml-1 text-2xs font-normal text-content-secondary">{unit}</span>
       </div>
     </div>
   );

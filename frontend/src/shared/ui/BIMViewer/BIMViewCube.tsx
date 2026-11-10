@@ -324,10 +324,10 @@ export function BIMViewCube({
           style={{ width: size, height: size }}
         >
           <Box size={18} strokeWidth={1.5} aria-hidden="true" />
-          <span className="text-[9px] font-semibold leading-tight">
+          <span className="text-2xs font-semibold leading-tight">
             {t('bim.view_cube_label', { defaultValue: 'View cube' })}
           </span>
-          <span className="text-[8px] leading-tight">
+          <span className="text-2xs leading-tight">
             {t('bim.view_cube_no_context', { defaultValue: 'no 3D context' })}
           </span>
         </div>

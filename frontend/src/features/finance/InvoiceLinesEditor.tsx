@@ -196,7 +196,7 @@ export function InvoiceLinesEditor({
           <MoneyDisplay amount={totals.tax} currency={currency} />
         </dd>
         <dt className="font-semibold text-content-primary">{t('finance.total_gross', { defaultValue: 'Gross' })}</dt>
-        <dd className="text-right font-bold tabular-nums" data-testid="invoice-total-gross">
+        <dd className="text-right font-semibold tabular-nums" data-testid="invoice-total-gross">
           <MoneyDisplay amount={totals.total} currency={currency} />
         </dd>
       </dl>

@@ -126,7 +126,7 @@ function WidgetCard({
   return (
     <div
       data-testid={testId}
-      className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4 h-64 flex flex-col"
+      className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 h-64 flex flex-col"
     >
       <div className="mb-2">
         <h4 className="text-xs font-semibold text-content-primary">{title}</h4>
@@ -454,12 +454,12 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
       >
         <div className="h-full flex flex-col items-center justify-center text-center">
           <div
-            className={`text-3xl font-bold tabular-nums ${
+            className={`text-3xl font-semibold tabular-nums ${
               coverage.drift > 0
-                ? 'text-amber-500'
+                ? 'text-semantic-warning'
                 : coverage.drift < 0
-                  ? 'text-rose-500'
-                  : 'text-emerald-500'
+                  ? 'text-semantic-error'
+                  : 'text-semantic-success'
             }`}
             data-testid="pi-scope-coverage-pct"
           >
@@ -475,7 +475,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
           {coverage.drift !== 0 && (
             <div
               className={`text-2xs mt-0.5 ${
-                coverage.drift > 0 ? 'text-amber-500' : 'text-rose-500'
+                coverage.drift > 0 ? 'text-semantic-warning' : 'text-semantic-error'
               }`}
               data-testid="pi-scope-drift"
             >
@@ -508,7 +508,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
               })}
             </button>
           ) : (
-            <div className="text-[10px] text-content-quaternary mt-1.5">
+            <div className="text-2xs text-content-quaternary mt-1.5">
               {coverage.source === 'metadata'
                 ? t('project_intelligence.analytics.baseline_src_metadata', {
                     defaultValue: 'Baseline: captured',
@@ -521,7 +521,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
             </div>
           )}
           {baselineMsg && (
-            <div className="text-[10px] text-content-tertiary mt-1" data-testid="pi-baseline-msg">
+            <div className="text-2xs text-content-tertiary mt-1" data-testid="pi-baseline-msg">
               {baselineMsg}
             </div>
           )}
@@ -546,7 +546,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
       >
         <div className="h-full flex flex-col items-center justify-center gap-1">
           <div
-            className="text-3xl font-bold text-content-primary tabular-nums"
+            className="text-3xl font-semibold text-content-primary tabular-nums"
             data-testid="pi-validation-passed"
           >
             {validation.passed}
@@ -556,13 +556,13 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
             </span>
           </div>
           <div className="flex items-center gap-3 text-2xs mt-1">
-            <span className="text-rose-500" data-testid="pi-validation-errors">
+            <span className="text-semantic-error" data-testid="pi-validation-errors">
               {validation.errors}{' '}
               {t('project_intelligence.analytics.errors', {
                 defaultValue: 'errors',
               })}
             </span>
-            <span className="text-amber-500">
+            <span className="text-semantic-warning">
               {validation.warnings}{' '}
               {t('project_intelligence.analytics.warnings', {
                 defaultValue: 'warnings',

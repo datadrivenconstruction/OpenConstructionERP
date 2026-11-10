@@ -1361,7 +1361,7 @@ function CasesList() {
                         <Icon size={15} strokeWidth={1.8} aria-hidden="true" />
                         <span
                           className={clsx(
-                            "absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold tabular-nums shadow-sm",
+                            "absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-2xs font-semibold tabular-nums shadow-sm",
                             active
                               ? "bg-white text-current dark:bg-black/40"
                               : "bg-surface-primary text-content-secondary ring-1 ring-inset ring-border-light",
@@ -2321,7 +2321,7 @@ function CaseCard({
             {pathPosition != null && (
               <span
                 data-testid="case-path-position"
-                className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-oe-blue px-1.5 text-2xs font-bold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/20"
+                className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-oe-blue px-1.5 text-2xs font-semibold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/20"
                 title={t("cases.tracks.position", {
                   defaultValue: "Case {{n}} of the path",
                   n: pathPosition,
@@ -2332,7 +2332,7 @@ function CaseCard({
             )}
             {num != null && pathPosition == null && (
               <span
-                className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-slate-900/85 px-1.5 text-2xs font-bold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/15"
+                className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-slate-900/85 px-1.5 text-2xs font-semibold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/15"
                 title={t("cases.card.number", {
                   defaultValue: "Case {{num}} of {{total}}",
                   num,
@@ -2591,12 +2591,12 @@ function CaseCard({
         <div className="mt-auto flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-1.5">
             {stage && StageIcon && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-inset ring-white/20">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-2xs font-medium text-white ring-1 ring-inset ring-white/20">
                 <StageIcon size={10} strokeWidth={2} aria-hidden="true" />
                 {t(stage.shortKey, { defaultValue: stage.shortDefault })}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-inset ring-white/20">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-2xs font-medium text-white ring-1 ring-inset ring-white/20">
               <Clock size={10} aria-hidden="true" />
               {t("cases.card.minutes_short", {
                 defaultValue: "{{count}} min",
@@ -2604,7 +2604,7 @@ function CaseCard({
               })}
             </span>
             {pb.region && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-inset ring-white/20">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-2xs font-medium text-white ring-1 ring-inset ring-white/20">
                 <CountryFlag
                   code={pb.region.toLowerCase()}
                   size={15}
@@ -2646,14 +2646,14 @@ function CaseCard({
                     ) : null,
                   )}
                   {roles.length > 3 && (
-                    <span className="ml-2 text-[10px] font-medium text-white/70">
+                    <span className="ml-2 text-2xs font-medium text-white/70">
                       +{roles.length - 3}
                     </span>
                   )}
                 </div>
               )}
               {shownCompanies.length > 0 && (
-                <p className="flex min-w-0 items-center gap-1 text-[10px] font-medium text-white/70">
+                <p className="flex min-w-0 items-center gap-1 text-2xs font-medium text-white/70">
                   {/* Same split as the module line: the run is clipped to the
                       width the panel has, the whole list is read out.
 

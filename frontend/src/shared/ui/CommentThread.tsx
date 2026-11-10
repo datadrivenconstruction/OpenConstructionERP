@@ -102,10 +102,10 @@ function avatarLetter(label: string): string {
 /** Deterministic color based on author ID. */
 const AVATAR_COLORS = [
   'bg-blue-500',
-  'bg-emerald-500',
-  'bg-amber-500',
+  'bg-semantic-success',
+  'bg-semantic-warning',
   'bg-violet-500',
-  'bg-rose-500',
+  'bg-semantic-error',
   'bg-cyan-500',
   'bg-orange-500',
   'bg-indigo-500',
@@ -221,7 +221,7 @@ function CommentItem({
           the same swatch; the letter comes from the resolved display name. */}
       <div
         className={clsx(
-          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white',
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold text-white',
           avatarColor(comment.author_id),
         )}
         title={displayName}

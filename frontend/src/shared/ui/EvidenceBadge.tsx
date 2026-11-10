@@ -21,7 +21,7 @@ export function EvidenceBadge({ evidence, compact = false, className }: Evidence
   const { t } = useTranslation();
   if (!evidence) {
     return (
-      <span className={clsx('inline-flex items-center gap-1 text-[10px] text-content-tertiary', className)}>
+      <span className={clsx('inline-flex items-center gap-1 text-2xs text-content-tertiary', className)}>
         <ShieldAlert size={11} />
         {t('field_evidence.none', { defaultValue: 'No capture evidence' })}
       </span>
@@ -43,8 +43,8 @@ export function EvidenceBadge({ evidence, compact = false, className }: Evidence
     return (
       <span
         className={clsx(
-          'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium',
-          full ? 'bg-emerald-600/90 text-white' : 'bg-amber-500/90 text-white',
+          'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-medium',
+          full ? 'bg-semantic-success/90 text-white' : 'bg-semantic-warning/90 text-white',
           className,
         )}
         title={gradeLabel}
@@ -86,9 +86,9 @@ export function EvidenceBadge({ evidence, compact = false, className }: Evidence
     <dl className={clsx('space-y-1 text-xs text-content-secondary', className)} data-testid="evidence-details">
       <div className="flex items-center gap-1.5 font-medium">
         {full ? (
-          <ShieldCheck size={13} className="text-emerald-600" />
+          <ShieldCheck size={13} className="text-semantic-success" />
         ) : (
-          <ShieldAlert size={13} className="text-amber-500" />
+          <ShieldAlert size={13} className="text-semantic-warning" />
         )}
         <span>{gradeLabel}</span>
       </div>
@@ -128,7 +128,7 @@ export function EvidenceBadge({ evidence, compact = false, className }: Evidence
           </span>
         </div>
       )}
-      <div className="flex items-center gap-1.5 font-mono text-[10px]" title={evidence.sha256}>
+      <div className="flex items-center gap-1.5 font-mono text-2xs" title={evidence.sha256}>
         <Fingerprint size={12} className="shrink-0" />
         <span>SHA-256 {evidence.sha256.slice(0, 16)}</span>
       </div>

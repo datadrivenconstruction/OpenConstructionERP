@@ -114,13 +114,13 @@ function formatSize(bytes: number): string {
 function fileIcon(mime: string, name?: string) {
   const lower = (name ?? '').toLowerCase();
   if (mime.includes('pdf') || lower.endsWith('.pdf')) {
-    return <FileText size={16} className="text-red-500" />;
+    return <FileText size={16} className="text-semantic-error" />;
   }
   if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|tiff?)$/.test(lower)) {
-    return <Image size={16} className="text-emerald-500" />;
+    return <Image size={16} className="text-semantic-success" />;
   }
   if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv') || /\.(xlsx?|csv)$/.test(lower)) {
-    return <FileSpreadsheet size={16} className="text-green-600" />;
+    return <FileSpreadsheet size={16} className="text-semantic-success" />;
   }
   if (/\.(dwg|dxf)$/.test(lower)) {
     return <File size={16} className="text-orange-500" />;
@@ -134,9 +134,9 @@ function fileIcon(mime: string, name?: string) {
 /** Tailwind background class for a file-type badge/avatar, paired with the icon. */
 function fileIconBg(mime: string, name?: string): string {
   const lower = (name ?? '').toLowerCase();
-  if (mime.includes('pdf') || lower.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-950/20';
-  if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|tiff?)$/.test(lower)) return 'bg-emerald-50 dark:bg-emerald-950/20';
-  if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv') || /\.(xlsx?|csv)$/.test(lower)) return 'bg-green-50 dark:bg-green-950/20';
+  if (mime.includes('pdf') || lower.endsWith('.pdf')) return 'bg-semantic-error-bg';
+  if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|tiff?)$/.test(lower)) return 'bg-semantic-success-bg';
+  if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv') || /\.(xlsx?|csv)$/.test(lower)) return 'bg-semantic-success-bg';
   if (/\.(dwg|dxf)$/.test(lower)) return 'bg-orange-50 dark:bg-orange-950/20';
   if (/\.(rvt|ifc|nwd|nwc)$/.test(lower)) return 'bg-blue-50 dark:bg-blue-950/20';
   return 'bg-surface-secondary';
@@ -417,7 +417,7 @@ function PreviewModal({
             BIM viewer with the element preselected. */}
         {linkedElements && linkedElements.items.length > 0 && (
           <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
               {t('documents.linked_bim_elements', {
                 defaultValue: 'Linked BIM elements',
               })}
@@ -434,16 +434,16 @@ function PreviewModal({
                     navigate(`/bim?element=${encodeURIComponent(link.bim_element_id)}`);
                     onClose();
                   }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border-light text-[11px] text-content-secondary hover:text-oe-blue hover:bg-oe-blue/5"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border-light text-2xs text-content-secondary hover:text-oe-blue hover:bg-oe-blue/5"
                   title={link.bim_element_id}
                 >
-                  <span className="font-mono text-[10px]">
+                  <span className="font-mono text-2xs">
                     {link.bim_element_id.slice(0, 8)}
                   </span>
                 </button>
               ))}
               {linkedElements.items.length > 12 && (
-                <span className="text-[10px] text-content-tertiary">
+                <span className="text-2xs text-content-tertiary">
                   + {linkedElements.items.length - 12} more
                 </span>
               )}
@@ -1042,11 +1042,11 @@ export function DocumentsPage() {
           {t('documents.supported_types', { defaultValue: 'PDF, images, Excel, DWG, IFC - any file type' })}
         </p>
         <div className="flex items-center justify-center gap-2 mt-3">
-          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-red-500/10 text-red-500 border border-red-500/15 font-semibold">.pdf</span>
-          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/15 font-semibold">.img</span>
-          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-green-500/10 text-green-600 border border-green-500/15 font-semibold">.xlsx</span>
-          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 border border-orange-500/15 font-semibold">.dwg</span>
-          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/15 font-semibold">.ifc</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-error/10 text-semantic-error border border-red-500/15 font-semibold">.pdf</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-emerald-500/15 font-semibold">.img</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-green-500/15 font-semibold">.xlsx</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 border border-orange-500/15 font-semibold">.dwg</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/15 font-semibold">.ifc</span>
         </div>
         <button
           type="button"
@@ -1168,7 +1168,7 @@ export function DocumentsPage() {
               const fmt = (s.file_format || '').toUpperCase();
               const fmtColor: Record<string, string> = {
                 RVT: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
-                IFC: 'bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400',
+                IFC: 'bg-semantic-success-bg text-semantic-success',
                 DWG: 'bg-orange-50 text-orange-500 dark:bg-orange-950/30 dark:text-orange-400',
               };
               return (
@@ -1184,13 +1184,13 @@ export function DocumentsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-content-primary truncate" title={s.display_name}>{s.display_name}</p>
-                      <p className="text-[11px] text-content-tertiary mt-1 flex items-center gap-1.5">
-                        <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${fmtColor[fmt] || 'bg-surface-secondary text-content-tertiary'}`}>{fmt || '—'}</span>
+                      <p className="text-2xs text-content-tertiary mt-1 flex items-center gap-1.5">
+                        <span className={`px-1.5 py-0.5 rounded font-mono text-2xs font-semibold ${fmtColor[fmt] || 'bg-surface-secondary text-content-tertiary'}`}>{fmt || '—'}</span>
                         <span>{s.element_count.toLocaleString(getNumberLocale())} elements</span>
                       </p>
                     </div>
                   </div>
-                  <div className="mt-3 pt-2.5 border-t border-border-light/60 flex items-center justify-between text-[10px] text-content-quaternary">
+                  <div className="mt-3 pt-2.5 border-t border-border-light/60 flex items-center justify-between text-2xs text-content-quaternary">
                     <span>{fmtFixed(s.extraction_time, 1)}s</span>
                     {s.created_at && <span><DateDisplay value={s.created_at} /></span>}
                     {s.is_permanent ? (
@@ -1233,7 +1233,7 @@ export function DocumentsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{m.name}</p>
-                    <p className="text-[10px] text-content-tertiary">
+                    <p className="text-2xs text-content-tertiary">
                       {(m.model_format || m.format || 'BIM').toUpperCase()} &middot; {(m.element_count ?? 0).toLocaleString(getNumberLocale())} elem
                     </p>
                   </div>
@@ -1254,7 +1254,7 @@ export function DocumentsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{d.name}</p>
-                    <p className="text-[10px] text-content-tertiary">
+                    <p className="text-2xs text-content-tertiary">
                       DWG &middot; {d.entity_count ?? 0} ent
                     </p>
                   </div>
@@ -1270,12 +1270,12 @@ export function DocumentsPage() {
                 title={td.filename}
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded bg-red-50 dark:bg-red-950/30 shrink-0">
-                    <FileText size={13} className="text-red-500" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded bg-semantic-error-bg shrink-0">
+                    <FileText size={13} className="text-semantic-error" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{td.filename}</p>
-                    <p className="text-[10px] text-content-tertiary">
+                    <p className="text-2xs text-content-tertiary">
                       PDF &middot; {td.pages ?? 0} pg
                     </p>
                   </div>
@@ -1363,7 +1363,7 @@ export function DocumentsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-medium text-content-primary truncate" title={doc.name}>{doc.name}</h3>
-                    <p className="text-[11px] text-content-tertiary mt-1">
+                    <p className="text-2xs text-content-tertiary mt-1">
                       {formatSize(doc.file_size)}
                       {' \u00B7 '}
                       <DateDisplay value={doc.created_at} />
@@ -1405,7 +1405,7 @@ export function DocumentsPage() {
                         </span>
                       )}
                       {previewKind && (
-                        <span className="flex items-center gap-0.5 text-[10px] text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="flex items-center gap-0.5 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity">
                           <Eye size={10} />
                           {t('documents.preview', { defaultValue: 'Preview' })}
                         </span>
@@ -1415,12 +1415,12 @@ export function DocumentsPage() {
                     {doc.tags && doc.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {doc.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="rounded-full bg-content-primary/[0.04] px-2 py-[1px] text-[10px] font-medium text-content-tertiary">
+                          <span key={tag} className="rounded-full bg-content-primary/[0.04] px-2 py-[1px] text-2xs font-medium text-content-tertiary">
                             {tag}
                           </span>
                         ))}
                         {doc.tags.length > 3 && (
-                          <span className="text-[10px] text-content-quaternary">+{doc.tags.length - 3}</span>
+                          <span className="text-2xs text-content-quaternary">+{doc.tags.length - 3}</span>
                         )}
                       </div>
                     )}

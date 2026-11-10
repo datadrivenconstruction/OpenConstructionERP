@@ -126,7 +126,7 @@ export function SnapshotPickerInline({
                 onClick={() => handlePick(item.id)}
                 data-testid={`snapshot-picker-inline-option-${item.id}`}
                 className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-surface-secondary ${
-                  isActive ? 'bg-emerald-500/5 text-emerald-200' : 'text-content-primary'
+                  isActive ? 'bg-semantic-success/5 text-emerald-200' : 'text-content-primary'
                 }`}
               >
                 <span className="flex h-3 w-3 flex-shrink-0 items-center justify-center">
@@ -135,7 +135,7 @@ export function SnapshotPickerInline({
                 <span className="flex-1 truncate" title={item.label}>
                   {item.label}
                 </span>
-                <span className="flex-shrink-0 text-[10px] text-content-tertiary">
+                <span className="flex-shrink-0 text-2xs text-content-tertiary">
                   {formatDate(item.created_at)}
                 </span>
               </button>

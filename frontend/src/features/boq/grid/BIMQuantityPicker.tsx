@@ -258,9 +258,9 @@ export function BIMQuantityPicker({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
         <div className="flex items-center gap-1.5">
-          <Cuboid size={14} className="text-emerald-600" />
+          <Cuboid size={14} className="text-semantic-success" />
           <span className="text-xs font-semibold text-content-primary">BIM Quantities</span>
-          <span className="text-[10px] text-content-tertiary tabular-nums">
+          <span className="text-2xs text-content-tertiary tabular-nums">
             (
             {t('boq.bim_qty_elements_count', {
               count: cadElementIds.length,
@@ -301,11 +301,11 @@ export function BIMQuantityPicker({
                     ? 'Linked IDs not found in model'
                     : 'No numeric quantities found'}
             </span>
-            <span className="text-[9px] text-content-quaternary tabular-nums">
+            <span className="text-2xs text-content-quaternary tabular-nums">
               {totalFetched} elements loaded, {totalMatched} matched, {cadElementIds.length} linked
             </span>
             {fetchError && (
-              <span className="text-[9px] text-red-400 mt-1 px-3 text-center">
+              <span className="text-2xs text-red-400 mt-1 px-3 text-center">
                 {String(fetchError instanceof Error ? fetchError.message : fetchError)}
               </span>
             )}
@@ -324,13 +324,13 @@ export function BIMQuantityPicker({
                   className="w-full flex items-center gap-1.5 px-3 py-1.5 text-left
                              hover:bg-surface-secondary/60 transition-colors"
                 >
-                  <span className="text-[10px] text-content-quaternary shrink-0">
+                  <span className="text-2xs text-content-quaternary shrink-0">
                     {expandedElements.has(element.id) ? '\u25BC' : '\u25B6'}
                   </span>
-                  <span className="text-[11px] font-medium text-content-secondary truncate min-w-0 flex-1">
+                  <span className="text-2xs font-medium text-content-secondary truncate min-w-0 flex-1">
                     {element.name || element.element_type}
                   </span>
-                  <span className="text-[9px] text-content-quaternary font-mono shrink-0">
+                  <span className="text-2xs text-content-quaternary font-mono shrink-0">
                     {element.element_type}
                   </span>
                 </button>
@@ -361,9 +361,9 @@ export function BIMQuantityPicker({
 
             {/* Sum section */}
             {sums.length > 0 && (
-              <div className="border-t border-border-light dark:border-border-dark bg-emerald-50/50 dark:bg-emerald-950/20">
+              <div className="border-t border-border-light dark:border-border-dark bg-semantic-success/10">
                 <div className="px-3 py-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-success">
                     Totals
                   </span>
                 </div>
@@ -417,19 +417,19 @@ function QuantityRow({
   const shownUnit = displayQuantity ? displayQuantity.unitFor(unit) : unit;
   return (
     <div
-      className={`flex items-center gap-1 px-3 py-1 group/row hover:bg-emerald-50/80 dark:hover:bg-emerald-950/30 transition-colors ${
+      className={`flex items-center gap-1 px-3 py-1 group/row hover:bg-semantic-success/10 transition-colors ${
         isSum ? 'font-medium' : ''
       }`}
     >
-      <span className="text-[11px] text-content-secondary flex-1 truncate pl-3">{label}</span>
-      <span className="text-[11px] tabular-nums text-content-primary font-medium shrink-0">
+      <span className="text-2xs text-content-secondary flex-1 truncate pl-3">{label}</span>
+      <span className="text-2xs tabular-nums text-content-primary font-medium shrink-0">
         {fmtNum(shownValue)}
       </span>
       {shownUnit && (
-        <span className="text-[9px] text-content-quaternary font-mono shrink-0 w-5">{shownUnit}</span>
+        <span className="text-2xs text-content-quaternary font-mono shrink-0 w-5">{shownUnit}</span>
       )}
       {isCurrent ? (
-        <span className="text-[9px] text-emerald-600 font-medium shrink-0 w-9 text-center">
+        <span className="text-2xs text-semantic-success font-medium shrink-0 w-9 text-center">
           current
         </span>
       ) : (

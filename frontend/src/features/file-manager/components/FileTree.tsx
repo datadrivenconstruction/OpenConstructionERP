@@ -76,7 +76,7 @@ export function FileTree({ nodes, selectedId, onSelect, isLoading, projectId }: 
           <div className="text-base font-semibold text-content-primary tabular-nums">
             {fmtBytes(totalBytes)}
           </div>
-          <div className="text-[10px] text-content-tertiary mb-2">
+          <div className="text-2xs text-content-tertiary mb-2">
             {t('files.tree.file_count', {
               defaultValue: '{{count}} files',
               count: totalCount,
@@ -153,7 +153,7 @@ export function FileTree({ nodes, selectedId, onSelect, isLoading, projectId }: 
                 </span>
               </button>
               {node.total_bytes > 0 && (
-                <div className="ps-8 pe-2 text-[10px] text-content-quaternary tabular-nums">
+                <div className="ps-8 pe-2 text-2xs text-content-quaternary tabular-nums">
                   {fmtBytes(node.total_bytes)}
                 </div>
               )}

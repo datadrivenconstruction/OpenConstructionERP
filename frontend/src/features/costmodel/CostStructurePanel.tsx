@@ -69,7 +69,7 @@ export function worstSeverity(findings: readonly StructureFinding[]): FindingSev
 
 const LIGHT_CLASS: Record<FindingSeverity | 'ok', string> = {
   error: 'bg-semantic-error',
-  warning: 'bg-amber-500',
+  warning: 'bg-semantic-warning',
   info: 'bg-oe-blue',
   ok: 'bg-semantic-success',
 };
@@ -598,11 +598,11 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
             {suspenseInUse.map((bucket) => (
               <tr
                 key={bucket.kind}
-                className="border-b border-border-light/60 bg-amber-50/60 dark:bg-amber-900/10"
+                className="border-b border-border-light/60 bg-semantic-warning/10"
                 data-testid={`structure-suspense-${bucket.kind}`}
               >
                 <td className="px-3 py-1.5 font-mono text-content-tertiary">-</td>
-                <td className="px-3 py-1.5 font-medium text-amber-700 dark:text-amber-300">
+                <td className="px-3 py-1.5 font-medium text-semantic-warning">
                   {suspenseLabel(t, bucket)}
                 </td>
                 <td className="px-3 py-1.5" />
@@ -618,7 +618,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
               <th colSpan={4} className="px-3 py-2 text-start text-xs font-semibold text-content-primary">
                 {t('costmodel.structure.grand_total', { defaultValue: 'Total incl. suspense' })}
               </th>
-              <td className="whitespace-nowrap px-3 py-2 text-end text-xs font-bold tabular-nums" data-testid="structure-total">
+              <td className="whitespace-nowrap px-3 py-2 text-end text-xs font-semibold tabular-nums" data-testid="structure-total">
                 {money(structure.total)}
               </td>
               <td colSpan={2} />

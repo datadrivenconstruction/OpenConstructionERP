@@ -74,7 +74,7 @@ function CheckBanner({ check }: { check: DossierCheck }) {
     check.check_status === 'passed'
       ? 'border-semantic-success/40 bg-semantic-success/5 text-semantic-success'
       : check.check_status === 'warnings'
-        ? 'border-amber-400/50 bg-amber-50 text-amber-700 dark:bg-amber-500/10'
+        ? 'border-amber-400/50 bg-semantic-warning-bg text-semantic-warning dark:bg-amber-500/10'
         : 'border-semantic-error/40 bg-semantic-error/5 text-semantic-error';
   const Icon = check.check_status === 'passed' ? CheckCircle2 : check.check_status === 'warnings' ? AlertTriangle : XCircle;
   return (
@@ -547,7 +547,7 @@ export function DossierPanel({
                     </Badge>
                   )}
                   {d.sha256 && (
-                    <span className="font-mono text-[10px] text-content-quaternary" title={d.sha256}>
+                    <span className="font-mono text-2xs text-content-quaternary" title={d.sha256}>
                       SHA-256 {d.sha256.slice(0, 12)}
                     </span>
                   )}

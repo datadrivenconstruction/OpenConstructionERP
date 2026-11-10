@@ -395,7 +395,7 @@ export function ReportAttachments({
               })}
             </button>
           </div>
-          <p className="text-[11px] text-content-tertiary">
+          <p className="text-2xs text-content-tertiary">
             {t('fieldreports.attach_existing_hint', {
               defaultValue:
                 'Attach a file already in project files instead of uploading it again.',

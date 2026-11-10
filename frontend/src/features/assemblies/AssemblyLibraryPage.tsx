@@ -157,13 +157,13 @@ export function AssemblyLibraryPage() {
             'assemblies.library.search_placeholder',
             'Search by name, tag, or translation…'
           )}
-          className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 ps-10 pe-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          className="w-full rounded-lg border border-border bg-surface-primary py-2.5 ps-10 pe-10 text-sm text-content-primary placeholder:text-zinc-400 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
         />
         {search && (
           <button
             type="button"
             onClick={() => setSearch('')}
-            className="absolute end-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800"
+            className="absolute end-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-content-quaternary hover:bg-surface-secondary hover:text-content-secondary"
             aria-label={t('common.clear', 'Clear')}
           >
             <X className="h-4 w-4" />
@@ -182,7 +182,7 @@ export function AssemblyLibraryPage() {
               'rounded-full border px-3 py-1 text-sm transition-colors ' +
               (category === c.value
                 ? 'border-oe-blue bg-oe-blue text-white'
-                : 'border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600')
+                : 'border-border bg-surface-primary text-content-secondary hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600')
             }
           >
             {t(c.key, c.value || 'All')}
@@ -255,7 +255,7 @@ function TemplateCard({
     >
       <div className="flex h-full flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="line-clamp-2 text-sm font-semibold text-content-primary">
             {localisedName}
           </h3>
           <Badge variant={badgeColor}>{categoryLabel(template.category, t)}</Badge>
@@ -279,7 +279,7 @@ function TemplateCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="mt-auto flex items-center justify-between text-xs text-content-tertiary">
           <span className="flex items-center gap-1">
             <Layers className="h-3.5 w-3.5" />
             {t('assemblies.library.components_count', {
@@ -288,7 +288,7 @@ function TemplateCard({
               defaultValue: '{{count}} components',
             })}
           </span>
-          <span className="font-mono text-zinc-700 dark:text-zinc-300">
+          <span className="font-mono text-content-secondary">
             {t('assemblies.library.per_unit', 'per')} {unitGlyph(template.unit)}
           </span>
         </div>
@@ -347,7 +347,7 @@ export function PreviewTotalsFooter({
   return (
     <tfoot>
       <tr>
-        <td colSpan={4} className="pt-2 text-right text-[11px] font-normal text-zinc-500 dark:text-zinc-400">
+        <td colSpan={4} className="pt-2 text-right text-2xs font-normal text-content-tertiary">
           {t(
             'assemblies.library.no_single_total',
             'No single total: this preview covers more than one currency, and part of it could not be converted.'
@@ -535,19 +535,19 @@ function TemplateDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
       <div
-        className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white shadow-xl dark:bg-zinc-900"
+        className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface-primary shadow-xl"
         role="dialog"
         aria-labelledby="template-drawer-title"
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border-light bg-surface-primary px-5 py-4">
           <div>
             <h2
               id="template-drawer-title"
-              className="text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+              className="text-lg font-semibold text-content-primary"
             >
               {localisedName}
             </h2>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-xs text-content-tertiary">
               {categoryLabel(template.category, t)} · {t('assemblies.library.per_unit', 'per')}{' '}
               {unitGlyph(template.unit)} · {t('assemblies.library.components_count', {
                 count: template.component_count,
@@ -559,7 +559,7 @@ function TemplateDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800"
+            className="rounded p-1 text-content-quaternary hover:bg-surface-secondary hover:text-content-secondary"
             aria-label={t('common.close', 'Close')}
           >
             <X className="h-5 w-5" />
@@ -570,7 +570,7 @@ function TemplateDrawer({
           {/* Translations */}
           {Object.keys(template.name_translations || {}).length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
                 <Globe className="mr-1 inline h-3.5 w-3.5" />
                 {t('assemblies.library.translations', 'Translations')}
               </h3>
@@ -578,7 +578,7 @@ function TemplateDrawer({
                 {Object.entries(template.name_translations).map(([k, v]) => (
                   <li key={k} className="flex gap-2">
                     <span className="w-8 font-mono text-zinc-400">{k}</span>
-                    <span className="text-zinc-700 dark:text-zinc-300">{v}</span>
+                    <span className="text-content-secondary">{v}</span>
                   </li>
                 ))}
               </ul>
@@ -590,7 +590,7 @@ function TemplateDrawer({
             template.classification?.masterformat ||
             template.classification?.nrm) && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
                 {t('assemblies.library.classification', 'Classification')}
               </h3>
               <div className="flex gap-2">
@@ -613,17 +613,17 @@ function TemplateDrawer({
 
           {/* Components */}
           <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
               {t('assemblies.library.components', 'Components')}
             </h3>
-            <ul className="divide-y divide-zinc-200 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            <ul className="divide-y divide-border-light rounded-md border border-border-light">
               {template.components.map((c, idx) => (
                 <li key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
                   <div>
-                    <div className="text-zinc-800 dark:text-zinc-200">{c.description}</div>
+                    <div className="text-content-primary">{c.description}</div>
                     <div className="text-xs text-zinc-500">{roleLabel(c.role, t)}</div>
                   </div>
-                  <div className="text-right font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                  <div className="text-right font-mono text-xs text-content-secondary">
                     {c.factor} {unitGlyph(c.unit)}
                   </div>
                 </li>
@@ -634,7 +634,7 @@ function TemplateDrawer({
           {/* Tags */}
           {template.tags.length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
                 {t('assemblies.library.tags', 'Tags')}
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -648,11 +648,11 @@ function TemplateDrawer({
           )}
 
           {/* Apply form */}
-          <section className="rounded-md border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/40">
-            <h3 className="mb-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <section className="rounded-md border border-border-light bg-surface-secondary p-4">
+            <h3 className="mb-1 text-sm font-semibold text-content-primary">
               {t('assemblies.library.preview_heading', 'Preview against a project')}
             </h3>
-            <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mb-3 text-xs text-content-tertiary">
               {t(
                 'assemblies.library.preview_explainer',
                 'Resolves each template component against the project cost catalogue so you can review rates. Nothing is saved until you create an assembly from the preview.'
@@ -660,13 +660,13 @@ function TemplateDrawer({
             </p>
             <div className="space-y-3">
               <label className="block text-sm">
-                <span className="mb-1 block text-zinc-700 dark:text-zinc-300">
+                <span className="mb-1 block text-content-secondary">
                   {t('assemblies.library.project', 'Project')}
                 </span>
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
                 >
                   <option value="">
                     {t('assemblies.library.pick_project', '- pick a project -')}
@@ -679,7 +679,7 @@ function TemplateDrawer({
                 </select>
               </label>
               <label className="block text-sm">
-                <span className="mb-1 block text-zinc-700 dark:text-zinc-300">
+                <span className="mb-1 block text-content-secondary">
                   {t('assemblies.library.quantity', 'Quantity')} ({template.unit})
                 </span>
                 <input
@@ -688,7 +688,7 @@ function TemplateDrawer({
                   step="any"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
                 />
               </label>
               <Button
@@ -709,11 +709,11 @@ function TemplateDrawer({
           {/* Result */}
           {result && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
                 {t('assemblies.library.preview', 'Preview')}
               </h3>
               {result.warnings.length > 0 && (
-                <div className="mb-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                <div className="mb-2 flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
                   <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                   <div>
                     {result.warnings.map((w, i) => (
@@ -739,22 +739,22 @@ function TemplateDrawer({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                <tbody className="divide-y divide-border-light">
                   {result.components.map((c, i) => {
                     const matched = Boolean(c.matched_cost_item_id);
                     return (
                       <tr key={i} className={matched ? '' : 'bg-zinc-50/60 dark:bg-zinc-800/30'}>
                         <td className="py-1.5 pr-2">
-                          <div className="flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
+                          <div className="flex items-center gap-1.5 text-content-primary">
                             {c.description}
                             {!matched && (
-                              <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                              <span className="rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
                                 {t('assemblies.library.not_matched', 'not matched')}
                               </span>
                             )}
                           </div>
                           {c.matched_code && (
-                            <div className="font-mono text-[10px] text-zinc-500">
+                            <div className="font-mono text-2xs text-zinc-500">
                               {c.matched_code}
                             </div>
                           )}
@@ -789,8 +789,8 @@ function TemplateDrawer({
               {/* Persist step — the honest "this actually writes something"
                   action. Creates a real project-scoped assembly from the
                   previewed components. */}
-              <div className="mt-4 flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="mt-4 flex flex-col gap-2 rounded-md border border-border-light bg-surface-primary p-3">
+                <p className="text-xs text-content-tertiary">
                   {t(
                     'assemblies.library.save_explainer',
                     'Create a reusable assembly in this project from the preview above. You can then refine rates and apply it to a BOQ from the assembly editor.'

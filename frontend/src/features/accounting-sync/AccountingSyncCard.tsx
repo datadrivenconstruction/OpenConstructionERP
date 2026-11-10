@@ -49,7 +49,7 @@ export function AccountingSyncCard() {
             {
               label: t('accountingSync.card_failures', { defaultValue: 'Open failures' }),
               value: nf.format(data.open_failures),
-              tone: data.open_failures > 0 ? 'text-rose-600' : 'text-emerald-600',
+              tone: data.open_failures > 0 ? 'text-semantic-error' : 'text-semantic-success',
             },
           ]}
         />

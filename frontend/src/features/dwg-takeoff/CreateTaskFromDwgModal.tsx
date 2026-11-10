@@ -146,7 +146,7 @@ export default function CreateTaskFromDwgModal({
                 defaultValue: 'Create task pinned to DWG entity',
               })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {entityIds.length === 1
                 ? entityLabel || t('dwg_takeoff.entity', { defaultValue: 'Entity' })
                 : t('dwg_takeoff.create_task_bulk', {
@@ -167,7 +167,7 @@ export default function CreateTaskFromDwgModal({
         {/* Form */}
         <div className="p-5 space-y-3">
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('dwg_takeoff.task_title', { defaultValue: 'Title' })}
               <span className="text-rose-500 ml-0.5">*</span>
             </label>
@@ -181,7 +181,7 @@ export default function CreateTaskFromDwgModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('dwg_takeoff.task_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -197,7 +197,7 @@ export default function CreateTaskFromDwgModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                 {t('dwg_takeoff.task_type', { defaultValue: 'Type' })}
               </label>
               <select
@@ -213,7 +213,7 @@ export default function CreateTaskFromDwgModal({
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                 {t('dwg_takeoff.task_priority', { defaultValue: 'Priority' })}
               </label>
               <select
@@ -233,7 +233,7 @@ export default function CreateTaskFromDwgModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('dwg_takeoff.task_due_date', { defaultValue: 'Due date (optional)' })}
             </label>
             <input
@@ -245,7 +245,7 @@ export default function CreateTaskFromDwgModal({
           </div>
 
           {/* Entity pin info */}
-          <div className="rounded-md border border-amber-300/40 bg-amber-50/40 dark:bg-amber-950/20 px-2.5 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+          <div className="rounded-md border border-amber-300/40 bg-amber-50/40 dark:bg-amber-950/20 px-2.5 py-2 text-2xs text-amber-700 dark:text-amber-300">
             <div className="flex items-start gap-1.5">
               <ListChecks size={11} className="shrink-0 mt-0.5" />
               <span>

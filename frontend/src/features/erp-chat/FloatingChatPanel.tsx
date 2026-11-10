@@ -575,7 +575,7 @@ function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
   return (
     <div
       className={clsx(
-        'my-1 rounded-lg text-[12px] text-[color:var(--chat-text-secondary)]',
+        'my-1 rounded-lg text-xs text-[color:var(--chat-text-secondary)]',
         reason && 'border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-1)]',
       )}
       data-testid="floating-chat-tool"
@@ -658,7 +658,7 @@ function GroupHeading({ id, icon, children }: { id: string; icon: ReactNode; chi
   return (
     <h3
       id={id}
-      className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--chat-text-secondary)]"
+      className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-[color:var(--chat-text-secondary)]"
     >
       {icon}
       {children}
@@ -700,7 +700,7 @@ function EmptyState({
 
   return (
     <div className="px-4 pb-4 pt-5" data-testid="floating-chat-empty">
-      <p className="text-[15px] font-semibold leading-snug text-[color:var(--chat-text-primary)]">
+      <p className="text-base font-semibold leading-snug text-[color:var(--chat-text-primary)]">
         {t('chat.dock.empty_title', {
           defaultValue: 'Tell me what to do. I prepare the changes, you approve them.',
         })}
@@ -713,10 +713,10 @@ function EmptyState({
       >
         {steps.map((step, i) => (
           <li key={i} className="flex items-center gap-1.5">
-            <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-[color:var(--chat-surface-2)] pe-2.5 ps-1 text-[12px] font-medium text-[color:var(--chat-text-primary)]">
+            <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-[color:var(--chat-surface-2)] pe-2.5 ps-1 text-xs font-medium text-[color:var(--chat-text-primary)]">
               <span
                 aria-hidden
-                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-[10px] font-semibold leading-none text-content-inverse"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold leading-none text-content-inverse"
               >
                 {i + 1}
               </span>
@@ -732,7 +732,7 @@ function EmptyState({
           </li>
         ))}
       </ol>
-      <p className="mt-2 flex items-center gap-1.5 text-[12px] text-[color:var(--chat-text-secondary)]">
+      <p className="mt-2 flex items-center gap-1.5 text-xs text-[color:var(--chat-text-secondary)]">
         <ShieldCheck size={13} aria-hidden className="shrink-0" />
         {t('chat.dock.steps_note', { defaultValue: 'Every change is logged in the project history.' })}
       </p>
@@ -741,7 +741,7 @@ function EmptyState({
         <GroupHeading id={doHeadingId} icon={<PenLine size={12} aria-hidden />}>
           {t('chat.dock.group_do', { defaultValue: 'Make a change' })}
         </GroupHeading>
-        <p id={doHintId} className="mt-0.5 text-[12px] text-[color:var(--chat-text-secondary)]">
+        <p id={doHintId} className="mt-0.5 text-xs text-[color:var(--chat-text-secondary)]">
           {t('chat.dock.group_do_hint', {
             defaultValue: 'Pick an example and adjust it before you send it.',
           })}
@@ -769,7 +769,7 @@ function EmptyState({
         {hasContextual && (
           <>
             <p
-              className="mt-2 text-[12px] font-medium text-[color:var(--chat-text-secondary)]"
+              className="mt-2 text-xs font-medium text-[color:var(--chat-text-secondary)]"
               data-testid="floating-chat-contextual-label"
             >
               {t('chat.panel.contextual_label', { defaultValue: 'For this page' })}
@@ -779,7 +779,7 @@ function EmptyState({
                 <SuggestionChip key={s} text={s} kind="ask" onPick={onAsk} testIdSuffix={`ctx-${i}`} />
               ))}
             </div>
-            <p className="mt-3 text-[12px] font-medium text-[color:var(--chat-text-secondary)]">
+            <p className="mt-3 text-xs font-medium text-[color:var(--chat-text-secondary)]">
               {t('chat.panel.generic_label', { defaultValue: 'Anywhere' })}
             </p>
           </>
@@ -1063,7 +1063,7 @@ function HistoryLoading() {
   return (
     <div
       role="status"
-      className="flex items-center justify-center gap-2 px-4 py-10 text-[12px] text-[color:var(--chat-text-secondary)]"
+      className="flex items-center justify-center gap-2 px-4 py-10 text-xs text-[color:var(--chat-text-secondary)]"
       data-testid="floating-chat-history-loading"
     >
       <Loader2 size={14} aria-hidden className="animate-spin" />
@@ -1090,7 +1090,7 @@ function HistoryError({ onRetry, onNew }: { onRetry: () => void; onNew: () => vo
             type="button"
             onClick={onRetry}
             data-testid="floating-chat-history-retry"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-oe-blue px-3 text-[12px] font-semibold text-content-inverse transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-oe-blue px-3 text-xs font-semibold text-content-inverse transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2"
           >
             <RotateCw size={12} aria-hidden />
             {t('chat.dock.history_retry', { defaultValue: 'Try again' })}
@@ -1098,7 +1098,7 @@ function HistoryError({ onRetry, onNew }: { onRetry: () => void; onNew: () => vo
           <button
             type="button"
             onClick={onNew}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[color:var(--chat-border)] px-3 text-[12px] font-medium text-[color:var(--chat-text-primary)] transition-colors hover:bg-[color:var(--chat-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[color:var(--chat-border)] px-3 text-xs font-medium text-[color:var(--chat-text-primary)] transition-colors hover:bg-[color:var(--chat-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
           >
             <MessageSquarePlus size={12} aria-hidden />
             {t('chat.dock.history_new', { defaultValue: 'Start a new chat' })}
@@ -2431,7 +2431,7 @@ export function FloatingChatPanel() {
             onChange={(e) => setTitle(e.target.value)}
             aria-label={t('chat.panel.title_edit', { defaultValue: 'Conversation title' })}
             title={t('chat.panel.title_edit', { defaultValue: 'Conversation title' })}
-            className="min-w-0 flex-1 truncate rounded-md border-none bg-transparent px-1.5 py-1 text-[13.5px] font-semibold outline-none transition-colors hover:bg-[color:var(--chat-surface-2)] focus:bg-[color:var(--chat-surface-2)] focus-visible:ring-2 focus-visible:ring-oe-blue"
+            className="min-w-0 flex-1 truncate rounded-md border-none bg-transparent px-1.5 py-1 text-sm font-semibold outline-none transition-colors hover:bg-[color:var(--chat-surface-2)] focus:bg-[color:var(--chat-surface-2)] focus-visible:ring-2 focus-visible:ring-oe-blue"
             style={{ color: 'var(--chat-text-primary)' }}
           />
           <DockHeaderButton
@@ -2643,7 +2643,7 @@ export function FloatingChatPanel() {
                 {showCounter && (
                   <span
                     className={clsx(
-                      'shrink-0 text-[12px] tabular-nums text-[color:var(--chat-text-secondary)]',
+                      'shrink-0 text-xs tabular-nums text-[color:var(--chat-text-secondary)]',
                       overHard && 'font-medium text-semantic-error',
                       !overHard && overSoft && 'font-medium text-semantic-warning',
                     )}
@@ -2675,7 +2675,7 @@ export function FloatingChatPanel() {
                 </button>
               </div>
             </div>
-            <div className="mt-1.5 flex items-center gap-1.5 px-1 text-[12px] leading-4 text-[color:var(--chat-text-secondary)]">
+            <div className="mt-1.5 flex items-center gap-1.5 px-1 text-xs leading-4 text-[color:var(--chat-text-secondary)]">
               <ShieldCheck size={13} aria-hidden className="shrink-0" />
               <span id={composerNoteId} className="min-w-0 flex-1">
                 {t('chat.dock.composer_note', {
@@ -2787,7 +2787,7 @@ function ContextChips({ projectName, pathname }: { projectName: string | null; p
   const { t } = useTranslation();
   const page = pageContextLabel(pathname, t);
   const chip =
-    'inline-flex min-w-0 max-w-[60%] items-center gap-1 rounded-full border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-2)] px-2 py-0.5 text-[11.5px] leading-4 text-[color:var(--chat-text-secondary)]';
+    'inline-flex min-w-0 max-w-[60%] items-center gap-1 rounded-full border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-2)] px-2 py-0.5 text-xs leading-4 text-[color:var(--chat-text-secondary)]';
   return (
     <div
       className="flex min-w-0 flex-wrap items-center gap-1.5 px-2.5 pt-2"
@@ -2836,7 +2836,7 @@ function CopyMessageButton({ text }: { text: string }) {
       aria-label={label}
       title={label}
       data-testid="floating-chat-copy"
-      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] text-[color:var(--chat-text-secondary)] opacity-0 transition-opacity hover:bg-[color:var(--chat-surface-2)] hover:text-[color:var(--chat-text-primary)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue group-hover:opacity-100 group-focus-within:opacity-100"
+      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-[color:var(--chat-text-secondary)] opacity-0 transition-opacity hover:bg-[color:var(--chat-surface-2)] hover:text-[color:var(--chat-text-primary)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue group-hover:opacity-100 group-focus-within:opacity-100"
     >
       {copied ? <Check size={12} aria-hidden /> : <Copy size={12} aria-hidden />}
       <span aria-live="polite">{copied ? label : null}</span>

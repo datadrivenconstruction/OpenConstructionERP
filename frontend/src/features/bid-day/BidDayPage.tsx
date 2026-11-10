@@ -192,7 +192,7 @@ function Figure({ label, value, accent, children }: { label: string; value: stri
   return (
     <div className="min-w-0">
       <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
-      <div className={clsx('tabular-nums', accent ? 'text-2xl font-bold text-content-primary' : 'text-base font-semibold text-content-primary')}>
+      <div className={clsx('tabular-nums', accent ? 'text-2xl font-semibold text-content-primary' : 'text-base font-semibold text-content-primary')}>
         {value}
         {children}
       </div>

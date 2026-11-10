@@ -320,7 +320,7 @@ function SummaryStats({
               <Icon size={16} className={stat.color} />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold tabular-nums text-content-primary">{stat.value}</p>
+              <p className="text-xl font-semibold tabular-nums text-content-primary">{stat.value}</p>
               <p className="text-2xs text-content-tertiary truncate">{stat.label}</p>
             </div>
           </Card>
@@ -812,7 +812,7 @@ function GanttChart({
                 <div className="flex min-w-0 flex-1 flex-col justify-center py-1.5" style={{ height: ROW_HEIGHT }}>
                   <div className="flex items-center gap-1.5">
                     {isCritical && (
-                      <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                      <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-2xs font-semibold leading-none text-white">
                         CP
                       </span>
                     )}
@@ -843,7 +843,7 @@ function GanttChart({
                         title={t('schedule.duration_estimated_tooltip', {
                           defaultValue: 'Duration estimated from production rates',
                         })}
-                        className="inline-flex shrink-0 cursor-help items-center gap-0.5 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[9px] font-semibold text-content-tertiary"
+                        className="inline-flex shrink-0 cursor-help items-center gap-0.5 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs font-semibold text-content-tertiary"
                       >
                         <Clock size={9} className="shrink-0" />
                         {t('schedule.duration_estimated_badge', { defaultValue: 'Est.' })}
@@ -852,7 +852,7 @@ function GanttChart({
                     <ViewInBIMButton
                       elementIds={activity.bim_element_ids ?? []}
                       iconSize={9}
-                      className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 border border-amber-200 dark:border-amber-900/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                      className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-2xs font-semibold bg-semantic-warning-bg text-semantic-warning border border-semantic-warning/30 hover:bg-semantic-warning-bg transition-colors"
                     />
                     {/* CONN-33: the activity already carries the BOQ positions
                         it was generated from; turn that data island into a
@@ -871,7 +871,7 @@ function GanttChart({
                           defaultValue: 'View in BOQ ({{count}} position(s))',
                           count: activity.boq_position_ids.length,
                         })}
-                        className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-oe-blue-subtle text-oe-blue-text border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
+                        className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-2xs font-semibold bg-oe-blue-subtle text-oe-blue-text border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
                       >
                         <Table2 size={9} className="shrink-0" />
                         {t('schedule.view_in_boq_short', { defaultValue: 'BOQ' })}
@@ -959,7 +959,7 @@ function GanttChart({
                           strokeWidth={1.5}
                         />
                         {isCritical && (
-                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-4 items-center rounded bg-semantic-error px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-4 items-center rounded bg-semantic-error px-1 text-2xs font-semibold leading-none text-white shadow-sm">
                             CP
                           </span>
                         )}
@@ -977,7 +977,7 @@ function GanttChart({
                         />
                         {/* CP badge for critical path activities */}
                         {isCritical && (
-                          <span className="absolute -top-2.5 -right-1 flex h-4 items-center rounded bg-semantic-error px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                          <span className="absolute -top-2.5 -right-1 flex h-4 items-center rounded bg-semantic-error px-1 text-2xs font-semibold leading-none text-white shadow-sm">
                             CP
                           </span>
                         )}
@@ -1030,10 +1030,10 @@ function GanttChart({
             {/* Today marker */}
             {todayPct >= 0 && todayPct <= 100 && (
               <div
-                className="absolute top-0 bottom-0 w-px bg-red-500 z-10 pointer-events-none"
+                className="absolute top-0 bottom-0 w-px bg-semantic-error z-10 pointer-events-none"
                 style={{ left: `${todayPct}%` }}
               >
-                <div className="absolute -top-0 left-1/2 -translate-x-1/2 rounded bg-red-500 px-1.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
+                <div className="absolute -top-0 left-1/2 -translate-x-1/2 rounded bg-semantic-error px-1.5 py-0.5 text-2xs font-semibold text-white whitespace-nowrap">
                   {t('schedule.today', { defaultValue: 'Today' })}
                 </div>
               </div>
@@ -1098,7 +1098,7 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
             <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {item.label}
             </p>
-            <p className={`text-xl font-bold tabular-nums ${item.color}`}>{item.value}</p>
+            <p className={`text-xl font-semibold tabular-nums ${item.color}`}>{item.value}</p>
             <p className="text-2xs text-content-tertiary">{item.sub}</p>
           </div>
         ))}
@@ -1779,7 +1779,7 @@ export function ScheduleDetail({
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-content-primary">{schedule.name}</h1>
+          <h1 className="text-2xl font-semibold text-content-primary">{schedule.name}</h1>
           {schedule.description && (
             <p className="mt-1 text-sm text-content-secondary">{schedule.description}</p>
           )}
@@ -2091,7 +2091,7 @@ export function ScheduleDetail({
                   <span className="text-sm font-medium text-content-primary">
                     {t('schedule.overall_progress', { defaultValue: 'Overall Progress' })}
                   </span>
-                  <span className="text-sm font-bold text-oe-blue tabular-nums">
+                  <span className="text-sm font-semibold text-oe-blue tabular-nums">
                     {pct}%
                   </span>
                 </div>
@@ -2987,7 +2987,7 @@ export function ProjectSchedules({
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-content-primary">{project.name}</h1>
+          <h1 className="text-2xl font-semibold text-content-primary">{project.name}</h1>
           <p className="mt-1 text-sm text-content-secondary">
             {t('schedule.project_schedules', 'Schedules for this project')}
           </p>
@@ -3047,7 +3047,7 @@ export function ProjectSchedules({
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
               <CalendarDays size={32} className="text-oe-blue" />
             </div>
-            <h2 className="text-xl font-bold text-content-primary">
+            <h2 className="text-xl font-semibold text-content-primary">
               {t('schedule.empty_hero_title', { defaultValue: '4D Schedule with Gantt Chart' })}
             </h2>
             <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
@@ -3073,8 +3073,8 @@ export function ProjectSchedules({
               </p>
             </div>
             <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
-              <div className="mx-auto w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-3">
-                <GitBranch size={20} className="text-emerald-600 dark:text-emerald-400" />
+              <div className="mx-auto w-10 h-10 rounded-lg bg-semantic-success-bg flex items-center justify-center mb-3">
+                <GitBranch size={20} className="text-semantic-success" />
               </div>
               <h3 className="text-sm font-semibold text-content-primary mb-1">
                 {t('schedule.feature_deps_title', { defaultValue: 'Dependencies & Links' })}
@@ -3086,8 +3086,8 @@ export function ProjectSchedules({
               </p>
             </div>
             <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
-              <div className="mx-auto w-10 h-10 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-3">
-                <Zap size={20} className="text-red-600 dark:text-red-400" />
+              <div className="mx-auto w-10 h-10 rounded-lg bg-semantic-error-bg flex items-center justify-center mb-3">
+                <Zap size={20} className="text-semantic-error" />
               </div>
               <h3 className="text-sm font-semibold text-content-primary mb-1">
                 {t('schedule.feature_cpm_title', { defaultValue: 'CPM Critical Path' })}
@@ -3404,7 +3404,7 @@ function HowScheduleWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -3577,7 +3577,7 @@ export function SchedulePage() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
               <Calendar size={32} className="text-oe-blue" />
             </div>
-            <h2 className="text-xl font-bold text-content-primary">
+            <h2 className="text-xl font-semibold text-content-primary">
               {t('schedule.no_projects_title', { defaultValue: 'No projects yet' })}
             </h2>
             <p className="text-sm text-content-secondary mt-2 max-w-md mx-auto">
@@ -3632,7 +3632,7 @@ export function SchedulePage() {
               onClick={() => setActiveProject(project.id, project.name)}
             >
               <div className="flex items-center gap-3 px-5 py-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-bold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-semibold">
                   {project.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">

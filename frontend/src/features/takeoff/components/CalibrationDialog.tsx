@@ -166,7 +166,7 @@ export function CalibrationDialog({
         </div>
         {isValid && unit !== 'm' && (
           <p
-            className="text-[10px] text-purple-500/90 mb-2 tabular-nums"
+            className="text-2xs text-purple-500/90 mb-2 tabular-nums"
             data-testid="calibration-metric-note"
           >
             {t('takeoff_viewer.calibrate_metric_note', {
@@ -181,7 +181,7 @@ export function CalibrationDialog({
             })}
           </p>
         )}
-        <p className="text-[10px] text-content-tertiary">
+        <p className="text-2xs text-content-tertiary">
           {t('takeoff_viewer.calibrate_hint', {
             defaultValue:
               'Tip: pick two points along a known dimension (door, wall, grid line).',

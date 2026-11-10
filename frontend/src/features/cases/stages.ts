@@ -65,10 +65,10 @@ export const STAGE_META: StageMeta[] = [
     descDefault: 'Set the project up and test the budget before design.',
     icon: Compass,
     tint: {
-      tile: 'bg-slate-500/10 text-slate-600 ring-slate-500/20 dark:text-slate-300',
-      chip: 'border-slate-500/40 bg-slate-500/10 text-slate-700 dark:text-slate-300',
+      tile: 'bg-slate-500/10 text-content-secondary ring-slate-500/20 dark:text-slate-300',
+      chip: 'border-slate-500/40 bg-slate-500/10 text-content-secondary dark:text-slate-300',
       accent: 'border-l-slate-400/60',
-      text: 'text-slate-600 dark:text-slate-300',
+      text: 'text-content-secondary',
     },
   },
   {
@@ -99,10 +99,10 @@ export const STAGE_META: StageMeta[] = [
     descDefault: 'Measure, price and plan the cost of the work.',
     icon: Calculator,
     tint: {
-      tile: 'bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400',
-      chip: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+      tile: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/20 dark:text-amber-400',
+      chip: 'border-amber-500/40 bg-semantic-warning/10 text-semantic-warning dark:text-amber-300',
       accent: 'border-l-amber-400/60',
-      text: 'text-amber-600 dark:text-amber-400',
+      text: 'text-semantic-warning',
     },
   },
   {
@@ -116,10 +116,10 @@ export const STAGE_META: StageMeta[] = [
     descDefault: 'Package, tender and buy the work.',
     icon: ShoppingCart,
     tint: {
-      tile: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 dark:text-emerald-400',
-      chip: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+      tile: 'bg-semantic-success/10 text-semantic-success ring-emerald-500/20 dark:text-emerald-400',
+      chip: 'border-emerald-500/40 bg-semantic-success/10 text-semantic-success dark:text-emerald-300',
       accent: 'border-l-emerald-400/60',
-      text: 'text-emerald-600 dark:text-emerald-400',
+      text: 'text-semantic-success',
     },
   },
   {
@@ -133,10 +133,10 @@ export const STAGE_META: StageMeta[] = [
     descDefault: 'Build the programme and get ready to start on site.',
     icon: CalendarRange,
     tint: {
-      tile: 'bg-sky-500/10 text-sky-600 ring-sky-500/20 dark:text-sky-400',
-      chip: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+      tile: 'bg-semantic-info/10 text-semantic-info ring-sky-500/20 dark:text-sky-400',
+      chip: 'border-sky-500/40 bg-semantic-info/10 text-semantic-info dark:text-sky-300',
       accent: 'border-l-sky-400/60',
-      text: 'text-sky-600 dark:text-sky-400',
+      text: 'text-semantic-info',
     },
   },
   {

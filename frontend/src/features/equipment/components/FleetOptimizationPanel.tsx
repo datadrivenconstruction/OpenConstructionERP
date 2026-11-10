@@ -61,7 +61,7 @@ export function FleetOptimizationPanel({
     return (
       <Card padding="md">
         <p className="flex items-center gap-1.5 text-xs text-content-secondary">
-          <AlertTriangle size={13} className="text-amber-500" />
+          <AlertTriangle size={13} className="text-semantic-warning" />
           {optQ.error
             ? getErrorMessage(optQ.error)
             : t('equipment.fleet_intel.unavailable', {
@@ -112,7 +112,7 @@ export function FleetOptimizationPanel({
               defaultValue: 'Savings opportunity',
             })}
           </p>
-          <p className="mt-1 text-lg font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+          <p className="mt-1 text-lg font-semibold tabular-nums text-semantic-success">
             <MoneyDisplay
               amount={o.estimated_monthly_savings}
               currency={currency || undefined}
@@ -219,10 +219,10 @@ export function FleetOptimizationPanel({
                             <td className="px-3 py-2 truncate max-w-[180px]">
                               {u.name}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-amber-600 dark:text-amber-400">
+                            <td className="px-3 py-2 text-right tabular-nums text-semantic-warning">
                               {fmtPercent(u.utilization_pct, 0)}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-emerald-600 dark:text-emerald-400">
+                            <td className="px-3 py-2 text-right tabular-nums text-semantic-success">
                               <MoneyDisplay
                                 amount={u.estimated_monthly_saving}
                                 currency={currency || undefined}

@@ -50,12 +50,12 @@ export function GuaranteesSummaryCard() {
             {
               label: t('guarantees.card_expiring', { defaultValue: 'Expiring soon' }),
               value: nf.format(data.expiring_count),
-              tone: data.expiring_count > 0 ? 'text-amber-600' : 'text-content-secondary',
+              tone: data.expiring_count > 0 ? 'text-semantic-warning' : 'text-content-secondary',
             },
             {
               label: t('guarantees.card_expired', { defaultValue: 'Expired' }),
               value: nf.format(data.expired_count),
-              tone: data.expired_count > 0 ? 'text-rose-600' : 'text-content-secondary',
+              tone: data.expired_count > 0 ? 'text-semantic-error' : 'text-content-secondary',
             },
           ]}
         />

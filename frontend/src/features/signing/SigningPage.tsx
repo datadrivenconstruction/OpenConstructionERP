@@ -384,7 +384,7 @@ function SessionFormModal({
                 <button
                   type="button"
                   onClick={() => removeSignatory(idx)}
-                  className="shrink-0 rounded p-1.5 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-950/30"
+                  className="shrink-0 rounded p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('common.remove', { defaultValue: 'Remove' })}
                 >
                   <XIcon size={14} />
@@ -893,7 +893,7 @@ const SessionRow = React.memo(function SessionRow({
             <Button
               variant="secondary"
               size="sm"
-              className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="text-semantic-error hover:bg-semantic-error-bg"
               icon={<Trash2 size={13} />}
               onClick={(e) => {
                 e.stopPropagation();

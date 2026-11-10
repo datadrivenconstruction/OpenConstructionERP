@@ -857,7 +857,7 @@ export function AssembliesPage() {
               size="sm"
               icon={<Trash2 size={13} />}
               onClick={() => setShowBulkConfirmDelete(true)}
-              className="text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800/40 dark:hover:bg-red-900/20"
+              className="text-semantic-error border-semantic-error/30 hover:bg-semantic-error-bg"
             >
               {t('assemblies.bulk_delete', { defaultValue: 'Delete' })}
             </Button>
@@ -1092,7 +1092,7 @@ function StatTile({
     active
       ? 'border-oe-blue bg-oe-blue-subtle'
       : highlightTone === 'amber'
-        ? 'border-amber-200/60 bg-amber-50/60 dark:border-amber-700/30 dark:bg-amber-900/15'
+        ? 'border-semantic-warning/30 bg-semantic-warning/10'
         : 'border-border-light bg-surface-secondary';
   const cursor = interactive ? 'cursor-pointer hover:border-content-tertiary' : '';
   const Tag = interactive ? 'button' : 'div';
@@ -1106,7 +1106,7 @@ function StatTile({
         <span
           className={
             highlightTone === 'amber'
-              ? 'text-amber-600 dark:text-amber-400'
+              ? 'text-semantic-warning'
               : 'text-content-tertiary'
           }
         >
@@ -1256,7 +1256,7 @@ function AssemblyTable({
                         <button
                           type="button"
                           onClick={() => { setConfirmId(null); onDelete(a.id); }}
-                          className="rounded-md px-2 py-1 text-xs font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+                          className="rounded-md px-2 py-1 text-xs font-medium text-white bg-semantic-error hover:bg-semantic-error transition-colors"
                         >
                           {t('common.delete', { defaultValue: 'Delete' })}
                         </button>
@@ -1272,7 +1272,7 @@ function AssemblyTable({
                       <button
                         type="button"
                         onClick={() => setConfirmId(a.id)}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-all"
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-all"
                         title={t('assemblies.delete_confirm', { defaultValue: 'Delete assembly?' })}
                         aria-label={t('a11y.assemblies.delete_row', {
                           defaultValue: 'Delete assembly {{name}}',
@@ -1408,8 +1408,8 @@ function BulkDeleteConfirm({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 mb-3">
-            <Trash2 size={18} className="text-red-500" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg mb-3">
+            <Trash2 size={18} className="text-semantic-error" />
           </div>
           <h2 className="text-sm font-semibold text-content-primary mb-1">
             {t('assemblies.bulk_delete_title', { defaultValue: `Delete ${count} assemblies?`, count })}
@@ -1513,10 +1513,10 @@ function AIGenerateModal({
   // as AI certainty.
   const coverageColor = result
     ? result.confidence >= 0.7
-      ? 'text-emerald-600'
+      ? 'text-semantic-success'
       : result.confidence >= 0.4
-        ? 'text-amber-600'
-        : 'text-red-500'
+        ? 'text-semantic-warning'
+        : 'text-semantic-error'
     : '';
 
   const coverageLabel = result
@@ -1664,7 +1664,7 @@ function AIGenerateModal({
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-content-primary tabular-nums">
+                  <p className="text-lg font-semibold text-content-primary tabular-nums">
                     {fmt(result.total_rate)}
                     <span className="text-xs font-normal text-content-tertiary ml-1">/ {result.unit}</span>
                   </p>
@@ -1690,13 +1690,13 @@ function AIGenerateModal({
                         const typeBadge = comp.type === 'labor'
                           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                           : comp.type === 'equipment'
-                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400';
+                            ? 'bg-semantic-warning-bg text-semantic-warning'
+                            : 'bg-semantic-success-bg text-semantic-success';
                         return (
                           <tr key={`${comp.name}-${comp.type}-${idx}`} className="hover:bg-surface-secondary/50">
                             <td className="px-3 py-2 text-content-primary truncate max-w-[250px]">{comp.name}</td>
                             <td className="px-3 py-2 text-center">
-                              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${typeBadge}`}>
+                              <span className={`inline-block px-1.5 py-0.5 rounded text-2xs font-medium ${typeBadge}`}>
                                 {comp.type}
                               </span>
                             </td>
@@ -1798,12 +1798,12 @@ function AssemblyCard({
       {/* Delete confirmation overlay */}
       {confirmDelete && (
         <div
-          className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-4"
+          className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-white/95 backdrop-blur-sm p-4"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 mx-auto mb-3">
-              <Trash2 size={18} className="text-red-500" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg mx-auto mb-3">
+              <Trash2 size={18} className="text-semantic-error" />
             </div>
             <p className="text-sm font-semibold text-content-primary mb-1">{t('assemblies.delete_confirm', { defaultValue: 'Delete assembly?' })}</p>
             <p className="text-xs text-content-tertiary mb-4 max-w-[180px] mx-auto line-clamp-1">{assembly.name}</p>
@@ -1923,7 +1923,7 @@ function AssemblyCard({
             <div className="h-px bg-border-light" />
             <button
               onClick={() => { setMenuOpen(false); setConfirmDelete(true); }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
             >
               <Trash2 size={14} /> {t('common.delete', { defaultValue: 'Delete' })}
             </button>
@@ -1951,13 +1951,13 @@ function AssemblyCard({
         </div>
 
         {/* Rate */}
-        <p className="mt-1.5 text-base font-bold tabular-nums" style={{ color: assembly.total_rate > 0 ? undefined : 'var(--color-content-tertiary)' }}>
+        <p className="mt-1.5 text-base font-semibold tabular-nums" style={{ color: assembly.total_rate > 0 ? undefined : 'var(--color-content-tertiary)' }}>
           {assembly.total_rate > 0 ? fmt(assembly.total_rate) : '0,00'}
           <span className="ml-1 text-xs font-normal text-content-tertiary">
             / {assembly.unit}
           </span>
           {assembly.total_rate === 0 && (
-            <span className="ml-2 text-2xs font-medium text-amber-500">
+            <span className="ml-2 text-2xs font-medium text-semantic-warning">
               ({t('assemblies.draft', { defaultValue: 'draft' })})
             </span>
           )}
@@ -2029,7 +2029,7 @@ function QuickPreview({
 
   return (
     <div
-      className="absolute inset-0 z-30 flex flex-col rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-4 animate-fade-in overflow-hidden"
+      className="absolute inset-0 z-30 flex flex-col rounded-xl bg-white/95 backdrop-blur-sm p-4 animate-fade-in overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-3">
@@ -2073,7 +2073,7 @@ function QuickPreview({
               <span className="font-medium text-content-secondary">
                 {t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
               </span>
-              <span className="font-bold text-content-primary tabular-nums">
+              <span className="font-semibold text-content-primary tabular-nums">
                 {fmt(data.total_rate)} / {data.unit}
               </span>
             </div>

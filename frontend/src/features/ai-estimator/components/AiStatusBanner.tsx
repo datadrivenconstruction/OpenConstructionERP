@@ -28,8 +28,8 @@ function Chip({
       className={clsx(
         'flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs',
         ready
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-200'
-          : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200',
+          ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
+          : 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
       )}
     >
       <span className="shrink-0">{icon}</span>

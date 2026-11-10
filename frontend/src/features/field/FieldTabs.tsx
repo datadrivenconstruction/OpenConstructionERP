@@ -233,13 +233,13 @@ export function CaptureTab({
         type="button"
         onClick={() => void submit()}
         disabled={hours <= 0}
-        className="flex h-14 items-center justify-center gap-2 rounded-xl bg-sky-600 text-base font-semibold text-white disabled:opacity-50"
+        className="flex h-14 items-center justify-center gap-2 rounded-xl bg-semantic-info text-base font-semibold text-white disabled:opacity-50"
       >
         <Plus size={20} aria-hidden="true" />
         {t('field.save_time', { defaultValue: 'Save time' })}
       </button>
       {savedAt && (
-        <p className="text-center text-sm text-emerald-600">
+        <p className="text-center text-sm text-semantic-success">
           {t('field.saved_offline', {
             defaultValue: 'Saved. Will sync when online.',
           })}
@@ -452,7 +452,7 @@ export function CrewTab({
           <button
             type="button"
             onClick={() => setTyping(true)}
-            className="self-start text-sm font-medium text-sky-700 underline"
+            className="self-start text-sm font-medium text-semantic-info underline"
           >
             {t('field.crew_not_listed', { defaultValue: 'Someone not on the list' })}
           </button>
@@ -486,7 +486,7 @@ export function CrewTab({
             <button
               type="button"
               onClick={() => setTyping(false)}
-              className="self-start text-sm font-medium text-sky-700 underline"
+              className="self-start text-sm font-medium text-semantic-info underline"
             >
               {t('field.crew_back_to_list', { defaultValue: 'Back to the project list' })}
             </button>
@@ -525,7 +525,7 @@ export function CrewTab({
                   <button
                     type="button"
                     onClick={() => void punchOut(m.id)}
-                    className="flex h-12 items-center gap-1 rounded-xl bg-rose-600 px-4 font-semibold text-white"
+                    className="flex h-12 items-center gap-1 rounded-xl bg-semantic-error px-4 font-semibold text-white"
                   >
                     <Square size={18} aria-hidden="true" />
                     {t('field.punch_out', { defaultValue: 'Out' })}
@@ -534,7 +534,7 @@ export function CrewTab({
                   <button
                     type="button"
                     onClick={() => punchIn(m.id)}
-                    className="flex h-12 items-center gap-1 rounded-xl bg-emerald-600 px-4 font-semibold text-white"
+                    className="flex h-12 items-center gap-1 rounded-xl bg-semantic-success px-4 font-semibold text-white"
                   >
                     <Play size={18} aria-hidden="true" />
                     {t('field.punch_in', { defaultValue: 'In' })}
@@ -542,7 +542,7 @@ export function CrewTab({
                 )}
               </div>
               {m.startedAt && (
-                <p className="mt-2 flex items-center gap-1 text-xs text-emerald-600">
+                <p className="mt-2 flex items-center gap-1 text-xs text-semantic-success">
                   <Clock size={14} aria-hidden="true" />
                   {t('field.punched_in_since', {
                     defaultValue: 'In since {{time}}',

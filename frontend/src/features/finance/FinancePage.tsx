@@ -689,8 +689,8 @@ export function FinanceSummaryCards({
       basis: basisNet,
       value: totalInvoiced,
       icon: <Receipt size={18} />,
-      color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
-      accent: 'bg-amber-500',
+      color: 'bg-semantic-warning-bg text-semantic-warning',
+      accent: 'bg-semantic-warning',
     },
     {
       key: 'paid',
@@ -698,8 +698,8 @@ export function FinanceSummaryCards({
       basis: basisGross,
       value: totalPaid,
       icon: <CreditCard size={18} />,
-      color: 'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400',
-      accent: 'bg-sky-500',
+      color: 'bg-semantic-info-bg text-semantic-info',
+      accent: 'bg-semantic-info',
     },
     {
       // What the old "Total Invoiced (Payable)" card showed: supplier
@@ -718,8 +718,8 @@ export function FinanceSummaryCards({
       basis: basisGross,
       value: totalReceivable,
       icon: <PiggyBank size={18} />,
-      color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
-      accent: 'bg-green-500',
+      color: 'bg-semantic-success-bg text-semantic-success',
+      accent: 'bg-semantic-success',
     },
     {
       // The money already past its due date, beside the money still owed. The
@@ -734,9 +734,9 @@ export function FinanceSummaryCards({
       icon: <AlertTriangle size={18} />,
       color:
         totalOverdue > 0
-          ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
-          : 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
-      accent: totalOverdue > 0 ? 'bg-red-500' : 'bg-green-500',
+          ? 'bg-semantic-error-bg text-semantic-error'
+          : 'bg-semantic-success-bg text-semantic-success',
+      accent: totalOverdue > 0 ? 'bg-semantic-error' : 'bg-semantic-success',
     },
     {
       key: 'remaining',
@@ -745,9 +745,9 @@ export function FinanceSummaryCards({
       value: remaining,
       icon: <DollarSign size={18} />,
       color: remaining >= 0
-        ? 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400'
-        : 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
-      accent: remaining >= 0 ? 'bg-green-500' : 'bg-red-500',
+        ? 'bg-semantic-success-bg text-semantic-success'
+        : 'bg-semantic-error-bg text-semantic-error',
+      accent: remaining >= 0 ? 'bg-semantic-success' : 'bg-semantic-error',
     },
   ];
   // Only when there is some: committed never goes below zero, so money spent
@@ -759,16 +759,16 @@ export function FinanceSummaryCards({
       basis: basisNet,
       value: totalOverCommitment,
       icon: <AlertTriangle size={18} />,
-      color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
-      accent: 'bg-red-500',
+      color: 'bg-semantic-error-bg text-semantic-error',
+      accent: 'bg-semantic-error',
     });
   }
 
   const barColor =
     warningLevel === 'critical'
-      ? 'bg-red-500'
+      ? 'bg-semantic-error'
       : warningLevel === 'caution'
-        ? 'bg-amber-500'
+        ? 'bg-semantic-warning'
         : 'bg-oe-blue';
 
   return (
@@ -790,7 +790,7 @@ export function FinanceSummaryCards({
                   {card.icon}
                 </div>
               </div>
-              <div className="text-xl font-bold tabular-nums text-content-primary">
+              <div className="text-xl font-semibold tabular-nums text-content-primary">
                 <MoneyDisplay amount={card.value} currency={currency} />
               </div>
               {card.basis && (
@@ -810,7 +810,7 @@ export function FinanceSummaryCards({
           offer the place to fix it. The per-cell guard is unchanged. */}
       {!currency && (
         <div
-          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
+          className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
           data-testid="finance-no-currency-notice"
         >
           {t('finance.no_currency_notice', {
@@ -831,7 +831,7 @@ export function FinanceSummaryCards({
           currency has no configured rate it was summed unconverted, so we
           flag the figure as approximate rather than presenting it as exact. */}
       {mixedCurrencies && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
           {missingFx.length > 0
             ? t('finance.mixed_currency_missing_fx', {
                 defaultValue:
@@ -863,8 +863,8 @@ export function FinanceSummaryCards({
                     className={clsx(
                       'ml-2 rounded-full px-2 py-0.5 text-2xs font-medium',
                       warningLevel === 'critical'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+                        ? 'bg-semantic-error-bg text-semantic-error'
+                        : 'bg-semantic-warning-bg text-semantic-warning',
                     )}
                   >
                     {warningLevel === 'critical'
@@ -1512,7 +1512,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
                 if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
               }}
-              className={clsx(inputCls, 'pl-12', budgetErrors.original_budget && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+              className={clsx(inputCls, 'pl-12', budgetErrors.original_budget && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
               placeholder="0.00"
             />
           </div>
@@ -2041,12 +2041,12 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               </p>
             </div>
             {importError && (
-              <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+              <div className="rounded-lg bg-semantic-error-bg border border-semantic-error/30 p-3 text-sm text-semantic-error">
                 {importError}
               </div>
             )}
             {importResult && (
-              <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+              <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 text-sm text-content-primary space-y-1">
                 <p>
                   {t('finance.import_result', {
                     defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',
@@ -3111,21 +3111,21 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   className={clsx(
                     'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
                     invoiceForm.direction === 'payable'
-                      ? 'border-red-400 bg-red-50 dark:bg-red-950/20 shadow-sm'
-                      : 'border-border hover:border-red-200 dark:hover:border-red-800 hover:bg-surface-secondary',
+                      ? 'border-semantic-error/60 bg-semantic-error-bg shadow-sm'
+                      : 'border-border hover:border-semantic-error/30 hover:bg-surface-secondary',
                   )}
                 >
                   <div className={clsx(
                     'flex h-10 w-10 items-center justify-center rounded-full',
                     invoiceForm.direction === 'payable'
-                      ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'
+                      ? 'bg-semantic-error-bg text-semantic-error'
                       : 'bg-surface-secondary text-content-tertiary',
                   )}>
                     <ArrowUpRight size={20} />
                   </div>
                   <span className={clsx(
                     'text-sm font-semibold',
-                    invoiceForm.direction === 'payable' ? 'text-red-700 dark:text-red-300' : 'text-content-secondary',
+                    invoiceForm.direction === 'payable' ? 'text-semantic-error' : 'text-content-secondary',
                   )}>
                     {t('finance.payable', { defaultValue: 'Payable' })}
                   </span>
@@ -3139,21 +3139,21 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   className={clsx(
                     'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
                     invoiceForm.direction === 'receivable'
-                      ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 shadow-sm'
-                      : 'border-border hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-surface-secondary',
+                      ? 'border-semantic-success/60 bg-semantic-success-bg shadow-sm'
+                      : 'border-border hover:border-semantic-success/30 hover:bg-surface-secondary',
                   )}
                 >
                   <div className={clsx(
                     'flex h-10 w-10 items-center justify-center rounded-full',
                     invoiceForm.direction === 'receivable'
-                      ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-semantic-success-bg text-semantic-success'
                       : 'bg-surface-secondary text-content-tertiary',
                   )}>
                     <ArrowDownLeft size={20} />
                   </div>
                   <span className={clsx(
                     'text-sm font-semibold',
-                    invoiceForm.direction === 'receivable' ? 'text-emerald-700 dark:text-emerald-300' : 'text-content-secondary',
+                    invoiceForm.direction === 'receivable' ? 'text-semantic-success' : 'text-content-secondary',
                   )}>
                     {t('finance.receivable', { defaultValue: 'Receivable' })}
                   </span>
@@ -3237,7 +3237,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   setInvoiceForm((f) => ({ ...f, invoice_date: e.target.value }));
                   if (invoiceErrors.invoice_date) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.invoice_date; return next; });
                 }}
-                className={clsx(inputCls, invoiceErrors.invoice_date && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                className={clsx(inputCls, invoiceErrors.invoice_date && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
               />
             </WideModalField>
 
@@ -3874,7 +3874,7 @@ function EVMTab({
                 {kpi.label}
               </div>
               <div
-                className={`text-xl font-bold tabular-nums ${indicatorColor || 'text-content-primary'}`}
+                className={`text-xl font-semibold tabular-nums ${indicatorColor || 'text-content-primary'}`}
               >
                 {kpi.isCurrency ? (
                   <MoneyDisplay

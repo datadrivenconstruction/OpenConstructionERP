@@ -61,7 +61,7 @@ export function CostAllocationCoverageBar({
       })}>
         <span className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-secondary" aria-hidden="true">
           <span
-            className={`block h-full rounded-full ${complete ? 'bg-semantic-success' : 'bg-amber-500'}`}
+            className={`block h-full rounded-full ${complete ? 'bg-semantic-success' : 'bg-semantic-warning'}`}
             style={{ width: `${width}%` }}
           />
         </span>
@@ -81,7 +81,7 @@ export function CostAllocationCoverageBar({
       </span>
       {inSuspense > 0 && (
         <span
-          className="flex items-center gap-1 font-medium text-amber-700 dark:text-amber-300"
+          className="flex items-center gap-1 font-medium text-semantic-warning"
           data-testid="cost-allocation-suspense"
           title={t('boq.cost_allocation.coverage_suspense_tip', {
             defaultValue:

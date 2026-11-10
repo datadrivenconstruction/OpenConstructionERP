@@ -29,7 +29,7 @@ export function PresenceAvatars({ boqId }: { boqId: string }) {
         <Avatar key={u.id} user={u} />
       ))}
       {overflow > 0 && (
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-tertiary text-2xs font-bold text-content-secondary ring-2 ring-surface-primary z-10">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-tertiary text-2xs font-semibold text-content-secondary ring-2 ring-surface-primary z-10">
           +{overflow}
         </span>
       )}
@@ -41,7 +41,7 @@ function Avatar({ user }: { user: PresenceUser }) {
   const initial = user.name.charAt(0).toUpperCase();
   return (
     <span
-      className="flex h-5 w-5 items-center justify-center rounded-full text-2xs font-bold text-white ring-2 ring-surface-primary"
+      className="flex h-5 w-5 items-center justify-center rounded-full text-2xs font-semibold text-white ring-2 ring-surface-primary"
       style={{ backgroundColor: user.color }}
       title={user.name}
     >

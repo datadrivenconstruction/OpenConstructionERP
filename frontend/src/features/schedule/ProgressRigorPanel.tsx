@@ -101,7 +101,7 @@ function EvmWarnings({ warnings }: { warnings: EvmWarningKey[] }) {
       {warnings.map((w) => (
         <div
           key={w}
-          className="flex items-start gap-2 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs text-amber-800 ring-1 ring-amber-200"
+          className="flex items-start gap-2 rounded-md bg-semantic-warning-bg px-2.5 py-1.5 text-xs text-semantic-warning ring-1 ring-semantic-warning/30"
         >
           <AlertTriangle size={13} className="mt-0.5 shrink-0" />
           <span>{warningText(w, t)}</span>
@@ -246,7 +246,7 @@ export function ProgressRigorPanel({ scheduleId, activities, currency, dataDate 
 function PvStat({ label, value, loading }: { label: string; value: string; loading: boolean }) {
   return (
     <div className="bg-surface-primary px-4 py-3">
-      <div className="text-[11px] uppercase tracking-wide text-content-tertiary">{label}</div>
+      <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
       <div className="mt-0.5 text-base font-semibold text-content-primary">
         {loading ? <Loader2 size={15} className="animate-spin" /> : value}
       </div>
@@ -369,7 +369,7 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
             {t(`schedule.status_${view.status}`, { defaultValue: view.status })}
           </Badge>
           {suspended && view.suspended_at && (
-            <span className="text-xs text-amber-700">
+            <span className="text-xs text-semantic-warning">
               {t('schedule.suspended_since', { defaultValue: 'Suspended since {{date}}', date: view.suspended_at })}
               {view.suspend_reason ? ` - ${view.suspend_reason}` : ''}
             </span>
@@ -622,7 +622,7 @@ function StepChecklist({
                 className="min-w-[10rem] flex-1"
                 aria-label={t('schedule.step_name', { defaultValue: 'Step name' })}
               />
-              <label className="flex items-center gap-1 text-[11px] text-content-tertiary">
+              <label className="flex items-center gap-1 text-2xs text-content-tertiary">
                 {t('schedule.step_weight', { defaultValue: 'Weight' })}
                 <Input
                   type="number"
@@ -632,7 +632,7 @@ function StepChecklist({
                   className="w-16"
                 />
               </label>
-              <label className="flex items-center gap-1 text-[11px] text-content-tertiary">
+              <label className="flex items-center gap-1 text-2xs text-content-tertiary">
                 %
                 <Input
                   type="number"
@@ -648,7 +648,7 @@ function StepChecklist({
                 title={t('schedule.milestone', { defaultValue: 'Milestone' })}
                 aria-pressed={s.is_milestone}
                 onClick={() => update.mutate({ id: s.id, data: { is_milestone: !s.is_milestone } })}
-                className={`rounded p-1 ${s.is_milestone ? 'text-amber-600' : 'text-content-tertiary hover:text-content-secondary'}`}
+                className={`rounded p-1 ${s.is_milestone ? 'text-semantic-warning' : 'text-content-tertiary hover:text-content-secondary'}`}
               >
                 <Flag size={14} />
               </button>
@@ -656,7 +656,7 @@ function StepChecklist({
                 type="button"
                 title={t('common.delete', { defaultValue: 'Delete' })}
                 onClick={() => remove.mutate(s.id)}
-                className="rounded p-1 text-content-tertiary hover:text-red-600"
+                className="rounded p-1 text-content-tertiary hover:text-semantic-error"
               >
                 <Trash2 size={14} />
               </button>

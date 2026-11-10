@@ -290,7 +290,7 @@ export function SearchableSelect({
                 <span className="truncate text-xs text-content-tertiary">{selected.meta}</span>
               )}
               {selected.hint && (
-                <span className="ml-auto shrink-0 font-mono text-[10px] text-content-tertiary">
+                <span className="ml-auto shrink-0 font-mono text-2xs text-content-tertiary">
                   {selected.hint}
                 </span>
               )}
@@ -367,7 +367,7 @@ export function SearchableSelect({
                     <li
                       key={`g-${row.label}-${i}`}
                       role="presentation"
-                      className="sticky top-0 z-[1] bg-surface-elevated px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-content-tertiary"
+                      className="sticky top-0 z-[1] bg-surface-elevated px-3 pb-1 pt-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary"
                     >
                       {row.label}
                     </li>
@@ -422,7 +422,7 @@ export function SearchableSelect({
                       )}
                     </span>
                     {o.hint && (
-                      <span className="shrink-0 font-mono text-[10px] text-content-tertiary">
+                      <span className="shrink-0 font-mono text-2xs text-content-tertiary">
                         {highlightMatch(o.hint, query)}
                       </span>
                     )}
@@ -434,7 +434,7 @@ export function SearchableSelect({
           </ul>
 
           {showSearch && pickable > 0 && (
-            <div className="border-t border-border-light/60 bg-surface-secondary px-3 py-1.5 text-[10px] text-content-tertiary">
+            <div className="border-t border-border-light/60 bg-surface-secondary px-3 py-1.5 text-2xs text-content-tertiary">
               {t('searchable_select.footer', {
                 defaultValue: '{{shown}} of {{total}} · ↑↓ to move · ↵ to pick',
                 shown: filtered.length,

@@ -287,7 +287,7 @@ export function PartnerPackDeactivateDialog({
 
           {/* Success summary. */}
           {finished?.ok && (
-            <div className="mt-4 flex items-start gap-2 rounded-lg border border-semantic-success/40 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100">
+            <div className="mt-4 flex items-start gap-2 rounded-lg border border-semantic-success/40 bg-semantic-success-bg px-3.5 py-3 text-sm text-semantic-success">
               <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
               <span>
                 {t('modules.pp_deact_summary', {

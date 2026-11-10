@@ -99,7 +99,7 @@ export function EntityNameFilter({
           <h3 className="text-sm font-semibold text-foreground">
             {t('dwg_takeoff.entity_names', 'Entity Names')}
           </h3>
-          <span className="text-[10px] text-muted-foreground tabular-nums">
+          <span className="text-2xs text-muted-foreground tabular-nums">
             ({nameGroups.length})
           </span>
         </div>
@@ -160,7 +160,7 @@ export function EntityNameFilter({
                   )}
                 >
                   {visible ? <Eye size={13} /> : <EyeOff size={13} />}
-                  <span className="truncate flex-1 text-left font-mono text-[11px]">
+                  <span className="truncate flex-1 text-left font-mono text-2xs">
                     {group.name}
                   </span>
                   <span className="text-muted-foreground tabular-nums">{group.count}</span>
@@ -179,7 +179,7 @@ export function EntityNameFilter({
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="text-[11px] text-oe-blue hover:text-oe-blue-text font-medium text-center py-1 transition-colors"
+              className="text-2xs text-oe-blue hover:text-oe-blue-text font-medium text-center py-1 transition-colors"
             >
               {showAll
                 ? t('dwg_takeoff.show_less', 'Show less')

@@ -48,14 +48,14 @@ export function OfflineStatusBadge({
         aria-live="polite"
         data-testid="field-status-badge"
         data-state="offline"
-        className={`inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 ${className}`}
+        className={`inline-flex items-center gap-1.5 rounded-full bg-semantic-warning-bg px-3 py-1.5 text-xs font-semibold text-semantic-warning ${className}`}
       >
         <CloudOff size={14} aria-hidden="true" />
         <span>{t('field.offline', { defaultValue: 'Offline' })}</span>
         {pending > 0 && (
           <span
             data-testid="field-pending-count"
-            className="ml-0.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-amber-800 px-1.5 text-[11px] font-bold text-white"
+            className="ml-0.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-amber-800 px-1.5 text-2xs font-semibold text-white"
           >
             {pending}
           </span>
@@ -75,7 +75,7 @@ export function OfflineStatusBadge({
         aria-live="polite"
         data-testid="field-status-badge"
         data-state={syncing ? 'syncing' : 'pending'}
-        className={`inline-flex min-h-[2rem] items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-800 disabled:opacity-80 ${className}`}
+        className={`inline-flex min-h-[2rem] items-center gap-1.5 rounded-full bg-semantic-info-bg px-3 py-1.5 text-xs font-semibold text-semantic-info disabled:opacity-80 ${className}`}
       >
         <RefreshCw size={14} aria-hidden="true" className={syncing ? 'animate-spin' : ''} />
         <span>
@@ -86,7 +86,7 @@ export function OfflineStatusBadge({
         {pending > 0 && (
           <span
             data-testid="field-pending-count"
-            className="ml-0.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-sky-700 px-1.5 text-[11px] font-bold text-white"
+            className="ml-0.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-semantic-info px-1.5 text-2xs font-semibold text-white"
           >
             {pending}
           </span>
@@ -102,7 +102,7 @@ export function OfflineStatusBadge({
       aria-live="polite"
       data-testid="field-status-badge"
       data-state="online"
-      className={`inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full bg-semantic-success-bg px-3 py-1.5 text-xs font-semibold text-semantic-success ${className}`}
     >
       <Cloud size={14} aria-hidden="true" />
       <span>{t('field.online', { defaultValue: 'Online' })}</span>

@@ -128,10 +128,10 @@ function Field({
 }) {
   const id = useId();
   const shared =
-    'w-full rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800';
+    'w-full rounded border border-border px-2 py-1.5';
   return (
     <div className="text-sm">
-      <label htmlFor={id} className="mb-1 block text-gray-600 dark:text-gray-300">
+      <label htmlFor={id} className="mb-1 block text-content-secondary">
         {label}
       </label>
       {children ? (
@@ -153,10 +153,10 @@ function Field({
 /** One worked-out figure, with the label above it and the unit beside it. */
 function Figure({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded border border-gray-100 px-3 py-2 dark:border-gray-800">
-      <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</div>
+    <div className="rounded border border-border-light px-3 py-2">
+      <div className="text-xs uppercase tracking-wide text-content-tertiary">{label}</div>
       <div className="mt-0.5 font-medium tabular-nums">{value}</div>
-      {sub ? <div className="text-xs text-gray-500 dark:text-gray-400">{sub}</div> : null}
+      {sub ? <div className="text-xs text-content-tertiary">{sub}</div> : null}
     </div>
   );
 }
@@ -176,14 +176,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-t border-gray-100 pt-4 dark:border-gray-800">
+    <section className="border-t border-border-light pt-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold">
             {icon}
             {title}
           </h3>
-          {hint ? <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{hint}</p> : null}
+          {hint ? <p className="mt-0.5 text-xs text-content-tertiary">{hint}</p> : null}
         </div>
         {action}
       </div>
@@ -410,7 +410,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
           <button
             type="button"
             onClick={onBack}
-            className="mb-1 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            className="mb-1 flex items-center gap-1 text-xs text-content-tertiary hover:text-content-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {t('funding.back_to_register', { defaultValue: 'Back to the register' })}
@@ -419,7 +419,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             {application.code}
             {application.title ? ` · ${application.title}` : ''}
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-content-tertiary">
             {programme ? programme.name || programme.code : t('funding.programme_gone', { defaultValue: 'The programme is no longer in the catalogue' })}
           </p>
         </div>
@@ -433,22 +433,22 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
           {blocking.map((finding: ValidationFinding) => (
             <li
               key={finding.rule_id}
-              className="flex items-start gap-2 rounded border border-gray-100 px-3 py-2 text-sm dark:border-gray-800"
+              className="flex items-start gap-2 rounded border border-border-light px-3 py-2 text-sm"
             >
               <Badge variant={finding.severity === 'error' ? 'error' : finding.severity === 'warning' ? 'warning' : 'neutral'} size="sm">
                 {t(`funding.severity.${finding.severity}`, { defaultValue: finding.severity })}
               </Badge>
               <span className="min-w-0">
-                <span className="block text-gray-700 dark:text-gray-200">{finding.message}</span>
+                <span className="block text-content-secondary">{finding.message}</span>
                 {finding.suggestion ? (
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">{finding.suggestion}</span>
+                  <span className="block text-xs text-content-tertiary">{finding.suggestion}</span>
                 ) : null}
               </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+        <p className="flex items-center gap-2 text-sm text-semantic-success">
           <CheckCircle2 className="h-4 w-4" />
           {t('funding.checks_pass', { defaultValue: 'Every check on this application passes' })}
         </p>
@@ -492,19 +492,19 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         {decided ? (
           <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.decided_on', { defaultValue: 'Decided on' })}</dt>
+              <dt className="text-content-tertiary">{t('funding.field.decided_on', { defaultValue: 'Decided on' })}</dt>
               <dd className="tabular-nums">{date(application.decided_on)}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.award_reference', { defaultValue: 'Award reference' })}</dt>
+              <dt className="text-content-tertiary">{t('funding.field.award_reference', { defaultValue: 'Award reference' })}</dt>
               <dd>{application.award_reference || '—'}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.approved', { defaultValue: 'Approved' })}</dt>
+              <dt className="text-content-tertiary">{t('funding.field.approved', { defaultValue: 'Approved' })}</dt>
               <dd className="tabular-nums">{money(application.approved_amount)}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.period', { defaultValue: 'Award period' })}</dt>
+              <dt className="text-content-tertiary">{t('funding.field.period', { defaultValue: 'Award period' })}</dt>
               {/* Two dates and a separator: keep the browser from choosing
                   the middle of one of them as the place to break. */}
               <dd className="whitespace-nowrap tabular-nums">
@@ -515,13 +515,13 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             </div>
             {application.conditions ? (
               <div className="sm:col-span-2">
-                <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.conditions', { defaultValue: 'Conditions' })}</dt>
+                <dt className="text-content-tertiary">{t('funding.field.conditions', { defaultValue: 'Conditions' })}</dt>
                 <dd className="whitespace-pre-line">{application.conditions}</dd>
               </div>
             ) : null}
             {application.rejection_reason ? (
               <div className="sm:col-span-2">
-                <dt className="text-gray-500 dark:text-gray-400">{t('funding.field.rejection_reason', { defaultValue: 'Reason for rejection' })}</dt>
+                <dt className="text-content-tertiary">{t('funding.field.rejection_reason', { defaultValue: 'Reason for rejection' })}</dt>
                 <dd className="whitespace-pre-line">{application.rejection_reason}</dd>
               </div>
             ) : null}
@@ -537,7 +537,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                   className={
                     awardApproved === approved
                       ? 'rounded border border-blue-600 bg-blue-50 px-3 py-1 text-sm text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                      : 'rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 dark:border-gray-600 dark:text-gray-300'
+                      : 'rounded border border-border px-3 py-1 text-sm text-content-secondary'
                   }
                 >
                   {approved
@@ -617,7 +617,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         }
       >
         {showAllocationForm ? (
-          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-5">
+          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-border-light p-3 sm:grid-cols-5">
             <Field
               label={t('funding.field.cost_group', { defaultValue: 'Cost group' })}
               value={allocationDraft.cost_group}
@@ -651,7 +651,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                   setAllocationDraft((p) => ({ ...p, eligibility: e.target.value as Eligibility }))
                 }
                 aria-label={t('funding.field.eligibility', { defaultValue: 'Eligibility' })}
-                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800"
+                className="w-full rounded border border-border px-2 py-1.5 text-sm"
               >
                 {ELIGIBILITIES.map((value) => (
                   <option key={value} value={value}>
@@ -673,14 +673,14 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         ) : null}
 
         {cost_allocations.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-content-tertiary">
             {t('funding.no_allocations', {
               defaultValue: 'No cost is split yet, so the eligible base is the figure entered by hand.',
             })}
           </p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-gray-500 dark:text-gray-400">
+            <thead className="text-left text-xs uppercase text-content-tertiary">
               <tr>
                 <th className="px-2 py-1">{t('funding.field.cost_group', { defaultValue: 'Cost group' })}</th>
                 <th className="px-2 py-1">{t('common.description', { defaultValue: 'Description' })}</th>
@@ -691,9 +691,9 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             </thead>
             <tbody>
               {cost_allocations.map((row) => (
-                <tr key={row.id} className="border-t border-gray-100 dark:border-gray-800">
+                <tr key={row.id} className="border-t border-border-light">
                   <td className="px-2 py-1 font-medium">{row.cost_group}</td>
-                  <td className="px-2 py-1 text-gray-600 dark:text-gray-300">{row.description || '—'}</td>
+                  <td className="px-2 py-1 text-content-secondary">{row.description || '—'}</td>
                   <td className="px-2 py-1 text-right tabular-nums">{money(row.amount)}</td>
                   <td className="px-2 py-1 text-right tabular-nums">{money(row.eligible_amount)}</td>
                   <td className="px-2 py-1">
@@ -705,7 +705,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
               ))}
             </tbody>
             <tfoot>
-              <tr className="border-t border-gray-200 font-medium dark:border-gray-700">
+              <tr className="border-t border-border-light font-medium">
                 <td className="px-2 py-1" colSpan={2}>
                   {t('common.total', { defaultValue: 'Total' })}
                 </td>
@@ -732,7 +732,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         }
       >
         {showDrawForm ? (
-          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-4">
+          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-border-light p-3 sm:grid-cols-4">
             <Field
               label={t('funding.field.period_from', { defaultValue: 'Spending from' })}
               value={drawDraft.period_from}
@@ -765,7 +765,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         ) : null}
 
         {disbursements.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-content-tertiary">
             {decided
               ? t('funding.no_draws', { defaultValue: 'Nothing drawn yet against this award.' })
               : t('funding.no_draws_undecided', {
@@ -774,7 +774,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
           </p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-gray-500 dark:text-gray-400">
+            <thead className="text-left text-xs uppercase text-content-tertiary">
               <tr>
                 <th className="px-2 py-1">{t('funding.field.code', { defaultValue: 'Reference' })}</th>
                 {/* The draw's own spending period, which is a window inside
@@ -789,17 +789,17 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             </thead>
             <tbody>
               {disbursements.map((row: FundingDisbursement) => (
-                <tr key={row.id} className="border-t border-gray-100 align-top dark:border-gray-800">
+                <tr key={row.id} className="border-t border-border-light align-top">
                   <td className="px-2 py-1 font-medium">{row.code || `#${row.sequence}`}</td>
                   {/* A range is two dates and a separator, and the browser
                       is free to break it anywhere. In a right-to-left page it
                       picks the middle of a date. */}
-                  <td className="whitespace-nowrap px-2 py-1 tabular-nums text-gray-600 dark:text-gray-300">
+                  <td className="whitespace-nowrap px-2 py-1 tabular-nums text-content-secondary">
                     {row.period_from || row.period_to ? `${date(row.period_from)} … ${date(row.period_to)}` : '—'}
                   </td>
                   <td className="px-2 py-1 text-right tabular-nums">{money(row.amount_requested)}</td>
                   <td className="px-2 py-1 text-right tabular-nums">{money(row.amount_received)}</td>
-                  <td className="px-2 py-1 tabular-nums text-gray-600 dark:text-gray-300">{date(row.spend_deadline_on)}</td>
+                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.spend_deadline_on)}</td>
                   <td className="px-2 py-1">
                     <Badge variant={drawVariant(row.status)} size="sm">
                       {t(`funding.draw_status.${row.status}`, { defaultValue: row.status })}
@@ -810,7 +810,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                       // The column header is blank because it holds a button.
                       // Once the button is gone the date underneath it has
                       // nothing naming it, so it carries its own label.
-                      <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      <span className="block text-xs text-content-tertiary">
                         <span className="block">
                           {t('funding.field.received_on', { defaultValue: 'Received on' })}
                         </span>
@@ -876,7 +876,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         }
       >
         {showProofForm ? (
-          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-3">
+          <div className="mb-3 grid grid-cols-1 gap-3 rounded border border-border-light p-3 sm:grid-cols-3">
             <Field
               label={t('funding.field.kind', { defaultValue: 'Kind' })}
               value={proofKind}
@@ -886,7 +886,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                 value={proofKind}
                 onChange={(e) => setProofKind(e.target.value as ProofKind)}
                 aria-label={t('funding.field.kind', { defaultValue: 'Kind' })}
-                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800"
+                className="w-full rounded border border-border px-2 py-1.5 text-sm"
               >
                 {PROOF_KINDS.map((value) => (
                   <option key={value} value={value}>
@@ -910,14 +910,14 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         ) : null}
 
         {proofs_of_use.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-content-tertiary">
             {t('funding.no_proofs', {
               defaultValue: 'No report drafted yet. The final one is due after the award period ends.',
             })}
           </p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-gray-500 dark:text-gray-400">
+            <thead className="text-left text-xs uppercase text-content-tertiary">
               <tr>
                 <th className="px-2 py-1">{t('funding.field.kind', { defaultValue: 'Kind' })}</th>
                 <th className="px-2 py-1">{t('funding.field.due_on', { defaultValue: 'Due on' })}</th>
@@ -929,23 +929,23 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             </thead>
             <tbody>
               {proofs_of_use.map((row) => (
-                <tr key={row.id} className="border-t border-gray-100 dark:border-gray-800">
+                <tr key={row.id} className="border-t border-border-light">
                   <td className="px-2 py-1 font-medium">
                     {t(`funding.proof_kind.${row.kind}`, { defaultValue: row.kind })}
                   </td>
-                  <td className="px-2 py-1 tabular-nums text-gray-600 dark:text-gray-300">{date(row.due_on)}</td>
+                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.due_on)}</td>
                   <td className="px-2 py-1 text-right tabular-nums">{money(row.total_eligible_spent)}</td>
                   <td className="px-2 py-1">
                     <Badge variant={proofVariant(row.status)} size="sm">
                       {t(`funding.proof_status.${row.status}`, { defaultValue: row.status })}
                     </Badge>
                   </td>
-                  <td className="px-2 py-1 tabular-nums text-gray-600 dark:text-gray-300">{date(row.retention_until)}</td>
+                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.retention_until)}</td>
                   <td className="px-2 py-1">
                     {row.accepted_on ? (
                       // Same blank header, same problem: a bare date under a
                       // column with no name tells the reader nothing.
-                      <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      <span className="block text-xs text-content-tertiary">
                         <span className="block">
                           {t('funding.field.accepted_on', { defaultValue: 'Accepted on' })}
                         </span>
@@ -977,17 +977,17 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
         })}
       >
         {obligations.length === 0 ? (
-          <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="flex items-center gap-2 text-sm text-content-tertiary">
             <Info className="h-4 w-4" />
             {t('funding.no_obligations', {
               defaultValue: 'None yet. Recording the decision derives them from the programme terms.',
             })}
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+          <ul className="divide-y divide-border-light">
             {obligations.map((row) => (
               <li key={row.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                <span className="tabular-nums text-gray-600 dark:text-gray-300">{date(row.due_on)}</span>
+                <span className="tabular-nums text-content-secondary">{date(row.due_on)}</span>
                 <span className="min-w-0 flex-1">{obligationLabel(row, t, disbursements)}</span>
                 <Badge variant="neutral" size="sm">
                   {t(`funding.obligation_source.${row.source}`, { defaultValue: row.source })}

@@ -1183,9 +1183,9 @@ export function Changelog({ maxEntries }: { maxEntries?: number } = {}) {
               className={[
                 'mb-3 break-inside-avoid rounded-xl border px-3.5 py-2.5',
                 'bg-white/60 backdrop-blur-xl border-white/40',
-                'dark:bg-slate-900/40 dark:border-white/[0.05]',
-                'transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:bg-white/80 dark:hover:bg-slate-900/60',
-                isCurrent ? 'ring-1 ring-emerald-500/50 bg-emerald-50/60 dark:bg-emerald-900/15 dark:ring-emerald-400/40' : '',
+                '/[0.05]',
+                'transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:bg-white/80',
+                isCurrent ? 'ring-1 ring-emerald-500/50 bg-semantic-success/10 dark:bg-emerald-900/15 dark:ring-emerald-400/40' : '',
                 stale ? 'opacity-70' : '',
               ].join(' ')}
             >
@@ -1197,7 +1197,7 @@ export function Changelog({ maxEntries }: { maxEntries?: number } = {}) {
                   {entry.date}
                 </span>
                 {isCurrent && (
-                  <span className="text-2xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-success">
                     {t('about.current_version', { defaultValue: 'Current' })}
                   </span>
                 )}

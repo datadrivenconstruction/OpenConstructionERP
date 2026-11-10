@@ -61,13 +61,13 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
   },
   {
     slug: 'full-showcase-riyadh',
-    appearance: { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
+    appearance: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
     groups: null,
     stem: 'demo_profiles.full_showcase',
   },
   {
     slug: 'residential-riyadh-offplan',
-    appearance: { accent: 'teal', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
+    appearance: { accent: 'teal', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
     groups: null,
     stem: 'demo_profiles.developer',
   },

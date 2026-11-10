@@ -58,8 +58,8 @@ function tintForCount(open: number, maxOpen: number): string {
   // gradient because Tailwind purges unused classes — we need explicit
   // class strings.
   const ratio = maxOpen > 0 ? open / maxOpen : 0;
-  if (ratio < 0.2) return 'bg-amber-50';
-  if (ratio < 0.4) return 'bg-amber-100';
+  if (ratio < 0.2) return 'bg-semantic-warning-bg';
+  if (ratio < 0.4) return 'bg-semantic-warning-bg';
   if (ratio < 0.6) return 'bg-amber-200';
   if (ratio < 0.8) return 'bg-red-200';
   return 'bg-red-300';
@@ -69,8 +69,8 @@ function tintForCount(open: number, maxOpen: number): string {
 function textForCount(open: number, maxOpen: number): string {
   const ratio = maxOpen > 0 ? open / maxOpen : 0;
   if (open <= 0) return 'text-content-tertiary';
-  if (ratio < 0.6) return 'text-amber-900';
-  return 'text-red-900';
+  if (ratio < 0.6) return 'text-semantic-warning';
+  return 'text-semantic-error';
 }
 
 /** English fallback labels, kept for the aria-string builder (which renders

@@ -178,7 +178,7 @@ function PhotoThumb({
               type="button"
               onClick={() => onDelete(index)}
               disabled={deleting}
-              className="inline-flex items-center gap-1 rounded-md bg-semantic-error px-2 py-1 text-2xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-md bg-semantic-error px-2 py-1 text-2xs font-semibold text-white hover:bg-semantic-error disabled:opacity-60"
             >
               {deleting ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
               {t('common.delete', { defaultValue: 'Delete' })}

@@ -163,7 +163,7 @@ function HowSupplierCatalogsWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1286,7 +1286,7 @@ function PriceComparisonModal({
                       <p className="text-xs uppercase tracking-wide text-content-tertiary">
                         {t('supplier_catalogs.net_price', { defaultValue: 'Net price' })}
                       </p>
-                      <p className="text-xl font-bold text-content-primary">
+                      <p className="text-xl font-semibold text-content-primary">
                         <MoneyDisplay amount={String(r.net_price ?? r.unit_price)} currency={r.currency} />
                       </p>
                       {r.discount_source && r.discount_source !== 'none' && (

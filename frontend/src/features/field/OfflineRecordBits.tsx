@@ -23,7 +23,7 @@ export function SavedOnDeviceBadge({ flag }: { flag?: 'new' | 'edited' | null })
       title={t('offline_sync.saved_on_device_hint', {
         defaultValue: 'Not on the server yet. It uploads when you are back online.',
       })}
-      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning"
     >
       <HardDrive size={11} aria-hidden="true" />
       {t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })}

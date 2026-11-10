@@ -105,7 +105,7 @@ export function PhotoMetaEditor({ photo }: { photo: ArchivePhoto }) {
             onClick={() => save.mutate(bulkPatch(current, { kind: 'field', on: !isField })!)}
             aria-pressed={isField}
             title={t('photos.field_category_hint')}
-            className={`${link} ${isField ? 'bg-emerald-100 text-emerald-800' : ''}`}
+            className={`${link} ${isField ? 'bg-semantic-success-bg text-semantic-success' : ''}`}
           >
             {isField ? t('photoArchive.field_unmark') : t('photos.quick_tag_field')}
           </button>

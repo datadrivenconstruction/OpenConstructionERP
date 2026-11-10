@@ -43,22 +43,22 @@ function toNum(v: number | string | null | undefined): number {
 function colorFor(score: number): { bar: string; text: string; ring: string } {
   if (score >= 80) {
     return {
-      bar: 'bg-emerald-500',
-      text: 'text-emerald-700 dark:text-emerald-300',
-      ring: 'ring-emerald-200 dark:ring-emerald-900/40',
+      bar: 'bg-semantic-success',
+      text: 'text-semantic-success',
+      ring: 'ring-semantic-success/30',
     };
   }
   if (score >= 60) {
     return {
-      bar: 'bg-amber-500',
-      text: 'text-amber-700 dark:text-amber-300',
-      ring: 'ring-amber-200 dark:ring-amber-900/40',
+      bar: 'bg-semantic-warning',
+      text: 'text-semantic-warning',
+      ring: 'ring-semantic-warning/30',
     };
   }
   return {
-    bar: 'bg-rose-500',
-    text: 'text-rose-700 dark:text-rose-300',
-    ring: 'ring-rose-200 dark:ring-rose-900/40',
+    bar: 'bg-semantic-error',
+    text: 'text-semantic-error',
+    ring: 'ring-semantic-error/30',
   };
 }
 
@@ -91,17 +91,17 @@ function Dial({ label, value, prior, icon: Icon }: DialProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Icon size={12} className={cls.text} />
-          <span className="text-[10px] font-medium uppercase tracking-wide text-content-secondary">
+          <span className="text-2xs font-medium uppercase tracking-wide text-content-secondary">
             {label}
           </span>
         </div>
         {delta !== null && delta !== 0 && (
           <span
             className={clsx(
-              'inline-flex items-center gap-0.5 text-[10px] font-semibold tabular-nums',
+              'inline-flex items-center gap-0.5 text-2xs font-semibold tabular-nums',
               delta > 0
-                ? 'text-emerald-600 dark:text-emerald-300'
-                : 'text-rose-600 dark:text-rose-300',
+                ? 'text-semantic-success'
+                : 'text-semantic-error',
             )}
             aria-label={
               delta > 0 ? `+${delta} vs prior period` : `${delta} vs prior period`
@@ -218,19 +218,19 @@ export function ScorecardTile({ ratings }: ScorecardTileProps) {
             defaultValue: 'Performance - current period',
           })}
         </h3>
-        <span className="text-[11px] text-content-tertiary font-mono">
+        <span className="text-2xs text-content-tertiary font-mono">
           {current.period}
           {prior ? ` · vs ${prior.period}` : ''}
         </span>
       </div>
       <div className="rounded-lg ring-1 ring-inset ring-border-light bg-surface-primary p-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+          <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('subcontractors.overall', { defaultValue: 'Overall' })}
           </p>
           <p
             className={clsx(
-              'mt-0.5 text-2xl font-bold tabular-nums',
+              'mt-0.5 text-2xl font-semibold tabular-nums',
               overallCls.text,
             )}
           >
@@ -245,8 +245,8 @@ export function ScorecardTile({ ratings }: ScorecardTileProps) {
             className={clsx(
               'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset tabular-nums',
               overallDelta > 0
-                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:ring-emerald-900/40'
-                : 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:ring-rose-900/40',
+                ? 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30'
+                : 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30',
             )}
           >
             {overallDelta > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}

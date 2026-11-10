@@ -293,7 +293,7 @@ export function AISmartPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-content-tertiary hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="p-1.5 rounded-md hover:bg-semantic-error-bg text-content-tertiary hover:text-semantic-error transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={18} />
@@ -332,19 +332,19 @@ export function AISmartPanel({
 
       {/* AI not configured warning */}
       {aiConfigured === false && (
-        <div className="mx-4 mt-3 px-3 py-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800">
+        <div className="mx-4 mt-3 px-3 py-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg">
           <div className="flex items-start gap-2">
-            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle size={14} className="text-semantic-warning shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+              <p className="text-xs font-medium text-semantic-warning">
                 {t('boq.ai_not_configured', { defaultValue: 'AI not configured' })}
               </p>
-              <p className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-0.5">
+              <p className="text-2xs text-semantic-warning mt-0.5">
                 {t('boq.ai_not_configured_desc', { defaultValue: 'Add your API key in Settings to use AI Smart Actions.' })}
               </p>
               <Link
                 to="/settings"
-                className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium text-amber-700 dark:text-amber-300 hover:underline"
+                className="inline-flex items-center gap-1 mt-1.5 text-2xs font-medium text-semantic-warning hover:underline"
               >
                 <Settings size={11} />
                 {t('boq.go_to_settings', { defaultValue: 'Configure AI' })}
@@ -356,7 +356,7 @@ export function AISmartPanel({
 
       {/* Connected indicator */}
       {aiConfigured === true && (
-        <div className="mx-4 mt-2 flex items-center gap-1.5 text-[11px] text-semantic-success font-medium">
+        <div className="mx-4 mt-2 flex items-center gap-1.5 text-2xs text-semantic-success font-medium">
           <span className="h-1.5 w-1.5 rounded-full bg-semantic-success animate-pulse" />
           {t('boq.ai_connected_via', { defaultValue: 'Connected via {{provider}}', provider: aiProvider || 'AI' })}
         </div>
@@ -364,7 +364,7 @@ export function AISmartPanel({
 
       {/* Error */}
       {error && (
-        <div className="mx-4 mt-2 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs">
+        <div className="mx-4 mt-2 px-3 py-2 rounded-md bg-semantic-error-bg text-semantic-error text-xs">
           {error}
         </div>
       )}
@@ -390,7 +390,7 @@ export function AISmartPanel({
         >
           {enhanceResult && (
             <div className="space-y-2">
-              <div className="p-2 rounded bg-green-50 dark:bg-green-900/20 text-sm">
+              <div className="p-2 rounded bg-semantic-success-bg text-sm">
                 {enhanceResult.enhanced_description}
               </div>
               {enhanceResult.specifications.length > 0 && (
@@ -408,7 +408,7 @@ export function AISmartPanel({
               {enhanceResult.standards.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {enhanceResult.standards.map((s) => (
-                    <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                    <span key={s} className="text-2xs px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
                       {s}
                     </span>
                   ))}
@@ -438,21 +438,21 @@ export function AISmartPanel({
               {prereqResult.suggestions.map((item, i) => (
                 <div key={`${item.relationship}-${item.description.slice(0, 30)}-${i}`} className="p-2 rounded border border-border-light bg-surface">
                   <div className="flex items-start gap-2">
-                    <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    <span className={`shrink-0 text-2xs font-semibold px-1.5 py-0.5 rounded ${
                       item.relationship === 'prerequisite'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        ? 'bg-semantic-error-bg text-semantic-error'
                         : item.relationship === 'successor'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                        : 'bg-semantic-warning-bg text-semantic-warning'
                     }`}>
                       {item.relationship}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium leading-tight">{item.description}</p>
-                      <p className="text-[10px] text-content-tertiary mt-0.5">
+                      <p className="text-2xs text-content-tertiary mt-0.5">
                         {item.unit} | {fmtWithCurrency(item.typical_rate_eur, locale, currencyCode)}
                       </p>
-                      <p className="text-[10px] text-content-tertiary italic mt-0.5">{item.reason}</p>
+                      <p className="text-2xs text-content-tertiary italic mt-0.5">{item.reason}</p>
                     </div>
                   </div>
                   <button
@@ -489,17 +489,17 @@ export function AISmartPanel({
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 rounded bg-surface-secondary">
                 <div className="text-center">
-                  <p className="text-[10px] text-content-tertiary">{t('boq.ai_original', { defaultValue: 'Original' })}</p>
+                  <p className="text-2xs text-content-tertiary">{t('boq.ai_original', { defaultValue: 'Original' })}</p>
                   <p className="text-sm font-mono">{fmtWithCurrency(escalateResult.original_rate, locale, currencyCode)}</p>
                 </div>
-                <ArrowUpRight size={16} className="text-green-500 shrink-0" />
+                <ArrowUpRight size={16} className="text-semantic-success shrink-0" />
                 <div className="text-center">
-                  <p className="text-[10px] text-content-tertiary">{t('boq.ai_escalated', { defaultValue: 'Escalated' })}</p>
-                  <p className="text-sm font-mono font-bold text-green-600 dark:text-green-400">
+                  <p className="text-2xs text-content-tertiary">{t('boq.ai_escalated', { defaultValue: 'Escalated' })}</p>
+                  <p className="text-sm font-mono font-semibold text-semantic-success">
                     {fmtWithCurrency(escalateResult.escalated_rate, locale, currencyCode)}
                   </p>
                 </div>
-                <span className="ml-auto text-xs font-bold text-green-600 dark:text-green-400">
+                <span className="ml-auto text-xs font-semibold text-semantic-success">
                   +{escalateResult.escalation_percent}%
                 </span>
               </div>
@@ -509,7 +509,7 @@ export function AISmartPanel({
                 <FactorBadge label={t('boq.ai_factor_labor', { defaultValue: 'Labor' })} value={escalateResult.factors.labor_cost_change} />
                 <FactorBadge label={t('boq.ai_factor_region', { defaultValue: 'Regional' })} value={escalateResult.factors.regional_adjustment} />
               </div>
-              <p className="text-[10px] text-content-tertiary italic">{escalateResult.reasoning}</p>
+              <p className="text-2xs text-content-tertiary italic">{escalateResult.reasoning}</p>
               <div className="flex items-center gap-2">
                 <ConfidenceBadge level={escalateResult.confidence} />
                 <Button size="sm" variant="primary" icon={<Zap size={13} />} onClick={applyEscalatedRate}>
@@ -554,7 +554,7 @@ export function AISmartPanel({
                       strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
                     {Math.round(scopeResult.completeness_score * 100)}%
                   </span>
                 </div>
@@ -570,7 +570,7 @@ export function AISmartPanel({
               {scopeResult.warnings.length > 0 && (
                 <div className="space-y-1">
                   {scopeResult.warnings.map((w, i) => (
-                    <div key={`warn-${w.slice(0, 30)}-${i}`} className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                    <div key={`warn-${w.slice(0, 30)}-${i}`} className="flex items-start gap-1.5 text-xs text-semantic-warning">
                       <AlertTriangle size={12} className="shrink-0 mt-0.5" />
                       {w}
                     </div>
@@ -587,20 +587,20 @@ export function AISmartPanel({
                   {scopeResult.missing_items.map((item, i) => (
                     <div key={`${item.category}-${item.description.slice(0, 30)}-${i}`} className="p-2 rounded border border-border-light bg-surface">
                       <div className="flex items-start gap-2">
-                        <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        <span className={`shrink-0 text-2xs font-semibold px-1.5 py-0.5 rounded ${
                           item.priority === 'high'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            ? 'bg-semantic-error-bg text-semantic-error'
                             : item.priority === 'low'
-                            ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                            ? 'bg-surface-secondary text-content-secondary'
+                            : 'bg-semantic-warning-bg text-semantic-warning'
                         }`}>
                           {item.priority}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium leading-tight">{item.description}</p>
-                          <p className="text-[10px] text-content-tertiary mt-0.5">{item.category}</p>
-                          <p className="text-[10px] text-content-tertiary italic">{item.reason}</p>
-                          <p className="text-[10px] text-content-secondary mt-0.5">
+                          <p className="text-2xs text-content-tertiary mt-0.5">{item.category}</p>
+                          <p className="text-2xs text-content-tertiary italic">{item.reason}</p>
+                          <p className="text-2xs text-content-secondary mt-0.5">
                             {item.unit} | ~{fmtWithCurrency(item.estimated_rate, locale, currencyCode)}
                           </p>
                         </div>
@@ -622,7 +622,7 @@ export function AISmartPanel({
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 px-4 py-2 border-t border-border-light text-[10px] text-content-tertiary">
+      <div className="shrink-0 px-4 py-2 border-t border-border-light text-2xs text-content-tertiary">
         <div className="flex items-center gap-1">
           <Sparkles size={10} />
           {t('boq.ai_smart_footer', { defaultValue: 'Powered by your AI provider (Settings > AI). Results are suggestions - always review.' })}
@@ -655,7 +655,7 @@ function ActionCard({ icon, title, subtitle, loading, disabled, onClick, expande
         <div className="shrink-0 text-primary">{icon}</div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium">{title}</p>
-          <p className="text-[10px] text-content-tertiary truncate">{subtitle}</p>
+          <p className="text-2xs text-content-tertiary truncate">{subtitle}</p>
         </div>
         <button
           onClick={onClick}
@@ -697,8 +697,8 @@ function ActionCard({ icon, title, subtitle, loading, disabled, onClick, expande
 function FactorBadge({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-2 py-1 rounded bg-surface-secondary text-center">
-      <p className="text-[10px] text-content-tertiary">{label}</p>
-      <p className={`text-xs font-bold ${value > 0 ? 'text-red-500' : value < 0 ? 'text-green-500' : 'text-content-secondary'}`}>
+      <p className="text-2xs text-content-tertiary">{label}</p>
+      <p className={`text-xs font-semibold ${value > 0 ? 'text-semantic-error' : value < 0 ? 'text-semantic-success' : 'text-content-secondary'}`}>
         {value > 0 ? '+' : ''}{value}%
       </p>
     </div>

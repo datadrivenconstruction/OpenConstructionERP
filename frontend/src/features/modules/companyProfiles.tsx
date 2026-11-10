@@ -332,7 +332,7 @@ export function CompanyProfileCard({
         isActive
           ? 'border-oe-blue bg-oe-blue-subtle ring-1 ring-oe-blue/30'
           : isFull
-            ? 'border-emerald-300 bg-emerald-50/60 hover:border-emerald-400 hover:shadow-xs dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:border-emerald-600'
+            ? 'border-semantic-success/30 bg-semantic-success/10 hover:border-semantic-success/60 hover:shadow-xs'
             : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-xs',
         className,
       )}
@@ -341,7 +341,7 @@ export function CompanyProfileCard({
         <div
           className={clsx(
             'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-            isActive ? 'bg-oe-blue/10 text-oe-blue' : isFull ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-surface-secondary text-content-secondary',
+            isActive ? 'bg-oe-blue/10 text-oe-blue' : isFull ? 'bg-semantic-success-bg text-semantic-success' : 'bg-surface-secondary text-content-secondary',
           )}
         >
           <Icon size={20} />

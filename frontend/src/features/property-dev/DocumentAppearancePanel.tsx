@@ -327,7 +327,7 @@ export function DocumentAppearancePanel({
                     disabled={!canEdit || busy}
                     aria-pressed={draft.margin_mm === preset.mm}
                     onClick={() => set('margin_mm', preset.mm)}
-                    className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`rounded-full border px-2.5 py-0.5 text-2xs font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
                       draft.margin_mm === preset.mm
                         ? 'border-oe-blue text-oe-blue'
                         : 'border-border text-content-secondary hover:border-oe-blue hover:text-oe-blue'
@@ -393,7 +393,7 @@ export function DocumentAppearancePanel({
                     defaultValue: 'Heading colour',
                   })}
                 />
-                <code className="text-[11px] text-content-secondary">
+                <code className="text-2xs text-content-secondary">
                   {draft.accent_color}
                 </code>
               </div>
@@ -518,7 +518,7 @@ export function DocumentAppearancePanel({
                     defaultValue: 'Footer colour',
                   })}
                 />
-                <code className="text-[11px] text-content-secondary">
+                <code className="text-2xs text-content-secondary">
                   {draft.footer_color}
                 </code>
               </div>
@@ -654,7 +654,7 @@ export function DocumentAppearancePanel({
                       type="button"
                       disabled={!canEdit || busy}
                       onClick={() => set('watermark_text', word)}
-                      className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-full border border-border px-2.5 py-0.5 text-2xs font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
                       data-testid={`appearance-watermark-preset-${preset.key}`}
                     >
                       {word}
@@ -684,7 +684,7 @@ export function DocumentAppearancePanel({
                     defaultValue: 'Watermark strength (%)',
                   })}
                 />
-                <code className="w-8 shrink-0 text-right text-[11px] text-content-secondary">
+                <code className="w-8 shrink-0 text-right text-2xs text-content-secondary">
                   {look.watermark_opacity}
                 </code>
               </div>
@@ -736,7 +736,7 @@ export function DocumentAppearancePanel({
                 data-testid="appearance-preview-watermark"
               >
                 <span
-                  className="whitespace-nowrap font-bold text-[#6b7280]"
+                  className="whitespace-nowrap font-semibold text-[#6b7280]"
                   style={{
                     opacity: look.watermark_opacity / 100,
                     fontSize: `${Math.max(10, Math.min(28, 220 / Math.max(4, draft.watermark_text.length)))}px`,
@@ -838,7 +838,7 @@ export function DocumentAppearancePanel({
               </div>
             </div>
           </div>
-          <p className="mt-1.5 text-[11px] leading-snug text-content-secondary">
+          <p className="mt-1.5 text-2xs leading-snug text-content-secondary">
             {inSettings
               ? t('settings.company.appearance_preview_note', {
                   defaultValue: 'Layout only. Open the sample PDF above to see a real one.',
@@ -915,7 +915,7 @@ function AppearanceGroup({
 }) {
   return (
     <fieldset className="min-w-0 rounded-lg border border-border-light p-3" data-testid={testId}>
-      <legend className="px-1 text-[11px] font-semibold uppercase tracking-wide text-content-tertiary">
+      <legend className="px-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {title}
       </legend>
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>

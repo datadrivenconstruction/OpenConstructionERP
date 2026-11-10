@@ -118,13 +118,13 @@ const STATUS_CONFIG: Record<
   SubmittalStatus,
   { variant: 'neutral' | 'blue' | 'success' | 'error' | 'warning'; cls: string }
 > = {
-  draft: { variant: 'neutral', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  draft: { variant: 'neutral', cls: 'bg-surface-secondary text-content-secondary' },
   submitted: { variant: 'blue', cls: '' },
   under_review: { variant: 'warning', cls: '' },
   approved: { variant: 'success', cls: '' },
   approved_as_noted: {
     variant: 'success',
-    cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    cls: 'bg-semantic-success-bg text-semantic-success',
   },
   revise_and_resubmit: {
     variant: 'warning',
@@ -374,7 +374,7 @@ function SubmittalFormModal({
             className={clsx(
               inputCls,
               titleError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -400,7 +400,7 @@ function SubmittalFormModal({
             className={clsx(
               inputCls,
               specError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -1524,7 +1524,7 @@ export function SubmittalsPage() {
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('submittals.stat_pending', { defaultValue: 'Pending Review' })}
           </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-amber-500">{stats.pending}</p>
+          <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-warning">{stats.pending}</p>
         </div>
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">

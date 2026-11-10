@@ -12,7 +12,7 @@
 import type { ReactNode } from 'react';
 
 export function KvList({ children }: { children: ReactNode }) {
-  return <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1 text-[12px]">{children}</dl>;
+  return <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1 text-xs">{children}</dl>;
 }
 
 export function Kv({
@@ -27,11 +27,11 @@ export function Kv({
   const isEmptyVal = value == null || value === '';
   return (
     <>
-      <dt className="text-[11px] text-content-tertiary">{label}</dt>
+      <dt className="text-2xs text-content-tertiary">{label}</dt>
       <dd
         className={`min-w-0 break-words ${
           isEmptyVal ? 'text-content-quaternary' : 'text-content-primary'
-        } ${mono ? 'font-mono text-[11px]' : ''}`}
+        } ${mono ? 'font-mono text-2xs' : ''}`}
       >
         {isEmptyVal ? '—' : value}
       </dd>

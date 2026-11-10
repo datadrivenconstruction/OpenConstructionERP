@@ -1734,7 +1734,7 @@ export function CostDatabaseSearchModal({
                 {flag && flag !== 'custom' ? (
                   <CountryFlag code={flag} size={13} />
                 ) : flag === 'custom' ? (
-                  <span className="text-[10px]">&#9733;</span>
+                  <span className="text-2xs">&#9733;</span>
                 ) : null}
                 <span>{label}</span>
               </button>
@@ -2206,7 +2206,7 @@ export function CostDatabaseSearchModal({
                                   >
                                     <AlertCircle
                                       size={12}
-                                      className="text-amber-500 dark:text-amber-400"
+                                      className="text-semantic-warning"
                                     />
                                   </span>
                                 );

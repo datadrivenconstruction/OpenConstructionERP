@@ -416,7 +416,7 @@ export function RegionalPriceListImport() {
               {preview.warnings.length > 0 && (
                 <ul className="space-y-1">
                   {preview.warnings.map((w) => (
-                    <li key={w} className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-300">
+                    <li key={w} className="flex items-start gap-2 text-xs text-semantic-warning">
                       <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                       <span>{warningText[w] ?? w}</span>
                     </li>

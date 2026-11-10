@@ -135,7 +135,7 @@ export function HeaderNewsButton({ className }: { className?: string }) {
         {unseen && (
           <span
             aria-hidden="true"
-            className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-surface-primary"
+            className="absolute right-1 top-1 h-2 w-2 rounded-full bg-semantic-error ring-2 ring-surface-primary"
           />
         )}
       </button>

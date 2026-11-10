@@ -95,18 +95,18 @@ export function FieldAuthPage() {
               if (e.key === 'Enter') void submit();
             }}
             placeholder="000000"
-            className="h-14 rounded-xl border border-slate-300 px-4 text-center text-2xl tracking-[0.5em]"
+            className="h-14 rounded-xl border border-slate-300 px-4 text-center text-2xl tracking-wider"
             aria-label={t('field.auth_pin', { defaultValue: 'PIN' })}
           />
         </label>
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && <p className="text-sm text-semantic-error">{error}</p>}
 
         <button
           type="button"
           onClick={() => void submit()}
           disabled={busy || pin.length !== 6}
-          className="flex h-14 items-center justify-center gap-2 rounded-xl bg-sky-600 text-base font-semibold text-white disabled:opacity-50"
+          className="flex h-14 items-center justify-center gap-2 rounded-xl bg-semantic-info text-base font-semibold text-white disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <LogIn size={20} aria-hidden="true" />}
           {t('field.auth_submit', { defaultValue: 'Sign in' })}

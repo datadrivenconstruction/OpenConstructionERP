@@ -132,13 +132,13 @@ const PREQUAL_CONFIG: Record<
 > = {
   pending: {
     icon: Clock,
-    cls: 'text-amber-500',
+    cls: 'text-semantic-warning',
     labelKey: 'contacts.prequal_pending',
     defaultLabel: 'Pending',
   },
   approved: {
     icon: ShieldCheck,
-    cls: 'text-green-600 dark:text-green-400',
+    cls: 'text-semantic-success',
     labelKey: 'contacts.prequal_approved',
     defaultLabel: 'Approved',
   },
@@ -205,14 +205,14 @@ const inputCls =
 
 const TYPE_CARD_CONFIG: Record<ContactType, { icon: React.ElementType; color: string }> = {
   client: { icon: Users, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
-  contractor: { icon: Building2, color: 'text-sky-600 bg-sky-50 border-sky-200 dark:text-sky-400 dark:bg-sky-950/30 dark:border-sky-800' },
-  subcontractor: { icon: HardHat, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
-  authority: { icon: Landmark, color: 'text-slate-600 bg-slate-50 border-slate-200 dark:text-slate-300 dark:bg-slate-800/50 dark:border-slate-700' },
-  supplier: { icon: Truck, color: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800' },
-  consultant: { icon: Briefcase, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
+  contractor: { icon: Building2, color: 'text-semantic-info bg-semantic-info-bg border-semantic-info/30' },
+  subcontractor: { icon: HardHat, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
+  authority: { icon: Landmark, color: 'text-content-secondary bg-surface-secondary border-border-light' },
+  supplier: { icon: Truck, color: 'text-semantic-success bg-semantic-success-bg border-semantic-success/30' },
+  consultant: { icon: Briefcase, color: 'text-content-secondary bg-surface-secondary border-border-light' },
   internal: { icon: Users, color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800' },
-  lead: { icon: User, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
-  customer: { icon: Users, color: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/30 dark:border-emerald-800' },
+  lead: { icon: User, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
+  customer: { icon: Users, color: 'text-semantic-success bg-semantic-success-bg border-semantic-success/30' },
 };
 
 interface ContactFormData {
@@ -528,7 +528,7 @@ function AddContactModal({
             className={clsx(
               inputCls,
               errors.company_name &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -664,7 +664,7 @@ function AddContactModal({
             maxLength={2}
             className={clsx(
               inputCls,
-              errors.country && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              errors.country && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
             placeholder={t('contacts.country_placeholder', {
               defaultValue: 'e.g. DE, US, GB',
@@ -960,14 +960,14 @@ function ImportContactsModal({
 
           {/* Error */}
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+            <div className="rounded-lg bg-semantic-error-bg border border-semantic-error/30 p-3 text-sm text-semantic-error">
               {error}
             </div>
           )}
 
           {/* Result */}
           {result && (
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+            <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 text-sm text-content-primary space-y-1">
               <p>
                 {t('contacts.import_result', {
                   defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',
@@ -1079,7 +1079,7 @@ const ContactCard = React.memo(function ContactCard({
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onEdit(contact); }}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text font-bold text-sm shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text font-semibold text-sm shrink-0">
             {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
@@ -1122,7 +1122,7 @@ const ContactCard = React.memo(function ContactCard({
               variant="ghost"
               size="sm"
               onClick={() => onDelete(contact.id)}
-              className="!p-1 text-content-quaternary hover:text-red-500 h-auto"
+              className="!p-1 text-content-quaternary hover:text-semantic-error h-auto"
               title={t('common.delete', { defaultValue: 'Delete' })}
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
             >
@@ -1369,7 +1369,7 @@ function ContactDetailDrawer({
               ))}
             </div>
           ) : isError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20 p-3 text-xs text-semantic-error">
+            <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3 text-xs text-semantic-error">
               <p className="mb-1.5">
                 {error instanceof Error
                   ? error.message
@@ -1396,7 +1396,7 @@ function ContactDetailDrawer({
             <div className="space-y-3">
               {leads.length > 0 && (
                 <div>
-                  <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+                  <p className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                     {t('contacts.linked_leads', { defaultValue: 'Leads' })} ({leads.length})
                   </p>
                   <div className="space-y-1.5">
@@ -1434,7 +1434,7 @@ function ContactDetailDrawer({
               )}
               {buyers.length > 0 && (
                 <div>
-                  <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+                  <p className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                     {t('contacts.linked_buyers', { defaultValue: 'Buyers' })} ({buyers.length})
                   </p>
                   <div className="space-y-1.5">
@@ -1963,7 +1963,7 @@ export function ContactsPage() {
             <div className="flex items-center gap-2">
               <Users size={16} className="text-oe-blue shrink-0" />
               <div className="min-w-0">
-                <p className="text-lg font-bold leading-tight text-content-primary">
+                <p className="text-lg font-semibold leading-tight text-content-primary">
                   {stats.total}
                 </p>
                 <p className="truncate text-xs text-content-tertiary">
@@ -1974,9 +1974,9 @@ export function ContactsPage() {
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-green-600 dark:text-green-400 shrink-0" />
+              <ShieldCheck size={16} className="text-semantic-success shrink-0" />
               <div className="min-w-0">
-                <p className="text-lg font-bold leading-tight text-content-primary">
+                <p className="text-lg font-semibold leading-tight text-content-primary">
                   {stats.by_type.subcontractor ?? 0}
                 </p>
                 <p className="truncate text-xs text-content-tertiary">
@@ -1987,9 +1987,9 @@ export function ContactsPage() {
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2">
-              <Truck size={16} className="text-green-600 dark:text-green-400 shrink-0" />
+              <Truck size={16} className="text-semantic-success shrink-0" />
               <div className="min-w-0">
-                <p className="text-lg font-bold leading-tight text-content-primary">
+                <p className="text-lg font-semibold leading-tight text-content-primary">
                   {stats.by_type.supplier ?? 0}
                 </p>
                 <p className="truncate text-xs text-content-tertiary">
@@ -2010,7 +2010,7 @@ export function ContactsPage() {
                 )}
               />
               <div className="min-w-0">
-                <p className="text-lg font-bold leading-tight text-content-primary">
+                <p className="text-lg font-semibold leading-tight text-content-primary">
                   {stats.with_expiring_prequalification}
                 </p>
                 <p className="truncate text-xs text-content-tertiary">
@@ -2048,7 +2048,7 @@ export function ContactsPage() {
             </div>
             {groupedFacets.map((group) => (
               <div key={group.label} className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 w-16 shrink-0 text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+                <span className="mr-1 w-16 shrink-0 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
                   {group.label}
                 </span>
                 {group.items.map((item) => {
@@ -2069,7 +2069,7 @@ export function ContactsPage() {
                       {item.label}
                       <span
                         className={clsx(
-                          'ml-1.5 text-[10px]',
+                          'ml-1.5 text-2xs',
                           active ? 'text-white/80' : 'text-content-tertiary',
                         )}
                       >

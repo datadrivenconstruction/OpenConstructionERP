@@ -249,7 +249,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
       ) : (
         <div className="space-y-2 border-t border-border-light pt-3">
           {/* Column labels (>= lg) */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.4fr)_120px_minmax(0,1.8fr)_84px_minmax(0,1.6fr)_32px] gap-2 px-0.5 text-[10px] uppercase tracking-wider text-content-tertiary font-semibold">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.4fr)_120px_minmax(0,1.8fr)_84px_minmax(0,1.6fr)_32px] gap-2 px-0.5 text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
             <span>{t('assembly.params.col_name', { defaultValue: 'Name' })}</span>
             <span>{t('assembly.params.col_kind', { defaultValue: 'Kind' })}</span>
             <span>{t('assembly.params.col_value', { defaultValue: 'Value / formula' })}</span>
@@ -349,7 +349,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
           ) : validation.data ? (
             <div className="space-y-2">
               {validation.data.ok ? (
-                <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-semantic-success">
                   <CheckCircle2 size={13} />
                   {t('assembly.params.ok', { defaultValue: 'Parameters resolve cleanly' })}
                 </div>
@@ -381,14 +381,14 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
 
               {resolvedEntries.length > 0 && (
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+                  <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
                     {t('assembly.params.resolved_title', { defaultValue: 'Resolved defaults' })}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {resolvedEntries.map(([name, value]) => (
                       <span
                         key={name}
-                        className="inline-flex items-center gap-1 rounded-md bg-surface-tertiary px-1.5 py-0.5 text-[11px]"
+                        className="inline-flex items-center gap-1 rounded-md bg-surface-tertiary px-1.5 py-0.5 text-2xs"
                       >
                         <span className="font-mono text-content-secondary">{name}</span>
                         <span className="tabular-nums font-semibold text-content-primary">
@@ -401,7 +401,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
               )}
 
               {dirty && (
-                <p className="text-[11px] text-content-tertiary">
+                <p className="text-2xs text-content-tertiary">
                   {t('assembly.params.dirty_hint', {
                     defaultValue: 'Unsaved edits are not checked yet - save to re-validate.',
                   })}

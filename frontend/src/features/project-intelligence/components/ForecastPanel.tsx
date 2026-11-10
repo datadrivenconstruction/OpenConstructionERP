@@ -87,10 +87,10 @@ interface ForecastPanelProps {
 }
 
 const SEVERITY_STYLE: Record<string, { chip: string; dot: string; label: string }> = {
-  critical: { chip: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300', dot: 'bg-rose-500', label: 'Critical' },
-  error: { chip: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300', dot: 'bg-rose-500', label: 'Error' },
-  warning: { chip: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300', dot: 'bg-amber-500', label: 'Warning' },
-  info: { chip: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300', dot: 'bg-sky-500', label: 'Info' },
+  critical: { chip: 'bg-semantic-error-bg text-semantic-error', dot: 'bg-semantic-error', label: 'Critical' },
+  error: { chip: 'bg-semantic-error-bg text-semantic-error', dot: 'bg-semantic-error', label: 'Error' },
+  warning: { chip: 'bg-semantic-warning-bg text-semantic-warning', dot: 'bg-semantic-warning', label: 'Warning' },
+  info: { chip: 'bg-semantic-info-bg text-semantic-info', dot: 'bg-semantic-info', label: 'Info' },
 };
 
 /** Classify a performance index: ≥1.0 healthy, ≥0.95 caution, else red. */
@@ -101,9 +101,9 @@ function indexLevel(value: number): 'green' | 'amber' | 'red' {
 }
 
 const INDEX_COLOR: Record<'green' | 'amber' | 'red', string> = {
-  green: 'text-emerald-500',
-  amber: 'text-amber-500',
-  red: 'text-rose-500',
+  green: 'text-semantic-success',
+  amber: 'text-semantic-warning',
+  red: 'text-semantic-error',
 };
 const INDEX_BAR: Record<'green' | 'amber' | 'red', string> = {
   green: 'bg-emerald-400',
@@ -240,7 +240,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
   if (error) {
     return (
       <div className="py-10 text-center space-y-3">
-        <AlertTriangle size={24} className="mx-auto text-amber-500" />
+        <AlertTriangle size={24} className="mx-auto text-semantic-warning" />
         <p className="text-sm text-content-secondary">{error}</p>
         <button
           onClick={() => {
@@ -303,7 +303,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       {/* Performance index chips + Forecast-to-Completion */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* SPI chip */}
-        <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-medium text-content-secondary">
               {t('project_intelligence.forecast.spi', {
@@ -317,7 +317,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
             )}
           </div>
           <div className="flex items-end justify-between mt-2">
-            <span className={`text-2xl font-bold tabular-nums ${INDEX_COLOR[spiLevel]}`}>
+            <span className={`text-2xl font-semibold tabular-nums ${INDEX_COLOR[spiLevel]}`}>
               {fmtFixed(spi, 3)}
             </span>
             <Sparkline values={spiSeries} color={INDEX_BAR[spiLevel]} />
@@ -330,7 +330,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
         </div>
 
         {/* CPI chip */}
-        <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-medium text-content-secondary">
               {t('project_intelligence.forecast.cpi', {
@@ -345,7 +345,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
           </div>
           <div className="flex items-end justify-between mt-2">
             <span
-              className={`text-2xl font-bold tabular-nums ${INDEX_COLOR[cpiLevel]}`}
+              className={`text-2xl font-semibold tabular-nums ${INDEX_COLOR[cpiLevel]}`}
               data-testid="forecast-cpi"
             >
               {fmtFixed(cpi, 3)}
@@ -361,8 +361,8 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
 
         {/* Contingency / overrun gauge */}
         <div
-          className={`rounded-xl bg-white dark:bg-gray-800/60 border shadow-sm p-4 ${
-            overBudget ? 'border-rose-300 dark:border-rose-900/50' : 'border-emerald-300 dark:border-emerald-900/50'
+          className={`rounded-xl bg-surface-primary border shadow-sm p-4 ${
+            overBudget ? 'border-semantic-error/30' : 'border-semantic-success/30'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -371,14 +371,14 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                 defaultValue: 'Variance at Completion (VAC)',
               })}
             </h4>
-            <span className={`w-2 h-2 rounded-full ${overBudget ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+            <span className={`w-2 h-2 rounded-full ${overBudget ? 'bg-semantic-error' : 'bg-semantic-success'}`} />
           </div>
           <div className="mt-2">
             <MoneyDisplay
               amount={vac}
               currency={currency}
               colorize
-              className="text-2xl font-bold tabular-nums"
+              className="text-2xl font-semibold tabular-nums"
             />
           </div>
           <p className="text-2xs text-content-tertiary mt-1">
@@ -395,7 +395,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       </div>
 
       {/* Forecast-to-Completion card */}
-      <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+      <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
         <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
           <Target size={15} className="text-oe-blue" />
           {t('project_intelligence.forecast.ftc_title', {
@@ -434,7 +434,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
               <MoneyDisplay
                 amount={eac}
                 currency={currency}
-                className={`tabular-nums font-semibold ${overBudget ? 'text-rose-500' : 'text-emerald-500'}`}
+                className={`tabular-nums font-semibold ${overBudget ? 'text-semantic-error' : 'text-semantic-success'}`}
               />
             </div>
             <div className="h-3 rounded-full bg-surface-tertiary overflow-hidden">
@@ -470,7 +470,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       </div>
 
       {/* Active Alerts table */}
-      <div className="rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4">
+      <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
         <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-3">
           <AlertTriangle size={15} className={alerts.length ? 'text-rose-400' : 'text-content-quaternary'} />
           {t('project_intelligence.forecast.active_alerts', {

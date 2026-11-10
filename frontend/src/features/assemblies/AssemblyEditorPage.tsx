@@ -365,7 +365,7 @@ export function AssemblyEditorPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-content-primary truncate">
+            <h1 className="text-2xl font-semibold text-content-primary truncate">
               {assembly.name}
             </h1>
             <Badge variant="blue" size="md">
@@ -465,7 +465,7 @@ export function AssemblyEditorPage() {
             icon={<Boxes size={15} />}
             onClick={() => openCatalogPicker(null)}
             disabled={!canEditAssembly}
-            className="border-emerald-300/30 text-emerald-700 hover:bg-emerald-50"
+            className="border-semantic-success/30 text-semantic-success hover:bg-semantic-success-bg"
             title={
               editHint ??
               t('assemblies.from_catalog_title', {
@@ -520,9 +520,9 @@ export function AssemblyEditorPage() {
                 >
                   {(
                     [
-                      { rt: 'material', icon: LayersIcon, color: 'text-emerald-700' },
+                      { rt: 'material', icon: LayersIcon, color: 'text-semantic-success' },
                       { rt: 'labor', icon: HardHat, color: 'text-blue-700' },
-                      { rt: 'equipment', icon: Wrench, color: 'text-amber-700' },
+                      { rt: 'equipment', icon: Wrench, color: 'text-semantic-warning' },
                       { rt: 'operator', icon: Hammer, color: 'text-orange-700' },
                       { rt: 'subcontractor', icon: Briefcase, color: 'text-violet-700' },
                       { rt: 'overhead', icon: Plus, color: 'text-slate-700' },
@@ -546,7 +546,7 @@ export function AssemblyEditorPage() {
                     type="button"
                     role="menuitem"
                     onClick={() => openCatalogPicker(null)}
-                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-surface-secondary flex items-center gap-2 text-emerald-700"
+                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-surface-secondary flex items-center gap-2 text-semantic-success"
                   >
                     <Boxes size={14} />
                     {t('assemblies.from_catalog', { defaultValue: 'From Catalog…' })}
@@ -983,7 +983,7 @@ function CostDbSearchForAssembly({
                     {fmt(item.rate, item.currency)}
                   </span>
                   {added.has(item.id) ? (
-                    <span className="flex items-center gap-1 text-xs font-medium text-green-600 px-2">
+                    <span className="flex items-center gap-1 text-xs font-medium text-semantic-success px-2">
                       <Check size={14} /> {t('common.added', { defaultValue: 'Added' })}
                     </span>
                   ) : (
@@ -1036,20 +1036,20 @@ function inferResourceType(component: AssemblyComponent): 'material' | 'labor' |
 }
 
 const RESOURCE_TYPE_STYLES: Record<string, string> = {
-  material: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
+  material: 'bg-semantic-success-bg text-semantic-success',
   labor: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
-  equipment: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
+  equipment: 'bg-semantic-warning-bg text-semantic-warning',
   operator: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400',
   subcontractor: 'bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400',
-  overhead: 'bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300',
+  overhead: 'bg-surface-secondary text-content-secondary',
 };
 
 // Hex bar colours for the M/L/E summary panel — slightly more saturated
 // than the badge backgrounds so the percent bar reads at-a-glance.
 const RESOURCE_TYPE_BAR: Record<string, string> = {
-  material: 'bg-emerald-500',
+  material: 'bg-semantic-success',
   labor: 'bg-blue-500',
-  equipment: 'bg-amber-500',
+  equipment: 'bg-semantic-warning',
   operator: 'bg-orange-500',
   subcontractor: 'bg-violet-500',
   overhead: 'bg-slate-500',
@@ -1206,7 +1206,7 @@ export function ComponentRow({
               onChange={(e) =>
                 onUpdate({ resource_type: e.target.value as ResourceType })
               }
-              className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold cursor-pointer border-none outline-none focus:ring-1 focus:ring-oe-blue/40 ${RESOURCE_TYPE_STYLES[resType] ?? RESOURCE_TYPE_STYLES.material}`}
+              className={`inline-block px-1.5 py-0.5 rounded text-2xs font-semibold cursor-pointer border-none outline-none focus:ring-1 focus:ring-oe-blue/40 ${RESOURCE_TYPE_STYLES[resType] ?? RESOURCE_TYPE_STYLES.material}`}
               title={t('assemblies.type_change_hint', {
                 defaultValue: 'Change resource type - recomputes the line total',
               })}
@@ -1246,7 +1246,7 @@ export function ComponentRow({
                 defaultValue: 'Quantity is computed from a formula: {{formula}}',
                 formula: component.quantity_formula,
               })}
-              className="text-[9px] font-mono font-bold text-oe-blue bg-oe-blue/10 rounded px-1 py-0.5 leading-none cursor-help shrink-0"
+              className="text-2xs font-mono font-semibold text-oe-blue bg-oe-blue/10 rounded px-1 py-0.5 leading-none cursor-help shrink-0"
             >
               fx
             </span>
@@ -1507,7 +1507,7 @@ function DetailField({
   }, [value]);
   return (
     <label className={clsx('block', span)}>
-      <div className="text-[10px] uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+      <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
         {label}
       </div>
       <input
@@ -1528,7 +1528,7 @@ function DetailField({
         }}
         className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
       />
-      {hint && <div className="text-[10px] text-content-tertiary mt-1">{hint}</div>}
+      {hint && <div className="text-2xs text-content-tertiary mt-1">{hint}</div>}
     </label>
   );
 }
@@ -1791,7 +1791,7 @@ function ApplyToBOQModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {inputParams.map((p) => (
                     <label key={p.name} className="block">
-                      <div className="text-[11px] text-content-secondary mb-1 flex items-center gap-1">
+                      <div className="text-2xs text-content-secondary mb-1 flex items-center gap-1">
                         <span className="font-mono">{p.name}</span>
                         {p.unit && <span className="text-content-tertiary">({p.unit})</span>}
                       </div>
@@ -1933,7 +1933,7 @@ function BreakdownSidebar({
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <div className="text-[11px] text-content-tertiary tabular-nums mt-0.5">
+                  <div className="text-2xs text-content-tertiary tabular-nums mt-0.5">
                     {fmt(value)} {currency}
                   </div>
                 </div>
@@ -1965,7 +1965,7 @@ function BreakdownSidebar({
             <span className="font-semibold text-content-primary">
               {t('assemblies.breakdown_total', { defaultValue: 'Total / unit' })}
             </span>
-            <span className="font-bold text-content-primary tabular-nums">
+            <span className="font-semibold text-content-primary tabular-nums">
               {fmt(breakdown.withBid)} {currency} / {unitGlyph(unit)}
             </span>
           </div>
@@ -2054,7 +2054,7 @@ function CatalogResourcePickerModal({
       <Card className="w-full max-w-3xl mt-12">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Boxes size={16} className="text-emerald-600" />
+            <Boxes size={16} className="text-semantic-success" />
             <h2 className="text-base font-semibold">
               {t('assemblies.catalog_picker_title', {
                 defaultValue: 'Add resource from catalog',
@@ -2084,7 +2084,7 @@ function CatalogResourcePickerModal({
               placeholder={t('assemblies.catalog_search_ph', {
                 defaultValue: 'Search materials / labor / equipment…',
               })}
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded-lg border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              className="w-full ps-8 pe-3 py-1.5 text-sm rounded-lg border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-semantic-success/60"
               autoFocus
             />
           </div>
@@ -2144,13 +2144,13 @@ function CatalogResourcePickerModal({
                       <div className="font-medium text-content-primary truncate max-w-[260px]">
                         {it.name}
                       </div>
-                      <div className="text-[11px] text-content-tertiary truncate max-w-[260px]">
+                      <div className="text-2xs text-content-tertiary truncate max-w-[260px]">
                         {it.resource_code}{it.region ? ` · ${it.region}` : ''}
                       </div>
                     </td>
                     <td className="py-2 text-center">
                       <span
-                        className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                        className={`inline-block px-1.5 py-0.5 rounded text-2xs font-semibold ${
                           RESOURCE_TYPE_STYLES[it.resource_type] ?? RESOURCE_TYPE_STYLES.material
                         }`}
                       >
@@ -2163,7 +2163,7 @@ function CatalogResourcePickerModal({
                         minimumFractionDigits: currencyFractionDigits(it.currency),
                         maximumFractionDigits: currencyFractionDigits(it.currency),
                       }).format(it.base_price || 0)}{' '}
-                      <span className="text-[10px] text-content-tertiary">{it.currency}</span>
+                      <span className="text-2xs text-content-tertiary">{it.currency}</span>
                     </td>
                     <td className="py-2 text-right">
                       <Button

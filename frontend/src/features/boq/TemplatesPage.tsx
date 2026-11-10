@@ -256,11 +256,11 @@ export function TemplatesPage() {
       )}
 
       {templatesFailed && (
-        <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm dark:border-red-900 dark:bg-red-950/40">
-          <p className="font-medium text-red-700 dark:text-red-300">
+        <div className="rounded-xl border border-semantic-error/30 bg-semantic-error-bg px-4 py-3 text-sm">
+          <p className="font-medium text-semantic-error">
             {t('boq_templates.load_failed', { defaultValue: 'Could not load the templates' })}
           </p>
-          <p className="mt-1 text-red-600 dark:text-red-400">
+          <p className="mt-1 text-semantic-error">
             {templatesError instanceof Error
               ? templatesError.message
               : t('boq_templates.load_failed_generic', {
@@ -423,7 +423,7 @@ export function TemplatesPage() {
                   <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                     {t('boq.estimated_total', { defaultValue: 'Estimated total' })}
                   </p>
-                  <p className="mt-0.5 text-lg font-bold text-content-primary tabular-nums">
+                  <p className="mt-0.5 text-lg font-semibold text-content-primary tabular-nums">
                     ~{fmtCurrency.format(estimatedTotal)}{' '}
                     <span className="text-sm font-normal text-content-secondary">{selected.currency}</span>
                   </p>

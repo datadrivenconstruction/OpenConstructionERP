@@ -110,7 +110,7 @@ export function StageRail({
                   isCurrent
                     ? 'bg-oe-blue text-white'
                     : isDone
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-semantic-success text-white'
                       : 'bg-surface-secondary text-content-secondary',
                 )}
               >

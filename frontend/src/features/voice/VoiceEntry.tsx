@@ -178,7 +178,7 @@ export function VoiceEntry({
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <span className="relative flex h-16 w-16 items-center justify-center">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400/40" />
-            <span className="relative inline-flex h-16 w-16 items-center justify-center rounded-full bg-red-500 text-white">
+            <span className="relative inline-flex h-16 w-16 items-center justify-center rounded-full bg-semantic-error text-white">
               <Mic className="h-7 w-7" />
             </span>
           </span>
@@ -240,7 +240,7 @@ export function VoiceEntry({
           </p>
 
           {transcriptionUnavailable && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            <div className="flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
                 {t('voice.no_transcription', {
@@ -283,7 +283,7 @@ export function VoiceEntry({
     if (capture.phase === 'error') {
       return (
         <div className="space-y-4">
-          <div className="flex items-start gap-2 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+          <div className="flex items-start gap-2 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{capture.error ?? t('voice.error', { defaultValue: 'Something went wrong.' })}</span>
           </div>

@@ -573,7 +573,7 @@ function ImportDemoModal({
           )}
 
           {installMutation.isError && (
-            <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700">
+            <div className="rounded-lg bg-semantic-error-bg p-3 text-xs text-semantic-error">
               {t('demo.install_error', 'Failed to install demo project. Please try again.')}
             </div>
           )}
@@ -787,7 +787,7 @@ function OnboardingSteps({
                 {/* Step number + icon row */}
                 <div className="mb-4 flex items-center gap-3">
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                       step.done
                         ? 'bg-semantic-success-bg text-semantic-success'
                         : 'bg-oe-blue-subtle text-oe-blue-text'
@@ -1104,7 +1104,7 @@ function KpiRibbon({
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-lg font-bold tabular-nums text-content-primary leading-tight truncate">
+                <span className="text-lg font-semibold tabular-nums text-content-primary leading-tight truncate">
                   {card.value ?? (showFallback ? <span className="text-content-tertiary">--</span> : <span className="inline-block h-5 w-14 animate-pulse rounded bg-surface-tertiary" />)}
                 </span>
                 {'sublabel' in card && card.sublabel && (
@@ -1207,7 +1207,7 @@ function PortfolioOverview() {
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.active_projects', { defaultValue: 'Active Projects' })}
           </div>
-          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+          <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
             {analytics.total_projects}
           </div>
         </div>
@@ -1215,7 +1215,7 @@ function PortfolioOverview() {
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.total_budget_all', { defaultValue: 'Total Budget' })}
           </div>
-          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+          <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
             <MultiCurrencyTotal items={totalBudgetItems} variant="inline" compact />
           </div>
         </div>
@@ -1223,14 +1223,14 @@ function PortfolioOverview() {
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.with_budget', { defaultValue: 'With Budget' })}
           </div>
-          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+          <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
             {analytics.projects_with_budget}
           </div>
         </div>
       </div>
       {overBudgetProjects.length > 0 && (
         <div className="mt-3 pt-3 border-t border-border-light">
-          <p className="text-2xs font-medium text-amber-600 uppercase tracking-wider mb-2">
+          <p className="text-2xs font-medium text-semantic-warning uppercase tracking-wider mb-2">
             {t('dashboard.projects_over_budget', { defaultValue: 'Projects Over Budget' })}
           </p>
           <div className="space-y-1.5">
@@ -1241,7 +1241,7 @@ function PortfolioOverview() {
                 className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs hover:bg-surface-secondary transition-colors text-left"
               >
                 <span className="text-content-primary font-medium truncate">{p.name}</span>
-                <span className="text-amber-600 tabular-nums shrink-0 ml-2">
+                <span className="text-semantic-warning tabular-nums shrink-0 ml-2">
                   {p.variance_pct > 0 ? '+' : ''}{p.variance_pct}%
                 </span>
               </button>
@@ -1357,13 +1357,13 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
       dot:       'bg-semantic-error',
       value:     'text-semantic-error',
       iconColor: 'text-semantic-error',
-      iconBg:    'bg-rose-50 dark:bg-rose-900/20',
+      iconBg:    'bg-semantic-error-bg',
     },
     attention: {
       dot:       'bg-semantic-warning',
-      value:     'text-amber-600 dark:text-amber-400',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      iconBg:    'bg-amber-50 dark:bg-amber-900/20',
+      value:     'text-semantic-warning',
+      iconColor: 'text-semantic-warning',
+      iconBg:    'bg-semantic-warning-bg',
     },
     info: {
       dot:       'bg-content-quaternary',
@@ -1409,7 +1409,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-2">
                   <span
-                    className={`text-2xl font-bold leading-none tabular-nums ${hasItems ? s.value : 'text-content-tertiary'}`}
+                    className={`text-2xl font-semibold leading-none tabular-nums ${hasItems ? s.value : 'text-content-tertiary'}`}
                   >
                     {it.value}
                   </span>
@@ -1588,7 +1588,7 @@ function NextSteps({
       style={{ animationDelay: '90ms' }}
     >
       <div className="flex items-center gap-2 mb-3">
-        <Lightbulb size={16} className="text-amber-500" strokeWidth={1.75} />
+        <Lightbulb size={16} className="text-semantic-warning" strokeWidth={1.75} />
         <h3 className="text-sm font-semibold text-content-primary">
           {t('dashboard.next_steps', { defaultValue: 'Suggested Next Steps' })}
         </h3>
@@ -1603,7 +1603,7 @@ function NextSteps({
           >
             {/* Plain Stroke per 2026-05-11 design-system: icon-only, no chip.
                 Amber accent comes from the icon color, not a fill block. */}
-            <div className="text-amber-600 transition-transform group-hover:scale-110">
+            <div className="text-semantic-warning transition-transform group-hover:scale-110">
               {s.icon}
             </div>
             <div>
@@ -1862,7 +1862,7 @@ function SystemStatusSummary({
           aria-busy={b.value === null || undefined}
         >
           <span className={b.color}>{b.icon}</span>
-          <span className={`text-xs font-bold tabular-nums ${b.color}`}>
+          <span className={`text-xs font-semibold tabular-nums ${b.color}`}>
             {b.value ?? (
               <span
                 className="inline-block h-3 w-4 animate-pulse rounded bg-surface-tertiary align-middle"
@@ -2894,7 +2894,7 @@ function DashboardPageInner() {
           href="https://datadrivenconstruction.io/?utm_source=erp"
           target="_blank"
           rel="noopener noreferrer"
-          className="group/ddc inline-flex items-center gap-1.5 text-[11px] text-content-tertiary hover:text-content-secondary transition-colors"
+          className="group/ddc inline-flex items-center gap-1.5 text-2xs text-content-tertiary hover:text-content-secondary transition-colors"
         >
           <img
             src="/brand/ddc-logo.webp"
@@ -2917,7 +2917,7 @@ function DashboardPageInner() {
         >
           <span className="relative flex h-2 w-2 shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-semantic-success" />
           </span>
           <span>{t('dashboard.open_source_badge', { defaultValue: 'Open-source construction ERP' })}</span>
           <ExternalLink size={11} className="text-content-quaternary group-hover/oss:text-oe-blue transition-colors" />
@@ -2961,14 +2961,14 @@ function DashboardPageInner() {
       {rollup.error != null && (
         <div
           role="status"
-          className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 animate-card-in"
+          className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 animate-card-in"
         >
           <AlertTriangle
             size={16}
-            className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+            className="text-semantic-warning shrink-0 mt-0.5"
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-amber-900 dark:text-amber-100">
+            <p className="text-sm text-semantic-warning">
               {t('dashboard.rollup_error', {
                 defaultValue:
                   'Could not load dashboard metrics. Some widgets below may show no data.',
@@ -3037,7 +3037,7 @@ function DashboardPageInner() {
                   <Sparkles size={28} className="text-oe-blue" />
                 </div>
               </div>
-              <h2 id="update-welcome-title" className="text-xl font-bold text-content-primary">
+              <h2 id="update-welcome-title" className="text-xl font-semibold text-content-primary">
                 {t('dashboard.update_welcome_title', {
                   defaultValue: 'Welcome to v{{version}}',
                   version: APP_VERSION,
@@ -3175,7 +3175,7 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
           className="flex w-full items-center gap-4 px-6 py-3.5 text-left transition-all duration-normal ease-oe hover:bg-surface-secondary animate-stagger-in"
           style={{ animationDelay: `${300 + index * 60}ms` }}
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text text-xs font-bold">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text text-xs font-semibold">
             {p.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
@@ -3314,7 +3314,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('dashboard.total_projects', { defaultValue: 'Total Projects' })}
             </div>
-            <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+            <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
               {stats.totalProjects}
             </div>
           </div>
@@ -3322,7 +3322,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('dashboard.total_boqs', { defaultValue: 'Total BOQs' })}
             </div>
-            <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+            <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
               {stats.totalBoqs}
             </div>
           </div>
@@ -3336,7 +3336,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
               )}
             </div>
             {stats.byCurrency.length === 0 ? (
-              <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+              <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
                 {fmtCompact(0, projects[0]?.currency ?? 'EUR')}
               </div>
             ) : stats.multiCurrency ? (
@@ -3344,14 +3344,14 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
                 {stats.byCurrency.map((ct) => (
                   <span
                     key={ct.currency}
-                    className="text-base font-bold tabular-nums text-content-primary"
+                    className="text-base font-semibold tabular-nums text-content-primary"
                   >
                     {fmtCompact(Number(ct.total_value) || 0, ct.currency)}
                   </span>
                 ))}
               </div>
             ) : (
-              <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+              <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
                 {fmtCompact(
                   Number(stats.byCurrency[0]?.total_value) || 0,
                   stats.byCurrency[0]?.currency ?? 'EUR',

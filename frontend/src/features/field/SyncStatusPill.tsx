@@ -24,11 +24,11 @@ import type { OfflineSyncStatus } from '@/shared/lib/offline/offlineSyncStore';
 import { MergeConflictDialog } from './MergeConflictDialog';
 
 const TONE: Record<OfflineSyncStatus, string> = {
-  'online-synced': 'bg-emerald-100 text-emerald-800',
-  offline: 'bg-amber-100 text-amber-800',
-  syncing: 'bg-sky-100 text-sky-800',
-  pending: 'bg-sky-100 text-sky-800',
-  error: 'bg-red-100 text-red-800',
+  'online-synced': 'bg-semantic-success-bg text-semantic-success',
+  offline: 'bg-semantic-warning-bg text-semantic-warning',
+  syncing: 'bg-semantic-info-bg text-semantic-info',
+  pending: 'bg-semantic-info-bg text-semantic-info',
+  error: 'bg-semantic-error-bg text-semantic-error',
   conflict: 'bg-orange-100 text-orange-900',
 };
 

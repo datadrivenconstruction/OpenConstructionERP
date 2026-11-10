@@ -29,7 +29,7 @@ const ICON_CHIP_TONES: Record<StatCardTone, string> = {
   default: 'bg-surface-tertiary text-content-tertiary',
   blue: 'bg-oe-blue/10 text-oe-blue-text',
   success: 'bg-semantic-success/10 text-semantic-success',
-  warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  warning: 'bg-semantic-warning/10 text-semantic-warning',
   danger: 'bg-semantic-error/10 text-semantic-error',
 };
 
@@ -37,7 +37,7 @@ const VALUE_TONES: Record<StatCardTone, string> = {
   default: 'text-content-primary',
   blue: 'text-oe-blue-text',
   success: 'text-semantic-success',
-  warning: 'text-amber-600 dark:text-amber-400',
+  warning: 'text-semantic-warning',
   danger: 'text-semantic-error',
 };
 

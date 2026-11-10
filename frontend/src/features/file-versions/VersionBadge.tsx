@@ -25,7 +25,7 @@ export function VersionBadge({ versionNumber, isCurrent, className }: VersionBad
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1 px-1.5 h-5 rounded-md text-[10px] font-semibold tabular-nums',
+        'inline-flex items-center gap-1 px-1.5 h-5 rounded-md text-2xs font-semibold tabular-nums',
         isCurrent
           ? 'bg-oe-blue/10 text-oe-blue border border-oe-blue/20'
           : 'bg-surface-secondary text-content-tertiary border border-border-light',

@@ -77,8 +77,8 @@ const TONE_RING: Record<Variant['tone'], string> = {
 
 const TONE_ICON_BG: Record<Variant['tone'], string> = {
   info: 'bg-blue-500/15 text-blue-300 ring-blue-400/30',
-  warning: 'bg-amber-500/15 text-amber-300 ring-amber-400/30',
-  danger: 'bg-red-500/15 text-red-300 ring-red-400/30',
+  warning: 'bg-semantic-warning/15 text-amber-300 ring-amber-400/30',
+  danger: 'bg-semantic-error/15 text-red-300 ring-red-400/30',
 };
 
 export function GeoEmptyState({
@@ -350,7 +350,7 @@ export function GeoEmptyState({
                 data-testid="geo-empty-auto-anchor"
                 className={[
                   'inline-flex items-center gap-1.5 rounded-md',
-                  'bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white',
+                  'bg-semantic-success px-3 py-1.5 text-xs font-semibold text-white',
                   'shadow-sm transition hover:bg-emerald-400',
                   'disabled:cursor-wait disabled:opacity-70',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70',
@@ -373,7 +373,7 @@ export function GeoEmptyState({
                 data-testid="geo-empty-place-on-map"
                 className={[
                   'inline-flex items-center gap-1.5 rounded-md',
-                  'bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white',
+                  'bg-semantic-success px-3 py-1.5 text-xs font-semibold text-white',
                   'shadow-sm transition hover:bg-emerald-400',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70',
                 ].join(' ')}

@@ -85,14 +85,14 @@ const STATE_CONFIG: Record<
 > = {
   wip: {
     variant: 'warning',
-    cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    cls: 'bg-semantic-warning-bg text-semantic-warning',
     label: 'WIP',
   },
   shared: { variant: 'blue', cls: '', label: 'Shared' },
   published: { variant: 'success', cls: '', label: 'Published' },
   archived: {
     variant: 'neutral',
-    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    cls: 'bg-surface-secondary text-content-secondary',
     label: 'Archived',
   },
 };
@@ -128,12 +128,12 @@ const DISCIPLINE_LABELS: Record<CDEDiscipline, string> = {
 
 const DISCIPLINE_COLORS: Record<CDEDiscipline, string> = {
   architecture: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  structural: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  mep: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  civil: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  landscape: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  structural: 'bg-semantic-error-bg text-semantic-error',
+  mep: 'bg-semantic-success-bg text-semantic-success',
+  civil: 'bg-semantic-warning-bg text-semantic-warning',
+  landscape: 'bg-semantic-success-bg text-semantic-success',
   interior: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  other: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  other: 'bg-surface-secondary text-content-secondary',
 };
 
 const inputCls =
@@ -266,7 +266,7 @@ function CreateCDEModal({
                 className={clsx(
                   inputCls,
                   codeError &&
-                    'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                    'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
                 )}
                 autoFocus
               />
@@ -317,7 +317,7 @@ function CreateCDEModal({
               className={clsx(
                 inputCls,
                 titleError &&
-                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
             />
             {titleError && (
@@ -504,7 +504,7 @@ function ApprovalSignatureModal({
               })}
               className={clsx(
                 inputCls,
-                sigError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                sigError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
               autoFocus
             />
@@ -1206,7 +1206,7 @@ function HowCdeWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1258,9 +1258,9 @@ function HowCdeWorks() {
  *  approver, viewer throughout). Initial-badge colours, no extra icon imports. */
 const ROLE_ACCENT: Record<string, string> = {
   author: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  reviewer: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  approver: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  viewer: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  reviewer: 'bg-semantic-warning-bg text-semantic-warning',
+  approver: 'bg-semantic-success-bg text-semantic-success',
+  viewer: 'bg-surface-secondary text-content-secondary',
 };
 
 /**
@@ -1305,7 +1305,7 @@ function CdeFunctionalRoles() {
               <div className="flex items-center gap-2">
                 <span
                   className={clsx(
-                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-bold',
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-semibold',
                     ROLE_ACCENT[role.key] ?? ROLE_ACCENT.viewer,
                   )}
                   aria-hidden="true"
@@ -1391,7 +1391,7 @@ const READINESS_LEVEL: Record<
   not_started: { variant: 'neutral', bar: 'bg-gray-300 dark:bg-gray-600', label: 'Not started' },
   forming: { variant: 'warning', bar: 'bg-amber-400', label: 'Forming' },
   operational: { variant: 'blue', bar: 'bg-oe-blue', label: 'Operational' },
-  mature: { variant: 'success', bar: 'bg-green-500', label: 'Mature' },
+  mature: { variant: 'success', bar: 'bg-semantic-success', label: 'Mature' },
 };
 
 /**
@@ -1452,7 +1452,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
         <div className="flex shrink-0 items-center gap-3">
           <div className="text-right">
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold tabular-nums leading-none text-content-primary">
+              <span className="text-3xl font-semibold tabular-nums leading-none text-content-primary">
                 {data.score}
               </span>
               <span className="text-sm font-medium text-content-tertiary">/100</span>
@@ -1509,7 +1509,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
               className={clsx(
                 'flex items-center gap-2 rounded-lg border px-2.5 py-1.5',
                 s.done
-                  ? 'border-green-200 bg-green-50/60 dark:border-green-900/40 dark:bg-green-900/10'
+                  ? 'border-semantic-success/30 bg-semantic-success/10'
                   : 'border-border-light bg-surface-secondary/40',
               )}
               title={hint}
@@ -1518,7 +1518,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
                 className={clsx(
                   'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
                   s.done
-                    ? 'border-green-500 bg-green-500 text-white'
+                    ? 'border-semantic-success/60 bg-semantic-success text-white'
                     : 'border-border text-transparent',
                 )}
                 aria-hidden="true"
@@ -1983,7 +1983,7 @@ export function CDEPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('cde.stat_total', { defaultValue: 'Total containers' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {stats.total}
             </span>
           </div>
@@ -1991,7 +1991,7 @@ export function CDEPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('cde.state_wip', { defaultValue: 'WIP' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {stats.by_state?.wip ?? 0}
             </span>
           </div>
@@ -1999,7 +1999,7 @@ export function CDEPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('cde.state_shared', { defaultValue: 'Shared' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {stats.by_state?.shared ?? 0}
             </span>
           </div>
@@ -2007,7 +2007,7 @@ export function CDEPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('cde.state_published', { defaultValue: 'Published' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {stats.by_state?.published ?? 0}
             </span>
           </div>
@@ -2015,7 +2015,7 @@ export function CDEPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('cde.state_archived', { defaultValue: 'Archived' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {stats.by_state?.archived ?? 0}
             </span>
           </div>

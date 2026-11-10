@@ -91,20 +91,20 @@ function PercentileCard({
 }) {
   const borderClass =
     variant === 'green'
-      ? 'border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-950/20'
+      ? 'border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20'
       : variant === 'orange'
-        ? 'border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20'
+        ? 'border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20'
         : variant === 'red'
-          ? 'border-rose-400/50 bg-rose-50/50 dark:bg-rose-950/20'
+          ? 'border-rose-400/50 bg-semantic-error/10 dark:bg-rose-950/20'
           : 'border-border-light bg-surface-secondary/30';
 
   const valueClass =
     variant === 'green'
-      ? 'text-emerald-700 dark:text-emerald-400'
+      ? 'text-semantic-success'
       : variant === 'orange'
-        ? 'text-amber-700 dark:text-amber-400'
+        ? 'text-semantic-warning'
         : variant === 'red'
-          ? 'text-rose-700 dark:text-rose-400'
+          ? 'text-semantic-error'
           : 'text-content-primary';
 
   return (
@@ -112,7 +112,7 @@ function PercentileCard({
       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
         {label}
       </div>
-      <div className={`text-sm font-bold tabular-nums mt-0.5 ${valueClass}`}>
+      <div className={`text-sm font-semibold tabular-nums mt-0.5 ${valueClass}`}>
         <MoneyDisplay amount={value} currency={currency} compact />
       </div>
     </div>
@@ -156,8 +156,8 @@ function Histogram({
             const isRightOfP80 = binMid > percentiles.p80;
 
             let barColor = 'bg-blue-400/70 hover:bg-blue-500';
-            if (isLeftOfP50) barColor = 'bg-emerald-400/60 hover:bg-emerald-500';
-            else if (isRightOfP80) barColor = 'bg-rose-400/60 hover:bg-rose-500';
+            if (isLeftOfP50) barColor = 'bg-emerald-400/60 hover:bg-semantic-success';
+            else if (isRightOfP80) barColor = 'bg-rose-400/60 hover:bg-semantic-error';
 
             return (
               <div
@@ -177,18 +177,18 @@ function Histogram({
         {range > 0 && (
           <>
             <div
-              className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-emerald-600 dark:border-emerald-400 pointer-events-none"
+              className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-semantic-success/60 pointer-events-none"
               style={{ left: `${Math.min(Math.max(p50Pct, 0), 100)}%` }}
             >
-              <span className="absolute -top-5 -translate-x-1/2 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap bg-surface-primary/80 px-1 rounded">
+              <span className="absolute -top-5 -translate-x-1/2 text-2xs font-semibold text-semantic-success whitespace-nowrap bg-surface-primary/80 px-1 rounded">
                 P50
               </span>
             </div>
             <div
-              className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-amber-600 dark:border-amber-400 pointer-events-none"
+              className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-semantic-warning/60 pointer-events-none"
               style={{ left: `${Math.min(Math.max(p80Pct, 0), 100)}%` }}
             >
-              <span className="absolute -top-5 -translate-x-1/2 text-[10px] font-semibold text-amber-700 dark:text-amber-400 whitespace-nowrap bg-surface-primary/80 px-1 rounded">
+              <span className="absolute -top-5 -translate-x-1/2 text-2xs font-semibold text-semantic-warning whitespace-nowrap bg-surface-primary/80 px-1 rounded">
                 P80
               </span>
             </div>
@@ -196,7 +196,7 @@ function Histogram({
         )}
       </div>
 
-      <div className="flex justify-between text-[10px] text-content-quaternary tabular-nums">
+      <div className="flex justify-between text-2xs text-content-quaternary tabular-nums">
         <span>{fmtMoney(minVal)}</span>
         <span>{fmtMoney(maxVal)}</span>
       </div>
@@ -275,7 +275,7 @@ function RiskDriversTable({
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-20 h-2 bg-surface-tertiary rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-rose-500/70"
+                        className="h-full rounded-full bg-semantic-error/70"
                         style={{ width: `${Math.min(driver.contributionPct, 100)}%` }}
                       />
                     </div>
@@ -845,7 +845,7 @@ export default function RiskAnalysisModule() {
                       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('risk.contingency', { defaultValue: 'Contingency (P80 − P50)' })}
                       </div>
-                      <div className="text-lg font-bold text-blue-700 dark:text-blue-400 tabular-nums mt-0.5">
+                      <div className="text-lg font-semibold text-blue-700 dark:text-blue-400 tabular-nums mt-0.5">
                         <MoneyDisplay amount={result.contingency} currency={projectCurrency} compact />{' '}
                         <span className="text-sm font-medium text-blue-600/70">({fmtPercent(result.contingencyPct)})</span>
                       </div>
@@ -854,7 +854,7 @@ export default function RiskAnalysisModule() {
                       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('risk.recommended_budget', { defaultValue: 'Recommended Budget (P80)' })}
                       </div>
-                      <div className="text-lg font-bold text-content-primary tabular-nums mt-0.5">
+                      <div className="text-lg font-semibold text-content-primary tabular-nums mt-0.5">
                         <MoneyDisplay amount={result.percentiles.p80} currency={projectCurrency} compact />
                       </div>
                     </div>

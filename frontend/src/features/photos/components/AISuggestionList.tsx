@@ -70,7 +70,7 @@ function SuggestionRow({ s, photoId }: { s: Suggestion; photoId: string }) {
             type="button"
             onClick={() => accept.mutate()}
             disabled={accept.isPending || invalid}
-            className="inline-flex items-center gap-1 rounded bg-emerald-600 px-2 py-1 text-xs text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded bg-semantic-success px-2 py-1 text-xs text-white disabled:opacity-50"
           >
             <Check className="h-3 w-3" aria-hidden />
             {t('photoArchive.ai.accept')}

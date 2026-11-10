@@ -7290,9 +7290,9 @@ export default function TakeoffViewerModule({
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-center">
-                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/10 text-oe-blue border border-oe-blue/15 font-semibold">.pdf</span>
+                      <span className="text-2xs font-mono px-2 py-1 rounded-md bg-oe-blue/10 text-oe-blue border border-oe-blue/15 font-semibold">.pdf</span>
                     </div>
-                    <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
+                    <p className="text-2xs text-content-quaternary leading-relaxed mt-1 text-center">
                       {t('takeoff.landing_dropzone_hint', { defaultValue: 'Architectural drawings \u00B7 floor plans \u00B7 sections \u00B7 scans' })}
                     </p>
                     <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
@@ -7304,7 +7304,7 @@ export default function TakeoffViewerModule({
                     instead of re-uploading the same file. */}
                 {recentDocuments && recentDocuments.length > 0 && (
                   <div className="mt-4">
-                    <h2 className="text-[10px] font-bold text-content-tertiary uppercase tracking-widest mb-2">
+                    <h2 className="text-2xs font-semibold text-content-tertiary uppercase tracking-widest mb-2">
                       {t('takeoff.landing_recent_drawings', { defaultValue: 'Recent drawings' })}
                     </h2>
                     <ul className="space-y-1.5">
@@ -7319,10 +7319,10 @@ export default function TakeoffViewerModule({
                               <FileText size={13} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[11px] font-semibold text-content-primary">
+                              <p className="truncate text-2xs font-semibold text-content-primary">
                                 {doc.filename}
                               </p>
-                              <p className="text-[10px] text-content-tertiary">
+                              <p className="text-2xs text-content-tertiary">
                                 {doc.pages > 0
                                   ? `${doc.pages} ${t('takeoff.pages_short', { defaultValue: 'p' })} · `
                                   : ''}
@@ -7344,7 +7344,7 @@ export default function TakeoffViewerModule({
               {/* RIGHT — Hero text + supported formats cards */}
               <div className="flex flex-col justify-center gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
+                  <h2 className="text-2xl font-semibold text-content-primary tracking-tight leading-tight">
                     {t('takeoff.landing_hero_title', { defaultValue: 'PDF Takeoff' })}
                   </h2>
                   <p className="text-base text-content-secondary mt-3 leading-relaxed">
@@ -7359,7 +7359,7 @@ export default function TakeoffViewerModule({
                     below; pulling it up here keeps the formats-at-a-glance
                     without the redundant textual line. */}
                 <div>
-                  <h2 className="text-[10px] font-bold text-content-tertiary uppercase tracking-widest mb-2">
+                  <h2 className="text-2xs font-semibold text-content-tertiary uppercase tracking-widest mb-2">
                     {t('takeoff.landing_supported_formats', { defaultValue: 'Supported formats' })}
                   </h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -7385,16 +7385,16 @@ export default function TakeoffViewerModule({
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1">
-                            <span className={`text-[11px] font-mono font-bold ${f.primary ? 'text-oe-blue' : 'text-content-primary'}`}>
+                            <span className={`text-2xs font-mono font-semibold ${f.primary ? 'text-oe-blue' : 'text-content-primary'}`}>
                               .{f.ext.toLowerCase()}
                             </span>
                             {f.primary && (
-                              <span className="text-[8px] font-semibold uppercase tracking-wider text-oe-blue">
+                              <span className="text-2xs font-semibold uppercase tracking-wider text-oe-blue">
                                 {t('takeoff.landing_fmt_primary', { defaultValue: 'Primary' })}
                               </span>
                             )}
                           </div>
-                          <p className="text-[10px] text-content-tertiary leading-snug mt-0.5 truncate">{f.label}</p>
+                          <p className="text-2xs text-content-tertiary leading-snug mt-0.5 truncate">{f.label}</p>
                         </div>
                       </div>
                     ))}
@@ -7405,7 +7405,7 @@ export default function TakeoffViewerModule({
 
             {/* Row 2: Feature cards */}
             <div>
-              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-2">
+              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-widest mb-2">
                 {t('takeoff.landing_what_you_get', { defaultValue: 'What you get' })}
               </h2>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
@@ -7419,7 +7419,7 @@ export default function TakeoffViewerModule({
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                      <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                      <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -7471,7 +7471,7 @@ export default function TakeoffViewerModule({
                       <Loader2 size={16} className="animate-spin" />
                     </div>
                   )}
-                  <span className="flex items-center justify-between gap-1 px-1 py-0.5 text-[10px] text-content-secondary">
+                  <span className="flex items-center justify-between gap-1 px-1 py-0.5 text-2xs text-content-secondary">
                     <span className="tabular-nums">{n}</span>
                     {countsByPage[n] ? (
                       <span className="tabular-nums rounded-full bg-purple-500/15 px-1 text-purple-500" data-testid="thumbnail-badge">
@@ -7517,7 +7517,7 @@ export default function TakeoffViewerModule({
                           >
                             <span className="tabular-nums">{t('takeoff_viewer.page_label', { defaultValue: 'Page' })} {p}</span>
                             {cnt > 0 && (
-                              <span className={`tabular-nums rounded-full px-1.5 py-0.5 text-[10px] ${p === currentPage ? 'bg-white/20' : 'bg-purple-500/15 text-purple-500'}`}>
+                              <span className={`tabular-nums rounded-full px-1.5 py-0.5 text-2xs ${p === currentPage ? 'bg-white/20' : 'bg-purple-500/15 text-purple-500'}`}>
                                 {cnt}
                               </span>
                             )}
@@ -7619,7 +7619,7 @@ export default function TakeoffViewerModule({
                       </button>
                     </div>
                     {/* Status line: match count / busy / empty. */}
-                    <div className="flex items-center justify-between px-0.5 text-[11px] text-content-tertiary" data-testid="find-match-count">
+                    <div className="flex items-center justify-between px-0.5 text-2xs text-content-tertiary" data-testid="find-match-count">
                       {searchBusy ? (
                         <span className="flex items-center gap-1"><Loader2 size={11} className="animate-spin" />{t('takeoff_viewer.find_searching', { defaultValue: 'Searching…' })}</span>
                       ) : searchQuery.trim().length === 0 ? (
@@ -7648,11 +7648,11 @@ export default function TakeoffViewerModule({
                             data-page={m.page}
                             data-index={m.index}
                             data-active={i === activeMatchIdx}
-                            className={`flex w-full items-start gap-2 px-2 py-1.5 text-left text-[11px] transition-colors ${
+                            className={`flex w-full items-start gap-2 px-2 py-1.5 text-left text-2xs transition-colors ${
                               i === activeMatchIdx ? 'bg-oe-blue/10' : 'hover:bg-surface-secondary'
                             }`}
                           >
-                            <span className="shrink-0 rounded bg-surface-secondary px-1 py-0.5 font-mono text-[10px] text-content-secondary tabular-nums">
+                            <span className="shrink-0 rounded bg-surface-secondary px-1 py-0.5 font-mono text-2xs text-content-secondary tabular-nums">
                               {t('takeoff_viewer.find_page_chip', { defaultValue: 'p{{n}}', n: m.page })}
                             </span>
                             <span className="min-w-0 flex-1 truncate text-content-primary">{m.snippet}</span>
@@ -7878,7 +7878,7 @@ export default function TakeoffViewerModule({
               {isCalibrated && !calibrationMode && !settingScale && (
                 <button
                   onClick={handleStartCalibration}
-                  className="inline-flex h-7 items-center gap-1.5 rounded-md border border-purple-300/60 bg-purple-50 px-2 text-[11px] font-medium text-purple-700 transition-colors hover:bg-purple-100 dark:border-purple-700/50 dark:bg-purple-900/25 dark:text-purple-300 dark:hover:bg-purple-900/40"
+                  className="inline-flex h-7 items-center gap-1.5 rounded-md border border-purple-300/60 bg-purple-50 px-2 text-2xs font-medium text-purple-700 transition-colors hover:bg-purple-100 dark:border-purple-700/50 dark:bg-purple-900/25 dark:text-purple-300 dark:hover:bg-purple-900/40"
                   title={t('takeoff_viewer.calibrated_tooltip', {
                     defaultValue: 'Calibrated · {{ratio}}{{atLen}} - click to recalibrate',
                     ratio: formatScaleRatio(scale),
@@ -7898,7 +7898,7 @@ export default function TakeoffViewerModule({
               {!isCalibrated && !calibrationMode && !settingScale && (
                 <button
                   onClick={handleStartCalibration}
-                  className="inline-flex h-7 items-center gap-1.5 rounded-md border border-amber-300/60 bg-amber-50 px-2 text-[11px] font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300 dark:hover:bg-amber-900/40"
+                  className="inline-flex h-7 items-center gap-1.5 rounded-md border border-amber-300/60 bg-amber-50 px-2 text-2xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300 dark:hover:bg-amber-900/40"
                   title={t('takeoff_viewer.uncalibrated_hint', { defaultValue: 'Drawing is not calibrated - measurements may be inaccurate. Click to calibrate.' })}
                   data-testid="uncalibrated-badge"
                 >
@@ -8042,7 +8042,7 @@ export default function TakeoffViewerModule({
                 silently treated as empty. Dismissible per opened document. */}
             {noTextLayer && noTextLayer.count > 0 && !noTextBannerDismissed && (
               <div
-                className="mb-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-800 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-200"
+                className="mb-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-200"
                 role="status"
                 data-testid="takeoff-needs-ocr-banner"
               >
@@ -8159,7 +8159,7 @@ export default function TakeoffViewerModule({
                   never eats the click. */}
               {hoverInfo && hoverMeasurement && (
                 <div
-                  className="absolute z-20 max-w-[220px] rounded-md border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg px-2.5 py-1.5 text-[11px] pointer-events-none"
+                  className="absolute z-20 max-w-[220px] rounded-md border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg px-2.5 py-1.5 text-2xs pointer-events-none"
                   style={{ left: `${hoverInfo.x + 14}px`, top: `${hoverInfo.y + 14}px` }}
                   data-testid="measurement-hover-tooltip"
                 >
@@ -8175,12 +8175,12 @@ export default function TakeoffViewerModule({
                     </div>
                   )}
                   <div className="mt-0.5 flex items-center gap-1 text-content-tertiary">
-                    <span className="uppercase tracking-wide text-[10px]">
+                    <span className="uppercase tracking-wide text-2xs">
                       {t('takeoff_viewer.tooltip_group', { defaultValue: 'Group' })}
                     </span>
                     <span>{displayGroupName(hoverMeasurement.group || 'General')}</span>
                   </div>
-                  <div className="mt-0.5 text-[10px]">
+                  <div className="mt-0.5 text-2xs">
                     {hoverMeasurement.linkedPositionOrdinal ? (
                       <span className="text-emerald-600 dark:text-emerald-400 font-mono">
                         {t('takeoff_viewer.tooltip_linked', {
@@ -8240,7 +8240,7 @@ export default function TakeoffViewerModule({
                   scale (the helper returns null) so we never show "0 m". */}
               {drawReadout && (
                 <div
-                  className="absolute bottom-2 right-2 z-10 rounded-lg border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg px-3 py-2 text-[11px] font-mono text-content-secondary pointer-events-none space-y-0.5"
+                  className="absolute bottom-2 right-2 z-10 rounded-lg border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg px-3 py-2 text-2xs font-mono text-content-secondary pointer-events-none space-y-0.5"
                   data-testid="draw-readout"
                 >
                   <div className="flex items-center gap-2">
@@ -8310,7 +8310,7 @@ export default function TakeoffViewerModule({
                       informed decision rather than a gamble. */}
                   {suggestionBands.low > 0 && (
                     <span
-                      className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 whitespace-nowrap"
+                      className="rounded-full bg-rose-100 px-1.5 py-0.5 text-2xs font-semibold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 whitespace-nowrap"
                       title={t('takeoff_viewer.suggestions_low_hint', {
                         defaultValue: 'Accept all confirms these too. Check them first.',
                       })}
@@ -8325,7 +8325,7 @@ export default function TakeoffViewerModule({
                   <button
                     onClick={() => void acceptAllSuggestions()}
                     disabled={reviewBusy}
-                    className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                    className="rounded-full bg-emerald-500 px-2.5 py-1 text-2xs font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 disabled:cursor-wait"
                     data-testid="accept-all-suggestions"
                   >
                     {t('takeoff_viewer.accept_all', { defaultValue: 'Accept all' })}
@@ -8333,7 +8333,7 @@ export default function TakeoffViewerModule({
                   <button
                     onClick={() => void dismissAllSuggestions()}
                     disabled={reviewBusy}
-                    className="rounded-full bg-surface-secondary px-2.5 py-1 text-[11px] font-semibold text-content-secondary hover:bg-surface-tertiary transition-colors disabled:opacity-60 disabled:cursor-wait"
+                    className="rounded-full bg-surface-secondary px-2.5 py-1 text-2xs font-semibold text-content-secondary hover:bg-surface-tertiary transition-colors disabled:opacity-60 disabled:cursor-wait"
                     data-testid="dismiss-all-suggestions"
                   >
                     {t('takeoff_viewer.dismiss_all', { defaultValue: 'Dismiss all' })}
@@ -8347,7 +8347,7 @@ export default function TakeoffViewerModule({
                   so this branch only fires for measure/annotation tools. */}
               {!settingScale && activeTool !== 'select' && (
                 <div
-                  className="absolute top-2 left-1/2 -translate-x-1/2 bg-oe-blue/90 text-white px-3 py-1 rounded-md text-[11px] font-medium shadow-lg pointer-events-none flex items-center gap-2"
+                  className="absolute top-2 left-1/2 -translate-x-1/2 bg-oe-blue/90 text-white px-3 py-1 rounded-md text-2xs font-medium shadow-lg pointer-events-none flex items-center gap-2"
                   data-testid="active-tool-hint"
                 >
                   <span>
@@ -8411,7 +8411,7 @@ export default function TakeoffViewerModule({
                     data-testid="legend-drag-handle"
                     title={t('takeoff_viewer.legend_drag_hint', { defaultValue: 'Drag to move, double-click to reset' })}
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary">
+                    <span className="text-2xs font-semibold uppercase tracking-widest text-content-tertiary">
                       {t('takeoff_viewer.legend', { defaultValue: 'Legend' })}
                     </span>
                     <button
@@ -8491,13 +8491,13 @@ export default function TakeoffViewerModule({
                             className="h-3 w-3 rounded-full shrink-0 ring-1 ring-white/40"
                             style={{ backgroundColor: row.color }}
                           />
-                          <span className="flex-1 text-[11px] font-semibold text-content-primary truncate">
+                          <span className="flex-1 text-2xs font-semibold text-content-primary truncate">
                             {displayGroupName(row.name)}
                           </span>
-                          <span className="text-[10px] font-mono text-content-tertiary tabular-nums">
+                          <span className="text-2xs font-mono text-content-tertiary tabular-nums">
                             {row.count}
                           </span>
-                          <span className="text-[10px] font-mono text-content-secondary tabular-nums min-w-0">
+                          <span className="text-2xs font-mono text-content-secondary tabular-nums min-w-0">
                             {(() => {
                               const d = convertQuantity(row.total, row.unit, measurementSystem);
                               // Count-only groups render whole pieces (K-14);
@@ -8531,7 +8531,7 @@ export default function TakeoffViewerModule({
           <div className={clsx('w-72 shrink-0 space-y-2 overflow-y-auto min-h-0', !showSidebar && 'hidden')}>
             {/* Scale info */}
             <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary mb-1">
+              <p className="text-2xs font-semibold uppercase tracking-widest text-content-tertiary mb-1">
                 {t('takeoff_viewer.scale', { defaultValue: 'Scale' })}
               </p>
               <p className="text-sm font-semibold text-content-primary tabular-nums">
@@ -8551,7 +8551,7 @@ export default function TakeoffViewerModule({
                   <button
                     key={s.label}
                     onClick={() => setScale(presetScale(s.ratio))}
-                    className="text-[10px] px-1.5 py-0.5 rounded-sm bg-surface-secondary hover:bg-oe-blue hover:text-white text-content-secondary transition-all font-medium"
+                    className="text-2xs px-1.5 py-0.5 rounded-sm bg-surface-secondary hover:bg-oe-blue hover:text-white text-content-secondary transition-all font-medium"
                   >
                     {s.label}
                   </button>
@@ -8561,7 +8561,7 @@ export default function TakeoffViewerModule({
 
             {/* Active group selector */}
             <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1">
+              <label className="text-2xs font-semibold uppercase tracking-widest text-content-tertiary block mb-1">
                 {t('takeoff_viewer.active_group', { defaultValue: 'Active Group' })}
               </label>
               <div className="flex items-center gap-2">
@@ -8622,7 +8622,7 @@ export default function TakeoffViewerModule({
             {/* Count label (when count tool active) */}
             {activeTool === 'count' && (
               <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1">
+                <label className="text-2xs font-semibold uppercase tracking-widest text-content-tertiary block mb-1">
                   {t('takeoff_viewer.count_label', { defaultValue: 'Count Label' })}
                 </label>
                 <input
@@ -8638,7 +8638,7 @@ export default function TakeoffViewerModule({
             {/* Annotation color picker (when annotation tool active) */}
             {isAnnotationTool(activeTool) && (
               <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1.5">
+                <label className="text-2xs font-semibold uppercase tracking-widest text-content-tertiary block mb-1.5">
                   {t('takeoff_viewer.annotation_color', { defaultValue: 'Annotation Color' })}
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -8672,7 +8672,7 @@ export default function TakeoffViewerModule({
                 aria-selected={sidebarTab === 'properties'}
                 onClick={() => setSidebarTab('properties')}
                 className={clsx(
-                  'flex-1 px-2 py-1 rounded text-[11px] font-semibold transition-colors',
+                  'flex-1 px-2 py-1 rounded text-2xs font-semibold transition-colors',
                   sidebarTab === 'properties'
                     ? 'bg-oe-blue text-white shadow-sm'
                     : 'text-content-secondary hover:bg-surface-secondary',
@@ -8687,7 +8687,7 @@ export default function TakeoffViewerModule({
                 aria-selected={sidebarTab === 'ledger'}
                 onClick={() => setSidebarTab('ledger')}
                 className={clsx(
-                  'flex-1 px-2 py-1 rounded text-[11px] font-semibold transition-colors',
+                  'flex-1 px-2 py-1 rounded text-2xs font-semibold transition-colors',
                   sidebarTab === 'ledger'
                     ? 'bg-oe-blue text-white shadow-sm'
                     : 'text-content-secondary hover:bg-surface-secondary',
@@ -8695,7 +8695,7 @@ export default function TakeoffViewerModule({
                 data-testid="sidebar-tab-ledger"
               >
                 {t('takeoff_viewer.tab_ledger', { defaultValue: 'Ledger' })}
-                <span className="ml-1 text-[9px] opacity-70">
+                <span className="ml-1 text-2xs opacity-70">
                   ({measurements.length})
                 </span>
               </button>
@@ -8711,7 +8711,7 @@ export default function TakeoffViewerModule({
                     data-testid="ledger-bulk-add-panel"
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-oe-blue">
+                      <span className="text-2xs font-semibold uppercase tracking-wider text-oe-blue">
                         {t('takeoff.bulk_add_title', {
                           defaultValue: 'Add {{count}} measurements to BOQ',
                           count: bulkAddMeasurements.length,
@@ -8726,7 +8726,7 @@ export default function TakeoffViewerModule({
                         <X size={10} />
                       </button>
                     </div>
-                    <p className="text-[10px] text-content-tertiary mb-1.5">
+                    <p className="text-2xs text-content-tertiary mb-1.5">
                       {t('takeoff.bulk_add_desc', {
                         defaultValue:
                           'Each measurement becomes a new position carrying its measured quantity, unit and label.',
@@ -8736,7 +8736,7 @@ export default function TakeoffViewerModule({
                       <select
                         value={linkPickerProjectId}
                         onChange={(e) => handlePickerProjectChange(e.target.value)}
-                        className="text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
+                        className="text-2xs rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
                         aria-label={t('takeoff.bulk_add_target_project', {
                           defaultValue: 'Target project',
                         })}
@@ -8750,7 +8750,7 @@ export default function TakeoffViewerModule({
                         value={linkPickerBoqId}
                         onChange={(e) => handlePickerBoqChange(e.target.value)}
                         disabled={!linkPickerProjectId || linkBoqsLoading}
-                        className="text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
+                        className="text-2xs rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
                         aria-label={t('takeoff.bulk_add_target_boq', {
                           defaultValue: 'Target BOQ',
                         })}
@@ -8769,7 +8769,7 @@ export default function TakeoffViewerModule({
                       type="button"
                       onClick={handleBulkAddConfirm}
                       disabled={linkingInProgress || !linkPickerBoqId}
-                      className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-semibold bg-oe-blue text-white hover:bg-oe-blue/90 disabled:opacity-50 transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue/90 disabled:opacity-50 transition-colors"
                       data-testid="ledger-bulk-add-confirm"
                     >
                       {linkingInProgress && <Loader2 size={10} className="animate-spin" />}
@@ -8799,7 +8799,7 @@ export default function TakeoffViewerModule({
                 data-testid="properties-panel"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-oe-blue">
+                  <p className="text-2xs font-semibold uppercase tracking-widest text-oe-blue">
                     {t('takeoff_viewer.properties', { defaultValue: 'Properties' })}
                   </p>
                   <button
@@ -8850,7 +8850,7 @@ export default function TakeoffViewerModule({
 
                 {/* Group dropdown */}
                 <div>
-                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                  <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                     {t('takeoff_viewer.prop_group', { defaultValue: 'Group' })}
                   </label>
                   <select
@@ -8881,7 +8881,7 @@ export default function TakeoffViewerModule({
                     six colors (#310). The chosen color persists round-trip and
                     both renderers honor it over the group color. */}
                 <div>
-                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                  <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                     {t('takeoff_viewer.prop_color', { defaultValue: 'Color' })}
                   </label>
                   <div className="flex items-center gap-1.5">
@@ -8950,7 +8950,7 @@ export default function TakeoffViewerModule({
                         }
                         className="h-3.5 w-3.5 accent-oe-blue"
                       />
-                      <span className="text-[11px] text-content-secondary">
+                      <span className="text-2xs text-content-secondary">
                         {t('takeoff_viewer.prop_use_group_color', {
                           defaultValue: 'Use group color',
                         })}
@@ -8967,7 +8967,7 @@ export default function TakeoffViewerModule({
                   selectedMeasurement.type === 'volume' ||
                   selectedMeasurement.type === 'count') && (
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                       <span>{t('takeoff_viewer.prop_fill_opacity', { defaultValue: 'Fill opacity' })}</span>
                       <span className="tabular-nums">
                         {Math.round(
@@ -8997,7 +8997,7 @@ export default function TakeoffViewerModule({
                         <button
                           type="button"
                           onClick={() => updateSelectedMeasurement({ fillAlpha: undefined })}
-                          className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                          className="text-2xs text-content-tertiary hover:text-content-primary underline"
                           data-testid="prop-fill-opacity-reset"
                         >
                           {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9017,12 +9017,12 @@ export default function TakeoffViewerModule({
                 {(selectedMeasurement.type === 'distance' ||
                   selectedMeasurement.type === 'polyline') && (
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                       <span>{t('takeoff_viewer.prop_stroke_width', { defaultValue: 'Line width' })}</span>
                       <select
                         value={widthMode}
                         onChange={(e) => handleWidthUnitChange(e.target.value as 'px' | 'real')}
-                        className="rounded border border-border bg-surface-primary px-1 py-0.5 text-[10px] text-content-primary"
+                        className="rounded border border-border bg-surface-primary px-1 py-0.5 text-2xs text-content-primary"
                         data-testid="prop-width-unit"
                       >
                         <option value="px">{t('takeoff_viewer.width_unit_px', { defaultValue: 'px' })}</option>
@@ -9075,7 +9075,7 @@ export default function TakeoffViewerModule({
                           <button
                             type="button"
                             onClick={() => updateSelectedMeasurement({ strokeWidth: undefined })}
-                            className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                            className="text-2xs text-content-tertiary hover:text-content-primary underline"
                             data-testid="prop-stroke-width-reset"
                           >
                             {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9099,7 +9099,7 @@ export default function TakeoffViewerModule({
                                 className="w-14 rounded border border-border bg-surface-primary px-1.5 py-1 text-xs text-content-primary tabular-nums"
                                 data-testid="prop-stroke-width-ft"
                               />
-                              <span className="text-[10px] text-content-tertiary">
+                              <span className="text-2xs text-content-tertiary">
                                 {t('takeoff_viewer.width_unit_ft', { defaultValue: 'ft' })}
                               </span>
                               <input
@@ -9114,7 +9114,7 @@ export default function TakeoffViewerModule({
                                 className="w-16 rounded border border-border bg-surface-primary px-1.5 py-1 text-xs text-content-primary tabular-nums"
                                 data-testid="prop-stroke-width-in"
                               />
-                              <span className="text-[10px] text-content-tertiary">
+                              <span className="text-2xs text-content-tertiary">
                                 {t('takeoff_viewer.width_unit_in', { defaultValue: 'in' })}
                               </span>
                             </>
@@ -9132,7 +9132,7 @@ export default function TakeoffViewerModule({
                                 className="w-20 rounded border border-border bg-surface-primary px-1.5 py-1 text-xs text-content-primary tabular-nums"
                                 data-testid="prop-stroke-width-m"
                               />
-                              <span className="text-[10px] text-content-tertiary">
+                              <span className="text-2xs text-content-tertiary">
                                 {t('takeoff_viewer.width_unit_m', { defaultValue: 'm' })}
                               </span>
                             </>
@@ -9144,7 +9144,7 @@ export default function TakeoffViewerModule({
                                 setWidthDraft({ m: '', ft: '', in: '' });
                                 updateSelectedMeasurement({ strokeWidthReal: undefined });
                               }}
-                              className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                              className="text-2xs text-content-tertiary hover:text-content-primary underline"
                               data-testid="prop-stroke-width-real-reset"
                             >
                               {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9156,7 +9156,7 @@ export default function TakeoffViewerModule({
                             placeholder default, so warn the user to calibrate. */}
                         {!pageIsCalibrated(pageScales, selectedMeasurement.page) && (
                           <p
-                            className="mt-1 text-[10px] leading-tight text-amber-700 dark:text-amber-300"
+                            className="mt-1 text-2xs leading-tight text-amber-700 dark:text-amber-300"
                             data-testid="prop-width-not-calibrated"
                           >
                             {t('takeoff_viewer.width_not_calibrated', {
@@ -9176,7 +9176,7 @@ export default function TakeoffViewerModule({
                 {(selectedMeasurement.type === 'distance' ||
                   selectedMeasurement.type === 'polyline') && (
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                       <span>{t('takeoff_viewer.prop_stroke_opacity', { defaultValue: 'Line opacity' })}</span>
                       <span className="tabular-nums">
                         {Math.round((selectedMeasurement.strokeAlpha ?? 1) * 100)}%
@@ -9199,7 +9199,7 @@ export default function TakeoffViewerModule({
                         <button
                           type="button"
                           onClick={() => updateSelectedMeasurement({ strokeAlpha: undefined })}
-                          className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                          className="text-2xs text-content-tertiary hover:text-content-primary underline"
                           data-testid="prop-stroke-opacity-reset"
                         >
                           {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9212,7 +9212,7 @@ export default function TakeoffViewerModule({
                 {/* Value + Unit (read-only for computed types) */}
                 <div className="grid grid-cols-[1fr_auto] gap-2">
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                       {t('takeoff_viewer.prop_value', { defaultValue: 'Value' })}
                     </label>
                     <div
@@ -9236,7 +9236,7 @@ export default function TakeoffViewerModule({
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                       {t('takeoff_viewer.prop_unit', { defaultValue: 'Unit' })}
                     </label>
                     <div
@@ -9259,7 +9259,7 @@ export default function TakeoffViewerModule({
                     re-checking the whole document by hand. */}
                 {!isAnnotationType(selectedMeasurement.type) && (
                   <div>
-                    <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                       {t('takeoff_viewer.prop_scale_source', { defaultValue: 'Scale from' })}
                     </label>
                     <div
@@ -9293,7 +9293,7 @@ export default function TakeoffViewerModule({
                       onChange={(e) => updateSelectedMeasurement({ isDeduction: e.target.checked })}
                       className="h-3.5 w-3.5 accent-semantic-error"
                     />
-                    <span className="text-[11px] text-content-secondary">
+                    <span className="text-2xs text-content-secondary">
                       {t('takeoff_viewer.prop_deduction', {
                         defaultValue: 'Opening / deduction (subtract from net area)',
                       })}
@@ -9308,7 +9308,7 @@ export default function TakeoffViewerModule({
                     className="space-y-1.5 rounded border border-amber-300/70 dark:border-amber-700/50 bg-amber-50/70 dark:bg-amber-950/20 p-2"
                     data-testid="prop-linked-drift"
                   >
-                    <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                    <p className="flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                       <AlertTriangle size={11} className="shrink-0" />
                       {t('takeoff_drift.title', { defaultValue: 'Bill differs from the drawing' })}
                     </p>
@@ -9325,12 +9325,12 @@ export default function TakeoffViewerModule({
                         type="button"
                         onClick={() => void handleUpdateLinkedQuantity()}
                         disabled={linkingInProgress}
-                        className="rounded bg-amber-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+                        className="rounded bg-amber-600 px-2 py-1 text-2xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
                         data-testid="prop-linked-drift-update"
                       >
                         {t('takeoff_drift.update', { defaultValue: 'Update bill' })}
                       </button>
-                      <span className="min-w-0 text-[10px] text-content-tertiary">
+                      <span className="min-w-0 text-2xs text-content-tertiary">
                         {t('takeoff_drift.hint', {
                           defaultValue: 'Writes the measured quantity into position {{posOrdinal}}. Nothing changes until you confirm.',
                           posOrdinal: selectedMeasurement.linkedPositionOrdinal ?? '',
@@ -9353,7 +9353,7 @@ export default function TakeoffViewerModule({
                     className="space-y-2 rounded border border-border/60 bg-surface-secondary/30 p-2"
                     data-testid="prop-adjustments"
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                    <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                       {t('takeoff_viewer.prop_adjustments', { defaultValue: 'Quantity adjustments' })}
                     </p>
 
@@ -9372,13 +9372,13 @@ export default function TakeoffViewerModule({
                         (factor = 1 / cos(deg)); editing one syncs the other. */}
                     {selectedMeasurement.type === 'area' && (
                       <div>
-                        <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                        <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                           <span>{t('takeoff_viewer.prop_slope', { defaultValue: 'Slope / pitch (roof, ramp)' })}</span>
                           {selectedMeasurement.slopeFactor != null && (
                             <button
                               type="button"
                               onClick={() => updateSelectedMeasurement({ slopeFactor: undefined })}
-                              className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                              className="text-2xs text-content-tertiary hover:text-content-primary underline"
                               data-testid="prop-slope-reset"
                             >
                               {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9401,7 +9401,7 @@ export default function TakeoffViewerModule({
                               className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary tabular-nums"
                               data-testid="prop-slope-factor"
                             />
-                            <span className="text-[9px] text-content-quaternary">
+                            <span className="text-2xs text-content-quaternary">
                               {t('takeoff_viewer.prop_slope_factor', { defaultValue: 'factor' })}
                             </span>
                           </label>
@@ -9427,7 +9427,7 @@ export default function TakeoffViewerModule({
                               className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary tabular-nums"
                               data-testid="prop-slope-degrees"
                             />
-                            <span className="text-[9px] text-content-quaternary">
+                            <span className="text-2xs text-content-quaternary">
                               {t('takeoff_viewer.prop_slope_degrees', { defaultValue: 'pitch °' })}
                             </span>
                           </label>
@@ -9437,13 +9437,13 @@ export default function TakeoffViewerModule({
 
                     {/* Wastage / allowance % (all measurable types). */}
                     <div>
-                      <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                      <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                         <span>{t('takeoff_viewer.prop_wastage', { defaultValue: 'Wastage / allowance %' })}</span>
                         {selectedMeasurement.wastagePct != null && (
                           <button
                             type="button"
                             onClick={() => updateSelectedMeasurement({ wastagePct: undefined })}
-                            className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                            className="text-2xs text-content-tertiary hover:text-content-primary underline"
                             data-testid="prop-wastage-reset"
                           >
                             {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9469,13 +9469,13 @@ export default function TakeoffViewerModule({
                     {/* Typical multiplier (all measurable types): this shape
                         stands for N identical repeats (typical floors / bays). */}
                     <div>
-                      <label className="text-[10px] font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
+                      <label className="text-2xs font-semibold text-content-tertiary flex items-center justify-between mb-0.5">
                         <span>{t('takeoff_viewer.prop_multiplier', { defaultValue: 'Typical multiplier (x)' })}</span>
                         {selectedMeasurement.multiplier != null && (
                           <button
                             type="button"
                             onClick={() => updateSelectedMeasurement({ multiplier: undefined })}
-                            className="text-[10px] text-content-tertiary hover:text-content-primary underline"
+                            className="text-2xs text-content-tertiary hover:text-content-primary underline"
                             data-testid="prop-multiplier-reset"
                           >
                             {t('takeoff_viewer.reset', { defaultValue: 'Reset' })}
@@ -9501,7 +9501,7 @@ export default function TakeoffViewerModule({
                     {/* Effective (reported) quantity - shown only when a factor
                         is active so an unadjusted measurement stays uncluttered. */}
                     {hasQuantityFactor(selectedMeasurement) && (
-                      <div className="flex items-center justify-between text-[11px] pt-0.5 border-t border-border/50">
+                      <div className="flex items-center justify-between text-2xs pt-0.5 border-t border-border/50">
                         <span className="text-content-tertiary">
                           {t('takeoff_viewer.prop_effective_qty', { defaultValue: 'Effective qty' })}
                         </span>
@@ -9527,7 +9527,7 @@ export default function TakeoffViewerModule({
 
                 {/* Annotation / label */}
                 <div>
-                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                  <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                     {t('takeoff_viewer.prop_annotation', { defaultValue: 'Annotation' })}
                   </label>
                   <input
@@ -9542,7 +9542,7 @@ export default function TakeoffViewerModule({
 
                 {/* Notes */}
                 <div>
-                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                  <label className="text-2xs font-semibold text-content-tertiary block mb-0.5">
                     {t('takeoff_viewer.prop_notes', { defaultValue: 'Notes' })}
                   </label>
                   <textarea
@@ -9564,7 +9564,7 @@ export default function TakeoffViewerModule({
                     className="space-y-1.5 rounded border border-border/60 bg-surface-secondary/30 p-2"
                     data-testid="prop-copy-to-pages"
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                    <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                       {t('takeoff_viewer.prop_copy_to_pages', { defaultValue: 'Copy to pages' })}
                     </p>
                     <div className="flex flex-wrap gap-1 max-h-24 overflow-auto">
@@ -9585,7 +9585,7 @@ export default function TakeoffViewerModule({
                                 })
                               }
                               className={clsx(
-                                'px-1.5 py-0.5 rounded text-[10px] border tabular-nums transition-colors',
+                                'px-1.5 py-0.5 rounded text-2xs border tabular-nums transition-colors',
                                 on
                                   ? 'bg-oe-blue/15 text-oe-blue border-oe-blue/30'
                                   : 'bg-surface-primary text-content-secondary border-border hover:border-oe-blue/40',
@@ -9606,7 +9606,7 @@ export default function TakeoffViewerModule({
                         onClick={() =>
                           copyMeasurementsToPages([selectedMeasurement], Array.from(copyTargetPages))
                         }
-                        className="flex-1 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/30 hover:bg-oe-blue/20 disabled:opacity-40 disabled:pointer-events-none px-2 py-1 text-[11px] font-semibold transition-colors"
+                        className="flex-1 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/30 hover:bg-oe-blue/20 disabled:opacity-40 disabled:pointer-events-none px-2 py-1 text-2xs font-semibold transition-colors"
                         data-testid="copy-measurement-btn"
                       >
                         {t('takeoff_viewer.copy_measurement', { defaultValue: 'This measurement' })}
@@ -9623,7 +9623,7 @@ export default function TakeoffViewerModule({
                           );
                           copyMeasurementsToPages(groupHere, Array.from(copyTargetPages));
                         }}
-                        className="flex-1 rounded bg-surface-primary text-content-secondary border border-border hover:border-oe-blue/40 disabled:opacity-40 disabled:pointer-events-none px-2 py-1 text-[11px] font-semibold transition-colors"
+                        className="flex-1 rounded bg-surface-primary text-content-secondary border border-border hover:border-oe-blue/40 disabled:opacity-40 disabled:pointer-events-none px-2 py-1 text-2xs font-semibold transition-colors"
                         data-testid="copy-group-btn"
                         title={t('takeoff_viewer.copy_group_hint', {
                           defaultValue: 'Copy every measurement in this group on this page',
@@ -9650,7 +9650,7 @@ export default function TakeoffViewerModule({
                     this measurement's type/size and apply a priced BOQ position to it. */}
                 {activeProjectId && (
                   <div className="pt-2 border-t border-oe-blue/20">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-oe-blue mb-1.5">
+                    <p className="text-2xs font-semibold uppercase tracking-widest text-oe-blue mb-1.5">
                       {t('match.apply_section_title', { defaultValue: 'Find a cost position' })}
                     </p>
                     <div className="h-96 rounded-md border border-border-light overflow-hidden bg-surface-primary">
@@ -9730,17 +9730,17 @@ export default function TakeoffViewerModule({
                 {fileName && (
                   <div className="flex items-center gap-1.5">
                     {syncing ? (
-                      <span className="text-[10px] text-oe-blue flex items-center gap-0.5 animate-pulse">
+                      <span className="text-2xs text-oe-blue flex items-center gap-0.5 animate-pulse">
                         <Loader2 className="h-3 w-3 animate-spin" />
                         {t('takeoff_viewer.syncing', { defaultValue: 'Syncing...' })}
                       </span>
                     ) : syncedToServer ? (
-                      <span className="text-[10px] text-semantic-success flex items-center gap-0.5">
+                      <span className="text-2xs text-semantic-success flex items-center gap-0.5">
                         <Cloud className="h-3 w-3" />
                         {t('takeoff_viewer.synced', { defaultValue: 'Synced' })}
                       </span>
                     ) : hasPersistedData ? (
-                      <span className="text-[10px] text-amber-500 flex items-center gap-0.5">
+                      <span className="text-2xs text-amber-500 flex items-center gap-0.5">
                         <HardDriveDownload className="h-3 w-3" />
                         {t('takeoff_viewer.local_only', { defaultValue: 'Local' })}
                       </span>
@@ -10021,7 +10021,7 @@ export default function TakeoffViewerModule({
                                     return (
                                       <span
                                         className={clsx(
-                                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0',
+                                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-2xs font-semibold shrink-0',
                                           CONFIDENCE_BAND_CLASSES[band],
                                         )}
                                         title={`${bandLabel} - ${t('takeoff_viewer.suggested_hint', { defaultValue: 'AI suggestion - accept to keep it' })}`}
@@ -10037,7 +10037,7 @@ export default function TakeoffViewerModule({
                                     <button
                                       type="button"
                                       onClick={(e) => { e.stopPropagation(); handleOpenLinkedPosition(m); }}
-                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[9px] font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors shrink-0"
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-2xs font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors shrink-0"
                                       title={`${t('takeoff.linked_badge_title', { defaultValue: 'Linked to BOQ' })}: ${m.linkedPositionOrdinal}`}
                                     >
                                       <Link2 size={8} />
@@ -10162,7 +10162,7 @@ export default function TakeoffViewerModule({
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <div className="flex items-center justify-between mb-1.5">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                                    <span className="text-2xs font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-400">
                                       {m.linkedPositionId
                                         ? t('takeoff_viewer.relink_title', { defaultValue: 'Linked - pick new or unlink' })
                                         : t('takeoff_viewer.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
@@ -10180,7 +10180,7 @@ export default function TakeoffViewerModule({
                                   {/* Transfer-preview banner — shows exactly what will
                                       be pushed to the picked position. Removes the "I
                                       hope I clicked the right thing" anxiety. */}
-                                  <div className="mb-1.5 flex items-center gap-1.5 rounded bg-rose-100/70 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/30 px-1.5 py-1 text-[10px]">
+                                  <div className="mb-1.5 flex items-center gap-1.5 rounded bg-rose-100/70 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/30 px-1.5 py-1 text-2xs">
                                     <ArrowUpRight size={10} className="text-rose-600 dark:text-rose-400 shrink-0" />
                                     <span className="text-content-tertiary shrink-0">
                                       {t('takeoff.will_transfer', { defaultValue: 'Will transfer:' })}
@@ -10211,7 +10211,7 @@ export default function TakeoffViewerModule({
                                   {m.linkedPositionId && (
                                     <div className="mb-1.5 flex items-center gap-1.5 rounded bg-emerald-100/60 dark:bg-emerald-950/30 px-1.5 py-1">
                                       <Link2 size={10} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
-                                      <span className="flex-1 min-w-0 text-[10px]">
+                                      <span className="flex-1 min-w-0 text-2xs">
                                         <span className="font-mono text-emerald-700 dark:text-emerald-400">{m.linkedPositionOrdinal}</span>
                                         {m.linkedPositionLabel && (
                                           <span className="text-content-secondary"> — {m.linkedPositionLabel.slice(0, 40)}</span>
@@ -10220,7 +10220,7 @@ export default function TakeoffViewerModule({
                                       <button
                                         onClick={() => handleUnlinkMeasurement(m.id)}
                                         disabled={linkingInProgress}
-                                        className="text-[10px] text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
+                                        className="text-2xs text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
                                       >
                                         {t('takeoff.unlink', { defaultValue: 'Unlink' })}
                                       </button>
@@ -10232,7 +10232,7 @@ export default function TakeoffViewerModule({
                                     <select
                                       value={linkPickerProjectId}
                                       onChange={(e) => handlePickerProjectChange(e.target.value)}
-                                      className="text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
+                                      className="text-2xs rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
                                     >
                                       <option value="">{t('takeoff.pick_project', { defaultValue: '- project -' })}</option>
                                       {linkPickerProjects.map((p) => (
@@ -10243,7 +10243,7 @@ export default function TakeoffViewerModule({
                                       value={linkPickerBoqId}
                                       onChange={(e) => handlePickerBoqChange(e.target.value)}
                                       disabled={!linkPickerProjectId || linkBoqsLoading}
-                                      className="text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
+                                      className="text-2xs rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
                                     >
                                       <option value="">
                                         {linkBoqsLoading
@@ -10257,7 +10257,7 @@ export default function TakeoffViewerModule({
                                   </div>
 
                                   {/* Mode switch: Pick existing / Create new */}
-                                  <div className="flex gap-1 mb-1.5 text-[10px]">
+                                  <div className="flex gap-1 mb-1.5 text-2xs">
                                     <button
                                       type="button"
                                       onClick={() => setLinkPickerMode('pick')}
@@ -10287,18 +10287,18 @@ export default function TakeoffViewerModule({
 
                                   {linkPickerMode === 'pick' ? (
                                     !linkPickerBoqId ? (
-                                      <p className="text-[10px] text-content-tertiary py-1">
+                                      <p className="text-2xs text-content-tertiary py-1">
                                         {t('takeoff.link_need_project_boq', { defaultValue: 'Pick a project and BOQ above.' })}
                                       </p>
                                     ) : linkPositionsLoading ? (
                                       <div className="flex items-center gap-1.5 py-2">
                                         <Loader2 size={12} className="animate-spin text-rose-600" />
-                                        <span className="text-[10px] text-content-tertiary">
+                                        <span className="text-2xs text-content-tertiary">
                                           {t('common.loading', { defaultValue: 'Loading...' })}
                                         </span>
                                       </div>
                                     ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
-                                      <p className="text-[10px] text-content-tertiary py-1">
+                                      <p className="text-2xs text-content-tertiary py-1">
                                         {t('takeoff.link_boq_empty', { defaultValue: 'BOQ is empty - switch to "Create new".' })}
                                       </p>
                                     ) : (
@@ -10308,7 +10308,7 @@ export default function TakeoffViewerModule({
                                           value={linkPickerSearch}
                                           onChange={(e) => setLinkPickerSearch(e.target.value)}
                                           placeholder={t('takeoff.link_search_placeholder', { defaultValue: 'Search ordinal or description...' })}
-                                          className="w-full mb-1 text-[10px] rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-content-primary"
+                                          className="w-full mb-1 text-2xs rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-content-primary"
                                         />
                                         <div className="max-h-32 overflow-y-auto space-y-0.5">
                                           {linkBoqPositions
@@ -10339,7 +10339,7 @@ export default function TakeoffViewerModule({
                                                   type="button"
                                                   onClick={() => handleLinkToPosition(m.id, pos)}
                                                   disabled={linkingInProgress}
-                                                  className="w-full text-left px-2 py-1 rounded text-[10px] hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                                  className="w-full text-left px-2 py-1 rounded text-2xs hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                                                   title={
                                                     dimensionMismatch
                                                       ? t('takeoff.dimension_mismatch_row_hint', {
@@ -10364,17 +10364,17 @@ export default function TakeoffViewerModule({
                                                   <span className="text-content-primary truncate flex-1">{pos.description}</span>
                                                   {/* Current qty badge — shows what's about to be replaced. */}
                                                   {currentQty > 0 && (
-                                                    <span className="font-mono tabular-nums text-content-tertiary shrink-0 text-[9px]">
+                                                    <span className="font-mono tabular-nums text-content-tertiary shrink-0 text-2xs">
                                                       {currentQty.toLocaleString(getIntlLocale())}
                                                     </span>
                                                   )}
                                                   {unitMismatch ? (
-                                                    <span className="inline-flex items-center gap-0.5 font-mono shrink-0 text-[9px] text-amber-600 dark:text-amber-400" aria-label={t('takeoff.unit_mismatch', { defaultValue: 'unit mismatch' })}>
+                                                    <span className="inline-flex items-center gap-0.5 font-mono shrink-0 text-2xs text-amber-600 dark:text-amber-400" aria-label={t('takeoff.unit_mismatch', { defaultValue: 'unit mismatch' })}>
                                                       <AlertTriangle size={9} />
                                                       {pos.unit}
                                                     </span>
                                                   ) : (
-                                                    <span className="text-content-tertiary shrink-0 text-[9px]">{pos.unit}</span>
+                                                    <span className="text-content-tertiary shrink-0 text-2xs">{pos.unit}</span>
                                                   )}
                                                 </button>
                                               );
@@ -10388,12 +10388,12 @@ export default function TakeoffViewerModule({
                                        reader's unit, optional price from the cost
                                        database. The server creates + links it. */
                                     <div className="rounded bg-surface-primary/60 p-1.5 space-y-1" data-testid="link-create-form">
-                                      <label className="block text-[10px] text-content-secondary">
+                                      <label className="block text-2xs text-content-secondary">
                                         <span className="font-semibold">{t('takeoff_create.section', { defaultValue: 'Section' })}</span>
                                         <select
                                           value={linkCreateSectionId ?? defaultSectionId(linkBoqPositions)}
                                           onChange={(e) => setLinkCreateSectionId(e.target.value)}
-                                          className="mt-0.5 w-full text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
+                                          className="mt-0.5 w-full text-2xs rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
                                           data-testid="link-create-section"
                                         >
                                           <option value="">{t('takeoff_create.no_section', { defaultValue: '(top level, no section)' })}</option>
@@ -10402,17 +10402,17 @@ export default function TakeoffViewerModule({
                                           ))}
                                         </select>
                                       </label>
-                                      <label className="block text-[10px] text-content-secondary">
+                                      <label className="block text-2xs text-content-secondary">
                                         <span className="font-semibold">{t('takeoff.description', { defaultValue: 'Description' })}</span>
                                         <input
                                           type="text"
                                           value={linkCreateDescription ?? defaultPositionDescription(m)}
                                           onChange={(e) => setLinkCreateDescription(e.target.value)}
-                                          className="mt-0.5 w-full text-[10px] rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-content-primary"
+                                          className="mt-0.5 w-full text-2xs rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-content-primary"
                                           data-testid="link-create-description"
                                         />
                                       </label>
-                                      <div className="grid grid-cols-[auto_1fr] gap-x-1.5 text-[10px] text-content-secondary">
+                                      <div className="grid grid-cols-[auto_1fr] gap-x-1.5 text-2xs text-content-secondary">
                                         <span className="font-semibold">{t('takeoff.quantity', { defaultValue: 'Quantity' })}:</span>
                                         <span className="text-content-primary font-mono" data-testid="link-create-quantity">
                                           {/* The reported quantity, stated in the unit the
@@ -10455,7 +10455,7 @@ export default function TakeoffViewerModule({
                                       </div>
                                       {linkCreateCost && linkCreateCost.unit
                                         && normalizeUnit(linkCreateCost.unit) !== positionUnitFor(m, measurementSystem) && (
-                                        <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400" data-testid="link-create-cost-unit-warning">
+                                        <p className="flex items-center gap-1 text-2xs text-amber-600 dark:text-amber-400" data-testid="link-create-cost-unit-warning">
                                           <AlertTriangle size={10} className="shrink-0" />
                                           {t('takeoff_create.cost_unit_mismatch', {
                                             defaultValue: 'The cost item is priced per {{costUnit}}, the position is in {{unit}}. Check the rate before pricing.',
@@ -10470,7 +10470,7 @@ export default function TakeoffViewerModule({
                                         // An opening, or a suggestion nobody accepted yet, is
                                         // not a bill quantity (the server refuses both too).
                                         disabled={linkingInProgress || !linkPickerBoqId || Boolean(m.isDeduction) || Boolean(m.suggested)}
-                                        className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                                        className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-2xs font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
                                         data-testid="link-create-submit"
                                       >
                                         {linkingInProgress && <Loader2 size={10} className="animate-spin" />}

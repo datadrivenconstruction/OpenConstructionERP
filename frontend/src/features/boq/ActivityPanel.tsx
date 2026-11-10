@@ -88,7 +88,7 @@ const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: 
   },
   status_changed: {
     icon: <Activity size={12} strokeWidth={2} />,
-    color: 'text-amber-500',
+    color: 'text-semantic-warning',
   },
 };
 

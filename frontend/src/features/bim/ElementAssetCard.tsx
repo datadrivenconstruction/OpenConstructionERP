@@ -139,7 +139,7 @@ export default function ElementAssetCard({
         <div className="flex items-center justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-1.5">
             <Package size={12} className="text-oe-blue shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
               {t('assets.card_title', { defaultValue: 'Asset info' })}
             </span>
           </div>
@@ -148,7 +148,7 @@ export default function ElementAssetCard({
               type="button"
               onClick={handleEditClick}
               disabled={resolving}
-              className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline disabled:opacity-50"
+              className="inline-flex items-center gap-1 text-2xs text-oe-blue hover:underline disabled:opacity-50"
               data-testid="bim-asset-edit"
             >
               <Edit3 size={10} />
@@ -174,7 +174,7 @@ export default function ElementAssetCard({
         </div>
 
         {tracked ? (
-          <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[11px]">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-2xs">
             {tracked.asset_info.manufacturer && (
               <>
                 <dt className="text-content-tertiary">
@@ -200,7 +200,7 @@ export default function ElementAssetCard({
                 <dt className="text-content-tertiary">
                   {t('assets.field.serial_short', { defaultValue: 'S/N' })}
                 </dt>
-                <dd className="font-mono text-[10px] text-content-primary truncate" title={tracked.asset_info.serial_number}>
+                <dd className="font-mono text-2xs text-content-primary truncate" title={tracked.asset_info.serial_number}>
                   {tracked.asset_info.serial_number}
                 </dd>
               </>
@@ -210,7 +210,7 @@ export default function ElementAssetCard({
                 <dt className="text-content-tertiary">
                   {t('assets.field.status_short', { defaultValue: 'Status' })}
                 </dt>
-                <dd className="text-[11px] text-content-secondary">
+                <dd className="text-2xs text-content-secondary">
                   {tracked.asset_info.operational_status.replace('_', ' ')}
                 </dd>
               </>
@@ -220,14 +220,14 @@ export default function ElementAssetCard({
                 <dt className="text-content-tertiary">
                   {t('assets.field.warranty_short', { defaultValue: 'Warranty' })}
                 </dt>
-                <dd className="text-[11px] text-content-secondary">
+                <dd className="text-2xs text-content-secondary">
                   {tracked.asset_info.warranty_until}
                 </dd>
               </>
             )}
           </dl>
         ) : (
-          <p className="text-[11px] text-content-tertiary italic">
+          <p className="text-2xs text-content-tertiary italic">
             {t('assets.not_tracked', {
               defaultValue: 'Not tracked yet - register to capture manufacturer, serial, warranty…',
             })}

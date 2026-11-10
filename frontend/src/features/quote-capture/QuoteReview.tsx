@@ -180,7 +180,7 @@ export function QuoteReview({ quote }: { quote: Quote }) {
                       key={line.id}
                       data-testid="quote-line"
                       data-low={low || undefined}
-                      className={`border-t align-top ${low ? 'bg-rose-50 dark:bg-rose-950/30' : ''}`}
+                      className={`border-t align-top ${low ? 'bg-semantic-error-bg' : ''}`}
                       onClick={() => setAnchor(line.anchor)}
                     >
                       <td className="py-1 pr-2" dir="auto">{line.description}</td>
@@ -241,11 +241,11 @@ export function QuoteReview({ quote }: { quote: Quote }) {
         <section className="rounded border p-3" data-testid="quote-findings">
           <h3 className="mb-2 text-sm font-semibold">{t('quote_capture.checks', 'Checks')}</h3>
           {quote.findings.length === 0 ? (
-            <p className="text-sm text-emerald-700">{t('quote_capture.checks_ok', 'All checks pass.')}</p>
+            <p className="text-sm text-semantic-success">{t('quote_capture.checks_ok', 'All checks pass.')}</p>
           ) : (
             <ul className="flex flex-col gap-1 text-sm">
               {quote.findings.map((f, i) => (
-                <li key={`${f.rule_id}-${i}`} className={f.severity === 'error' ? 'text-rose-700' : 'text-amber-700'}>
+                <li key={`${f.rule_id}-${i}`} className={f.severity === 'error' ? 'text-semantic-error' : 'text-semantic-warning'}>
                   <strong className="mr-1">{t(`quote_capture.rule.${f.rule_id.split('.')[1]}`, f.rule_id)}:</strong>
                   {f.message}
                 </li>
@@ -255,7 +255,7 @@ export function QuoteReview({ quote }: { quote: Quote }) {
         </section>
 
         {locked ? (
-          <p className="rounded border border-emerald-300 bg-emerald-50 p-3 text-sm dark:bg-emerald-950/30" data-testid="quote-confirmed">
+          <p className="rounded border border-semantic-success/30 bg-semantic-success-bg p-3 text-sm" data-testid="quote-confirmed">
             {t('quote_capture.confirmed_as', 'Confirmed: {{target}}', {
               target: quote.confirmation.target ? targetLabel[quote.confirmation.target] : '',
             })}
@@ -291,7 +291,7 @@ export function QuoteReview({ quote }: { quote: Quote }) {
               ))}
             </div>
             {errors.length > 0 && (
-              <p className="text-xs text-rose-700">
+              <p className="text-xs text-semantic-error">
                 {t('quote_capture.fix_errors', 'Resolve the errors above before confirming.')}
               </p>
             )}

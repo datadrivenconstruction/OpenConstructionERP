@@ -17,9 +17,9 @@ import { useProcessesUi } from './useProcessesUi';
 import { ProcessesStartWatch } from './ProcessesStartWatch';
 
 const DOT: Record<string, string> = {
-  ok: 'bg-emerald-500',
-  busy: 'bg-amber-500',
-  error: 'bg-rose-500',
+  ok: 'bg-semantic-success',
+  busy: 'bg-semantic-warning',
+  error: 'bg-semantic-error',
   idle: 'bg-slate-400',
 };
 

@@ -218,7 +218,7 @@ function GlobalNoProjectsEmpty({
           <div
             className={[
               'mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md',
-              'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30',
+              'bg-semantic-success/15 text-emerald-300 ring-1 ring-emerald-400/30',
             ].join(' ')}
           >
             <MapPin size={18} strokeWidth={2} />
@@ -242,7 +242,7 @@ function GlobalNoProjectsEmpty({
               data-testid="geo-empty-bulk-anchor"
               className={[
                 'inline-flex items-center gap-1.5 rounded-md',
-                'bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white',
+                'bg-semantic-success px-3 py-1.5 text-xs font-semibold text-white',
                 'shadow-sm transition hover:bg-emerald-400',
                 'disabled:cursor-wait disabled:opacity-70',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70',
@@ -384,7 +384,7 @@ function AnchoredProjectsOverlay({
       className={[
         // Floating overlay — never claims the full map height.
         'absolute top-3 left-3 z-20 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         // Hide on phone-width so it doesn't cover the whole map; users
         // get the collapsed pill instead (rendered when toggled).
@@ -397,7 +397,7 @@ function AnchoredProjectsOverlay({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('geo_hub.rail.title', { defaultValue: 'Anchored projects' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -464,7 +464,7 @@ function AnchoredProjectsOverlay({
           </div>
         )}
         {!isLoading && isError && (
-          <div className="m-3 rounded-md border border-red-300/40 bg-red-50 px-3 py-3 text-2xs text-red-900 dark:bg-red-950/40 dark:text-red-100">
+          <div className="m-3 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-3 text-2xs text-semantic-error">
             <div className="flex items-start gap-2">
               <AlertTriangle size={13} className="mt-0.5 shrink-0" />
               <div className="space-y-1">
@@ -501,7 +501,7 @@ function AnchoredProjectsOverlay({
                     className={[
                       'group rounded-md border px-3 py-2 transition-colors',
                       isFocused
-                        ? 'border-emerald-400/60 bg-emerald-50 dark:bg-emerald-950/30'
+                        ? 'border-emerald-400/60 bg-semantic-success-bg dark:bg-emerald-950/30'
                         : 'border-transparent hover:border-border hover:bg-surface-secondary',
                     ].join(' ')}
                   >
@@ -511,8 +511,8 @@ function AnchoredProjectsOverlay({
                         className={[
                           'inline-block h-2 w-2 shrink-0 rounded-full',
                           isFocused
-                            ? 'bg-emerald-500 ring-2 ring-emerald-300/50'
-                            : 'bg-emerald-500/80',
+                            ? 'bg-semantic-success ring-2 ring-semantic-success/30'
+                            : 'bg-semantic-success/80',
                         ].join(' ')}
                       />
                       <button
@@ -628,7 +628,7 @@ function GeoSearchOverlay({
         className={[
           'pointer-events-auto rounded-xl border border-white/15 bg-white/95',
           'p-2 shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
-          'dark:bg-slate-900/90',
+          '',
         ].join(' ')}
       >
         <AddressAutocomplete
@@ -653,15 +653,15 @@ function GeoSearchOverlay({
           <div
             className={[
               'mt-2 flex items-center gap-2 rounded-md',
-              'border border-sky-300/40 bg-sky-50/90 px-2.5 py-1.5',
-              'text-2xs text-sky-900 dark:bg-sky-950/40 dark:text-sky-100',
+              'border border-semantic-info/30 bg-semantic-info/10 px-2.5 py-1.5',
+              'text-2xs text-semantic-info',
             ].join(' ')}
             role="status"
           >
             <MapPin
               size={12}
               strokeWidth={2.25}
-              className="shrink-0 text-sky-600 dark:text-sky-300"
+              className="shrink-0 text-semantic-info"
               aria-hidden
             />
             <span className="min-w-0 flex-1 truncate font-medium">
@@ -678,7 +678,7 @@ function GeoSearchOverlay({
               }}
               className={[
                 'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded',
-                'text-sky-700 hover:bg-sky-100 dark:text-sky-200 dark:hover:bg-sky-900/50',
+                'text-semantic-info hover:bg-semantic-info-bg',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400',
               ].join(' ')}
               aria-label={t('geo.search_pin_dismiss', {
@@ -959,7 +959,7 @@ export function GeoHubPage() {
           <span
             className={[
               'inline-flex h-8 w-8 items-center justify-center rounded-md',
-              'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300',
+              'bg-semantic-success/10 text-semantic-success',
             ].join(' ')}
           >
             <Globe2 size={16} strokeWidth={2} />
@@ -970,7 +970,7 @@ export function GeoHubPage() {
                 defaultValue: 'Geo Hub - Global view',
               })}
             </h1>
-            <p className="text-2xs uppercase tracking-[0.14em] text-content-tertiary">
+            <p className="text-2xs uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.global_eyebrow', {
                 defaultValue: 'All your projects on a 3D globe',
               })}
@@ -1017,7 +1017,7 @@ export function GeoHubPage() {
           banner because the user fix is different: restart / update the
           backend (or wait for it to come back up). */}
       {projectsQuery.isError && isStaleBackend && (
-        <div className="border-b border-amber-300/40 bg-amber-50 px-5 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <div className="border-b border-semantic-warning/30 bg-semantic-warning-bg px-5 py-2 text-xs text-semantic-warning">
           <div className="flex items-center gap-2">
             <ServerCrash size={13} className="shrink-0" />
             <span className="flex-1">
@@ -1030,8 +1030,8 @@ export function GeoHubPage() {
               type="button"
               onClick={() => projectsQuery.refetch()}
               className={[
-                'inline-flex items-center gap-1 rounded-md border border-amber-300/50 px-2 py-0.5',
-                'font-medium hover:bg-amber-100 dark:hover:bg-amber-900/40',
+                'inline-flex items-center gap-1 rounded-md border border-semantic-warning/30 px-2 py-0.5',
+                'font-medium hover:bg-semantic-warning-bg',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
               ].join(' ')}
             >
@@ -1045,7 +1045,7 @@ export function GeoHubPage() {
       {/* Generic failure banner — visible up top so the user understands the rail
           status before scanning the canvas. Inline-dismissable retry. */}
       {projectsQuery.isError && !isStaleBackend && (
-        <div className="border-b border-red-300/40 bg-red-50 px-5 py-2 text-xs text-red-900 dark:bg-red-950/40 dark:text-red-100">
+        <div className="border-b border-semantic-error/30 bg-semantic-error-bg px-5 py-2 text-xs text-semantic-error">
           <div className="flex items-center gap-2">
             <AlertTriangle size={13} className="shrink-0" />
             <span className="flex-1">
@@ -1058,8 +1058,8 @@ export function GeoHubPage() {
               type="button"
               onClick={() => projectsQuery.refetch()}
               className={[
-                'inline-flex items-center gap-1 rounded-md border border-red-300/50 px-2 py-0.5',
-                'font-medium hover:bg-red-100 dark:hover:bg-red-900/40',
+                'inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-0.5',
+                'font-medium hover:bg-semantic-error-bg',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400',
               ].join(' ')}
             >
@@ -1076,7 +1076,7 @@ export function GeoHubPage() {
           either resolve pins or hit an error state (which renders its
           own banner above). */}
       {projectsQuery.isLoading && !projectsQuery.isError && (
-        <div className="border-b border-emerald-300/40 bg-emerald-50/70 px-5 py-2 text-xs text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
+        <div className="border-b border-semantic-success/30 bg-semantic-success/10 px-5 py-2 text-xs text-semantic-success">
           <div className="flex items-center gap-2">
             <Info size={13} className="shrink-0" />
             <span className="flex-1">

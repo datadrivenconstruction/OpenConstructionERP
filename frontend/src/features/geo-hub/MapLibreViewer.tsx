@@ -474,8 +474,8 @@ export function MapLibreViewer({
                 aria-label={searchPin.name}
                 title={searchPin.name}
               >
-                <span className="absolute inset-0 rounded-full bg-sky-500/25 animate-ping" />
-                <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg ring-2 ring-white">
+                <span className="absolute inset-0 rounded-full bg-semantic-info/25 animate-ping" />
+                <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-semantic-info text-white shadow-lg ring-2 ring-white">
                   <MapPin size={14} fill="currentColor" strokeWidth={0} />
                 </span>
               </div>

@@ -228,10 +228,10 @@ function ChatBubble({
     >
       {/* Bubble */}
       <div
-        className={`relative max-w-[85%] sm:max-w-[75%] px-[14px] py-[9px] text-[15px] leading-[1.38] ${
+        className={`relative max-w-[85%] sm:max-w-[75%] px-[14px] py-[9px] text-base leading-[1.38] ${
           isUser
-            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-[6px]'
-            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-[6px]'
+            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-md'
+            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-md'
         }`}
       >
         <div className="whitespace-pre-wrap break-words">
@@ -246,7 +246,7 @@ function ChatBubble({
             }`}
           >
             <p
-              className={`flex items-center gap-1 text-[11px] font-medium mb-1 ${
+              className={`flex items-center gap-1 text-2xs font-medium mb-1 ${
                 isUser ? 'text-white/70' : 'text-content-tertiary'
               }`}
             >
@@ -277,7 +277,7 @@ function ChatBubble({
               // bubble make the source a deep link into the Cost Database.
               if (isUser) {
                 return (
-                  <p key={j} className="text-[11px] leading-tight text-white/60">
+                  <p key={j} className="text-2xs leading-tight text-white/60">
                     {body}
                   </p>
                 );
@@ -315,7 +315,7 @@ function ChatBubble({
                 hover:bg-oe-blue hover:text-white hover:border-oe-blue hover:shadow-sm
                 active:scale-[0.97]"
             >
-              <span className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-oe-blue/10 text-[11px] font-semibold">
+              <span className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold">
                 {i + 1}
               </span>
               {opt}
@@ -364,7 +364,7 @@ function ChatBubble({
 
       {/* Timestamp */}
       <p
-        className={`mt-[3px] text-[11px] ${
+        className={`mt-[3px] text-2xs ${
           isUser ? 'text-content-quaternary/50 mr-1' : 'text-content-quaternary/50 ml-1'
         }`}
       >
@@ -675,27 +675,27 @@ export function AdvisorPage() {
 
       {/* AI not configured warning */}
       {aiConfigured === false && (
-        <div className="mb-3 shrink-0 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-4 py-3">
-          <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+        <div className="mb-3 shrink-0 flex items-center gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+          <AlertTriangle size={18} className="text-semantic-warning shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            <p className="text-sm font-medium text-semantic-warning">
               {t('ai.not_configured_title', { defaultValue: 'AI is not configured' })}
             </p>
-            <p className="text-xs text-amber-700 dark:text-amber-400/80">
+            <p className="text-xs text-semantic-warning">
               {t('ai.not_configured_desc', { defaultValue: 'Add your API key (Anthropic, OpenAI, or other) to use the AI Cost Advisor.' })}
             </p>
           </div>
           <button
             type="button"
             onClick={checkAiSettings}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-transparent px-3 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-semantic-warning/30 bg-transparent px-3 py-1.5 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg transition-colors shrink-0"
           >
             <RefreshCw size={13} />
             {t('common.retry', { defaultValue: 'Retry' })}
           </button>
           <Link
             to="/settings"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-warning px-3 py-1.5 text-xs font-medium text-white hover:bg-semantic-warning transition-colors shrink-0"
           >
             <Settings size={13} />
             {t('ai.go_to_settings', { defaultValue: 'Configure AI' })}
@@ -714,7 +714,7 @@ export function AdvisorPage() {
             {/* No visible module-name heading here — the top app bar already
                 shows the module name + icon. We keep the assistant avatar and
                 the contextual scope line, which carry real information. */}
-            <p className="text-[13px] font-medium text-content-primary leading-tight truncate">
+            <p className="text-sm font-medium text-content-primary leading-tight truncate">
               {activeProjectId && activeProjectName
                 ? t('ai.advisor_scoped', {
                     defaultValue: 'Using {{project}} region & currency as default context',
@@ -874,7 +874,7 @@ export function AdvisorPage() {
           {/* Typing indicator */}
           {loading && (
             <div className="flex items-start animate-msg-in">
-              <div className="rounded-[20px] rounded-bl-[6px] bg-surface-secondary">
+              <div className="rounded-[20px] rounded-bl-md bg-surface-secondary">
                 <TypingDots />
               </div>
             </div>

@@ -599,7 +599,7 @@ function StepBar({
             <>
               <span
                 className={clsx(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-semibold transition-colors',
                   done && 'bg-oe-blue text-white',
                   here && 'bg-oe-blue-subtle text-oe-blue-text ring-2 ring-oe-blue',
                   !done && !here && 'bg-surface-secondary text-content-quaternary ring-1 ring-border-light',

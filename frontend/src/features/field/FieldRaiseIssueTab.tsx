@@ -92,22 +92,22 @@ const PRIORITIES: readonly PriorityOption[] = [
     value: 'medium',
     labelKey: 'field.issue_priority_medium',
     defaultLabel: 'Medium',
-    activeClass: 'border-sky-500 bg-sky-50 text-sky-700',
-    dotClass: 'bg-sky-500',
+    activeClass: 'border-semantic-info/60 bg-semantic-info-bg text-semantic-info',
+    dotClass: 'bg-semantic-info',
   },
   {
     value: 'high',
     labelKey: 'field.issue_priority_high',
     defaultLabel: 'High',
-    activeClass: 'border-amber-500 bg-amber-50 text-amber-700',
-    dotClass: 'bg-amber-500',
+    activeClass: 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning',
+    dotClass: 'bg-semantic-warning',
   },
   {
     value: 'critical',
     labelKey: 'field.issue_priority_critical',
     defaultLabel: 'Critical',
-    activeClass: 'border-rose-500 bg-rose-50 text-rose-700',
-    dotClass: 'bg-rose-500',
+    activeClass: 'border-semantic-error/60 bg-semantic-error-bg text-semantic-error',
+    dotClass: 'bg-semantic-error',
   },
 ] as const;
 
@@ -335,7 +335,7 @@ export function FieldRaiseIssueTab({
     <div className="flex w-full flex-col gap-4 px-4 py-4">
       <div>
         <h2 className="flex items-center gap-1.5 text-base font-semibold text-slate-900">
-          <AlertTriangle size={18} className="text-amber-500" aria-hidden="true" />
+          <AlertTriangle size={18} className="text-semantic-warning" aria-hidden="true" />
           {t('field.issue_title', { defaultValue: 'Raise a site issue' })}
         </h2>
         <p className="mt-0.5 text-xs text-slate-500">
@@ -433,7 +433,7 @@ export function FieldRaiseIssueTab({
           </label>
         )}
         {storageFull && (
-          <p role="alert" data-testid="photo-storage-full" className="mt-2 text-sm text-rose-600">
+          <p role="alert" data-testid="photo-storage-full" className="mt-2 text-sm text-semantic-error">
             {t('field.quota.warning', {
               defaultValue: 'Phone storage is almost full. Sync soon so photos are not lost.',
             })}
@@ -449,7 +449,7 @@ export function FieldRaiseIssueTab({
         {geo ? (
           <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
             <span className="flex min-w-0 items-center gap-2 text-sm text-slate-700">
-              <MapPin size={18} className="shrink-0 text-emerald-600" aria-hidden="true" />
+              <MapPin size={18} className="shrink-0 text-semantic-success" aria-hidden="true" />
               <span className="truncate">
                 {geo.lat.toFixed(5)}, {geo.lon.toFixed(5)}
                 {typeof geo.accuracyM === 'number' && (
@@ -487,7 +487,7 @@ export function FieldRaiseIssueTab({
             {t('field.issue_geo_add', { defaultValue: 'Add my location' })}
           </button>
         )}
-        {geoError && <p className="text-xs text-rose-600">{geoError}</p>}
+        {geoError && <p className="text-xs text-semantic-error">{geoError}</p>}
       </div>
 
       {/* Submit */}
@@ -495,13 +495,13 @@ export function FieldRaiseIssueTab({
         type="button"
         onClick={() => void submit()}
         disabled={!canSubmit}
-        className="flex h-14 items-center justify-center gap-2 rounded-xl bg-amber-600 text-base font-semibold text-white disabled:opacity-50"
+        className="flex h-14 items-center justify-center gap-2 rounded-xl bg-semantic-warning text-base font-semibold text-white disabled:opacity-50"
       >
         <Send size={20} aria-hidden="true" />
         {t('field.issue_submit', { defaultValue: 'Raise issue' })}
       </button>
       {savedAt !== null && (
-        <p className="text-center text-sm text-emerald-600">
+        <p className="text-center text-sm text-semantic-success">
           {online
             ? t('field.issue_saved_online', { defaultValue: 'Issue raised. Sending to the office.' })
             : t('field.issue_saved_offline', {
@@ -540,12 +540,12 @@ export function FieldRaiseIssueTab({
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {queued ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-2xs font-medium text-amber-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-medium text-semantic-warning">
                         <CloudOff size={12} aria-hidden="true" />
                         {t('field.issue_state_queued', { defaultValue: 'Queued' })}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-medium text-emerald-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-medium text-semantic-success">
                         <Check size={12} aria-hidden="true" />
                         {t('field.issue_state_sent', { defaultValue: 'Sent' })}
                       </span>
@@ -557,7 +557,7 @@ export function FieldRaiseIssueTab({
                           {t('field.issue_photo_waiting', { defaultValue: 'Photo waiting' })}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-medium text-emerald-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-medium text-semantic-success">
                           <Camera size={12} aria-hidden="true" />
                           {t('field.issue_photo_sent', { defaultValue: 'Photo sent' })}
                         </span>

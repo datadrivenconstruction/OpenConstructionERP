@@ -129,7 +129,7 @@ export function SampleTemplateButton({ template }: { template: CountryTemplate }
                     ? template.classification || t(COLUMN_META[k].labelKey, { defaultValue: COLUMN_META[k].label })
                     : t(COLUMN_META[k].labelKey, { defaultValue: COLUMN_META[k].label })}
                 </span>
-                {required.has(k) && <span className="text-rose-500 font-semibold">*</span>}
+                {required.has(k) && <span className="text-semantic-error font-semibold">*</span>}
               </span>
             ))}
           </div>

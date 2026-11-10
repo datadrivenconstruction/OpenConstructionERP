@@ -64,8 +64,8 @@ function errorText(t: TFunction, err: unknown): string {
 
 function SeverityIcon({ severity }: { severity: ChainFinding['severity'] }) {
   if (severity === 'error') return <AlertOctagon size={16} className="mt-0.5 shrink-0 text-semantic-error" />;
-  if (severity === 'warning') return <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />;
-  return <Info size={16} className="mt-0.5 shrink-0 text-sky-500" />;
+  if (severity === 'warning') return <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />;
+  return <Info size={16} className="mt-0.5 shrink-0 text-semantic-info" />;
 }
 
 function Bucket({

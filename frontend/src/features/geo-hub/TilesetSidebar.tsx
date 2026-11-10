@@ -334,7 +334,7 @@ export function TilesetSidebar({
   const containerClasses = isOverlay
     ? [
         'absolute top-3 left-3 z-20 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         // Hide on phone-width — the collapsed pill takes its place when
         // the user opens the panel from the toggle button.
@@ -358,7 +358,7 @@ export function TilesetSidebar({
       >
         <div className="flex items-center gap-1.5">
           <Layers size={13} className="text-content-tertiary" />
-          <h2 className="text-2xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+          <h2 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('geo_hub.sidebar.title', { defaultValue: 'Tilesets' })}
           </h2>
           {tilesets && (
@@ -390,7 +390,7 @@ export function TilesetSidebar({
         {tilesets && tilesets.length > 0 && (
           <div className="mt-1.5 flex items-center gap-2 text-2xs text-content-tertiary">
             <span className="inline-flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
               {readyCount}
             </span>
             {procCount > 0 && (
@@ -401,7 +401,7 @@ export function TilesetSidebar({
             )}
             {failedCount > 0 && (
               <span className="inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                <span className="h-1.5 w-1.5 rounded-full bg-semantic-error" />
                 {failedCount}
               </span>
             )}

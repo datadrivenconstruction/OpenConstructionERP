@@ -60,7 +60,7 @@ export function LinkToPositionBanner({
           onClick={onLink}
           disabled={selectionCount === 0}
           data-testid="bim-link-position-go"
-          className="flex items-center gap-1 rounded-lg bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t('bim.link_mode_link', { defaultValue: 'Link selection ({{n}})', n: selectionCount })}
         </button>
@@ -68,7 +68,7 @@ export function LinkToPositionBanner({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1 rounded-lg border border-border-light px-2.5 py-1 text-[11px] font-medium text-content-secondary hover:bg-surface-secondary"
+        className="flex items-center gap-1 rounded-lg border border-border-light px-2.5 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary"
       >
         <ArrowLeft size={12} />
         {t('bim.link_mode_back', { defaultValue: 'Back to BOQ' })}

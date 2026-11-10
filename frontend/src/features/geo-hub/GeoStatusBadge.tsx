@@ -18,28 +18,28 @@ interface GeoStatusBadgeProps {
 
 const STATUS_TONE: Record<TilesetStatus, string> = {
   ready:
-    'bg-emerald-50 text-emerald-700 border-emerald-200 ' +
+    'bg-semantic-success-bg text-semantic-success border-semantic-success/30 ' +
     'dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/60',
   generating:
     'bg-blue-50 text-blue-700 border-blue-200 ' +
     'dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/60',
   draft:
     'bg-slate-50 text-slate-600 border-slate-200 ' +
-    'dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700',
+    '',
   failed:
-    'bg-red-50 text-red-700 border-red-200 ' +
+    'bg-semantic-error-bg text-semantic-error border-semantic-error/30 ' +
     'dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/60',
   obsolete:
-    'bg-amber-50 text-amber-700 border-amber-200 ' +
+    'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30 ' +
     'dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/60',
 };
 
 const STATUS_DOT: Record<TilesetStatus, string> = {
-  ready: 'bg-emerald-500',
+  ready: 'bg-semantic-success',
   generating: 'bg-blue-500 animate-pulse',
   draft: 'bg-slate-400',
-  failed: 'bg-red-500',
-  obsolete: 'bg-amber-500',
+  failed: 'bg-semantic-error',
+  obsolete: 'bg-semantic-warning',
 };
 
 export function GeoStatusBadge({ status, className }: GeoStatusBadgeProps) {

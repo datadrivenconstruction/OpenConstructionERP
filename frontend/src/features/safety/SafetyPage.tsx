@@ -228,13 +228,13 @@ function getIncidentTypeCards(t: (key: string, opts?: Record<string, unknown>) =
     injury: {
       icon: Heart,
       color:
-        'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+        'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
       description: t('safety.incident_type_injury', { defaultValue: 'Worker injury' }),
     },
     near_miss: {
       icon: AlertTriangle,
       color:
-        'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+        'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
       description: t('safety.incident_type_near_miss', { defaultValue: 'Close call' }),
     },
     property_damage: {
@@ -246,13 +246,13 @@ function getIncidentTypeCards(t: (key: string, opts?: Record<string, unknown>) =
     environmental: {
       icon: Leaf,
       color:
-        'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+        'text-semantic-success bg-semantic-success-bg border-semantic-success/30',
       description: t('safety.incident_type_environmental', { defaultValue: 'Spill or emission' }),
     },
     fire: {
       icon: Flame,
       color:
-        'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-800',
+        'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
       description: t('safety.incident_type_fire', { defaultValue: 'Fire or explosion' }),
     },
   };
@@ -277,13 +277,13 @@ function getObsTypeCards(t: (key: string, opts?: Record<string, unknown>) => str
     positive: {
       icon: ThumbsUp,
       color:
-        'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+        'text-semantic-success bg-semantic-success-bg border-semantic-success/30',
       description: t('safety.obs_type_positive', { defaultValue: 'Good safety practice observed' }),
     },
     unsafe_act: {
       icon: UserX,
       color:
-        'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+        'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
       description: t('safety.obs_type_unsafe_act', { defaultValue: 'Person doing something unsafe' }),
     },
     unsafe_condition: {
@@ -295,7 +295,7 @@ function getObsTypeCards(t: (key: string, opts?: Record<string, unknown>) => str
     near_miss: {
       icon: AlertTriangle,
       color:
-        'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+        'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
       description: t('safety.obs_type_near_miss', { defaultValue: 'Almost happened' }),
     },
   };
@@ -306,10 +306,10 @@ const OBS_TYPES_LIST = ['positive', 'unsafe_act', 'unsafe_condition', 'near_miss
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 function riskScoreColor(score: number): string {
-  if (score <= 5) return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300';
-  if (score <= 10) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
+  if (score <= 5) return 'bg-semantic-success-bg text-semantic-success';
+  if (score <= 10) return 'bg-semantic-warning-bg text-semantic-warning';
   if (score <= 15) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300';
-  return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
+  return 'bg-semantic-error-bg text-semantic-error';
 }
 
 function riskScoreLabel(score: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
@@ -328,7 +328,7 @@ function SeverityDots({ level, max = 5 }: { level: number; max?: number }) {
           className={`inline-block h-2 w-2 rounded-full ${
             i < level
               ? level >= 4
-                ? 'bg-red-500'
+                ? 'bg-semantic-error'
                 : level >= 3
                   ? 'bg-orange-400'
                   : level >= 2
@@ -642,7 +642,7 @@ function HowSafetyWork() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1456,7 +1456,7 @@ function IncidentsTab({
                   setIncidentForm((f) => ({ ...f, incident_date: e.target.value }));
                   if (incidentErrors.incident_date) setIncidentErrors((prev) => { const next = { ...prev }; delete next.incident_date; return next; });
                 }}
-                className={clsx(inputCls, incidentErrors.incident_date && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                className={clsx(inputCls, incidentErrors.incident_date && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
               />
               {incidentErrors.incident_date && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.incident_date}</p>}
             </div>
@@ -1474,7 +1474,7 @@ function IncidentsTab({
                   if (incidentErrors.description) setIncidentErrors((prev) => { const next = { ...prev }; delete next.description; return next; });
                 }}
                 rows={3}
-                className={clsx(textareaCls, incidentErrors.description && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                className={clsx(textareaCls, incidentErrors.description && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
                 placeholder={t('safety.incident_desc_placeholder', { defaultValue: 'Describe what happened...' })}
               />
               {incidentErrors.description && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.description}</p>}
@@ -1520,12 +1520,12 @@ function IncidentsTab({
                         'flex items-center justify-center gap-1.5 rounded-lg border-2 px-3 py-2.5 transition-all text-center',
                         selected
                           ? opt.value === 'hospital'
-                            ? 'text-red-600 bg-red-50 border-red-200 ring-2 ring-red-300 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800'
+                            ? 'text-semantic-error bg-semantic-error-bg border-semantic-error/30 ring-2 ring-semantic-error/30'
                             : opt.value === 'medical'
                               ? 'text-orange-600 bg-orange-50 border-orange-200 ring-2 ring-orange-300 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800'
                               : opt.value === 'first_aid'
-                                ? 'text-amber-600 bg-amber-50 border-amber-200 ring-2 ring-amber-300 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800'
-                                : 'text-gray-600 bg-gray-50 border-gray-200 ring-2 ring-gray-300 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700'
+                                ? 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30 ring-2 ring-semantic-warning/30'
+                                : 'text-content-secondary bg-surface-secondary border-border-light ring-2 ring-gray-300'
                           : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                       )}
                     >
@@ -1846,7 +1846,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                     })}
                   </Badge>
                   {obs.risk_score > 15 && (
-                    <div className="text-2xs text-red-600 mt-1">
+                    <div className="text-2xs text-semantic-error mt-1">
                       {t('safety.high_risk_hint', { defaultValue: 'High risk \u2014 consider scheduling an inspection' })}
                       <Button variant="ghost" size="sm" className="text-2xs ml-1" onClick={(e) => { e.stopPropagation(); navigate('/inspections'); }}>
                         {t('safety.create_inspection_link', { defaultValue: 'Create Inspection \u2192' })}
@@ -1896,7 +1896,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               </span>
             </div>
             {obs.risk_score > 15 && (
-              <div className="text-2xs text-red-600 mt-2">
+              <div className="text-2xs text-semantic-error mt-2">
                 {t('safety.high_risk_hint', { defaultValue: 'High risk \u2014 consider scheduling an inspection' })}
                 <Button variant="ghost" size="sm" className="text-2xs ml-1" onClick={() => navigate('/inspections')}>
                   {t('safety.create_inspection_link', { defaultValue: 'Create Inspection \u2192' })}
@@ -1989,7 +1989,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                   if (obsErrors.description) setObsErrors((prev) => { const next = { ...prev }; delete next.description; return next; });
                 }}
                 rows={3}
-                className={clsx(textareaCls, obsErrors.description && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                className={clsx(textareaCls, obsErrors.description && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
                 placeholder={t('safety.obs_desc_placeholder', { defaultValue: 'Describe the observation...' })}
               />
               {obsErrors.description && <p className="mt-1 text-xs text-semantic-error">{obsErrors.description}</p>}
@@ -2029,7 +2029,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                           'inline-block h-5 w-5 rounded-full transition-colors',
                           v <= obsForm.severity
                             ? obsForm.severity >= 4
-                              ? 'bg-red-500'
+                              ? 'bg-semantic-error'
                               : obsForm.severity >= 3
                                 ? 'bg-orange-400'
                                 : obsForm.severity >= 2
@@ -2067,7 +2067,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                           'inline-block h-5 w-5 rounded-full transition-colors',
                           v <= obsForm.likelihood
                             ? obsForm.likelihood >= 4
-                              ? 'bg-red-500'
+                              ? 'bg-semantic-error'
                               : obsForm.likelihood >= 3
                                 ? 'bg-orange-400'
                                 : obsForm.likelihood >= 2

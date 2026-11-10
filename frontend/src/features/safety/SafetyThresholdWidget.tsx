@@ -48,18 +48,18 @@ const STATUS_META: Record<
 > = {
   green: {
     icon: ShieldCheck,
-    badge: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-    dot: 'bg-green-500',
+    badge: 'bg-semantic-success-bg text-semantic-success',
+    dot: 'bg-semantic-success',
   },
   yellow: {
     icon: ShieldAlert,
-    badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-    dot: 'bg-yellow-500',
+    badge: 'bg-semantic-warning-bg text-semantic-warning',
+    dot: 'bg-semantic-warning',
   },
   red: {
     icon: ShieldX,
-    badge: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-    dot: 'bg-red-500',
+    badge: 'bg-semantic-error-bg text-semantic-error',
+    dot: 'bg-semantic-error',
   },
   unknown: {
     icon: Shield,
@@ -109,7 +109,7 @@ function RateRow({
         <span className="text-sm font-medium text-content-secondary">{label}</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
-        <span className="font-bold tabular-nums text-content-primary">
+        <span className="font-semibold tabular-nums text-content-primary">
           {current === null ? '—' : current}
         </span>
         <span className="text-xs text-content-tertiary">

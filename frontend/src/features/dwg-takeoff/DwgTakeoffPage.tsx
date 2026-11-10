@@ -521,7 +521,7 @@ function OfflineReadyBadge({
   if (isLoading) {
     return (
       <div
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light text-[11px] text-content-tertiary"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light text-2xs text-content-tertiary"
         data-testid={testId}
       >
         <Loader2 size={11} className="animate-spin" />
@@ -553,7 +553,7 @@ function OfflineReadyBadge({
         type="button"
         onClick={() => setShowHint((v) => !v)}
         className={clsx(
-          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors',
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-2xs font-medium transition-colors',
           ready
             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/15'
             : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/15',
@@ -594,7 +594,7 @@ function OfflineReadyBadge({
 
       {showHint && (
         <div
-          className="absolute top-full right-0 mt-1.5 z-30 w-72 rounded-lg border border-border-light bg-surface-elevated shadow-xl p-3 text-[11px]"
+          className="absolute top-full right-0 mt-1.5 z-30 w-72 rounded-lg border border-border-light bg-surface-elevated shadow-xl p-3 text-2xs"
           data-testid="dwg-offline-hint"
         >
           <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -618,7 +618,7 @@ function OfflineReadyBadge({
           </p>
           {converterMissing && (
             <>
-              <div className="mt-2 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-1.5 text-[10px] text-amber-300">
+              <div className="mt-2 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-1.5 text-2xs text-amber-300">
                 {t('dwg_takeoff.offline_install_hint', {
                   defaultValue:
                     'Upload DXF files to continue without the converter, or install it to enable .dwg support.',
@@ -629,7 +629,7 @@ function OfflineReadyBadge({
                 onClick={() => installMutation.mutate()}
                 disabled={installMutation.isPending}
                 data-testid="dwg-converter-install-btn"
-                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-2.5 py-2 hover:bg-oe-blue-dark disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue text-white text-2xs font-semibold px-2.5 py-2 hover:bg-oe-blue-dark disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {installMutation.isPending ? (
                   <>
@@ -659,7 +659,7 @@ function OfflineReadyBadge({
                 href={DWG_CONVERTER_MANUAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1.5 block text-center text-[10px] text-content-tertiary hover:text-content-secondary underline"
+                className="mt-1.5 block text-center text-2xs text-content-tertiary hover:text-content-secondary underline"
               >
                 {t('dwg_takeoff.converter_install_manual', {
                   defaultValue: 'Manual install instructions',
@@ -3391,7 +3391,7 @@ export function DwgTakeoffPage() {
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dxf</span>
                         </div>
                         {dwgRange && (
-                          <p className="text-[11px] text-gray-600 leading-relaxed mt-1 text-center">
+                          <p className="text-2xs text-gray-600 leading-relaxed mt-1 text-center">
                             {dwgRange}
                           </p>
                         )}
@@ -3403,7 +3403,7 @@ export function DwgTakeoffPage() {
                   <div className="flex flex-col justify-center gap-4">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h1 className="text-2xl font-bold text-gray-100 tracking-tight leading-tight">
+                        <h1 className="text-2xl font-semibold text-gray-100 tracking-tight leading-tight">
                           {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
                         </h1>
                         <OfflineReadyBadge
@@ -3431,7 +3431,7 @@ export function DwgTakeoffPage() {
                           <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"><f.icon size={15} className="text-orange-400" /></div>
                           <div className="min-w-0">
                             <h3 className="text-xs font-semibold text-gray-200 leading-tight">{f.title}</h3>
-                            <p className="text-[11px] text-gray-500 leading-snug mt-1">{f.desc}</p>
+                            <p className="text-2xs text-gray-500 leading-snug mt-1">{f.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -3450,12 +3450,12 @@ export function DwgTakeoffPage() {
                             ? t('common.local_processing', { defaultValue: '100% Local Processing · Your files never leave your computer' })
                             : t('dwg_takeoff.processed_on_your_server', { defaultValue: 'Processed on your OpenConstructionERP server · never sent to third parties' })}
                         </span>
-                        <span className="text-[10px] text-emerald-500/30">|</span>
+                        <span className="text-2xs text-emerald-500/30">|</span>
                         <a
                           href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] text-emerald-400/70 hover:text-emerald-300 hover:underline whitespace-nowrap"
+                          className="text-2xs text-emerald-400/70 hover:text-emerald-300 hover:underline whitespace-nowrap"
                         >
                           {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                         </a>
@@ -3529,7 +3529,7 @@ export function DwgTakeoffPage() {
             <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
               {unresolvedXrefs.length > 0 && (
                 <div
-                  className="absolute inset-x-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-[11px] text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
+                  className="absolute inset-x-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-2xs text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
                   role="status"
                   data-testid="dwg-xref-notice"
                 >
@@ -3913,7 +3913,7 @@ export function DwgTakeoffPage() {
                       autoComplete="off"
                     />
                     <span
-                      className="min-w-[52px] text-center text-[11px] tabular-nums text-slate-500 dark:text-slate-300"
+                      className="min-w-[52px] text-center text-2xs tabular-nums text-slate-500 dark:text-slate-300"
                       data-testid="dwg-find-count"
                     >
                       {textMatches.length > 0
@@ -3966,7 +3966,7 @@ export function DwgTakeoffPage() {
                           type="button"
                           onClick={() => gotoMatch(i)}
                           className={clsx(
-                            'block w-full truncate px-2.5 py-1 text-left text-[11px]',
+                            'block w-full truncate px-2.5 py-1 text-left text-2xs',
                             i === safeMatchIdx
                               ? 'bg-oe-blue/15 font-semibold text-oe-blue'
                               : 'text-slate-700 hover:bg-black/5 dark:text-slate-200 dark:hover:bg-white/10',
@@ -4115,7 +4115,7 @@ export function DwgTakeoffPage() {
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                       {/* Already-linked badge */}
                       {alreadyLinked && (
-                        <div className="flex items-center gap-1.5 rounded-sm bg-emerald-950/40 border border-emerald-800/40 px-2 py-1 text-[11px]">
+                        <div className="flex items-center gap-1.5 rounded-sm bg-emerald-950/40 border border-emerald-800/40 px-2 py-1 text-2xs">
                           <Link2 size={11} className="text-emerald-400 shrink-0" />
                           <span className="text-emerald-300 truncate">
                             {t('dwg_takeoff.already_linked', { defaultValue: 'Already linked to a BOQ position' })}
@@ -4124,7 +4124,7 @@ export function DwgTakeoffPage() {
                       )}
 
                       {/* Entity summary */}
-                      <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-[11px] space-y-0.5">
+                      <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-2xs space-y-0.5">
                         <div className="flex justify-between">
                           <span className="text-slate-400">{t('dwg_takeoff.prop_type', 'Type')}</span>
                           <span className="font-mono text-slate-100">{selectedEntity.type}</span>
@@ -4154,7 +4154,7 @@ export function DwgTakeoffPage() {
                         <select
                           value={linkPickerProjectId}
                           onChange={(e) => handlePickerProjectChange(e.target.value)}
-                          className="text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100"
+                          className="text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100"
                         >
                           <option value="">
                             {t('dwg_takeoff.pick_project', { defaultValue: '- project -' })}
@@ -4167,7 +4167,7 @@ export function DwgTakeoffPage() {
                           value={linkPickerBoqId}
                           onChange={(e) => handlePickerBoqChange(e.target.value)}
                           disabled={!linkPickerProjectId || linkBoqsLoading}
-                          className="text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100 disabled:opacity-60"
+                          className="text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100 disabled:opacity-60"
                         >
                           <option value="">
                             {linkBoqsLoading
@@ -4181,7 +4181,7 @@ export function DwgTakeoffPage() {
                       </div>
 
                       {/* Mode switch */}
-                      <div className="flex gap-1 text-[11px]">
+                      <div className="flex gap-1 text-2xs">
                         <button
                           type="button"
                           onClick={() => setLinkPickerMode('pick')}
@@ -4211,7 +4211,7 @@ export function DwgTakeoffPage() {
 
                       {linkPickerMode === 'pick' ? (
                         !linkPickerBoqId ? (
-                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                          <p className="text-2xs text-slate-400 py-2 text-center">
                             {t('dwg_takeoff.link_need_project_boq', {
                               defaultValue: 'Pick a project and BOQ above.',
                             })}
@@ -4219,12 +4219,12 @@ export function DwgTakeoffPage() {
                         ) : linkPositionsLoading ? (
                           <div className="flex items-center justify-center gap-1.5 py-3">
                             <Loader2 size={12} className="animate-spin text-blue-400" />
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-2xs text-slate-400">
                               {t('common.loading', 'Loading...')}
                             </span>
                           </div>
                         ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
-                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                          <p className="text-2xs text-slate-400 py-2 text-center">
                             {t('dwg_takeoff.link_boq_empty', {
                               defaultValue: 'BOQ is empty - switch to "Create new".',
                             })}
@@ -4238,7 +4238,7 @@ export function DwgTakeoffPage() {
                               placeholder={t('dwg_takeoff.link_search_placeholder', {
                                 defaultValue: 'Search ordinal or description...',
                               })}
-                              className="w-full text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-2 py-1 text-slate-100 placeholder:text-slate-500"
+                              className="w-full text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-2 py-1 text-slate-100 placeholder:text-slate-500"
                             />
                             <div className="max-h-56 overflow-y-auto space-y-0.5">
                               {linkBoqPositions
@@ -4264,7 +4264,7 @@ export function DwgTakeoffPage() {
                                       }
                                     }}
                                     disabled={linkingInProgress}
-                                    className="w-full text-left px-2 py-1 rounded-sm text-[11px] hover:bg-blue-900/40 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                    className="w-full text-left px-2 py-1 rounded-sm text-2xs hover:bg-blue-900/40 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                                   >
                                     <span className="font-mono text-blue-300 shrink-0">
                                       {pos.ordinal}
@@ -4272,7 +4272,7 @@ export function DwgTakeoffPage() {
                                     <span className="text-slate-100 truncate flex-1">
                                       {pos.description}
                                     </span>
-                                    <span className="text-slate-400 shrink-0 text-[10px]">
+                                    <span className="text-slate-400 shrink-0 text-2xs">
                                       {pos.unit}
                                     </span>
                                   </button>
@@ -4283,7 +4283,7 @@ export function DwgTakeoffPage() {
                       ) : (
                         /* Create new position */
                         <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 space-y-1.5">
-                          <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+                          <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-2xs">
                             <span className="text-slate-400">
                               {t('dwg_takeoff.description', { defaultValue: 'Description' })}:
                             </span>
@@ -4306,7 +4306,7 @@ export function DwgTakeoffPage() {
                             type="button"
                             onClick={() => handleCreateAndLink(selectedEntity.id)}
                             disabled={linkingInProgress || !linkPickerBoqId}
-                            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
+                            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
                           >
                             {linkingInProgress && <Loader2 size={11} className="animate-spin" />}
                             {t('dwg_takeoff.create_and_link', {
@@ -4389,10 +4389,10 @@ export function DwgTakeoffPage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Sigma size={13} className="text-amber-400" />
-                    <span className="text-[11px] font-semibold text-content-primary">
+                    <span className="text-2xs font-semibold text-content-primary">
                       {t('dwg_takeoff.group_selection', { defaultValue: 'Group selection' })}
                     </span>
-                    <span className="text-[10px] text-content-tertiary tabular-nums">
+                    <span className="text-2xs text-content-tertiary tabular-nums">
                       ({selectedEntityIds.size})
                     </span>
                   </div>
@@ -4405,7 +4405,7 @@ export function DwgTakeoffPage() {
                   </button>
                 </div>
                 <div
-                  className="grid grid-cols-3 gap-1.5 text-[11px]"
+                  className="grid grid-cols-3 gap-1.5 text-2xs"
                   data-testid="dwg-group-aggregate"
                 >
                   <div>
@@ -4416,7 +4416,7 @@ export function DwgTakeoffPage() {
                       {selectionAggregate.area > 0
                         ? fmtFixed(q.convert(selectionAggregate.area, 'm²').value, 2) : '—'}
                     </div>
-                    <div className="text-content-tertiary text-[9px] uppercase">
+                    <div className="text-content-tertiary text-2xs uppercase">
                       {t('dwg_takeoff.area', 'Area')} {q.unitFor('m²')}
                     </div>
                   </div>
@@ -4428,7 +4428,7 @@ export function DwgTakeoffPage() {
                       {selectionAggregate.perimeter > 0
                         ? fmtFixed(q.convert(selectionAggregate.perimeter, 'm').value, 2) : '—'}
                     </div>
-                    <div className="text-content-tertiary text-[9px] uppercase">
+                    <div className="text-content-tertiary text-2xs uppercase">
                       {t('dwg_takeoff.perimeter', 'Perimeter')} {q.unitFor('m')}
                     </div>
                   </div>
@@ -4440,7 +4440,7 @@ export function DwgTakeoffPage() {
                       {selectionAggregate.length > 0
                         ? fmtFixed(q.convert(selectionAggregate.length, 'm').value, 2) : '—'}
                     </div>
-                    <div className="text-content-tertiary text-[9px] uppercase">
+                    <div className="text-content-tertiary text-2xs uppercase">
                       {t('dwg_takeoff.length', 'Length')} {q.unitFor('m')}
                     </div>
                   </div>
@@ -4449,7 +4449,7 @@ export function DwgTakeoffPage() {
                   <button
                     onClick={handleCreateBoqFromGroup}
                     disabled={linkingInProgress}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-2 py-1 hover:bg-oe-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-md bg-oe-blue text-white text-2xs font-semibold px-2 py-1 hover:bg-oe-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     data-testid="dwg-group-create-boq"
                     title={t('dwg_takeoff.group_to_boq_title', {
                       defaultValue: 'Book the group total as one BOQ position',
@@ -4463,7 +4463,7 @@ export function DwgTakeoffPage() {
                   </button>
                   <button
                     onClick={handleSaveSelectionAsGroup}
-                    className="flex items-center justify-center rounded-md border border-border-medium bg-surface-secondary text-content-primary text-[11px] px-2 py-1 hover:bg-surface-tertiary transition-colors"
+                    className="flex items-center justify-center rounded-md border border-border-medium bg-surface-secondary text-content-primary text-2xs px-2 py-1 hover:bg-surface-tertiary transition-colors"
                     title={t('dwg_takeoff.save_as_group', { defaultValue: 'Save as group' })}
                     data-testid="dwg-group-save"
                   >
@@ -4476,7 +4476,7 @@ export function DwgTakeoffPage() {
             {/* Hidden-entities toolbar */}
             {hiddenEntityIds.size > 0 && (
               <div className="flex items-center justify-between border-b border-border-light bg-surface-secondary/60 px-3 py-1.5">
-                <span className="text-[10px] text-content-tertiary flex items-center gap-1">
+                <span className="text-2xs text-content-tertiary flex items-center gap-1">
                   <EyeOff size={11} />
                   {t('dwg_takeoff.hidden_count', {
                     defaultValue: '{{count}} hidden',
@@ -4485,7 +4485,7 @@ export function DwgTakeoffPage() {
                 </span>
                 <button
                   onClick={handleShowAllEntities}
-                  className="text-[10px] font-medium text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
+                  className="text-2xs font-medium text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
                 >
                   <Eye size={11} />
                   {t('dwg_takeoff.show_all', { defaultValue: 'Show all' })}
@@ -4526,30 +4526,30 @@ export function DwgTakeoffPage() {
               return (
                 <div className="border-b border-border-light px-3 py-2 bg-surface-secondary/40">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                    <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
                       {t('dwg_takeoff.summary', 'Summary')}
                     </span>
                     <button
                       onClick={handleExportCsv}
                       disabled={annotations.length === 0}
-                      className="text-[10px] font-medium text-oe-blue hover:text-oe-blue/80 disabled:text-content-quaternary disabled:cursor-not-allowed"
+                      className="text-2xs font-medium text-oe-blue hover:text-oe-blue/80 disabled:text-content-quaternary disabled:cursor-not-allowed"
                       title={t('dwg_takeoff.export_csv', 'Export measurements as CSV')}
                     >
                       {t('dwg_takeoff.export_csv_short', 'Export CSV')}
                     </button>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                  <div className="grid grid-cols-3 gap-1.5 text-2xs">
                     <div>
                       <div className="font-semibold text-content-primary tabular-nums">{entities.length}</div>
-                      <div className="text-content-tertiary text-[9px] uppercase">{t('dwg_takeoff.entities', 'Entities')}</div>
+                      <div className="text-content-tertiary text-2xs uppercase">{t('dwg_takeoff.entities', 'Entities')}</div>
                     </div>
                     <div>
                       <div className="font-semibold text-content-primary tabular-nums">{areaSum > 0 ? fmtFixed(q.convert(areaSum, 'm²').value, 1) : '—'}</div>
-                      <div className="text-content-tertiary text-[9px] uppercase">{q.unitFor('m²')}</div>
+                      <div className="text-content-tertiary text-2xs uppercase">{q.unitFor('m²')}</div>
                     </div>
                     <div>
                       <div className="font-semibold text-content-primary tabular-nums">{distSum > 0 ? fmtFixed(q.convert(distSum, 'm').value, 1) : '—'}</div>
-                      <div className="text-content-tertiary text-[9px] uppercase">{q.unitFor('m')}</div>
+                      <div className="text-content-tertiary text-2xs uppercase">{q.unitFor('m')}</div>
                     </div>
                   </div>
                 </div>
@@ -4574,7 +4574,7 @@ export function DwgTakeoffPage() {
                   onClick={() => setRightTab(id)}
                   title={t(titleKey, titleFallback)}
                   className={clsx(
-                    'flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 px-1 text-[10px] font-medium leading-none transition-colors',
+                    'flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 px-1 text-2xs font-medium leading-none transition-colors',
                     rightTab === id
                       ? 'border-b-2 border-oe-blue text-oe-blue'
                       : 'text-muted-foreground hover:text-foreground',
@@ -4585,7 +4585,7 @@ export function DwgTakeoffPage() {
                   <span className="flex items-center gap-0.5 truncate">
                     <span className="truncate">{t(labelKey, fallback)}</span>
                     {count > 0 && (
-                      <span className="text-[9px] tabular-nums opacity-60">
+                      <span className="text-2xs tabular-nums opacity-60">
                         ({count})
                       </span>
                     )}
@@ -4729,7 +4729,7 @@ export function DwgTakeoffPage() {
                           <button
                             type="button"
                             onClick={() => handleOpenLinkToBoq(selectedEntity.id)}
-                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-boq"
                           >
                             <Link2 size={12} className="text-oe-blue shrink-0" />
@@ -4746,7 +4746,7 @@ export function DwgTakeoffPage() {
                                 entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
                               })
                             }
-                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-task"
                           >
                             <ListChecks size={12} className="text-amber-500 shrink-0" />
@@ -4763,7 +4763,7 @@ export function DwgTakeoffPage() {
                                 entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
                               })
                             }
-                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-document"
                           >
                             <FileText size={12} className="text-violet-500 shrink-0" />
@@ -4780,7 +4780,7 @@ export function DwgTakeoffPage() {
                                 entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
                               })
                             }
-                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-activity"
                           >
                             <CalendarDays size={12} className="text-emerald-500 shrink-0" />
@@ -4797,7 +4797,7 @@ export function DwgTakeoffPage() {
                                 entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
                               })
                             }
-                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-requirement"
                           >
                             <ClipboardCheck size={12} className="text-violet-500 shrink-0" />
@@ -4825,7 +4825,7 @@ export function DwgTakeoffPage() {
                         }
                         return (
                           <div className="mt-2 pt-2 border-t border-[#3a3a3a]">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-blue-300 mb-1.5">
+                            <p className="text-2xs font-semibold uppercase tracking-widest text-blue-300 mb-1.5">
                               {t('match.apply_section_title', { defaultValue: 'Find a cost position' })}
                             </p>
                             <div className="h-96 rounded-sm border border-[#3a3a3a] overflow-hidden bg-surface-primary">
@@ -4890,7 +4890,7 @@ export function DwgTakeoffPage() {
                               <span className="text-emerald-400 font-medium">
                                 {t('dwg_takeoff.perimeter', 'Perimeter')}
                               </span>
-                              <span className="font-mono font-bold text-emerald-300">
+                              <span className="font-mono font-semibold text-emerald-300">
                                 {formatMeasurement(perimeter, 'm')}
                               </span>
                             </div>
@@ -4899,7 +4899,7 @@ export function DwgTakeoffPage() {
                                 <span className="text-blue-400 font-medium">
                                   {t('dwg_takeoff.area', 'Area')}
                                 </span>
-                                <span className="font-mono font-bold text-blue-300">
+                                <span className="font-mono font-semibold text-blue-300">
                                   {formatMeasurement(area, 'm\u00B2')}
                                 </span>
                               </div>
@@ -4928,7 +4928,7 @@ export function DwgTakeoffPage() {
                                 : t('common.no', 'No')}
                             />
                             <div className="mt-2">
-                              <div className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                              <div className="font-medium text-2xs text-muted-foreground uppercase tracking-wider mb-1">
                                 {t('dwg_takeoff.segments', 'Segments')} ({segLengths.length})
                               </div>
                               <div className="space-y-0.5 max-h-48 overflow-y-auto">
@@ -4937,10 +4937,10 @@ export function DwgTakeoffPage() {
                                     key={i}
                                     className="flex items-center justify-between rounded px-2 py-1 bg-surface-secondary hover:bg-surface-tertiary transition-colors"
                                   >
-                                    <span className="text-muted-foreground font-mono text-[10px]">
+                                    <span className="text-muted-foreground font-mono text-2xs">
                                       #{i + 1}
                                     </span>
-                                    <span className="font-mono font-medium text-[11px]">
+                                    <span className="font-mono font-medium text-2xs">
                                       {formatMeasurement(len * effectiveScale, 'm')}
                                     </span>
                                   </div>
@@ -5015,10 +5015,10 @@ export function DwgTakeoffPage() {
                   <FileUp size={20} className="text-oe-blue" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-content-primary">
+                  <h3 className="text-sm font-semibold text-content-primary">
                     {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
                   </h3>
-                  <p className="text-[11px] text-content-tertiary">
+                  <p className="text-2xs text-content-tertiary">
                     {t('dwg_takeoff.upload_hint', 'DWG or DXF files')}
                   </p>
                 </div>
@@ -5088,7 +5088,7 @@ export function DwgTakeoffPage() {
                     <FileText size={18} className="text-oe-blue" />
                   </div>
                   <p className="text-sm font-semibold text-content-primary">{uploadFile.name}</p>
-                  <p className="text-[11px] text-content-quaternary">
+                  <p className="text-2xs text-content-quaternary">
                     {formatFileSize(uploadFile.size)}
                   </p>
                 </>
@@ -5100,7 +5100,7 @@ export function DwgTakeoffPage() {
                   <p className="text-sm font-medium text-content-primary">
                     {t('dwg_takeoff.click_or_drop', 'Click or drag a file here')}
                   </p>
-                  <p className="text-[11px] text-content-quaternary">.dwg, .dxf</p>
+                  <p className="text-2xs text-content-quaternary">.dwg, .dxf</p>
                 </>
               )}
             </button>
@@ -5132,7 +5132,7 @@ export function DwgTakeoffPage() {
                 OfflineReadyBadge CTA + the error-state link in the notice). */}
             {uploadNeedsDwgConverter && (
               <div className="space-y-1.5" data-testid="dwg-upload-install-hint">
-                <p className="flex items-start gap-1.5 text-[10px] text-content-tertiary leading-relaxed">
+                <p className="flex items-start gap-1.5 text-2xs text-content-tertiary leading-relaxed">
                   <WifiOff size={12} className="shrink-0 mt-0.5" />
                   <span>
                     {t('dwg_takeoff.auto_install_dxf_note', {
@@ -5161,7 +5161,7 @@ export function DwgTakeoffPage() {
                 {t('dwg_takeoff.project_label', { defaultValue: 'Project' })}
               </label>
               {noProjects ? (
-                <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-[12px] text-amber-700 dark:text-amber-300">
+                <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
                   <Info size={14} className="shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-1.5">
                     <p className="font-semibold">
@@ -5179,7 +5179,7 @@ export function DwgTakeoffPage() {
                         closeUploadModal();
                         navigate('/projects/new');
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/90 hover:bg-amber-600 text-white px-2.5 py-1 text-[11px] font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/90 hover:bg-amber-600 text-white px-2.5 py-1 text-2xs font-semibold transition-colors"
                     >
                       <Plus size={12} />
                       {t('dwg_takeoff.create_project_cta', { defaultValue: 'Create project' })}
@@ -5283,13 +5283,13 @@ export function DwgTakeoffPage() {
                       });
                       closeUploadModal();
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg"
                   >
                     <Upload size={16} />
                     {t('dwg_takeoff.upload_and_process', 'Upload & Process')}
                   </button>
                   {blocker && (
-                    <p className="text-[11px] text-content-tertiary text-center">
+                    <p className="text-2xs text-content-tertiary text-center">
                       {blocker}
                     </p>
                   )}
@@ -5444,10 +5444,10 @@ function DrawingFilmstrip({
       {/* Header -- always visible, no longer acts as a collapse toggle. */}
       <div className="flex items-center w-full px-3 py-1">
         <Layers size={12} className="text-slate-300 mr-1.5 shrink-0" />
-        <span className="text-[11px] font-semibold text-slate-100">
+        <span className="text-2xs font-semibold text-slate-100">
           {t('dwg_takeoff.drawings', 'Drawings')}
         </span>
-        <span className="text-[10px] text-slate-400 ml-1">({drawings.length})</span>
+        <span className="text-2xs text-slate-400 ml-1">({drawings.length})</span>
       </div>
 
       {/* Drawing cards - always visible, horizontally scrolling if needed. */}
@@ -5514,14 +5514,14 @@ function DrawingFilmstrip({
                     />
                     <span
                       className={clsx(
-                        'text-[10px] font-semibold truncate',
+                        'text-2xs font-semibold truncate',
                         activeDrawingId === d.id ? 'text-blue-300' : 'text-slate-100',
                       )}
                     >
                       {d.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-[9px] text-slate-400">
+                  <div className="flex items-center gap-1 text-2xs text-slate-400">
                     <span className="capitalize truncate">{d.discipline}</span>
                     <span>&middot;</span>
                     <span className="tabular-nums">
@@ -5532,7 +5532,7 @@ function DrawingFilmstrip({
                   </div>
                   {uploadedLabel && (
                     <div
-                      className="text-[9px] text-slate-500 truncate"
+                      className="text-2xs text-slate-500 truncate"
                       title={uploadedLabel}
                     >
                       {uploadedLabel}
@@ -5558,7 +5558,7 @@ function DrawingFilmstrip({
             );
           })
         ) : (
-          <span className="text-[10px] text-slate-400">
+          <span className="text-2xs text-slate-400">
             {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
           </span>
         )}
@@ -5612,13 +5612,13 @@ function SummaryKpiCard({ label, value, unit, accent }: SummaryKpiCardProps) {
       )}
       data-testid="dwg-summary-kpi"
     >
-      <div className="text-[9px] uppercase tracking-wider opacity-80 truncate">
+      <div className="text-2xs uppercase tracking-wider opacity-80 truncate">
         {label}
       </div>
-      <div className="text-lg font-bold tabular-nums leading-tight truncate">
+      <div className="text-lg font-semibold tabular-nums leading-tight truncate">
         {value}
         {unit && (
-          <span className="text-[10px] font-medium ml-1 opacity-70">{unit}</span>
+          <span className="text-2xs font-medium ml-1 opacity-70">{unit}</span>
         )}
       </div>
     </div>
@@ -5740,7 +5740,7 @@ function ScaleTab({
         type="button"
         onClick={() => onModeChange(id)}
         className={clsx(
-          'flex-1 flex flex-col items-start gap-0.5 rounded-md border px-2.5 py-1.5 text-left text-[11px] transition-colors',
+          'flex-1 flex flex-col items-start gap-0.5 rounded-md border px-2.5 py-1.5 text-left text-2xs transition-colors',
           active
             ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
             : 'border-border bg-surface-secondary text-content-primary hover:bg-surface-tertiary',
@@ -5749,7 +5749,7 @@ function ScaleTab({
         aria-pressed={active}
       >
         <span className="font-semibold">{label}</span>
-        <span className={clsx('text-[10px] leading-tight', active ? 'text-oe-blue/80' : 'text-content-tertiary')}>
+        <span className={clsx('text-2xs leading-tight', active ? 'text-oe-blue/80' : 'text-content-tertiary')}>
           {hint}
         </span>
       </button>
@@ -5773,7 +5773,7 @@ function ScaleTab({
           to be in metres (historical default). */}
       <div
         className={clsx(
-          'flex items-center justify-between rounded-md border px-2.5 py-1.5 text-[11px]',
+          'flex items-center justify-between rounded-md border px-2.5 py-1.5 text-2xs',
           unitKnown
             ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300'
             : 'border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-300',
@@ -5790,7 +5790,7 @@ function ScaleTab({
       </div>
 
       {spanMetres && (
-        <div className="flex flex-col gap-1 text-[11px]" data-testid="dwg-scale-span">
+        <div className="flex flex-col gap-1 text-2xs" data-testid="dwg-scale-span">
           <span className="text-content-secondary">
             {t('dwg_takeoff.drawing_span', {
               defaultValue: 'Drawing size at this scale: {{w}} m x {{h}} m',
@@ -5814,7 +5814,7 @@ function ScaleTab({
 
       {/* Mode picker - 3 strategies */}
       <div className="flex flex-col gap-1.5">
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary">
+        <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
           {t('dwg_takeoff.scale_mode_label', { defaultValue: 'Scale mode' })}
         </span>
         <div className="flex gap-1.5">
@@ -5839,7 +5839,7 @@ function ScaleTab({
       {/* ── Mode: Preset ──────────────────────────────────────────────── */}
       {mode === 'preset' && (
         <>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-2xs text-muted-foreground leading-relaxed">
             {t('dwg_takeoff.scale_explainer_units', {
               defaultValue:
                 'Drawing units come from the file header ({{units}}) and every measurement is converted to metres. Keep 1:1 for a drawing made at full size. For a drawing made at paper size, pick its ratio: 1:50 multiplies every measurement by 50.',
@@ -5910,7 +5910,7 @@ function ScaleTab({
             </label>
           </div>
 
-          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-[11px] text-muted-foreground leading-relaxed">
+          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-2xs text-muted-foreground leading-relaxed">
             {t('dwg_takeoff.scale_example', {
               defaultValue:
                 'Example: if the drawing shows a 10 m wall at 1:100, set scale to 1:100 and the wall will report as 10 m on the canvas.',
@@ -5922,16 +5922,16 @@ function ScaleTab({
       {/* ── Mode: Calibrate ───────────────────────────────────────────── */}
       {mode === 'calibrated' && (
         <div className="flex flex-col gap-3">
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-2xs text-muted-foreground leading-relaxed">
             {t('dwg_takeoff.scale_calibrate_explainer', {
               defaultValue:
                 'Click a Distance measurement on the drawing between two points whose real length you know. Type the real length below, then press Apply - the scale is computed automatically.',
             })}
           </p>
 
-          <div className="rounded-md border border-border bg-surface-secondary px-3 py-2.5 text-[11px] flex flex-col gap-2">
+          <div className="rounded-md border border-border bg-surface-secondary px-3 py-2.5 text-2xs flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-content-tertiary uppercase tracking-wider text-[9px] font-semibold">
+              <span className="text-content-tertiary uppercase tracking-wider text-2xs font-semibold">
                 {t('dwg_takeoff.scale_calibrate_measured', { defaultValue: 'Measured (raw)' })}
               </span>
               <span className="font-mono font-semibold text-content-primary tabular-nums">
@@ -5944,7 +5944,7 @@ function ScaleTab({
               <button
                 type="button"
                 onClick={onStartCalibration}
-                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-[11px] font-semibold text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-2xs font-semibold text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
               >
                 <Ruler size={11} />
                 {calibrationPixels !== null
@@ -5955,7 +5955,7 @@ function ScaleTab({
               <button
                 type="button"
                 onClick={onCancelCalibration}
-                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-[11px] font-semibold text-content-primary bg-surface-tertiary hover:bg-surface-primary transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-2xs font-semibold text-content-primary bg-surface-tertiary hover:bg-surface-primary transition-colors"
               >
                 {t('dwg_takeoff.scale_calibrate_cancel', { defaultValue: 'Cancel - click two points on the drawing' })}
               </button>
@@ -5963,7 +5963,7 @@ function ScaleTab({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('dwg_takeoff.scale_calibrate_real_label', { defaultValue: 'Real-world distance' })}
             </span>
             <div className="flex items-center gap-2">
@@ -5992,7 +5992,7 @@ function ScaleTab({
               type="button"
               onClick={applyCalibration}
               disabled={!calibrationPixels || !Number(realDistance)}
-              className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-[11px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-2xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               data-testid="dwg-scale-calibrate-apply"
             >
               {t('dwg_takeoff.scale_calibrate_apply', { defaultValue: 'Apply calibration' })}
@@ -6004,14 +6004,14 @@ function ScaleTab({
       {/* ── Mode: Per-annotation ──────────────────────────────────────── */}
       {mode === 'per_annotation' && (
         <div className="flex flex-col gap-3">
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-2xs text-muted-foreground leading-relaxed">
             {t('dwg_takeoff.scale_per_annotation_explainer', {
               defaultValue:
                 'Use when one sheet mixes scales (e.g. a 1:100 plan with a 1:20 detail window). Every new annotation you draw carries the scale below until you change it - older annotations keep their own stored scale.',
             })}
           </p>
 
-          <label className="flex items-center gap-2 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-3 py-2 text-[11px]">
+          <label className="flex items-center gap-2 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-3 py-2 text-2xs">
             <span className="font-mono font-semibold shrink-0 text-oe-blue">
               {t('dwg_takeoff.scale_active_override', { defaultValue: 'New annotation scale 1:' })}
             </span>
@@ -6026,7 +6026,7 @@ function ScaleTab({
             />
           </label>
 
-          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-[11px] text-muted-foreground leading-relaxed">
+          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-2xs text-muted-foreground leading-relaxed">
             {t('dwg_takeoff.scale_per_annotation_note', {
               defaultValue:
                 'Tip: switch back to Preset mode once the detail takeoff is done so the default scale applies to the rest of the sheet again.',
@@ -6035,7 +6035,7 @@ function ScaleTab({
         </div>
       )}
 
-      <div className="text-[10px] text-content-tertiary tabular-nums">
+      <div className="text-2xs text-content-tertiary tabular-nums">
         {t('dwg_takeoff.scale_current', {
           defaultValue: 'Current: 1:{{n}}',
           n: drawingScale,
@@ -6130,7 +6130,7 @@ function SummaryTab({
           <button
             type="button"
             onClick={onExportExcel}
-            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-2xs font-semibold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
             data-testid="dwg-summary-export-excel"
             title={t('dwg_takeoff.export_excel', {
               defaultValue: 'Export quantities as Excel (.xlsx)',
@@ -6142,7 +6142,7 @@ function SummaryTab({
           <button
             type="button"
             onClick={onExportCsv}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-[10px] font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-2xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
             data-testid="dwg-summary-export"
             title={t('dwg_takeoff.export_csv', {
               defaultValue: 'Export measurements as CSV',
@@ -6154,7 +6154,7 @@ function SummaryTab({
           <button
             type="button"
             onClick={onExportPdf}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-[10px] font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-2xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
             data-testid="dwg-summary-export-pdf"
             title={t('dwg_takeoff.export_pdf', {
               defaultValue: 'Export current viewport as PDF',
@@ -6203,11 +6203,11 @@ function SummaryTab({
       >
         <div className="flex items-center gap-1.5">
           <Hash size={12} className="text-content-tertiary" />
-          <span className="text-[11px] font-medium text-content-secondary">
+          <span className="text-2xs font-medium text-content-secondary">
             {t('dwg_takeoff.summary_count_items', { defaultValue: 'Count items' })}
           </span>
         </div>
-        <span className="text-sm font-bold tabular-nums text-content-primary">
+        <span className="text-sm font-semibold tabular-nums text-content-primary">
           {countTotal.toLocaleString(getNumberLocale())}
         </span>
       </div>
@@ -6215,7 +6215,7 @@ function SummaryTab({
       {/* Manual Distance / Area totals, the values the canvas labels show */}
       {(manualTotals.area > 0 || manualTotals.length > 0) && (
         <div
-          className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-2.5 py-2 text-[11px]"
+          className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-2.5 py-2 text-2xs"
           data-testid="dwg-summary-manual-totals"
         >
           <span className="font-medium text-content-secondary">
@@ -6244,14 +6244,14 @@ function SummaryTab({
       <div data-testid="dwg-summary-by-layer">
         <div className="flex items-center gap-1.5 mb-0.5">
           <Zap size={12} className="text-amber-400" />
-          <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-secondary">
+          <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('dwg_takeoff.quantify_title', { defaultValue: 'Auto-quantify by layer' })}
           </h4>
-          <span className="text-[10px] text-content-quaternary tabular-nums">
+          <span className="text-2xs text-content-quaternary tabular-nums">
             ({layerQuantities.length})
           </span>
         </div>
-        <p className="text-[10px] text-content-tertiary mb-1.5 leading-snug">
+        <p className="text-2xs text-content-tertiary mb-1.5 leading-snug">
           {t('dwg_takeoff.quantify_subtitle', {
             defaultValue: 'Measured straight from the drawing vectors - no manual tracing.',
           })}
@@ -6260,34 +6260,34 @@ function SummaryTab({
         {/* Grand totals strip */}
         <div className="grid grid-cols-3 gap-1 mb-2" data-testid="dwg-quantify-totals">
           <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-1.5">
-            <div className="text-[9px] uppercase tracking-wide text-emerald-500/80">
+            <div className="text-2xs uppercase tracking-wide text-emerald-500/80">
               {t('dwg_takeoff.area', 'Area')}
             </div>
-            <div className="text-[11px] font-bold tabular-nums text-emerald-300">
+            <div className="text-2xs font-semibold tabular-nums text-emerald-300">
               {quantifyTotals.area > 0
                 ? q.convert(quantifyTotals.area, 'm²').value.toLocaleString(getNumberLocale(), { maximumFractionDigits: 2 })
                 : '-'}
-              <span className="text-[9px] font-medium opacity-70"> {q.unitFor('m²')}</span>
+              <span className="text-2xs font-medium opacity-70"> {q.unitFor('m²')}</span>
             </div>
           </div>
           <div className="rounded-md bg-violet-500/10 border border-violet-500/20 px-2 py-1.5">
-            <div className="text-[9px] uppercase tracking-wide text-violet-400/80">
+            <div className="text-2xs uppercase tracking-wide text-violet-400/80">
               {t('dwg_takeoff.length', 'Length')}
             </div>
-            <div className="text-[11px] font-bold tabular-nums text-violet-300">
+            <div className="text-2xs font-semibold tabular-nums text-violet-300">
               {quantifyTotals.length > 0
                 ? q.convert(quantifyTotals.length, 'm').value.toLocaleString(getNumberLocale(), { maximumFractionDigits: 2 })
                 : '-'}
-              <span className="text-[9px] font-medium opacity-70"> {q.unitFor('m')}</span>
+              <span className="text-2xs font-medium opacity-70"> {q.unitFor('m')}</span>
             </div>
           </div>
           <div className="rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-1.5">
-            <div className="text-[9px] uppercase tracking-wide text-sky-400/80">
+            <div className="text-2xs uppercase tracking-wide text-sky-400/80">
               {t('dwg_takeoff.count', 'Count')}
             </div>
-            <div className="text-[11px] font-bold tabular-nums text-sky-300">
+            <div className="text-2xs font-semibold tabular-nums text-sky-300">
               {quantifyTotals.count.toLocaleString(getNumberLocale())}
-              <span className="text-[9px] font-medium opacity-70"> nr</span>
+              <span className="text-2xs font-medium opacity-70"> nr</span>
             </div>
           </div>
         </div>
@@ -6319,12 +6319,12 @@ function SummaryTab({
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <span
-                    className="font-mono text-[11px] text-content-primary truncate"
+                    className="font-mono text-2xs text-content-primary truncate"
                     title={row.layer}
                   >
                     {row.layer}
                   </span>
-                  <span className="text-[9px] tabular-nums text-content-tertiary shrink-0">
+                  <span className="text-2xs tabular-nums text-content-tertiary shrink-0">
                     {row.count} {t('dwg_takeoff.quantify_entities_short', { defaultValue: 'ent.' })}
                   </span>
                 </div>
@@ -6336,13 +6336,13 @@ function SummaryTab({
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span
-                    className="text-[13px] font-bold tabular-nums text-content-primary"
+                    className="text-sm font-semibold tabular-nums text-content-primary"
                     data-testid="dwg-quantify-value"
                   >
                     {display.value.toLocaleString(getNumberLocale(), {
                       maximumFractionDigits: measure === 'count' ? 0 : 2,
                     })}
-                    <span className="text-[10px] font-medium text-content-tertiary"> {display.unit}</span>
+                    <span className="text-2xs font-medium text-content-tertiary"> {display.unit}</span>
                   </span>
                   {/* Measure toggle - only the measures this layer actually has. */}
                   {row.available.length > 1 && (
@@ -6355,7 +6355,7 @@ function SummaryTab({
                             setLayerMeasure((prev) => ({ ...prev, [row.layer]: m }))
                           }
                           className={clsx(
-                            'px-1.5 py-0.5 rounded text-[9px] font-semibold transition-colors',
+                            'px-1.5 py-0.5 rounded text-2xs font-semibold transition-colors',
                             measure === m
                               ? 'bg-surface-primary text-content-primary shadow-xs'
                               : 'text-content-tertiary hover:text-content-primary',
@@ -6375,7 +6375,7 @@ function SummaryTab({
             );
           })}
           {layerQuantities.length > 30 && (
-            <p className="text-[10px] text-content-tertiary text-center py-1">
+            <p className="text-2xs text-content-tertiary text-center py-1">
               {t('dwg_takeoff.summary_layers_more', {
                 defaultValue: '+{{count}} more',
                 count: layerQuantities.length - 30,
@@ -6389,10 +6389,10 @@ function SummaryTab({
       <div data-testid="dwg-summary-by-type">
         <div className="flex items-center gap-1.5 mb-1.5">
           <Sigma size={11} className="text-content-tertiary" />
-          <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('dwg_takeoff.summary_by_type', { defaultValue: 'By entity type' })}
           </h4>
-          <span className="text-[10px] text-content-quaternary tabular-nums">
+          <span className="text-2xs text-content-quaternary tabular-nums">
             ({byType.length})
           </span>
         </div>
@@ -6400,7 +6400,7 @@ function SummaryTab({
           {byType.map((row) => (
             <div
               key={row.type}
-              className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1 text-[10px]"
+              className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1 text-2xs"
             >
               <span className="font-mono text-content-primary truncate">
                 {row.type}
@@ -6419,10 +6419,10 @@ function SummaryTab({
         <div data-testid="dwg-summary-by-block">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Hash size={11} className="text-content-tertiary" />
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+            <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('dwg_takeoff.summary_by_block', { defaultValue: 'Count by block' })}
             </h4>
-            <span className="text-[10px] text-content-quaternary tabular-nums">
+            <span className="text-2xs text-content-quaternary tabular-nums">
               ({byBlock.length})
             </span>
           </div>
@@ -6430,7 +6430,7 @@ function SummaryTab({
             {byBlock.map((row) => (
               <div
                 key={row.name}
-                className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1 text-[10px]"
+                className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1 text-2xs"
               >
                 <span className="font-mono text-content-primary truncate">
                   {row.name}
@@ -6545,7 +6545,7 @@ function MenuItem({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-[11px] text-white/85 hover:bg-white/10 transition-colors"
+      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-2xs text-white/85 hover:bg-white/10 transition-colors"
     >
       {icon}
       <span>{label}</span>
@@ -6578,11 +6578,11 @@ function UploadProgressInline() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Upload size={12} className="text-oe-blue shrink-0" />
-          <span className="text-[11px] font-semibold text-content-primary truncate">
+          <span className="text-2xs font-semibold text-content-primary truncate">
             {active.fileName}
           </span>
         </div>
-        <span className="text-[11px] font-semibold text-oe-blue tabular-nums shrink-0">
+        <span className="text-2xs font-semibold text-oe-blue tabular-nums shrink-0">
           {active.progress}%
         </span>
       </div>
@@ -6592,7 +6592,7 @@ function UploadProgressInline() {
           style={{ width: `${active.progress}%` }}
         />
       </div>
-      <p className="text-[10px] text-content-tertiary">
+      <p className="text-2xs text-content-tertiary">
         {t(active.stage, { defaultValue: 'Processing upload…' })}
       </p>
     </div>
@@ -6690,7 +6690,7 @@ function ConversionProgressCard({
             </p>
           </div>
           <span
-            className="text-[11px] font-semibold tabular-nums text-content-secondary bg-surface-secondary px-2 py-1 rounded-md shrink-0"
+            className="text-2xs font-semibold tabular-nums text-content-secondary bg-surface-secondary px-2 py-1 rounded-md shrink-0"
             aria-label={t('dwg_takeoff.conv_elapsed', { defaultValue: 'Elapsed time' })}
           >
             {elapsedLabel}
@@ -6717,7 +6717,7 @@ function ConversionProgressCard({
               type="button"
               onClick={onCancel}
               data-testid="dwg-conversion-cancel"
-              className="text-[11px] font-medium text-content-tertiary hover:text-red-500 transition-colors underline-offset-2 hover:underline"
+              className="text-2xs font-medium text-content-tertiary hover:text-red-500 transition-colors underline-offset-2 hover:underline"
             >
               {t('dwg_takeoff.conv_cancel', {
                 defaultValue: 'Cancel - remove this drawing',
@@ -6790,7 +6790,7 @@ function InstallDwgConverterCTA({
 
   if (unsupportedMessage) {
     return (
-      <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] text-amber-700 dark:text-amber-200">
+      <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-2xs text-amber-700 dark:text-amber-200">
         <p>{unsupportedMessage}</p>
         <a
           href="/settings?tab=converters"
@@ -6822,14 +6822,14 @@ function InstallDwgConverterCTA({
         type="button"
         onClick={() => installMutation.mutate()}
         data-testid="dwg-install-converter-cta"
-        className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-emerald-700 transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 text-white text-2xs font-semibold px-3 py-1.5 hover:bg-emerald-700 transition-colors"
       >
         <Download size={12} />
         {t('dwg_takeoff.conv_install_cta', {
           defaultValue: 'Install DWG converter (1 click)',
         })}
       </button>
-      <p className="mt-1.5 text-[10px] text-content-tertiary">
+      <p className="mt-1.5 text-2xs text-content-tertiary">
         {t('dwg_takeoff.conv_install_hint', {
           defaultValue:
             'Downloads 15-30 MB to ~/.openestimator/converters/ on Windows, Linux or macOS. Takes under a minute.',
@@ -6901,7 +6901,7 @@ function ConversionErrorCard({
                   })}
             </p>
             {!isMissingConverter && converterError?.code && (
-              <p className="text-[11px] text-content-tertiary mt-2 leading-relaxed" data-testid="dwg-converter-error">
+              <p className="text-2xs text-content-tertiary mt-2 leading-relaxed" data-testid="dwg-converter-error">
                 {t('dwg_takeoff.conv_converter_said', { defaultValue: 'Converter report' })}:{' '}
                 <span className="font-mono">{converterError.code}</span>
                 {converterSays ? ` - ${converterSays}` : ''}
@@ -6915,7 +6915,7 @@ function ConversionErrorCard({
                     type="button"
                     onClick={onRetry}
                     data-testid="dwg-conversion-retry"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-2xs font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
                   >
                     <RotateCcw size={12} />
                     {isMissingConverter
@@ -6932,7 +6932,7 @@ function ConversionErrorCard({
                     type="button"
                     onClick={onDelete}
                     data-testid="dwg-conversion-error-delete"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 text-red-500 text-[11px] font-medium px-3 py-1.5 hover:bg-red-500/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 text-red-500 text-2xs font-medium px-3 py-1.5 hover:bg-red-500/10 transition-colors"
                   >
                     <Trash2 size={12} />
                     {t('dwg_takeoff.conv_delete', {
@@ -6994,7 +6994,7 @@ function ConversionEmptyCard({
                     type="button"
                     onClick={onUploadAnother}
                     data-testid="dwg-conversion-empty-upload"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-2xs font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
                   >
                     <Upload size={12} />
                     {t('dwg_takeoff.conv_upload_another', {
@@ -7007,7 +7007,7 @@ function ConversionEmptyCard({
                     type="button"
                     onClick={onDelete}
                     data-testid="dwg-conversion-empty-delete"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-medium px-3 py-1.5 hover:bg-amber-500/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 text-amber-700 dark:text-amber-300 text-2xs font-medium px-3 py-1.5 hover:bg-amber-500/10 transition-colors"
                   >
                     <Trash2 size={12} />
                     {t('dwg_takeoff.conv_delete', {
@@ -7089,7 +7089,7 @@ function NeedsConversionCard({
                   type="button"
                   onClick={onUploadAnother}
                   data-testid="dwg-needs-conversion-upload"
-                  className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-2xs font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
                 >
                   <Upload size={12} />
                   {t('dwg_takeoff.needs_conv_reupload', {
@@ -7102,7 +7102,7 @@ function NeedsConversionCard({
                   type="button"
                   onClick={onUploadAnother}
                   data-testid="dwg-needs-conversion-upload-dxf"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-oe-blue/30 text-oe-blue text-[11px] font-medium px-3 py-1.5 hover:bg-oe-blue/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-oe-blue/30 text-oe-blue text-2xs font-medium px-3 py-1.5 hover:bg-oe-blue/10 transition-colors"
                 >
                   <FileText size={12} />
                   {t('dwg_takeoff.needs_conv_upload_dxf', {
@@ -7115,7 +7115,7 @@ function NeedsConversionCard({
                   type="button"
                   onClick={onDelete}
                   data-testid="dwg-needs-conversion-delete"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border-light text-content-tertiary text-[11px] font-medium px-3 py-1.5 hover:bg-surface-secondary transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border-light text-content-tertiary text-2xs font-medium px-3 py-1.5 hover:bg-surface-secondary transition-colors"
                 >
                   <Trash2 size={12} />
                   {t('dwg_takeoff.conv_delete', {

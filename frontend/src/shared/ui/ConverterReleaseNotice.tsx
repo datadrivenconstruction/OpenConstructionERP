@@ -38,9 +38,9 @@ export function ConverterReleaseNotice({
     <div
       role="note"
       data-testid="converter-release-notice"
-      className={`flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-3.5 py-3 text-start ${className}`}
+      className={`flex items-start gap-3 rounded-xl border border-amber-500/30 bg-semantic-warning/5 px-3.5 py-3 text-start ${className}`}
     >
-      <Megaphone size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+      <Megaphone size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
       <div className="min-w-0 flex-1 space-y-2">
         <p className="text-xs leading-relaxed text-content-secondary">
           {t('converter_notice.text', {

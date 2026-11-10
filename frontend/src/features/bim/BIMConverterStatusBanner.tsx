@@ -589,7 +589,7 @@ export function BIMConverterStatusBanner({
         })}
         data-testid="bim-converters-mini-icon"
         className={clsx(
-          'inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-medium',
+          'inline-flex items-center gap-1 px-2 py-1 rounded-full border text-2xs font-medium',
           allHealthy
             ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors'
             : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors',
@@ -634,7 +634,7 @@ export function BIMConverterStatusBanner({
         className={clsx('rounded-xl border px-3 py-2', stripTone, className)}
         role="status"
       >
-        <div className="flex items-center gap-2 text-[12px] flex-wrap">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
           {stripIcon}
           <span className="font-semibold text-content-primary">
             {t('bim.converter_panel_title', { defaultValue: 'BIM converters' })}
@@ -651,7 +651,7 @@ export function BIMConverterStatusBanner({
           <button
             type="button"
             onClick={() => setCollapsedPersist(false)}
-            className="ms-auto text-[11px] underline-offset-2 hover:underline text-content-secondary"
+            className="ms-auto text-2xs underline-offset-2 hover:underline text-content-secondary"
           >
             {t('bim.converters_show_details', { defaultValue: 'Show details' })}
           </button>
@@ -723,7 +723,7 @@ export function BIMConverterStatusBanner({
             </p>
             <span
               className={clsx(
-                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold border tabular-nums',
+                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-2xs font-semibold border tabular-nums',
                 anyFailed
                   ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                   : allHealthy
@@ -768,7 +768,7 @@ export function BIMConverterStatusBanner({
               onClick={handleRefresh}
               disabled={isFetching}
               className={clsx(
-                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium border transition-colors',
+                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-2xs font-medium border transition-colors',
                 'border-transparent hover:bg-black/5 dark:hover:bg-white/10',
                 headerTextTone,
                 isFetching && 'opacity-60 cursor-wait',
@@ -801,7 +801,7 @@ export function BIMConverterStatusBanner({
               <button
                 type="button"
                 onClick={() => setCollapsedPersist(true)}
-                className="ms-auto text-[10px] underline-offset-2 hover:underline text-emerald-700 dark:text-emerald-300"
+                className="ms-auto text-2xs underline-offset-2 hover:underline text-emerald-700 dark:text-emerald-300"
               >
                 {t('bim.converters_collapse', { defaultValue: 'Collapse' })}
               </button>
@@ -836,7 +836,7 @@ export function BIMConverterStatusBanner({
               </button>
             )}
           </div>
-          <p className={clsx('text-[11px] mt-0.5 opacity-90', headerTextTone)}>
+          <p className={clsx('text-2xs mt-0.5 opacity-90', headerTextTone)}>
             {anyFailed
               ? t('bim.converter_panel_subtitle_failed', {
                   defaultValue:
@@ -873,7 +873,7 @@ export function BIMConverterStatusBanner({
           </p>
           {versionCheck?.any_outdated && !updateBannerDismissed && (
             <div
-              className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1.5 text-[11px] text-amber-900 dark:text-amber-200"
+              className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1.5 text-2xs text-amber-900 dark:text-amber-200"
               data-testid="bim-converters-update-banner"
             >
               <AlertTriangle
@@ -974,7 +974,7 @@ function CollapsedConverterPill({
   return (
     <span
       className={clsx(
-        'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border tabular-nums',
+        'inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-semibold border tabular-nums',
         tone,
       )}
       title={`${converterName(t, conv)} - ${titleSuffix}`}
@@ -1132,7 +1132,7 @@ function ConverterRow({
           : 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-200/70 dark:border-amber-900/60';
 
   return (
-    <li className={clsx('text-[11px] rounded-lg border px-2.5 py-2', rowBg)}>
+    <li className={clsx('text-2xs rounded-lg border px-2.5 py-2', rowBg)}>
       <div className="flex items-center gap-2.5">
         <span className="shrink-0">{icon}</span>
         <span className={clsx('font-semibold tracking-tight', labelTone)}>
@@ -1140,7 +1140,7 @@ function ConverterRow({
         </span>
         <span
           className={clsx(
-            'tabular-nums text-[10px] opacity-70',
+            'tabular-nums text-2xs opacity-70',
             health === 'ok' && !updateAvailable
               ? 'text-emerald-700 dark:text-emerald-300'
               : health === 'failed'
@@ -1154,7 +1154,7 @@ function ConverterRow({
           })}
         </span>
         {conv.format_range && (
-          <span className="hidden xl:inline truncate max-w-[200px] text-[10px] text-content-quaternary opacity-80">
+          <span className="hidden xl:inline truncate max-w-[200px] text-2xs text-content-quaternary opacity-80">
             {conv.format_range}
           </span>
         )}
@@ -1165,7 +1165,7 @@ function ConverterRow({
             yet (offline / GitHub rate-limited / pre-Linux). */}
         {conv.installed && (
           <span
-            className="hidden lg:inline text-[10px] text-content-quaternary dark:text-zinc-400 font-mono"
+            className="hidden lg:inline text-2xs text-content-quaternary dark:text-zinc-400 font-mono"
             title={
               versionEntry?.installed_sha
                 ? t('bim.converter_sha_tooltip', {
@@ -1193,7 +1193,7 @@ function ConverterRow({
               defaultValue:
                 'A newer build of this converter is available. Click to download and replace the installed copy.',
             })}
-            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {installing ? (
               <Loader2 size={11} className="animate-spin" />
@@ -1214,7 +1214,7 @@ function ConverterRow({
               defaultValue:
                 'A newer build of this converter is available on GitHub. Open the file there to download manually.',
             })}
-            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
+            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
           >
             <Download size={11} />
             {t('bim.converter_update_available', {
@@ -1224,7 +1224,7 @@ function ConverterRow({
         )}
         <span
           className={clsx(
-            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border',
             !updateAvailable && 'ms-auto',
             pillTone,
           )}
@@ -1241,7 +1241,7 @@ function ConverterRow({
             type="button"
             onClick={onVerify}
             disabled={verifying}
-            className="ms-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="ms-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {verifying ? (
               <Loader2 size={11} className="animate-spin" />
@@ -1266,7 +1266,7 @@ function ConverterRow({
           )}
         >
           {health === 'not_installed' && CONVERTERS_WITH_FALLBACK.has(conv.id) && (
-            <p className="text-[11px] text-emerald-800 dark:text-emerald-200">
+            <p className="text-2xs text-emerald-800 dark:text-emerald-200">
               {t('bim.converter_row_fallback_msg', {
                 defaultValue:
                   'IFC files are parsed by a built-in fallback. Install the DDC binary to upgrade placeholder boxes to real meshes.',
@@ -1276,7 +1276,7 @@ function ConverterRow({
           {conv.health_message && (
             <p
               className={clsx(
-                'text-[11px]',
+                'text-2xs',
                 health === 'failed'
                   ? 'text-rose-800 dark:text-rose-200'
                   : 'text-amber-800 dark:text-amber-200',
@@ -1304,7 +1304,7 @@ function ConverterRow({
                 type="button"
                 onClick={onVerify}
                 disabled={verifying}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {verifying ? (
                   <Loader2 size={11} className="animate-spin" />
@@ -1364,7 +1364,7 @@ function ActionButton({
           type="button"
           onClick={onInstall}
           disabled={installing}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
         >
           {installing ? (
             <>
@@ -1389,7 +1389,7 @@ function ActionButton({
           type="button"
           onClick={onInstall}
           disabled={installing}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
         >
           {installing ? (
             <>
@@ -1414,7 +1414,7 @@ function ActionButton({
           href={VC_REDIST_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
         >
           <ExternalLink size={11} />
           {t('bim.converter_panel_vcredist_btn', {
@@ -1428,7 +1428,7 @@ function ActionButton({
           href={DDC_REPO_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
         >
           <ExternalLink size={11} />
           {t('bim.converter_panel_manual_install_btn', {
@@ -1439,7 +1439,7 @@ function ActionButton({
     case 'unblock_files':
       return (
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           title={t('bim.converter_panel_unblock_help', {
             defaultValue:
               'Right-click each .exe and .dll → Properties → tick "Unblock" → OK',
@@ -1453,7 +1453,7 @@ function ActionButton({
     case 'check_permissions':
       return (
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           title={t('bim.converter_panel_perms_help', {
             defaultValue:
               'Run the converter once as Administrator, or move the install dir somewhere your user can write to.',

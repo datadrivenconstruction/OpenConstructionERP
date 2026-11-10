@@ -224,8 +224,8 @@ export function VideoPlayerDialog({
                   className={clsx(
                     'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
                     watched
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                      : 'border-border-light text-content-secondary hover:border-emerald-500/40 hover:text-emerald-700 dark:hover:text-emerald-300',
+                      ? 'border-emerald-500/40 bg-semantic-success/10 text-semantic-success dark:text-emerald-300'
+                      : 'border-border-light text-content-secondary hover:border-emerald-500/40 hover:text-semantic-success dark:hover:text-emerald-300',
                   )}
                 >
                   {watched ? <CheckCircle2 size={13} aria-hidden /> : <Circle size={13} aria-hidden />}

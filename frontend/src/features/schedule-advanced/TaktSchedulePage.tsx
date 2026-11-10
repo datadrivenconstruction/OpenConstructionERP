@@ -483,7 +483,7 @@ export function TaktSchedulePage() {
                       {t('takt.compute_to_see', { defaultValue: 'Compute to check the takt rhythm.' })}
                     </p>
                   ) : lob.violations.length === 0 ? (
-                    <p className="text-xs text-emerald-600">
+                    <p className="text-xs text-semantic-success">
                       {t('takt.no_violations', { defaultValue: 'Takt rhythm is steady - no violations.' })}
                     </p>
                   ) : (
@@ -494,8 +494,8 @@ export function TaktSchedulePage() {
                           className={clsx(
                             'rounded-md border p-2 text-xs',
                             v.severity === 'error'
-                              ? 'border-rose-300 bg-rose-500/10 text-rose-700 dark:text-rose-300'
-                              : 'border-amber-300 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+                              ? 'border-semantic-error/30 bg-semantic-error/10 text-semantic-error'
+                              : 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning',
                           )}
                         >
                           <div className="flex items-center gap-1 font-medium">

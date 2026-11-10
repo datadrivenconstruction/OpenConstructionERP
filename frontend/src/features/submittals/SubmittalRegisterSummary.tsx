@@ -113,7 +113,7 @@ export function SubmittalRegisterSummary({
           testId="submittals-stat-awaiting"
           label={t('submittals.stat_awaiting_review', { defaultValue: 'Awaiting review' })}
           value={summary.awaiting_review}
-          tone={summary.awaiting_review > 0 ? 'text-amber-500' : 'text-content-primary'}
+          tone={summary.awaiting_review > 0 ? 'text-semantic-warning' : 'text-content-primary'}
           active={awaiting.active}
           onPress={awaiting.press}
         >
@@ -149,7 +149,7 @@ export function SubmittalRegisterSummary({
           testId="submittals-stat-long-lead"
           label={t('submittals.stat_long_lead_awaiting', { defaultValue: 'Long lead awaiting approval' })}
           value={summary.long_lead_awaiting_approval}
-          tone={summary.long_lead_awaiting_approval > 0 ? 'text-amber-500' : 'text-content-primary'}
+          tone={summary.long_lead_awaiting_approval > 0 ? 'text-semantic-warning' : 'text-content-primary'}
           active={longLead.active}
           onPress={longLead.press}
         >
@@ -161,7 +161,7 @@ export function SubmittalRegisterSummary({
               })}
             </p>
             {summary.long_lead_without_lead_time > 0 && (
-              <p className="font-medium text-amber-700 dark:text-amber-400">
+              <p className="font-medium text-semantic-warning">
                 {t('submittals.stat_long_lead_no_lead_time', {
                   defaultValue: '{{n}} with no approval deadline: lead time or site date missing',
                   n: summary.long_lead_without_lead_time,

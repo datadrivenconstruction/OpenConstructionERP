@@ -154,7 +154,7 @@ export function CoordinatePicker({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-2xs font-semibold uppercase tracking-[0.12em] text-content-tertiary">
+        <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
           {t('geo_hub.coords.format', { defaultValue: 'Format' })}
         </span>
         <div
@@ -207,7 +207,7 @@ export function CoordinatePicker({
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <label htmlFor={`${reactId}-lat`} className="block">
-          <span className="text-2xs font-semibold uppercase tracking-[0.12em] text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('geo_hub.coords.lat', { defaultValue: 'Latitude' })}
           </span>
           <div className="relative mt-1">
@@ -226,7 +226,7 @@ export function CoordinatePicker({
               className={[
                 'h-9 w-full rounded-md border bg-surface-primary px-2',
                 'pr-8 font-mono text-xs tabular-nums text-content-primary',
-                latState.error ? 'border-red-500' : 'border-border',
+                latState.error ? 'border-semantic-error/60' : 'border-border',
                 'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
                 disabled ? 'opacity-60 cursor-not-allowed' : '',
               ].join(' ')}
@@ -241,7 +241,7 @@ export function CoordinatePicker({
           {latState.error && (
             <p
               id={`${reactId}-lat-err`}
-              className="mt-1 text-2xs text-red-600"
+              className="mt-1 text-2xs text-semantic-error"
               role="alert"
             >
               {latState.error}
@@ -249,7 +249,7 @@ export function CoordinatePicker({
           )}
         </label>
         <label htmlFor={`${reactId}-lon`} className="block">
-          <span className="text-2xs font-semibold uppercase tracking-[0.12em] text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('geo_hub.coords.lon', { defaultValue: 'Longitude' })}
           </span>
           <div className="relative mt-1">
@@ -268,7 +268,7 @@ export function CoordinatePicker({
               className={[
                 'h-9 w-full rounded-md border bg-surface-primary px-2',
                 'pr-8 font-mono text-xs tabular-nums text-content-primary',
-                lonState.error ? 'border-red-500' : 'border-border',
+                lonState.error ? 'border-semantic-error/60' : 'border-border',
                 'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
                 disabled ? 'opacity-60 cursor-not-allowed' : '',
               ].join(' ')}
@@ -283,7 +283,7 @@ export function CoordinatePicker({
           {lonState.error && (
             <p
               id={`${reactId}-lon-err`}
-              className="mt-1 text-2xs text-red-600"
+              className="mt-1 text-2xs text-semantic-error"
               role="alert"
             >
               {lonState.error}

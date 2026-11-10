@@ -189,7 +189,7 @@ export default function LinkRequirementToBIMModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('bim.link_req_title', { defaultValue: 'Link a requirement' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {elements.length === 1
                 ? '→ ' + (elements[0]!.name || elements[0]!.element_type)
                 : t('bim.link_req_bulk', {
@@ -235,7 +235,7 @@ export default function LinkRequirementToBIMModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {sets.length === 0
                 ? t('bim.no_req_sets', {
                     defaultValue:
@@ -284,7 +284,7 @@ export default function LinkRequirementToBIMModal({
                             )}
                           </span>
                           <span
-                            className={`shrink-0 inline-flex items-center px-1 py-0.5 text-[8px] font-bold uppercase rounded border ${priorityClass}`}
+                            className={`shrink-0 inline-flex items-center px-1 py-0.5 text-2xs font-semibold uppercase rounded border ${priorityClass}`}
                           >
                             {req.priority}
                           </span>
@@ -307,7 +307,7 @@ export default function LinkRequirementToBIMModal({
                             />
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-content-tertiary tabular-nums">
+                        <div className="flex items-center gap-2 text-2xs text-content-tertiary tabular-nums">
                           <span className="font-mono">
                             {req.constraint_type} {req.constraint_value}
                             {req.unit ? ` ${req.unit}` : ''}
@@ -336,7 +336,7 @@ export default function LinkRequirementToBIMModal({
                         Math.min(c + PAGE_SIZE, filtered.length),
                       )
                     }
-                    className="w-full text-center text-[11px] text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
+                    className="w-full text-center text-2xs text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
                   >
                     {t('bim.load_more', {
                       defaultValue:

@@ -62,7 +62,7 @@ export function SnapshotDiffView({
 
         {diffQuery.isError && (
           <div
-            className="rounded border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-300"
+            className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300"
             data-testid="snapshot-diff-error"
           >
             {t('dashboards.diff_error', {
@@ -151,7 +151,7 @@ function DiffHeader({ diff }: { diff: SnapshotDiff }) {
         {diff.b_label}
       </span>
       {diff.schema_hash_match && (
-        <Badge variant="neutral" className="text-[10px]">
+        <Badge variant="neutral" className="text-2xs">
           schema-hash match
         </Badge>
       )}
@@ -205,9 +205,9 @@ interface ChipProps {
 
 function Chip({ tone, label, value, testId }: ChipProps) {
   const palette: Record<ChipProps['tone'], string> = {
-    emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    rose: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-    amber: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    emerald: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
+    rose: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
+    amber: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
     neutral: 'bg-surface-secondary text-content-secondary border-border-light',
   };
   return (
@@ -235,8 +235,8 @@ function ColumnList({ variant, title, icon, names, testId }: ColumnListProps) {
   const { t } = useTranslation();
   const tone =
     variant === 'added'
-      ? 'border-emerald-500/30 bg-emerald-500/5'
-      : 'border-rose-500/30 bg-rose-500/5';
+      ? 'border-emerald-500/30 bg-semantic-success/5'
+      : 'border-rose-500/30 bg-semantic-error/5';
   return (
     <div className={`rounded border ${tone} p-2`} data-testid={testId}>
       <div className="mb-1 flex items-center gap-1 text-xs font-medium text-content-primary">
@@ -274,7 +274,7 @@ function ChangedList({
   const { t } = useTranslation();
   return (
     <div
-      className="rounded border border-amber-500/30 bg-amber-500/5 p-2"
+      className="rounded border border-amber-500/30 bg-semantic-warning/5 p-2"
       data-testid="snapshot-diff-changed"
     >
       <div className="mb-1 flex items-center gap-1 text-xs font-medium text-content-primary">

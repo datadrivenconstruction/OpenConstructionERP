@@ -325,7 +325,7 @@ export function PopulatePreviewModal({
       <WideModalSection>
         {skippedHints.length > 0 && (
           <div
-            className="mb-3 flex flex-col gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+            className="mb-3 flex flex-col gap-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
             role="status"
           >
             {skippedHints.map((h) => (
@@ -357,7 +357,7 @@ export function PopulatePreviewModal({
             role="alert"
             data-testid="populate-empty"
           >
-            <AlertTriangle size={16} className="text-amber-500" aria-hidden />
+            <AlertTriangle size={16} className="text-semantic-warning" aria-hidden />
             {emptyText ?? t('contracts.populate_empty', {
               defaultValue:
                 'No progress observations are available for this contract in the current period. Record field progress against BOQ-linked schedule-of-values lines, then try again.',
@@ -536,7 +536,7 @@ function PreviewRow({
                 })}
               </span>
             ) : row.regressed ? (
-              <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300" role="status">
+              <span className="flex items-center gap-1.5 text-semantic-warning" role="status">
                 <AlertTriangle size={12} aria-hidden />
                 {t('contracts.populate_regressed', {
                   defaultValue:

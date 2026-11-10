@@ -86,8 +86,8 @@ const STAGE_META: Record<PrefabStage, StageMeta> = {
   design: {
     label: 'Design',
     dot: 'bg-slate-400',
-    badge: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    column: 'border-slate-300 dark:border-slate-700',
+    badge: 'bg-surface-secondary text-content-secondary',
+    column: 'border-border',
   },
   approved_for_production: {
     label: 'Approved for production',
@@ -98,8 +98,8 @@ const STAGE_META: Record<PrefabStage, StageMeta> = {
   in_production: {
     label: 'In production',
     dot: 'bg-amber-400',
-    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    column: 'border-amber-300 dark:border-amber-800',
+    badge: 'bg-semantic-warning-bg text-semantic-warning',
+    column: 'border-semantic-warning/30',
   },
   qa: {
     label: 'QA',
@@ -121,17 +121,17 @@ const STAGE_META: Record<PrefabStage, StageMeta> = {
   },
   installed: {
     label: 'Installed',
-    dot: 'bg-green-500',
-    badge: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-    column: 'border-green-300 dark:border-green-800',
+    dot: 'bg-semantic-success',
+    badge: 'bg-semantic-success-bg text-semantic-success',
+    column: 'border-semantic-success/30',
   },
 };
 
 const DEFAULT_STAGE_META: StageMeta = {
   label: 'Unknown',
   dot: 'bg-gray-400',
-  badge: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  column: 'border-gray-300 dark:border-gray-700',
+  badge: 'bg-surface-secondary text-content-secondary',
+  column: 'border-border',
 };
 
 const UNIT_TYPE_LABELS: Record<PrefabUnitType, string> = {
@@ -247,10 +247,10 @@ function RiskTile({
   const zero = count === 0;
   const toneActive =
     tone === 'danger'
-      ? 'border-red-400 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300'
-      : 'border-amber-400 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300';
+      ? 'border-semantic-error/60 bg-semantic-error-bg text-semantic-error'
+      : 'border-semantic-warning/60 bg-semantic-warning-bg text-semantic-warning';
   const toneIdle =
-    tone === 'danger' ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400';
+    tone === 'danger' ? 'text-semantic-error' : 'text-semantic-warning';
   return (
     <button
       type="button"
@@ -265,7 +265,7 @@ function RiskTile({
       )}
     >
       <span className={active ? undefined : toneIdle}>{icon}</span>
-      <span className="text-lg font-bold tabular-nums">{count}</span>
+      <span className="text-lg font-semibold tabular-nums">{count}</span>
       <span
         className={clsx(
           'text-2xs font-medium uppercase tracking-wide',
@@ -364,7 +364,7 @@ function CreateUnitModal({
                 placeholder={t('prefab.ref_placeholder', { defaultValue: 'e.g. POD-L03-14' })}
                 className={clsx(
                   inputCls,
-                  refError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  refError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
                 )}
                 autoFocus
               />
@@ -480,7 +480,7 @@ const UnitCard = React.memo(function UnitCard({
       className={clsx(
         'w-full text-left rounded-lg border p-3 shadow-xs transition-all hover:shadow-sm',
         overdue
-          ? 'border-red-300 bg-red-50/50 hover:border-red-400 dark:border-red-900/50 dark:bg-red-950/15'
+          ? 'border-semantic-error/30 bg-semantic-error/10 hover:border-semantic-error/60'
           : 'border-border-light bg-surface-primary hover:border-oe-blue/40',
       )}
     >
@@ -501,7 +501,7 @@ const UnitCard = React.memo(function UnitCard({
             className={clsx(
               'inline-flex items-center gap-1',
               overdue && 'font-medium text-semantic-error',
-              dueSoon && 'font-medium text-amber-600 dark:text-amber-400',
+              dueSoon && 'font-medium text-semantic-warning',
             )}
           >
             {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
@@ -518,7 +518,7 @@ const UnitCard = React.memo(function UnitCard({
       {(overdue || dueSoon) && (
         <div className="mt-2">
           {overdue ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-1.5 py-0.5 text-2xs font-medium text-red-700 dark:bg-red-900/20 dark:text-red-300">
+            <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-error">
               <AlertTriangle size={11} className="shrink-0" />
               {days != null
                 ? t('prefab.overdue_by_days', {
@@ -528,7 +528,7 @@ const UnitCard = React.memo(function UnitCard({
                 : t('prefab.overdue', { defaultValue: 'Overdue' })}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-2xs font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1 rounded-md bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
               <Clock size={11} className="shrink-0" />
               {days === 0
                 ? t('prefab.due_today', { defaultValue: 'Due today' })
@@ -541,7 +541,7 @@ const UnitCard = React.memo(function UnitCard({
         </div>
       )}
       {unit.cost_basis != null && (
-        <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-2xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+        <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success">
           <Coins size={11} className="shrink-0" />
           <span className="tabular-nums">{unit.cost_basis}</span>
           {unit.earned_value != null && (
@@ -632,7 +632,7 @@ function LinkCostSection({
             <span className="text-2xs text-content-tertiary">
               {t('prefab.earned_value', { defaultValue: 'Earned value' })}
             </span>
-            <span className="text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
+            <span className="text-sm font-semibold tabular-nums text-semantic-success">
               {unit.earned_value ?? '-'}
               <span className="ml-1 text-2xs font-normal text-content-tertiary">({pct}%)</span>
             </span>
@@ -640,7 +640,7 @@ function LinkCostSection({
           {/* Progress bar - earned vs basis */}
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-tertiary">
             <div
-              className="h-full rounded-full bg-emerald-500 transition-all"
+              className="h-full rounded-full bg-semantic-success transition-all"
               style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
             />
           </div>
@@ -909,7 +909,7 @@ function UnitDetailDrawer({
 
           {/* QA gate hint */}
           {hasPassedQa ? (
-            <div className="flex items-start gap-2 rounded-lg border border-green-300/40 bg-green-50 dark:bg-green-900/15 px-3 py-2 text-xs text-green-700 dark:text-green-300">
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success-bg px-3 py-2 text-xs text-semantic-success">
               <ShieldCheck size={15} className="mt-0.5 shrink-0" />
               <span>
                 {t('prefab.qa_passed_hint', {
@@ -918,7 +918,7 @@ function UnitDetailDrawer({
               </span>
             </div>
           ) : (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-300/40 bg-amber-50 dark:bg-amber-900/15 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
               <ShieldCheck size={15} className="mt-0.5 shrink-0" />
               <span>
                 {t('prefab.qa_pending_hint', {
@@ -972,7 +972,7 @@ function UnitDetailDrawer({
                 </Button>
               </>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+              <div className="flex items-center gap-2 text-sm text-semantic-success">
                 <CheckCircle2 size={16} className="shrink-0" />
                 {t('prefab.fully_installed', {
                   defaultValue: 'This unit is installed - the lifecycle is complete.',
@@ -1398,7 +1398,7 @@ export function PrefabPage() {
             <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               {t('prefab.stat_total', { defaultValue: 'Total' })}
             </span>
-            <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
               {total}
             </span>
           </div>
@@ -1413,7 +1413,7 @@ export function PrefabPage() {
                   {t(`prefab.stage_${stage}`, { defaultValue: stageMeta(stage).label })}
                 </span>
               </span>
-              <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">
+              <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
                 {stats?.by_status?.[stage] ?? 0}
               </span>
             </div>

@@ -122,7 +122,7 @@ export function TaktCrewFlowView({ lob }: Props) {
                 x={dayToX(d)}
                 y={chartH - padBottom + 16}
                 textAnchor="middle"
-                className="fill-content-tertiary text-[10px]"
+                className="fill-content-tertiary text-2xs"
               >
                 D{d}
               </text>
@@ -137,7 +137,7 @@ export function TaktCrewFlowView({ lob }: Props) {
                 x={padLeft - 10}
                 y={y + rowH / 2 + 4}
                 textAnchor="end"
-                className="fill-content-secondary text-[11px] font-medium"
+                className="fill-content-secondary text-2xs font-medium"
               >
                 {crew.name}
               </text>
@@ -192,7 +192,7 @@ export function TaktCrewFlowView({ lob }: Props) {
               {t('takt.crew_size', { defaultValue: 'Crew' })}: {hover.crew_size}
             </div>
             {hover.has_rhythm_break && (
-              <div className="mt-1 inline-flex items-center gap-1 text-amber-600">
+              <div className="mt-1 inline-flex items-center gap-1 text-semantic-warning">
                 <AlertTriangle size={11} />
                 {t('takt.rhythmBreak', { defaultValue: 'Takt rhythm break' })}
               </div>

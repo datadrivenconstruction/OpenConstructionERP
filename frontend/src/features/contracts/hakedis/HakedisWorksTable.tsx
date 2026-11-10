@@ -61,7 +61,7 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
     <div className="overflow-x-auto rounded-lg border border-border-light" data-testid="hakedis-works">
       <table className="w-full min-w-[56rem] text-xs">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-surface-secondary text-[10px] uppercase tracking-wide text-content-tertiary">
+        <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
           <tr>
             {columns.map((column) => (
               <th
@@ -103,7 +103,7 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
                 key={`${row.kind}-${rowIndex}`}
                 className={clsx(
                   total && 'bg-surface-secondary/40 font-semibold',
-                  row.held && 'bg-amber-50/60 dark:bg-amber-950/20',
+                  row.held && 'bg-semantic-warning/10',
                 )}
                 data-testid={`hakedis-works-${row.kind}`}
                 data-held={row.held ? 'true' : undefined}

@@ -340,7 +340,7 @@ export function RomEstimatePage() {
             </p>
 
             {save.isSuccess && !save.isPending && (
-              <p className="mt-2 text-2xs font-medium text-emerald-600 dark:text-emerald-400">
+              <p className="mt-2 text-2xs font-medium text-semantic-success">
                 {t('romEstimate.saved_ok', { defaultValue: 'Saved as the project baseline.' })}
               </p>
             )}
@@ -423,7 +423,7 @@ function RomResultView({
               <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
                 {t('romEstimate.total', { defaultValue: 'Estimated total' })}
               </div>
-              <div className="text-2xl font-bold tabular-nums text-content-primary">
+              <div className="text-2xl font-semibold tabular-nums text-content-primary">
                 {formatCurrency(result.total, currency, undefined, { maximumFractionDigits: 0 })}
               </div>
               <div className="mt-1 text-2xs text-content-tertiary">
@@ -464,7 +464,7 @@ function RomResultView({
           </div>
 
           {!result.accuracy.localized && (
-            <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-2xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-semantic-warning-bg p-3 text-2xs text-semantic-warning">
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>
                 {t('romEstimate.no_region_note', {
@@ -489,7 +489,7 @@ function RomResultView({
               <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
                 {t('romEstimate.rate_base', { defaultValue: 'Base / m²' })}
               </div>
-              <div className="mt-0.5 text-sm font-bold tabular-nums text-content-primary">
+              <div className="mt-0.5 text-sm font-semibold tabular-nums text-content-primary">
                 {formatCurrency(result.cost_per_m2, currency)}
               </div>
             </div>
@@ -626,18 +626,18 @@ const RECONCILE_STATUS_STYLE: Record<
   { pill: string; accent: string; Icon: LucideIcon }
 > = {
   on_track: {
-    pill: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    accent: 'text-emerald-600 dark:text-emerald-400',
+    pill: 'bg-semantic-success-bg text-semantic-success',
+    accent: 'text-semantic-success',
     Icon: CheckCircle2,
   },
   over: {
-    pill: 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-    accent: 'text-red-600 dark:text-red-400',
+    pill: 'bg-semantic-error-bg text-semantic-error',
+    accent: 'text-semantic-error',
     Icon: TrendingUp,
   },
   under: {
-    pill: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    accent: 'text-amber-600 dark:text-amber-400',
+    pill: 'bg-semantic-warning-bg text-semantic-warning',
+    accent: 'text-semantic-warning',
     Icon: TrendingDown,
   },
   no_baseline: {
@@ -754,7 +754,7 @@ function RomReconciliationView({ rec }: { rec: RomReconciliation }) {
           <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('romEstimate.reconcile.conceptual', { defaultValue: 'Conceptual baseline' })}
           </div>
-          <div className="text-xl font-bold tabular-nums text-content-primary">
+          <div className="text-xl font-semibold tabular-nums text-content-primary">
             {hasBaseline
               ? formatCurrency(rec.conceptual_total, currency, undefined, { maximumFractionDigits: 0 })
               : t('romEstimate.reconcile.not_set', { defaultValue: 'Not set' })}
@@ -771,7 +771,7 @@ function RomReconciliationView({ rec }: { rec: RomReconciliation }) {
           <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('romEstimate.reconcile.detailed', { defaultValue: 'Detailed BOQ total' })}
           </div>
-          <div className="text-xl font-bold tabular-nums text-content-primary">
+          <div className="text-xl font-semibold tabular-nums text-content-primary">
             {formatCurrency(rec.detailed_total, currency, undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="mt-1 text-2xs text-content-tertiary">
@@ -787,7 +787,7 @@ function RomReconciliationView({ rec }: { rec: RomReconciliation }) {
           <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('romEstimate.reconcile.variance', { defaultValue: 'Variance' })}
           </div>
-          <div className={`text-xl font-bold tabular-nums ${hasBaseline ? style.accent : 'text-content-tertiary'}`}>
+          <div className={`text-xl font-semibold tabular-nums ${hasBaseline ? style.accent : 'text-content-tertiary'}`}>
             {hasBaseline
               ? signedMoney(rec.variance_amount, currency)
               : t('romEstimate.reconcile.not_set', { defaultValue: 'Not set' })}
@@ -807,7 +807,7 @@ function RomReconciliationView({ rec }: { rec: RomReconciliation }) {
       </div>
 
       {rec.currency_mismatch && (
-        <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-2xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+        <div className="flex items-start gap-2 rounded-lg bg-semantic-warning-bg p-3 text-2xs text-semantic-warning">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>
             {t('romEstimate.reconcile.currency_mismatch', {

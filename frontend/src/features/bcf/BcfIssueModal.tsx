@@ -276,7 +276,7 @@ export function BcfIssueModal({
             })}
             className={clsx(
               inputCls,
-              titleError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
             autoFocus
           />

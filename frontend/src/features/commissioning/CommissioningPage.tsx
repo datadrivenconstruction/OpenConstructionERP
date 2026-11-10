@@ -221,7 +221,7 @@ function ReadinessStat({
 }) {
   return (
     <div className="flex flex-col items-center rounded-md border border-border-light bg-surface-primary py-1.5">
-      <span className={clsx('text-base font-bold tabular-nums', READINESS_TONE[tone])}>{value}</span>
+      <span className={clsx('text-base font-semibold tabular-nums', READINESS_TONE[tone])}>{value}</span>
       <span className="text-2xs leading-tight text-content-tertiary text-center">{label}</span>
     </div>
   );
@@ -1125,7 +1125,7 @@ function HowCommissioningWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1169,7 +1169,7 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs">
       <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">{label}</span>
-      <span className="mt-1 text-2xl font-bold tabular-nums text-content-primary">{value}</span>
+      <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">{value}</span>
     </div>
   );
 }

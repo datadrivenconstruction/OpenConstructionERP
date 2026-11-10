@@ -56,7 +56,7 @@ function PaidHint({ id, lesson, dismissed }: { id: string; lesson: boolean; dism
       className={clsx(
         'pointer-events-none absolute bottom-full start-1/2 z-50 mb-1.5 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap',
         'rounded-md bg-slate-900 px-2 py-1 text-2xs font-medium text-white shadow-lg opacity-0 transition-opacity duration-150',
-        'group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 dark:bg-slate-700 motion-reduce:transition-none',
+        'group-hover:opacity-100 group-hover:delay-300 group-focus-visible:opacity-100 motion-reduce:transition-none',
         dismissed && '!opacity-0',
       )}
     >

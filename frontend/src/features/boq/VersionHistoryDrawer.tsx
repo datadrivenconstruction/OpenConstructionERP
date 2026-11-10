@@ -435,9 +435,9 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                       diff && (diff.positionDelta !== null || diff.totalDelta !== null);
                     const dotColor =
                       diff?.trend === 'up'
-                        ? 'bg-emerald-500'
+                        ? 'bg-semantic-success'
                         : diff?.trend === 'down'
-                          ? 'bg-red-500'
+                          ? 'bg-semantic-error'
                           : 'bg-gray-400';
 
                     return (
@@ -495,8 +495,8 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                                     className={clsx(
                                       'text-2xs font-medium',
                                       diff.positionDelta > 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400',
+                                        ? 'text-semantic-success'
+                                        : 'text-semantic-error',
                                     )}
                                   >
                                     {diff.positionDelta > 0
@@ -515,8 +515,8 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                                     className={clsx(
                                       'text-2xs font-mono font-medium',
                                       diff.totalDelta > 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400',
+                                        ? 'text-semantic-success'
+                                        : 'text-semantic-error',
                                     )}
                                   >
                                     {fmtSigned.format(diff.totalDelta)}
@@ -537,7 +537,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             <button
                               onClick={() => restoreMutation.mutate(snap.id)}
                               disabled={restoreMutation.isPending}
-                              className="flex h-6 items-center gap-1 rounded bg-amber-500 px-2 text-[10px] font-medium text-white hover:bg-amber-600 transition-colors"
+                              className="flex h-6 items-center gap-1 rounded bg-semantic-warning px-2 text-2xs font-medium text-white hover:bg-semantic-warning transition-colors"
                             >
                               {restoreMutation.isPending ? (
                                 <Loader2 size={10} className="animate-spin" />
@@ -548,7 +548,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             </button>
                             <button
                               onClick={() => setConfirmRestoreId(null)}
-                              className="flex h-6 items-center rounded bg-surface-secondary px-2 text-[10px] font-medium text-content-secondary hover:bg-surface-tertiary transition-colors"
+                              className="flex h-6 items-center rounded bg-surface-secondary px-2 text-2xs font-medium text-content-secondary hover:bg-surface-tertiary transition-colors"
                             >
                               {t('common.cancel', { defaultValue: 'Cancel' })}
                             </button>
@@ -557,7 +557,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                           <div className="flex items-center gap-0.5 shrink-0">
                             <button
                               onClick={() => setConfirmRestoreId(snap.id)}
-                              className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                              className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
                               title={t('boq.restore_snapshot', { defaultValue: 'Restore this version' })}
                             >
                               <RotateCcw size={13} />
@@ -565,7 +565,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             <button
                               onClick={() => deleteMutation.mutate(snap.id)}
                               disabled={deleteMutation.isPending}
-                              className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                              className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
                               title={t('boq.delete_snapshot', { defaultValue: 'Delete snapshot' })}
                             >
                               {deleteMutation.isPending ? (
@@ -659,7 +659,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                           field: row.field,
                           value: formatAuditValue(row.oldValue),
                         } as Record<string, string>)}
-                        className="shrink-0 flex h-6 items-center gap-1 rounded bg-amber-500/10 px-2 text-[10px] font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
+                        className="shrink-0 flex h-6 items-center gap-1 rounded bg-semantic-warning/10 px-2 text-2xs font-medium text-semantic-warning hover:bg-semantic-warning/20 disabled:opacity-50 transition-colors"
                       >
                         {fieldRestoreMutation.isPending &&
                         fieldRestoreMutation.variables?.logId === row.logId &&

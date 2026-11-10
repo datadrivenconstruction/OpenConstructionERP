@@ -1482,7 +1482,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           type="button"
           onClick={() => openSearch()}
           className={clsx(
-            'group flex items-center gap-2 rounded-md border border-border-light bg-surface-secondary/60 text-[12px] text-content-tertiary hover:border-content-quaternary/30 hover:bg-surface-secondary hover:text-content-secondary transition-colors',
+            'group flex items-center gap-2 rounded-md border border-border-light bg-surface-secondary/60 text-xs text-content-tertiary hover:border-content-quaternary/30 hover:bg-surface-secondary hover:text-content-secondary transition-colors',
             iconified ? 'h-8 w-8 justify-center' : 'w-full px-2.5 py-1.5',
           )}
           aria-label={t('common.search', { defaultValue: 'Search' })}
@@ -1494,7 +1494,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               <span className="truncate">
                 {t('common.search', { defaultValue: 'Search' })}
               </span>
-              <kbd className="ms-auto hidden sm:inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-[9px] font-medium text-content-quaternary group-hover:text-content-tertiary">
+              <kbd className="ms-auto hidden sm:inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-2xs font-medium text-content-quaternary group-hover:text-content-tertiary">
                 ⌘K
               </kbd>
             </>
@@ -1690,7 +1690,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                       // Sentence case as written, not CSS uppercase: that maps
                       // the Turkish dotless and dotted i wrongly unless the
                       // document language is set to match.
-                      className="px-2.5 pb-0.5 pt-2.5 text-[11px] font-semibold text-content-quaternary"
+                      className="px-2.5 pb-0.5 pt-2.5 text-2xs font-semibold text-content-quaternary"
                     >
                       {t(section.labelKey, { defaultValue: section.defaultLabel })}
                     </li>,
@@ -1727,10 +1727,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               <LayoutGrid size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
               {!iconified && (
                 <>
-                  <span className="min-w-0 flex-1 truncate text-left text-[12px] font-medium">
+                  <span className="min-w-0 flex-1 truncate text-left text-xs font-medium">
                     {t('sidebar.more_modules', { defaultValue: 'More modules' })}
                   </span>
-                  <span className="shrink-0 text-[11px] tabular-nums text-content-tertiary">{moreCount}</span>
+                  <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">{moreCount}</span>
                   <ChevronDown
                     size={11}
                     strokeWidth={2}
@@ -1759,7 +1759,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             >
               <Plus size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
               {!iconified && (
-                <span className="min-w-0 flex-1 truncate text-left text-[12px] font-medium">
+                <span className="min-w-0 flex-1 truncate text-left text-xs font-medium">
                   {t('packs.focus_more', { defaultValue: 'Show more modules' })}
                 </span>
               )}
@@ -1843,7 +1843,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             <button
               type="button"
               onClick={enterEditMode}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-light bg-surface-secondary/30 px-2.5 py-1.5 text-[11px] font-medium text-content-secondary hover:border-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-light bg-surface-secondary/30 px-2.5 py-1.5 text-2xs font-medium text-content-secondary hover:border-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
               title={t('sidebar.show_hidden', { defaultValue: 'Show hidden' })}
             >
               <Eye size={12} strokeWidth={2} />
@@ -1881,11 +1881,11 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               aria-hidden
             />
             {iconified ? (
-              <span className="text-[9px] font-semibold tabular-nums leading-none text-content-secondary">
+              <span className="text-2xs font-semibold tabular-nums leading-none text-content-secondary">
                 {moduleCounts.shown}/{moduleCounts.total}
               </span>
             ) : (
-              <span className="text-[11px] font-medium tabular-nums">
+              <span className="text-2xs font-medium tabular-nums">
                 <span className="font-semibold text-content-primary">{moduleCounts.shown}</span>
                 <span className="text-content-tertiary"> / {moduleCounts.total} </span>
                 {t('sidebar.module_count_label', { defaultValue: 'modules' })}
@@ -1930,7 +1930,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             >
               <Pencil size={12} strokeWidth={2} aria-hidden />
               {!iconified && (
-                <span className="text-[11px] font-medium">
+                <span className="text-2xs font-medium">
                   {t('sidebar.edit_menu', { defaultValue: 'Edit menu' })}
                 </span>
               )}
@@ -1962,7 +1962,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 <span className="block text-xs font-semibold text-content-primary leading-tight">
                   {t('nav.add_module', { defaultValue: 'Add module' })}
                 </span>
-                <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
+                <span className="block text-2xs text-content-tertiary leading-tight mt-0.5 truncate">
                   {t('nav.add_module_hint', { defaultValue: 'Build your own · developer guide' })}
                 </span>
               </span>
@@ -2010,7 +2010,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     defaultValue: 'Request a custom module',
                   })}
                 </span>
-                <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
+                <span className="block text-2xs text-content-tertiary leading-tight mt-0.5 truncate">
                   {t('nav.request_custom_module_hint', {
                     defaultValue: 'Missing something? Tell us what you need',
                   })}
@@ -2162,7 +2162,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     )}
                   >
                     <Github size={14} strokeWidth={1.75} aria-hidden className="shrink-0 text-content-secondary" />
-                    <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
+                    <span className="min-w-0 flex-1 text-2xs font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
                       GitHub
                     </span>
                   </a>
@@ -2183,7 +2183,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-[14px] w-[14px] shrink-0 text-content-secondary" aria-hidden>
                       <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z" />
                     </svg>
-                    <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
+                    <span className="min-w-0 flex-1 text-2xs font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
                       {t('sidebar.community_title', { defaultValue: 'Community' })}
                     </span>
                   </a>
@@ -2380,7 +2380,7 @@ function NavGroupSection({
             )}
           >
             {/* Sentence case as written: CSS uppercase maps the Turkish i wrongly. */}
-            <span className="max-w-[75%] truncate text-[11px] font-medium text-content-tertiary group-hover:text-content-secondary">
+            <span className="max-w-[75%] truncate text-2xs font-medium text-content-tertiary group-hover:text-content-secondary">
               {label}
             </span>
             <span className="h-px min-w-[1rem] flex-1 bg-border-light" aria-hidden />
@@ -2453,7 +2453,7 @@ function NavGroupSection({
             )}
             aria-hidden
           />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.085em] text-content-tertiary group-hover:text-content-secondary transition-colors truncate">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary group-hover:text-content-secondary transition-colors truncate">
             {label}
           </span>
         </span>
@@ -2498,7 +2498,7 @@ function NavGroupSection({
       )}
       </div>
       {!isCollapsed && description && (
-        <p className="mb-1 px-2 text-[10px] leading-snug text-content-quaternary">
+        <p className="mb-1 px-2 text-2xs leading-snug text-content-quaternary">
           {description}
         </p>
       )}
@@ -2572,7 +2572,7 @@ function LearnSection({
           <GraduationCap size={12} strokeWidth={2.25} />
         </span>
         <span
-          className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.085em] text-oe-blue/80 dark:text-oe-blue"
+          className="min-w-0 flex-1 truncate text-2xs font-semibold uppercase tracking-wider text-oe-blue/80 dark:text-oe-blue"
         >
           {label}
         </span>
@@ -2603,7 +2603,7 @@ function LearnSection({
               aria-label={t('sidebar.learn.hide', { defaultValue: 'Hide video guides & use cases' })}
               aria-describedby={hintId}
               className={clsx(
-                'flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] font-medium text-content-tertiary',
+                'flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-2xs font-medium text-content-tertiary',
                 'hover:bg-oe-blue/10 hover:text-oe-blue',
                 'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-oe-blue/40',
                 // Fades in with the header's hover or keyboard focus; always
@@ -2624,8 +2624,8 @@ function LearnSection({
               role="tooltip"
               className={clsx(
                 'pointer-events-none absolute inset-x-0 top-full z-20 mt-1',
-                'rounded-lg bg-slate-900 px-2.5 py-2 text-[11px] leading-snug text-white shadow-lg',
-                'ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10',
+                'rounded-lg bg-slate-900 px-2.5 py-2 text-2xs leading-snug text-white shadow-lg',
+                'ring-1 ring-black/5 dark:ring-white/10',
                 'invisible translate-y-1 opacity-0 transition-all duration-150',
                 'group-hover/learnhead:visible group-hover/learnhead:translate-y-0 group-hover/learnhead:opacity-100 group-hover/learnhead:delay-300',
                 'group-focus-within/learnhead:visible group-focus-within/learnhead:translate-y-0 group-focus-within/learnhead:opacity-100',
@@ -2822,8 +2822,8 @@ function SidebarItem({
             'relative flex items-center rounded-md border-l-2 border-transparent',
             'transition-colors duration-fast ease-oe',
             compact
-              ? 'gap-1.5 pl-2 pr-1.5 py-[3px] text-[12px]'
-              : 'gap-2 pl-[10px] pr-2.5 py-1 text-[13px]',
+              ? 'gap-1.5 pl-2 pr-1.5 py-[3px] text-xs'
+              : 'gap-2 pl-[10px] pr-2.5 py-1 text-sm',
             item.highlight && !active
               ? 'font-medium bg-gradient-to-r from-[#7c3aed]/10 to-[#0ea5e9]/10 text-[#6d28d9] hover:from-[#7c3aed]/15 hover:to-[#0ea5e9]/15'
               : active
@@ -2839,7 +2839,7 @@ function SidebarItem({
         {seq != null && (
           <span
             className={clsx(
-              'shrink-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full px-1 text-[9px] font-bold tabular-nums opacity-60 transition-colors',
+              'shrink-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full px-1 text-2xs font-semibold tabular-nums opacity-60 transition-colors',
               isActive
                 ? 'bg-oe-blue/20 text-oe-blue'
                 : 'bg-content-tertiary/15 text-content-tertiary',
@@ -2881,7 +2881,7 @@ function SidebarItem({
           {!compact && (
             <span
               className={clsx(
-                'hidden lg:inline-flex justify-end items-center gap-0.5 text-[9px] font-medium tracking-wide tabular-nums',
+                'hidden lg:inline-flex justify-end items-center gap-0.5 text-2xs font-medium tracking-wide tabular-nums',
                 kbdHint ? 'min-w-[26px]' : 'min-w-0',
                 isActive ? 'text-oe-blue/60' : 'text-content-quaternary',
               )}
@@ -2897,7 +2897,7 @@ function SidebarItem({
           {numericBadge != null && numericBadge > 0 && (
             <span
               className={clsx(
-                'flex h-4 min-w-[1.25rem] items-center justify-center rounded-full text-2xs font-bold px-1 transition-colors',
+                'flex h-4 min-w-[1.25rem] items-center justify-center rounded-full text-2xs font-semibold px-1 transition-colors',
                 isActive
                   ? 'bg-oe-blue text-white'
                   : 'bg-surface-tertiary text-content-secondary',
@@ -2911,7 +2911,7 @@ function SidebarItem({
             <span
               className={clsx(
                 item.badge === 'BETA'
-                  ? 'text-[9px] font-medium uppercase tracking-wide px-1.5 py-px rounded text-content-quaternary bg-surface-tertiary/60 dark:bg-surface-tertiary/40'
+                  ? 'text-2xs font-medium uppercase tracking-wide px-1.5 py-px rounded text-content-quaternary bg-surface-tertiary/60 dark:bg-surface-tertiary/40'
                   : item.highlight
                     ? 'text-2xs font-semibold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
                     : 'text-2xs font-semibold px-1.5 py-0.5 rounded-full text-content-tertiary',
@@ -3133,7 +3133,7 @@ function AdminGrid({
                 aria-hidden
                 className="shrink-0"
               />
-              <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="min-w-0 flex-1 text-2xs font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis">
                 {label}
               </span>
               {editable && (
@@ -3194,11 +3194,11 @@ export function FloatingRecentButton() {
                     to={item.url}
                     onClick={() => setOpen(false)}
                     title={item.title}
-                    className="flex items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
                   >
                     <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
                     <span className="truncate flex-1">{item.title}</span>
-                    <span className="text-[10px] text-content-quaternary shrink-0 tabular-nums">
+                    <span className="text-2xs text-content-quaternary shrink-0 tabular-nums">
                       {new Date(item.visitedAt).toLocaleTimeString(getIntlLocale(), { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </NavLink>

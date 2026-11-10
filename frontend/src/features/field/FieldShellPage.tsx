@@ -103,28 +103,28 @@ function HowFieldWorks() {
 
   const steps = [
     {
-      icon: <Smartphone size={14} className="text-sky-600" />,
+      icon: <Smartphone size={14} className="text-semantic-info" />,
       title: t('field.flow_1_title', { defaultValue: 'Sign in' }),
       desc: t('field.flow_1_desc', {
         defaultValue: 'Open the link from your SMS and enter your PIN - no password needed.',
       }),
     },
     {
-      icon: <ClipboardList size={14} className="text-sky-600" />,
+      icon: <ClipboardList size={14} className="text-semantic-info" />,
       title: t('field.flow_2_title', { defaultValue: 'Log today' }),
       desc: t('field.flow_2_desc', {
         defaultValue: 'Record your hours and the progress on the jobs you worked today.',
       }),
     },
     {
-      icon: <Camera size={14} className="text-sky-600" />,
+      icon: <Camera size={14} className="text-semantic-info" />,
       title: t('field.flow_3_title', { defaultValue: 'Capture' }),
       desc: t('field.flow_3_desc', {
         defaultValue: 'Add site photos and notes - it all works even with no signal.',
       }),
     },
     {
-      icon: <RefreshCw size={14} className="text-sky-600" />,
+      icon: <RefreshCw size={14} className="text-semantic-info" />,
       title: t('field.flow_4_title', { defaultValue: 'Auto-sync' }),
       desc: t('field.flow_4_desc', {
         defaultValue: 'Saved offline and sent to the office automatically when you are back online.',
@@ -135,7 +135,7 @@ function HowFieldWorks() {
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-        <Network size={15} className="text-sky-600" />
+        <Network size={15} className="text-semantic-info" />
         {t('field.flow_title', { defaultValue: 'How field work connects' })}
       </h2>
       <p className="mt-1 text-xs text-slate-500">
@@ -150,7 +150,7 @@ function HowFieldWorks() {
             key={s.title}
             className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3"
           >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-50 text-2xs font-bold text-sky-600">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-semantic-info-bg text-2xs font-semibold text-semantic-info">
               {i + 1}
             </span>
             <div className="min-w-0">
@@ -168,19 +168,19 @@ function HowFieldWorks() {
         <span className="font-medium text-slate-600">
           {t('field.flow_feeds', { defaultValue: 'Feeds the office:' })}
         </span>{' '}
-        <Link to="/schedule" className="font-medium text-sky-600 hover:underline">
+        <Link to="/schedule" className="font-medium text-semantic-info hover:underline">
           {t('field.mod_schedule', { defaultValue: 'Schedule' })}
         </Link>{' '}
         ·{' '}
-        <Link to="/payroll" className="font-medium text-sky-600 hover:underline">
+        <Link to="/payroll" className="font-medium text-semantic-info hover:underline">
           {t('field.mod_payroll', { defaultValue: 'Payroll' })}
         </Link>{' '}
         ·{' '}
-        <Link to="/inspections" className="font-medium text-sky-600 hover:underline">
+        <Link to="/inspections" className="font-medium text-semantic-info hover:underline">
           {t('field.mod_inspections', { defaultValue: 'Inspections' })}
         </Link>{' '}
         ·{' '}
-        <Link to="/safety" className="font-medium text-sky-600 hover:underline">
+        <Link to="/safety" className="font-medium text-semantic-info hover:underline">
           {t('field.mod_safety', { defaultValue: 'Safety' })}
         </Link>
       </div>
@@ -335,7 +335,7 @@ export function FieldShellPage() {
               aria-current={active ? 'page' : undefined}
               aria-label={tabLabel}
               className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-xs ${
-                active ? 'text-sky-600' : 'text-slate-500'
+                active ? 'text-semantic-info' : 'text-slate-500'
               }`}
             >
               <Icon size={28} aria-hidden="true" />

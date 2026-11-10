@@ -276,7 +276,7 @@ export function TimelineScrubber({
             const v = Number(e.target.value) as FourDTimelinePlaybackSpeed;
             if (SPEEDS.includes(v)) onSpeedChange(v);
           }}
-          className="shrink-0 text-[11px] py-1 px-1.5 rounded border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="shrink-0 text-2xs py-1 px-1.5 rounded border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
           aria-label={t('bim.4d_speed', { defaultValue: 'Playback speed' })}
           data-testid="bim-4d-speed"
         >
@@ -290,7 +290,7 @@ export function TimelineScrubber({
 
       {/* Date tick labels — render at 25% / 50% / 75% so users orient
           without cluttering the rail itself. */}
-      <div className="relative h-3 text-[9px] text-content-tertiary tabular-nums select-none">
+      <div className="relative h-3 text-2xs text-content-tertiary tabular-nums select-none">
         <span
           className="absolute -translate-x-1/2"
           style={{ left: '25%' }}
@@ -315,7 +315,7 @@ export function TimelineScrubber({
       </div>
 
       {/* Current date + active activity name */}
-      <div className="flex items-center justify-between gap-3 text-[11px]">
+      <div className="flex items-center justify-between gap-3 text-2xs">
         <span
           className="inline-flex items-center gap-1 text-content-primary font-medium tabular-nums"
           data-testid="bim-4d-current-date"

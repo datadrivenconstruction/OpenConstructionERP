@@ -363,7 +363,7 @@ export function ConnectorsTab({ projectId }: { projectId: string }) {
                         onClick={() => handleDelete(c)}
                         title={t('common.delete', { defaultValue: 'Delete' })}
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-red-50 hover:text-red-600 transition-colors dark:hover:bg-red-950/30"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -413,7 +413,7 @@ function SyncResultPanel({ log }: { log: SyncLog }) {
     ) : log.status === 'failed' ? (
       <XCircle size={14} className="text-semantic-error" />
     ) : (
-      <AlertTriangle size={14} className="text-amber-500" />
+      <AlertTriangle size={14} className="text-semantic-warning" />
     );
   return (
     <div className="mt-3 rounded-lg border border-border-light bg-surface-secondary/40 p-3 text-xs">
@@ -451,12 +451,12 @@ function SyncResultPanel({ log }: { log: SyncLog }) {
         </ul>
       )}
       {log.warnings.map((w, i) => (
-        <p key={`w${i}`} className="mt-1 text-amber-600 dark:text-amber-400">
+        <p key={`w${i}`} className="mt-1 text-semantic-warning">
           {w}
         </p>
       ))}
       {log.errors.map((e, i) => (
-        <p key={`e${i}`} className="mt-1 text-red-600 dark:text-red-400">
+        <p key={`e${i}`} className="mt-1 text-semantic-error">
           {e}
         </p>
       ))}

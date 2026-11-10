@@ -79,7 +79,7 @@ export function ReviewPromptCard() {
     'group inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5',
     'text-xs font-medium transition-colors',
     'border-border-light bg-surface-primary text-content-primary',
-    'hover:border-amber-400 hover:bg-amber-50',
+    'hover:border-semantic-warning/60 hover:bg-semantic-warning-bg',
     'dark:hover:border-amber-500/50 dark:hover:bg-amber-950/40',
   );
 
@@ -91,7 +91,7 @@ export function ReviewPromptCard() {
       className={clsx(
         'oe-dock-aware fixed bottom-4 right-4 z-[60] w-[min(22rem,calc(100vw-2rem))]',
         'rounded-xl border p-3.5 shadow-lg animate-card-in',
-        'border-amber-300/60 bg-surface-elevated',
+        'border-semantic-warning/30 bg-surface-elevated',
         'dark:border-amber-500/30',
       )}
     >
@@ -105,7 +105,7 @@ export function ReviewPromptCard() {
       </button>
 
       <div className="flex items-start gap-2.5 pr-6">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-300">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-warning/15 text-semantic-warning">
           <Star size={16} className="fill-current" />
         </div>
         <div className="min-w-0 flex-1">

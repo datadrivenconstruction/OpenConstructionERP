@@ -86,7 +86,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
             onClick={toggleWeather}
             aria-pressed={weatherEnabled}
             title={t('widget_settings.toggle_weather', { defaultValue: 'Toggle weather forecast' })}
-            className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+            className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-2xs font-medium transition-colors ${
               weatherEnabled
                 ? 'bg-oe-blue-subtle text-oe-blue-text'
                 : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'
@@ -95,7 +95,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
             <CloudSun size={11} />
             {t('widget_settings.weather', { defaultValue: 'Weather' })}
           </button>
-          <span className="text-[10px] tabular-nums text-content-tertiary">{groups.length}</span>
+          <span className="text-2xs tabular-nums text-content-tertiary">{groups.length}</span>
         </span>
       </div>
       <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 overflow-hidden p-2">
@@ -117,7 +117,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
                 </span>
                 <span className="truncate text-xs font-semibold text-content-primary">{city}</span>
                 {rows.length > 1 && (
-                  <span className="shrink-0 text-[10px] tabular-nums text-content-tertiary">
+                  <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">
                     {rows.length}
                   </span>
                 )}
@@ -133,7 +133,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
                   />
                 )
               ) : (
-                <span className="pl-6 text-[10px] text-content-quaternary">
+                <span className="pl-6 text-2xs text-content-quaternary">
                   {t('dashboard.sites_no_location', { defaultValue: 'No location set' })}
                 </span>
               )}

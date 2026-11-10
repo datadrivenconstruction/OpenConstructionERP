@@ -319,7 +319,7 @@ function RowActions({
         size="sm"
         onClick={onDelete}
         title={t('common.delete', { defaultValue: 'Delete' })}
-        className="!p-1 text-content-quaternary hover:text-red-500 h-auto"
+        className="!p-1 text-content-quaternary hover:text-semantic-error h-auto"
       >
         <Trash2 size={13} />
       </Button>
@@ -336,7 +336,7 @@ function DashKPI({
 }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">
         {label}
       </p>
       <p className="mt-0.5 text-sm font-semibold text-content-primary tabular-nums">
@@ -924,7 +924,7 @@ export function VariationsPage() {
             </h3>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+                <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                   {t('variations.agreed_variations', {
                     defaultValue: 'Agreed variations',
                   })}
@@ -937,7 +937,7 @@ export function VariationsPage() {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+                <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                   {t('variations.pending_requests', {
                     defaultValue: 'Pending requests',
                   })}
@@ -950,7 +950,7 @@ export function VariationsPage() {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+                <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                   {t('variations.forecast_additional', {
                     defaultValue: 'Forecast additional',
                   })}

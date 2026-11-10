@@ -92,22 +92,22 @@ function getStatusColor(status: BenchmarkStatus): {
       return {
         text: 'text-semantic-success',
         bg: 'bg-semantic-success-bg',
-        indicator: 'bg-green-500',
-        bar: 'bg-green-500',
+        indicator: 'bg-semantic-success',
+        bar: 'bg-semantic-success',
       };
     case 'near_edge':
       return {
-        text: 'text-amber-600',
-        bg: 'bg-amber-50',
-        indicator: 'bg-amber-500',
-        bar: 'bg-amber-500',
+        text: 'text-semantic-warning',
+        bg: 'bg-semantic-warning-bg',
+        indicator: 'bg-semantic-warning',
+        bar: 'bg-semantic-warning',
       };
     case 'outside':
       return {
         text: 'text-semantic-error',
         bg: 'bg-semantic-error-bg',
-        indicator: 'bg-red-500',
-        bar: 'bg-red-500',
+        indicator: 'bg-semantic-error',
+        bar: 'bg-semantic-error',
       };
   }
 }
@@ -181,7 +181,7 @@ const RangeIndicator = memo(function RangeIndicator({
       <div className="relative h-3 w-full rounded-full bg-surface-secondary overflow-hidden">
         {/* Benchmark range highlight */}
         <div
-          className="absolute top-0 h-full bg-green-100 dark:bg-green-900/30"
+          className="absolute top-0 h-full bg-semantic-success-bg"
           style={{
             left: `${rangeStartPct}%`,
             width: `${rangeEndPct - rangeStartPct}%`,
@@ -334,7 +334,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                     {t('costmodel.benchmark_cost_per_unit', { defaultValue: 'Cost / {{unit}}', unit: rateUnit })}
                   </div>
                   <div
-                    className={`text-xl font-bold tabular-nums ${currencyMismatch ? 'text-content-primary' : getStatusColor(benchmark.status).text}`}
+                    className={`text-xl font-semibold tabular-nums ${currencyMismatch ? 'text-content-primary' : getStatusColor(benchmark.status).text}`}
                   >
                     {/* RATE (reciprocal): EUR/m2 -> EUR/ft2 for imperial */}
                     {fmtRate(benchmark.costPerM2)}

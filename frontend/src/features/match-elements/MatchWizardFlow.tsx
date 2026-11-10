@@ -261,7 +261,7 @@ function StageRail({
                   isCurrent
                     ? 'bg-oe-blue text-white'
                     : isDone
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-semantic-success text-white'
                       : 'bg-surface-secondary text-content-secondary',
                 )}
               >
@@ -329,9 +329,9 @@ function StatTile({
       className={clsx(
         'rounded-lg border px-4 py-3',
         tone === 'good'
-          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20'
+          ? 'border-semantic-success/30 bg-semantic-success-bg'
           : tone === 'warn'
-            ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20'
+            ? 'border-semantic-warning/30 bg-semantic-warning-bg'
             : 'border-border-light bg-surface-secondary',
       )}
     >
@@ -353,20 +353,20 @@ const LANE_ACCENT: Record<
   { dot: string; ring: string; count: string }
 > = {
   needs_you: {
-    dot: 'bg-rose-500',
-    ring: 'border-rose-200 dark:border-rose-900/50',
-    count: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
+    dot: 'bg-semantic-error',
+    ring: 'border-semantic-error/30',
+    count: 'bg-semantic-error-bg text-semantic-error',
   },
   quick_review: {
-    dot: 'bg-amber-500',
-    ring: 'border-amber-200 dark:border-amber-900/50',
-    count: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+    dot: 'bg-semantic-warning',
+    ring: 'border-semantic-warning/30',
+    count: 'bg-semantic-warning-bg text-semantic-warning',
   },
   auto_confirmed: {
-    dot: 'bg-emerald-500',
-    ring: 'border-emerald-200 dark:border-emerald-900/50',
+    dot: 'bg-semantic-success',
+    ring: 'border-semantic-success/30',
     count:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
+      'bg-semantic-success-bg text-semantic-success',
   },
 };
 
@@ -375,14 +375,14 @@ function BandChip({ band }: { band: GroupSummary['confidence_band'] }) {
   const { t } = useTranslation();
   const cls =
     band === 'high'
-      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'
+      ? 'bg-semantic-success-bg text-semantic-success'
       : band === 'medium'
-        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'
+        ? 'bg-semantic-warning-bg text-semantic-warning'
         : band === 'low'
-          ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'
-          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+          ? 'bg-semantic-error-bg text-semantic-error'
+          : 'bg-surface-secondary text-content-secondary';
   return (
-    <span className={clsx('rounded-full px-2 py-0.5 text-[11px] font-medium', cls)}>
+    <span className={clsx('rounded-full px-2 py-0.5 text-2xs font-medium', cls)}>
       {t(`match.confidence_band_${band}`, {
         defaultValue:
           band === 'high'
@@ -434,7 +434,7 @@ function LaneSection({
             <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
             <span
               className={clsx(
-                'rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
+                'rounded-full px-2 py-0.5 text-2xs font-semibold tabular-nums',
                 accent.count,
               )}
             >
@@ -501,12 +501,12 @@ function LaneSection({
             <BandChip band={g.confidence_band} />
             <span
               className={clsx(
-                'rounded-full px-2 py-0.5 text-[11px]',
+                'rounded-full px-2 py-0.5 text-2xs',
                 g.status === 'confirmed' || g.status === 'applied'
-                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'
+                  ? 'bg-semantic-success-bg text-semantic-success'
                   : g.status === 'suggested'
-                    ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+                    ? 'bg-surface-secondary text-content-secondary'
+                    : 'bg-surface-secondary text-content-tertiary',
               )}
             >
               {t(`match.group_status_${g.status}`, { defaultValue: g.status })}
@@ -1242,8 +1242,8 @@ export function MatchWizardFlow() {
           retries, occasional stale-cache shape mismatches, ranker
           tuning). The banner sets the right expectation and gives a
           1-click path to file an issue against the public repo. */}
-      <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-amber-200/60 bg-gradient-to-r from-amber-50/80 via-white to-white px-3 py-2 shadow-sm dark:border-amber-800/40 dark:from-amber-950/20 dark:via-surface-primary dark:to-surface-primary">
-        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-amber-300/60 bg-amber-100/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-900 dark:border-amber-700/40 dark:bg-amber-900/40 dark:text-amber-100">
+      <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-semantic-warning/30 bg-gradient-to-r from-amber-50/80 via-white to-white px-3 py-2 shadow-sm dark:from-amber-950/20 dark:via-surface-primary dark:to-surface-primary">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-semantic-warning">
           <Sparkles className="h-2.5 w-2.5" />
           {t('match_elements.beta_badge', { defaultValue: 'Beta' })}
         </span>
@@ -1257,7 +1257,7 @@ export function MatchWizardFlow() {
           href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new?labels=match-elements&template=bug_report.yml"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-300/60 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow-sm transition-all hover:-translate-y-px hover:bg-amber-50 dark:border-amber-700/40 dark:bg-surface-primary/80 dark:text-amber-100 dark:hover:bg-amber-900/30"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-semantic-warning/30 bg-white/90 px-2.5 py-1 text-2xs font-semibold text-semantic-warning shadow-sm transition-all hover:-translate-y-px hover:bg-semantic-warning-bg dark:bg-surface-primary/80"
         >
           <MessageSquarePlus className="h-3 w-3" />
           {t('match_elements.beta_cta', { defaultValue: 'Open an issue' })}
@@ -1336,7 +1336,7 @@ export function MatchWizardFlow() {
           <ol className="grid gap-1.5 sm:grid-cols-2">
             {STAGES.map((s) => (
               <li key={s.id} className="flex gap-2">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[11px] font-semibold text-oe-blue">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue">
                   {s.index}
                 </span>
                 <span>
@@ -1397,7 +1397,7 @@ export function MatchWizardFlow() {
                     uploadHref={projectId ? `/bim?project=${projectId}` : '/bim'}
                   />
                   {modelsQ.isError ? (
-                    <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-200">
+                    <div className="mt-4 rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-4 text-sm text-semantic-error">
                       <div className="font-medium">
                         {t('match.wizard.modelsError', {
                           defaultValue: 'Could not load BIM models',
@@ -1423,7 +1423,7 @@ export function MatchWizardFlow() {
                   ) : (
                     !modelsQ.isLoading &&
                     (modelsQ.data ?? []).length === 0 && (
-                      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+                      <div className="mt-4 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
                         {t('match.wizard.noModels', {
                           defaultValue:
                             'This project has no ready BIM models yet. Upload and convert one first.',
@@ -1498,7 +1498,7 @@ export function MatchWizardFlow() {
                       {autoBlocked && (
                         <p
                           data-testid="catalogue-auto-blocked"
-                          className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300"
+                          className="mt-1 text-xs font-medium text-semantic-warning"
                         >
                           {autoBlocked === 'region_language_unknown'
                             ? t('match.wizard.catalogueAutoMultiLanguage', {
@@ -1592,7 +1592,7 @@ export function MatchWizardFlow() {
                             baseCurrency &&
                             displayCurrency !== baseCurrency &&
                             !displayFx
-                            ? 'text-amber-600 dark:text-amber-400'
+                            ? 'text-semantic-warning'
                             : 'text-content-tertiary',
                         )}
                       >
@@ -1738,7 +1738,7 @@ export function MatchWizardFlow() {
                             })}
                           </span>
                           {aiConnected ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success/10 px-2 py-0.5 text-2xs font-medium text-semantic-success">
                               <Check className="h-3 w-3" />
                               {t('match.wizard.aiConnected', {
                                 defaultValue: 'AI connected',
@@ -1748,7 +1748,7 @@ export function MatchWizardFlow() {
                                 : ''}
                             </span>
                           ) : (
-                            <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-[11px] font-medium text-content-tertiary">
+                            <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
                               {t('match.wizard.aiNotConnected', {
                                 defaultValue: 'Not connected',
                               })}
@@ -1821,7 +1821,7 @@ export function MatchWizardFlow() {
                     })}
                   </p>
                   {!sessionId ? (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+                    <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
                       <div className="font-medium">
                         {t('match.wizard.noSession', {
                           defaultValue: 'No match session yet',
@@ -2039,7 +2039,7 @@ export function MatchWizardFlow() {
                               })}
                             </div>
                             {applyResult.positions.some((p) => Number(p.unit_rate) === 0) && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-medium text-semantic-warning">
                                 {t('match.wizard.zeroRateWarning', {
                                   defaultValue:
                                     '{{n}} line(s) have no rate yet',
@@ -2086,12 +2086,12 @@ export function MatchWizardFlow() {
                                           {p.description}
                                         </div>
                                         {p.section_path.length > 0 && (
-                                          <div className="mt-0.5 text-[11px] text-content-tertiary">
+                                          <div className="mt-0.5 text-2xs text-content-tertiary">
                                             {p.section_path.join(' · ')}
                                           </div>
                                         )}
                                         {p.resources.length > 0 && (
-                                          <div className="mt-0.5 text-[11px] text-content-tertiary">
+                                          <div className="mt-0.5 text-2xs text-content-tertiary">
                                             {t('match.wizard.resourceCount', {
                                               defaultValue: '{{n}} resource sub-rows',
                                               n: p.resources.length,
@@ -2111,7 +2111,7 @@ export function MatchWizardFlow() {
                                         className={clsx(
                                           'px-3 py-2 text-right tabular-nums',
                                           zeroRate
-                                            ? 'text-amber-700 dark:text-amber-300'
+                                            ? 'text-semantic-warning'
                                             : 'text-content-secondary',
                                         )}
                                       >
@@ -2154,8 +2154,8 @@ export function MatchWizardFlow() {
                           </Button>
                         </div>
                       ) : (
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-900/20">
-                          <div className="flex items-center gap-2 font-medium text-emerald-800 dark:text-emerald-200">
+                        <div className="rounded-lg border border-semantic-success/30 bg-semantic-success-bg p-4">
+                          <div className="flex items-center gap-2 font-medium text-semantic-success">
                             <CheckCircle2 className="h-5 w-5" />
                             {t('match.wizard.done', {
                               defaultValue: 'Bill of quantities created.',

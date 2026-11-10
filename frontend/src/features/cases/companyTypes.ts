@@ -75,10 +75,10 @@ export const COMPANY_TYPE_META: CompanyTypeMeta[] = [
     descDefault: 'Prices, measures and controls cost on behalf of a client',
     icon: Calculator,
     tint: {
-      tile: 'bg-green-500/10 text-green-600 ring-green-500/20 dark:text-green-400',
-      chip: 'border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-300',
+      tile: 'bg-semantic-success/10 text-semantic-success ring-green-500/20 dark:text-green-400',
+      chip: 'border-green-500/40 bg-semantic-success/10 text-semantic-success dark:text-green-300',
       accent: 'border-l-green-400/60',
-      text: 'text-green-600 dark:text-green-400',
+      text: 'text-semantic-success',
     },
   },
   {
@@ -114,10 +114,10 @@ export const COMPANY_TYPE_META: CompanyTypeMeta[] = [
     descDefault: 'Coordinates the programme, the trades and the client',
     icon: ClipboardList,
     tint: {
-      tile: 'bg-yellow-500/10 text-yellow-600 ring-yellow-500/20 dark:text-yellow-400',
-      chip: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
+      tile: 'bg-semantic-warning/10 text-semantic-warning ring-yellow-500/20 dark:text-yellow-400',
+      chip: 'border-yellow-500/40 bg-semantic-warning/10 text-semantic-warning dark:text-yellow-300',
       accent: 'border-l-yellow-400/60',
-      text: 'text-yellow-600 dark:text-yellow-400',
+      text: 'text-semantic-warning',
     },
   },
   {

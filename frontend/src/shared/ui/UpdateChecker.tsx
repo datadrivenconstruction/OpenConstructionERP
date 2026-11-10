@@ -678,11 +678,11 @@ export function UpdateBadge() {
       onClick={() => navigate('/about')}
       title={label}
       aria-label={label}
-      className="relative mx-auto mb-2 mt-3 flex h-8 w-8 items-center justify-center rounded-lg text-sky-600 hover:bg-sky-500/10 dark:text-sky-300"
+      className="relative mx-auto mb-2 mt-3 flex h-8 w-8 items-center justify-center rounded-lg text-semantic-info hover:bg-semantic-info/10"
     >
       <Sparkles size={16} strokeWidth={2.25} />
       <span
-        className="absolute right-1 top-1 h-2 w-2 rounded-full bg-sky-500 ring-2 ring-surface-primary"
+        className="absolute right-1 top-1 h-2 w-2 rounded-full bg-semantic-info ring-2 ring-surface-primary"
         aria-hidden="true"
       />
     </button>
@@ -706,7 +706,7 @@ export function UpdateInlineNotice({ className = '' }: { className?: string }) {
     <div
       className={`flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm dark:border-sky-800 dark:bg-sky-950 ${className}`}
     >
-      <Sparkles size={14} className="shrink-0 text-sky-500" />
+      <Sparkles size={14} className="shrink-0 text-semantic-info" />
       <span className="text-content-secondary">
         {release.current_version
           ? t('settings.update_available_inline', {
@@ -775,14 +775,14 @@ export function UpdateNotification() {
             <div className="flex items-center gap-2">
               <div className="relative shrink-0">
                 <span
-                  className="absolute inset-0 rounded-md bg-sky-500/35 animate-ping"
+                  className="absolute inset-0 rounded-md bg-semantic-info/35 animate-ping"
                   aria-hidden="true"
                 />
                 <div className="relative flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-blue-500/30">
                   <Sparkles size={12} strokeWidth={2.5} />
                 </div>
               </div>
-              <span className="flex-1 text-[13px] font-bold text-blue-900 dark:text-sky-100 tabular-nums leading-tight break-words">
+              <span className="flex-1 text-sm font-semibold text-blue-900 dark:text-sky-100 tabular-nums leading-tight break-words">
                 {/* The arrow needs both ends to mean anything. A body that
                     named the new version but not the running one would
                     otherwise read "v → v15.1.0". */}
@@ -790,12 +790,12 @@ export function UpdateNotification() {
                   ? `v${release.current_version} → v${release.latest_version}`
                   : `v${release.latest_version}`}
               </span>
-              <span className="shrink-0 inline-flex items-center rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+              <span className="shrink-0 inline-flex items-center rounded-full bg-semantic-success/15 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-semantic-success dark:text-emerald-300">
                 {t('update.new_available', { defaultValue: 'available' })}
               </span>
             </div>
             {(relativeDate || (grouped && grouped.totalCount > 0)) && (
-              <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 pl-8 text-[11px] text-blue-700/75 dark:text-sky-300/65 tabular-nums">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 pl-8 text-2xs text-blue-700/75 dark:text-sky-300/65 tabular-nums">
                 {relativeDate && <span>{relativeDate}</span>}
                 {grouped && grouped.totalCount > 0 && (
                   <>
@@ -810,7 +810,7 @@ export function UpdateNotification() {
                 )}
               </div>
             )}
-            <div className="mt-2 flex items-center justify-end gap-1 text-[11px] font-semibold text-blue-600 dark:text-sky-300">
+            <div className="mt-2 flex items-center justify-end gap-1 text-2xs font-semibold text-blue-600 dark:text-sky-300">
               {t('update.details', { defaultValue: 'Details' })}
               <ExternalLink size={11} />
             </div>
@@ -819,7 +819,7 @@ export function UpdateNotification() {
         <button
           onClick={handleDismiss}
           aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
-          className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded text-sky-500/70 hover:text-blue-700 hover:bg-sky-500/20 dark:hover:bg-sky-400/20 transition-colors"
+          className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded text-sky-500/70 hover:text-blue-700 hover:bg-semantic-info/20 dark:hover:bg-sky-400/20 transition-colors"
         >
           <X size={11} />
         </button>
@@ -858,7 +858,7 @@ function HighlightGroup({
         <span className={`flex h-3 w-3 items-center justify-center rounded ${iconClass}`}>
           {icon}
         </span>
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-blue-700/75 dark:text-sky-300/65">
+        <span className="text-2xs font-semibold uppercase tracking-wider text-blue-700/75 dark:text-sky-300/65">
           {label}
         </span>
       </div>
@@ -866,13 +866,13 @@ function HighlightGroup({
         {items.map((line, i) => (
           <li
             key={i}
-            className="text-[10px] leading-snug text-blue-900/85 dark:text-sky-100/85 line-clamp-2"
+            className="text-2xs leading-snug text-blue-900/85 dark:text-sky-100/85 line-clamp-2"
           >
             {line}
           </li>
         ))}
         {hiddenCount > 0 && (
-          <li className="text-[10px] italic text-blue-600/65 dark:text-sky-400/55">
+          <li className="text-2xs italic text-blue-600/65 dark:text-sky-400/55">
             {t('update.more_count', {
               defaultValue: '+ {{count}} more',
               count: hiddenCount,
@@ -1062,7 +1062,7 @@ function UpdateFullModal({
         <div className="relative px-6 py-5 bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 dark:from-sky-950/50 dark:via-blue-950/40 dark:to-cyan-950/30 border-b border-border">
           <div className="flex items-start gap-3">
             <div className="relative shrink-0">
-              <span className="absolute inset-0 rounded-xl bg-sky-500/30 animate-ping" aria-hidden="true" />
+              <span className="absolute inset-0 rounded-xl bg-semantic-info/30 animate-ping" aria-hidden="true" />
               <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-blue-500/40">
                 <Sparkles size={20} strokeWidth={2.5} />
               </div>
@@ -1070,7 +1070,7 @@ function UpdateFullModal({
             <div className="flex-1 min-w-0">
               <h2
                 id="update-fullmodal-title"
-                className="text-xl font-bold text-content-primary leading-tight"
+                className="text-xl font-semibold text-content-primary leading-tight"
               >
                 {t('update.popup_title', {
                   defaultValue: 'Update available - v{{version}}',
@@ -1125,7 +1125,7 @@ function UpdateFullModal({
                 {grouped.added.length > 0 && (
                   <HighlightGroup
                     icon={<Plus size={10} />}
-                    iconClass="text-sky-600 dark:text-sky-300 bg-sky-500/20"
+                    iconClass="text-semantic-info bg-semantic-info/20"
                     label={t('update.group_new', { defaultValue: 'New' })}
                     items={grouped.added.slice(0, 6)}
                     hiddenCount={Math.max(0, grouped.added.length - 6)}
@@ -1157,7 +1157,7 @@ function UpdateFullModal({
                           key={i}
                           className="flex items-start gap-2 text-sm leading-snug text-content-primary"
                         >
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500/70" />
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-semantic-info/70" />
                           <span>{line}</span>
                         </li>
                       ))}
@@ -1247,7 +1247,7 @@ function UpdateFullModal({
               )}
               {upgradeStatus === 'running' && (
                 <div className="flex items-center gap-3">
-                  <Loader2 size={18} className="animate-spin text-sky-600 dark:text-sky-400" />
+                  <Loader2 size={18} className="animate-spin text-semantic-info dark:text-sky-400" />
                   <div className="text-sm text-content-primary">
                     {t('update.running', {
                       defaultValue: 'Running pip install - this can take a minute on first download…',
@@ -1257,7 +1257,7 @@ function UpdateFullModal({
               )}
               {upgradeStatus === 'done' && upgradeResult && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-semantic-success dark:text-emerald-300">
                     <Check size={16} />
                     {t('update.installed', {
                       defaultValue: 'Installed v{{version}}',
@@ -1265,7 +1265,7 @@ function UpdateFullModal({
                     })}
                   </div>
                   {upgradeResult.restart_required && (
-                    <div className="rounded-lg bg-amber-500/15 px-3 py-2 text-2xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+                    <div className="rounded-lg bg-semantic-warning/15 px-3 py-2 text-2xs text-semantic-warning dark:text-amber-300 flex items-start gap-2">
                       <RotateCcw size={12} className="mt-0.5 shrink-0" />
                       <span>{upgradeResult.restart_hint}</span>
                     </div>
@@ -1275,7 +1275,7 @@ function UpdateFullModal({
                       <summary className="cursor-pointer text-content-tertiary">
                         {t('update.show_log', { defaultValue: 'Show pip log' })}
                       </summary>
-                      <pre className="mt-1 max-h-40 overflow-auto rounded-md bg-surface-secondary/60 p-2 text-[10px] leading-snug font-mono whitespace-pre-wrap">
+                      <pre className="mt-1 max-h-40 overflow-auto rounded-md bg-surface-secondary/60 p-2 text-2xs leading-snug font-mono whitespace-pre-wrap">
                         {upgradeResult.stdout.slice(-2000)}
                       </pre>
                     </details>
@@ -1284,10 +1284,10 @@ function UpdateFullModal({
               )}
               {upgradeStatus === 'error' && (
                 <div className="space-y-2">
-                  <div className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                  <div className="text-sm font-semibold text-semantic-error dark:text-rose-300">
                     {t('update.error', { defaultValue: 'Upgrade failed' })}
                   </div>
-                  <pre className="max-h-40 overflow-auto rounded-md bg-rose-500/10 p-2 text-[10px] leading-snug font-mono text-rose-700 dark:text-rose-300 whitespace-pre-wrap">
+                  <pre className="max-h-40 overflow-auto rounded-md bg-semantic-error/10 p-2 text-2xs leading-snug font-mono text-semantic-error dark:text-rose-300 whitespace-pre-wrap">
                     {upgradeError ?? 'unknown error'}
                   </pre>
                   <div className="text-2xs text-content-tertiary">
@@ -1403,7 +1403,7 @@ function UpdateFullModal({
                     >
                       {copiedKey === m.key ? (
                         <>
-                          <Check size={11} className="text-sky-500" />
+                          <Check size={11} className="text-semantic-info" />
                           {t('common.copied', { defaultValue: 'Copied' })}
                         </>
                       ) : (
@@ -1414,7 +1414,7 @@ function UpdateFullModal({
                       )}
                     </button>
                   </div>
-                  <pre className="px-3 py-2.5 text-[11px] leading-relaxed font-mono text-content-primary bg-surface-secondary/40 overflow-x-auto whitespace-pre">
+                  <pre className="px-3 py-2.5 text-2xs leading-relaxed font-mono text-content-primary bg-surface-secondary/40 overflow-x-auto whitespace-pre">
                     {m.cmd}
                   </pre>
                 </div>

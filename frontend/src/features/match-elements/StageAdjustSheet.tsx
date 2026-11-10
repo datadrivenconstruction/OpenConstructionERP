@@ -190,12 +190,12 @@ export function StageAdjustSheet({
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider text-content-tertiary font-semibold">
+            <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
               {t('match_elements.pipeline.adjust_stage', 'Adjust stage')}
             </div>
             <h2
               id="stage-adjust-title"
-              className="text-base font-bold text-content-primary truncate"
+              className="text-base font-semibold text-content-primary truncate"
             >
               {stage.title}
             </h2>
@@ -220,7 +220,7 @@ export function StageAdjustSheet({
           {/* Group-by knob */}
           {stage.stage_name === 'group' && (
             <div>
-              <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+              <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                 {t('match_elements.pipeline.group_by', 'Group by keys')}
               </label>
               <input
@@ -229,7 +229,7 @@ export function StageAdjustSheet({
                 placeholder="ifc_class, predefined_type"
                 className="mt-1 w-full text-xs px-2.5 py-2 rounded-lg border border-border bg-surface-primary text-content-primary font-mono"
               />
-              <p className="mt-1 text-[11px] text-content-tertiary">
+              <p className="mt-1 text-2xs text-content-tertiary">
                 {t(
                   'match_elements.pipeline.group_by_hint',
                   'Comma-separated. RVT → category, type_name · IFC → ifc_class, predefined_type · DWG → layer, block_name',
@@ -242,7 +242,7 @@ export function StageAdjustSheet({
           {stage.stage_name === 'match' && (
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+                <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                   {t('match_elements.pipeline.method', 'Method')}
                 </label>
                 <div className="mt-1 flex gap-1.5 flex-wrap">
@@ -266,7 +266,7 @@ export function StageAdjustSheet({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+                  <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                     {t('match_elements.pipeline.max_groups', 'Max groups')}
                   </label>
                   <input
@@ -279,7 +279,7 @@ export function StageAdjustSheet({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+                  <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                     Top-K
                   </label>
                   <input
@@ -298,7 +298,7 @@ export function StageAdjustSheet({
           {/* LLM prompt + provider */}
           {stage.uses_llm && stage.prompt_key && (
             <div className="space-y-3 border-t border-border pt-3">
-              <div className="flex items-start gap-1.5 text-[11px] text-content-tertiary bg-surface-secondary border border-border rounded-lg px-2.5 py-2">
+              <div className="flex items-start gap-1.5 text-2xs text-content-tertiary bg-surface-secondary border border-border rounded-lg px-2.5 py-2">
                 <Sparkles className="w-3 h-3 mt-0.5 shrink-0 text-indigo-500" />
                 <span>
                   {t(
@@ -313,7 +313,7 @@ export function StageAdjustSheet({
                 onSelect={setPromptId}
               />
               <div>
-                <label className="text-[11px] uppercase tracking-wider text-content-tertiary font-semibold">
+                <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
                   {t('match_elements.pipeline.llm_provider', 'LLM provider')}
                 </label>
                 <div className="mt-1 grid grid-cols-1 gap-1">
@@ -335,7 +335,7 @@ export function StageAdjustSheet({
                         className="accent-oe-blue"
                       />
                       <span className="text-content-primary">{p.label}</span>
-                      <code className="ml-auto text-[10px] text-content-tertiary">
+                      <code className="ml-auto text-2xs text-content-tertiary">
                         {p.id}
                       </code>
                     </label>
@@ -348,7 +348,7 @@ export function StageAdjustSheet({
           {(runMut.isError || stageError) && (
             <div
               role="alert"
-              className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/40 rounded-lg px-3 py-2 break-words"
+              className="text-xs text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-3 py-2 break-words"
             >
               {runMut.isError
                 ? ((runMut.error as Error)?.message ??

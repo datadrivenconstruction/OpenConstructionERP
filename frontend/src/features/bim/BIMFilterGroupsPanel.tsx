@@ -143,7 +143,7 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(id)}
               data-testid={`bim-filter-groups-tab-${id}`}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-medium transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-2xs font-medium transition-colors ${
                 isActive
                   ? 'text-oe-blue bg-surface-primary border-b-2 border-oe-blue'
                   : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'
@@ -152,7 +152,7 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
               <span className="truncate">{label}</span>
               {showBadge && (
                 <span
-                  className={`inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full text-[9px] font-semibold ${
+                  className={`inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full text-2xs font-semibold ${
                     isActive
                       ? 'bg-oe-blue text-white'
                       : 'bg-surface-tertiary text-content-secondary'
@@ -229,7 +229,7 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
                 <p className="text-xs font-semibold text-content-primary">
                   {t('bim.groups_empty_title', { defaultValue: 'No saved groups yet' })}
                 </p>
-                <p className="text-[11px] text-content-tertiary">
+                <p className="text-2xs text-content-tertiary">
                   {t('bim.groups_empty_desc', {
                     defaultValue:
                       'Filter the model to the elements you need, then click "Save as group" to reuse the selection for linking and quantities.',
@@ -238,7 +238,7 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
                 <button
                   type="button"
                   onClick={() => setActiveTab('filters')}
-                  className="mt-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
+                  className="mt-1 px-3 py-1.5 rounded-lg text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
                 >
                   {t('bim.groups_empty_cta', { defaultValue: 'Open filters' })}
                 </button>

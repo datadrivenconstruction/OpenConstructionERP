@@ -211,7 +211,7 @@ export function RetainagePanel({
               </label>
             </div>
             {amount.trim() !== '' && amountNum > heldNum && (
-              <p className="text-xs text-rose-600 dark:text-rose-400">
+              <p className="text-xs text-semantic-error">
                 {t('procurement.retainage_exceeds_held', {
                   defaultValue:
                     'Amount cannot exceed the held balance ({{held}}).',
@@ -340,11 +340,11 @@ function SummaryTile({
 }) {
   const bg =
     tone === 'amber'
-      ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900'
+      ? 'bg-semantic-warning-bg border-semantic-warning/30'
       : 'bg-surface-primary border-border';
   const text =
     tone === 'amber'
-      ? 'text-amber-700 dark:text-amber-400'
+      ? 'text-semantic-warning'
       : 'text-content-primary';
   return (
     <div className={`rounded-lg border px-4 py-3 ${bg}`}>

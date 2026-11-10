@@ -215,7 +215,7 @@ function FolderCard({
             <Icon size={15} strokeWidth={2} className={tone.icon} />
           </span>
           <h3
-            className="text-[13px] font-semibold text-content-primary truncate"
+            className="text-sm font-semibold text-content-primary truncate"
             title={label}
           >
             {label}
@@ -255,7 +255,7 @@ function FolderCard({
             data-testid={`folder-lock-${kind}`}
             title={lockTooltip}
             aria-label={lockTooltip}
-            className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300"
+            className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-semantic-warning-bg text-semantic-warning"
           >
             <Lock size={10} />
           </span>
@@ -298,7 +298,7 @@ function FolderCard({
             <Icon size={15} strokeWidth={2} className={tone.icon} />
           </span>
           <h3
-            className="text-[13px] font-semibold text-content-primary truncate"
+            className="text-sm font-semibold text-content-primary truncate"
             title={label}
           >
             {label}

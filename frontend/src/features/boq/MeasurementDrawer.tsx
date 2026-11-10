@@ -354,11 +354,11 @@ export function MeasurementDrawer({
                           onChange={(e) => patch(index, 'formula', e.target.value)}
                           disabled={readOnly}
                           aria-label={t('boq.measurement.formula')}
-                          className="mt-1 w-full rounded border border-border-light bg-surface-secondary px-2 py-1 font-mono text-[11px] focus:border-border-focus focus:outline-none disabled:opacity-60"
+                          className="mt-1 w-full rounded border border-border-light bg-surface-secondary px-2 py-1 font-mono text-2xs focus:border-border-focus focus:outline-none disabled:opacity-60"
                         />
                       )}
                       {line?.error && (
-                        <p className="mt-1 text-[11px] text-semantic-error">{line.error}</p>
+                        <p className="mt-1 text-2xs text-semantic-error">{line.error}</p>
                       )}
                     </td>
                     <td className="px-2 py-1">

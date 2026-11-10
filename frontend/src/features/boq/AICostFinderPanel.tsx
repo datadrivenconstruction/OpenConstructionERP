@@ -57,14 +57,14 @@ interface AICostFinderPanelProps {
 const UNITS = ['', ...getUnitsForLocale()];
 
 function scoreColor(score: number): string {
-  if (score >= 0.8) return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-  if (score >= 0.5) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-  return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+  if (score >= 0.8) return 'bg-semantic-success-bg text-semantic-success';
+  if (score >= 0.5) return 'bg-semantic-warning-bg text-semantic-warning';
+  return 'bg-surface-secondary text-content-secondary';
 }
 
 function scoreBorder(score: number): string {
-  if (score >= 0.8) return 'border-green-200 dark:border-green-800';
-  if (score >= 0.5) return 'border-amber-200 dark:border-amber-800';
+  if (score >= 0.8) return 'border-semantic-success/30';
+  if (score >= 0.5) return 'border-semantic-warning/30';
   return 'border-border-light';
 }
 
@@ -184,7 +184,7 @@ export function AICostFinderPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-content-tertiary hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="p-1.5 rounded-md hover:bg-semantic-error-bg text-content-tertiary hover:text-semantic-error transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={18} />
@@ -256,7 +256,7 @@ export function AICostFinderPanel({
 
         {/* Error */}
         {isError && (
-          <div className="text-center py-8 text-red-500 text-sm">
+          <div className="text-center py-8 text-semantic-error text-sm">
             {t('boq.cost_finder_error', { defaultValue: 'Search failed. Check vector database.' })}
           </div>
         )}
@@ -352,7 +352,7 @@ function ResultCard({
       {/* Top row: score badge + description */}
       <div className="flex items-start gap-2">
         <span
-          className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${scoreColor(item.score)}`}
+          className={`shrink-0 text-2xs font-semibold px-1.5 py-0.5 rounded ${scoreColor(item.score)}`}
         >
           {Math.round(item.score * 100)}%
         </span>
@@ -374,7 +374,7 @@ function ResultCard({
               {item.code}
             </span>
           </div>
-          <div className="text-[10px] text-content-tertiary mt-0.5">
+          <div className="text-2xs text-content-tertiary mt-0.5">
             {item.region}
           </div>
         </div>
@@ -420,7 +420,7 @@ function ResultCard({
         {canApplyRate && (
           <button
             onClick={onApplyRate}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-semantic-success/10 text-semantic-success hover:bg-semantic-success/20 transition-colors"
           >
             <TrendingUp size={12} />
             {t('boq.cost_finder_apply_rate', { defaultValue: 'Apply Rate' })}

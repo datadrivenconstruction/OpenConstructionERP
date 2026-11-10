@@ -46,7 +46,7 @@ export function DemoChooserPage() {
         <h1 className="text-sm font-semibold uppercase tracking-wide text-content-tertiary">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
         </h1>
-        <p className="mt-2 text-3xl font-bold text-content-primary">
+        <p className="mt-2 text-3xl font-semibold text-content-primary">
           {t('demo_chooser.title', { defaultValue: 'Which company do you want to see?' })}
         </p>
         <p className="mx-auto mt-3 max-w-2xl text-base text-content-secondary">
@@ -85,7 +85,7 @@ export function DemoChooserPage() {
                   {t(`${profile.stem}.audience`)}
                 </p>
                 <h2
-                  className="mt-1 ps-12 text-xl font-bold text-content-primary"
+                  className="mt-1 ps-12 text-xl font-semibold text-content-primary"
                   style={{ fontFamily: FONT_STACK[profile.appearance.font] }}
                 >
                   {t(`${profile.stem}.title`)}

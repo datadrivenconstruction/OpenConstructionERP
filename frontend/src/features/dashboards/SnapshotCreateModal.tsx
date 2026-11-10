@@ -192,7 +192,7 @@ export function SnapshotCreateModal({
                       key={`${f.name}-${i}`}
                       className={`flex items-center gap-2 rounded border px-2 py-1 text-xs ${
                         bad
-                          ? 'border-rose-400/50 bg-rose-50 text-rose-700'
+                          ? 'border-rose-400/50 bg-semantic-error-bg text-semantic-error'
                           : 'border-border-light bg-surface-secondary text-content-secondary'
                       }`}
                     >
@@ -204,7 +204,7 @@ export function SnapshotCreateModal({
                       <button
                         type="button"
                         onClick={() => removeFile(i)}
-                        className="text-content-tertiary hover:text-rose-500"
+                        className="text-content-tertiary hover:text-semantic-error"
                         aria-label="remove"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -216,7 +216,7 @@ export function SnapshotCreateModal({
             )}
 
             {invalidFiles.length > 0 && (
-              <p className="mt-2 text-xs text-rose-600">
+              <p className="mt-2 text-xs text-semantic-error">
                 {t('dashboards.snapshot_invalid_hint', {
                   defaultValue:
                     'Remove unsupported or oversized files (IFC/RVT/DWG only, ≤ 200 MB each).',

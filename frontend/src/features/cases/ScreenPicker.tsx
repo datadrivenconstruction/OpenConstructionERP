@@ -140,11 +140,11 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
             <span className="truncate text-sm font-medium text-content-primary">{label(item)}</span>
             {chosen && <Check className="h-3.5 w-3.5 shrink-0 text-oe-blue" />}
           </span>
-          <span className="mt-0.5 block truncate font-mono text-[11px] text-content-tertiary">
+          <span className="mt-0.5 block truncate font-mono text-2xs text-content-tertiary">
             {item.to}
           </span>
           {group && (
-            <span className="mt-0.5 block truncate text-[11px] text-content-tertiary">{group}</span>
+            <span className="mt-0.5 block truncate text-2xs text-content-tertiary">{group}</span>
           )}
         </span>
       </button>

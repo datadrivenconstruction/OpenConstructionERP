@@ -208,7 +208,7 @@ export function EstimateChecksSettingsPage() {
                 <span className="text-xs text-content-secondary">{tx(t, 'estimate_checks.settings.saved')}</span>
               )}
               {save.isError && (
-                <span className="text-xs text-red-600">{tx(t, 'estimate_checks.settings.save_error')}</span>
+                <span className="text-xs text-semantic-error">{tx(t, 'estimate_checks.settings.save_error')}</span>
               )}
             </div>
           </form>

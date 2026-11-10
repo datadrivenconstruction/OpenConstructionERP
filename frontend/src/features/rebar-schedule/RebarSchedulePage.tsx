@@ -350,7 +350,7 @@ function RebarScheduleExplainer() {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>
@@ -1026,7 +1026,7 @@ export function RebarSchedulePage() {
                   t('rebar_schedule.import_hint_3', { defaultValue: 'Click Import to add it to the project' }),
                 ].map((hint, i) => (
                   <li key={hint} className="flex items-center gap-1.5">
-                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
                       {i + 1}
                     </span>
                     {hint}

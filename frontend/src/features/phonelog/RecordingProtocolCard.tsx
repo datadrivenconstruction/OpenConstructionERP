@@ -379,7 +379,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
       </div>
 
       {noTranscript && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
             {t('phonelog.rec.manual_note', {
@@ -512,7 +512,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
                   type="button"
                   onClick={() => removeActionItem(index)}
                   aria-label={t('phonelog.rec.action_remove', { defaultValue: 'Remove action item' })}
-                  className="inline-flex items-center justify-center rounded-md px-2 py-1 text-content-tertiary hover:bg-surface-secondary hover:text-red-600"
+                  className="inline-flex items-center justify-center rounded-md px-2 py-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

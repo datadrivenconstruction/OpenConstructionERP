@@ -106,7 +106,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
           {t('packs.focus_installed', { defaultValue: '{{pack}} is set up', pack: packName })}
         </p>
         <h1 className="sr-only">{t('nav.packs', { defaultValue: 'Packs' })}</h1>
-        <h2 className="mt-2 text-xl font-bold text-content-primary" data-testid="pack-focus-headline">
+        <h2 className="mt-2 text-xl font-semibold text-content-primary" data-testid="pack-focus-headline">
           {t('packs.focus_headline', {
             defaultValue: '{{on}} modules are on for {{pack}}. {{hidden}} others are hidden.',
             on: on.length,

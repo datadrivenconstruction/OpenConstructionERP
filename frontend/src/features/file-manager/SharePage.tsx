@@ -175,12 +175,12 @@ export function SharePage() {
           {state.kind === 'expired' && (
             <div
               data-testid="share-expired"
-              className="rounded-lg border border-amber-300/40 bg-amber-50 dark:bg-amber-900/20 p-4 text-center space-y-2"
+              className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-center space-y-2"
             >
               <Clock
                 size={28}
                 strokeWidth={1.5}
-                className="mx-auto text-amber-600 dark:text-amber-400"
+                className="mx-auto text-semantic-warning"
               />
               <h2 className="text-sm font-semibold text-content-primary">
                 {t('share.page.expired_title', {

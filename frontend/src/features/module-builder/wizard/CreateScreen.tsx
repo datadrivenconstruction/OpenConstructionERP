@@ -265,7 +265,7 @@ export function PreviewFiles({ preview }: { preview: PreviewResponse }) {
               </button>
               {isOpen && (
                 <pre
-                  className="max-h-80 overflow-auto border-t border-border-light bg-surface-secondary/60 px-3 py-2 font-mono text-[11px] leading-relaxed text-content-secondary"
+                  className="max-h-80 overflow-auto border-t border-border-light bg-surface-secondary/60 px-3 py-2 font-mono text-2xs leading-relaxed text-content-secondary"
                   data-testid={`module-builder-file-content-${file.path}`}
                 >
                   {file.content}

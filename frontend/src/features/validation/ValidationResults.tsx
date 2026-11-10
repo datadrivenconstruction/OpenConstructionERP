@@ -186,7 +186,7 @@ export function SummaryStrip({
       )}
       {report.unsupported_rule_sets && report.unsupported_rule_sets.length > 0 && (
         <p
-          className="px-3 pb-1 text-xs text-amber-700 dark:text-amber-300"
+          className="px-3 pb-1 text-xs text-semantic-warning"
           title={t('validation.unsupported_rule_sets_hint', {
             defaultValue:
               'No validation rules are implemented for this rule set, so it was not run. It is reported as not implemented rather than passed.',

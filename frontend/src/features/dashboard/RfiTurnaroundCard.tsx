@@ -86,7 +86,7 @@ export function RfiTurnaroundCard() {
             {
               label: t('dashboard.rfi_overdue', { defaultValue: 'Overdue' }),
               value: formatCount(overdueCount),
-              tone: overdueCount > 0 ? 'text-amber-600' : 'text-content-secondary',
+              tone: overdueCount > 0 ? 'text-semantic-warning' : 'text-content-secondary',
             },
             {
               label: t('dashboard.rfi_avg_label', { defaultValue: 'Avg days' }),

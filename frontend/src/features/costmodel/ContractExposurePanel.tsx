@@ -41,7 +41,7 @@ function ratioToPct(ratio: number | null | undefined): number | null {
 function ratioColor(pct: number | null): string {
   if (pct == null) return 'text-content-tertiary';
   if (pct > 100) return 'text-semantic-error';
-  if (pct >= 90) return 'text-amber-600';
+  if (pct >= 90) return 'text-semantic-warning';
   return 'text-content-secondary';
 }
 
@@ -49,7 +49,7 @@ function ratioColor(pct: number | null): string {
 function ratioBar(pct: number | null): string {
   if (pct == null) return 'bg-surface-secondary';
   if (pct > 100) return 'bg-semantic-error';
-  if (pct >= 90) return 'bg-amber-500';
+  if (pct >= 90) return 'bg-semantic-warning';
   return 'bg-oe-blue';
 }
 
@@ -182,10 +182,10 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
       {data?.mixed_currency && (
         <div
           role="alert"
-          className="flex items-start gap-2 border-b border-amber-200 bg-amber-50/70 px-5 py-2.5 dark:border-amber-800/50 dark:bg-amber-950/20"
+          className="flex items-start gap-2 border-b border-semantic-warning/30 bg-semantic-warning/10 px-5 py-2.5"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="text-xs text-amber-800 dark:text-amber-300">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <p className="text-xs text-semantic-warning">
             {t('costmodel.exposure_mixed_currency', {
               defaultValue:
                 'Budget lines span more than one currency, so the summed totals may have been blended across a missing exchange rate. Compare groups within the same currency.',
@@ -213,7 +213,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
               <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
                 {t('costmodel.exposure_total_budgeted', { defaultValue: 'Budgeted' })}
               </div>
-              <div className="text-xl font-bold tabular-nums text-content-primary">
+              <div className="text-xl font-semibold tabular-nums text-content-primary">
                 {fmtCurrency(data?.total_budgeted, resolvedCurrency)}
               </div>
             </div>
@@ -221,7 +221,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
               <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
                 {t('costmodel.exposure_total_committed', { defaultValue: 'Committed' })}
               </div>
-              <div className="text-xl font-bold tabular-nums text-content-primary">
+              <div className="text-xl font-semibold tabular-nums text-content-primary">
                 {fmtCurrency(data?.total_committed, resolvedCurrency)}
               </div>
               {totalPct != null && (
@@ -238,7 +238,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                 {t('costmodel.exposure_remaining_to_commit', { defaultValue: 'Remaining to commit' })}
               </div>
               <div
-                className={`text-xl font-bold tabular-nums ${remainingNegative ? 'text-semantic-error' : 'text-content-primary'}`}
+                className={`text-xl font-semibold tabular-nums ${remainingNegative ? 'text-semantic-error' : 'text-content-primary'}`}
               >
                 {fmtCurrency(data?.total_remaining_to_commit, resolvedCurrency)}
               </div>
@@ -368,7 +368,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                     {fmtCurrency(data?.total_remaining_to_commit, resolvedCurrency)}
                   </td>
                   <td className="py-3.5 px-2 text-center">
-                    <span className={`text-2xs font-bold tabular-nums ${ratioColor(totalPct)}`}>
+                    <span className={`text-2xs font-semibold tabular-nums ${ratioColor(totalPct)}`}>
                       {totalPct == null ? '-' : fmtPercent(totalPct, 0)}
                     </span>
                   </td>

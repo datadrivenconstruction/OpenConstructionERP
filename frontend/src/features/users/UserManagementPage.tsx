@@ -92,13 +92,13 @@ const ROLE_CONFIG: Record<UserRole, RoleConfigEntry> = {
   admin: {
     icon: Crown,
     labelKey: 'admin',
-    color: 'text-red-600 dark:text-red-400',
+    color: 'text-semantic-error',
     variant: 'error',
   },
   manager: {
     icon: ShieldCheck,
     labelKey: 'manager',
-    color: 'text-amber-600 dark:text-amber-400',
+    color: 'text-semantic-warning',
     variant: 'warning',
   },
   editor: {
@@ -133,8 +133,8 @@ const ACCESS_LEVELS: {
 }[] = [
   { value: 'none', labelKey: 'none', color: 'text-content-quaternary' },
   { value: 'view', labelKey: 'view', color: 'text-blue-600' },
-  { value: 'edit', labelKey: 'edit', color: 'text-amber-600' },
-  { value: 'full', labelKey: 'full', color: 'text-green-600' },
+  { value: 'edit', labelKey: 'edit', color: 'text-semantic-warning' },
+  { value: 'full', labelKey: 'full', color: 'text-semantic-success' },
 ];
 
 interface ModuleEntry {
@@ -992,9 +992,9 @@ export function UserManagementPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
           { label: t('users.total', { defaultValue: 'Total Users' }), value: stats.total, icon: Users, color: 'text-oe-blue' },
-          { label: t('users.active', { defaultValue: 'Active' }), value: stats.active, icon: Check, color: 'text-green-600' },
-          { label: t('users.admins', { defaultValue: 'Admins' }), value: stats.admins, icon: Crown, color: 'text-red-500' },
-          { label: t('users.managers', { defaultValue: 'Managers' }), value: stats.managers, icon: ShieldCheck, color: 'text-amber-500' },
+          { label: t('users.active', { defaultValue: 'Active' }), value: stats.active, icon: Check, color: 'text-semantic-success' },
+          { label: t('users.admins', { defaultValue: 'Admins' }), value: stats.admins, icon: Crown, color: 'text-semantic-error' },
+          { label: t('users.managers', { defaultValue: 'Managers' }), value: stats.managers, icon: ShieldCheck, color: 'text-semantic-warning' },
         ].map((s) => (
           <Card key={s.label} className="p-3">
             <div className="flex items-center gap-2">
@@ -1091,7 +1091,7 @@ export function UserManagementPage() {
                       <div className="flex items-center gap-2.5">
                         <div
                           className={clsx(
-                            'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white',
+                            'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white',
                             user.is_active ? 'bg-oe-blue' : 'bg-gray-400',
                           )}
                         >
@@ -1161,8 +1161,8 @@ export function UserManagementPage() {
                             isSelf
                               ? 'text-content-quaternary cursor-not-allowed opacity-60'
                               : user.is_active
-                                ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30'
-                                : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30',
+                                ? 'text-semantic-error hover:bg-semantic-error-bg'
+                                : 'text-semantic-success hover:bg-semantic-success-bg',
                           )}
                         >
                           {user.is_active ? <Lock size={13} /> : <Unlock size={13} />}
@@ -1184,7 +1184,7 @@ export function UserManagementPage() {
                             'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
                             isSelf
                               ? 'text-content-quaternary cursor-not-allowed opacity-60'
-                              : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30',
+                              : 'text-semantic-error hover:bg-semantic-error-bg',
                           )}
                         >
                           <Trash2 size={13} />

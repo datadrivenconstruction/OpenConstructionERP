@@ -83,7 +83,7 @@ const PROPOSAL_CAP = 60;
 
 const TONE_COLOR: Record<CoverageTone, string> = {
   good: 'bg-semantic-success',
-  partial: 'bg-amber-500',
+  partial: 'bg-semantic-warning',
   none: 'bg-semantic-error',
 };
 
@@ -381,8 +381,8 @@ function CarbonBreakdownCard({ carbon }: { carbon: WholeLifeCarbonBreakdown }) {
           })}
         >
           <div className="bg-oe-blue" style={{ width: `${seg(a1a5)}%` }} />
-          <div className="bg-emerald-500" style={{ width: `${seg(bTotal)}%` }} />
-          <div className="bg-amber-500" style={{ width: `${seg(c)}%` }} />
+          <div className="bg-semantic-success" style={{ width: `${seg(bTotal)}%` }} />
+          <div className="bg-semantic-warning" style={{ width: `${seg(c)}%` }} />
         </div>
       )}
 

@@ -202,9 +202,9 @@ function ModuleNodeComponent({ data }: { data: ModuleNodeData }) {
           className="w-3 h-3 rounded-full shrink-0"
           style={{ background: color }}
         />
-        <span className="text-sm font-bold truncate">{data.label}</span>
+        <span className="text-sm font-semibold truncate">{data.label}</span>
       </div>
-      <div className="text-[10px] space-y-0.5" style={{ color: NODE_TEXT_DIM }}>
+      <div className="text-2xs space-y-0.5" style={{ color: NODE_TEXT_DIM }}>
         <div className="flex justify-between">
           <span>Models</span>
           <span className="font-mono">{data.modelsCount}</span>
@@ -245,14 +245,14 @@ function ModelNodeComponent({ data }: { data: ModelNodeData }) {
       <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
       <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       <div
-        className="px-3 py-1.5 text-xs font-bold"
+        className="px-3 py-1.5 text-xs font-semibold"
         style={{ background: `${color}20`, borderBottom: `1px solid ${color}30` }}
       >
         <div className="flex items-center gap-1.5">
           <Table2 size={12} style={{ color }} />
           <span className="truncate">{data.label}</span>
         </div>
-        <div className="text-[9px] font-normal mt-0.5" style={{ color: NODE_TEXT_DIM }}>
+        <div className="text-2xs font-normal mt-0.5" style={{ color: NODE_TEXT_DIM }}>
           {data.tablename}
         </div>
       </div>
@@ -261,7 +261,7 @@ function ModelNodeComponent({ data }: { data: ModelNodeData }) {
           const isPk = col.name === 'id';
           const isFk = col.name.endsWith('_id') && col.name !== 'id';
           return (
-            <div key={col.name} className="flex items-center gap-1.5 text-[10px]">
+            <div key={col.name} className="flex items-center gap-1.5 text-2xs">
               <span
                 className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{
@@ -271,14 +271,14 @@ function ModelNodeComponent({ data }: { data: ModelNodeData }) {
               <span className="font-mono truncate" style={{ color: isPk ? '#eab308' : isFk ? '#60a5fa' : NODE_TEXT_DIM }}>
                 {col.name}
               </span>
-              <span className="ml-auto text-[9px] shrink-0" style={{ color: '#475569' }}>
+              <span className="ml-auto text-2xs shrink-0" style={{ color: '#475569' }}>
                 {col.sql_type}
               </span>
             </div>
           );
         })}
         {data.columns.length > 5 && (
-          <div className="text-[9px] pt-0.5" style={{ color: '#475569' }}>
+          <div className="text-2xs pt-0.5" style={{ color: '#475569' }}>
             +{data.columns.length - 5} more columns
           </div>
         )}
@@ -310,7 +310,7 @@ function RouteNodeComponent({ data }: { data: RouteNodeData }) {
       <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       <div className="flex items-center gap-2">
         <span
-          className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"
+          className="px-1.5 py-0.5 rounded text-2xs font-semibold shrink-0"
           style={{
             background: `${methodColor}20`,
             color: methodColor,
@@ -319,9 +319,9 @@ function RouteNodeComponent({ data }: { data: RouteNodeData }) {
         >
           {data.method}
         </span>
-        <span className="text-[11px] font-mono truncate">{data.path}</span>
+        <span className="text-2xs font-mono truncate">{data.path}</span>
       </div>
-      <div className="text-[9px] mt-1" style={{ color: NODE_TEXT_DIM }}>
+      <div className="text-2xs mt-1" style={{ color: NODE_TEXT_DIM }}>
         {data.handler}
       </div>
     </div>
@@ -739,12 +739,12 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 className="w-3 h-3 rounded-full"
                 style={{ background: getCategoryColor(mod.module_category) }}
               />
-              <h3 className="text-lg font-bold" style={{ color: NODE_TEXT }}>
+              <h3 className="text-lg font-semibold" style={{ color: NODE_TEXT }}>
                 {mod.module_label || mod.module_id}
               </h3>
             </div>
             <span
-              className="inline-block text-[10px] px-2 py-0.5 rounded-full font-medium"
+              className="inline-block text-2xs px-2 py-0.5 rounded-full font-medium"
               style={{
                 background: `${getCategoryColor(mod.module_category)}20`,
                 color: getCategoryColor(mod.module_category),
@@ -766,7 +766,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 {mod.manifest.depends.map((dep) => (
                   <span
                     key={dep}
-                    className="text-[10px] px-2 py-0.5 rounded-full"
+                    className="text-2xs px-2 py-0.5 rounded-full"
                     style={{ background: '#e2e8f0', color: NODE_TEXT_DIM }}
                   >
                     {dep}
@@ -785,13 +785,13 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 {mod.models.map((model) => (
                   <div
                     key={model.class_name}
-                    className="text-[11px] px-2 py-1 rounded"
+                    className="text-2xs px-2 py-1 rounded"
                     style={{ background: '#f8fafc', color: NODE_TEXT_DIM }}
                   >
                     <span className="font-mono font-medium" style={{ color: '#eab308' }}>
                       {model.class_name}
                     </span>
-                    <span className="ml-2 text-[9px]">({model.columns.length} cols)</span>
+                    <span className="ml-2 text-2xs">({model.columns.length} cols)</span>
                   </div>
                 ))}
               </div>
@@ -807,11 +807,11 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 {mod.routes.map((route, idx) => (
                   <div
                     key={`${route.method}-${route.path}-${idx}`}
-                    className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
+                    className="flex items-center gap-2 text-2xs px-2 py-1 rounded"
                     style={{ background: '#f8fafc' }}
                   >
                     <span
-                      className="px-1 py-0.5 rounded text-[9px] font-bold shrink-0"
+                      className="px-1 py-0.5 rounded text-2xs font-semibold shrink-0"
                       style={{
                         background: `${METHOD_COLORS[route.method] ?? '#6b7280'}20`,
                         color: METHOD_COLORS[route.method] ?? '#6b7280',
@@ -843,11 +843,11 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Table2 size={16} style={{ color: '#eab308' }} />
-              <h3 className="text-lg font-bold" style={{ color: NODE_TEXT }}>
+              <h3 className="text-lg font-semibold" style={{ color: NODE_TEXT }}>
                 {model.class_name}
               </h3>
             </div>
-            <div className="text-[10px] font-mono" style={{ color: NODE_TEXT_DIM }}>
+            <div className="text-2xs font-mono" style={{ color: NODE_TEXT_DIM }}>
               {model.tablename}
             </div>
             {model.docstring && (
@@ -868,7 +868,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 return (
                   <div
                     key={col.name}
-                    className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
+                    className="flex items-center gap-2 text-2xs px-2 py-1 rounded"
                     style={{ background: '#f8fafc' }}
                   >
                     <span
@@ -883,11 +883,11 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                     >
                       {col.name}
                     </span>
-                    <span className="ml-auto text-[9px] shrink-0" style={{ color: '#475569' }}>
+                    <span className="ml-auto text-2xs shrink-0" style={{ color: '#475569' }}>
                       {col.sql_type}
                     </span>
                     {col.nullable && (
-                      <span className="text-[8px] shrink-0" style={{ color: '#475569' }}>
+                      <span className="text-2xs shrink-0" style={{ color: '#475569' }}>
                         NULL
                       </span>
                     )}
@@ -905,7 +905,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
               {model.relationships.map((rel) => (
                 <div
                   key={rel.name}
-                  className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
+                  className="flex items-center gap-2 text-2xs px-2 py-1 rounded"
                   style={{ background: '#f8fafc' }}
                 >
                   <ChevronRight size={10} style={{ color: '#f59e0b' }} />
@@ -936,7 +936,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span
-                className="px-2 py-0.5 rounded text-xs font-bold"
+                className="px-2 py-0.5 rounded text-xs font-semibold"
                 style={{
                   background: `${METHOD_COLORS[route.method] ?? '#6b7280'}20`,
                   color: METHOD_COLORS[route.method] ?? '#6b7280',
@@ -944,7 +944,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
               >
                 {route.method}
               </span>
-              <span className="text-sm font-mono font-bold" style={{ color: NODE_TEXT }}>
+              <span className="text-sm font-mono font-semibold" style={{ color: NODE_TEXT }}>
                 {route.path}
               </span>
             </div>
@@ -1020,10 +1020,10 @@ function Legend() {
   const { t } = useTranslation();
   return (
     <div
-      className="rounded-lg px-3 py-2 text-[10px] space-y-2"
+      className="rounded-lg px-3 py-2 text-2xs space-y-2"
       style={{ background: '#ffffffee', border: '1px solid #334155', color: NODE_TEXT_DIM }}
     >
-      <div className="font-semibold text-[11px]" style={{ color: NODE_TEXT }}>
+      <div className="font-semibold text-2xs" style={{ color: NODE_TEXT }}>
         {t('architecture.legend', { defaultValue: 'Legend' })}
       </div>
       <div className="space-y-1">
@@ -1086,7 +1086,7 @@ function ArchitectureEmptyState() {
         >
           <Network size={32} style={{ color: '#6b7280' }} />
         </div>
-        <h2 className="text-xl font-bold">
+        <h2 className="text-xl font-semibold">
           {t('architecture.empty_title', { defaultValue: 'Architecture Map' })}
         </h2>
         <p className="text-sm" style={{ color: NODE_TEXT_DIM }}>
@@ -1312,12 +1312,12 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
                 <button
                   type="button"
                   onClick={onPaneClick}
-                  className="ml-1 rounded-full px-2 py-0.5 text-[11px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  className="ml-1 rounded-full px-2 py-0.5 text-2xs text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
                 >
                   {t('architecture.clear_highlight', { defaultValue: 'Clear' })}
                 </button>
               ) : (
-                <span className="ml-1 text-[11px] font-normal text-slate-400">
+                <span className="ml-1 text-2xs font-normal text-slate-400">
                   {t('architecture.click_to_lock', { defaultValue: 'click to lock' })}
                 </span>
               )}
@@ -1502,7 +1502,7 @@ export function ArchitectureMapPage() {
 
         {/* Stats badge */}
         <div
-          className="hidden md:flex items-center gap-2 text-[10px] px-3 py-1 rounded-md"
+          className="hidden md:flex items-center gap-2 text-2xs px-3 py-1 rounded-md"
           style={{ background: '#f8fafc', border: '1px solid #334155', color: NODE_TEXT_DIM }}
         >
           <Info size={12} />

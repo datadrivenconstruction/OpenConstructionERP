@@ -245,7 +245,7 @@ export function WebhookTargetsPage() {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(target.id)}
-                        className="rounded-md p-1.5 text-content-tertiary hover:bg-rose-50 hover:text-rose-500"
+                        className="rounded-md p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                         title={t('common.delete', { defaultValue: 'Delete' })}
                         aria-label="delete"
                       >
@@ -279,7 +279,7 @@ function StatusBadge({ target }: { target: WebhookTarget }) {
           });
     return (
       <span
-        className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 text-2xs text-rose-700 dark:text-rose-300"
+        className="inline-flex items-center gap-1 rounded-full bg-semantic-error-bg px-2 py-0.5 text-2xs text-semantic-error"
         title={message}
       >
         {message}
@@ -303,13 +303,13 @@ function StatusBadge({ target }: { target: WebhookTarget }) {
   }
   if (lastOk) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-2xs text-emerald-700 dark:text-emerald-300">
+      <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs text-semantic-success">
         OK · {target.last_status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 text-2xs text-rose-700 dark:text-rose-300">
+    <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error-bg px-2 py-0.5 text-2xs text-semantic-error">
       Failed · {target.last_status} (×{target.failure_count})
     </span>
   );

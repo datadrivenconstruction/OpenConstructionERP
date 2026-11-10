@@ -46,7 +46,7 @@ export function StylesLabPage() {
           <div className="absolute top-20 left-1/3 h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl animate-float-slow" />
         </div>
         <div className="relative mx-auto max-w-content px-8 py-10">
-          <div className="text-2xs uppercase tracking-[0.18em] text-content-tertiary font-medium">
+          <div className="text-2xs uppercase tracking-wider text-content-tertiary font-medium">
             Internal · Design exploration
           </div>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight bg-gradient-to-r from-content-primary via-oe-blue to-fuchsia-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-text">
@@ -105,8 +105,8 @@ function Specimen({
   no: number; name: string; family: string; note: string; children: ReactNode;
 }) {
   return (
-    <div className="group relative rounded-[12px] border border-border-light bg-surface-primary p-6 transition-all duration-normal ease-oe hover:border-border hover:shadow-md">
-      <div className="flex items-center gap-2 text-2xs uppercase tracking-[0.16em] text-content-tertiary font-medium">
+    <div className="group relative rounded-xl border border-border-light bg-surface-primary p-6 transition-all duration-normal ease-oe hover:border-border hover:shadow-md">
+      <div className="flex items-center gap-2 text-2xs uppercase tracking-wider text-content-tertiary font-medium">
         <span className="tabular-nums">{String(no).padStart(2, '0')}</span>
         <span className="h-px flex-1 bg-border-light" />
         <span>{family}</span>
@@ -114,7 +114,7 @@ function Specimen({
       <div className="mt-2 text-sm font-semibold text-content-primary">{name}</div>
       <p className="mt-1 text-xs text-content-tertiary leading-relaxed min-h-[2.5em]">{note}</p>
 
-      <div className="mt-5 flex min-h-[88px] items-center justify-center rounded-[8px] bg-surface-secondary/60 px-4 py-6 ring-1 ring-inset ring-border-light/60">
+      <div className="mt-5 flex min-h-[88px] items-center justify-center rounded-lg bg-surface-secondary/60 px-4 py-6 ring-1 ring-inset ring-border-light/60">
         {children}
       </div>
     </div>
@@ -155,7 +155,7 @@ function HeadingsSection() {
 
         <Specimen no={3} name="Eyebrow + Display" family="Editorial" note="Маленький uppercase-лейбл + крупный заголовок. Журнальная типографика.">
           <div className="text-center">
-            <div className="text-2xs uppercase tracking-[0.22em] text-oe-blue font-semibold">Phase 02 · Cost Plan</div>
+            <div className="text-2xs uppercase tracking-wider text-oe-blue font-semibold">Phase 02 · Cost Plan</div>
             <h3 className="mt-2 text-2xl font-semibold tracking-tight text-content-primary">Project overview</h3>
           </div>
         </Specimen>
@@ -169,14 +169,14 @@ function HeadingsSection() {
 
         <Specimen no={5} name="Numbered Watermark" family="Editorial" note="Огромная цифра-водяной-знак позади. Для wizard / пошаговых страниц.">
           <div className="relative">
-            <span aria-hidden className="absolute -top-6 -left-2 text-7xl font-bold text-content-primary/5 leading-none select-none">03</span>
+            <span aria-hidden className="absolute -top-6 -left-2 text-7xl font-semibold text-content-primary/5 leading-none select-none">03</span>
             <h3 className="relative text-2xl font-semibold tracking-tight text-content-primary">Project overview</h3>
           </div>
         </Specimen>
 
         <Specimen no={6} name="Icon + Heading + Meta" family="Functional" note="Иконка-чип, заголовок, мета-строка. Шаблон для dashboard-tile.">
           <div className="flex items-start gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-[10px] bg-oe-blue/10 text-oe-blue ring-1 ring-oe-blue/20">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-oe-blue/10 text-oe-blue ring-1 ring-oe-blue/20">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
@@ -192,26 +192,26 @@ function HeadingsSection() {
 
         <Specimen no={8} name="Mono Fingerprint" family="Technical" note="Mono-префикс как code-метка + sans-заголовок. Для тех-страниц.">
           <div className="flex items-baseline gap-3">
-            <span className="font-mono text-xs px-1.5 py-0.5 rounded-[5px] bg-surface-tertiary text-content-tertiary border border-border-light">v2.9.36</span>
+            <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-surface-tertiary text-content-tertiary border border-border-light">v2.9.36</span>
             <h3 className="text-2xl font-semibold tracking-tight text-content-primary">Project overview</h3>
           </div>
         </Specimen>
 
         <Specimen no={9} name="Outline Stroke" family="Display" note="Только обводка, без заливки. Для hero и empty-state. -webkit-text-stroke.">
-          <h3 className="text-3xl font-bold tracking-tight text-transparent [-webkit-text-stroke:1.5px_var(--oe-text-primary)] dark:[-webkit-text-stroke:1.5px_var(--oe-text-primary)]">
+          <h3 className="text-3xl font-semibold tracking-tight text-transparent [-webkit-text-stroke:1.5px_var(--oe-text-primary)] dark:[-webkit-text-stroke:1.5px_var(--oe-text-primary)]">
             Project overview
           </h3>
         </Specimen>
 
         <Specimen no={10} name="Mixed Weights" family="Editorial" note="Лёгкий вес для контекста + жирный градиент для имени. Заметнее, чем плоский semibold.">
           <h3 className="text-2xl tracking-tight">
-            <span className="font-light text-content-tertiary">Project </span>
-            <span className="font-bold bg-gradient-to-r from-oe-blue to-fuchsia-500 bg-clip-text text-transparent">overview</span>
+            <span className="font-normal text-content-tertiary">Project </span>
+            <span className="font-semibold bg-gradient-to-r from-oe-blue to-fuchsia-500 bg-clip-text text-transparent">overview</span>
           </h3>
         </Specimen>
 
         <Specimen no={11} name="Ultra Display" family="Hero" note="Максимальный размер + жирный вес + ультра-tight tracking. Только для splash/landing.">
-          <h3 className="text-[44px] font-bold tracking-[-0.04em] leading-[1.02] text-content-primary">
+          <h3 className="text-[44px] font-semibold tracking-tight leading-[1.02] text-content-primary">
             Build it<br/>brilliantly.
           </h3>
         </Specimen>
@@ -240,30 +240,30 @@ function ButtonsSection() {
       <SectionTitle sub="14 directions · all r ≤ 10px">Buttons</SectionTitle>
       <Grid>
         <Specimen no={1} name="Apple Liquid (default)" family="Current" note="Текущий OE primary. Радиус снижен до 10px (было 20). Лёгкий scale на hover.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium bg-oe-blue text-white shadow-xs hover:shadow-md hover:bg-oe-blue-hover hover:scale-[1.02] active:scale-[0.98] transition-all duration-normal ease-oe">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium bg-oe-blue text-white shadow-xs hover:shadow-md hover:bg-oe-blue-hover hover:scale-[1.02] active:scale-[0.98] transition-all duration-normal ease-oe">
             <Plus className="h-4 w-4" /> Create BOQ
           </button>
         </Specimen>
 
         <Specimen no={2} name="Liquid Glass (WWDC25)" family="Modern" note="Frosted glass + верхний rim-highlight + внутренняя тень. Apple iOS 26 / visionOS.">
           <div className="relative w-full">
-            <div className="absolute inset-0 -z-10 rounded-[10px] bg-gradient-to-br from-oe-blue/30 via-fuchsia-400/20 to-cyan-400/30 blur-xl" />
-            <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-content-primary bg-white/45 dark:bg-white/10 backdrop-blur-2xl ring-1 ring-white/50 dark:ring-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.08)] hover:bg-white/55 transition-all duration-normal ease-oe">
+            <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-br from-oe-blue/30 via-fuchsia-400/20 to-cyan-400/30 blur-xl" />
+            <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-content-primary bg-white/45 dark:bg-white/10 backdrop-blur-2xl ring-1 ring-white/50 dark:ring-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.08)] hover:bg-white/55 transition-all duration-normal ease-oe">
               <Sparkles className="h-4 w-4 text-oe-blue" /> Create BOQ
             </button>
           </div>
         </Specimen>
 
         <Specimen no={3} name="Gradient Mesh" family="Premium" note="Анимированный градиент. Для главного CTA, AI-кнопок, Pro-плана.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all duration-normal ease-oe bg-[linear-gradient(120deg,var(--oe-blue)_0%,#7c3aed_45%,#06b6d4_100%)] bg-[length:200%_auto] hover:bg-[position:right_center] active:scale-[0.97]">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all duration-normal ease-oe bg-[linear-gradient(120deg,var(--oe-blue)_0%,#7c3aed_45%,#06b6d4_100%)] bg-[length:200%_auto] hover:bg-[position:right_center] active:scale-[0.97]">
             <Wand2 className="h-4 w-4" /> Generate with AI
           </button>
         </Specimen>
 
         <Specimen no={4} name="Neon Glow" family="Futuristic" note="Тёмный solid + цветное свечение. На тёмном фоне - chat, advisor.">
-          <div className="rounded-[10px] bg-[#0f1117] p-5 -m-5 w-full">
+          <div className="rounded-lg bg-[#0f1117] p-5 -m-5 w-full">
             <div className="grid place-items-center">
-              <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium bg-[#1a1d2b] text-cyan-300 ring-1 ring-cyan-400/40 shadow-[0_0_0_1px_rgba(34,211,238,0.15),0_0_24px_rgba(34,211,238,0.35)] hover:shadow-[0_0_0_1px_rgba(34,211,238,0.3),0_0_36px_rgba(34,211,238,0.55)] transition-all duration-normal ease-oe">
+              <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium bg-[#1a1d2b] text-cyan-300 ring-1 ring-cyan-400/40 shadow-[0_0_0_1px_rgba(34,211,238,0.15),0_0_24px_rgba(34,211,238,0.35)] hover:shadow-[0_0_0_1px_rgba(34,211,238,0.3),0_0_36px_rgba(34,211,238,0.55)] transition-all duration-normal ease-oe">
                 <Zap className="h-4 w-4" /> Run inference
               </button>
             </div>
@@ -271,13 +271,13 @@ function ButtonsSection() {
         </Specimen>
 
         <Specimen no={5} name="Brutalist Hard Shadow" family="Bold" note="Чёрный border + offset-shadow. Маркетинг, dev-инструменты. r=8px.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[8px] text-sm font-bold bg-yellow-300 text-black border-2 border-black shadow-[3px_3px_0_0_#000] hover:shadow-[5px_5px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-[1px_1px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-fast">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold bg-yellow-300 text-black border-2 border-black shadow-[3px_3px_0_0_#000] hover:shadow-[5px_5px_0_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-[1px_1px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-fast">
             <ArrowRight className="h-4 w-4" /> Ship it
           </button>
         </Specimen>
 
         <Specimen no={6} name="Animated Conic Border" family="Premium" note="Конический градиент вращается по периметру. Признак pro/premium.">
-          <span className="relative inline-flex p-[1.5px] rounded-[10px] overflow-hidden">
+          <span className="relative inline-flex p-[1.5px] rounded-lg overflow-hidden">
             <span aria-hidden className="absolute inset-[-100%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_0deg,var(--oe-blue),#a855f7,#06b6d4,var(--oe-blue))]" />
             <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-[8.5px] text-sm font-medium bg-surface-primary text-content-primary">
               <Sparkles className="h-4 w-4 text-fuchsia-500" /> Upgrade
@@ -286,38 +286,38 @@ function ButtonsSection() {
         </Specimen>
 
         <Specimen no={7} name="Bevel Hairline" family="SaaS Modern" note="Тонкая верхняя hairline + inner bottom shadow. Modern SaaS style.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-white bg-content-primary shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),inset_0_-1px_0_0_rgba(0,0,0,0.4),0_1px_2px_rgba(0,0,0,0.2)] hover:bg-content-primary/90 active:translate-y-px transition-all duration-fast">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-white bg-content-primary shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),inset_0_-1px_0_0_rgba(0,0,0,0.4),0_1px_2px_rgba(0,0,0,0.2)] hover:bg-content-primary/90 active:translate-y-px transition-all duration-fast">
             <FileText className="h-4 w-4" /> Open report
           </button>
         </Specimen>
 
         <Specimen no={8} name="3D Press" family="Tactile" note="Тёмный bottom-edge даёт физическое нажатие. Stripe style.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-semibold text-white bg-oe-blue active:translate-y-[2px] transition-transform duration-fast shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.25),0_2px_0_0_#005bb5] active:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.25),0_0px_0_0_#005bb5]">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold text-white bg-oe-blue active:translate-y-[2px] transition-transform duration-fast shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.25),0_2px_0_0_#005bb5] active:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.25),0_0px_0_0_#005bb5]">
             <Download className="h-4 w-4" /> Export GAEB
           </button>
         </Specimen>
 
         <Specimen no={9} name="Outline Refined" family="Minimal" note="Modern-SaaS-style тонкий border, мягкая заливка на hover. Для secondary actions.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-content-primary border border-border bg-surface-primary hover:bg-surface-secondary hover:border-content-tertiary transition-all duration-normal ease-oe">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-content-primary border border-border bg-surface-primary hover:bg-surface-secondary hover:border-content-tertiary transition-all duration-normal ease-oe">
             <FileText className="h-4 w-4" /> Open report
           </button>
         </Specimen>
 
         <Specimen no={10} name="Shimmer Sweep" family="Attention" note="Полоса света бежит по поверхности на hover. Для важного редкого CTA.">
-          <button className="group relative inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-white bg-content-primary overflow-hidden">
-            <span aria-hidden className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 ease-out" />
+          <button className="group relative inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-white bg-content-primary overflow-hidden">
+            <span aria-hidden className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-500 ease-out" />
             <span className="relative inline-flex items-center gap-2"><Check className="h-4 w-4" /> Approve change order</span>
           </button>
         </Specimen>
 
         <Specimen no={11} name="Soft Inset (pressed)" family="Calm" note="Кнопка как будто утоплена в поверхность. Для toggle-like state, фильтров.">
-          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-content-primary bg-surface-secondary shadow-[inset_0_1px_2px_rgba(0,0,0,0.06),inset_0_-1px_0_rgba(255,255,255,0.5)] hover:bg-surface-tertiary transition-colors duration-normal">
+          <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-content-primary bg-surface-secondary shadow-[inset_0_1px_2px_rgba(0,0,0,0.06),inset_0_-1px_0_rgba(255,255,255,0.5)] hover:bg-surface-tertiary transition-colors duration-normal">
             <Settings className="h-4 w-4 text-content-tertiary" /> Configure
           </button>
         </Specimen>
 
         <Specimen no={12} name="Pulse Attention" family="Alert" note="Пульсирующее цветное кольцо вокруг. Для notification-actions, новых фичей.">
-          <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-white bg-oe-blue shadow-md animate-[pulseGlow_2s_ease_infinite]">
+          <button className="relative inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-medium text-white bg-oe-blue shadow-md animate-[pulseGlow_2s_ease_infinite]">
             <Bell className="h-4 w-4" /> 3 new updates
           </button>
         </Specimen>
@@ -333,10 +333,10 @@ function ButtonsSection() {
         </Specimen>
 
         <Specimen no={14} name="Segmented Pill" family="iOS Native" note="iOS-style segmented control. Для view-switchers (List/Grid/Map).">
-          <div className="inline-flex h-9 items-center rounded-[8px] bg-surface-tertiary p-0.5 ring-1 ring-inset ring-border-light">
-            <button className="h-8 px-3 text-xs font-medium rounded-[6px] bg-surface-primary text-content-primary shadow-sm">List</button>
-            <button className="h-8 px-3 text-xs font-medium rounded-[6px] text-content-tertiary hover:text-content-primary">Grid</button>
-            <button className="h-8 px-3 text-xs font-medium rounded-[6px] text-content-tertiary hover:text-content-primary">Map</button>
+          <div className="inline-flex h-9 items-center rounded-lg bg-surface-tertiary p-0.5 ring-1 ring-inset ring-border-light">
+            <button className="h-8 px-3 text-xs font-medium rounded-md bg-surface-primary text-content-primary shadow-sm">List</button>
+            <button className="h-8 px-3 text-xs font-medium rounded-md text-content-tertiary hover:text-content-primary">Grid</button>
+            <button className="h-8 px-3 text-xs font-medium rounded-md text-content-tertiary hover:text-content-primary">Map</button>
           </div>
         </Specimen>
       </Grid>
@@ -358,13 +358,13 @@ function IconsSection() {
         </Specimen>
 
         <Specimen no={2} name="Soft Chip" family="Functional" note="Иконка в мягко-окрашенном квадрате. Dashboard tile, feature card.">
-          <div className="grid h-12 w-12 place-items-center rounded-[10px] bg-oe-blue/10 text-oe-blue">
+          <div className="grid h-12 w-12 place-items-center rounded-lg bg-oe-blue/10 text-oe-blue">
             <Building2 className="h-6 w-6" strokeWidth={1.75} />
           </div>
         </Specimen>
 
         <Specimen no={3} name="Gradient Chip" family="Premium" note="Цветной градиент + белая иконка. Для AI и premium-фичей.">
-          <div className="grid h-12 w-12 place-items-center rounded-[10px] text-white shadow-md bg-[linear-gradient(135deg,var(--oe-blue)_0%,#7c3aed_100%)]">
+          <div className="grid h-12 w-12 place-items-center rounded-lg text-white shadow-md bg-[linear-gradient(135deg,var(--oe-blue)_0%,#7c3aed_100%)]">
             <Sparkles className="h-6 w-6" strokeWidth={1.75} />
           </div>
         </Specimen>
@@ -378,7 +378,7 @@ function IconsSection() {
         <Specimen no={5} name="Glow Halo" family="Hero" note="Иконка + мягкое цветное свечение позади. Для splash и hero-блоков.">
           <div className="relative">
             <div aria-hidden className="absolute inset-0 -m-2 rounded-full bg-fuchsia-500/30 blur-xl" />
-            <div className="relative grid h-12 w-12 place-items-center rounded-[10px] bg-surface-primary text-fuchsia-500 ring-1 ring-fuchsia-500/30">
+            <div className="relative grid h-12 w-12 place-items-center rounded-lg bg-surface-primary text-fuchsia-500 ring-1 ring-fuchsia-500/30">
               <Wand2 className="h-6 w-6" strokeWidth={1.75} />
             </div>
           </div>
@@ -399,21 +399,21 @@ function IconsSection() {
         </Specimen>
 
         <Specimen no={8} name="Inset Depth" family="Tactile" note="Внутренняя тень даёт «выгравированную» глубину. Toggle/option-grid.">
-          <div className="grid h-12 w-12 place-items-center rounded-[10px] bg-surface-secondary text-content-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.08),inset_0_-1px_0_rgba(255,255,255,0.6)]">
+          <div className="grid h-12 w-12 place-items-center rounded-lg bg-surface-secondary text-content-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.08),inset_0_-1px_0_rgba(255,255,255,0.6)]">
             <Calculator className="h-6 w-6" strokeWidth={1.75} />
           </div>
         </Specimen>
 
         <Specimen no={9} name="SF Symbol Ramp" family="iOS Native" note="Серый градиент-ramp с тёмным окантом. iOS Settings-icon style.">
-          <div className="grid h-12 w-12 place-items-center rounded-[10px] text-white shadow-md bg-[linear-gradient(180deg,#8e8e93_0%,#48484a_100%)] ring-1 ring-inset ring-white/10">
+          <div className="grid h-12 w-12 place-items-center rounded-lg text-white shadow-md bg-[linear-gradient(180deg,#8e8e93_0%,#48484a_100%)] ring-1 ring-inset ring-white/10">
             <Settings className="h-6 w-6" strokeWidth={1.75} />
           </div>
         </Specimen>
 
         <Specimen no={10} name="Glass Floating" family="Modern" note="Frosted-glass chip с rim highlight. Поверх изображений / 3D-вьюера.">
           <div className="relative w-full grid place-items-center">
-            <div className="absolute inset-0 -z-10 rounded-[10px] bg-gradient-to-br from-oe-blue/30 to-fuchsia-400/30 blur-md" />
-            <div className="grid h-12 w-12 place-items-center rounded-[10px] bg-white/45 dark:bg-white/10 backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/15 text-content-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_4px_12px_rgba(0,0,0,0.08)]">
+            <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-br from-oe-blue/30 to-fuchsia-400/30 blur-md" />
+            <div className="grid h-12 w-12 place-items-center rounded-lg bg-white/45 dark:bg-white/10 backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/15 text-content-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_4px_12px_rgba(0,0,0,0.08)]">
               <Cpu className="h-6 w-6" strokeWidth={1.75} />
             </div>
           </div>
@@ -421,9 +421,9 @@ function IconsSection() {
 
         <Specimen no={11} name="Stacked Layers (3D)" family="Editorial" note="Несколько слоёв со сдвигом - псевдо-3D глубина. Для feature-карточек.">
           <div className="relative h-12 w-12">
-            <div className="absolute inset-0 rounded-[10px] bg-oe-blue/15 translate-x-2 translate-y-2" />
-            <div className="absolute inset-0 rounded-[10px] bg-oe-blue/30 translate-x-1 translate-y-1" />
-            <div className="absolute inset-0 grid place-items-center rounded-[10px] bg-oe-blue text-white shadow-md">
+            <div className="absolute inset-0 rounded-lg bg-oe-blue/15 translate-x-2 translate-y-2" />
+            <div className="absolute inset-0 rounded-lg bg-oe-blue/30 translate-x-1 translate-y-1" />
+            <div className="absolute inset-0 grid place-items-center rounded-lg bg-oe-blue text-white shadow-md">
               <Layers className="h-6 w-6" strokeWidth={1.75} />
             </div>
           </div>
@@ -490,14 +490,14 @@ function TagsSection() {
         </Specimen>
 
         <Specimen no={7} name="Mono Code Chip" family="Technical" note="Monospace + рамка как kbd. r=5px. Версии, IDs, error codes.">
-          <span className="inline-flex h-6 items-center rounded-[5px] px-1.5 font-mono text-2xs font-medium text-content-primary bg-surface-tertiary border border-border-light shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)]">
+          <span className="inline-flex h-6 items-center rounded-sm px-1.5 font-mono text-2xs font-medium text-content-primary bg-surface-tertiary border border-border-light shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)]">
             DIN-276/330
           </span>
         </Specimen>
 
         <Specimen no={8} name="Glass Frosted" family="Modern" note="Backdrop-blur на цветном фоне. Для overlays поверх 3D-вьюера.">
           <div className="relative w-full grid place-items-center">
-            <div className="absolute inset-0 -z-10 rounded-[8px] bg-gradient-to-br from-oe-blue/30 to-fuchsia-400/30 blur-md" />
+            <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-br from-oe-blue/30 to-fuchsia-400/30 blur-md" />
             <span className="inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-content-primary bg-white/50 dark:bg-white/10 backdrop-blur-xl ring-1 ring-white/40 dark:ring-white/15">
               <Layers className="h-3 w-3" /> Level 02
             </span>
@@ -515,9 +515,9 @@ function TagsSection() {
 
         <Specimen no={10} name="Squircle Solid" family="iOS Native" note="iOS Section-style: пастельный блок с r=6px. Для категорий и tag-таксономий.">
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
-            <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">Rebar</span>
-            <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">Finish</span>
+            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
+            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-warning-bg text-semantic-warning">Rebar</span>
+            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-success-bg text-semantic-success">Finish</span>
           </div>
         </Specimen>
 
@@ -534,10 +534,10 @@ function TagsSection() {
 
         <Specimen no={12} name="Counter Pip" family="Notification" note="Круглый цифровой badge поверх иконки. Inbox, queue, pending count.">
           <div className="relative">
-            <div className="grid h-10 w-10 place-items-center rounded-[10px] bg-surface-tertiary text-content-secondary">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-surface-tertiary text-content-secondary">
               <Bell className="h-5 w-5" strokeWidth={1.75} />
             </div>
-            <span className="absolute -top-1 -right-1 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-semantic-error px-1 text-2xs font-bold text-white ring-2 ring-surface-primary">
+            <span className="absolute -top-1 -right-1 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-semantic-error px-1 text-2xs font-semibold text-white ring-2 ring-surface-primary">
               12
             </span>
           </div>
@@ -552,13 +552,13 @@ function TagsSection() {
       </Grid>
 
       {/* Composite demo */}
-      <div className="mt-10 rounded-[12px] border border-border-light bg-surface-primary p-6">
-        <div className="text-2xs uppercase tracking-[0.16em] text-content-tertiary font-medium">Composition · realistic row</div>
+      <div className="mt-10 rounded-xl border border-border-light bg-surface-primary p-6">
+        <div className="text-2xs uppercase tracking-wider text-content-tertiary font-medium">Composition · realistic row</div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-semantic-success-bg px-2 text-xs font-medium text-semantic-success">Approved</span>
           <span className="inline-flex h-6 items-center gap-2 text-xs font-medium text-content-primary"><span className="h-2 w-2 rounded-full bg-semantic-warning ring-2 ring-semantic-warning/20"/>Waiting client</span>
-          <span className="inline-flex h-6 items-center rounded-[5px] px-1.5 font-mono text-2xs text-content-primary bg-surface-tertiary border border-border-light">v2.9.36</span>
-          <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
+          <span className="inline-flex h-6 items-center rounded-sm px-1.5 font-mono text-2xs text-content-primary bg-surface-tertiary border border-border-light">v2.9.36</span>
+          <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
           <span className="inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-semibold bg-semantic-success-bg text-semantic-success"><TrendingUp className="h-3 w-3"/> +12.4%</span>
           <span className="inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-xs font-semibold text-white bg-[linear-gradient(120deg,var(--oe-blue),#a855f7,#06b6d4)] bg-[length:200%_auto] animate-gradient-text">
             <Sparkles className="h-3 w-3"/> AI suggested
@@ -589,9 +589,9 @@ function BgSpecimen({
   children?: ReactNode;
 }) {
   return (
-    <div className="rounded-[12px] border border-border-light bg-surface-primary overflow-hidden transition-all duration-normal ease-oe hover:border-border hover:shadow-md">
+    <div className="rounded-xl border border-border-light bg-surface-primary overflow-hidden transition-all duration-normal ease-oe hover:border-border hover:shadow-md">
       <div className="px-6 pt-5 pb-3">
-        <div className="flex items-center gap-2 text-2xs uppercase tracking-[0.16em] text-content-tertiary font-medium">
+        <div className="flex items-center gap-2 text-2xs uppercase tracking-wider text-content-tertiary font-medium">
           <span className="tabular-nums">{String(no).padStart(2, '0')}</span>
           <span className="h-px flex-1 bg-border-light" />
           <span>{family}</span>
@@ -619,7 +619,7 @@ function SampleContent({ dark = false }: { dark?: boolean }) {
   return (
     <div className="relative h-full p-6 flex flex-col justify-between">
       <div>
-        <div className={['text-2xs uppercase tracking-[0.18em] font-medium', dark ? 'text-white/55' : 'text-content-tertiary'].join(' ')}>
+        <div className={['text-2xs uppercase tracking-wider font-medium', dark ? 'text-white/55' : 'text-content-tertiary'].join(' ')}>
           Phase 02 · Cost plan
         </div>
         <h4 className={['mt-1.5 text-xl font-semibold tracking-tight', titleColor].join(' ')}>
@@ -630,7 +630,7 @@ function SampleContent({ dark = false }: { dark?: boolean }) {
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <button className={['inline-flex h-8 items-center gap-1.5 px-3 rounded-[8px] text-xs font-medium shadow-sm', btnBg].join(' ')}>
+        <button className={['inline-flex h-8 items-center gap-1.5 px-3 rounded-lg text-xs font-medium shadow-sm', btnBg].join(' ')}>
           <Sparkles className="h-3.5 w-3.5" /> Review estimate
         </button>
         <span className={['inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium ring-1 ring-inset', cardBg].join(' ')}>

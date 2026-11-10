@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const CATEGORY_BG_CLASSES: Record<string, string> = {
   material: 'bg-blue-500',
-  labor: 'bg-amber-500',
+  labor: 'bg-semantic-warning',
   machinery: 'bg-teal-500',
   equipment: 'bg-violet-500',
   subcontractor: 'bg-pink-500',
@@ -35,11 +35,11 @@ const CATEGORY_BG_CLASSES: Record<string, string> = {
 
 const CATEGORY_TEXT_CLASSES: Record<string, string> = {
   material: 'text-blue-600 dark:text-blue-400',
-  labor: 'text-amber-600 dark:text-amber-400',
+  labor: 'text-semantic-warning',
   machinery: 'text-teal-600 dark:text-teal-400',
   equipment: 'text-violet-600 dark:text-violet-400',
   subcontractor: 'text-pink-600 dark:text-pink-400',
-  other: 'text-gray-600 dark:text-gray-400',
+  other: 'text-content-secondary',
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -176,7 +176,7 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
             {t('boq.cost_breakdown', { defaultValue: 'Cost Breakdown' })}
           </span>
         </div>
-        <span className="text-sm font-bold text-content-primary tabular-nums">
+        <span className="text-sm font-semibold text-content-primary tabular-nums">
           {fmtCompact(data.grand_total, fmt)}
         </span>
       </button>
@@ -197,10 +197,10 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
               />
               {/* Center label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[10px] text-content-tertiary uppercase tracking-wide">
+                <span className="text-2xs text-content-tertiary uppercase tracking-wide">
                   {t('boq.cost_breakdown_total', { defaultValue: 'Total' })}
                 </span>
-                <span className="text-sm font-bold text-content-primary tabular-nums">
+                <span className="text-sm font-semibold text-content-primary tabular-nums">
                   {fmtCompact(data.grand_total, fmt)}
                 </span>
               </div>
@@ -388,7 +388,7 @@ function SummaryRow({
       <span
         className={
           bold
-            ? 'font-bold text-content-primary text-sm'
+            ? 'font-semibold text-content-primary text-sm'
             : secondary
               ? 'text-content-tertiary'
               : 'text-content-secondary font-medium'
@@ -397,7 +397,7 @@ function SummaryRow({
         {label}
       </span>
       <span
-        className={`tabular-nums ${bold ? 'font-bold text-content-primary text-sm' : secondary ? 'text-content-tertiary' : 'text-content-primary font-medium'}`}
+        className={`tabular-nums ${bold ? 'font-semibold text-content-primary text-sm' : secondary ? 'text-content-tertiary' : 'text-content-primary font-medium'}`}
       >
         {fmtCompact(value, fmt)}
       </span>

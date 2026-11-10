@@ -66,7 +66,7 @@ export function VersionDropdown({
     return (
       <div
         className={clsx(
-          'inline-flex items-center gap-1.5 px-2 h-7 rounded-md text-[11px] text-semantic-error border border-semantic-error/20 bg-semantic-error/5',
+          'inline-flex items-center gap-1.5 px-2 h-7 rounded-md text-2xs text-semantic-error border border-semantic-error/20 bg-semantic-error/5',
           className,
         )}
       >
@@ -85,7 +85,7 @@ export function VersionDropdown({
         data-testid="version-dropdown-button"
         className={clsx(
           'inline-flex items-center gap-1.5 h-7 px-2 rounded-md',
-          'text-[11px] font-medium border border-border-light',
+          'text-2xs font-medium border border-border-light',
           'text-content-secondary hover:bg-surface-secondary',
           'disabled:opacity-50 disabled:cursor-not-allowed',
         )}
@@ -139,11 +139,11 @@ export function VersionDropdown({
                     <DateDisplay
                       value={v.uploaded_at}
                       format="datetime"
-                      className="text-[10px] text-content-tertiary"
+                      className="text-2xs text-content-tertiary"
                     />
                   </div>
                   {v.notes && (
-                    <p className="mt-1 text-[11px] text-content-secondary line-clamp-2">
+                    <p className="mt-1 text-2xs text-content-secondary line-clamp-2">
                       {v.notes}
                     </p>
                   )}
@@ -155,7 +155,7 @@ export function VersionDropdown({
                     disabled={restore.isPending}
                     data-testid={`version-restore-${v.version_number}`}
                     className={clsx(
-                      'inline-flex items-center gap-1 h-6 px-1.5 rounded text-[10px] font-medium',
+                      'inline-flex items-center gap-1 h-6 px-1.5 rounded text-2xs font-medium',
                       'text-oe-blue hover:bg-oe-blue/10',
                       'disabled:opacity-50 disabled:cursor-not-allowed',
                     )}

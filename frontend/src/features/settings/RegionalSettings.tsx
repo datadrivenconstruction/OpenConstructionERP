@@ -784,12 +784,12 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
                   className={clsx(
                     'mt-2 h-10 w-full rounded-lg border bg-surface-primary px-3 text-sm text-content-primary uppercase placeholder:normal-case placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:border-transparent',
                     customCurrencyInvalid
-                      ? 'border-amber-400 focus:ring-amber-400'
+                      ? 'border-semantic-warning/60 focus:ring-semantic-warning/60'
                       : 'border-border focus:ring-oe-blue',
                   )}
                 />
                 {customCurrencyInvalid && (
-                  <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
+                  <p className="mt-1 text-2xs text-semantic-warning">
                     {t('currency_picker.custom_hint', {
                       defaultValue: 'Use a 3-letter ISO code (e.g. XAF) so amounts format correctly.',
                     })}

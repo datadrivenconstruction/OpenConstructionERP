@@ -138,7 +138,7 @@ export function DemoQuickStart() {
   return (
     <section className="mb-10" data-testid="demo-quick-start">
       <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <h2 className="text-xl font-bold text-content-primary">
+        <h2 className="text-xl font-semibold text-content-primary">
           {t('howto.demo.headline', {
             defaultValue: 'Explore a working construction ERP on real demo projects',
           })}
@@ -182,7 +182,7 @@ export function DemoQuickStart() {
               className="group relative flex min-w-0 flex-col rounded-2xl border border-border-light bg-surface-primary p-5 ps-14 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <HexMark icon={c.icon} size={48} className="-top-3 -start-3" />
-              <h3 className="text-base font-bold text-content-primary">{c.title}</h3>
+              <h3 className="text-base font-semibold text-content-primary">{c.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">{c.body}</p>
               {c.external ? (
                 <a href={c.to} target="_blank" rel="noopener noreferrer" className={linkClass}>

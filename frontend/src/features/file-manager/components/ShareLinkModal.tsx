@@ -309,7 +309,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                 </div>
                 <div
                   data-testid="share-link-url"
-                  className="font-mono text-[10px] text-content-secondary break-all leading-relaxed"
+                  className="font-mono text-2xs text-content-secondary break-all leading-relaxed"
                 >
                   {absoluteShareUrl(justCreated.url)}
                 </div>
@@ -359,7 +359,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                             })}
                           />
                         )}
-                        <span className="font-mono text-[10px] text-content-secondary truncate">
+                        <span className="font-mono text-2xs text-content-secondary truncate">
                           {absoluteShareUrl(link.url)}
                         </span>
                       </div>
@@ -407,7 +407,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                         </button>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-content-tertiary">
+                    <div className="flex items-center justify-between text-2xs text-content-tertiary">
                       <span>
                         {link.expires_at
                           ? `${t('files.share.expires_label', { defaultValue: 'Expires' })}: ${new Date(link.expires_at).toLocaleString(getIntlLocale())}`

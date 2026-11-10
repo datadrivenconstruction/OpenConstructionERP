@@ -325,9 +325,9 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
       <div
         role="alert"
         data-testid="match-readiness-blocked"
-        className="rounded-xl border border-rose-200 bg-rose-50/70 px-4 py-3 dark:border-rose-800/60 dark:bg-rose-950/20"
+        className="rounded-xl border border-semantic-error/30 bg-semantic-error/10 px-4 py-3"
       >
-        <div className="flex items-center gap-2 text-sm font-semibold text-rose-900 dark:text-rose-100">
+        <div className="flex items-center gap-2 text-sm font-semibold text-semantic-error">
           <XCircle className="h-4 w-4 shrink-0" />
           {t('match_readiness.blocked_title', {
             defaultValue: 'Matching cannot run here yet',
@@ -341,7 +341,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               'Matching compares every model element with a rate catalogue by meaning, so it needs two things on this server: the meaning search service and a rate catalogue for your country.',
           })}
         </p>
-        <ul className="mt-1.5 space-y-1 pl-6 text-xs text-rose-800 dark:text-rose-200">
+        <ul className="mt-1.5 space-y-1 pl-6 text-xs text-semantic-error">
           {data.blockers.map((b) => (
             <li key={b.code} data-code={b.code}>
               {sentence(b, t, locale)}
@@ -357,7 +357,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={installM.isPending}
               onClick={() => installM.mutate()}
-              className="inline-flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-md bg-semantic-error px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-semantic-error disabled:cursor-not-allowed disabled:opacity-60"
             >
               {installM.isPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -374,7 +374,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={readinessQ.isFetching || installM.isPending}
               onClick={() => void readinessQ.refetch()}
-              className="inline-flex items-center gap-1.5 rounded-md border border-rose-300 bg-white/70 px-3 py-1.5 text-xs font-medium text-rose-800 transition-colors hover:bg-white disabled:opacity-60 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100 dark:hover:bg-rose-900/50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-semantic-error/30 bg-white/70 px-3 py-1.5 text-xs font-medium text-semantic-error transition-colors hover:bg-white disabled:opacity-60"
             >
               <RefreshCw className={readinessQ.isFetching ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
               {t('qdrant_health.refresh_button', { defaultValue: 'Refresh status' })}
@@ -383,7 +383,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
           {unreachable && unreachable.params.local_install !== 'available' && (
             <Link
               to="/settings?tab=ai"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-900 underline-offset-2 hover:underline dark:text-rose-100"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-semantic-error underline-offset-2 hover:underline"
             >
               {t('match_readiness.open_search_settings', { defaultValue: 'Set up search' })}
               <ArrowRight className="h-3 w-3" />
@@ -393,7 +393,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
             <button
               type="button"
               onClick={onOpenSetup}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-900 underline-offset-2 hover:underline dark:text-rose-100"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-semantic-error underline-offset-2 hover:underline"
             >
               {t('match_readiness.open_setup', { defaultValue: 'Open Setup & tools' })}
               <ArrowRight className="h-3 w-3" />
@@ -412,15 +412,15 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
     return (
       <div
         data-testid="match-readiness-warnings"
-        className="rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 dark:border-amber-800/60 dark:bg-amber-950/20"
+        className="rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 px-4 py-3"
       >
-        <div className="flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-100">
+        <div className="flex items-center gap-2 text-sm font-semibold text-semantic-warning">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {t('match_readiness.warnings_title', {
             defaultValue: 'Matching works, with limits',
           })}
         </div>
-        <ul className="mt-1.5 space-y-1 pl-6 text-xs text-amber-800 dark:text-amber-200">
+        <ul className="mt-1.5 space-y-1 pl-6 text-xs text-semantic-warning">
           {data.warnings.map((w) => (
             <li key={w.code} data-code={w.code}>
               {sentence(w, t, locale)}
@@ -428,7 +428,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
           ))}
         </ul>
         {switchItem && !data.can_change_catalogue && (
-          <p className="mt-1.5 pl-6 text-xs text-amber-800 dark:text-amber-200">
+          <p className="mt-1.5 pl-6 text-xs text-semantic-warning">
             {t('match_readiness.switch_ask_owner', {
               defaultValue: 'Ask the project owner or an administrator to switch the catalogue.',
             })}
@@ -440,7 +440,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={switchM.isPending}
               onClick={() => void handleSwitch(switchItem.params.catalogue!)}
-              className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-amber-900 hover:bg-amber-50 disabled:opacity-60 dark:border-amber-700/50 dark:bg-surface-primary/80 dark:text-amber-100"
+              className="inline-flex items-center gap-1 rounded-full border border-semantic-warning/30 bg-white/90 px-2.5 py-1 text-2xs font-semibold text-semantic-warning hover:bg-semantic-warning-bg disabled:opacity-60 dark:bg-surface-primary/80"
             >
               {t('match_readiness.switch', {
                 defaultValue: 'Switch to {{catalogue}}',
@@ -452,7 +452,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
             <button
               type="button"
               onClick={onOpenSetup}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-amber-900 underline-offset-2 hover:underline dark:text-amber-100"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-semantic-warning underline-offset-2 hover:underline"
             >
               {t('match_readiness.open_setup', { defaultValue: 'Open Setup & tools' })}
               <ArrowRight className="h-3 w-3" />
@@ -467,7 +467,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
   return (
     <div
       data-testid="match-readiness-ready"
-      className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-2 text-xs text-emerald-900 dark:border-emerald-800/60 dark:bg-emerald-950/20 dark:text-emerald-100"
+      className="flex items-center gap-2 rounded-xl border border-semantic-success/30 bg-semantic-success/10 px-4 py-2 text-xs text-semantic-success"
     >
       <CheckCircle2 className="h-4 w-4 shrink-0" />
       {readyCatalogue

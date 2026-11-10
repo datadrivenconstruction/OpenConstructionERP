@@ -137,7 +137,7 @@ export function UserSearchInput({
               onClick={() => handleSelect(u)}
               className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-surface-secondary transition-colors"
             >
-              <div className="w-6 h-6 rounded-full bg-oe-blue flex items-center justify-center text-white text-2xs font-bold shrink-0">
+              <div className="w-6 h-6 rounded-full bg-oe-blue flex items-center justify-center text-white text-2xs font-semibold shrink-0">
                 {u.full_name?.[0]?.toUpperCase() || '?'}
               </div>
               <div className="flex-1 min-w-0">

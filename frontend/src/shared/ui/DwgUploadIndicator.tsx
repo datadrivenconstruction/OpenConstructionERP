@@ -119,9 +119,9 @@ export function DwgUploadIndicator() {
         {isActive ? (
           <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
         ) : primary.status === 'ready' ? (
-          <Check size={14} className="text-emerald-500 shrink-0" />
+          <Check size={14} className="text-semantic-success shrink-0" />
         ) : (
-          <X size={14} className="text-red-500 shrink-0" />
+          <X size={14} className="text-semantic-error shrink-0" />
         )}
         <div className="flex-1 min-w-0 text-left">
           <p className="text-xs font-medium text-content-primary truncate">
@@ -142,7 +142,7 @@ export function DwgUploadIndicator() {
           )}
         </div>
         {active.length > 1 && (
-          <span className="text-[10px] text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
+          <span className="text-2xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
             +{active.length - 1}
           </span>
         )}
@@ -210,13 +210,13 @@ function DwgJobRow({
     <div className="px-4 py-3 flex items-start gap-3">
       <div className="mt-0.5 shrink-0">
         {isActive && <Loader2 size={16} className="text-oe-blue animate-spin" />}
-        {isDone && <Check size={16} className="text-emerald-500" />}
-        {isError && <X size={16} className="text-red-500" />}
+        {isDone && <Check size={16} className="text-semantic-success" />}
+        {isError && <X size={16} className="text-semantic-error" />}
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-content-primary truncate">{job.fileName}</p>
-        <p className="text-[10px] text-content-quaternary">{formatFileSize(job.fileSize)}</p>
+        <p className="text-2xs text-content-quaternary">{formatFileSize(job.fileSize)}</p>
 
         {isActive && (
           <div className="mt-1.5">
@@ -230,7 +230,7 @@ function DwgJobRow({
               uploadPercent={job.progress}
             />
             {job.status === 'converting' && (
-              <p className="text-[10px] text-content-quaternary mt-0.5">
+              <p className="text-2xs text-content-quaternary mt-0.5">
                 {t('conv.dock_may_leave', {
                   defaultValue: 'The file is uploaded. You can keep working: the server continues on its own.',
                 })}
@@ -240,7 +240,7 @@ function DwgJobRow({
         )}
 
         {isError && (
-          <p className="text-[10px] text-red-500 mt-0.5 line-clamp-2">
+          <p className="text-2xs text-semantic-error mt-0.5 line-clamp-2">
             {job.errorCode === 'ui_stalled'
               ? stalledText.body
               : conversionErrorText(job.errorCode, job.errorMessage, t) ||
@@ -253,7 +253,7 @@ function DwgJobRow({
             <button
               type="button"
               onClick={onCancel}
-              className="text-[10px] text-content-tertiary hover:text-red-500 font-medium"
+              className="text-2xs text-content-tertiary hover:text-semantic-error font-medium"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
@@ -262,7 +262,7 @@ function DwgJobRow({
             <button
               type="button"
               onClick={onOpen}
-              className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline font-medium"
+              className="inline-flex items-center gap-1 text-2xs text-oe-blue hover:underline font-medium"
             >
               <ExternalLink size={10} />
               {t('dwg_upload.open', { defaultValue: 'Open' })}
@@ -272,7 +272,7 @@ function DwgJobRow({
             <button
               type="button"
               onClick={onDismiss}
-              className="text-[10px] text-content-quaternary hover:text-content-secondary"
+              className="text-2xs text-content-quaternary hover:text-content-secondary"
             >
               {t('common.dismiss', { defaultValue: 'Dismiss' })}
             </button>

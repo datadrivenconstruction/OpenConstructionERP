@@ -74,11 +74,11 @@ export function DeviationOverlay({
           className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm border border-black/10"
           style={{ background: summary.worst_severity_color }}
         />
-        <span className="text-[11px] font-semibold text-content-primary">
+        <span className="text-2xs font-semibold text-content-primary">
           {deviationHeadline(summary, t)}
         </span>
       </div>
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+      <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {t('bim.deviation_legend_title', {
           defaultValue: 'Scan vs design',
         })}
@@ -87,7 +87,7 @@ export function DeviationOverlay({
         {rows.map((row) => (
           <li
             key={row.severity}
-            className="flex items-center gap-1.5 text-[11px] text-content-secondary"
+            className="flex items-center gap-1.5 text-2xs text-content-secondary"
           >
             <span
               className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm border border-black/10"
@@ -107,14 +107,14 @@ export function DeviationOverlay({
           {detail.map((d) => (
             <li
               key={d.key}
-              className="flex items-center gap-1.5 text-[10px] text-content-tertiary"
+              className="flex items-center gap-1.5 text-2xs text-content-tertiary"
               title={d.rms ?? undefined}
             >
               <span className="truncate">{d.rms}</span>
             </li>
           ))}
           {hiddenDetail > 0 && (
-            <li className="text-[10px] italic text-content-tertiary">
+            <li className="text-2xs italic text-content-tertiary">
               {t('bim.deviation_more_scans', {
                 defaultValue: '+{{count}} more scan(s)',
                 count: hiddenDetail,

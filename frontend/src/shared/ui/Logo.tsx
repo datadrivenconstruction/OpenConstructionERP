@@ -112,8 +112,8 @@ interface LogoWithTextProps extends LogoProps {
 
 /* Text sizes — larger than icon to make the name prominent */
 const textSizeMap = {
-  xs: 'text-[15px] leading-none',
-  sm: 'text-[16px] leading-none',
+  xs: 'text-base leading-none',
+  sm: 'text-lg leading-none',
   md: 'text-[17px] leading-none',
   lg: 'text-xl leading-none',
   xl: 'text-2xl leading-none',

@@ -104,16 +104,16 @@ export function cellClasses(cell: LevelingCell | undefined): string {
   if (cell.capacity_unknown) {
     // Allocation present but no capacity declared: slate/neutral, never a
     // false "overload" colour.
-    return 'bg-slate-300/50 text-slate-800 dark:bg-slate-600/40 dark:text-slate-100';
+    return 'bg-slate-300/50 text-content-primary dark:bg-slate-600/40 dark:text-slate-100';
   }
   if (cell.over_allocated) {
-    return 'bg-rose-500/90 text-white font-semibold';
+    return 'bg-semantic-error/90 text-white font-semibold';
   }
   const cap = cell.capacity_percent ?? 100;
   const ratio = cap > 0 ? cell.allocation_percent / cap : 1;
   if (ratio > 0.8) return 'bg-amber-400/80 text-amber-950';
-  if (ratio > 0.5) return 'bg-emerald-500/70 text-emerald-950';
-  return 'bg-emerald-300/50 text-emerald-900';
+  if (ratio > 0.5) return 'bg-semantic-success/70 text-emerald-950';
+  return 'bg-emerald-300/50 text-semantic-success';
 }
 
 interface DrawerState {
@@ -351,13 +351,13 @@ export function ResourceLevelingPage() {
           left at unknown capacity, an unqualified all-clear would overstate
           what was actually checked. */}
       {data && !isLoading && resources.length > 0 && data.overloaded_resources === 0 && (
-        <div className="flex items-start gap-3 rounded-xl border border-emerald-300/60 bg-emerald-50/60 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+        <div className="flex items-start gap-3 rounded-xl border border-semantic-success/30 bg-semantic-success/10 p-4">
           <CheckCircle2
             size={18}
-            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+            className="mt-0.5 shrink-0 text-semantic-success"
           />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
+            <h2 className="text-sm font-semibold text-semantic-success">
               {t('leveling.all_clear_title', { defaultValue: 'Nothing is over capacity' })}
             </h2>
             <p className="mt-1 text-xs text-emerald-900/80 dark:text-emerald-200/80">
@@ -433,7 +433,7 @@ export function ResourceLevelingPage() {
                   {buckets.map((b) => (
                     <div
                       key={b.index}
-                      className="text-center text-[11px] font-medium text-content-tertiary"
+                      className="text-center text-2xs font-medium text-content-tertiary"
                       title={`${b.start.slice(0, 10)} → ${b.end.slice(0, 10)}`}
                     >
                       {b.label}
@@ -478,7 +478,7 @@ export function ResourceLevelingPage() {
                                 </Badge>
                               )}
                             </div>
-                            <span className="block truncate text-[11px] text-content-tertiary">
+                            <span className="block truncate text-2xs text-content-tertiary">
                               {row.code}
                               {row.capacity_percent != null
                                 ? ` · ${t('leveling.capacity_label', { defaultValue: 'Capacity' })} ${row.capacity_percent}%`
@@ -506,9 +506,9 @@ export function ResourceLevelingPage() {
                             cell && cell.allocation_percent > 0
                               ? `${cell.allocation_percent}%`
                               : '';
-                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${cellClasses(
+                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${cellClasses(
                             cell,
-                          )} ${cell?.cross_project ? 'ring-2 ring-inset ring-rose-700' : ''}`;
+                          )} ${cell?.cross_project ? 'ring-2 ring-inset ring-semantic-error/60' : ''}`;
                           // Capacity Planning already ships a red cell as a
                           // button that says "resolve this here" and sends the
                           // reader to this page. The equivalent cell here was an
@@ -555,7 +555,7 @@ export function ResourceLevelingPage() {
                 label={t('leveling.legend_low', { defaultValue: '≤ 50% of capacity' })}
               />
               <LegendSwatch
-                className="bg-emerald-500/70"
+                className="bg-semantic-success/70"
                 label={t('leveling.legend_mid', { defaultValue: '51-80%' })}
               />
               <LegendSwatch
@@ -563,7 +563,7 @@ export function ResourceLevelingPage() {
                 label={t('leveling.legend_high', { defaultValue: '81-100%' })}
               />
               <LegendSwatch
-                className="bg-rose-500/90"
+                className="bg-semantic-error/90"
                 label={t('leveling.legend_over', { defaultValue: 'Over capacity' })}
               />
               <LegendSwatch
@@ -571,7 +571,7 @@ export function ResourceLevelingPage() {
                 label={t('leveling.legend_unknown', { defaultValue: 'Capacity unknown' })}
               />
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-rose-700" />
+                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-semantic-error/60" />
                 {t('leveling.legend_cross', { defaultValue: 'Two or more projects compete' })}
               </span>
             </div>
@@ -599,7 +599,7 @@ export function ResourceLevelingPage() {
           <div className="space-y-5 p-5">
             {/* Capacity-unknown notice */}
             {drawer.row.capacity_unknown && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50/60 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+              <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-xs text-semantic-warning">
                 <HelpCircle size={15} className="mt-0.5 shrink-0" />
                 <span>
                   {t('leveling.unknown_notice', {
@@ -678,7 +678,7 @@ export function ResourceLevelingPage() {
                       </span>
                       <span
                         className={`tabular-nums font-semibold ${
-                          cell.over_allocated ? 'text-rose-600 dark:text-rose-400' : 'text-content-primary'
+                          cell.over_allocated ? 'text-semantic-error' : 'text-content-primary'
                         }`}
                       >
                         {cell.allocation_percent}%
@@ -803,10 +803,10 @@ function SuggestionItem({
         suggested: suggestion.suggested_allocation_percent,
       });
   return (
-    <li className="rounded-lg border border-rose-200/70 bg-rose-50/50 p-3 dark:border-rose-500/30 dark:bg-rose-500/10">
+    <li className="rounded-lg border border-semantic-error/30 bg-semantic-error/10 p-3">
       <div className="flex items-center gap-2">
-        <ActionIcon size={14} className="shrink-0 text-rose-600 dark:text-rose-400" />
-        <span className="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+        <ActionIcon size={14} className="shrink-0 text-semantic-error" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-semantic-error">
           {isShift
             ? t('leveling.action_shift', { defaultValue: 'Shift' })
             : t('leveling.action_spread', { defaultValue: 'Spread' })}
@@ -816,7 +816,7 @@ function SuggestionItem({
         </Badge>
       </div>
       <p className="mt-1.5 text-xs text-content-secondary">{rationale}</p>
-      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-content-tertiary">
+      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-2xs text-content-tertiary">
         <span>
           {t('leveling.target_project', { defaultValue: 'Project' })}:{' '}
           {onOpenProject ? (
@@ -853,7 +853,7 @@ function SuggestionItem({
             type="button"
             onClick={onApply}
             disabled={applying}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1 disabled:opacity-50"
           >
             <Check size={12} />
             {t('leveling.apply', { defaultValue: 'Apply' })}
@@ -863,7 +863,7 @@ function SuggestionItem({
             <button
               type="button"
               onClick={onOpenSchedule}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-2.5 py-1 text-[11px] font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-2.5 py-1 text-2xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
             >
               <CalendarDays size={12} />
               {t('leveling.review_booking', { defaultValue: 'Review in 4D Schedule' })}
@@ -874,7 +874,7 @@ function SuggestionItem({
           <button
             type="button"
             onClick={onOpenSchedule}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
+            className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
             title={t('leveling.view_in_schedule', { defaultValue: 'View in 4D Schedule' })}
           >
             <ExternalLink size={11} />
@@ -897,15 +897,15 @@ function SummaryChip({
 }) {
   const toneClass =
     tone === 'danger'
-      ? 'text-rose-600 dark:text-rose-400'
+      ? 'text-semantic-error'
       : tone === 'ok'
-        ? 'text-emerald-600 dark:text-emerald-400'
+        ? 'text-semantic-success'
         : tone === 'warn'
-          ? 'text-amber-600 dark:text-amber-400'
+          ? 'text-semantic-warning'
           : 'text-content-primary';
   return (
     <div className="rounded-xl border border-border bg-surface-primary px-4 py-2.5">
-      <div className={`text-xl font-bold tabular-nums ${toneClass}`}>{value}</div>
+      <div className={`text-xl font-semibold tabular-nums ${toneClass}`}>{value}</div>
       <div className="text-xs text-content-tertiary">{label}</div>
     </div>
   );

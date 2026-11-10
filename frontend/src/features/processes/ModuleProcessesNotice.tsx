@@ -68,16 +68,16 @@ export function ModuleProcessesNotice({
       data-state={starting ? 'preparing' : 'off'}
       className={
         (starting
-          ? 'flex items-center gap-2 rounded-xl border border-sky-500/25 bg-sky-500/5 px-3 py-2 text-xs '
-          : 'flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm sm:flex-row sm:items-center ') +
+          ? 'flex items-center gap-2 rounded-xl border border-sky-500/25 bg-semantic-info/5 px-3 py-2 text-xs '
+          : 'flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-semantic-warning/10 p-3 text-sm sm:flex-row sm:items-center ') +
         (className ?? '')
       }
     >
       <div className="flex min-w-0 flex-1 items-start gap-2">
         {starting ? (
-          <Loader2 size={14} className="mt-0.5 shrink-0 animate-spin text-sky-600" aria-hidden />
+          <Loader2 size={14} className="mt-0.5 shrink-0 animate-spin text-semantic-info" aria-hidden />
         ) : (
-          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-600" aria-hidden />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
         )}
         <div className="min-w-0">
           <p className="font-medium text-content-primary">

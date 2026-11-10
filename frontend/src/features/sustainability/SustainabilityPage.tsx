@@ -65,11 +65,11 @@ function ratingColor(rating: string): string {
 
 function complianceStyle(level: string, t: (key: string, opts?: Record<string, unknown>) => string) {
   switch (level) {
-    case 'excellent': return { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', Icon: CheckCircle2, label: t('sustainability.compliance_excellent', { defaultValue: 'Excellent' }) };
-    case 'good': return { bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-700 dark:text-green-400', Icon: CheckCircle2, label: t('sustainability.compliance_good', { defaultValue: 'Good' }) };
-    case 'acceptable': return { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', Icon: AlertTriangle, label: t('sustainability.compliance_acceptable', { defaultValue: 'Acceptable' }) };
-    case 'non-compliant': return { bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-700 dark:text-red-400', Icon: XCircle, label: t('sustainability.compliance_non_compliant', { defaultValue: 'Non-Compliant' }) };
-    default: return { bg: 'bg-gray-50 dark:bg-gray-950/30', text: 'text-gray-500', Icon: Info, label: t('sustainability.compliance_na', { defaultValue: 'N/A' }) };
+    case 'excellent': return { bg: 'bg-semantic-success-bg', text: 'text-semantic-success', Icon: CheckCircle2, label: t('sustainability.compliance_excellent', { defaultValue: 'Excellent' }) };
+    case 'good': return { bg: 'bg-semantic-success-bg', text: 'text-semantic-success', Icon: CheckCircle2, label: t('sustainability.compliance_good', { defaultValue: 'Good' }) };
+    case 'acceptable': return { bg: 'bg-semantic-warning-bg', text: 'text-semantic-warning', Icon: AlertTriangle, label: t('sustainability.compliance_acceptable', { defaultValue: 'Acceptable' }) };
+    case 'non-compliant': return { bg: 'bg-semantic-error-bg', text: 'text-semantic-error', Icon: XCircle, label: t('sustainability.compliance_non_compliant', { defaultValue: 'Non-Compliant' }) };
+    default: return { bg: 'bg-surface-secondary', text: 'text-gray-500', Icon: Info, label: t('sustainability.compliance_na', { defaultValue: 'N/A' }) };
   }
 }
 
@@ -513,7 +513,7 @@ export function SustainabilityPage() {
                   {t('sustainability.total_co2', 'Total Embodied Carbon')}
                 </div>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-3xl font-bold tabular-nums text-content-primary">
+                  <span className="text-3xl font-semibold tabular-nums text-content-primary">
                     {/* ABSOLUTE CO2 mass - kept in t CO2e (EN 15804 standard) */}
                     {data.total_co2_tons.toLocaleString(numberLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                   </span>
@@ -521,7 +521,7 @@ export function SustainabilityPage() {
                 </div>
                 {data.rating && (
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl text-xl font-bold text-white"
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl text-xl font-semibold text-white"
                       style={{ backgroundColor: ratingColor(data.rating) }}>{data.rating}</div>
                     <div>
                       <div className="text-sm font-semibold text-content-primary">{data.rating_label}</div>
@@ -686,7 +686,7 @@ export function SustainabilityPage() {
                           </td>
                           <td className="py-2 pl-3 text-right tabular-nums font-medium text-content-primary">
                             {pos.gwp_total ? (
-                              <span className={pos.gwp_total < 0 ? 'text-emerald-600' : ''}>
+                              <span className={pos.gwp_total < 0 ? 'text-semantic-success' : ''}>
                                 {/* ABSOLUTE CO2 mass - kept in kg CO2e */}
                                 {pos.gwp_total.toLocaleString(numberLocale, { maximumFractionDigits: 1 })} kg
                               </span>

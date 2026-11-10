@@ -240,7 +240,7 @@ function ActiveNowCard({ projectId }: { projectId: string }) {
         <Radio
           className={
             'h-4 w-4 ' +
-            (status === 'open' ? 'text-emerald-500' : 'text-content-tertiary')
+            (status === 'open' ? 'text-semantic-success' : 'text-content-tertiary')
           }
         />
         <h2 className="text-sm font-semibold text-content-primary">
@@ -269,7 +269,7 @@ function ActiveNowCard({ projectId }: { projectId: string }) {
           {users.map((u) => (
             <li key={u.user_id} className="flex items-center gap-2.5">
               <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold text-white"
                 style={{ backgroundColor: colorFor(u.user_id) }}
                 title={u.user_name}
               >
@@ -278,8 +278,8 @@ function ActiveNowCard({ projectId }: { projectId: string }) {
               <span className="min-w-0 flex-1 truncate text-xs font-medium text-content-primary">
                 {u.user_name}
               </span>
-              <span className="flex items-center gap-1 text-2xs text-emerald-600 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="flex items-center gap-1 text-2xs text-semantic-success">
+                <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
                 {t('collab.online', { defaultValue: 'online' })}
               </span>
             </li>
@@ -394,7 +394,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
     <div className="rounded-xl border border-border bg-surface-primary p-5">
       <div className="mb-1 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Camera className="h-4 w-4 text-amber-500" />
+          <Camera className="h-4 w-4 text-semantic-warning" />
           <h2 className="text-sm font-semibold text-content-primary">
             {t('collab.viewpoints_title', { defaultValue: 'Viewpoints' })}
           </h2>
@@ -599,14 +599,14 @@ function HowItWorksCard() {
               })}
             />
             <MiniFeature
-              icon={<Zap className="h-4 w-4 text-amber-500" />}
+              icon={<Zap className="h-4 w-4 text-semantic-warning" />}
               title={t('collab.feature_crdt', { defaultValue: 'CRDT Conflict Resolution' })}
               description={t('collab.feature_crdt_short', {
                 defaultValue: 'Built on Yjs - concurrent edits merge with no data loss.',
               })}
             />
             <MiniFeature
-              icon={<Shield className="h-4 w-4 text-emerald-500" />}
+              icon={<Shield className="h-4 w-4 text-semantic-success" />}
               title={t('collab.feature_presence', { defaultValue: 'Presence Awareness' })}
               description={t('collab.feature_presence_short', {
                 defaultValue: 'See who is online and where their cursor is.',

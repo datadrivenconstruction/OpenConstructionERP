@@ -90,7 +90,7 @@ function Findings({
               >
                 <Icon
                   size={16}
-                  className={`mt-0.5 shrink-0 ${f.severity === 'warning' ? 'text-amber-500' : 'text-sky-500'}`}
+                  className={`mt-0.5 shrink-0 ${f.severity === 'warning' ? 'text-semantic-warning' : 'text-semantic-info'}`}
                 />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm text-content-primary">{findingTitle(t, f)}</span>

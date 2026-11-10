@@ -85,7 +85,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         label: t('geo_hub.legend.tilesets', { defaultValue: '3D models' }),
         emptyTo: () => '/bim',
         emptyCta: t('geo_hub.legend.add_model', { defaultValue: 'Add a 3D model' }),
-        dot: 'bg-sky-500',
+        dot: 'bg-semantic-info',
       },
       {
         key: 'overlays',
@@ -105,7 +105,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         emptyCta: t('geo_hub.legend.place_drawing', {
           defaultValue: 'Place a drawing',
         }),
-        dot: 'bg-amber-500',
+        dot: 'bg-semantic-warning',
       },
       {
         key: 'viewpoints',
@@ -129,7 +129,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         label: t('geo_hub.legend.punchlist', { defaultValue: 'Punch list' }),
         emptyTo: () => '/punchlist',
         emptyCta: t('geo_hub.legend.add_punch', { defaultValue: 'Add a punch item' }),
-        dot: 'bg-rose-500',
+        dot: 'bg-semantic-error',
       },
       {
         key: 'diary_pins',
@@ -137,7 +137,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         label: t('geo_hub.legend.diary', { defaultValue: 'Site photos' }),
         emptyTo: (pid) => `/projects/${pid}/daily-diary`,
         emptyCta: t('geo_hub.legend.add_photo', { defaultValue: 'Add a site photo' }),
-        dot: 'bg-emerald-500',
+        dot: 'bg-semantic-success',
       },
     ],
     [t],
@@ -176,7 +176,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
       data-testid="geo-layer-legend"
       className={[
         'absolute bottom-3 right-3 z-20 flex w-64 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95 dark:bg-slate-900/90',
+        'rounded-xl border border-white/15 bg-white/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         'hidden md:flex',
       ].join(' ')}
@@ -184,7 +184,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-content-secondary">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
             {t('geo_hub.legend.title', { defaultValue: 'Map layers' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -216,7 +216,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
       {/* Derived-anchor nudge — the location is auto-placed from the
           project address, not yet confirmed. */}
       {query.data?.anchor_is_derived && (
-        <div className="mx-2 mt-2 flex items-start gap-1.5 rounded-md border border-amber-300/40 bg-amber-50 px-2.5 py-1.5 text-2xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <div className="mx-2 mt-2 flex items-start gap-1.5 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-2.5 py-1.5 text-2xs text-semantic-warning">
           <MapPin size={12} className="mt-0.5 shrink-0" />
           <span>
             {t('geo_hub.legend.derived_anchor', {
@@ -235,7 +235,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
           </div>
         )}
         {!query.isLoading && query.isError && (
-          <div className="m-1 flex items-start gap-2 rounded-md border border-red-300/40 bg-red-50 px-3 py-2.5 text-2xs text-red-900 dark:bg-red-950/40 dark:text-red-100">
+          <div className="m-1 flex items-start gap-2 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-2.5 text-2xs text-semantic-error">
             <AlertTriangle size={13} className="mt-0.5 shrink-0" />
             <span>
               {t('geo_hub.legend.error_hint', {
@@ -309,7 +309,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
                         .map(([bucket, count]) => (
                           <span
                             key={bucket}
-                            className="rounded bg-surface-secondary px-1 py-px text-[10px] font-medium uppercase tracking-wide text-content-tertiary"
+                            className="rounded bg-surface-secondary px-1 py-px text-2xs font-medium uppercase tracking-wide text-content-tertiary"
                           >
                             {bucket} · {count}
                           </span>

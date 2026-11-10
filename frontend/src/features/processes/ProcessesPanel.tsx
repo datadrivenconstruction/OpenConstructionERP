@@ -64,13 +64,13 @@ const CATEGORY_ICON: Record<ProcessCategory, LucideIcon> = {
 };
 
 const STATUS_STYLE: Record<ProcessStatus, string> = {
-  running: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/30 dark:text-emerald-300',
+  running: 'bg-semantic-success/10 text-semantic-success ring-emerald-500/30 dark:text-emerald-300',
   disabled: 'bg-slate-500/10 text-content-secondary ring-slate-500/25',
-  idle: 'bg-sky-500/10 text-sky-700 ring-sky-500/30 dark:text-sky-300',
-  starting: 'bg-amber-500/10 text-amber-700 ring-amber-500/30 dark:text-amber-300',
-  stopping: 'bg-amber-500/10 text-amber-700 ring-amber-500/30 dark:text-amber-300',
-  degraded: 'bg-amber-500/10 text-amber-700 ring-amber-500/30 dark:text-amber-300',
-  error: 'bg-rose-500/10 text-rose-700 ring-rose-500/30 dark:text-rose-300',
+  idle: 'bg-semantic-info/10 text-semantic-info ring-sky-500/30 dark:text-sky-300',
+  starting: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
+  stopping: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
+  degraded: 'bg-semantic-warning/10 text-semantic-warning ring-amber-500/30 dark:text-amber-300',
+  error: 'bg-semantic-error/10 text-semantic-error ring-rose-500/30 dark:text-rose-300',
 };
 
 export function statusLabel(t: TFunction, s: ProcessStatus): string {
@@ -339,13 +339,13 @@ function ProcessRow({
             </p>
           )}
           {p.last_error && (
-            <div role="alert" className="rounded-lg bg-rose-500/10 p-2 text-rose-800 dark:text-rose-200">
+            <div role="alert" className="rounded-lg bg-semantic-error/10 p-2 text-semantic-error">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold">{t('processes.last_error', { defaultValue: 'Last error' })}</span>
                 <button
                   type="button"
                   onClick={copyError}
-                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-rose-500/10"
+                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-semantic-error/10"
                 >
                   {copied ? <Check size={12} aria-hidden /> : <Copy size={12} aria-hidden />}
                   {copied
@@ -499,7 +499,7 @@ export function ProcessesPanel() {
           )}
 
           {isError && !data && (
-            <div role="alert" className="rounded-xl bg-rose-500/10 p-3 text-sm text-rose-800 dark:text-rose-200">
+            <div role="alert" className="rounded-xl bg-semantic-error/10 p-3 text-sm text-semantic-error">
               <p>{t('processes.load_failed', { defaultValue: 'Could not read the status of the services.' })}</p>
               <p className="mt-1 text-xs opacity-80">{getErrorMessage(error)}</p>
               <button type="button" onClick={() => refetch()} className="mt-2 text-xs font-semibold underline">
@@ -555,7 +555,7 @@ export function ProcessesPanel() {
                   })}
                 >
                   <div
-                    className={clsx('h-full rounded-full', budgetPct > 80 ? 'bg-amber-500' : 'bg-emerald-500')}
+                    className={clsx('h-full rounded-full', budgetPct > 80 ? 'bg-semantic-warning' : 'bg-semantic-success')}
                     style={{ width: `${budgetPct}%` }}
                   />
                 </div>

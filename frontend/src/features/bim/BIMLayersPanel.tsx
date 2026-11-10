@@ -43,7 +43,7 @@ export default function BIMLayersPanel({ elements }: BIMLayersPanelProps) {
         <button
           type="button"
           onClick={resetCategoryOverrides}
-          className="text-[11px] text-oe-blue hover:underline"
+          className="text-2xs text-oe-blue hover:underline"
         >
           {t('bim.layers_reset', { defaultValue: 'Reset' })}
         </button>
@@ -78,12 +78,12 @@ export default function BIMLayersPanel({ elements }: BIMLayersPanelProps) {
                   {hidden ? <EyeOff size={12} /> : <Eye size={12} />}
                 </button>
                 <span
-                  className="flex-1 text-[11px] font-medium text-content-primary truncate"
+                  className="flex-1 text-2xs font-medium text-content-primary truncate"
                   title={category}
                 >
                   {category}
                 </span>
-                <span className="text-[10px] text-content-tertiary tabular-nums">
+                <span className="text-2xs text-content-tertiary tabular-nums">
                   {count}
                 </span>
               </div>
@@ -104,7 +104,7 @@ export default function BIMLayersPanel({ elements }: BIMLayersPanelProps) {
                   className="flex-1 accent-oe-blue"
                   data-testid={`layer-opacity-${category}`}
                 />
-                <span className="text-[10px] text-content-tertiary tabular-nums w-8 text-right">
+                <span className="text-2xs text-content-tertiary tabular-nums w-8 text-right">
                   {Math.round(opacity * 100)}%
                 </span>
               </div>

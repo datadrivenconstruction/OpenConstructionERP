@@ -98,7 +98,7 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
       {(missingAccounts.length > 0 || missingTaxes.length > 0) && (
         <div
           data-testid="accounting-sync-mapping-warning"
-          className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300"
+          className="flex items-start gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-sm text-semantic-warning"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           <span>

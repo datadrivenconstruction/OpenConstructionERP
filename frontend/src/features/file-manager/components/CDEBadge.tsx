@@ -11,10 +11,10 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 
 export const CDE_BADGE: Record<string, { label: string; cls: string }> = {
-  wip: { label: 'WIP', cls: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
-  shared: { label: 'Shared', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
-  published: { label: 'Published', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
-  archived: { label: 'Archived', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+  wip: { label: 'WIP', cls: 'bg-surface-secondary text-content-secondary' },
+  shared: { label: 'Shared', cls: 'bg-semantic-warning-bg text-semantic-warning' },
+  published: { label: 'Published', cls: 'bg-semantic-success-bg text-semantic-success' },
+  archived: { label: 'Archived', cls: 'bg-surface-secondary text-content-secondary' },
 };
 
 export function CDEBadge({ state, size = 'sm' }: { state: string | undefined; size?: 'xs' | 'sm' }) {
@@ -26,7 +26,7 @@ export function CDEBadge({ state, size = 'sm' }: { state: string | undefined; si
     <span
       className={clsx(
         'inline-flex items-center rounded-md font-medium uppercase tracking-wider',
-        size === 'xs' ? 'px-1 py-px text-[9px]' : 'px-1.5 py-0.5 text-[10px]',
+        size === 'xs' ? 'px-1 py-px text-2xs' : 'px-1.5 py-0.5 text-2xs',
         cfg.cls,
       )}
       title={t(`cde.state_${state}`, { defaultValue: cfg.label })}

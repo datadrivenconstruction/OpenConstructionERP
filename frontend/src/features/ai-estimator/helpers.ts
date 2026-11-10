@@ -19,12 +19,12 @@ export function scoreColor(
   score: number | null | undefined,
   thresholds: ScoreThresholds = DEFAULT_THRESHOLDS,
 ): string {
-  if (score == null) return 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
+  if (score == null) return 'bg-surface-secondary text-content-tertiary';
   if (score >= thresholds.high)
-    return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    return 'bg-semantic-success-bg text-semantic-success';
   if (score >= thresholds.low)
-    return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-  return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+    return 'bg-semantic-warning-bg text-semantic-warning';
+  return 'bg-surface-secondary text-content-secondary';
 }
 
 /** Tailwind border classes for a candidate / group card by score. */
@@ -33,8 +33,8 @@ export function scoreBorder(
   thresholds: ScoreThresholds = DEFAULT_THRESHOLDS,
 ): string {
   if (score == null) return 'border-border-light';
-  if (score >= thresholds.high) return 'border-green-200 dark:border-green-800';
-  if (score >= thresholds.low) return 'border-amber-200 dark:border-amber-800';
+  if (score >= thresholds.high) return 'border-semantic-success/30';
+  if (score >= thresholds.low) return 'border-semantic-warning/30';
   return 'border-border-light';
 }
 
@@ -58,18 +58,18 @@ export function groupStatusChip(status: GroupStatus): string {
   switch (status) {
     case 'confirmed':
     case 'applied':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
+      return 'bg-semantic-success-bg text-semantic-success';
     case 'suggested':
-      return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
+      return 'bg-semantic-warning-bg text-semantic-warning';
     case 'overridden':
       return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200';
     case 'needs_human':
-      return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200';
+      return 'bg-semantic-error-bg text-semantic-error';
     case 'skipped':
     case 'tbd':
-      return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+      return 'bg-surface-secondary text-content-tertiary';
     default:
-      return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+      return 'bg-surface-secondary text-content-secondary';
   }
 }
 
@@ -77,13 +77,13 @@ export function groupStatusChip(status: GroupStatus): string {
 export function runStatusChip(status: RunStatus): string {
   switch (status) {
     case 'applied':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
+      return 'bg-semantic-success-bg text-semantic-success';
     case 'failed':
-      return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200';
+      return 'bg-semantic-error-bg text-semantic-error';
     case 'cancelled':
-      return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+      return 'bg-surface-secondary text-content-tertiary';
     case 'review':
-      return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
+      return 'bg-semantic-warning-bg text-semantic-warning';
     default:
       return 'bg-oe-blue/10 text-oe-blue';
   }
@@ -95,11 +95,11 @@ export function validationTone(
 ): { dot: string; label: string; ring: string } {
   switch (status) {
     case 'passed':
-      return { dot: 'bg-emerald-500', label: 'text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-500/30' };
+      return { dot: 'bg-semantic-success', label: 'text-semantic-success', ring: 'ring-emerald-500/30' };
     case 'warnings':
-      return { dot: 'bg-amber-500', label: 'text-amber-700 dark:text-amber-300', ring: 'ring-amber-500/30' };
+      return { dot: 'bg-semantic-warning', label: 'text-semantic-warning', ring: 'ring-amber-500/30' };
     case 'errors':
-      return { dot: 'bg-rose-500', label: 'text-rose-700 dark:text-rose-300', ring: 'ring-rose-500/30' };
+      return { dot: 'bg-semantic-error', label: 'text-semantic-error', ring: 'ring-rose-500/30' };
     default:
       return { dot: 'bg-slate-400', label: 'text-content-secondary', ring: 'ring-slate-400/30' };
   }
@@ -109,11 +109,11 @@ export function validationTone(
 export function bandTone(band: ConfidenceBand): string {
   switch (band) {
     case 'high':
-      return 'text-emerald-600 dark:text-emerald-400';
+      return 'text-semantic-success';
     case 'medium':
-      return 'text-amber-600 dark:text-amber-400';
+      return 'text-semantic-warning';
     case 'low':
-      return 'text-rose-600 dark:text-rose-400';
+      return 'text-semantic-error';
     default:
       return 'text-content-tertiary';
   }
@@ -147,13 +147,13 @@ export function resourceTypeBadge(type: string): string {
     case 'labor':
       return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
     case 'material':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+      return 'bg-semantic-success-bg text-semantic-success';
     case 'equipment':
     case 'operator':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+      return 'bg-semantic-warning-bg text-semantic-warning';
     case 'electricity':
       return 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300';
     default:
-      return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+      return 'bg-surface-secondary text-content-secondary';
   }
 }

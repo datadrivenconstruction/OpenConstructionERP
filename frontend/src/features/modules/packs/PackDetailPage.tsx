@@ -295,7 +295,7 @@ export function PackDetailPage() {
                 </span>
               )}
             </div>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-content-primary">{entry.name}</h1>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-content-primary">{entry.name}</h1>
             <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-content-tertiary">
               {entry.country && <CountryFlag code={entry.country} size={18} className="rounded-sm" />}
               <span>{entry.countryName ? `${entry.countryName} · ${bandLabels[entry.region]}` : bandLabels[entry.region]}</span>

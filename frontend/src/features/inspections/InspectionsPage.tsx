@@ -139,14 +139,14 @@ const TYPE_CARD_CONFIG: Record<InspectionType, { icon: React.ElementType; color:
   concrete: { icon: Box, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
   concrete_pour: { icon: Box, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
   waterproofing: { icon: Droplet, color: 'text-cyan-600 bg-cyan-50 border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/30 dark:border-cyan-800' },
-  mep: { icon: Zap, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
-  electrical: { icon: Zap, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
+  mep: { icon: Zap, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
+  electrical: { icon: Zap, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30' },
   plumbing: { icon: Droplets, color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800' },
-  fire_safety: { icon: Flame, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
-  fire_stopping: { icon: Flame, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
+  fire_safety: { icon: Flame, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30' },
+  fire_stopping: { icon: Flame, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30' },
   structural: { icon: Columns3, color: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800' },
-  handover: { icon: Eye, color: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800' },
-  general: { icon: Eye, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
+  handover: { icon: Eye, color: 'text-semantic-success bg-semantic-success-bg border-semantic-success/30' },
+  general: { icon: Eye, color: 'text-content-secondary bg-surface-secondary border-border-light' },
 };
 
 const INSPECTION_STATUSES: InspectionStatus[] = [
@@ -403,7 +403,7 @@ function CreateInspectionModal({
               className={clsx(
                 inputCls,
                 titleError &&
-                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
               )}
               autoFocus
             />
@@ -441,7 +441,7 @@ function CreateInspectionModal({
                 className={clsx(
                   inputCls,
                   dateError &&
-                    'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                    'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
                 )}
               />
               {dateError && (
@@ -537,7 +537,7 @@ function CreateInspectionModal({
                         form.checklist.filter((_, i) => i !== idx),
                       )
                     }
-                    className="flex h-10 w-9 items-center justify-center rounded-lg text-content-tertiary hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                    className="flex h-10 w-9 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors shrink-0"
                     aria-label={t('inspections.checklist_remove', {
                       defaultValue: 'Remove checklist item',
                     })}
@@ -636,19 +636,19 @@ const RESULT_OPTIONS: {
     value: 'pass',
     icon: CheckCircle2,
     iconCls: 'text-semantic-success',
-    ringCls: 'border-green-300 bg-green-50 ring-2 ring-green-300 dark:border-green-700 dark:bg-green-950/30',
+    ringCls: 'border-semantic-success/30 bg-semantic-success-bg ring-2 ring-semantic-success/30',
   },
   {
     value: 'partial',
     icon: AlertTriangle,
-    iconCls: 'text-amber-500',
-    ringCls: 'border-amber-300 bg-amber-50 ring-2 ring-amber-300 dark:border-amber-700 dark:bg-amber-950/30',
+    iconCls: 'text-semantic-warning',
+    ringCls: 'border-semantic-warning/30 bg-semantic-warning-bg ring-2 ring-semantic-warning/30',
   },
   {
     value: 'fail',
     icon: XCircle,
     iconCls: 'text-semantic-error',
-    ringCls: 'border-red-300 bg-red-50 ring-2 ring-red-300 dark:border-red-700 dark:bg-red-950/30',
+    ringCls: 'border-semantic-error/30 bg-semantic-error-bg ring-2 ring-semantic-error/30',
   },
 ];
 
@@ -932,7 +932,7 @@ const InspectionRow = React.memo(function InspectionRow({
                     key={item.id}
                     className={clsx(
                       'flex items-start gap-2 text-sm rounded-md px-2 py-1',
-                      item.critical && !item.passed && 'bg-red-50 dark:bg-red-950/20',
+                      item.critical && !item.passed && 'bg-semantic-error-bg',
                     )}
                   >
                     {item.passed ? (
@@ -1087,7 +1087,7 @@ const InspectionRow = React.memo(function InspectionRow({
                   e.stopPropagation();
                   onDelete(inspection.id);
                 }}
-                className="!p-1.5 text-content-quaternary hover:text-red-500 h-auto"
+                className="!p-1.5 text-content-quaternary hover:text-semantic-error h-auto"
                 title={t('common.delete', { defaultValue: 'Delete' })}
               >
                 <Trash2 size={14} />

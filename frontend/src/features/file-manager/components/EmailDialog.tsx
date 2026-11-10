@@ -204,7 +204,7 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
                     )}
                   </button>
                 </div>
-                <div className="font-mono text-[10px] text-content-secondary break-all leading-relaxed">
+                <div className="font-mono text-2xs text-content-secondary break-all leading-relaxed">
                   {link.url}
                 </div>
               </div>

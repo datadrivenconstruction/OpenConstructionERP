@@ -151,7 +151,7 @@ function LookPreview({
             {brand.logo ? (
               <img src={brand.logo} alt="" className="block max-h-5 w-auto max-w-full object-contain" draggable={false} />
             ) : (
-              <span className="truncate text-[10px] font-extrabold text-content-primary">{brand.name.trim()}</span>
+              <span className="truncate text-2xs font-semibold text-content-primary">{brand.name.trim()}</span>
             )}
           </div>
         )}
@@ -161,14 +161,14 @@ function LookPreview({
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex h-8 items-center justify-between border-b border-border-light bg-surface-elevated px-2.5">
-          <span className="truncate text-[11px] font-semibold text-content-primary">
+          <span className="truncate text-2xs font-semibold text-content-primary">
             {t('onboarding.look_mock_header', { defaultValue: 'Project overview' })}
           </span>
           <span aria-hidden className="h-3 w-3 rounded-full" style={{ background: accent }} />
         </div>
         <div className="flex-1" style={{ padding: pad }}>
           <div className="border border-border-light bg-surface-elevated" style={{ borderRadius: r, padding: pad }}>
-            <span className="block truncate text-[11px] font-semibold text-content-primary">
+            <span className="block truncate text-2xs font-semibold text-content-primary">
               {t('onboarding.look_mock_card', { defaultValue: 'Budget' })}
             </span>
             <span aria-hidden className="mt-2 block h-1.5 w-full rounded-full bg-border-light">
@@ -328,7 +328,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-content-primary">
+      <h2 className="text-2xl font-semibold text-content-primary">
         {t('onboarding.look_title', { defaultValue: 'How your platform will look' })}
       </h2>
       <p className="mt-1 text-sm text-content-secondary">
@@ -357,7 +357,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
                     className="flex h-10 items-end gap-1 border border-border-light bg-surface-elevated p-1.5"
                     style={{ borderRadius: RADIUS_PX[p.value.radius] + 2, fontFamily: FONT_STACK[p.value.font] }}
                   >
-                    <span className="text-sm font-bold leading-none text-content-primary">Aa</span>
+                    <span className="text-sm font-semibold leading-none text-content-primary">Aa</span>
                     <span className="ms-auto h-3 w-5" style={{ background: ACCENT_SWATCH[p.value.accent], borderRadius: RADIUS_PX[p.value.radius] }} />
                   </span>
                 </CardRadio>

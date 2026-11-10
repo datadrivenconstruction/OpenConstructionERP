@@ -73,9 +73,9 @@ const ISSUE_TONE: Record<IntegrityIssueCode, 'danger' | 'warning' | 'info'> = {
 };
 
 const TONE_CLASSES: Record<'danger' | 'warning' | 'info', string> = {
-  danger: 'bg-rose-500/15 text-rose-300 border border-rose-500/30',
-  warning: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
-  info: 'bg-sky-500/15 text-sky-300 border border-sky-500/30',
+  danger: 'bg-semantic-error/15 text-rose-300 border border-rose-500/30',
+  warning: 'bg-semantic-warning/15 text-amber-300 border border-amber-500/30',
+  info: 'bg-semantic-info/15 text-sky-300 border border-sky-500/30',
 };
 
 export function IntegrityOverview({
@@ -152,7 +152,7 @@ export function IntegrityOverview({
 
         {reportQuery.isError && (
           <div
-            className="rounded border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-300"
+            className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300"
             data-testid="integrity-error"
           >
             {t('dashboards.integrity_error', {
@@ -201,9 +201,9 @@ function CompletenessChip({ score }: CompletenessChipProps) {
   const pct = Math.round(score * 100);
   const tone = score >= 0.95 ? 'emerald' : score >= 0.7 ? 'amber' : 'rose';
   const colour = {
-    emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    amber: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    rose: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+    emerald: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
+    amber: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
+    rose: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
   }[tone];
   return (
     <span
@@ -309,7 +309,7 @@ function IntegrityRow({ column, rowCount, isExpanded, onToggle }: IntegrityRowPr
           </span>
         </div>
         <div role="cell" className="truncate text-content-secondary" title={column.dtype}>
-          <Badge variant="neutral" className="text-[10px]">
+          <Badge variant="neutral" className="text-2xs">
             {column.inferred_type}
           </Badge>
         </div>
@@ -345,9 +345,9 @@ function IntegrityRow({ column, rowCount, isExpanded, onToggle }: IntegrityRowPr
 function CompletenessBar({ pct }: { pct: number }) {
   const tone = pct >= 95 ? 'emerald' : pct >= 70 ? 'amber' : 'rose';
   const fill = {
-    emerald: 'bg-emerald-500',
-    amber: 'bg-amber-500',
-    rose: 'bg-rose-500',
+    emerald: 'bg-semantic-success',
+    amber: 'bg-semantic-warning',
+    rose: 'bg-semantic-error',
   }[tone];
   return (
     <div className="flex items-center gap-2" data-testid={`integrity-completeness-bar-${pct}`}>
@@ -370,7 +370,7 @@ function IssueBadge({ code }: { code: IntegrityIssueCode }) {
   });
   return (
     <span
-      className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${TONE_CLASSES[tone]}`}
+      className={`rounded px-1.5 py-0.5 text-2xs font-medium ${TONE_CLASSES[tone]}`}
       data-testid={`integrity-issue-${code}`}
       title={label}
     >

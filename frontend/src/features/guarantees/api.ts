@@ -322,9 +322,9 @@ export interface GuaranteeDefaults {
 
 /** Tailwind classes per alert band: 14 red, 30 amber, 60 yellow. */
 export function alertBandClass(band: AlertBand | null): string {
-  if (band === 14) return 'bg-rose-100 text-rose-700';
-  if (band === 30) return 'bg-amber-100 text-amber-700';
-  if (band === 60) return 'bg-yellow-100 text-yellow-700';
+  if (band === 14) return 'bg-semantic-error-bg text-semantic-error';
+  if (band === 30) return 'bg-semantic-warning-bg text-semantic-warning';
+  if (band === 60) return 'bg-semantic-warning-bg text-semantic-warning';
   return 'bg-surface-secondary text-content-tertiary';
 }
 

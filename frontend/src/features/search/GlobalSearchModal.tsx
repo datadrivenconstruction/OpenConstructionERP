@@ -54,9 +54,9 @@ import { SemanticSearchOffHint } from '@/features/settings/SemanticSearchOffHint
 const FACET_COLOR: Record<string, string> = {
   oe_boq_positions: 'bg-blue-50 text-blue-700 border-blue-200',
   oe_documents: 'bg-violet-50 text-violet-700 border-violet-200',
-  oe_tasks: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  oe_risks: 'bg-rose-50 text-rose-700 border-rose-200',
-  oe_bim_elements: 'bg-amber-50 text-amber-700 border-amber-200',
+  oe_tasks: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  oe_risks: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
+  oe_bim_elements: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   oe_requirements: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
   oe_rfi_rfis: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   oe_submittals_submittals: 'bg-indigo-50 text-indigo-700 border-indigo-200',
@@ -278,7 +278,7 @@ export default function GlobalSearchModal() {
                   type="button"
                   onClick={() => toggleType(typeMeta.short)}
                   aria-pressed={isActive}
-                  className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1 text-[11px] font-medium rounded-full border transition-colors ${
+                  className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1 text-2xs font-medium rounded-full border transition-colors ${
                     isActive
                       ? 'bg-oe-blue text-white border-oe-blue'
                       : `${FACET_COLOR[typeMeta.name] ?? 'bg-surface-secondary text-content-secondary border-border-light'} hover:opacity-80`
@@ -297,13 +297,13 @@ export default function GlobalSearchModal() {
               <button
                 type="button"
                 onClick={clearTypes}
-                className="shrink-0 whitespace-nowrap text-[11px] text-oe-blue-text hover:underline ms-1"
+                className="shrink-0 whitespace-nowrap text-2xs text-oe-blue-text hover:underline ms-1"
               >
                 {t('common.clear', { defaultValue: 'Clear' })}
               </button>
             )}
           </div>
-          <label className="flex items-center gap-1.5 shrink-0 self-center ps-2 border-s border-border-light text-[11px] text-content-secondary cursor-pointer select-none whitespace-nowrap">
+          <label className="flex items-center gap-1.5 shrink-0 self-center ps-2 border-s border-border-light text-2xs text-content-secondary cursor-pointer select-none whitespace-nowrap">
             <input
               type="checkbox"
               checked={scopeProject}
@@ -322,7 +322,7 @@ export default function GlobalSearchModal() {
           {/* Saved searches */}
           {savedSearches.length > 0 && (
             <div className="px-4 pt-3 pb-1">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-content-secondary mb-1.5">
+              <div className="text-2xs font-semibold uppercase tracking-wide text-content-secondary mb-1.5">
                 {t('search.saved_searches', { defaultValue: 'Saved searches' })}
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -331,7 +331,7 @@ export default function GlobalSearchModal() {
                     key={s.query}
                     type="button"
                     onClick={() => handleClickSaved(s.query)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-full border border-border-light bg-surface-secondary text-content-secondary hover:bg-oe-blue/5 hover:text-oe-blue hover:border-oe-blue/30 transition-colors group"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-medium rounded-full border border-border-light bg-surface-secondary text-content-secondary hover:bg-oe-blue/5 hover:text-oe-blue hover:border-oe-blue/30 transition-colors group"
                   >
                     <Bookmark size={10} className="shrink-0 opacity-60" />
                     <span className="truncate max-w-[180px]">{s.query}</span>
@@ -342,7 +342,7 @@ export default function GlobalSearchModal() {
                         e.stopPropagation();
                         handleRemoveSaved(s.query);
                       }}
-                      className="shrink-0 rounded-full p-0.5 hover:bg-red-100 hover:text-red-600 transition-colors"
+                      className="shrink-0 rounded-full p-0.5 hover:bg-semantic-error-bg hover:text-semantic-error transition-colors"
                     >
                       <X size={10} />
                     </span>
@@ -389,10 +389,10 @@ export default function GlobalSearchModal() {
               {Object.entries(grouped).map(([collection, hits]) => (
                 <div key={collection}>
                   <div className="sticky top-0 z-10 flex items-center gap-2 px-2 py-1.5 bg-surface-primary/95 backdrop-blur-sm">
-                    <span className="text-[11px] font-bold uppercase tracking-wide text-content-secondary">
+                    <span className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
                       {collectionLabel(t, collection)}
                     </span>
-                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-surface-secondary text-[10px] font-semibold text-content-secondary tabular-nums">
+                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-surface-secondary text-2xs font-semibold text-content-secondary tabular-nums">
                       {hits.length}
                     </span>
                     <span className="flex-1 h-px bg-border-light" />
@@ -419,7 +419,7 @@ export default function GlobalSearchModal() {
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-[13px] font-medium text-content-primary truncate">
+                                <span className="text-sm font-medium text-content-primary truncate">
                                   {hitLabel(
                                     hit,
                                     (c) => collectionLabel(t, c),
@@ -431,12 +431,12 @@ export default function GlobalSearchModal() {
                                       }),
                                   )}
                                 </span>
-                                <span className="text-[10px] text-content-tertiary tabular-nums shrink-0">
+                                <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
                                   {Math.round(hit.score * 100)}%
                                 </span>
                               </div>
                               {hit.snippet && (
-                                <div className="text-[11px] text-content-tertiary line-clamp-2 mt-0.5 leading-snug">
+                                <div className="text-2xs text-content-tertiary line-clamp-2 mt-0.5 leading-snug">
                                   {hit.snippet}
                                 </div>
                               )}
@@ -461,7 +461,7 @@ export default function GlobalSearchModal() {
         <SemanticSearchOffHint className="mx-4 mb-2 shrink-0" />
 
         {/* Footer hint */}
-        <div className="px-4 py-2 border-t border-border-light shrink-0 flex items-center justify-between text-[10px] text-content-quaternary">
+        <div className="px-4 py-2 border-t border-border-light shrink-0 flex items-center justify-between text-2xs text-content-quaternary">
           <span>
             {t('global_search.footer_hint', {
               defaultValue: 'Semantic search powered by vector embeddings',

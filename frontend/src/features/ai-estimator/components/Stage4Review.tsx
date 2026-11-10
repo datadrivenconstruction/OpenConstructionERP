@@ -42,9 +42,9 @@ import type {
 function severityTone(sev: ValidationSeverity): string {
   switch (sev) {
     case 'error':
-      return 'text-rose-600 dark:text-rose-400';
+      return 'text-semantic-error';
     case 'warning':
-      return 'text-amber-600 dark:text-amber-400';
+      return 'text-semantic-warning';
     default:
       return 'text-content-tertiary';
   }
@@ -129,7 +129,7 @@ function ValidationPanel({ report }: { report: ValidationReport | null }) {
                 </span>
                 <div className="min-w-0">
                   <span className="text-content-primary">{r.message}</span>
-                  <div className="text-[10px] text-content-tertiary">
+                  <div className="text-2xs text-content-tertiary">
                     <span className="font-mono">{r.rule_id}</span>
                     {r.element_ref && (
                       <span>
@@ -214,7 +214,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
           </div>
           {multiCurrency && (
             <div className="mt-1 space-y-0.5 border-t border-border-light pt-1">
-              <div className="text-[10px] uppercase tracking-wide text-content-tertiary">
+              <div className="text-2xs uppercase tracking-wide text-content-tertiary">
                 {t('aiest.review.by_currency', { defaultValue: 'By currency' })}
               </div>
               {subtotals.map(([cur, val]) => (
@@ -233,7 +233,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
           <div className="mt-0.5 flex items-baseline gap-2">
             <span
               className={clsx(
-                'rounded px-1.5 py-0.5 text-sm font-bold',
+                'rounded px-1.5 py-0.5 text-sm font-semibold',
                 scoreColor(preview.completeness_score, thresholds),
               )}
             >
@@ -262,7 +262,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
 
       {/* Missing-scope advisory */}
       {preview.missing_items.length > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5 text-xs text-semantic-warning">
           <div className="mb-1 font-medium">
             {t('aiest.review.missing_title', { defaultValue: 'Possibly missing scope' })}
           </div>
@@ -326,7 +326,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
                         {p.confidence != null && (
                           <span
                             className={clsx(
-                              'rounded px-1 py-0.5 text-[10px] font-bold',
+                              'rounded px-1 py-0.5 text-2xs font-semibold',
                               scoreColor(p.confidence, thresholds),
                             )}
                           >
@@ -335,7 +335,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
                         )}
                       </div>
                       {p.section_path.length > 0 && (
-                        <div className="text-[10px] text-content-tertiary">
+                        <div className="text-2xs text-content-tertiary">
                           {p.section_path.join(' › ')}
                         </div>
                       )}
@@ -384,8 +384,8 @@ export function Stage4Review(props: Stage4ReviewProps) {
 
       {/* Apply */}
       {applied && appliedBoqId ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-900/20">
-          <div className="flex items-center gap-2 font-medium text-emerald-800 dark:text-emerald-200">
+        <div className="rounded-lg border border-semantic-success/30 bg-semantic-success-bg p-4">
+          <div className="flex items-center gap-2 font-medium text-semantic-success">
             <ShieldCheck className="h-5 w-5" />
             {t('aiest.review.applied', { defaultValue: 'Estimate written to the BOQ.' })}
           </div>
@@ -430,7 +430,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
               {t('aiest.review.create_boq', { defaultValue: 'Create / append to BOQ' })}
             </Button>
             {hasErrors ? (
-              <span className="inline-flex items-center gap-1 text-xs text-rose-600">
+              <span className="inline-flex items-center gap-1 text-xs text-semantic-error">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 {t('aiest.review.blocked', {
                   defaultValue: 'Blocked: resolve validation errors first.',

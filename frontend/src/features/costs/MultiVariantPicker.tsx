@@ -349,7 +349,7 @@ export function MultiVariantPicker({
 
         {/* Bulk actions */}
         <div className="px-6 py-3 border-b border-border-light bg-surface-secondary/40 flex flex-wrap items-center gap-2">
-          <span className="text-[11px] uppercase tracking-wide text-content-tertiary font-medium me-1">
+          <span className="text-2xs uppercase tracking-wide text-content-tertiary font-medium me-1">
             <Wand2 size={12} className="inline me-1 -mt-0.5" />
             {t('boq.mvp.bulk_label', { defaultValue: 'Quick fill:' })}
           </span>
@@ -430,25 +430,25 @@ export function MultiVariantPicker({
                   <div className="text-end shrink-0">
                     <div className="text-sm font-mono font-semibold tabular-nums">
                       {formatPrice(rate, slot.currency)}
-                      <span className="text-[10px] text-content-tertiary font-normal ms-1">
+                      <span className="text-2xs text-content-tertiary font-normal ms-1">
                         /{slot.unit}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 justify-end mt-0.5">
                       <span
                         className={
-                          'text-[10px] font-mono font-medium ' +
+                          'text-2xs font-mono font-medium ' +
                           (delta.tone === 'pos'
-                            ? 'text-rose-600 dark:text-rose-400'
+                            ? 'text-semantic-error'
                             : delta.tone === 'neg'
-                              ? 'text-emerald-600 dark:text-emerald-400'
+                              ? 'text-semantic-success'
                               : 'text-content-tertiary')
                         }
                       >
                         {delta.text}
                       </span>
                       {slot.quantity > 1 && (
-                        <span className="text-[10px] text-content-tertiary">
+                        <span className="text-2xs text-content-tertiary">
                           · {formatPrice(lineTotal, slot.currency)}
                         </span>
                       )}
@@ -521,11 +521,11 @@ export function MultiVariantPicker({
                             </span>
                             <span
                               className={
-                                'block text-[10px] font-mono font-medium mt-0.5 ' +
+                                'block text-2xs font-mono font-medium mt-0.5 ' +
                                 (rowDelta.tone === 'pos'
-                                  ? 'text-rose-600 dark:text-rose-400'
+                                  ? 'text-semantic-error'
                                   : rowDelta.tone === 'neg'
-                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    ? 'text-semantic-success'
                                     : 'text-content-tertiary')
                               }
                             >
@@ -545,7 +545,7 @@ export function MultiVariantPicker({
         {/* Footer */}
         <div className="px-6 py-4 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between gap-3">
           <div>
-            <div className="text-[11px] uppercase tracking-wide text-content-tertiary font-medium">
+            <div className="text-2xs uppercase tracking-wide text-content-tertiary font-medium">
               {t('boq.mvp.subtotal_label', { defaultValue: 'Position rate' })}
             </div>
             <div className="text-lg font-mono font-semibold tabular-nums text-content-primary">

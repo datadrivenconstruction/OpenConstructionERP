@@ -92,22 +92,22 @@ function StatusBadge({ status }: { status: InstallStatus }) {
   > = {
     loaded: {
       icon: CheckCircle2,
-      cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700',
+      cls: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
       label: t('catalogues.status_loaded', 'Loaded'),
     },
     installing: {
       icon: Loader2,
-      cls: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200 border-sky-200 dark:border-sky-700',
+      cls: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
       label: t('catalogues.status_installing', 'Installing…'),
     },
     available: {
       icon: Download,
-      cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 border-amber-200 dark:border-amber-700',
+      cls: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
       label: t('catalogues.status_available', 'Available'),
     },
     coming_soon: {
       icon: Clock,
-      cls: 'bg-slate-100 text-slate-700 dark:bg-slate-800/60 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+      cls: 'bg-surface-secondary text-content-secondary border-border-light',
       label: t('catalogues.status_coming_soon', 'Coming soon'),
     },
   };
@@ -115,7 +115,7 @@ function StatusBadge({ status }: { status: InstallStatus }) {
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium',
+        'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-2xs font-medium',
         cls,
       )}
     >
@@ -144,7 +144,7 @@ function InstallButton({
   const { t } = useTranslation();
   if (status === 'loaded') {
     return (
-      <span className="text-[11px] text-content-tertiary">
+      <span className="text-2xs text-content-tertiary">
         {t('catalogues.installed_hint', 'Ready to use')}
       </span>
     );
@@ -154,14 +154,14 @@ function InstallButton({
   // button that would just return 403.
   if (demoMode) {
     return (
-      <span className="text-[11px] text-content-quaternary italic">
+      <span className="text-2xs text-content-quaternary italic">
         {t('catalogues.demo_install_disabled', 'Self-host to install')}
       </span>
     );
   }
   if (status === 'coming_soon') {
     return (
-      <span className="text-[11px] text-content-quaternary italic">
+      <span className="text-2xs text-content-quaternary italic">
         {t('catalogues.coming_soon_hint', 'Not yet published by DDC')}
       </span>
     );
@@ -172,7 +172,7 @@ function InstallButton({
       onClick={onInstall}
       disabled={isPending}
       className={clsx(
-        'inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium',
+        'inline-flex items-center gap-1 rounded-md px-2 py-1 text-2xs font-medium',
         'bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60',
         'transition-colors',
       )}
@@ -337,23 +337,23 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
         className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-surface-secondary/50 transition-colors rounded-xl"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-100 to-sky-100 dark:from-emerald-900/40 dark:to-sky-900/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
-            <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-300" />
+          <div className="shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-100 to-sky-100 dark:from-emerald-900/40 dark:to-sky-900/30 border border-semantic-success/30 flex items-center justify-center">
+            <Database className="w-4 h-4 text-semantic-success" />
           </div>
           <div className="min-w-0">
             <div className="text-xs font-semibold text-content-primary">
               {t('catalogues.title', 'Cost catalogues')}
             </div>
-            <div className="text-[11px] text-content-tertiary truncate">
+            <div className="text-2xs text-content-tertiary truncate">
               {cataloguesQ.isLoading ? (
                 t('catalogues.loading', 'Checking server…')
               ) : (
                 <>
-                  <span className="text-emerald-700 dark:text-emerald-300 font-medium">
+                  <span className="text-semantic-success font-medium">
                     {stats.loaded}
                   </span>{' '}
                   {t('catalogues.stat_loaded', 'loaded')} ·{' '}
-                  <span className="text-amber-700 dark:text-amber-300 font-medium">
+                  <span className="text-semantic-warning font-medium">
                     {stats.available}
                   </span>{' '}
                   {t('catalogues.stat_available', 'available')} ·{' '}
@@ -377,7 +377,7 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
           {demoMode && (
             <div
               role="note"
-              className="mb-3 flex items-start gap-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200"
+              className="mb-3 flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning"
             >
               <AlertCircle size={13} className="shrink-0 mt-0.5" />
               <div>
@@ -423,7 +423,7 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
             </div>
           )}
           {cataloguesQ.data?.server && !cataloguesQ.data.server.reachable && (
-            <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200">
+            <div className="mb-3 flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning">
               <AlertCircle size={13} className="shrink-0 mt-0.5" />
               <div>
                 <div className="font-semibold">
@@ -442,7 +442,7 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
             </div>
           )}
 
-          <p className="text-[11px] text-content-tertiary mb-2">
+          <p className="text-2xs text-content-tertiary mb-2">
             {t(
               'catalogues.help',
               'Install the catalogue for the project region. The matcher will switch automatically once installed.',
@@ -456,9 +456,9 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
           </p>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-[11px]">
+            <table className="w-full text-2xs">
               <thead>
-                <tr className="text-left text-content-tertiary uppercase tracking-wider text-[10px] border-b border-border">
+                <tr className="text-left text-content-tertiary uppercase tracking-wider text-2xs border-b border-border">
                   <th className="py-1.5 pr-2">
                     {t('catalogues.col_region', 'Region')}
                   </th>
@@ -503,7 +503,7 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
                             {c.city}
                           </span>
                           {isPreferred && (
-                            <span className="ml-1 text-[9px] uppercase tracking-wider text-indigo-700 dark:text-indigo-300 font-bold">
+                            <span className="ml-1 text-2xs uppercase tracking-wider text-indigo-700 dark:text-indigo-300 font-semibold">
                               {t('catalogues.preferred_tag', 'Project')}
                             </span>
                           )}

@@ -128,7 +128,7 @@ function consumeTable(lines: string[], start: number): { html: string; next: num
 }
 
 const HEADING_CLASS: Record<number, string> = {
-  1: 'text-2xl font-bold mt-2 mb-3',
+  1: 'text-2xl font-semibold mt-2 mb-3',
   2: 'text-xl font-semibold mt-8 mb-3 pb-1.5 border-b border-border-light',
   3: 'text-base font-semibold mt-6 mb-2',
   4: 'text-sm font-semibold uppercase tracking-wide text-content-tertiary mt-4 mb-1',
@@ -165,10 +165,10 @@ export function renderDocMarkdown(md: string): string {
       i += 1; // skip the closing fence
       const code = escapeHtml(buf.join('\n'));
       const label = lang
-        ? `<span class="absolute right-2 top-2 text-[9px] uppercase tracking-wider text-gray-400">${escapeHtml(lang)}</span>`
+        ? `<span class="absolute right-2 top-2 text-2xs uppercase tracking-wider text-gray-400">${escapeHtml(lang)}</span>`
         : '';
       out.push(
-        `<pre class="relative my-4 overflow-x-auto rounded-lg border border-border-light bg-gray-900 dark:bg-gray-950 p-4 pt-5 text-[12px] leading-relaxed font-mono text-gray-100">${label}<code class="whitespace-pre">${code}</code></pre>`,
+        `<pre class="relative my-4 overflow-x-auto rounded-lg border border-border-light bg-gray-900 dark:bg-gray-950 p-4 pt-5 text-xs leading-relaxed font-mono text-gray-100">${label}<code class="whitespace-pre">${code}</code></pre>`,
       );
       continue;
     }

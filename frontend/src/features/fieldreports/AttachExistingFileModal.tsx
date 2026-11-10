@@ -163,7 +163,7 @@ export default function AttachExistingFileModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {docs.length === 0
                 ? t('fieldreports.no_project_files', {
                     defaultValue: 'No files in this project yet - upload one first.',
@@ -210,19 +210,19 @@ export default function AttachExistingFileModal({
                             {d.name}
                           </span>
                           {d.drawing_number && (
-                            <span className="text-[10px] font-mono text-content-tertiary">
+                            <span className="text-2xs font-mono text-content-tertiary">
                               {d.drawing_number}
                             </span>
                           )}
                         </div>
                         {d.category && (
-                          <span className="text-[10px] uppercase tracking-wider text-content-tertiary">
+                          <span className="text-2xs uppercase tracking-wider text-content-tertiary">
                             {d.category}
                           </span>
                         )}
                       </div>
                       {isAttached && (
-                        <span className="text-[10px] text-content-tertiary shrink-0">
+                        <span className="text-2xs text-content-tertiary shrink-0">
                           {t('fieldreports.already_attached', { defaultValue: 'Attached' })}
                         </span>
                       )}

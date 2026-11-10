@@ -48,7 +48,7 @@ export function TrashNode({ projectId, active, className }: TrashNodeProps) {
       </span>
       {count > 0 && (
         <span
-          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-semantic-warning/15 text-semantic-warning text-[10px] font-semibold tabular-nums"
+          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-semantic-warning/15 text-semantic-warning text-2xs font-semibold tabular-nums"
           aria-label={t('files.trash.count_aria', {
             defaultValue: '{{count}} items in recycle bin',
             count,

@@ -117,16 +117,16 @@ import { AccommodationCalendar } from './AccommodationCalendar';
 
 /** Visual badge palette for the per-row booking-status pill. */
 const BOOKING_STATUS_BADGE: Record<BookingStatus, string> = {
-  reserved: 'bg-sky-100 text-sky-800 border-sky-300',
-  checked_in: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  reserved: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
+  checked_in: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
   checked_out: 'bg-slate-200 text-slate-700 border-slate-300',
-  cancelled: 'bg-rose-100 text-rose-800 border-rose-300',
+  cancelled: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 
 const CHARGE_STATUS_BADGE: Record<ChargeStatus, string> = {
-  pending: 'bg-amber-100 text-amber-800 border-amber-300',
-  invoiced: 'bg-sky-100 text-sky-800 border-sky-300',
-  paid: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  pending: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
+  invoiced: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
+  paid: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
   waived: 'bg-slate-200 text-slate-700 border-slate-300',
 };
 
@@ -149,10 +149,10 @@ type OccupancyTab = 'bookings' | 'calendar';
 const OCCUPANCY_TAB_IDS: readonly OccupancyTab[] = ['bookings', 'calendar'];
 
 const ROOM_STATUS_STYLES: Record<RoomStatus, string> = {
-  available: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  occupied: 'bg-amber-100 text-amber-800 border-amber-300',
+  available: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  occupied: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   maintenance: 'bg-slate-200 text-slate-700 border-slate-300',
-  blocked: 'bg-rose-100 text-rose-800 border-rose-300',
+  blocked: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 
 export function AccommodationDetailPage() {
@@ -290,7 +290,7 @@ export function AccommodationDetailPage() {
             })}
             value={data.active_bookings_count}
             accent={
-              data.active_bookings_count > 0 ? 'text-emerald-700' : undefined
+              data.active_bookings_count > 0 ? 'text-semantic-success' : undefined
             }
           />
           <HeaderKpi
@@ -304,7 +304,7 @@ export function AccommodationDetailPage() {
             value={roomCounts.available}
             accent={
               roomCounts.available === 0 && data.rooms.length > 0
-                ? 'text-amber-700'
+                ? 'text-semantic-warning'
                 : undefined
             }
           />
@@ -444,7 +444,7 @@ function HeaderKpi({ icon, label, value, accent }: HeaderKpiProps) {
         {icon}
       </span>
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wide text-content-tertiary leading-tight">
+        <div className="text-2xs uppercase tracking-wide text-content-tertiary leading-tight">
           {label}
         </div>
         <div
@@ -824,7 +824,7 @@ function AssignOccupantModal({
       }
     >
       {disabled && (
-        <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <div className="mb-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-xs text-semantic-warning">
           <AlertTriangle className="mr-1.5 inline h-3.5 w-3.5" aria-hidden="true" />
           {t('accommodation.assign.disabled', {
             defaultValue:
@@ -906,7 +906,7 @@ function AssignOccupantModal({
           <div
             role="alert"
             data-testid="accommodation-assign-conflicts"
-            className="sm:col-span-2 rounded-xl border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900"
+            className="sm:col-span-2 rounded-xl border border-semantic-error/30 bg-semantic-error-bg p-3 text-xs text-semantic-error"
           >
             <div className="flex items-center gap-1.5 font-semibold">
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
@@ -922,7 +922,7 @@ function AssignOccupantModal({
                 >
                   <span
                     className={clsx(
-                      'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold',
+                      'inline-flex items-center rounded-md border px-1.5 py-0.5 text-2xs font-semibold',
                       BOOKING_STATUS_BADGE[c.status],
                     )}
                   >
@@ -934,12 +934,12 @@ function AssignOccupantModal({
                     {c.check_in} {'→'} {c.check_out ?? '∞'}
                   </span>
                   {c.occupant_name && (
-                    <span className="text-rose-700">- {c.occupant_name}</span>
+                    <span className="text-semantic-error">- {c.occupant_name}</span>
                   )}
                 </li>
               ))}
             </ul>
-            <p className="mt-1.5 text-rose-700">
+            <p className="mt-1.5 text-semantic-error">
               {t('accommodation.assign.conflict_hint', {
                 defaultValue:
                   'Adjust the check-in or check-out so the stay no longer overlaps, then create the booking.',
@@ -1624,7 +1624,7 @@ function ChargesTab({ data }: { data: AccommodationDetail }) {
                     </span>
                     <span
                       className={clsx(
-                        'inline-flex items-center rounded-md border px-1.5 py-0 text-[10px] font-semibold',
+                        'inline-flex items-center rounded-md border px-1.5 py-0 text-2xs font-semibold',
                         BOOKING_STATUS_BADGE[b.status],
                       )}
                     >

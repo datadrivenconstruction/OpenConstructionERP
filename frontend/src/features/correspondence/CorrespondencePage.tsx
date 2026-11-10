@@ -154,9 +154,9 @@ const DIRECTION_CARD_CONFIG: Record<
   },
   outgoing: {
     icon: ArrowUpRight,
-    color: 'text-green-600 dark:text-green-400',
+    color: 'text-semantic-success',
     selectedColor:
-      'text-green-600 bg-green-50 border-green-300 ring-2 ring-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-700 dark:ring-green-800',
+      'text-semantic-success bg-semantic-success-bg border-semantic-success/30 ring-2 ring-semantic-success/30',
     description: 'Sent to external party',
   },
 };
@@ -164,8 +164,8 @@ const DIRECTION_CARD_CONFIG: Record<
 const TYPE_BADGE_COLORS: Record<CorrespondenceType, string> = {
   letter: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800',
   email: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
-  notice: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
-  memo: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+  notice: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
+  memo: 'text-content-secondary bg-surface-secondary border-border-light',
   report: 'text-teal-600 bg-teal-50 border-teal-200 dark:text-teal-400 dark:bg-teal-950/30 dark:border-teal-800',
 };
 
@@ -680,7 +680,7 @@ function CreateCorrespondenceModal({
             })}
             className={clsx(
               inputCls,
-              subjectError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              subjectError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -1365,7 +1365,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
             <Button
               variant="secondary"
               size="sm"
-              className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="text-semantic-error hover:bg-semantic-error-bg"
               icon={<Trash2 size={13} />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -1896,7 +1896,7 @@ export function CorrespondencePage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
         </div>
       )}

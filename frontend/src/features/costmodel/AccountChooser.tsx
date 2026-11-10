@@ -146,7 +146,7 @@ export function AccountChooser({
         </div>
       ) : (
         <span className="inline-flex flex-wrap items-center gap-1.5 text-content-tertiary">
-          <span className={costLineId ? 'text-content-secondary' : 'text-amber-600'}>{label}</span>
+          <span className={costLineId ? 'text-content-secondary' : 'text-semantic-warning'}>{label}</span>
           {from && <span>({from})</span>}
           {reason && <span className="italic" title={reason}>“{reason}”</span>}
           {canEdit && (

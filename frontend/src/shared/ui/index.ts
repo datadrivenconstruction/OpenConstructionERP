@@ -266,3 +266,5 @@ export type { PickedProjectFile, ProjectFilePickerProps } from './ProjectFilePic
 
 export { SearchableSelect } from './SearchableSelect';
 export type { SearchableSelectOption, SearchableSelectProps } from './SearchableSelect';
+
+export { GlobalTitleTooltip } from './GlobalTitleTooltip';

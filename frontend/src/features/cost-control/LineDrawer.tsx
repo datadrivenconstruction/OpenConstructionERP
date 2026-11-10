@@ -175,7 +175,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                 <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
                   {t('cost_control.col_forecast', { defaultValue: 'Forecast' })}
                 </div>
-                <div className="text-2xl font-bold tabular-nums text-content-primary">
+                <div className="text-2xl font-semibold tabular-nums text-content-primary">
                   {fmtCurrency(current.forecast, currency)}
                 </div>
               </div>
@@ -321,7 +321,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                       {e.kind === 'change' ? (
                         <GitCommitHorizontal size={12} className="text-indigo-500" />
                       ) : e.kind === 'snapshot' ? (
-                        <FileText size={12} className="text-sky-500" />
+                        <FileText size={12} className="text-semantic-info" />
                       ) : (
                         <PenLine size={12} className="text-violet-500" />
                       )}

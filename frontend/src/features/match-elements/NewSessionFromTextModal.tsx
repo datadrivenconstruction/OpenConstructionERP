@@ -132,7 +132,7 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
           </div>
 
           {mut.isError && (
-            <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-200">
+            <div className="rounded border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-xs text-semantic-error">
               {String((mut.error as Error)?.message ?? mut.error)}
             </div>
           )}

@@ -117,11 +117,11 @@ export function isProjectFilterActive(
 const REGION_AVATAR_PALETTE = [
   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  'bg-semantic-error-bg text-semantic-error',
+  'bg-semantic-warning-bg text-semantic-warning',
+  'bg-semantic-success-bg text-semantic-success',
   'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
-  'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300',
+  'bg-surface-secondary text-content-secondary',
 ];
 
 function getRegionAvatarClass(region?: string): string {
@@ -690,7 +690,7 @@ export function ProjectsPage() {
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_total', { defaultValue: 'Total Projects' })}
               </div>
-              <div className="mt-1 text-xl font-bold text-content-primary tabular-nums leading-none">
+              <div className="mt-1 text-xl font-semibold text-content-primary tabular-nums leading-none">
                 {stats.totalProjects}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1">
@@ -716,7 +716,7 @@ export function ProjectsPage() {
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_boqs', { defaultValue: 'Total BOQs' })}
               </div>
-              <div className="mt-1 text-xl font-bold text-content-primary tabular-nums leading-none">
+              <div className="mt-1 text-xl font-semibold text-content-primary tabular-nums leading-none">
                 {boqStats ? stats.totalBoqs.toLocaleString(getNumberLocale()) : (
                   <Skeleton width={40} height={20} className="inline-block align-middle" />
                 )}
@@ -743,12 +743,12 @@ export function ProjectsPage() {
                   <Skeleton width={64} height={20} className="inline-block align-middle" />
                 </div>
               ) : stats.valueByCurrency.length === 0 ? (
-                <div className="mt-1 text-xl font-bold text-content-primary tabular-nums leading-none">
+                <div className="mt-1 text-xl font-semibold text-content-primary tabular-nums leading-none">
                   {currencyFmt.format(0)}
                 </div>
               ) : stats.multiCurrency ? (
                 <>
-                  <div className="mt-1 text-sm font-bold text-content-primary leading-none">
+                  <div className="mt-1 text-sm font-semibold text-content-primary leading-none">
                     {t('projects.stats_value_mixed', { defaultValue: 'Mixed currencies' })}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
@@ -768,7 +768,7 @@ export function ProjectsPage() {
               ) : (
                 <>
                   <div className="mt-1 flex items-baseline gap-1.5 leading-none">
-                    <span className="text-xl font-bold text-content-primary tabular-nums">
+                    <span className="text-xl font-semibold text-content-primary tabular-nums">
                       {formatBigValue(stats.valueByCurrency[0]!.total)}
                     </span>
                     <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
@@ -794,12 +794,12 @@ export function ProjectsPage() {
                   <Skeleton width={64} height={20} className="inline-block align-middle" />
                 </div>
               ) : stats.valueByCurrency.length === 0 ? (
-                <div className="mt-1 text-xl font-bold text-content-primary tabular-nums leading-none">
+                <div className="mt-1 text-xl font-semibold text-content-primary tabular-nums leading-none">
                   {currencyFmt.format(0)}
                 </div>
               ) : stats.multiCurrency ? (
                 <>
-                  <div className="mt-1 text-sm font-bold text-content-primary leading-none">
+                  <div className="mt-1 text-sm font-semibold text-content-primary leading-none">
                     {t('projects.stats_value_mixed', { defaultValue: 'Mixed currencies' })}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
@@ -819,7 +819,7 @@ export function ProjectsPage() {
               ) : (
                 <>
                   <div className="mt-1 flex items-baseline gap-1.5 leading-none">
-                    <span className="text-xl font-bold text-content-primary tabular-nums">
+                    <span className="text-xl font-semibold text-content-primary tabular-nums">
                       {formatBigValue(stats.valueByCurrency[0]!.avg)}
                     </span>
                     <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
@@ -1019,14 +1019,14 @@ export function ProjectsPage() {
           {boqStatsError && (
             <div
               role="status"
-              className="mb-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2"
+              className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2"
             >
               <AlertTriangle
                 size={16}
-                className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+                className="text-semantic-warning shrink-0 mt-0.5"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-amber-900 dark:text-amber-100">
+                <p className="text-sm text-semantic-warning">
                   {t('projects.rollup_error', {
                     defaultValue:
                       'Could not load aggregated stats. Showing individual project data only.',
@@ -1387,7 +1387,7 @@ export function ProjectCard({
             <Link
               to={`/projects/${project.id}/geo`}
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/85 px-2.5 py-1 text-2xs font-semibold text-oe-blue shadow-sm backdrop-blur-md transition-all hover:bg-white hover:shadow-md hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 dark:border-white/10 dark:bg-slate-900/70 dark:text-sky-300 dark:hover:bg-slate-900/90"
+              className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/85 px-2.5 py-1 text-2xs font-semibold text-oe-blue shadow-sm backdrop-blur-md transition-all hover:bg-white hover:shadow-md hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 dark:text-sky-300"
               title={t('projects.card.fly_to_on_map', {
                 defaultValue: 'Fly camera to {{name}} on the globe',
                 name: project.name,
@@ -1406,7 +1406,7 @@ export function ProjectCard({
       )}
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-bold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(project.region)}`}>
+          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-semibold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(project.region)}`}>
             {project.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex items-center gap-1.5">
@@ -1653,11 +1653,11 @@ export function ProjectCard({
       {boqStats && boqStats.boqCount > 0 && boqStats.totalValue > 0 && (
         <div className="relative px-5 pb-3">
           <div className="rounded-xl border border-border-light bg-gradient-to-br from-oe-blue-subtle/60 via-surface-elevated to-surface-elevated px-4 py-3">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('projects.card_total_value', { defaultValue: 'Total value' })}
             </div>
             <div className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold tabular-nums text-content-primary">
+              <span className="text-xl font-semibold tabular-nums text-content-primary">
                 {currencyFmt.format(boqStats.totalValue)}
               </span>
               <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
@@ -1699,7 +1699,7 @@ export function ProjectCard({
             )}
             {openVariations > 0 && (
               <span
-                className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-2xs font-semibold text-amber-700 ring-1 ring-amber-200/60 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/20"
+                className="inline-flex items-center gap-1 rounded-md bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning ring-1 ring-semantic-warning/30"
                 title={t('projects.card_open_variations', {
                   defaultValue: 'Open variations',
                 })}
@@ -1773,7 +1773,7 @@ function PinButton({ projectId }: { projectId: string }) {
     <button
       className={`flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors ${
         isPinned
-          ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
+          ? 'text-semantic-warning hover:bg-semantic-warning-bg'
           : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'
       }`}
       onClick={(e) => {

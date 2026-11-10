@@ -110,14 +110,14 @@ export function ThresholdAlertBanner({
     emerald: {
       ring: 'ring-emerald-400/20',
       bg: 'from-emerald-50 to-teal-50/40 dark:from-emerald-500/10 dark:to-teal-500/5',
-      icon: 'text-emerald-600 dark:text-emerald-400',
+      icon: 'text-semantic-success',
       Icon: CheckCircle2,
       title: t('coordination.health_ok_title', { defaultValue: 'All clear' }),
     },
     amber: {
       ring: 'ring-amber-400/20',
       bg: 'from-amber-50 to-orange-50/40 dark:from-amber-500/10 dark:to-orange-500/5',
-      icon: 'text-amber-600 dark:text-amber-400',
+      icon: 'text-semantic-warning',
       Icon: Activity,
       title: t('coordination.health_attention_title', {
         defaultValue: 'Coordination in progress',
@@ -126,7 +126,7 @@ export function ThresholdAlertBanner({
     rose: {
       ring: 'ring-rose-400/30',
       bg: 'from-rose-50 to-orange-50/50 dark:from-rose-500/10 dark:to-orange-500/5',
-      icon: 'text-rose-600 dark:text-rose-400',
+      icon: 'text-semantic-error',
       Icon: AlertTriangle,
       title: t('coordination.health_alert_title', {
         defaultValue: 'Attention required',
@@ -163,7 +163,7 @@ export function ThresholdAlertBanner({
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/70 backdrop-blur dark:bg-slate-900/60 ${palette.icon}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/70 backdrop-blur ${palette.icon}`}
         >
           <Icon size={20} />
         </div>
@@ -180,8 +180,8 @@ export function ThresholdAlertBanner({
                   data-testid={`coordination-alert-${a.metric}`}
                   className={
                     a.level === 'error'
-                      ? 'inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-[11px] font-medium text-rose-800 dark:bg-rose-500/15 dark:text-rose-200'
-                      : 'inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-500/15 dark:text-amber-200'
+                      ? 'inline-flex items-center gap-1 rounded-full bg-semantic-error-bg px-2.5 py-0.5 text-2xs font-medium text-semantic-error'
+                      : 'inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2.5 py-0.5 text-2xs font-medium text-semantic-warning'
                   }
                   title={a.message}
                 >

@@ -60,7 +60,7 @@ export function StaleVersionPill({
       data-testid="stale-version-pill"
       className={clsx(
         'inline-flex items-center gap-1 h-5 px-1.5 rounded-md',
-        'text-[10px] font-medium tabular-nums',
+        'text-2xs font-medium tabular-nums',
         'bg-semantic-warning/10 text-semantic-warning border border-semantic-warning/20',
         className,
       )}

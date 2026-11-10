@@ -83,15 +83,15 @@ export function PriceReviewPanel({
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-amber-200/50 dark:border-amber-800/30 bg-amber-50/30 dark:bg-amber-950/10 p-4 mt-4 animate-card-in">
+    <div className="rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-4 mt-4 animate-card-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <AlertTriangle size={16} className="text-amber-500" />
+          <AlertTriangle size={16} className="text-semantic-warning" />
           <h3 className="text-sm font-semibold text-content-primary">
             {t('boq.price_review_title', { defaultValue: 'Price Check Results' })}
           </h3>
-          <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-2xs font-bold text-amber-700 dark:text-amber-300">
+          <span className="rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning">
             {items.length}
           </span>
         </div>
@@ -137,13 +137,13 @@ export function PriceReviewPanel({
                 {/* Suggested rate */}
                 <div className="text-xs">
                   <span className="text-content-tertiary">{t('boq.suggested', { defaultValue: 'Suggested' })}: </span>
-                  <span className={`font-mono font-bold ${item.diff < 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <span className={`font-mono font-semibold ${item.diff < 0 ? 'text-semantic-success' : 'text-semantic-error'}`}>
                     {fmtWithCurrency(item.suggestedRate, locale, currencyCode)}
                   </span>
                 </div>
 
                 {/* Diff */}
-                <div className={`flex items-center gap-0.5 text-2xs font-bold ${item.diff < 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                <div className={`flex items-center gap-0.5 text-2xs font-semibold ${item.diff < 0 ? 'text-semantic-success' : 'text-semantic-error'}`}>
                   {item.diff < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                   {item.diffPct > 0 ? '+' : ''}{fmtPercent(item.diffPct, 0)}
                 </div>
@@ -155,7 +155,7 @@ export function PriceReviewPanel({
               <button
                 onClick={() => onApply(item.id, item.suggestedRate)}
                 aria-label={`${t('boq.accept', { defaultValue: 'Accept' })} - ${item.ordinal}`}
-                className="flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                className="flex items-center gap-1 rounded-md bg-semantic-success-bg px-2.5 py-1.5 text-xs font-medium text-semantic-success hover:bg-semantic-success-bg transition-colors"
               >
                 <Check size={12} />
                 {t('boq.accept', { defaultValue: 'Accept' })}

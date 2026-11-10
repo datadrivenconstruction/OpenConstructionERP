@@ -120,7 +120,7 @@ function StampTile({ template, selected, onSelect }: StampTileProps) {
       )}
     >
       <div
-        className="px-2 py-1 rounded border-2 font-bold text-xs"
+        className="px-2 py-1 rounded border-2 font-semibold text-xs"
         style={{ borderColor: template.color, color: template.color }}
       >
         {template.text.slice(0, 16)}

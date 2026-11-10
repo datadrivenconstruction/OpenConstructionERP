@@ -91,10 +91,10 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
       aria-labelledby="no-match-modal-heading"
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700"
+        className="bg-surface-primary rounded-lg shadow-2xl w-full max-w-lg border border-border-light"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <header className="px-4 py-3 border-b border-border-light flex items-center justify-between">
           <h3 id="no-match-modal-heading" className="text-base font-semibold">
             {t('match_elements.no_match.heading', 'No match - choose action')}
           </h3>
@@ -102,7 +102,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
             type="button"
             onClick={onClose}
             aria-label={t('match_elements.no_match.close', 'Close no-match dialog')}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1 rounded hover:bg-surface-secondary"
           >
             <X className="w-5 h-5" />
           </button>
@@ -115,7 +115,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
               className={`block p-3 rounded border cursor-pointer transition ${
                 action === o.value
                   ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                  : 'border-border-light hover:border-border'
               }`}
             >
               <div className="flex items-start gap-2">
@@ -139,13 +139,13 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
           ))}
 
           {action === 'custom' && (
-            <div className="border border-slate-200 dark:border-slate-700 rounded p-3 mt-3 space-y-2">
+            <div className="border border-border-light rounded p-3 mt-3 space-y-2">
               <input
                 type="text"
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
                 placeholder={t('match_elements.no_match.placeholder.description', 'Position description')}
-                className="w-full px-2 py-1.5 text-sm rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                className="w-full px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
               />
               <div className="flex gap-2">
                 <input
@@ -153,7 +153,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   placeholder={t('match_elements.no_match.placeholder.unit', 'Unit')}
-                  className="w-24 px-2 py-1.5 text-sm rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-24 px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
                 />
                 <input
                   type="number"
@@ -161,10 +161,10 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                   onChange={(e) => setRate(e.target.value)}
                   placeholder={t('match_elements.no_match.placeholder.rate', 'Unit rate')}
                   step="0.01"
-                  className="flex-1 px-2 py-1.5 text-sm rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="flex-1 px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
                 />
               </div>
-              <label className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer pt-1">
+              <label className="flex items-start gap-2 text-xs text-content-secondary cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={saveToCatalogue}
@@ -184,7 +184,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
 
         {mut.isError && (
           <div
-            className="mx-4 mb-3 -mt-1 rounded border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 px-3 py-2 text-xs text-rose-800 dark:text-rose-100"
+            className="mx-4 mb-3 -mt-1 rounded border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-xs text-semantic-error"
             role="alert"
           >
             {t('match_elements.no_match.error', 'Could not apply: {{error}}', {
@@ -193,11 +193,11 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
           </div>
         )}
 
-        <footer className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2">
+        <footer className="px-4 py-3 border-t border-border-light flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 text-sm rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="px-3 py-1.5 text-sm rounded border border-border hover:bg-surface-secondary"
           >
             {t('match_elements.no_match.cancel', 'Cancel')}
           </button>

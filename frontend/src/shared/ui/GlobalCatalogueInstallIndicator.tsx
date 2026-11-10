@@ -109,11 +109,11 @@ export function GlobalCatalogueInstallIndicator() {
         className={`${pillPosition} flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all max-w-xs`}
       >
         {isActive ? (
-          <Loader2 size={14} className="text-emerald-600 animate-spin shrink-0" />
+          <Loader2 size={14} className="text-semantic-success animate-spin shrink-0" />
         ) : primary.status === 'ready' ? (
-          <Check size={14} className="text-emerald-500 shrink-0" />
+          <Check size={14} className="text-semantic-success shrink-0" />
         ) : (
-          <X size={14} className="text-red-500 shrink-0" />
+          <X size={14} className="text-semantic-error shrink-0" />
         )}
         <div className="flex-1 min-w-0 text-left">
           <p className="text-xs font-medium text-content-primary truncate">
@@ -124,15 +124,15 @@ export function GlobalCatalogueInstallIndicator() {
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex-1 h-1 rounded-full bg-surface-tertiary overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                    className="h-full rounded-full bg-semantic-success transition-all duration-300"
                     style={{ width: `${primary.progress}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-content-tertiary tabular-nums">
+                <span className="text-2xs text-content-tertiary tabular-nums">
                   {primary.progress}%
                 </span>
               </div>
-              <p className="text-[10px] text-content-tertiary mt-0.5 truncate">
+              <p className="text-2xs text-content-tertiary mt-0.5 truncate">
                 {t(primary.stage, {
                   defaultValue: STAGE_LABELS[primary.stage] ?? 'Working…',
                 })}{' '}
@@ -141,7 +141,7 @@ export function GlobalCatalogueInstallIndicator() {
             </>
           )}
           {!isActive && primary.status === 'ready' && (
-            <p className="text-[10px] text-emerald-600 mt-0.5">
+            <p className="text-2xs text-semantic-success mt-0.5">
               {t('catalogue_install.indicator_ready', {
                 defaultValue: 'Ready to use',
               })}
@@ -149,7 +149,7 @@ export function GlobalCatalogueInstallIndicator() {
           )}
         </div>
         {active.length > 1 && (
-          <span className="text-[10px] text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
+          <span className="text-2xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded-full">
             +{active.length - 1}
           </span>
         )}
@@ -162,7 +162,7 @@ export function GlobalCatalogueInstallIndicator() {
     <div className={`${pillPosition} w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in`}>
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-secondary/50 border-b border-border-light">
         <div className="flex items-center gap-2">
-          <Database size={14} className="text-emerald-600" />
+          <Database size={14} className="text-semantic-success" />
           <span className="text-xs font-semibold text-content-primary">
             {t('catalogue_install.indicator_title', {
               defaultValue: 'Catalogue installs',
@@ -199,13 +199,13 @@ function JobRow({ job, onDismiss }: { job: CatalogueInstallJob; onDismiss: () =>
   return (
     <div className="px-4 py-3 flex items-start gap-3">
       <div className="mt-0.5 shrink-0">
-        {isActive && <Loader2 size={16} className="text-emerald-600 animate-spin" />}
-        {isDone && <Check size={16} className="text-emerald-500" />}
-        {isError && <X size={16} className="text-red-500" />}
+        {isActive && <Loader2 size={16} className="text-semantic-success animate-spin" />}
+        {isDone && <Check size={16} className="text-semantic-success" />}
+        {isError && <X size={16} className="text-semantic-error" />}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-content-primary truncate">{job.label}</p>
-        <p className="text-[10px] text-content-quaternary">
+        <p className="text-2xs text-content-quaternary">
           ~{job.sizeMb} MB · {job.language?.toUpperCase()}
         </p>
         {isActive && (
@@ -213,15 +213,15 @@ function JobRow({ job, onDismiss }: { job: CatalogueInstallJob; onDismiss: () =>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-surface-tertiary rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                  className="h-full bg-semantic-success rounded-full transition-all duration-500"
                   style={{ width: `${job.progress}%` }}
                 />
               </div>
-              <span className="text-[10px] text-emerald-600 font-semibold tabular-nums w-8 text-right">
+              <span className="text-2xs text-semantic-success font-semibold tabular-nums w-8 text-right">
                 {job.progress}%
               </span>
             </div>
-            <p className="text-[10px] text-content-quaternary mt-0.5">
+            <p className="text-2xs text-content-quaternary mt-0.5">
               {t(job.stage, {
                 defaultValue: STAGE_LABELS[job.stage] ?? 'Working…',
               })}{' '}
@@ -230,7 +230,7 @@ function JobRow({ job, onDismiss }: { job: CatalogueInstallJob; onDismiss: () =>
           </div>
         )}
         {isError && (
-          <p className="text-[10px] text-red-500 mt-0.5 line-clamp-2">
+          <p className="text-2xs text-semantic-error mt-0.5 line-clamp-2">
             {job.errorMessage ||
               t('catalogue_install.indicator_error', { defaultValue: 'Install failed' })}
           </p>
@@ -238,7 +238,7 @@ function JobRow({ job, onDismiss }: { job: CatalogueInstallJob; onDismiss: () =>
         <div className="mt-1.5 flex items-center gap-2">
           <button
             onClick={onDismiss}
-            className="text-[10px] text-content-quaternary hover:text-content-secondary ms-auto"
+            className="text-2xs text-content-quaternary hover:text-content-secondary ms-auto"
           >
             {t('common.dismiss', { defaultValue: 'Dismiss' })}
           </button>

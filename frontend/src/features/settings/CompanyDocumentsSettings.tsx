@@ -584,7 +584,7 @@ export function CompanyDocumentsSettings() {
                   {t('settings.company.open_sample', { defaultValue: 'Open sample PDF' })}
                 </Button>
                 {(dirty || appearanceDirty) && (
-                  <p className="mt-1.5 text-[11px] leading-snug text-content-secondary">
+                  <p className="mt-1.5 text-2xs leading-snug text-content-secondary">
                     {t('settings.company.sample_saved_only', {
                       defaultValue: 'The sample PDF shows saved settings. Save your changes first.',
                     })}
@@ -833,7 +833,7 @@ function LogoSlot({
       )}
 
       {canEdit && accept && maxBytes !== null && (
-        <p className="mt-2 text-[11px] leading-snug text-content-tertiary">
+        <p className="mt-2 text-2xs leading-snug text-content-tertiary">
           {t('settings.company.logo_formats', {
             defaultValue:
               '{{types}}, up to {{max}} MB. A transparent PNG or an SVG in a wide format prints best.',
@@ -844,7 +844,7 @@ function LogoSlot({
       )}
 
       {!dataUrl && fallbackUrl && (
-        <div className="mt-2 flex items-center gap-2 text-[11px] text-content-secondary">
+        <div className="mt-2 flex items-center gap-2 text-2xs text-content-secondary">
           <img
             src={fallbackUrl}
             alt=""
@@ -888,7 +888,7 @@ function LogoTile({ src, dark, label }: { src: string; dark: boolean; label: str
       >
         <img src={src} alt={label} className="max-h-full max-w-full object-contain" draggable={false} />
       </div>
-      <figcaption className="text-center text-[10px] text-content-tertiary">{label}</figcaption>
+      <figcaption className="text-center text-2xs text-content-tertiary">{label}</figcaption>
     </figure>
   );
 }
@@ -981,7 +981,7 @@ function LetterheadPreview({
 
   const notice = (text: string, testId?: string) => (
     <p
-      className="rounded border border-dashed border-[#d1d5db] px-2 py-3 text-center text-[10px] text-[#6b7280]"
+      className="rounded border border-dashed border-[#d1d5db] px-2 py-3 text-center text-2xs text-[#6b7280]"
       data-testid={testId}
     >
       {text}
@@ -1001,7 +1001,7 @@ function LetterheadPreview({
           data-testid="letterhead-preview-watermark"
         >
           <span
-            className="whitespace-nowrap font-bold text-[#6b7280]"
+            className="whitespace-nowrap font-semibold text-[#6b7280]"
             style={{
               opacity: look.watermark_opacity / 100,
               fontSize: `${Math.max(10, Math.min(28, 220 / Math.max(4, look.watermark_text.length)))}px`,
@@ -1057,7 +1057,7 @@ function LetterheadPreview({
               <div className={clsx('min-w-0 break-words', textAlign, !logo && 'w-full')}>
                 {form.legal_name.trim() && (
                   <div
-                    className="text-[11px] font-bold leading-tight"
+                    className="text-2xs font-semibold leading-tight"
                     style={{ color: accent }}
                     data-testid="letterhead-preview-name"
                   >
@@ -1065,16 +1065,16 @@ function LetterheadPreview({
                   </div>
                 )}
                 {address.map((line, i) => (
-                  <div key={i} className="text-[9px] leading-snug text-[#666666]">
+                  <div key={i} className="text-2xs leading-snug text-[#666666]">
                     {line}
                   </div>
                 ))}
                 {form.registration_line.trim() && (
-                  <div className="text-[9px] leading-snug text-[#666666]">
+                  <div className="text-2xs leading-snug text-[#666666]">
                     {form.registration_line}
                   </div>
                 )}
-                {contact && <div className="text-[9px] leading-snug text-[#666666]">{contact}</div>}
+                {contact && <div className="text-2xs leading-snug text-[#666666]">{contact}</div>}
               </div>
             </div>
             <div className="h-px w-full bg-[#cccccc]" style={{ marginTop: pct(3) }} />

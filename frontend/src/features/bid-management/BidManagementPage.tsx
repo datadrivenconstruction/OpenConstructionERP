@@ -482,7 +482,7 @@ function HowBidManagementWorks() {
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-bold text-oe-blue-text">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue-subtle text-2xs font-semibold text-oe-blue-text">
                   {i + 1}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-content-primary">
@@ -1152,8 +1152,8 @@ function SubmissionsLevelingView({
           className={clsx(
             'rounded-lg border px-3 py-2 text-xs',
             pkg.status === 'awarded'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200'
-              : 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200',
+              ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
+              : 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error',
           )}
         >
           {pkg.status === 'awarded'
@@ -1445,7 +1445,7 @@ function LevelingTable({
                           key={row.id}
                           className={clsx(
                             'border-t border-border-light',
-                            isRecommended && 'bg-emerald-50/60 dark:bg-emerald-950/20',
+                            isRecommended && 'bg-semantic-success/10',
                           )}
                         >
                           <td className="px-3 py-1.5 tabular-nums">{row.rank}</td>
@@ -1524,7 +1524,7 @@ function LevelingTable({
                           ['included', 'alternative', 'noted'].includes(cell.inclusion_status);
                         const plug = plugByCell.get(`${col.id}:${row.line_item_id}`);
                         const cls = cell?.is_low
-                          ? 'text-green-700 font-semibold'
+                          ? 'text-semantic-success font-semibold'
                           : 'text-content-primary';
                         return (
                           <td
@@ -1564,9 +1564,9 @@ function LevelingTable({
                     const v = columnTotals.get(col.id) ?? 0;
                     const cls =
                       v > 0 && v === totalMin
-                        ? 'text-green-700'
+                        ? 'text-semantic-success'
                         : v > 0 && v === totalMax && totalMin !== totalMax
-                          ? 'text-red-700'
+                          ? 'text-semantic-error'
                           : '';
                     return (
                       <td key={col.id} className={clsx('px-3 py-2 text-right tabular-nums', cls)}>
@@ -1697,7 +1697,7 @@ function AwardConfirmModal({
       <div className="space-y-3">
         <LevelingCheckBanner check={awardCheckQ.data} />
         {!levelingComputed && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+          <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
             <Info size={14} className="mt-0.5 shrink-0" />
             <span>
               {t('bid_management.award_no_leveling', {
@@ -2887,7 +2887,7 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
           className={inputCls}
         />
         {link && (
-          <p className="text-[11px] text-content-tertiary">
+          <p className="text-2xs text-content-tertiary">
             {t('bid_management.linked_to_directory', {
               defaultValue: 'Linked to {{name}} in the Subcontractor Directory. The contract from an award names this firm.',
               name: link.name,

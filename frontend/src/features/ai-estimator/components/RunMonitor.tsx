@@ -31,10 +31,10 @@ import type { ProgressResponse, StepOut, StepRole } from '../api';
 const ROLE_META: Record<StepRole, { icon: typeof Brain; tone: string }> = {
   thought: { icon: Brain, tone: 'text-indigo-500' },
   tool_call: { icon: Wrench, tone: 'text-oe-blue' },
-  observation: { icon: Eye, tone: 'text-emerald-500' },
+  observation: { icon: Eye, tone: 'text-semantic-success' },
   answer: { icon: MessageSquare, tone: 'text-content-primary' },
-  error: { icon: AlertCircle, tone: 'text-rose-500' },
-  stage_complete: { icon: CheckCircle2, tone: 'text-emerald-500' },
+  error: { icon: AlertCircle, tone: 'text-semantic-error' },
+  stage_complete: { icon: CheckCircle2, tone: 'text-semantic-success' },
 };
 
 function stepText(step: StepOut): string {
@@ -79,7 +79,7 @@ export function RunMonitor({
           {isPolling ? (
             <Loader2 className="h-4 w-4 animate-spin text-oe-blue" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <CheckCircle2 className="h-4 w-4 text-semantic-success" />
           )}
           <h3 className="text-sm font-semibold text-content-primary">
             {t('aiest.monitor.stages_title', { defaultValue: 'Progress' })}
@@ -113,7 +113,7 @@ export function RunMonitor({
         </div>
 
         {(provider || model) && (
-          <p className="mt-2 text-[11px] text-content-tertiary">
+          <p className="mt-2 text-2xs text-content-tertiary">
             {t('aiest.monitor.running_on', {
               defaultValue: 'Running on {{model}}',
               model: model || provider,
@@ -142,7 +142,7 @@ export function RunMonitor({
                     <DateDisplay
                       value={step.created_at}
                       format="time"
-                      className="text-[10px] text-content-tertiary"
+                      className="text-2xs text-content-tertiary"
                     />
                   </div>
                 </div>

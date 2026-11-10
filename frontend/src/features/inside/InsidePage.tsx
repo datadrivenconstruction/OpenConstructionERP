@@ -79,7 +79,7 @@ function LockedTeaser() {
       <Card className="lg:col-span-3 overflow-hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={18} className="text-amber-500" />
+            <Sparkles size={18} className="text-semantic-warning" />
             <h2 className="text-lg font-semibold text-content-primary">
               {t('inside.teaser_title', { defaultValue: 'What backers see first' })}
             </h2>
@@ -213,9 +213,9 @@ function UnlockedPanel() {
 
   return (
     <div className="space-y-5">
-      <Card className="border-emerald-300/50 bg-gradient-to-br from-emerald-50/50 to-transparent dark:border-emerald-500/25 dark:from-emerald-950/20">
+      <Card className="border-semantic-success/30 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
         <div className="p-4 flex items-center gap-3">
-          <ShieldCheck size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <ShieldCheck size={18} className="shrink-0 text-semantic-success" />
           <p className="text-xs text-content-secondary leading-relaxed flex-1">
             {t('inside.unlocked_banner', {
               defaultValue:
@@ -233,7 +233,7 @@ function UnlockedPanel() {
         <Card className="lg:col-span-3">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
-              <Unlock size={17} className="text-emerald-600 dark:text-emerald-400" />
+              <Unlock size={17} className="text-semantic-success" />
               <h2 className="text-base font-semibold text-content-primary">
                 {t('inside.shipped_title', { defaultValue: 'Just shipped' })}
               </h2>

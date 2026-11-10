@@ -617,7 +617,7 @@ export function DesignOptionComparisonTable({
             {/* Grand total */}
             <tr className="border-t-2 border-border bg-surface-secondary/40">
               <td
-                className={`px-3 py-3 font-bold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
+                className={`px-3 py-3 font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
               >
                 {t('designOptions.total', { defaultValue: 'TOTAL' })}
               </td>
@@ -628,7 +628,7 @@ export function DesignOptionComparisonTable({
                     key={o.option_id}
                     className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
                   >
-                    <span className="font-bold text-content-primary">
+                    <span className="font-semibold text-content-primary">
                       {formatMoney(o.grand_total, o.currency)}
                     </span>
                     {!isBaseline && (

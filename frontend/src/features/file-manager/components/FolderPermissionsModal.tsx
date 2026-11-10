@@ -248,8 +248,8 @@ export function FolderPermissionsModal({
       >
         <header className="flex items-start justify-between gap-3 border-b border-border-light px-6 py-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/30">
-              <Lock size={16} className="text-amber-600 dark:text-amber-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-semantic-warning-bg">
+              <Lock size={16} className="text-semantic-warning" />
             </div>
             <div>
               <h2
@@ -310,16 +310,16 @@ export function FolderPermissionsModal({
                       <p className="truncate text-xs font-medium text-content-primary">
                         {row.user_full_name || row.user_email || row.user_id}
                       </p>
-                      <p className="truncate text-[10px] text-content-tertiary">
+                      <p className="truncate text-2xs text-content-tertiary">
                         {row.user_email}
                       </p>
                     </div>
                     <span
                       className={clsx(
-                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
-                        row.role === 'viewer' && 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300',
-                        row.role === 'editor' && 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300',
-                        row.role === 'owner' && 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300',
+                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-2xs font-medium uppercase tracking-wider',
+                        row.role === 'viewer' && 'bg-semantic-info-bg text-semantic-info',
+                        row.role === 'editor' && 'bg-semantic-success-bg text-semantic-success',
+                        row.role === 'owner' && 'bg-semantic-warning-bg text-semantic-warning',
                       )}
                     >
                       <ShieldCheck size={10} />
@@ -330,7 +330,7 @@ export function FolderPermissionsModal({
                       onClick={() => handleRevoke(row)}
                       disabled={revokingId === row.id}
                       data-testid={`folder-permission-revoke-${row.id}`}
-                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-content-tertiary hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/30 dark:hover:text-rose-300 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-2xs font-medium text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors disabled:opacity-50"
                     >
                       {revokingId === row.id ? (
                         <Loader2 size={10} className="animate-spin" />
@@ -352,7 +352,7 @@ export function FolderPermissionsModal({
             </h3>
 
             <div className="space-y-2.5">
-              <label className="block text-[11px] font-medium text-content-secondary">
+              <label className="block text-2xs font-medium text-content-secondary">
                 {t('files.permissions.user_label', { defaultValue: 'Member' })}
                 <select
                   value={selectedUserId}
@@ -373,7 +373,7 @@ export function FolderPermissionsModal({
                 </select>
               </label>
 
-              <label className="block text-[11px] font-medium text-content-secondary">
+              <label className="block text-2xs font-medium text-content-secondary">
                 {t('files.permissions.role_label', { defaultValue: 'Role' })}
                 <select
                   value={selectedRole}
@@ -390,7 +390,7 @@ export function FolderPermissionsModal({
               </label>
 
               {grantError && (
-                <p className="flex items-start gap-1.5 rounded-md bg-rose-50 px-2.5 py-1.5 text-[11px] text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">
+                <p className="flex items-start gap-1.5 rounded-md bg-semantic-error-bg px-2.5 py-1.5 text-2xs text-semantic-error">
                   <AlertTriangle size={11} className="mt-0.5 shrink-0" />
                   {grantError}
                 </p>

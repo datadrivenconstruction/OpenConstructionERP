@@ -318,10 +318,10 @@ function RuleSetCard({
                         className={clsx(
                           'inline-flex items-center gap-1',
                           r.severity === 'error'
-                            ? 'text-rose-700'
+                            ? 'text-semantic-error'
                             : r.severity === 'warning'
-                              ? 'text-amber-700'
-                              : 'text-sky-700',
+                              ? 'text-semantic-warning'
+                              : 'text-semantic-info',
                         )}
                       >
                         <SeverityIcon severity={r.severity} />

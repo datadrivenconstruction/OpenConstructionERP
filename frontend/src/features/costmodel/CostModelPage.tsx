@@ -129,22 +129,22 @@ const KPICard = memo(function KPICard({
   return (
     <div className="relative flex-1 min-w-[200px] overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       {/* Top accent bar */}
-      <div className={`absolute top-0 start-0 end-0 h-1 ${accentColor === 'green' ? 'bg-green-500' : accentColor === 'amber' ? 'bg-amber-500' : accentColor === 'rose' ? 'bg-rose-500' : 'bg-oe-blue'}`} />
+      <div className={`absolute top-0 start-0 end-0 h-1 ${accentColor === 'green' ? 'bg-semantic-success' : accentColor === 'amber' ? 'bg-semantic-warning' : accentColor === 'rose' ? 'bg-semantic-error' : 'bg-oe-blue'}`} />
       <div className="p-5 pt-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
             {label}
           </span>
           <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-            accentColor === 'green' ? 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400'
-            : accentColor === 'amber' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
-            : accentColor === 'rose' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+            accentColor === 'green' ? 'bg-semantic-success-bg text-semantic-success'
+            : accentColor === 'amber' ? 'bg-semantic-warning-bg text-semantic-warning'
+            : accentColor === 'rose' ? 'bg-semantic-error-bg text-semantic-error'
             : 'bg-oe-blue/10 text-oe-blue'
           }`}>
             {icon}
           </div>
         </div>
-        <div className="text-2xl font-bold tabular-nums text-content-primary leading-tight">
+        <div className="text-2xl font-semibold tabular-nums text-content-primary leading-tight">
           {formatCurrency(amount, currency)}
         </div>
         {variance !== undefined && variance !== 0 && (
@@ -191,7 +191,7 @@ const PerformanceIndicator = memo(function PerformanceIndicator({
   return (
     <div className="flex items-center gap-4">
       <div
-        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold tabular-nums ${
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold tabular-nums ${
           isHealthy
             ? 'bg-semantic-success-bg text-semantic-success'
             : 'bg-semantic-error-bg text-semantic-error'
@@ -551,7 +551,7 @@ const BudgetTable = memo(function BudgetTable({
                     </span>
                     <div className="h-1.5 w-full max-w-[60px] rounded-full bg-surface-secondary overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${spentOver ? 'bg-semantic-error' : spentPct > 80 ? 'bg-amber-500' : 'bg-oe-blue'}`}
+                        className={`h-full rounded-full transition-all ${spentOver ? 'bg-semantic-error' : spentPct > 80 ? 'bg-semantic-warning' : 'bg-oe-blue'}`}
                         style={{ width: `${Math.min(100, spentPct)}%` }}
                       />
                     </div>
@@ -587,7 +587,7 @@ const BudgetTable = memo(function BudgetTable({
             <td className="py-3.5 px-2">
               {totals.planned > 0 && (
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-2xs font-bold tabular-nums text-content-primary">
+                  <span className="text-2xs font-semibold tabular-nums text-content-primary">
                     {fmtPercent(Math.min(100, (totals.actual / totals.planned) * 100), 0)}
                   </span>
                   <div className="h-1.5 w-full max-w-[60px] rounded-full bg-surface-secondary overflow-hidden">
@@ -600,7 +600,7 @@ const BudgetTable = memo(function BudgetTable({
               )}
             </td>
             <td
-              className={`py-3.5 pl-4 text-right tabular-nums font-bold ${varianceColor(totals.variance)}`}
+              className={`py-3.5 pl-4 text-right tabular-nums font-semibold ${varianceColor(totals.variance)}`}
             >
               {totals.variance > 0 ? '+' : ''}
               {formatCurrency(totals.variance, currency)}
@@ -647,8 +647,8 @@ const EVMKPIBox = memo(function EVMKPIBox({
       colorClass = 'text-semantic-success';
       bgClass = 'bg-semantic-success-bg';
     } else if (value >= 0.85) {
-      colorClass = 'text-amber-600';
-      bgClass = 'bg-amber-50';
+      colorClass = 'text-semantic-warning';
+      bgClass = 'bg-semantic-warning-bg';
     } else {
       colorClass = 'text-semantic-error';
       bgClass = 'bg-semantic-error-bg';
@@ -668,7 +668,7 @@ const EVMKPIBox = memo(function EVMKPIBox({
       <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
         {label}
       </div>
-      <div className={`text-xl font-bold tabular-nums ${colorClass}`}>{displayValue}</div>
+      <div className={`text-xl font-semibold tabular-nums ${colorClass}`}>{displayValue}</div>
     </div>
   );
 });
@@ -705,12 +705,12 @@ const EVMProgressBars = memo(function EVMProgressBars({
       {
         label: t('costmodel.evm_ev', { defaultValue: 'Earned Value (EV)' }),
         value: evm.ev,
-        color: 'bg-green-500',
+        color: 'bg-semantic-success',
       },
       {
         label: t('costmodel.evm_ac', { defaultValue: 'Actual Cost (AC)' }),
         value: evm.ac,
-        color: 'bg-red-500',
+        color: 'bg-semantic-error',
       },
     ],
     [t, evm.pv, evm.ev, evm.ac],
@@ -765,7 +765,7 @@ const EVMDashboard = memo(function EVMDashboard({
   const liveTooltip = t('costmodel.evm_live_tooltip', { defaultValue: 'Live - these figures refresh automatically when cost, schedule progress or finance data changes' });
   const livePill = live ? (
     <span
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-semantic-success/10 px-2 py-0.5 text-[11px] font-medium text-semantic-success"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-semantic-success/10 px-2 py-0.5 text-2xs font-medium text-semantic-success"
       title={liveTooltip}
     >
       <span className="relative flex h-1.5 w-1.5">
@@ -849,9 +849,9 @@ const EVMDashboard = memo(function EVMDashboard({
 
           {/* SPI-capped warning — PV is a time-elapsed proxy and was clamped */}
           {evm.spi_capped && (
-            <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-800/50 dark:bg-amber-950/20">
-              <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-              <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-400/80">
+            <div className="flex items-start gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-3">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
+              <p className="text-xs leading-relaxed text-semantic-warning">
                 {t('costmodel.spi_capped_hint', {
                   defaultValue:
                     'SPI is indicative only - the project schedule has barely started, so Planned Value is approximate and the index was clamped to a safe range.',
@@ -1467,7 +1467,7 @@ function BudgetLinesEditor({
               {formatCurrency(lineTotal.forecast, currency)}
             </td>
             <td
-              className={`py-3.5 px-4 text-right tabular-nums font-bold ${varianceColor(lineTotal.planned - lineTotal.forecast)}`}
+              className={`py-3.5 px-4 text-right tabular-nums font-semibold ${varianceColor(lineTotal.planned - lineTotal.forecast)}`}
             >
               {lineTotal.planned - lineTotal.forecast > 0 ? '+' : ''}
               {formatCurrency(lineTotal.planned - lineTotal.forecast, currency)}
@@ -1701,7 +1701,7 @@ const SliderControl = memo(function SliderControl({
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-content-secondary">{label}</span>
         <span
-          className={`text-sm font-bold tabular-nums ${
+          className={`text-sm font-semibold tabular-nums ${
             value > 0
               ? 'text-semantic-error'
               : value < 0
@@ -1831,7 +1831,7 @@ function WhatIfPanel({
             {/* Presets */}
             <div className="flex flex-wrap gap-2">
               <button onClick={() => { setMaterialPct(-10); setLaborPct(-5); setDurationPct(-10); setResult(null); }}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20 transition-colors">
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-semantic-success/30 text-semantic-success hover:bg-semantic-success-bg transition-colors">
                 {t('costmodel.preset_optimistic', { defaultValue: 'Optimistic (-10%)' })}
               </button>
               <button onClick={() => { setMaterialPct(0); setLaborPct(0); setDurationPct(0); setResult(null); }}
@@ -1839,11 +1839,11 @@ function WhatIfPanel({
                 {t('costmodel.preset_baseline', { defaultValue: 'Baseline (0%)' })}
               </button>
               <button onClick={() => { setMaterialPct(5); setLaborPct(3); setDurationPct(5); setResult(null); }}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20 transition-colors">
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-semantic-warning/30 text-semantic-warning hover:bg-semantic-warning-bg transition-colors">
                 {t('costmodel.preset_moderate', { defaultValue: 'Moderate (+5%)' })}
               </button>
               <button onClick={() => { setMaterialPct(15); setLaborPct(10); setDurationPct(20); setResult(null); }}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors">
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-semantic-error/30 text-semantic-error hover:bg-semantic-error-bg transition-colors">
                 {t('costmodel.preset_pessimistic', { defaultValue: 'Pessimistic (+15%)' })}
               </button>
             </div>
@@ -1936,7 +1936,7 @@ function WhatIfPanel({
                       {t('costmodel.whatif_impact', { defaultValue: 'Impact' })}
                     </div>
                     <div
-                      className={`text-sm font-bold tabular-nums ${
+                      className={`text-sm font-semibold tabular-nums ${
                         result.delta > 0
                           ? 'text-semantic-error'
                           : result.delta < 0
@@ -2067,7 +2067,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
                 ].map((item) => (
                   <div key={item.label} className="rounded-xl border border-border-light bg-surface-secondary/50 px-3 py-2.5">
                     <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">{item.label}</p>
-                    <p className={`text-lg font-bold tabular-nums ${item.color}`}>{fmt(item.value)}</p>
+                    <p className={`text-lg font-semibold tabular-nums ${item.color}`}>{fmt(item.value)}</p>
                   </div>
                 ))}
               </div>
@@ -2243,15 +2243,15 @@ function FiveDDashboard({ project }: { project: Project }) {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue/10 text-oe-blue">
                 <DollarSign size={24} />
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600 dark:bg-green-950/40 dark:text-green-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-success-bg text-semantic-success">
                 <LineChart size={18} />
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
                 <Gauge size={18} />
               </div>
             </div>
 
-            <h2 className="text-xl font-bold text-content-primary">
+            <h2 className="text-xl font-semibold text-content-primary">
               {t('costmodel.empty_title', { defaultValue: '5D Cost Model' })}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-content-secondary">
@@ -2307,7 +2307,7 @@ function FiveDDashboard({ project }: { project: Project }) {
               ) : (
                 <div>
                   <div className="mb-2 flex items-center justify-center gap-2">
-                    <Lock size={16} className="text-amber-500" />
+                    <Lock size={16} className="text-semantic-warning" />
                     <span className="text-sm font-semibold text-content-primary">
                       {t('costmodel.prereq_boq', { defaultValue: 'BOQ estimate required' })}
                     </span>
@@ -2335,7 +2335,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             {/* Step 1: Budget (complete) */}
             <div className="flex-1 rounded-lg border border-semantic-success/30 bg-semantic-success-bg/30 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-semantic-success text-white text-xs font-bold">{'\u2713'}</div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-semantic-success text-white text-xs font-semibold">{'\u2713'}</div>
                 <span className="text-xs font-medium text-content-primary">
                   {t('costmodel.step_budget', { defaultValue: 'Budget Generated' })}
                 </span>
@@ -2350,7 +2350,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             {/* Step 2: Track Costs */}
             <div className="flex-1 rounded-lg border border-oe-blue/30 bg-oe-blue-subtle/20 p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-oe-blue text-white text-xs font-bold">2</div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-oe-blue text-white text-xs font-semibold">2</div>
                 <span className="text-xs font-medium text-content-primary">
                   {t('costmodel.step_track', { defaultValue: 'Track Costs' })}
                 </span>
@@ -2365,7 +2365,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             {/* Step 3: Analyze */}
             <div className="flex-1 rounded-lg border border-border-light p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-tertiary text-xs font-bold text-content-secondary">3</div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-tertiary text-xs font-semibold text-content-secondary">3</div>
                 <span className="text-xs font-medium text-content-primary">
                   {t('costmodel.step_analyze', { defaultValue: 'Analyze & Forecast' })}
                 </span>
@@ -2696,7 +2696,7 @@ const ProjectCard = memo(function ProjectCard({
       onClick={handleClick}
     >
       <div className="flex items-center gap-3 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-bold">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-semibold">
           {project.name.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
@@ -2871,7 +2871,7 @@ export function CostModelPage() {
         icon: <LineChart size={20} />,
         title: t('costmodel.feat_scurve', { defaultValue: 'S-Curve Analysis' }),
         desc: t('costmodel.feat_scurve_desc', { defaultValue: 'Visualize planned vs earned vs actual cost over time with cumulative S-curve charts.' }),
-        color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/40',
+        color: 'text-semantic-success bg-semantic-success-bg',
       },
       {
         icon: <Wallet size={20} />,
@@ -2883,13 +2883,13 @@ export function CostModelPage() {
         icon: <Gauge size={20} />,
         title: t('costmodel.feat_evm', { defaultValue: 'EVM (SPI / CPI / EAC)' }),
         desc: t('costmodel.feat_evm_desc', { defaultValue: 'Earned Value Management with Schedule and Cost Performance Indexes, Estimate at Completion, and variance analysis.' }),
-        color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40',
+        color: 'text-semantic-warning bg-semantic-warning-bg',
       },
       {
         icon: <Dice5 size={20} />,
         title: t('costmodel.feat_montecarlo', { defaultValue: 'Monte Carlo Simulation' }),
         desc: t('costmodel.feat_montecarlo_desc', { defaultValue: 'Run 1,000 probabilistic iterations to estimate P50, P80, and P95 cost confidence levels.' }),
-        color: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40',
+        color: 'text-semantic-error bg-semantic-error-bg',
       },
       {
         icon: <GitBranch size={20} />,
@@ -3018,10 +3018,10 @@ export function CostModelPage() {
           </div>
 
           {/* Prerequisites callout */}
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-800/50 dark:bg-amber-950/20">
-            <Lock size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="mt-6 flex items-start gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-4">
+            <Lock size={18} className="mt-0.5 shrink-0 text-semantic-warning" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              <p className="text-sm font-medium text-semantic-warning">
                 {t('costmodel.prereq_title', { defaultValue: 'Getting Started' })}
               </p>
               <p className="mt-0.5 text-xs text-amber-700/80 dark:text-amber-400/70">

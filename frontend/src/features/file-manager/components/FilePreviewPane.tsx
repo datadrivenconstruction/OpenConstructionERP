@@ -345,7 +345,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               title={t('files.module.play_video', { defaultValue: 'Play' })}
             >
               <PlayCircle size={44} strokeWidth={1.5} />
-              <span className="text-[11px] font-medium">
+              <span className="text-2xs font-medium">
                 {t('files.module.play_video', { defaultValue: 'Play' })}
               </span>
             </button>
@@ -429,7 +429,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
                       type="button"
                       onClick={() => navigateToModule(m)}
                       className={clsx(
-                        'inline-flex items-center gap-1 h-6 px-2 rounded-md text-[10.5px] font-medium transition-colors',
+                        'inline-flex items-center gap-1 h-6 px-2 rounded-md text-2xs font-medium transition-colors',
                         'border border-border-light text-content-secondary',
                         'hover:border-oe-blue/40 hover:text-oe-blue hover:bg-oe-blue/5',
                       )}
@@ -457,7 +457,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
           {/* W1 — version history. Renders <V## · Current> chip + dropdown
               with a "Make current" action for every superseded row. */}
           <div className="flex items-center justify-between gap-2 px-1 py-1 border-y border-border-light/60">
-            <span className="text-[10px] uppercase tracking-wider text-content-tertiary font-medium">
+            <span className="text-2xs uppercase tracking-wider text-content-tertiary font-medium">
               {t('files.versions.section_label', { defaultValue: 'Versions' })}
             </span>
             <VersionDropdown fileId={row.id} kind={row.kind} />
@@ -467,7 +467,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               backed by that table, so the control is gated to that kind. */}
           {row.kind === 'document' && (
             <div className="flex items-center justify-between gap-2 px-1 py-1 border-b border-border-light/60">
-              <span className="text-[10px] uppercase tracking-wider text-content-tertiary font-medium">
+              <span className="text-2xs uppercase tracking-wider text-content-tertiary font-medium">
                 {t('files.status.label', { defaultValue: 'Status' })}
               </span>
               <CdeStatusControl
@@ -599,7 +599,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             <button
               type="button"
               onClick={handleCopyPath}
-              className="inline-flex items-center gap-1 font-mono text-[10px] text-content-secondary hover:text-oe-blue text-left break-all"
+              className="inline-flex items-center gap-1 font-mono text-2xs text-content-secondary hover:text-oe-blue text-left break-all"
               title={t('files.actions.copy_path', { defaultValue: 'Copy path' })}
             >
               <Copy size={10} className="shrink-0" />
@@ -618,7 +618,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             <dl className="space-y-1.5 text-xs">
               {extras.map(([k, v]) => (
                 <Row key={k} label={k.replace(/_/g, ' ')}>
-                  <span className="font-mono text-[11px] break-words">
+                  <span className="font-mono text-2xs break-words">
                     {typeof v === 'object' ? JSON.stringify(v) : String(v)}
                   </span>
                 </Row>
@@ -777,11 +777,11 @@ interface ActivityEvent {
 }
 
 const ACTIVITY_ACTION_STYLE: Record<string, string> = {
-  uploaded: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  uploaded: 'bg-semantic-success-bg text-semantic-success',
   renamed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   downloaded: 'bg-surface-secondary text-content-secondary',
-  deleted: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
-  cde_state_changed: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  deleted: 'bg-semantic-error-bg text-semantic-error',
+  cde_state_changed: 'bg-semantic-warning-bg text-semantic-warning',
 };
 
 function formatActivityMeta(action: string, meta: Record<string, unknown>): string {
@@ -874,7 +874,7 @@ function ActivityLogSection({ documentId, kind }: { documentId: string; kind: Fi
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span
                     className={clsx(
-                      'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+                      'inline-flex items-center rounded-md px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide',
                       chipStyle,
                     )}
                   >
@@ -887,13 +887,13 @@ function ActivityLogSection({ documentId, kind }: { documentId: string; kind: Fi
                   />
                 </div>
                 {summary && (
-                  <p className="mt-0.5 text-[11px] text-content-secondary break-words">
+                  <p className="mt-0.5 text-2xs text-content-secondary break-words">
                     {summary}
                   </p>
                 )}
                 {ev.user_id && (
                   <p
-                    className="mt-0.5 text-[10px] font-mono text-content-quaternary truncate"
+                    className="mt-0.5 text-2xs font-mono text-content-quaternary truncate"
                     title={ev.user_id}
                   >
                     {ev.user_id}
@@ -999,18 +999,18 @@ function VersionHistorySection({
                   <DateDisplay
                     value={v.uploaded_at}
                     format="datetime"
-                    className="text-[10px] text-content-tertiary"
+                    className="text-2xs text-content-tertiary"
                   />
                 </div>
                 {v.notes && (
-                  <p className="mt-0.5 text-[11px] text-content-secondary line-clamp-2">
+                  <p className="mt-0.5 text-2xs text-content-secondary line-clamp-2">
                     {v.notes}
                   </p>
                 )}
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 {v.is_current ? (
-                  <span className="text-[10px] font-medium text-oe-blue uppercase tracking-wide">
+                  <span className="text-2xs font-medium text-oe-blue uppercase tracking-wide">
                     {t('files.versions.current', { defaultValue: 'Current' })}
                   </span>
                 ) : (
@@ -1020,7 +1020,7 @@ function VersionHistorySection({
                     disabled={restore.isPending}
                     data-testid={`version-history-restore-${v.version_number}`}
                     className={clsx(
-                      'inline-flex items-center gap-1 h-6 px-1.5 rounded text-[10px] font-medium',
+                      'inline-flex items-center gap-1 h-6 px-1.5 rounded text-2xs font-medium',
                       'text-oe-blue hover:bg-oe-blue/10',
                       'disabled:opacity-50 disabled:cursor-not-allowed',
                     )}
@@ -1178,7 +1178,7 @@ function CdeStatusControl({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={clsx(
-          'inline-flex items-center gap-1.5 h-6 px-1.5 rounded-md text-[10px] font-medium transition-colors',
+          'inline-flex items-center gap-1.5 h-6 px-1.5 rounded-md text-2xs font-medium transition-colors',
           'border border-border-light hover:border-oe-blue/40 hover:bg-surface-secondary',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
           'disabled:opacity-60 disabled:cursor-wait',
@@ -1192,7 +1192,7 @@ function CdeStatusControl({
         ) : activeCfg ? (
           <span
             className={clsx(
-              'inline-flex items-center rounded px-1 py-px text-[9px] font-medium uppercase tracking-wider',
+              'inline-flex items-center rounded px-1 py-px text-2xs font-medium uppercase tracking-wider',
               activeCfg.cls,
             )}
           >
@@ -1238,7 +1238,7 @@ function CdeStatusControl({
                 }
                 onClick={() => selectable && handlePick(key)}
                 className={clsx(
-                  'flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-[11px] transition-colors',
+                  'flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-2xs transition-colors',
                   isActive
                     ? 'bg-oe-blue/10 text-oe-blue font-medium'
                     : selectable
@@ -1249,7 +1249,7 @@ function CdeStatusControl({
                 <span className="inline-flex items-center gap-1.5">
                   <span
                     className={clsx(
-                      'inline-flex items-center rounded px-1 py-px text-[9px] font-medium uppercase tracking-wider',
+                      'inline-flex items-center rounded px-1 py-px text-2xs font-medium uppercase tracking-wider',
                       cfg.cls,
                     )}
                   >
@@ -1270,7 +1270,7 @@ function CdeStatusControl({
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="text-[10px] uppercase tracking-wider text-content-quaternary">{label}</dt>
+      <dt className="text-2xs uppercase tracking-wider text-content-quaternary">{label}</dt>
       <dd className="text-content-primary">{children}</dd>
     </div>
   );

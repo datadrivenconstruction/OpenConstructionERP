@@ -215,14 +215,14 @@ function FindingList({ tone, findings }: { tone: 'error' | 'warning'; findings: 
           className={clsx(
             'flex items-start gap-2 rounded-lg border px-3 py-2 text-sm',
             isError
-              ? 'border-red-200 bg-red-50/60 dark:border-red-900 dark:bg-red-950/30'
-              : 'border-amber-200 bg-amber-50/60 dark:border-amber-800 dark:bg-amber-950/30',
+              ? 'border-semantic-error/30 bg-semantic-error/10'
+              : 'border-semantic-warning/30 bg-semantic-warning/10',
           )}
         >
           {isError ? (
-            <ShieldX size={15} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+            <ShieldX size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
           ) : (
-            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           )}
           <div className="min-w-0">
             <p className="text-content-primary">{f.message}</p>

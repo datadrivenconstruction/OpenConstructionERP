@@ -333,7 +333,7 @@ function SheetCompletenessResult({
       </div>
 
       {allPresent ? (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-700 dark:text-emerald-300">
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-semantic-success/10 px-3 py-2.5 text-sm text-semantic-success dark:text-emerald-300">
           <CheckCircle2 size={16} className="shrink-0" />
           {t('sheetCompleteness.all_present', {
             defaultValue: 'All {{count}} index sheets are present',
@@ -343,19 +343,19 @@ function SheetCompletenessResult({
       ) : (
         <div className="space-y-3">
           <FindingGroup
-            icon={<XCircle size={14} className="text-red-500" />}
+            icon={<XCircle size={14} className="text-semantic-error" />}
             title={t('sheetCompleteness.missing', { defaultValue: 'Missing from the set' })}
             items={summary.missing}
           />
           <FindingGroup
-            icon={<AlertTriangle size={14} className="text-amber-500" />}
+            icon={<AlertTriangle size={14} className="text-semantic-warning" />}
             title={t('sheetCompleteness.extra', { defaultValue: 'Not in the index' })}
             items={summary.extra}
           />
           {summary.rev_mismatch.length > 0 && (
             <div>
               <h4 className="mb-1.5 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                <GitBranch size={14} className="text-amber-500" />
+                <GitBranch size={14} className="text-semantic-warning" />
                 {t('sheetCompleteness.rev_mismatch', { defaultValue: 'Revision mismatch' })}
                 <span className="text-content-quaternary">({summary.rev_mismatch.length})</span>
               </h4>

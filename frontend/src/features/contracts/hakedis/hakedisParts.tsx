@@ -104,10 +104,10 @@ export function RefusalNote({ t, refusal, testId }: { t: TFunction; refusal: Hak
   return (
     <div
       role="alert"
-      className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50/60 px-3 py-2 text-sm dark:border-red-900 dark:bg-red-950/30"
+      className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/10 px-3 py-2 text-sm"
       data-testid={testId}
     >
-      <AlertTriangle size={15} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+      <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
       <div className="min-w-0">
         <p className="break-words text-content-primary">{text}</p>
         {refusal.message && !text.includes(refusal.message) && (

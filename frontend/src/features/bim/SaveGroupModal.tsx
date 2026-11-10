@@ -317,7 +317,7 @@ export default function SaveGroupModal({
               <div className="font-semibold text-content-primary">
                 {t('bim.group_dynamic', { defaultValue: 'Dynamic' })}
               </div>
-              <div className="text-content-tertiary text-[11px]">
+              <div className="text-content-tertiary text-2xs">
                 {dynamicAllowed
                   ? t('bim.group_dynamic_desc', {
                       defaultValue:
@@ -341,7 +341,7 @@ export default function SaveGroupModal({
               <div className="font-semibold text-content-primary">
                 {t('bim.group_static', { defaultValue: 'Static' })}
               </div>
-              <div className="text-content-tertiary text-[11px]">
+              <div className="text-content-tertiary text-2xs">
                 {t('bim.group_static_desc', {
                   defaultValue:
                     'Snapshot the current {{count}} elements. Membership stays frozen even if the model changes.',
@@ -369,12 +369,12 @@ export default function SaveGroupModal({
                 defaultValue: 'Smart View - advanced rules',
               })}
               {treeDirty && (
-                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                <span className="text-2xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
                   {t('bim.smartview.edited', { defaultValue: 'edited' })}
                 </span>
               )}
             </span>
-            <span className="text-[10px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {advancedOpen
                 ? t('common.collapse', { defaultValue: 'Collapse' })
                 : t('common.expand', { defaultValue: 'Expand' })}
@@ -393,7 +393,7 @@ export default function SaveGroupModal({
         </div>
 
         {/* Counts pill — show what will actually be saved */}
-        <div className="flex items-center gap-2 text-[11px] text-content-tertiary">
+        <div className="flex items-center gap-2 text-2xs text-content-tertiary">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-oe-blue/10 text-oe-blue font-medium">
             {(effectiveDynamic ? visibleCount : elements.length).toLocaleString(getNumberLocale())}{' '}
             {t('bim.elements', { defaultValue: 'elements' })}

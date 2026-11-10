@@ -150,11 +150,11 @@ function deliverableRoute(deliverableType: string, projectId: string): string {
 // accent border + text. Keeps the matrix scannable at a glance.
 const CELL_STYLE: Record<DeliverableStatus, string> = {
   accepted:
-    'bg-green-50 border-green-300 text-green-900 hover:bg-green-100 dark:bg-green-900/30 dark:border-green-700 dark:text-green-100 dark:hover:bg-green-900/50',
+    'bg-semantic-success-bg border-semantic-success/30 text-semantic-success hover:bg-semantic-success-bg',
   submitted:
-    'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-100 dark:hover:bg-amber-900/50',
+    'bg-semantic-warning-bg border-semantic-warning/30 text-semantic-warning hover:bg-semantic-warning-bg',
   missing:
-    'bg-red-50 border-red-200 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-800/60 dark:text-red-300 dark:hover:bg-red-900/40',
+    'bg-semantic-error-bg border-semantic-error/30 text-semantic-error hover:bg-semantic-error-bg',
 };
 
 const INPUT_CLASS =
@@ -169,10 +169,10 @@ interface CoverageChipProps {
 function CoverageChip({ pct }: CoverageChipProps) {
   const tone =
     pct >= 80
-      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+      ? 'bg-semantic-success-bg text-semantic-success'
       : pct >= 50
-        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200'
-        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
+        ? 'bg-semantic-warning-bg text-semantic-warning'
+        : 'bg-semantic-error-bg text-semantic-error';
   return (
     <span
       className={clsx(
@@ -1049,7 +1049,7 @@ export function RequirementsMatrixPage() {
         {loading ? (
           <SkeletonTable rows={6} columns={5} className="border-0 rounded-none" />
         ) : matrixQuery.isError ? (
-          <div className="p-6 text-sm text-red-600">
+          <div className="p-6 text-sm text-semantic-error">
             {t('requirements.matrix.load_failed', { defaultValue: 'Failed to load the requirements matrix:' })}{' '}
             {(matrixQuery.error as Error).message}
           </div>
@@ -1125,7 +1125,7 @@ export function RequirementsMatrixPage() {
                       <div className="text-xs text-content-secondary">
                         {row.attribute}
                         {row.priority && (
-                          <span className="ml-1 rounded bg-surface-secondary px-1 py-0.5 text-[10px] uppercase">
+                          <span className="ml-1 rounded bg-surface-secondary px-1 py-0.5 text-2xs uppercase">
                             {t(`requirements.matrix.priority_${row.priority}`, { defaultValue: row.priority })}
                           </span>
                         )}
@@ -1139,7 +1139,7 @@ export function RequirementsMatrixPage() {
                           title={t('requirements.matrix.open_boq_position', {
                             defaultValue: 'Open the linked BOQ position',
                           })}
-                          className="mt-1 inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue/10 px-2 py-0.5 text-[11px] font-medium text-oe-blue transition hover:bg-oe-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                          className="mt-1 inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue/10 px-2 py-0.5 text-2xs font-medium text-oe-blue transition hover:bg-oe-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                         >
                           <Link2 size={11} />
                           {t('requirements.matrix.linked_boq', { defaultValue: 'BOQ' })}
@@ -1171,13 +1171,13 @@ export function RequirementsMatrixPage() {
                             <span className="font-semibold uppercase tracking-wide">
                               {t(`requirements.matrix.status_${status}`, { defaultValue: STATUS_LABEL[status] })}
                             </span>
-                            <span className="text-[11px] opacity-80">
+                            <span className="text-2xs opacity-80">
                               {cell?.lod ? `LOD ${cell.lod}` : 'LOD -'}
                               {' · '}
                               {cell?.loi ? `LOI ${cell.loi}` : 'LOI -'}
                             </span>
                             {!cell?.deliverable_id && (
-                              <span className="inline-flex items-center gap-0.5 text-[11px] opacity-70 group-hover:opacity-100">
+                              <span className="inline-flex items-center gap-0.5 text-2xs opacity-70 group-hover:opacity-100">
                                 <Plus size={10} /> {t('common.add', { defaultValue: 'Add' })}
                               </span>
                             )}
@@ -1201,7 +1201,7 @@ export function RequirementsMatrixPage() {
                           onClick={() => setReqToDelete(row)}
                           aria-label={t('requirements.matrix.row_delete', { defaultValue: 'Delete requirement' })}
                           title={t('requirements.matrix.row_delete', { defaultValue: 'Delete requirement' })}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-secondary hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:hover:bg-red-900/30"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                         >
                           <Trash2 size={14} />
                         </button>

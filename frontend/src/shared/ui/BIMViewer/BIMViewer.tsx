@@ -427,10 +427,10 @@ function SubTable({ data }: { data: Record<string, string> }) {
     <div className="mt-1 rounded-md border border-border-light/60 bg-surface-secondary/40 divide-y divide-border-light/40">
       {Object.entries(data).map(([k, v]) => (
         <div key={k} className="flex justify-between items-start gap-2 py-1 px-2">
-          <span className="text-[10px] text-content-tertiary shrink-0 max-w-[45%] truncate" title={k}>
+          <span className="text-2xs text-content-tertiary shrink-0 max-w-[45%] truncate" title={k}>
             {k}
           </span>
-          <span className="text-[10px] text-content-primary text-end break-words min-w-0" title={v}>
+          <span className="text-2xs text-content-primary text-end break-words min-w-0" title={v}>
             {v}
           </span>
         </div>
@@ -442,11 +442,11 @@ function SubTable({ data }: { data: Record<string, string> }) {
 /** Render a boolean as a coloured tag. */
 function BoolTag({ value }: { value: boolean }) {
   return value ? (
-    <span className="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2 py-[1px] text-[10px] font-semibold">
+    <span className="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2 py-[1px] text-2xs font-semibold">
       true
     </span>
   ) : (
-    <span className="inline-flex items-center rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 px-2 py-[1px] text-[10px] font-semibold">
+    <span className="inline-flex items-center rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 px-2 py-[1px] text-2xs font-semibold">
       false
     </span>
   );
@@ -511,7 +511,7 @@ function PropertiesTable({ properties }: { properties: Record<string, unknown> }
           >
             <div className="flex justify-between items-start gap-3">
               <span
-                className="text-[11px] text-content-tertiary shrink-0 max-w-[45%] truncate"
+                className="text-2xs text-content-tertiary shrink-0 max-w-[45%] truncate"
                 title={key}
               >
                 {label}
@@ -519,12 +519,12 @@ function PropertiesTable({ properties }: { properties: Record<string, unknown> }
               {bool !== null ? (
                 <BoolTag value={bool} />
               ) : mat ? (
-                <span className="text-[10px] text-content-tertiary italic">
+                <span className="text-2xs text-content-tertiary italic">
                   {Object.keys(mat).length} fields
                 </span>
               ) : (
                 <span
-                  className="text-[11px] text-content-primary font-medium text-end break-words min-w-0"
+                  className="text-2xs text-content-primary font-medium text-end break-words min-w-0"
                   title={String(value)}
                 >
                   {String(value)}
@@ -550,10 +550,10 @@ function QuantitiesTable({ quantities }: { quantities: Record<string, number> })
           key={key}
           className="flex justify-between items-center gap-3 py-1.5 px-2 rounded-md border bg-white/60 border-black/5 dark:bg-white/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors"
         >
-          <span className="text-[11px] text-content-tertiary truncate max-w-[50%]" title={key}>
+          <span className="text-2xs text-content-tertiary truncate max-w-[50%]" title={key}>
             {key}
           </span>
-          <span className="text-[11px] text-content-primary font-semibold tabular-nums">
+          <span className="text-2xs text-content-primary font-semibold tabular-nums">
             {typeof value === 'number'
               ? value.toLocaleString(getNumberLocale(), { maximumFractionDigits: 3 })
               : String(value)}
@@ -3594,7 +3594,7 @@ export function BIMViewer({
             <div className="relative">
               <Loader2 size={36} className="animate-spin text-oe-blue" />
               {geometryProgress !== null && geometryProgress < 1 && (
-                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-oe-blue tabular-nums">
+                <span className="absolute inset-0 flex items-center justify-center text-2xs font-semibold text-oe-blue tabular-nums">
                   {Math.round(geometryProgress * 100)}%
                 </span>
               )}
@@ -3617,7 +3617,7 @@ export function BIMViewer({
                       }}
                     />
                   </div>
-                  <span className="text-[11px] text-content-tertiary text-center">
+                  <span className="text-2xs text-content-tertiary text-center">
                     {geometryProgress >= 0.97
                       ? t('bim.loading_parsing', {
                           defaultValue:
@@ -3631,7 +3631,7 @@ export function BIMViewer({
                             defaultValue: 'Streaming geometry from server…',
                           })}
                   </span>
-                  <span className="text-[10px] text-content-quaternary text-center mt-1">
+                  <span className="text-2xs text-content-quaternary text-center mt-1">
                     {t('bim.loading_navigate_hint', {
                       defaultValue: 'You can navigate to other pages - loading will continue in the background',
                     })}
@@ -3648,7 +3648,7 @@ export function BIMViewer({
                       style={{ animation: 'oeBimIndeterminate 1.4s ease-in-out infinite' }}
                     />
                   </div>
-                  <span className="text-[11px] text-content-tertiary text-center">
+                  <span className="text-2xs text-content-tertiary text-center">
                     {t('bim.loading_elements', {
                       defaultValue: 'Fetching element list…',
                     })}
@@ -3762,19 +3762,19 @@ export function BIMViewer({
                   {headline}
                 </div>
                 {plainCause && (
-                  <div className="mt-1 text-[12.5px] text-amber-900 dark:text-amber-100 leading-snug">
+                  <div className="mt-1 text-sm text-amber-900 dark:text-amber-100 leading-snug">
                     {plainCause}
                   </div>
                 )}
                 {diagRemediation && (
-                  <div className="mt-2 text-[11.5px] text-amber-800 dark:text-amber-200 leading-snug">
+                  <div className="mt-2 text-xs text-amber-800 dark:text-amber-200 leading-snug">
                     <span className="font-semibold">
                       {t('bim.geometry_try_this', { defaultValue: 'Try this' })}:
                     </span>{' '}
                     {diagRemediation}
                   </div>
                 )}
-                <div className="mt-1.5 text-[10.5px] text-amber-700/80 dark:text-amber-300/80 font-mono break-all">
+                <div className="mt-1.5 text-2xs text-amber-700/80 dark:text-amber-300/80 font-mono break-all">
                   {status !== null && (
                     <>
                       <span>HTTP {status}</span>
@@ -3790,13 +3790,13 @@ export function BIMViewer({
                   {diagMessage && <span>{diagMessage}</span>}
                 </div>
                 {geometryErrorDiagnostic && (
-                  <details className="mt-2 text-[11px] text-amber-900/85 dark:text-amber-100/80" open>
+                  <details className="mt-2 text-2xs text-amber-900/85 dark:text-amber-100/80" open>
                     <summary className="cursor-pointer select-none hover:text-amber-900 dark:hover:text-amber-100 font-medium">
                       {t('bim.geometry_diagnostic.title', {
                         defaultValue: 'File diagnostic',
                       })}
                     </summary>
-                    <dl className="mt-1 grid grid-cols-[max-content_1fr] gap-x-2 gap-y-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40 p-2 text-[10px] font-mono">
+                    <dl className="mt-1 grid grid-cols-[max-content_1fr] gap-x-2 gap-y-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40 p-2 text-2xs font-mono">
                       {typeof geometryErrorDiagnostic.format === 'string' && (
                         <>
                           <dt className="text-amber-700 dark:text-amber-300">
@@ -3871,13 +3871,13 @@ export function BIMViewer({
                   </details>
                 )}
                 {geometryErrorStack && (
-                  <details className="mt-2 text-[11px] text-amber-900/80 dark:text-amber-100/70">
+                  <details className="mt-2 text-2xs text-amber-900/80 dark:text-amber-100/70">
                     <summary className="cursor-pointer select-none hover:text-amber-900 dark:hover:text-amber-100">
                       {t('bim.geometry_show_diagnostic', {
                         defaultValue: 'Show diagnostic',
                       })}
                     </summary>
-                    <pre className="mt-1 max-h-32 overflow-auto rounded bg-amber-100/60 dark:bg-amber-900/40 p-2 text-[10px] whitespace-pre-wrap break-all font-mono">
+                    <pre className="mt-1 max-h-32 overflow-auto rounded bg-amber-100/60 dark:bg-amber-900/40 p-2 text-2xs whitespace-pre-wrap break-all font-mono">
                       {geometryErrorStack}
                     </pre>
                   </details>
@@ -3966,7 +3966,7 @@ export function BIMViewer({
                       const blob = lines.join('\n');
                       copyToClipboard(blob);
                     }}
-                    className="text-[11px] text-amber-700/80 dark:text-amber-300/80 hover:text-amber-900 dark:hover:text-amber-100 underline-offset-2 hover:underline"
+                    className="text-2xs text-amber-700/80 dark:text-amber-300/80 hover:text-amber-900 dark:hover:text-amber-100 underline-offset-2 hover:underline"
                   >
                     {t('bim.geometry_copy_report', {
                       defaultValue: 'Copy bug report',
@@ -3981,7 +3981,7 @@ export function BIMViewer({
                       setGeometryErrorStatus(null);
                       setGeometryErrorRequestId(null);
                     }}
-                    className="text-[11px] text-amber-700/80 dark:text-amber-300/80 hover:text-amber-900 dark:hover:text-amber-100"
+                    className="text-2xs text-amber-700/80 dark:text-amber-300/80 hover:text-amber-900 dark:hover:text-amber-100"
                   >
                     {t('bim.geometry_dismiss', { defaultValue: 'Dismiss' })}
                   </button>
@@ -4206,7 +4206,7 @@ export function BIMViewer({
         locateState === 'error') && (
         <div
           className={clsx(
-            'absolute top-14 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-lg backdrop-blur text-[11px] font-medium shadow-lg select-none',
+            'absolute top-14 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-lg backdrop-blur text-2xs font-medium shadow-lg select-none',
             locateState === 'locating'
               ? 'bg-slate-900/85 text-white'
               : 'bg-amber-100/95 text-amber-900 border border-amber-300',
@@ -4250,7 +4250,7 @@ export function BIMViewer({
           user exits walk mode. */}
       {walkActive && (
         <div
-          className="absolute top-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/85 backdrop-blur text-white text-[11px] font-medium shadow-lg select-none"
+          className="absolute top-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/85 backdrop-blur text-white text-2xs font-medium shadow-lg select-none"
           data-testid="bim-walk-hint"
           role="status"
           aria-live="polite"
@@ -4277,7 +4277,7 @@ export function BIMViewer({
               helper.setLockCursor(next);
               setWalkFps(next);
             }}
-            className="ml-1 rounded border border-white/30 px-1.5 py-0.5 text-[10px] font-medium hover:bg-white/15"
+            className="ml-1 rounded border border-white/30 px-1.5 py-0.5 text-2xs font-medium hover:bg-white/15"
           >
             {walkFps
               ? t('viewerTools.walk_mode_drag', { defaultValue: 'Drag to look' })
@@ -4351,7 +4351,7 @@ export function BIMViewer({
           tab to drop stale measurements. */}
       {measureActive && (
         <div
-          className="absolute top-14 start-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 px-3 py-2 rounded-md bg-surface-primary border border-oe-blue/40 shadow-sm text-[11px] text-content-secondary"
+          className="absolute top-14 start-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 px-3 py-2 rounded-md bg-surface-primary border border-oe-blue/40 shadow-sm text-2xs text-content-secondary"
           data-testid="bim-measure-hint"
         >
           <div className="flex items-center gap-2">
@@ -4375,7 +4375,7 @@ export function BIMViewer({
                   aria-pressed={measureKind === k}
                   data-testid={`measure-kind-${k}`}
                   className={clsx(
-                    'inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium transition-colors',
+                    'inline-flex items-center gap-1 px-2 py-1 text-2xs font-medium transition-colors',
                     measureKind === k
                       ? 'bg-oe-blue text-white'
                       : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
@@ -4395,7 +4395,7 @@ export function BIMViewer({
                 defaultValue: 'Snap clicks to the nearest geometry vertex',
               })}
               className={clsx(
-                'inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-colors',
+                'inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium border transition-colors',
                 measureSnap
                   ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/40'
                   : 'bg-surface-secondary text-content-tertiary border-border-light hover:bg-surface-tertiary',
@@ -4433,7 +4433,7 @@ export function BIMViewer({
                   measureMgrRef.current?.clearAll();
                   useBIMMeasurementsStore.getState().clear();
                 }}
-                className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
+                className="ml-1 px-1.5 py-0.5 rounded text-2xs font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
               >
                 {t('bim.measure_clear', { defaultValue: 'Clear' })}
               </button>
@@ -4455,7 +4455,7 @@ export function BIMViewer({
             })}
           </span>
           {selectionParts.length > 0 && (
-            <span className="text-[10px] text-content-tertiary truncate max-w-[200px]">
+            <span className="text-2xs text-content-tertiary truncate max-w-[200px]">
               ({fmtList(selectionParts.map(selectionPartLabel))})
             </span>
           )}
@@ -4467,7 +4467,7 @@ export function BIMViewer({
                 const selected = selectionMgrRef.current?.getSelectedElements() ?? [];
                 if (selected.length > 0) onAddToBOQ(selected);
               }}
-              className="px-2 py-0.5 rounded text-[11px] font-medium text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
+              className="px-2 py-0.5 rounded text-2xs font-medium text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
             >
               {t('bim.sel_boq', { defaultValue: 'BOQ' })}
             </button>
@@ -4475,7 +4475,7 @@ export function BIMViewer({
           <button
             type="button"
             onClick={handleSelectionHide}
-            className="px-2 py-0.5 rounded text-[11px] font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
+            className="px-2 py-0.5 rounded text-2xs font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
             title={t('bim.sel_hide', { defaultValue: 'Hide selected (H)' })}
           >
             {t('bim.hide', { defaultValue: 'Hide' })}
@@ -4483,7 +4483,7 @@ export function BIMViewer({
           <button
             type="button"
             onClick={handleSelectionIsolate}
-            className="px-2 py-0.5 rounded text-[11px] font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
+            className="px-2 py-0.5 rounded text-2xs font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
             title={t('bim.sel_isolate', { defaultValue: 'Isolate selected (I)' })}
           >
             {t('bim.isolate', { defaultValue: 'Isolate' })}
@@ -4527,7 +4527,7 @@ export function BIMViewer({
           className="absolute bottom-3 end-3 z-20 flex flex-col items-end gap-1 rounded-lg bg-surface-primary border border-border-light shadow-sm px-3 py-2 min-w-[180px]"
           data-testid="bim-5d-legend"
         >
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
             {t('bim.5d_legend_title', { defaultValue: 'Unit rate' })}
           </span>
           <div
@@ -4538,7 +4538,7 @@ export function BIMViewer({
               ).join(', ')})`,
             }}
           />
-          <div className="flex items-center justify-between w-full text-[10px] text-content-secondary tabular-nums">
+          <div className="flex items-center justify-between w-full text-2xs text-content-secondary tabular-nums">
             <span>
               {rateStats.linkedCount > 0
                 ? rateStats.min.toLocaleString(getNumberLocale(), {
@@ -4557,7 +4557,7 @@ export function BIMViewer({
                 : '—'}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 w-full justify-between text-[10px] text-content-tertiary">
+          <div className="flex items-center gap-1.5 w-full justify-between text-2xs text-content-tertiary">
             <span>
               {t('bim.5d_legend_linked', {
                 defaultValue: '{{n}} linked',
@@ -4584,7 +4584,7 @@ export function BIMViewer({
           className="absolute bottom-3 end-3 z-20 flex flex-col items-end gap-1 rounded-lg bg-surface-primary border border-border-light shadow-sm px-3 py-2 min-w-[180px]"
           data-testid="bim-progress-legend"
         >
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
             {t('bim.progress_legend_title', { defaultValue: 'BOQ progress' })}
           </span>
           <div
@@ -4595,7 +4595,7 @@ export function BIMViewer({
               ).join(', ')})`,
             }}
           />
-          <div className="flex items-center justify-between w-full text-[10px] text-content-secondary tabular-nums">
+          <div className="flex items-center justify-between w-full text-2xs text-content-secondary tabular-nums">
             <span>{progressStats.withData > 0 ? `${Math.round(progressStats.min)}%` : '—'}</span>
             <span className="text-content-tertiary">
               {t('bim.progress_legend_avg', {
@@ -4605,7 +4605,7 @@ export function BIMViewer({
             </span>
             <span>{progressStats.withData > 0 ? `${Math.round(progressStats.max)}%` : '—'}</span>
           </div>
-          <div className="flex items-center gap-1.5 w-full justify-between text-[10px] text-content-tertiary">
+          <div className="flex items-center gap-1.5 w-full justify-between text-2xs text-content-tertiary">
             <span>
               {t('bim.progress_legend_measured', {
                 defaultValue: '{{n}} measured',
@@ -4627,7 +4627,7 @@ export function BIMViewer({
           for installed / in-progress / pending, mirroring the mesh colours. */}
       {colorByMode === 'install_status' && (
         <div className="absolute bottom-3 end-3 z-20 flex flex-col gap-1 rounded-lg bg-surface-primary border border-border-light shadow-sm px-3 py-2 min-w-[150px]">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
             {t('bim.install_status_legend_title', { defaultValue: 'Install status' })}
           </span>
           {(
@@ -4642,7 +4642,7 @@ export function BIMViewer({
           ).map(([key, label]) => (
             <span
               key={key}
-              className="flex items-center gap-1.5 text-[10px] text-content-secondary"
+              className="flex items-center gap-1.5 text-2xs text-content-secondary"
             >
               <span
                 className="inline-block h-2 w-2 rounded-full"
@@ -4682,7 +4682,7 @@ export function BIMViewer({
       {(hiddenIds.size > 0 || isIsolated) && (
         <div className="absolute bottom-3 end-3 z-20 flex items-center gap-1.5">
           {hiddenIds.size > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary">
               <EyeOffIcon size={11} />
               {t('bim.hidden_count', {
                 defaultValue: '{{count}} hidden',
@@ -4691,7 +4691,7 @@ export function BIMViewer({
             </span>
           )}
           {isIsolated && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-oe-blue/10 border border-oe-blue/30 shadow-sm text-oe-blue">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-oe-blue/10 border border-oe-blue/30 shadow-sm text-oe-blue">
               <Eye size={11} />
               {t('bim.isolated', { defaultValue: 'Isolated' })}
             </span>
@@ -4699,7 +4699,7 @@ export function BIMViewer({
           <button
             type="button"
             onClick={handleShowAll}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary hover:bg-surface-secondary transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary hover:bg-surface-secondary transition-colors"
           >
             <Eye size={11} />
             {t('bim.show_all', { defaultValue: 'Show all' })}
@@ -4722,7 +4722,7 @@ export function BIMViewer({
         <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-400px)] pointer-events-none">
           {/* Total elements pill — not clickable, just informational */}
           <span
-            className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
+            className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
             title={t('bim.element_count_title', {
               defaultValue: '{{count}} elements loaded in this model',
               count: elementCount,
@@ -4737,7 +4737,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('unlinked_boq')}
-              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100"
               title={t('bim.linked_count_title', {
                 defaultValue:
                   '{{linked}} of {{total}} linked to BOQ - click to show ONLY the unlinked',
@@ -4755,7 +4755,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('errors')}
-              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 shadow-sm hover:bg-rose-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-rose-50 text-rose-700 border border-rose-200 shadow-sm hover:bg-rose-100"
               title={t('bim.errors_count_title', {
                 defaultValue: '{{count}} elements with validation errors - click to filter',
                 count: healthStats.errors,
@@ -4771,7 +4771,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('warnings')}
-              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 shadow-sm hover:bg-amber-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-amber-50 text-amber-700 border border-amber-200 shadow-sm hover:bg-amber-100"
               title={t('bim.warnings_count_title', {
                 defaultValue: '{{count}} elements with validation warnings - click to filter',
                 count: healthStats.warnings,
@@ -4787,7 +4787,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('has_tasks')}
-              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-sm hover:bg-amber-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-sm hover:bg-amber-100"
               title={t('bim.tasks_count_title', {
                 defaultValue: '{{count}} elements have linked tasks - click to filter',
                 count: healthStats.hasTasks,
@@ -4803,7 +4803,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('has_docs')}
-              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-50 text-violet-700 border border-violet-200 shadow-sm hover:bg-violet-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-violet-50 text-violet-700 border border-violet-200 shadow-sm hover:bg-violet-100"
               title={t('bim.docs_count_title', {
                 defaultValue: '{{count}} elements have linked documents - click to filter',
                 count: healthStats.hasDocs,
@@ -4819,13 +4819,13 @@ export function BIMViewer({
       {/* Hover tooltip — follows the cursor when hovering over an element */}
       {hoveredElement && tooltipPos && !selectedElement && (
         <div
-          className="absolute z-30 pointer-events-none px-2.5 py-1.5 rounded-md bg-gray-900/90 text-white text-[11px] leading-tight shadow-lg backdrop-blur-sm max-w-[220px]"
+          className="absolute z-30 pointer-events-none px-2.5 py-1.5 rounded-md bg-gray-900/90 text-white text-2xs leading-tight shadow-lg backdrop-blur-sm max-w-[220px]"
           style={{ left: tooltipPos.x, top: tooltipPos.y }}
         >
           <div className="font-semibold truncate">
             {hoveredElement.name || hoveredElement.element_type}
           </div>
-          <div className="text-gray-300 text-[10px]">
+          <div className="text-gray-300 text-2xs">
             {hoveredElement.element_type}
             {hoveredElement.storey && (
               <span className="ml-1.5 text-gray-400">{hoveredElement.storey}</span>
@@ -4839,7 +4839,7 @@ export function BIMViewer({
               const pct = progressByElementId?.[hoveredElement.id];
               if (pct == null || !Number.isFinite(pct)) return null;
               return (
-                <div className="text-gray-200 text-[10px] mt-0.5">
+                <div className="text-gray-200 text-2xs mt-0.5">
                   {t('bim.boq_progress', { defaultValue: 'BOQ Progress' })}:{' '}
                   <span className="font-semibold tabular-nums">
                     {Math.round(Math.max(0, Math.min(100, pct)))}%
@@ -4855,7 +4855,7 @@ export function BIMViewer({
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-lg">
           <div className="bg-surface-primary rounded-xl shadow-2xl border border-border-light p-6 w-80">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-content-primary">
+              <h3 className="text-sm font-semibold text-content-primary">
                 {t('bim.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}
               </h3>
               <button
@@ -4887,7 +4887,7 @@ export function BIMViewer({
               ].map(([key, desc]) => (
                 <div key={key} className="flex items-center justify-between">
                   <span className="text-content-secondary">{desc}</span>
-                  <kbd className="px-1.5 py-0.5 bg-surface-secondary border border-border-light rounded text-[10px] font-mono text-content-primary min-w-[28px] text-center">
+                  <kbd className="px-1.5 py-0.5 bg-surface-secondary border border-border-light rounded text-2xs font-mono text-content-primary min-w-[28px] text-center">
                     {key}
                   </kbd>
                 </div>
@@ -4914,7 +4914,7 @@ export function BIMViewer({
               ) : (
                 <LayoutGrid size={16} className="text-oe-blue shrink-0" />
               )}
-              <h3 className="text-sm font-bold text-content-primary flex-1">
+              <h3 className="text-sm font-semibold text-content-primary flex-1">
                 {modelSummary.scope === 'selection'
                   ? t('bim.selection_summary', { defaultValue: 'Selection summary' })
                   : modelSummary.scope === 'filtered'
@@ -4940,7 +4940,7 @@ export function BIMViewer({
                 {t('bim.model_total_elements_label', { defaultValue: 'elements' })}
               </span>
               {modelSummary.scope !== 'all' && modelSummary.total !== modelSummary.shown && (
-                <span className="text-[10px] text-content-quaternary tabular-nums">
+                <span className="text-2xs text-content-quaternary tabular-nums">
                   {t('bim.of_total', { defaultValue: 'of {{total}}', total: modelSummary.total.toLocaleString(getNumberLocale()) })}
                 </span>
               )}
@@ -4952,7 +4952,7 @@ export function BIMViewer({
                 share visually via a tinted fill that stretches from the
                 left, with category name and count overlaid. */}
             <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
+              <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
                 {t('bim.by_category', { defaultValue: 'By category' })}
               </h4>
               <div className="space-y-0.5 max-h-48 overflow-y-auto -mx-1 px-1">
@@ -4979,14 +4979,14 @@ export function BIMViewer({
                       >
                         {prettifyCategoryName(cat)}
                       </span>
-                      <span className="relative text-[11px] font-semibold text-content-primary tabular-nums shrink-0">
+                      <span className="relative text-2xs font-semibold text-content-primary tabular-nums shrink-0">
                         {count.toLocaleString(getNumberLocale())}
                       </span>
                     </div>
                   );
                 })}
                 {modelSummary.categories.length > 15 && (
-                  <div className="text-[11px] text-content-quaternary italic pt-0.5 pl-2">
+                  <div className="text-2xs text-content-quaternary italic pt-0.5 pl-2">
                     + {modelSummary.categories.length - 15} {t('common.more', { defaultValue: 'more' })}
                   </div>
                 )}
@@ -4995,7 +4995,7 @@ export function BIMViewer({
             {/* Storey breakdown — same row-bg style for visual rhythm */}
             {modelSummary.storeys.length > 1 && (
               <div>
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
+                <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
                   {t('bim.by_storey', { defaultValue: 'By storey' })}
                 </h4>
                 <div className="space-y-0.5 max-h-36 overflow-y-auto -mx-1 px-1">
@@ -5016,7 +5016,7 @@ export function BIMViewer({
                           <span className="relative text-xs text-content-secondary truncate mr-2">
                             {st === 'Unassigned' ? t('bim.storey_unassigned', { defaultValue: 'Unassigned' }) : st}
                           </span>
-                          <span className="relative text-[11px] font-semibold text-content-primary tabular-nums shrink-0">
+                          <span className="relative text-2xs font-semibold text-content-primary tabular-nums shrink-0">
                             {count.toLocaleString(getNumberLocale())}
                           </span>
                         </div>
@@ -5029,7 +5029,7 @@ export function BIMViewer({
             {/* Aggregate quantities */}
             {(modelSummary.totalVolume > 0 || modelSummary.totalArea > 0 || modelSummary.totalLength > 0) && (
               <div>
-                <h4 className="text-xs font-bold text-content-primary mb-2">
+                <h4 className="text-xs font-semibold text-content-primary mb-2">
                   {t('bim.total_quantities', { defaultValue: 'Total quantities' })}
                 </h4>
                 <div className="grid grid-cols-1 gap-1.5">
@@ -5076,7 +5076,7 @@ export function BIMViewer({
                 vs "what the filter narrowed to". */}
             {modelSummary.aggregations.length > 0 && (
               <div className="pt-2 border-t border-border-light">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
+                <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
                   {modelSummary.scope === 'selection'
                     ? t('bim.group_quantities_selection', {
                         defaultValue: 'Selection quantities',
@@ -5112,21 +5112,21 @@ export function BIMViewer({
                         >
                           <div className="flex items-center gap-1 min-w-0">
                             <span
-                              className="text-[9px] font-bold uppercase text-emerald-600/90 tracking-wider shrink-0"
+                              className="text-2xs font-semibold uppercase text-emerald-600/90 tracking-wider shrink-0"
                               aria-hidden
                             >
                               Σ
                             </span>
-                            <span className="text-[11px] text-content-secondary truncate">
+                            <span className="text-2xs text-content-secondary truncate">
                               {a.label}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-1 shrink-0">
-                            <span className="text-[12px] font-semibold text-content-primary tabular-nums">
+                            <span className="text-xs font-semibold text-content-primary tabular-nums">
                               {fmtNum(cv(a.sum))}
                             </span>
                             {a.unit && (
-                              <span className="text-[9px] text-content-quaternary font-mono">
+                              <span className="text-2xs text-content-quaternary font-mono">
                                 {dispUnit}
                               </span>
                             )}
@@ -5149,28 +5149,28 @@ export function BIMViewer({
                           <div className="flex items-baseline justify-between gap-2">
                             <div className="flex items-center gap-1 min-w-0">
                               <span
-                                className="text-[9px] font-bold uppercase text-blue-600/90 tracking-wider shrink-0"
+                                className="text-2xs font-semibold uppercase text-blue-600/90 tracking-wider shrink-0"
                                 aria-hidden
                               >
                                 ⌀
                               </span>
-                              <span className="text-[11px] text-content-secondary truncate">
+                              <span className="text-2xs text-content-secondary truncate">
                                 {a.label}
                               </span>
                             </div>
                             <div className="flex items-baseline gap-1 shrink-0">
-                              <span className="text-[12px] font-semibold text-content-primary tabular-nums">
+                              <span className="text-xs font-semibold text-content-primary tabular-nums">
                                 {fmtNum(cv(a.avg))}
                               </span>
                               {a.unit && (
-                                <span className="text-[9px] text-content-quaternary font-mono">
+                                <span className="text-2xs text-content-quaternary font-mono">
                                   {dispUnit}
                                 </span>
                               )}
                             </div>
                           </div>
                           {!sameMinMax && (
-                            <div className="flex items-center justify-end gap-2 mt-0.5 text-[9px] text-content-quaternary tabular-nums">
+                            <div className="flex items-center justify-end gap-2 mt-0.5 text-2xs text-content-quaternary tabular-nums">
                               <span>
                                 {t('bim.agg_min', { defaultValue: 'min' })}{' '}
                                 {fmtNum(cv(a.min))}
@@ -5208,10 +5208,10 @@ export function BIMViewer({
                         })}
                       >
                         <div className="flex items-center gap-1 mb-0.5">
-                          <span className="text-[11px] text-content-secondary truncate flex-1">
+                          <span className="text-2xs text-content-secondary truncate flex-1">
                             {a.label}
                           </span>
-                          <span className="text-[9px] text-sky-600/90 font-bold uppercase tracking-wider shrink-0">
+                          <span className="text-2xs text-sky-600/90 font-semibold uppercase tracking-wider shrink-0">
                             {a.uniqueValues.length === 1
                               ? '='
                               : t('bim.agg_distinct_label', {
@@ -5224,18 +5224,18 @@ export function BIMViewer({
                           {head.map((v) => (
                             <span
                               key={v}
-                              className="inline-flex items-baseline gap-0.5 px-1.5 py-0.5 rounded border border-border-light bg-surface-secondary text-[10px] tabular-nums font-mono text-content-primary"
+                              className="inline-flex items-baseline gap-0.5 px-1.5 py-0.5 rounded border border-border-light bg-surface-secondary text-2xs tabular-nums font-mono text-content-primary"
                             >
                               {fmtNum(cv(v))}
                               {a.unit && (
-                                <span className="text-[8px] text-content-quaternary">
+                                <span className="text-2xs text-content-quaternary">
                                   {dispUnit}
                                 </span>
                               )}
                             </span>
                           ))}
                           {rest > 0 && (
-                            <span className="text-[10px] text-content-quaternary italic">
+                            <span className="text-2xs text-content-quaternary italic">
                               + {rest}{' '}
                               {t('common.more', { defaultValue: 'more' })}
                             </span>
@@ -5249,21 +5249,21 @@ export function BIMViewer({
             )}
             {/* Keyboard shortcuts hint */}
             <div className="pt-2 border-t border-border-light">
-              <h4 className="text-[10px] font-semibold text-content-quaternary uppercase tracking-wider mb-1">
+              <h4 className="text-2xs font-semibold text-content-quaternary uppercase tracking-wider mb-1">
                 {t('bim.shortcuts', { defaultValue: 'Shortcuts' })}
               </h4>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-content-tertiary">
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">F</kbd> {t('bim.shortcut_fit', { defaultValue: 'Fit all' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">W</kbd> {t('bim.shortcut_wireframe', { defaultValue: 'Wireframe' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">G</kbd> {t('bim.shortcut_grid', { defaultValue: 'Grid' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">H</kbd> {t('bim.shortcut_hide', { defaultValue: 'Hide' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">I</kbd> {t('bim.shortcut_isolate', { defaultValue: 'Isolate' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">Esc</kbd> {t('bim.shortcut_deselect', { defaultValue: 'Deselect' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">1</kbd> {t('bim.shortcut_front', { defaultValue: 'Front' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">2</kbd> {t('bim.shortcut_side', { defaultValue: 'Side' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">3</kbd> {t('bim.shortcut_top', { defaultValue: 'Top' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">0</kbd> {t('bim.shortcut_iso', { defaultValue: 'Iso' })}</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">?</kbd> {t('bim.shortcut_all', { defaultValue: 'All shortcuts' })}</span>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-2xs text-content-tertiary">
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">F</kbd> {t('bim.shortcut_fit', { defaultValue: 'Fit all' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">W</kbd> {t('bim.shortcut_wireframe', { defaultValue: 'Wireframe' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">G</kbd> {t('bim.shortcut_grid', { defaultValue: 'Grid' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">H</kbd> {t('bim.shortcut_hide', { defaultValue: 'Hide' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">I</kbd> {t('bim.shortcut_isolate', { defaultValue: 'Isolate' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">Esc</kbd> {t('bim.shortcut_deselect', { defaultValue: 'Deselect' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">1</kbd> {t('bim.shortcut_front', { defaultValue: 'Front' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">2</kbd> {t('bim.shortcut_side', { defaultValue: 'Side' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">3</kbd> {t('bim.shortcut_top', { defaultValue: 'Top' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">0</kbd> {t('bim.shortcut_iso', { defaultValue: 'Iso' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-2xs font-mono">?</kbd> {t('bim.shortcut_all', { defaultValue: 'All shortcuts' })}</span>
               </div>
             </div>
           </div>
@@ -5321,13 +5321,13 @@ export function BIMViewer({
                       className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary transition-colors"
                       aria-label={t('common.close', { defaultValue: 'Close' })}
                     >
-                      <span className="text-xs font-bold">&times;</span>
+                      <span className="text-xs font-semibold">&times;</span>
                     </button>
                   </div>
                   {stubLoading ? (
                     <div className="h-2.5 w-20 rounded bg-surface-secondary animate-pulse mb-0.5" />
                   ) : prettyCategory ? (
-                    <p className="text-[10px] text-content-tertiary mb-0.5">{prettyCategory}</p>
+                    <p className="text-2xs text-content-tertiary mb-0.5">{prettyCategory}</p>
                   ) : null}
                 </div>
               );
@@ -5344,7 +5344,7 @@ export function BIMViewer({
                   : selectedElement.mesh_ref || selectedElement.stable_id || selectedElement.id;
                 copyToClipboard(ids);
               }}
-              className="flex items-center gap-1 text-[10px] text-content-tertiary hover:text-oe-blue transition-colors group"
+              className="flex items-center gap-1 text-2xs text-content-tertiary hover:text-oe-blue transition-colors group"
               title={t('bim.copy_id', { defaultValue: 'Click to copy ID' })}
             >
               <span className="font-mono truncate max-w-[220px]">
@@ -5377,7 +5377,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onAskAiAboutElement(selectedElement)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 transition-colors"
                   title={t('bim.quick_ask_ai_title', {
                     defaultValue: 'Ask the AI assistant about this element',
                   })}
@@ -5390,7 +5390,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onAddToBOQ([selectedElement])}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-oe-blue/10 text-oe-blue hover:bg-oe-blue/20 border border-oe-blue/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-oe-blue/10 text-oe-blue hover:bg-oe-blue/20 border border-oe-blue/20 transition-colors"
                 >
                   <Plus size={10} />
                   {t('bim.quick_boq', { defaultValue: 'BOQ' })}
@@ -5400,7 +5400,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onCreateTask(selectedElement)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
                 >
                   <Plus size={10} />
                   {t('bim.quick_task', { defaultValue: 'Task' })}
@@ -5410,7 +5410,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onLinkDocument(selectedElement)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
                 >
                   <Plus size={10} />
                   {t('bim.quick_doc', { defaultValue: 'Document' })}
@@ -5420,7 +5420,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onLinkActivity(selectedElement)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
                 >
                   <Plus size={10} />
                   {t('bim.quick_schedule', { defaultValue: 'Schedule' })}
@@ -5430,7 +5430,7 @@ export function BIMViewer({
                 <button
                   type="button"
                   onClick={() => onLinkRequirement(selectedElement)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
                 >
                   <Plus size={10} />
                   {t('bim.quick_req', { defaultValue: 'Requirement' })}
@@ -5472,12 +5472,12 @@ export function BIMViewer({
                 {id === 'match' && <Sparkles size={11} />}
                 {label}
                 {id === 'links' && (selectedElement.boq_links?.length ?? 0) > 0 && (
-                  <span className="ml-1 text-[10px] text-oe-blue">
+                  <span className="ml-1 text-2xs text-oe-blue">
                     {selectedElement.boq_links!.length}
                   </span>
                 )}
                 {id === 'validation' && selectedElement.validation_status === 'error' && (
-                  <span className="ml-1 text-[10px] text-rose-500">!</span>
+                  <span className="ml-1 text-2xs text-rose-500">!</span>
                 )}
               </button>
             ))}
@@ -5507,7 +5507,7 @@ export function BIMViewer({
                       }
                       copyToClipboard(lines.join('\n'));
                     }}
-                    className="text-[10px] text-content-tertiary hover:text-oe-blue transition-colors flex items-center gap-1"
+                    className="text-2xs text-content-tertiary hover:text-oe-blue transition-colors flex items-center gap-1"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -5629,7 +5629,7 @@ export function BIMViewer({
                   ) : !parquetLoading && Object.keys(elementProperties).length > 0 ? (
                     <PropertiesTable properties={elementProperties} />
                   ) : !parquetLoading ? (
-                    <p className="text-[10px] text-content-tertiary italic py-1">
+                    <p className="text-2xs text-content-tertiary italic py-1">
                       {t('bim.no_extra_props', { defaultValue: 'No additional properties' })}
                     </p>
                   ) : null}
@@ -5667,7 +5667,7 @@ export function BIMViewer({
                         <ShieldCheck size={11} />
                       )}
                       {t('bim.validation_results', { defaultValue: 'Validation results' })}
-                      <span className="text-[10px] text-content-tertiary font-normal">
+                      <span className="text-2xs text-content-tertiary font-normal">
                         ({selectedElement.validation_results.length})
                       </span>
                     </h4>
@@ -5675,7 +5675,7 @@ export function BIMViewer({
                       {selectedElement.validation_results.map((vr, i) => (
                         <li
                           key={`${vr.rule_id}-${i}`}
-                          className="flex items-start gap-1.5 text-[10px] text-content-secondary"
+                          className="flex items-start gap-1.5 text-2xs text-content-secondary"
                         >
                           <span
                             className={`mt-0.5 inline-block h-1.5 w-1.5 rounded-full shrink-0 ${
@@ -5690,7 +5690,7 @@ export function BIMViewer({
                             <div className="text-content-primary truncate" title={vr.rule_id}>
                               {vr.rule_id}
                             </div>
-                            <div className="text-content-tertiary text-[9px] line-clamp-2">
+                            <div className="text-content-tertiary text-2xs line-clamp-2">
                               {vr.message}
                             </div>
                           </div>
@@ -5701,7 +5701,7 @@ export function BIMViewer({
                 ) : (
                   <div className="text-center py-4">
                     <ShieldCheck size={24} className="mx-auto text-content-quaternary mb-2" />
-                    <p className="text-[11px] text-content-tertiary">
+                    <p className="text-2xs text-content-tertiary">
                       {t('bim.no_validation', {
                         defaultValue: 'No validation results yet. Run a validation check on this model.',
                       })}
@@ -5752,7 +5752,7 @@ export function BIMViewer({
                   <Link2 size={11} />
                   {t('bim.linked_boq', { defaultValue: 'Linked BOQ positions' })}
                   {selectedElement.boq_links && selectedElement.boq_links.length > 0 && (
-                    <span className="text-[10px] text-content-tertiary font-normal">
+                    <span className="text-2xs text-content-tertiary font-normal">
                       ({selectedElement.boq_links.length})
                     </span>
                   )}
@@ -5761,7 +5761,7 @@ export function BIMViewer({
                   <button
                     type="button"
                     onClick={() => onAddToBOQ([selectedElement])}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-oe-blue text-white hover:bg-oe-blue-dark"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-oe-blue text-white hover:bg-oe-blue-dark"
                     title={t('bim.link_add_title', { defaultValue: 'Add this element to a BOQ position' })}
                   >
                     <Plus size={10} />
@@ -5789,7 +5789,7 @@ export function BIMViewer({
                 }
                 return (
                   <div className="mb-1.5" data-testid="bim-boq-progress">
-                    <div className="flex items-center justify-between text-[10px] mb-0.5">
+                    <div className="flex items-center justify-between text-2xs mb-0.5">
                       <span className="text-content-tertiary">
                         {t('bim.boq_progress', { defaultValue: 'BOQ Progress' })}
                       </span>
@@ -5808,7 +5808,7 @@ export function BIMViewer({
                     </div>
                     {asOf && (
                       <div
-                        className="text-[9px] text-content-tertiary mt-0.5"
+                        className="text-2xs text-content-tertiary mt-0.5"
                         data-testid="bim-boq-progress-date"
                       >
                         {t('bim.boq_progress_as_of', {
@@ -5830,12 +5830,12 @@ export function BIMViewer({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           {link.boq_position_ordinal && (
-                            <span className="text-[10px] font-mono font-semibold text-content-primary tabular-nums">
+                            <span className="text-2xs font-mono font-semibold text-content-primary tabular-nums">
                               {link.boq_position_ordinal}
                             </span>
                           )}
                           <span
-                            className={`text-[9px] px-1 rounded ${
+                            className={`text-2xs px-1 rounded ${
                               link.link_type === 'manual'
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : link.link_type === 'rule_based'
@@ -5846,7 +5846,7 @@ export function BIMViewer({
                             {link.link_type.replace('_', ' ')}
                           </span>
                         </div>
-                        <div className="text-[11px] text-content-secondary truncate" title={link.boq_position_description || ''}>
+                        <div className="text-2xs text-content-secondary truncate" title={link.boq_position_description || ''}>
                           {link.boq_position_description || '—'}
                         </div>
                         {(() => {
@@ -5862,7 +5862,7 @@ export function BIMViewer({
                           const total = num(link.boq_position_total);
                           if (rate == null && total == null) return null;
                           return (
-                            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-content-tertiary tabular-nums">
+                            <div className="mt-0.5 flex items-center gap-1.5 text-2xs text-content-tertiary tabular-nums">
                               {qty != null && (
                                 <span>
                                   {qty}
@@ -5893,7 +5893,7 @@ export function BIMViewer({
                   ))}
                 </ul>
               ) : (
-                <div className="text-[10px] text-content-tertiary italic">
+                <div className="text-2xs text-content-tertiary italic">
                   {t('bim.link_empty', {
                     defaultValue: 'Not linked - click "Add to BOQ" to link this element to a cost position',
                   })}
@@ -5909,7 +5909,7 @@ export function BIMViewer({
                   <h4 className="text-xs font-semibold text-violet-700 dark:text-violet-300 flex items-center gap-1">
                     <FileText size={11} />
                     {t('bim.linked_documents', { defaultValue: 'Linked documents' })}
-                    <span className="text-[10px] text-content-tertiary font-normal">
+                    <span className="text-2xs text-content-tertiary font-normal">
                       ({selectedElement.linked_documents?.length ?? 0})
                     </span>
                   </h4>
@@ -5917,7 +5917,7 @@ export function BIMViewer({
                     <button
                       type="button"
                       onClick={() => onLinkDocument(selectedElement)}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-600 text-white hover:bg-violet-700"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-violet-600 text-white hover:bg-violet-700"
                       title={t('bim.link_doc', { defaultValue: 'Link a document to this element' })}
                     >
                       <Plus size={10} />
@@ -5937,11 +5937,11 @@ export function BIMViewer({
                           onClick={() => onOpenDocument?.(d.document_id)}
                           className="flex-1 min-w-0 text-left"
                         >
-                          <div className="text-[11px] text-content-primary truncate" title={d.document_name || ''}>
+                          <div className="text-2xs text-content-primary truncate" title={d.document_name || ''}>
                             {d.document_name || '—'}
                           </div>
                           {d.document_category && (
-                            <div className="text-[9px] text-content-tertiary uppercase tracking-wider">
+                            <div className="text-2xs text-content-tertiary uppercase tracking-wider">
                               {d.document_category}
                             </div>
                           )}
@@ -5951,7 +5951,7 @@ export function BIMViewer({
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-[10px] text-content-tertiary italic">
+                  <div className="text-2xs text-content-tertiary italic">
                     {t('bim.docs_empty', {
                       defaultValue: 'No drawings linked yet - click "Link" to attach a drawing or photo',
                     })}
@@ -5967,7 +5967,7 @@ export function BIMViewer({
                   <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1">
                     <CheckSquare size={11} />
                     {t('bim.linked_tasks', { defaultValue: 'Linked tasks' })}
-                    <span className="text-[10px] text-content-tertiary font-normal">
+                    <span className="text-2xs text-content-tertiary font-normal">
                       ({selectedElement.linked_tasks?.length ?? 0})
                     </span>
                   </h4>
@@ -5975,7 +5975,7 @@ export function BIMViewer({
                     <button
                       type="button"
                       onClick={() => onCreateTask(selectedElement)}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-600 text-white hover:bg-amber-700"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-amber-600 text-white hover:bg-amber-700"
                       title={t('bim.create_task', { defaultValue: 'Create a task pinned to this element' })}
                     >
                       <Plus size={10} />
@@ -5997,7 +5997,7 @@ export function BIMViewer({
                         >
                           <div className="flex items-center gap-1.5">
                             <span
-                              className={`text-[9px] px-1 rounded uppercase tracking-wider ${
+                              className={`text-2xs px-1 rounded uppercase tracking-wider ${
                                 task.status === 'closed' || task.status === 'done'
                                   ? 'bg-emerald-100 text-emerald-700'
                                   : task.status === 'in_progress'
@@ -6008,10 +6008,10 @@ export function BIMViewer({
                               {task.status}
                             </span>
                             {task.task_type && (
-                              <span className="text-[9px] text-content-tertiary">{task.task_type}</span>
+                              <span className="text-2xs text-content-tertiary">{task.task_type}</span>
                             )}
                           </div>
-                          <div className="text-[11px] text-content-primary truncate" title={task.title}>
+                          <div className="text-2xs text-content-primary truncate" title={task.title}>
                             {task.title}
                           </div>
                         </button>
@@ -6020,7 +6020,7 @@ export function BIMViewer({
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-[10px] text-content-tertiary italic">
+                  <div className="text-2xs text-content-tertiary italic">
                     {t('bim.tasks_empty', {
                       defaultValue: 'No tasks pinned yet - click "New" to file a defect or RFI',
                     })}
@@ -6036,7 +6036,7 @@ export function BIMViewer({
                   <h4 className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
                     <Calendar size={11} />
                     {t('bim.linked_activities', { defaultValue: 'Schedule activities (4D)' })}
-                    <span className="text-[10px] text-content-tertiary font-normal">
+                    <span className="text-2xs text-content-tertiary font-normal">
                       ({selectedElement.linked_activities?.length ?? 0})
                     </span>
                   </h4>
@@ -6044,7 +6044,7 @@ export function BIMViewer({
                     <button
                       type="button"
                       onClick={() => onLinkActivity(selectedElement)}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-600 text-white hover:bg-emerald-700"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-emerald-600 text-white hover:bg-emerald-700"
                       title={t('bim.link_activity', { defaultValue: 'Link a schedule activity to this element' })}
                     >
                       <Plus size={10} />
@@ -6064,10 +6064,10 @@ export function BIMViewer({
                           onClick={() => onOpenActivity?.(act.id)}
                           className="flex-1 min-w-0 text-left"
                         >
-                          <div className="text-[11px] text-content-primary truncate" title={act.name}>
+                          <div className="text-2xs text-content-primary truncate" title={act.name}>
                             {act.name}
                           </div>
-                          <div className="flex items-center gap-1.5 text-[9px] text-content-tertiary tabular-nums">
+                          <div className="flex items-center gap-1.5 text-2xs text-content-tertiary tabular-nums">
                             {act.start_date && <span>{act.start_date.slice(0, 10)}</span>}
                             {act.start_date && act.end_date && <span>→</span>}
                             {act.end_date && <span>{act.end_date.slice(0, 10)}</span>}
@@ -6081,7 +6081,7 @@ export function BIMViewer({
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-[10px] text-content-tertiary italic">
+                  <div className="text-2xs text-content-tertiary italic">
                     {t('bim.acts_empty', {
                       defaultValue: 'No 4D activities yet - click "Link" to attach a schedule activity',
                     })}
@@ -6104,7 +6104,7 @@ export function BIMViewer({
                     {t('bim.linked_requirements', {
                       defaultValue: 'Linked requirements',
                     })}
-                    <span className="text-[10px] text-content-tertiary font-normal">
+                    <span className="text-2xs text-content-tertiary font-normal">
                       ({selectedElement.linked_requirements?.length ?? 0})
                     </span>
                   </h4>
@@ -6112,7 +6112,7 @@ export function BIMViewer({
                     <button
                       type="button"
                       onClick={() => onLinkRequirement(selectedElement)}
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-600 text-white hover:bg-violet-700"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-violet-600 text-white hover:bg-violet-700"
                       title={t('bim.link_requirement', {
                         defaultValue: 'Pin a requirement to this element',
                       })}
@@ -6143,7 +6143,7 @@ export function BIMViewer({
                             className="flex-1 min-w-0 text-left"
                           >
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] font-medium text-content-primary truncate">
+                              <span className="text-2xs font-medium text-content-primary truncate">
                                 {req.entity}
                                 {req.attribute && (
                                   <span className="text-content-tertiary">
@@ -6152,12 +6152,12 @@ export function BIMViewer({
                                 )}
                               </span>
                               <span
-                                className={`text-[9px] font-bold uppercase shrink-0 ${priorityColor}`}
+                                className={`text-2xs font-semibold uppercase shrink-0 ${priorityColor}`}
                               >
                                 {req.priority}
                               </span>
                             </div>
-                            <div className="text-[9px] font-mono text-content-tertiary tabular-nums truncate">
+                            <div className="text-2xs font-mono text-content-tertiary tabular-nums truncate">
                               {req.constraint_type} {req.constraint_value}
                               {req.unit ? ` ${req.unit}` : ''}
                             </div>
@@ -6171,7 +6171,7 @@ export function BIMViewer({
                     })}
                   </ul>
                 ) : (
-                  <div className="text-[10px] text-content-tertiary italic">
+                  <div className="text-2xs text-content-tertiary italic">
                     {t('bim.req_empty', {
                       defaultValue:
                         'No requirements yet - click "Link" to pin a constraint to this element',
@@ -6311,7 +6311,7 @@ function ClipControls({
             aria-pressed={mode === m}
             data-testid={`clip-mode-${m}`}
             className={clsx(
-              'flex-1 px-2 py-1 text-[11px] font-medium transition-colors',
+              'flex-1 px-2 py-1 text-2xs font-medium transition-colors',
               mode === m
                 ? 'bg-oe-blue text-white'
                 : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
@@ -6332,7 +6332,7 @@ function ClipControls({
             ] as const
           ).map(([axisLabel, minKey, maxKey]) => (
             <div key={axisLabel} className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-[10px] text-content-tertiary uppercase tracking-wider">
+              <div className="flex items-center justify-between text-2xs text-content-tertiary uppercase tracking-wider">
                 <span>
                   {t('bim.clip_axis', {
                     defaultValue: 'Axis {{axis}}',
@@ -6379,7 +6379,7 @@ function ClipControls({
                 aria-pressed={plane.axis === ax}
                 data-testid={`clip-plane-axis-${ax}`}
                 className={clsx(
-                  'flex-1 px-2 py-1 text-[11px] font-medium uppercase transition-colors',
+                  'flex-1 px-2 py-1 text-2xs font-medium uppercase transition-colors',
                   plane.axis === ax
                     ? 'bg-oe-blue text-white'
                     : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
@@ -6403,7 +6403,7 @@ function ClipControls({
             onClick={() => onPlaneChange({ flipped: !plane.flipped })}
             aria-pressed={plane.flipped}
             data-testid="clip-plane-flip"
-            className="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-2xs font-medium border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary transition-colors"
           >
             <RotateCcw size={12} />
             {t('bim.clip_plane_flip', { defaultValue: 'Flip side' })}
@@ -6415,7 +6415,7 @@ function ClipControls({
         type="button"
         onClick={onReset}
         data-testid="clip-reset"
-        className="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+        className="inline-flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-2xs font-medium text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
       >
         <RotateCcw size={12} />
         {t('bim.clip_reset', { defaultValue: 'Reset & disable' })}
@@ -6468,8 +6468,8 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
     <div className="flex justify-between items-center gap-3 py-1.5 px-2 rounded-md border bg-white/60 border-black/5 dark:bg-white/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors">
-      <span className="text-[11px] text-content-tertiary shrink-0">{label}</span>
-      <span className="text-[11px] text-content-primary font-medium text-end truncate min-w-0" title={value}>
+      <span className="text-2xs text-content-tertiary shrink-0">{label}</span>
+      <span className="text-2xs text-content-primary font-medium text-end truncate min-w-0" title={value}>
         {value}
       </span>
     </div>
@@ -6553,14 +6553,14 @@ function ColorModeLegend({
       className="absolute bottom-12 end-3 z-20 flex flex-col gap-1 rounded-lg bg-surface-primary/95 backdrop-blur-sm border border-border-light shadow-sm px-3 py-2 max-w-[220px]"
       data-testid="bim-color-legend"
     >
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+      <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {titleByMode[mode]}
       </span>
       <ul className="flex flex-col gap-0.5">
         {visible.map(({ label, hex }) => (
           <li
             key={`${label}-${hex}`}
-            className="flex items-center gap-1.5 text-[11px] text-content-secondary"
+            className="flex items-center gap-1.5 text-2xs text-content-secondary"
           >
             <span
               className="inline-block h-2.5 w-2.5 rounded-sm shrink-0 border border-black/10"
@@ -6571,7 +6571,7 @@ function ColorModeLegend({
         ))}
       </ul>
       {hiddenCount > 0 && (
-        <span className="text-[10px] text-content-tertiary italic">
+        <span className="text-2xs text-content-tertiary italic">
           {t('bim.legend_more', {
             defaultValue: '+{{count}} more',
             count: hiddenCount,

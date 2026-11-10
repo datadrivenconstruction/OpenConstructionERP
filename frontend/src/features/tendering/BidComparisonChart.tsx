@@ -290,7 +290,7 @@ export function BidComparisonChart({
                   x={chartArea.x - 8}
                   y={y + 4}
                   textAnchor="end"
-                  className="text-[10px]"
+                  className="text-2xs"
                   fill="var(--color-content-tertiary, #9ca3af)"
                 >
                   {formatCompact(tick, chartCurrency)}
@@ -314,7 +314,7 @@ export function BidComparisonChart({
               <text
                 x={chartArea.x + chartArea.width + 2}
                 y={budgetY - 6}
-                className="text-[10px] font-medium"
+                className="text-2xs font-medium"
                 fill="var(--oe-warning, #f59e0b)"
                 textAnchor="end"
               >
@@ -356,7 +356,7 @@ export function BidComparisonChart({
                   x={bar.x + bar.width / 2}
                   y={bar.y - 8}
                   textAnchor="middle"
-                  className="text-[10px] font-semibold"
+                  className="text-2xs font-semibold"
                   fill={
                     bar.bid.deviation_pct < -0.1
                       ? 'var(--oe-success, #15803d)'
@@ -374,7 +374,7 @@ export function BidComparisonChart({
                   x={bar.x + bar.width / 2}
                   y={chartArea.y + chartArea.height + 16}
                   textAnchor="middle"
-                  className="text-[11px] font-medium"
+                  className="text-2xs font-medium"
                   fill="var(--color-content-primary, #1f2937)"
                 >
                   {bar.bid.company_name.length > 14
@@ -400,7 +400,7 @@ export function BidComparisonChart({
                       x={bar.x + bar.width / 2}
                       y={bar.y - 26}
                       textAnchor="middle"
-                      className="text-[11px] font-semibold"
+                      className="text-2xs font-semibold"
                       fill="var(--color-content-primary, #1f2937)"
                     >
                       {formatFull(bar.bid.total, bar.bid.currency)}
@@ -427,7 +427,7 @@ export function BidComparisonChart({
             "Höchstes"), and a flex row with a gap never overlaps. */}
         {(plottedBids.length > 1 || budgetTotal > 0) && (
           <div
-            className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-content-secondary"
+            className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-2xs text-content-secondary"
             style={{ paddingLeft: chartArea.x }}
             data-testid="bid-chart-legend"
           >

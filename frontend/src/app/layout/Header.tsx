@@ -575,7 +575,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         >
           <Search size={14} strokeWidth={1.75} className="shrink-0" />
           <span className="truncate">{t('common.search')}</span>
-          <kbd className="ml-auto inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-[9px] font-medium text-content-quaternary">
+          <kbd className="ml-auto inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-2xs font-medium text-content-quaternary">
             ⌘K
           </kbd>
         </button>
@@ -895,7 +895,7 @@ export function BugReportMenu() {
     },
     {
       icon: MessageSquarePlus,
-      iconColor: 'text-emerald-500',
+      iconColor: 'text-semantic-success',
       title: t('bug.channel_form', { defaultValue: 'Web feedback form' }),
       desc: t('bug.channel_form_desc', { defaultValue: 'Richer fields and screenshots on openconstructionerp.com.' }),
       onClick: handleFeedbackForm,
@@ -929,7 +929,7 @@ export function BugReportMenu() {
         <Bug size={16} strokeWidth={1.75} />
         {errorCount > 0 && (
           <span
-            className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-surface-primary"
+            className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-semantic-error ring-2 ring-surface-primary"
             aria-label={t('bug.errors_captured', {
               defaultValue: '{{count}} errors captured this session',
               count: errorCount,
@@ -954,8 +954,8 @@ export function BugReportMenu() {
                 {t('bug.menu_heading', { defaultValue: 'Report a bug' })}
               </span>
               {errorCount > 0 && (
-                <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-2xs font-semibold text-red-500">
-                  <span className="h-1 w-1 rounded-full bg-red-500" />
+                <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-semantic-error/10 px-2 py-0.5 text-2xs font-semibold text-semantic-error">
+                  <span className="h-1 w-1 rounded-full bg-semantic-error" />
                   {t('bug.errors_chip', {
                     defaultValue: '{{count}} captured',
                     count: errorCount,
@@ -1014,9 +1014,9 @@ export function BugReportMenu() {
           {networkOnly && (
             <div
               role="alert"
-              className="mx-3 my-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2"
+              className="mx-3 my-2 rounded-lg border border-amber-500/30 bg-semantic-warning/10 px-3 py-2"
             >
-              <p className="text-2xs font-semibold text-amber-600 dark:text-amber-400">
+              <p className="text-2xs font-semibold text-semantic-warning">
                 {t('bug.network_only_title', {
                   defaultValue: 'Looks like a network issue, not a bug',
                 })}
@@ -1030,7 +1030,7 @@ export function BugReportMenu() {
               <button
                 type="button"
                 onClick={() => setOverrodeNetworkWarning(true)}
-                className="mt-1.5 text-2xs font-medium text-amber-700 dark:text-amber-300 underline-offset-2 hover:underline"
+                className="mt-1.5 text-2xs font-medium text-semantic-warning underline-offset-2 hover:underline"
               >
                 {t('bug.network_only_override', {
                   defaultValue: 'Report anyway →',
@@ -1066,13 +1066,13 @@ export function BugReportMenu() {
                     <Icon size={14} className={ch.iconColor} />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block text-[13px] font-medium text-content-primary">
+                    <span className="block text-sm font-medium text-content-primary">
                       {ch.title}
                     </span>
                     <span
                       className={clsx(
                         'block text-2xs leading-snug mt-0.5',
-                        blocked ? 'text-amber-600 dark:text-amber-400' : 'text-content-tertiary',
+                        blocked ? 'text-semantic-warning' : 'text-content-tertiary',
                       )}
                     >
                       {blocked
@@ -1670,7 +1670,7 @@ function UserMenu() {
           className="absolute -bottom-0.5 right-0 flex h-2.5 w-2.5 items-center justify-center overflow-hidden"
         >
           <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400/70 animate-ping" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-surface-primary" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-semantic-success ring-2 ring-surface-primary" />
         </span>
       </button>
 
@@ -1934,7 +1934,7 @@ function ProjectSwitcher() {
           className={clsx(
             // WCAG AA fix 2026-05-27: text-oe-blue-text (#0071e3) on bg-oe-blue-subtle
             // failed 4.35:1; text-oe-blue-text passes at 8.05:1.
-            'flex items-center gap-2 pl-1.5 pr-2 h-9 text-[13px] min-w-0',
+            'flex items-center gap-2 pl-1.5 pr-2 h-9 text-sm min-w-0',
             activeProjectId ? 'text-oe-blue-text' : 'text-oe-blue-text/85 hover:text-oe-blue-text',
           )}
           title={activeProjectId
@@ -2163,7 +2163,7 @@ function UploadQueueIndicator() {
           <Upload size={16} aria-hidden="true" />
         )}
         {(totalActive > 0 || errorTasks.length > 0) && (
-          <span className={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white ${
+          <span className={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-2xs font-semibold text-white ${
             errorTasks.length > 0 ? 'bg-semantic-error' : 'bg-oe-blue'
           }`}>
             {totalActive || errorTasks.length}

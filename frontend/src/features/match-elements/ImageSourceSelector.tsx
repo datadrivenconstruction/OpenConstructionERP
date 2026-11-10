@@ -159,7 +159,7 @@ export default function ImageSourceSelector({ file, onPick }: Props) {
               className="w-32 h-32 object-cover rounded-xl border border-border-light shadow-sm shrink-0"
             />
             <div className="min-w-0 text-left flex-1">
-              <span className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-medium text-sm">
+              <span className="inline-flex items-center gap-1.5 text-semantic-success font-medium text-sm">
                 <Check className="w-4 h-4" strokeWidth={3} />
                 <span className="truncate">{file.name}</span>
               </span>
@@ -210,14 +210,14 @@ export default function ImageSourceSelector({ file, onPick }: Props) {
       </div>
 
       {error && (
-        <div className="mt-2 text-xs text-rose-600 dark:text-rose-400">{error}</div>
+        <div className="mt-2 text-xs text-semantic-error">{error}</div>
       )}
 
       {/* Honest expectation-setting: the AI read is a low-confidence
           suggestion the user reviews, never an auto-applied match. */}
       <div className="mt-3 flex items-start gap-2 rounded-xl border border-indigo-200/60 dark:border-indigo-800/50 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2">
         <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-300 mt-0.5 shrink-0" />
-        <p className="text-[11px] leading-relaxed text-content-secondary">
+        <p className="text-2xs leading-relaxed text-content-secondary">
           {t('match_wizard.image_ai_note', {
             defaultValue:
               'AI reads the image and suggests visible elements with rough quantities. Every suggestion is low-confidence - you review and confirm each one. Needs an AI provider configured in Settings; without one the session opens empty.',

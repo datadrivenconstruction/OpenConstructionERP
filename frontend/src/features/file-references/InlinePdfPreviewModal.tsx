@@ -123,7 +123,7 @@ export function InlinePdfPreviewModal({
                 href={objectUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-[11px] font-medium text-content-secondary hover:bg-surface-secondary"
+                className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary"
                 title={t('files.preview.open_new_tab', {
                   defaultValue: 'Open in a new tab',
                 })}
@@ -137,7 +137,7 @@ export function InlinePdfPreviewModal({
               onClick={handleDownload}
               disabled={downloading}
               data-testid="inline-pdf-download"
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-[11px] font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {downloading ? (
                 <Loader2 size={12} className="animate-spin" />

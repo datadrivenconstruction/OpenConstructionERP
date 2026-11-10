@@ -238,7 +238,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
         <div id={`${formId}-title`}>
           <BlockTitle>{t('hakedis.taxes.title', { defaultValue: 'Withholdings and stamp duty' })}</BlockTitle>
         </div>
-        <p className="rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-sm text-content-primary dark:border-amber-900 dark:bg-amber-950/30">
+        <p className="rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2 text-sm text-content-primary">
           {t('hakedis.taxes.module_absent', {
             defaultValue:
               'The tax module is not installed, so the tax lines of this certificate stay held. Install it to decide them.',
@@ -277,10 +277,10 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
       {taxes.stale && (
         <div
           role="alert"
-          className="flex flex-wrap items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 dark:border-amber-900 dark:bg-amber-950/30"
+          className="flex flex-wrap items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2"
           data-testid="hakedis-taxes-stale"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           <p className="min-w-0 flex-1 break-words text-sm text-content-primary">
             {confirmed
               ? t('hakedis.taxes.stale_confirmed', {
@@ -400,7 +400,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
       {mayChoose && (
         <div className="flex flex-wrap items-center justify-end gap-2">
           {!complete && (
-            <p className="mr-auto text-xs text-amber-800 dark:text-amber-300">
+            <p className="mr-auto text-xs text-semantic-warning">
               {t('hakedis.taxes.incomplete', {
                 defaultValue: 'A tax marked as not applicable needs its reason before the choices can be saved.',
               })}
@@ -831,7 +831,7 @@ function FigureLine({
     );
   }
   return (
-    <p className="break-words text-amber-800 dark:text-amber-300">
+    <p className="break-words text-semantic-warning">
       <span className="font-semibold">{t('hakedis.line.held', { defaultValue: 'Held' })}</span>:{' '}
       {reasonSentence(t, figure.reason_key, figure.reason_params, context)}
     </p>
@@ -896,7 +896,7 @@ function StoredFigure({
 
       {figure.overridden && (
         <div
-          className="rounded-md border border-amber-200 bg-amber-50/60 px-2 py-1.5 dark:border-amber-900 dark:bg-amber-950/30"
+          className="rounded-md border border-semantic-warning/30 bg-semantic-warning/10 px-2 py-1.5"
           data-testid={`hakedis-tax-overridden-${kind}`}
         >
           <p className="break-words font-medium text-content-primary">

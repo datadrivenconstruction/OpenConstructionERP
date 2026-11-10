@@ -43,7 +43,7 @@ function StatusPill({ status }: { status: StageStatus }) {
     { cls: string; icon: React.ReactNode; label: string }
   > = {
     pending: {
-      cls: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
+      cls: 'bg-surface-secondary text-content-secondary',
       icon: <Circle className="w-3 h-3" />,
       label: t('match_elements.pipeline.status_pending', 'Not run'),
     },
@@ -53,22 +53,22 @@ function StatusPill({ status }: { status: StageStatus }) {
       label: t('match_elements.pipeline.status_running', 'Running'),
     },
     done: {
-      cls: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+      cls: 'bg-semantic-success-bg text-semantic-success',
       icon: <CheckCircle2 className="w-3 h-3" />,
       label: t('match_elements.pipeline.status_done', 'Done'),
     },
     error: {
-      cls: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
+      cls: 'bg-semantic-error-bg text-semantic-error',
       icon: <XCircle className="w-3 h-3" />,
       label: t('match_elements.pipeline.status_error', 'Error'),
     },
     stale: {
-      cls: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+      cls: 'bg-semantic-warning-bg text-semantic-warning',
       icon: <AlertTriangle className="w-3 h-3" />,
       label: t('match_elements.pipeline.status_stale', 'Needs re-run'),
     },
     skipped: {
-      cls: 'bg-slate-100 dark:bg-slate-800 text-slate-500',
+      cls: 'bg-surface-secondary text-content-tertiary',
       icon: <ChevronRight className="w-3 h-3" />,
       label: t('match_elements.pipeline.status_skipped', 'Skipped'),
     },
@@ -77,7 +77,7 @@ function StatusPill({ status }: { status: StageStatus }) {
   return (
     <span
       className={
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ' +
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold ' +
         s.cls
       }
     >
@@ -118,7 +118,7 @@ function OutputPreview({ output }: { output: Record<string, unknown> }) {
           {chips.slice(0, 8).map((c) => (
             <span
               key={c.k}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-surface-secondary border border-border text-content-tertiary"
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs bg-surface-secondary border border-border text-content-tertiary"
             >
               <span className="font-semibold text-content-secondary">
                 {c.k}
@@ -145,14 +145,14 @@ export function StageCard({
   const isRunning = running || stage.status === 'running';
   const done = stage.status === 'done';
   const numberCls = done
-    ? 'bg-emerald-500 text-white'
+    ? 'bg-semantic-success text-white'
     : stage.status === 'error'
-      ? 'bg-rose-500 text-white'
+      ? 'bg-semantic-error text-white'
       : stage.status === 'stale'
-        ? 'bg-amber-500 text-white'
+        ? 'bg-semantic-warning text-white'
         : isRunning
           ? 'bg-oe-blue text-white'
-          : 'bg-slate-200 dark:bg-slate-700 text-content-secondary';
+          : 'bg-surface-secondary text-content-secondary';
 
   return (
     <div className="flex gap-3">
@@ -160,7 +160,7 @@ export function StageCard({
       <div className="flex flex-col items-center">
         <div
           className={
-            'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ' +
+            'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors ' +
             numberCls
           }
         >
@@ -177,21 +177,21 @@ export function StageCard({
           className={
             'rounded-xl border bg-surface-primary p-3 shadow-sm transition-colors ' +
             (stage.status === 'stale'
-              ? 'border-amber-300/60 dark:border-amber-800/40'
+              ? 'border-semantic-warning/30'
               : stage.status === 'error'
-                ? 'border-rose-300/60 dark:border-rose-800/40'
+                ? 'border-semantic-error/30'
                 : 'border-border')
           }
         >
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="text-sm font-bold text-content-primary">
+                <h4 className="text-sm font-semibold text-content-primary">
                   {stage.title}
                 </h4>
                 {stage.uses_llm && (
                   <span
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40"
                     title={t(
                       'match_elements.pipeline.llm_tunable',
                       'LLM-augmented - prompt is editable',
@@ -203,7 +203,7 @@ export function StageCard({
                 )}
                 <StatusPill status={stage.status} />
                 {stage.took_ms != null && stage.status === 'done' && (
-                  <span className="text-[10px] text-content-tertiary">
+                  <span className="text-2xs text-content-tertiary">
                     {stage.took_ms < 1000
                       ? `${stage.took_ms} ms`
                       : `${fmtFixed(stage.took_ms / 1000, 1)} s`}
@@ -251,7 +251,7 @@ export function StageCard({
           </div>
 
           {/* Explainer — always visible so the step is self-documenting */}
-          <p className="text-[11px] text-content-tertiary leading-relaxed mt-2">
+          <p className="text-2xs text-content-tertiary leading-relaxed mt-2">
             {stage.explainer}
           </p>
 
@@ -262,13 +262,13 @@ export function StageCard({
 
           {/* Error */}
           {stage.status === 'error' && stage.error && (
-            <div className="mt-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/40 rounded-lg px-2.5 py-1.5 break-words">
+            <div className="mt-2 text-xs text-semantic-error bg-semantic-error-bg border border-semantic-error/30 rounded-lg px-2.5 py-1.5 break-words">
               {stage.error}
             </div>
           )}
 
           {stage.status === 'stale' && (
-            <div className="mt-2 text-[11px] text-amber-700 dark:text-amber-300">
+            <div className="mt-2 text-2xs text-semantic-warning">
               {t(
                 'match_elements.pipeline.stale_hint',
                 'An earlier stage changed - re-run this step to refresh its output.',

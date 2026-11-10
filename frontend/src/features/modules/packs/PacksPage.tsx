@@ -284,7 +284,7 @@ function HowPacksWork() {
             <li key={i} className="flex gap-3">
               <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue">
                 <Icon size={17} aria-hidden />
-                <span className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-[10px] font-bold text-content-inverse">
+                <span className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-content-inverse">
                   {i + 1}
                 </span>
               </span>
@@ -355,7 +355,7 @@ export function PacksPage() {
 
   const stat = (value: number | string, label: string) => (
     <div className="min-w-[5.5rem]">
-      <dd className="text-2xl font-bold tabular-nums text-content-primary">{value}</dd>
+      <dd className="text-2xl font-semibold tabular-nums text-content-primary">{value}</dd>
       <dt className="text-xs text-content-tertiary">{label}</dt>
     </div>
   );
@@ -367,7 +367,7 @@ export function PacksPage() {
       {/* Header */}
       <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <h1 className="text-2xl font-bold tracking-tight text-content-primary sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-content-primary sm:text-3xl">
             {t('nav.packs', { defaultValue: 'Packs' })}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-content-secondary sm:text-base">

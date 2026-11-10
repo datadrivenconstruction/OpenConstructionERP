@@ -183,7 +183,7 @@ export default function LinkActivityToBIMModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('bim.link_act_title', { defaultValue: 'Link a schedule activity' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {elements.length === 1
                 ? '→ ' + (elements[0]!.name || elements[0]!.element_type)
                 : t('bim.link_act_bulk', {
@@ -229,7 +229,7 @@ export default function LinkActivityToBIMModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {schedules.length === 0
                 ? t('bim.no_schedules', {
                     defaultValue: 'No schedules in this project yet - create one in /schedule first',
@@ -265,7 +265,7 @@ export default function LinkActivityToBIMModal({
                         <div className="text-xs font-medium text-content-primary truncate">
                           {act.name}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-content-tertiary tabular-nums">
+                        <div className="flex items-center gap-2 text-2xs text-content-tertiary tabular-nums">
                           {act.start_date && <span>{act.start_date.slice(0, 10)}</span>}
                           {act.start_date && act.end_date && <span>→</span>}
                           {act.end_date && <span>{act.end_date.slice(0, 10)}</span>}
@@ -293,7 +293,7 @@ export default function LinkActivityToBIMModal({
                         Math.min(c + PAGE_SIZE, filtered.length),
                       )
                     }
-                    className="w-full text-center text-[11px] text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
+                    className="w-full text-center text-2xs text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
                   >
                     {t('bim.load_more', {
                       defaultValue:

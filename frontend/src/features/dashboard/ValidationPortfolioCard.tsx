@@ -52,24 +52,24 @@ const ESTIMATES_PREVIEW = 3;
 
 const STATE_TONE: Record<PortfolioState, { pill: string; dot: string }> = {
   errors: {
-    pill: 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900',
-    dot: 'bg-rose-500',
+    pill: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30',
+    dot: 'bg-semantic-error',
   },
   warnings: {
-    pill: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900',
-    dot: 'bg-amber-500',
+    pill: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30',
+    dot: 'bg-semantic-warning',
   },
   not_validated: {
     pill: 'bg-surface-secondary text-content-secondary ring-border-light',
     dot: 'bg-content-quaternary',
   },
   info: {
-    pill: 'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:ring-sky-900',
-    dot: 'bg-sky-500',
+    pill: 'bg-semantic-info-bg text-semantic-info ring-semantic-info/30',
+    dot: 'bg-semantic-info',
   },
   passed: {
-    pill: 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900',
-    dot: 'bg-emerald-500',
+    pill: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30',
+    dot: 'bg-semantic-success',
   },
 };
 
@@ -345,14 +345,14 @@ export function ValidationPortfolioCard() {
               {
                 label: t('dashboard.validation_portfolio.kpi_errors', { defaultValue: 'Projects with errors' }),
                 value: formatCount(summary.errors),
-                tone: summary.errors > 0 ? 'text-rose-600' : 'text-content-secondary',
+                tone: summary.errors > 0 ? 'text-semantic-error' : 'text-content-secondary',
               },
               {
                 label: t('dashboard.validation_portfolio.kpi_warnings', {
                   defaultValue: 'Projects with warnings',
                 }),
                 value: formatCount(summary.warnings),
-                tone: summary.warnings > 0 ? 'text-amber-600' : 'text-content-secondary',
+                tone: summary.warnings > 0 ? 'text-semantic-warning' : 'text-content-secondary',
               },
               {
                 label: t('dashboard.validation_portfolio.kpi_not_validated', {
@@ -366,7 +366,7 @@ export function ValidationPortfolioCard() {
                   defaultValue: 'No errors or warnings',
                 }),
                 value: formatCount(summary.passed + summary.info),
-                tone: 'text-emerald-600',
+                tone: 'text-semantic-success',
               },
             ]}
           />

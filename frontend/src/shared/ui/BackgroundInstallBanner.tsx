@@ -207,7 +207,7 @@ export function BackgroundInstallBanner() {
 
       {costFailed && (
         <div
-          className="mx-4 mb-3 rounded-lg border border-semantic-warning/40 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-900/20 dark:text-amber-100"
+          className="mx-4 mb-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
           data-testid="bg-install-no-prices"
         >
           <p>

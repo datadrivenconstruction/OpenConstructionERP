@@ -106,8 +106,8 @@ function fmtPct(pct: string): string {
 const PAYAPP_STATUS_TONE: Record<PaymentApplicationStatus, string> = {
   draft: 'bg-surface-secondary text-content-secondary',
   submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  certified: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+  certified: 'bg-semantic-warning-bg text-semantic-warning',
+  paid: 'bg-semantic-success-bg text-semantic-success',
 };
 
 /** Payment-application lifecycle in order: draft -> submitted -> certified -> paid. */
@@ -150,7 +150,7 @@ function SummaryStrip({ summary, currency }: { summary: CvrSummary; currency: st
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">{tile.label}</div>
           <div
             className={
-              'mt-1 text-lg font-bold tabular-nums ' +
+              'mt-1 text-lg font-semibold tabular-nums ' +
               (tile.tone === 'good'
                 ? 'text-semantic-success'
                 : tile.tone === 'bad'
@@ -297,7 +297,7 @@ function LinesTable({
                     {line.description || '-'}
                     {line.flags.length > 0 && (
                       <span title={fmtList(line.flags)}>
-                        <AlertTriangle size={13} className="text-amber-500" />
+                        <AlertTriangle size={13} className="text-semantic-warning" />
                       </span>
                     )}
                   </span>
@@ -323,7 +323,7 @@ function LinesTable({
                       <button
                         type="button"
                         onClick={() => onDelete(line.id)}
-                        className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                        className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                         aria-label={t('cvr.delete_line', { defaultValue: 'Delete cost head' })}
                       >
                         <Trash2 size={14} />
@@ -781,7 +781,7 @@ export function CvrPage() {
                   type="button"
                   onClick={() => deleteReportMut.mutate()}
                   disabled={deleteReportMut.isPending}
-                  className="rounded p-1.5 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                  className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('cvr.delete_report', { defaultValue: 'Delete report' })}
                 >
                   <Trash2 size={16} />
@@ -796,7 +796,7 @@ export function CvrPage() {
           {/* Advisory warnings */}
           {summary && summary.warnings.length > 0 && (
             <Card padding="sm">
-              <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
+              <div className="flex items-start gap-2 text-sm text-semantic-warning">
                 <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                 <div>
                   <div className="font-medium">{t('cvr.forecast_warnings', { defaultValue: 'Forecast checks' })}</div>
@@ -1185,7 +1185,7 @@ function CashflowPointsTable({
                         <button
                           type="button"
                           onClick={() => setDeleteTarget(p)}
-                          className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                          className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                           aria-label={t('cvr.delete_point', { defaultValue: 'Delete cashflow point' })}
                         >
                           <Trash2 size={14} />
@@ -1375,7 +1375,7 @@ function PaymentApplicationsSection({
                     <button
                       type="button"
                       onClick={() => setDeleteTarget(app)}
-                      className="rounded p-1 text-content-tertiary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-900/20"
+                      className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                       aria-label={t('cvr.delete_payapp', { defaultValue: 'Delete payment application' })}
                     >
                       <Trash2 size={14} />
@@ -1445,7 +1445,7 @@ function RollupTile({
   return (
     <Card padding="sm">
       <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
-      <div className={'mt-1 text-base font-bold tabular-nums ' + (emphasize ? 'text-content-primary' : 'text-content-secondary')}>
+      <div className={'mt-1 text-base font-semibold tabular-nums ' + (emphasize ? 'text-content-primary' : 'text-content-secondary')}>
         {value}
       </div>
       {sub && <div className="mt-0.5 text-2xs text-content-tertiary">{sub}</div>}

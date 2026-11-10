@@ -965,7 +965,7 @@ function PayloadView({
             </pre>
           )}
           {/* The hash is what proves the bytes above are the bytes that went. */}
-          <p className="mt-1 break-all font-mono text-[11px] text-content-tertiary">
+          <p className="mt-1 break-all font-mono text-2xs text-content-tertiary">
             {doc.payload_hash}
           </p>
         </div>

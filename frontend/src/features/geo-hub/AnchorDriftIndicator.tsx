@@ -86,8 +86,8 @@ export function AnchorDriftIndicator({
         disabled={isReanchoring}
         className={[
           'inline-flex items-center gap-1 rounded-full px-2 py-0.5',
-          'border border-amber-300 bg-amber-50 text-2xs font-semibold text-amber-800',
-          'hover:bg-amber-100 disabled:opacity-60 disabled:cursor-wait',
+          'border border-semantic-warning/30 bg-semantic-warning-bg text-2xs font-semibold text-semantic-warning',
+          'hover:bg-semantic-warning-bg disabled:opacity-60 disabled:cursor-wait',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300',
         ].join(' ')}
         title={t('geo_hub.drift.title', {
@@ -106,7 +106,7 @@ export function AnchorDriftIndicator({
       className={[
         'space-y-1 rounded-md border border-border bg-surface-secondary/40',
         'px-3 py-2 text-2xs text-content-secondary',
-        drift ? 'border-amber-300 bg-amber-50/60' : '',
+        drift ? 'border-semantic-warning/30 bg-semantic-warning/10' : '',
       ].join(' ')}
       data-testid="geo-drift-indicator"
     >
@@ -118,7 +118,7 @@ export function AnchorDriftIndicator({
             className="mt-0.5 shrink-0 text-content-tertiary"
           />
           <div className="min-w-0 flex-1">
-            <span className="font-semibold uppercase tracking-[0.10em] text-content-tertiary">
+            <span className="font-semibold uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.drift.address_label', { defaultValue: 'Address' })}:
             </span>{' '}
             <span className="text-content-primary">{projectAddressText}</span>
@@ -133,7 +133,7 @@ export function AnchorDriftIndicator({
             className="mt-0.5 shrink-0 text-content-tertiary"
           />
           <div className="min-w-0 flex-1">
-            <span className="font-semibold uppercase tracking-[0.10em] text-content-tertiary">
+            <span className="font-semibold uppercase tracking-wider text-content-tertiary">
               {t('geo_hub.drift.anchored_label', { defaultValue: 'Anchored' })}:
             </span>{' '}
             <span className="text-content-secondary">{anchoredAddress}</span>
@@ -148,10 +148,10 @@ export function AnchorDriftIndicator({
           <AlertCircle
             size={11}
             strokeWidth={2.25}
-            className="text-amber-600"
+            className="text-semantic-warning"
             aria-hidden
           />
-          <span className="flex-1 text-amber-800">
+          <span className="flex-1 text-semantic-warning">
             {t('geo_hub.drift.warning', {
               defaultValue:
                 'Address text changed since the last geocode - anchor may be stale.',
@@ -162,8 +162,8 @@ export function AnchorDriftIndicator({
             onClick={onReanchor}
             disabled={isReanchoring}
             className={[
-              'inline-flex items-center gap-1 rounded-md border border-amber-300',
-              'bg-amber-100 px-2 py-0.5 text-2xs font-semibold text-amber-900',
+              'inline-flex items-center gap-1 rounded-md border border-semantic-warning/30',
+              'bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning',
               'hover:bg-amber-200 disabled:opacity-60 disabled:cursor-wait',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
             ].join(' ')}

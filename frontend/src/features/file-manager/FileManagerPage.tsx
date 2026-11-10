@@ -1004,7 +1004,7 @@ export function FileManagerPage() {
                 {contentActive && contentSearch.isError && (
                   <div
                     role="alert"
-                    className="mx-3 mt-3 flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200"
+                    className="mx-3 mt-3 flex items-center justify-between gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
                   >
                     <span>
                       {t('files.search.failed', {
@@ -1015,7 +1015,7 @@ export function FileManagerPage() {
                     <button
                       type="button"
                       onClick={() => void contentSearch.refetch()}
-                      className="shrink-0 rounded-md border border-amber-400 px-2 py-0.5 font-medium hover:bg-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/40"
+                      className="shrink-0 rounded-md border border-semantic-warning/60 px-2 py-0.5 font-medium hover:bg-semantic-warning-bg"
                     >
                       {t('common.retry', { defaultValue: 'Retry' })}
                     </button>

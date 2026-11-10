@@ -144,7 +144,7 @@ export default function LinkDocumentToDwgModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('dwg_takeoff.link_doc_title', { defaultValue: 'Link a document' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {entityIds.length === 1
                 ? '→ ' + (entityLabel || t('dwg_takeoff.entity', { defaultValue: 'Entity' }))
                 : t('dwg_takeoff.link_doc_bulk', {
@@ -190,7 +190,7 @@ export default function LinkDocumentToDwgModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {docs.length === 0
                 ? t('dwg_takeoff.no_docs', {
                     defaultValue: 'No documents in this project yet - upload one first',
@@ -215,12 +215,12 @@ export default function LinkDocumentToDwgModal({
                           {d.name || d.filename || d.id}
                         </span>
                         {d.drawing_number && (
-                          <span className="text-[10px] font-mono text-content-tertiary">
+                          <span className="text-2xs font-mono text-content-tertiary">
                             {d.drawing_number}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-content-tertiary">
+                      <div className="flex items-center gap-2 text-2xs text-content-tertiary">
                         {d.category && (
                           <span className="uppercase tracking-wider">{d.category}</span>
                         )}

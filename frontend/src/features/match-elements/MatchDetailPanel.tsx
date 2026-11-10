@@ -45,11 +45,11 @@ interface Props {
 function ConfidencePill({ band, score }: { band: ConfidenceBand; score: number }) {
   const cls =
     band === 'high'
-      ? 'bg-emerald-500'
+      ? 'bg-semantic-success'
       : band === 'medium'
-        ? 'bg-amber-500'
+        ? 'bg-semantic-warning'
         : band === 'low'
-          ? 'bg-rose-500'
+          ? 'bg-semantic-error'
           : 'bg-slate-400';
   return (
     <span className={`inline-block px-1.5 py-0.5 rounded text-white text-xs ${cls}`}>
@@ -72,10 +72,10 @@ function ReasonChips({ reasons }: { reasons: MatchReason[] }) {
           key={r.id}
           className={
             r.tone === 'negative'
-              ? 'inline-flex items-center rounded px-1.5 py-0.5 text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+              ? 'inline-flex items-center rounded px-1.5 py-0.5 text-2xs bg-semantic-error-bg text-semantic-error'
               : r.tone === 'neutral'
-                ? 'inline-flex items-center rounded px-1.5 py-0.5 text-[10px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                : 'inline-flex items-center rounded px-1.5 py-0.5 text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                ? 'inline-flex items-center rounded px-1.5 py-0.5 text-2xs bg-surface-secondary text-content-secondary'
+                : 'inline-flex items-center rounded px-1.5 py-0.5 text-2xs bg-semantic-success-bg text-semantic-success'
           }
         >
           {t(r.i18nKey, { defaultValue: r.defaultLabel, ...(r.vars ?? {}) })}
@@ -251,9 +251,9 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
         role="dialog"
         aria-modal="true"
         aria-labelledby="match-detail-title"
-        className="fixed top-0 right-0 bottom-0 w-full sm:w-[680px] bg-white dark:bg-slate-900 z-50 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-700"
+        className="fixed top-0 right-0 bottom-0 w-full sm:w-[680px] bg-surface-primary z-50 shadow-2xl flex flex-col border-l border-border-light"
       >
-        <header className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <header className="px-4 py-3 border-b border-border-light flex items-center justify-between">
           <div className="min-w-0 flex-1">
             <div
               id="match-detail-title"
@@ -270,7 +270,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                 ([k, v]) => `${k}=${fmtFixed(v as number, 1)}`,
               ).join(' · ')}
               {group.opening_warning && (
-                <span className="ml-2 inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <span className="ml-2 inline-flex items-center gap-1 text-semantic-warning">
                   <AlertCircle className="w-3 h-3" />
                   {t(
                     'match_elements.detail.opening_warning',
@@ -281,7 +281,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
             </div>
             {priorPick && (
               <div className="mt-1.5">
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-2xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
                   <Sparkles className="w-3 h-3" />
                   {t('match_elements.detail.prior_pick', {
                     defaultValue: 'You mapped this before ({{count}}x)',
@@ -304,14 +304,14 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
             type="button"
             onClick={onClose}
             aria-label={t('match_elements.detail.close', 'Close detail panel')}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1.5 rounded hover:bg-surface-secondary"
           >
             <X className="w-5 h-5" />
           </button>
         </header>
 
         <nav
-          className="px-4 border-b border-slate-200 dark:border-slate-700 flex gap-1"
+          className="px-4 border-b border-border-light flex gap-1"
           role="tablist"
           aria-label={t('match_elements.detail.tabs_label', 'Detail panel sections')}
           onKeyDown={onTabKeyDown}
@@ -329,7 +329,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
               className={`px-3 py-2 text-sm border-b-2 transition ${
                 tab === tabKey
                   ? 'border-indigo-500 text-indigo-600 dark:text-indigo-300'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  : 'border-transparent text-content-tertiary hover:text-content-secondary'
               }`}
             >
               {tabKey === 'methods'
@@ -351,7 +351,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
 
           {detailQ.isError && !detailQ.isLoading && (
             <div
-              className="rounded border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 px-3 py-3 text-sm text-rose-800 dark:text-rose-100 flex items-start gap-2"
+              className="rounded border border-semantic-error/30 bg-semantic-error-bg px-3 py-3 text-sm text-semantic-error flex items-start gap-2"
               role="alert"
             >
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -385,11 +385,11 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
               )}
               {methodNames.map((name) => (
                 <div key={name} className="mb-6">
-                  <h3 className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                  <h3 className="text-xs uppercase tracking-wider text-content-tertiary mb-2">
                     {name}
                   </h3>
-                  <table className="w-full text-sm border border-slate-200 dark:border-slate-700 rounded">
-                    <thead className="bg-slate-50 dark:bg-slate-800">
+                  <table className="w-full text-sm border border-border-light rounded">
+                    <thead className="bg-surface-secondary">
                       <tr>
                         <th className="text-left px-2 py-1.5 font-medium">{t('match_elements.detail.col.code', 'Code')}</th>
                         <th className="text-left px-2 py-1.5 font-medium">{t('match_elements.detail.col.description', 'Description')}</th>
@@ -412,12 +412,12 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                         return (
                         <tr
                           key={`${name}-${cand.code}-${idx}`}
-                          className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                          className="border-t border-border-light hover:bg-surface-secondary"
                         >
                           <td className="px-2 py-1.5 font-mono text-xs align-top">
                             {cand.code}
                             {isPrior && (
-                              <span className="mt-1 flex items-center gap-1 text-[10px] font-sans font-medium text-indigo-600 dark:text-indigo-300">
+                              <span className="mt-1 flex items-center gap-1 text-2xs font-sans font-medium text-indigo-600 dark:text-indigo-300">
                                 <Sparkles className="w-2.5 h-2.5" />
                                 {t('match_elements.detail.your_pick', {
                                   defaultValue: 'Your pick last time',
@@ -429,7 +429,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                             <div>{cand.description}</div>
                             <ReasonChips reasons={reasons} />
                             {note && (
-                              <div className="mt-1 text-[10px] italic text-slate-500 dark:text-slate-400">
+                              <div className="mt-1 text-2xs italic text-content-tertiary">
                                 {t('match_elements.detail.model_note', {
                                   defaultValue: 'Model note: {{note}}',
                                   note,
@@ -455,7 +455,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                                     )
                                   : undefined
                               }
-                              className="px-2 py-0.5 text-xs rounded bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                              className="px-2 py-0.5 text-xs rounded bg-semantic-success hover:bg-semantic-success text-white disabled:opacity-50"
                             >
                               {t('match_elements.detail.confirm', 'Confirm')}
                             </button>
@@ -502,9 +502,9 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
               <p className="text-xs text-slate-500 mb-2">
                 {t('match_elements.detail.element_ids_count', '{{count}} element id(s)', { count: detailQ.data.element_ids.length })}
               </p>
-              <div className="font-mono text-xs leading-tight max-h-[60vh] overflow-auto bg-slate-50 dark:bg-slate-800 p-2 rounded">
+              <div className="font-mono text-xs leading-tight max-h-[60vh] overflow-auto bg-surface-secondary p-2 rounded">
                 {detailQ.data.element_ids.slice(0, 200).map((id) => (
-                  <div key={id} className="truncate text-slate-600 dark:text-slate-300">{id}</div>
+                  <div key={id} className="truncate text-content-secondary">{id}</div>
                 ))}
                 {detailQ.data.element_ids.length > 200 && (
                   <div className="text-slate-500">{t('match_elements.detail.and_more', '…and {{count}} more', { count: detailQ.data.element_ids.length - 200 })}</div>
@@ -523,8 +523,8 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                 </div>
               )}
               {applyQ.data && (
-                <div className="mb-3 px-3 py-2 rounded bg-slate-50 dark:bg-slate-800 text-sm flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">
+                <div className="mb-3 px-3 py-2 rounded bg-surface-secondary text-sm flex items-center justify-between">
+                  <span className="text-content-secondary">
                     {t('match_elements.detail.apply_total', 'Total')}
                   </span>
                   <strong className="tabular-nums">
@@ -534,10 +534,10 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                 </div>
               )}
               {applyQ.data && applyQ.data.positions.map((p) => (
-                <div key={p.group_key} className="mb-4 border border-slate-200 dark:border-slate-700 rounded p-3">
+                <div key={p.group_key} className="mb-4 border border-border-light rounded p-3">
                   <div className="text-xs text-slate-500 mb-1">{p.section_path.join(' → ')}</div>
                   <div className="font-medium text-sm">{p.description}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                  <div className="text-xs text-content-secondary mt-1">
                     {(() => {
                       const dq = q.convert(Number(p.quantity), p.unit || '');
                       const dr = q.convertRate(Number(p.unit_rate), p.unit || '');
@@ -547,12 +547,12 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
                     <strong className="tabular-nums">{fmtFixed(Number(p.line_total), 2)} {p.currency}</strong>
                   </div>
                   {p.resources.length > 0 && (
-                    <div className="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-700">
+                    <div className="mt-2 pl-3 border-l-2 border-border-light">
                       <div className="text-xs text-slate-500 mb-1">{t('match_elements.detail.auto_loaded_resources', 'Auto-loaded resources:')}</div>
                       {p.resources.map((r, i) => {
                         const dr = q.convert(Number(r.quantity), r.unit || '');
                         return (
-                          <div key={i} className="text-xs flex justify-between text-slate-600 dark:text-slate-300">
+                          <div key={i} className="text-xs flex justify-between text-content-secondary">
                             <span>{r.description} (×{r.factor})</span>
                             <span className="tabular-nums">{`${fmtFixed(dr.value, 2)} ${r.unit ? dr.unit : ''}`.trim()}</span>
                           </div>
@@ -571,10 +571,10 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
           )}
         </div>
 
-        <footer className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <footer className="px-4 py-3 border-t border-border-light flex items-center justify-between">
           <button
             onClick={() => setNoMatchOpen(true)}
-            className="text-xs text-slate-600 hover:text-rose-600 inline-flex items-center gap-1"
+            className="text-xs text-slate-600 hover:text-semantic-error inline-flex items-center gap-1"
           >
             <XCircle className="w-3.5 h-3.5" />
             {t('match_elements.no_match', 'No match…')}
@@ -582,7 +582,7 @@ export function MatchDetailPanel({ sessionId, group, projectId, onClose }: Props
           <div className="flex items-center gap-1.5 text-xs text-slate-500">
             {t('match_elements.col.status', 'Status')}: <strong>{t(`match_elements.status.${group.status}`, { defaultValue: group.status })}</strong>
             <ChevronRight className="w-3 h-3" />
-            <CheckCircle2 className={`w-4 h-4 ${group.status === 'confirmed' ? 'text-emerald-500' : 'text-slate-300'}`} />
+            <CheckCircle2 className={`w-4 h-4 ${group.status === 'confirmed' ? 'text-semantic-success' : 'text-slate-300'}`} />
           </div>
         </footer>
       </aside>

@@ -253,7 +253,7 @@ function ActivePackSpotlight({
             </span>
             {t('packs.active_eyebrow', { defaultValue: 'Active pack' })}
           </p>
-          <h2 id="packs-active-title" className="mt-1 text-lg font-bold leading-snug text-content-primary">
+          <h2 id="packs-active-title" className="mt-1 text-lg font-semibold leading-snug text-content-primary">
             {entry.name}
           </h2>
           {summary && <p className="mt-0.5 text-sm text-content-secondary">{summary}</p>}

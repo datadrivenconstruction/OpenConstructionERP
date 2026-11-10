@@ -93,7 +93,7 @@ function UserAvatar({
 
   return (
     <div
-      className="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface-primary text-[10px] font-bold text-white"
+      className="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface-primary text-2xs font-semibold text-white"
       style={{ backgroundColor: color }}
       title={`${name}${isLocal ? ' (you)' : ''}`}
     >

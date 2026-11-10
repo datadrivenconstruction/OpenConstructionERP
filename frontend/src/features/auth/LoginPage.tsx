@@ -571,13 +571,13 @@ export function LoginPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
             </span>
-            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Open Source</span>
+            <span className="text-2xs font-medium tracking-wider text-emerald-700 dark:text-emerald-300">Open Source</span>
           </span>
         </div>
 
         {/* Marketing headline - kept as h2 because the form panel below has the
             authoritative h1 (visually hidden, always present in DOM). */}
-        <h2 className="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-[-0.025em] animate-stagger-in" style={{ animationDelay: '60ms' }}>
+        <h2 className="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-tight animate-stagger-in" style={{ animationDelay: '60ms' }}>
           {t('login.hero_h_a', { defaultValue: 'The' })}{' '}
           <span className="bg-gradient-to-r from-oe-blue to-sky-500 bg-clip-text text-transparent">#1</span>{' '}
           {t('login.hero_h_b', { defaultValue: 'open-source workspace for' })}
@@ -588,7 +588,7 @@ export function LoginPage() {
         </h2>
 
         {/* Subhead */}
-        <p className="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-[-0.008em] max-w-[420px] animate-stagger-in" style={{ animationDelay: '120ms' }}>
+        <p className="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-tight max-w-[420px] animate-stagger-in" style={{ animationDelay: '120ms' }}>
           {t('login.hero_desc', { defaultValue: 'Plan, estimate, schedule, tender - every step of a project on one professional platform.' })}
         </p>
 
@@ -604,7 +604,7 @@ export function LoginPage() {
           ].map((s) => (
             <div key={s.label} className="text-center">
               <div className="text-[22px] font-semibold text-content-primary tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-content-tertiary mt-0.5">{s.label}</div>
+              <div className="text-2xs text-content-tertiary mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
@@ -686,7 +686,7 @@ export function LoginPage() {
                     className={isAccent ? '' : 'text-oe-blue'}
                   />
                   <span
-                    className={`mt-[5px] text-[10px] font-semibold tracking-[-0.01em] ${
+                    className={`mt-[5px] text-2xs font-semibold tracking-tight ${
                       isAccent ? 'text-white/95' : 'text-slate-800'
                     }`}
                   >
@@ -713,11 +713,11 @@ export function LoginPage() {
                 <span aria-hidden className="absolute left-0 top-1 h-[14px] w-[2px] rounded-full bg-gradient-to-b from-oe-blue to-sky-500/60" />
                 <div className="flex items-center gap-1.5">
                   <Icon size={13} strokeWidth={1.8} className="text-oe-blue/85" />
-                  <span className="text-[12.5px] font-semibold tracking-[-0.01em] text-content-primary leading-tight">
+                  <span className="text-sm font-semibold tracking-tight text-content-primary leading-tight">
                     {feat.title}
                   </span>
                 </div>
-                <p className="mt-1 text-[11.5px] leading-[1.55] text-content-tertiary tracking-[-0.005em] whitespace-pre-line">
+                <p className="mt-1 text-xs leading-[1.55] text-content-tertiary tracking-tight whitespace-pre-line">
                   {feat.desc}
                 </p>
               </div>
@@ -727,7 +727,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <div className="mt-4 space-y-1 animate-stagger-in" style={{ animationDelay: '380ms' }}>
-          <div className="flex items-center gap-2 text-[11px] text-content-quaternary/60">
+          <div className="flex items-center gap-2 text-2xs text-content-quaternary/60">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-40"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">AGPL-3.0</a>
             <span className="opacity-30">&middot;</span>
@@ -775,7 +775,7 @@ export function LoginPage() {
                     />
                   ) : (
                     <span
-                      className="block max-w-full truncate text-center text-3xl font-extrabold text-content-primary leading-none"
+                      className="block max-w-full truncate text-center text-3xl font-semibold text-content-primary leading-none"
                       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
                       title={brandName}
                     >
@@ -785,7 +785,7 @@ export function LoginPage() {
                   {/* "by OpenConstructionERP" - subordinate attribution that
                       stays visible (AGPL-3.0). Mirrors CustomBranding.tsx. */}
                   <span
-                    className="mt-2 block text-[11px] leading-none text-content-tertiary"
+                    className="mt-2 block text-2xs leading-none text-content-tertiary"
                     style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '0.02em' }}
                   >
                     by{' '}
@@ -834,9 +834,9 @@ export function LoginPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
+                <span className="text-2xs font-semibold uppercase tracking-wider text-emerald-600">Open Source</span>
               </div>
-              <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
+              <p className="text-sm font-semibold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
                 {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
               </p>
             </div>
@@ -997,7 +997,7 @@ export function LoginPage() {
                       disabled={demoLoading !== null}
                       className="flex w-full items-center gap-3 rounded-xl border border-border-light/50 dark:border-white/10 bg-surface-secondary/50 dark:bg-white/[0.06] px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] dark:hover:bg-oe-blue/[0.14] hover:shadow-sm disabled:opacity-50 group"
                     >
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-semibold shadow-sm`}>
                         {demoLoading === acct.email ? (
                           <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
                         ) : (
@@ -1005,8 +1005,8 @@ export function LoginPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold text-content-primary">{acct.name}</div>
-                        <div className="text-[11px] text-content-tertiary dark:text-content-secondary truncate">{acct.email} · {acct.role}</div>
+                        <div className="text-sm font-semibold text-content-primary">{acct.name}</div>
+                        <div className="text-2xs text-content-tertiary dark:text-content-secondary truncate">{acct.email} · {acct.role}</div>
                       </div>
                       <ChevronDown size={15} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
                     </button>
@@ -1060,10 +1060,10 @@ export function LoginPage() {
                 <Github size={17} strokeWidth={1.9} />
               </span>
               <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
+                <span className="block text-sm font-semibold text-content-primary">
                   {t('login.github', { defaultValue: 'GitHub' })}
                 </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
+                <span className="block truncate text-2xs text-content-tertiary dark:text-content-secondary">
                   {t('login.github_sub', { defaultValue: 'Source code' })}
                 </span>
               </span>
@@ -1083,10 +1083,10 @@ export function LoginPage() {
                 <Users size={17} strokeWidth={1.9} />
               </span>
               <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
+                <span className="block text-sm font-semibold text-content-primary">
                   {t('login.community', { defaultValue: 'Community' })}
                 </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
+                <span className="block truncate text-2xs text-content-tertiary dark:text-content-secondary">
                   {t('login.community_sub', { defaultValue: 'Get help & discuss' })}
                 </span>
               </span>
@@ -1131,13 +1131,13 @@ export function LoginPage() {
             {/* Header */}
             <div className="px-6 pt-5 pb-4 border-b border-border-light clear-both">
               <LogoWithText size="sm" className="mb-3" />
-              <h3 className="text-base font-bold text-content-primary mb-2">
+              <h3 className="text-base font-semibold text-content-primary mb-2">
                 {t('about.title', 'Professional construction cost estimation - free and open source')}
               </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
+              <p className="text-sm text-content-secondary leading-relaxed">
                 {t('about.intro', 'OpenConstructionERP is a modern platform for construction cost management. It covers the full estimation workflow - from creating a bill of quantities to tendering and bid comparison. Designed for professionals worldwide, it supports international standards and works in 24 languages.')}
               </p>
-              <p className="mt-2 text-[13px] text-content-secondary leading-relaxed">
+              <p className="mt-2 text-sm text-content-secondary leading-relaxed">
                 {t('about.intro2', 'Unlike traditional commercial solutions, OpenConstructionERP runs entirely on your computer. Your project data never leaves your machine - you have full ownership and control. The source code is open and auditable, so you always know exactly what the software does.')}
               </p>
             </div>
@@ -1179,7 +1179,7 @@ export function LoginPage() {
               <h3 className="text-sm font-semibold text-content-primary mb-2">
                 {t('about.why_title', 'Why open source matters')}
               </h3>
-              <div className="space-y-2 text-[13px] text-content-secondary leading-relaxed">
+              <div className="space-y-2 text-sm text-content-secondary leading-relaxed">
                 <p>{t('about.why_1', 'Construction cost data is one of the most valuable assets a company owns. With proprietary software, your data is often locked inside formats you cannot control. If the vendor raises prices, changes terms, or discontinues the product - you may lose access to years of work.')}</p>
                 <p>{t('about.why_2', 'OpenConstructionERP takes a different approach. Your data is stored in open formats (SQLite, JSON, CSV) on your own hardware. You can export everything at any time. The source code is publicly auditable under AGPL-3.0, so there are no hidden data transfers, no telemetry, and no surprises.')}</p>
                 <p>{t('about.why_3', 'The platform is modular - install only what you need. Community modules extend functionality without bloating the core. And because it runs locally, it works offline and performs fast even with large projects.')}</p>
@@ -1191,7 +1191,7 @@ export function LoginPage() {
               <h3 className="text-sm font-semibold text-content-primary mb-2">
                 {t('about.who_title', 'Who is it for')}
               </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed mb-3">
+              <p className="text-sm text-content-secondary leading-relaxed mb-3">
                 {t('about.who_desc', 'OpenConstructionERP is designed for anyone involved in construction cost management - whether you work on residential projects or large-scale infrastructure, in-house or as a consultant.')}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -1227,7 +1227,7 @@ export function LoginPage() {
                   { value: '100%', label: t('about.stat.free', 'Free & open source') },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-lg bg-surface-secondary/50 py-2.5">
-                    <div className="text-lg font-bold text-oe-blue">{stat.value}</div>
+                    <div className="text-lg font-semibold text-oe-blue">{stat.value}</div>
                     <div className="text-2xs text-content-tertiary">{stat.label}</div>
                   </div>
                 ))}
@@ -1239,7 +1239,7 @@ export function LoginPage() {
               <h3 className="text-sm font-semibold text-content-primary mb-2">
                 {t('about.ai_title', 'About AI features')}
               </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
+              <p className="text-sm text-content-secondary leading-relaxed">
                 {t('about.ai_desc', 'OpenConstructionERP includes optional AI-powered tools - quick estimation from text descriptions, smart cost suggestions, and BOQ chat assistant. These features require an API key from a provider of your choice (Anthropic, OpenAI, Google). AI is always opt-in: it only activates when you configure it, and you decide what data to send. Without an API key, all other features work fully offline.')}
               </p>
             </div>

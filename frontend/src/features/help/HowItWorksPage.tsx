@@ -203,7 +203,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
         >
           <Icon size={19} strokeWidth={2} />
           {/* Sequence badge - makes the intended reading order obvious. */}
-          <span className="absolute -left-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full border border-surface-elevated bg-slate-900/85 px-1 text-2xs font-bold tabular-nums text-white shadow-sm dark:bg-slate-700">
+          <span className="absolute -left-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full border border-surface-elevated bg-slate-900/85 px-1 text-2xs font-semibold tabular-nums text-white shadow-sm dark:bg-slate-700">
             {index}
           </span>
         </span>
@@ -213,7 +213,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
               {title}
             </span>
             {module.beta && (
-              <span className="shrink-0 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
+              <span className="shrink-0 rounded-full bg-semantic-warning/15 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-semantic-warning">
                 {t('howto.beta', { defaultValue: 'Beta' })}
               </span>
             )}
@@ -243,7 +243,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
             className="mb-3 h-28 w-full"
           />
           <div className="rounded-xl bg-surface-secondary/50 p-3.5">
-            <p className="text-[13px] leading-relaxed text-content-secondary">{what}</p>
+            <p className="text-sm leading-relaxed text-content-secondary">{what}</p>
 
             {/* How it works — ordered steps. */}
             <p className="mt-3.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
@@ -251,10 +251,10 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
             </p>
             <ol className="mt-1.5 space-y-1.5">
               {module.how.map((step, i) => (
-                <li key={step.key} className="flex gap-2.5 text-[13px] text-content-secondary">
+                <li key={step.key} className="flex gap-2.5 text-sm text-content-secondary">
                   <span
                     aria-hidden="true"
-                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-semibold tabular-nums text-oe-blue"
+                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold tabular-nums text-oe-blue"
                   >
                     {i + 1}
                   </span>
@@ -271,9 +271,9 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
                 {module.tips.map((tip) => (
                   <li
                     key={tip.key}
-                    className="flex gap-2 rounded-lg bg-amber-500/5 px-2.5 py-1.5 text-xs leading-relaxed text-content-secondary ring-1 ring-inset ring-amber-500/10"
+                    className="flex gap-2 rounded-lg bg-semantic-warning/5 px-2.5 py-1.5 text-xs leading-relaxed text-content-secondary ring-1 ring-inset ring-amber-500/10"
                   >
-                    <Lightbulb size={13} className="mt-0.5 shrink-0 text-amber-500" aria-hidden="true" />
+                    <Lightbulb size={13} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
                     <span>{t(tip.key, { defaultValue: tip.default })}</span>
                   </li>
                 ))}

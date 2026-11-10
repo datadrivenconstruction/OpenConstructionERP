@@ -76,12 +76,12 @@ function TrendDirectionChip({
   > = {
     improving: {
       icon: TrendingDown,
-      cls: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+      cls: 'bg-semantic-success-bg text-semantic-success',
       label: t('safety.trend_improving', { defaultValue: 'Improving' }),
     },
     declining: {
       icon: TrendingUp,
-      cls: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+      cls: 'bg-semantic-error-bg text-semantic-error',
       label: t('safety.trend_declining', { defaultValue: 'Declining' }),
     },
     stable: {
@@ -138,7 +138,7 @@ export function SafetyTrendsChart({ projectId, period: initialPeriod = 'monthly'
             <div className="text-2xs uppercase text-content-tertiary">
               {t('safety.rolling_ltifr', { defaultValue: 'Rolling LTIFR' })}
             </div>
-            <div className="text-lg font-bold tabular-nums text-content-primary" data-testid="rolling-ltifr">
+            <div className="text-lg font-semibold tabular-nums text-content-primary" data-testid="rolling-ltifr">
               {data?.rolling_12_month_ltifr ?? '—'}
             </div>
           </div>
@@ -146,7 +146,7 @@ export function SafetyTrendsChart({ projectId, period: initialPeriod = 'monthly'
             <div className="text-2xs uppercase text-content-tertiary">
               {t('safety.rolling_trir', { defaultValue: 'Rolling TRIR' })}
             </div>
-            <div className="text-lg font-bold tabular-nums text-content-primary" data-testid="rolling-trir">
+            <div className="text-lg font-semibold tabular-nums text-content-primary" data-testid="rolling-trir">
               {data?.rolling_12_month_trir ?? '—'}
             </div>
           </div>

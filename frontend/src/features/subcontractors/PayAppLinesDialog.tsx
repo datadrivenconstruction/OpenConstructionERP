@@ -267,7 +267,7 @@ export function PayAppLinesDialog({
                       <td
                         className={
                           approvedKnown && gap > 0.004
-                            ? 'px-3 py-2 text-right text-amber-700 dark:text-amber-300'
+                            ? 'px-3 py-2 text-right text-semantic-warning'
                             : 'px-3 py-2 text-right text-content-tertiary'
                         }
                         data-testid="pay-app-line-gap"

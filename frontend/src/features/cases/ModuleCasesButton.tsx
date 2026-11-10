@@ -88,10 +88,10 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
         aria-expanded={open}
         aria-label={aria}
         title={aria}
-        icon={<BookOpen size={16} strokeWidth={2} className="text-emerald-600 dark:text-emerald-400" />}
+        icon={<BookOpen size={16} strokeWidth={2} className="text-semantic-success" />}
       >
         <span className="hidden sm:inline">{label}</span>
-        <span className="ms-1.5 inline-flex items-center justify-center rounded-full bg-surface-tertiary text-content-secondary text-[10px] font-semibold min-w-[16px] h-4 px-1 leading-none">
+        <span className="ms-1.5 inline-flex items-center justify-center rounded-full bg-surface-tertiary text-content-secondary text-2xs font-semibold min-w-[16px] h-4 px-1 leading-none">
           {cases.length}
         </span>
       </Button>
@@ -108,7 +108,7 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
           onMouseEnter={openNow}
           onMouseLeave={scheduleClose}
         >
-          <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <p className="px-2 pt-1 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('cases_for_module.heading', {
               defaultValue: 'Playbooks that use this module',
             })}
@@ -126,7 +126,7 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
                     <span className="block text-xs font-medium text-content-primary leading-snug">
                       {t(pb.titleKey, { defaultValue: pb.titleDefault })}
                     </span>
-                    <span className="block text-[10px] text-content-tertiary mt-0.5">
+                    <span className="block text-2xs text-content-tertiary mt-0.5">
                       {t('cases_for_module.steps_count', {
                         count: pb.steps.length,
                         defaultValue_one: '{{count}} step',
@@ -136,7 +136,7 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
                   </span>
                   <ArrowRight
                     size={13}
-                    className="shrink-0 mt-0.5 text-content-quaternary group-hover:text-emerald-600 transition-colors"
+                    className="shrink-0 mt-0.5 text-content-quaternary group-hover:text-semantic-success transition-colors"
                     aria-hidden
                   />
                 </button>
@@ -149,7 +149,7 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
               setOpen(false);
               navigate('/cases');
             }}
-            className="mt-1 w-full flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+            className="mt-1 w-full flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-2xs font-semibold text-semantic-success hover:bg-semantic-success/10 transition-colors"
           >
             {cases.length > MAX_SHOWN
               ? t('cases_for_module.see_all_n', {

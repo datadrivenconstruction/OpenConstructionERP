@@ -145,7 +145,7 @@ export default function LinkDocumentToBIMModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('bim.link_doc_title', { defaultValue: 'Link a document' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {elements.length === 1
                 ? '→ ' + (elements[0]!.name || elements[0]!.element_type)
                 : t('bim.link_doc_bulk', {
@@ -191,7 +191,7 @@ export default function LinkDocumentToBIMModal({
               {t('common.loading', { defaultValue: 'Loading…' })}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-[11px] text-content-tertiary italic">
+            <div className="text-center py-8 text-2xs text-content-tertiary italic">
               {docs.length === 0
                 ? t('bim.no_docs', {
                     defaultValue: 'No documents in this project yet - upload one first',
@@ -214,12 +214,12 @@ export default function LinkDocumentToBIMModal({
                           {d.name}
                         </span>
                         {d.drawing_number && (
-                          <span className="text-[10px] font-mono text-content-tertiary">
+                          <span className="text-2xs font-mono text-content-tertiary">
                             {d.drawing_number}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-content-tertiary">
+                      <div className="flex items-center gap-2 text-2xs text-content-tertiary">
                         {d.category && (
                           <span className="uppercase tracking-wider">{d.category}</span>
                         )}

@@ -147,7 +147,7 @@ export function SavedViewsRail({ projectId, onApply, compact = false }: SavedVie
         <Bookmark className="h-3.5 w-3.5" />
         <span>{t('files.views.title', { defaultValue: 'Saved views' })}</span>
         {views.length > 0 && (
-          <span className="ml-auto text-[10px] text-content-tertiary">{views.length}</span>
+          <span className="ml-auto text-2xs text-content-tertiary">{views.length}</span>
         )}
       </button>
       {expanded && (
@@ -191,7 +191,7 @@ export function SavedViewsRail({ projectId, onApply, compact = false }: SavedVie
                 {!compact && view.use_count > 0 && (
                   <span
                     data-testid={`saved-view-usecount-${view.id}`}
-                    className="ml-auto rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[10px] font-medium text-content-secondary"
+                    className="ml-auto rounded-full bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium text-content-secondary"
                   >
                     {view.use_count}
                   </span>

@@ -83,10 +83,10 @@ export function InspectionsQualityCard() {
 
   const rateColor =
     stats.passRate >= 90
-      ? 'text-emerald-600'
+      ? 'text-semantic-success'
       : stats.passRate >= 70
-        ? 'text-amber-600'
-        : 'text-rose-600';
+        ? 'text-semantic-warning'
+        : 'text-semantic-error';
 
   return (
     <Card className="h-full">
@@ -126,7 +126,7 @@ export function InspectionsQualityCard() {
             {
               label: t('dashboard.inspections_failed', { defaultValue: 'Failed' }),
               value: nf.format(stats.failed),
-              tone: stats.failed > 0 ? 'text-rose-600' : 'text-content-secondary',
+              tone: stats.failed > 0 ? 'text-semantic-error' : 'text-content-secondary',
             },
           ]}
         />

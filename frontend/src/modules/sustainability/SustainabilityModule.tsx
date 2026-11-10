@@ -47,10 +47,10 @@ function getComplianceLevel(gwpPerM2: number): 'excellent' | 'good' | 'acceptabl
 }
 
 const COMPLIANCE_STYLES = {
-  excellent:       { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', icon: CheckCircle2 },
-  good:            { bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-700 dark:text-green-400', icon: CheckCircle2 },
-  acceptable:      { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', icon: AlertTriangle },
-  'non-compliant': { bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-700 dark:text-red-400', icon: XCircle },
+  excellent:       { bg: 'bg-semantic-success-bg', text: 'text-semantic-success', icon: CheckCircle2 },
+  good:            { bg: 'bg-semantic-success-bg', text: 'text-semantic-success', icon: CheckCircle2 },
+  acceptable:      { bg: 'bg-semantic-warning-bg', text: 'text-semantic-warning', icon: AlertTriangle },
+  'non-compliant': { bg: 'bg-semantic-error-bg', text: 'text-semantic-error', icon: XCircle },
 };
 
 const materialMap = new Map(EPD_MATERIALS.map((m) => [m.id, m]));
@@ -179,11 +179,11 @@ export default function SustainabilityModule() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
-          <Leaf className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-success-bg">
+          <Leaf className="h-5 w-5 text-semantic-success" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-content-primary">
+          <h1 className="text-xl font-semibold text-content-primary">
             {t('sustainability.epd_title', { defaultValue: 'EPD / Embodied Carbon' })}
           </h1>
           <p className="text-sm text-content-tertiary">
@@ -258,7 +258,7 @@ export default function SustainabilityModule() {
                           className="flex items-center justify-between rounded px-2 py-1 text-xs hover:bg-surface-secondary"
                         >
                           <span className="text-content-primary truncate">{m.name}</span>
-                          <span className={`ml-2 whitespace-nowrap font-mono ${m.gwp < 0 ? 'text-emerald-600' : 'text-content-tertiary'}`}>
+                          <span className={`ml-2 whitespace-nowrap font-mono ${m.gwp < 0 ? 'text-semantic-success' : 'text-content-tertiary'}`}>
                             {m.gwp < 0 ? '' : '+'}{fmtFixed(m.gwp, m.gwp < 1 ? 3 : 1)} {m.unit}
                           </span>
                         </div>
@@ -369,13 +369,13 @@ export default function SustainabilityModule() {
                       />
                     </td>
                     <td className="px-3 py-2 text-xs text-content-tertiary">{item.unit}</td>
-                    <td className={`px-3 py-2 text-right font-mono text-xs ${item.gwp < 0 ? 'text-emerald-600' : 'text-content-primary'}`}>
+                    <td className={`px-3 py-2 text-right font-mono text-xs ${item.gwp < 0 ? 'text-semantic-success' : 'text-content-primary'}`}>
                       {item.gwp < 0 ? '' : '+'}{item.gwp.toLocaleString(getNumberLocale(), { maximumFractionDigits: 0 })}
                     </td>
                     <td className="px-3 py-2">
                       <button
                         onClick={() => removePosition(item.id)}
-                        className="text-content-quaternary hover:text-red-500"
+                        className="text-content-quaternary hover:text-semantic-error"
                         aria-label={t('sustainability.remove_position', { defaultValue: 'Remove position' })}
                       >
                         <X className="h-4 w-4" />
@@ -389,7 +389,7 @@ export default function SustainabilityModule() {
                   <td colSpan={4} className="px-3 py-2 text-sm font-semibold text-content-primary">
                     {t('common.total', { defaultValue: 'Total' })}
                   </td>
-                  <td className={`px-3 py-2 text-right font-mono text-sm font-bold ${carbonBreakdown.totalGWP < 0 ? 'text-emerald-600' : 'text-content-primary'}`}>
+                  <td className={`px-3 py-2 text-right font-mono text-sm font-semibold ${carbonBreakdown.totalGWP < 0 ? 'text-semantic-success' : 'text-content-primary'}`}>
                     {carbonBreakdown.totalGWP.toLocaleString(getNumberLocale(), { maximumFractionDigits: 0 })} kg
                   </td>
                   <td />
@@ -411,7 +411,7 @@ export default function SustainabilityModule() {
               <p className="text-xs text-content-tertiary mb-1">
                 {t('sustainability.total_gwp', { defaultValue: 'Total Embodied Carbon' })}
               </p>
-              <p className="text-xl font-bold text-content-primary">
+              <p className="text-xl font-semibold text-content-primary">
                 {fmtFixed(carbonBreakdown.totalGWP / 1000, 1)} <span className="text-sm font-normal">t CO2e</span>
               </p>
             </div>
@@ -419,7 +419,7 @@ export default function SustainabilityModule() {
               <p className="text-xs text-content-tertiary mb-1">
                 {t('sustainability.gwp_per_m2', { defaultValue: 'Carbon per m2 GFA' })}
               </p>
-              <p className="text-xl font-bold text-content-primary">
+              <p className="text-xl font-semibold text-content-primary">
                 {fmtFixed(carbonBreakdown.gwpPerM2, 1)} <span className="text-sm font-normal">kg CO2e/m2</span>
               </p>
             </div>
@@ -427,7 +427,7 @@ export default function SustainabilityModule() {
               <p className="text-xs text-content-tertiary mb-1">
                 {t('sustainability.gwp_annual', { defaultValue: 'Annual (50yr RSP)' })}
               </p>
-              <p className="text-xl font-bold text-content-primary">
+              <p className="text-xl font-semibold text-content-primary">
                 {fmtFixed(carbonBreakdown.gwpPerM2Year, 2)} <span className="text-sm font-normal">kg/m2/yr</span>
               </p>
             </div>
@@ -445,7 +445,7 @@ export default function SustainabilityModule() {
                     <span className="w-40 text-xs text-content-secondary truncate">{cat.label}</span>
                     <div className="flex-1 h-5 bg-surface-secondary rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 dark:bg-emerald-600 rounded-full transition-all"
+                        className="h-full bg-semantic-success rounded-full transition-all"
                         style={{ width: `${(cat.value / maxCategoryValue) * 100}%` }}
                       />
                     </div>
@@ -464,10 +464,10 @@ export default function SustainabilityModule() {
               {t('sustainability.cpr_benchmarks_title', { defaultValue: 'EU CPR 2024/3110 - GWP Benchmarks (A1-A3, 50yr RSP)' })}
             </p>
             <div className="flex flex-wrap gap-4 mt-2">
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> {t('sustainability.level_excellent', { defaultValue: 'Excellent' })}: &le; {EU_CPR_BENCHMARKS.excellent} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" /> {t('sustainability.level_good', { defaultValue: 'Good' })}: &le; {EU_CPR_BENCHMARKS.good} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" /> {t('sustainability.level_acceptable', { defaultValue: 'Acceptable' })}: &le; {EU_CPR_BENCHMARKS.acceptable} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" /> {t('sustainability.level_non_compliant', { defaultValue: 'Non-compliant' })}: &gt; {EU_CPR_BENCHMARKS.limit} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-semantic-success" /> {t('sustainability.level_excellent', { defaultValue: 'Excellent' })}: &le; {EU_CPR_BENCHMARKS.excellent} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-semantic-success" /> {t('sustainability.level_good', { defaultValue: 'Good' })}: &le; {EU_CPR_BENCHMARKS.good} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-semantic-warning" /> {t('sustainability.level_acceptable', { defaultValue: 'Acceptable' })}: &le; {EU_CPR_BENCHMARKS.acceptable} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-semantic-error" /> {t('sustainability.level_non_compliant', { defaultValue: 'Non-compliant' })}: &gt; {EU_CPR_BENCHMARKS.limit} kg/m2/yr</span>
             </div>
           </div>
         </div>

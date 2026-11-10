@@ -56,16 +56,16 @@ function PercentileCard({
 }) {
   const borderClass =
     variant === 'green'
-      ? 'rounded-lg border border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-950/20'
+      ? 'rounded-lg border border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20'
       : variant === 'orange'
-        ? 'rounded-lg border border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20'
+        ? 'rounded-lg border border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20'
         : 'rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm';
 
   const valueClass =
     variant === 'green'
-      ? 'text-emerald-700 dark:text-emerald-400'
+      ? 'text-semantic-success'
       : variant === 'orange'
-        ? 'text-amber-700 dark:text-amber-400'
+        ? 'text-semantic-warning'
         : 'text-content-primary';
 
   return (
@@ -73,7 +73,7 @@ function PercentileCard({
       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
         {label}
       </div>
-      <div className={`text-sm font-bold tabular-nums mt-0.5 ${valueClass}`}>
+      <div className={`text-sm font-semibold tabular-nums mt-0.5 ${valueClass}`}>
         {fmtCurrency(value, fmt)}
       </div>
     </div>
@@ -86,8 +86,8 @@ function StatTile({ label, value, hint }: { label: string; value: string; hint?:
   return (
     <div className="rounded-lg border border-border-light bg-surface-elevated/90 px-3 py-2">
       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{label}</div>
-      <div className="text-sm font-bold text-content-primary tabular-nums mt-0.5">{value}</div>
-      {hint && <div className="text-[10px] text-content-quaternary mt-0.5">{hint}</div>}
+      <div className="text-sm font-semibold text-content-primary tabular-nums mt-0.5">{value}</div>
+      {hint && <div className="text-2xs text-content-quaternary mt-0.5">{hint}</div>}
     </div>
   );
 }
@@ -105,17 +105,17 @@ function ConvergenceBadge({
 }) {
   const map = {
     converged: {
-      cls: 'border-emerald-400/50 bg-emerald-50/60 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400',
+      cls: 'border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20 text-semantic-success dark:text-emerald-400',
       icon: CheckCircle2,
       label: t('boq.cost_risk_converged', { defaultValue: 'Converged' }),
     },
     marginal: {
-      cls: 'border-amber-400/50 bg-amber-50/60 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400',
+      cls: 'border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20 text-semantic-warning dark:text-amber-400',
       icon: AlertTriangle,
       label: t('boq.cost_risk_marginal', { defaultValue: 'Marginal' }),
     },
     insufficient: {
-      cls: 'border-rose-400/50 bg-rose-50/60 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400',
+      cls: 'border-rose-400/50 bg-semantic-error/10 dark:bg-rose-950/20 text-semantic-error dark:text-rose-400',
       icon: AlertTriangle,
       label: t('boq.cost_risk_low_confidence', { defaultValue: 'Low confidence' }),
     },
@@ -175,7 +175,7 @@ function CorrelationControl({
           ))}
         </div>
       </div>
-      <p className="text-[10px] text-content-quaternary max-w-md">
+      <p className="text-2xs text-content-quaternary max-w-md">
         {t('boq.cost_risk_correlation_hint', {
           defaultValue:
             'Systemic drivers (escalation, market, weather) move many lines together. Higher correlation widens the band - independent lines unrealistically cancel out.',
@@ -214,7 +214,7 @@ function ContingencyCard({
               p: targetConfidence,
             })}
           </div>
-          <div className="text-lg font-bold text-blue-700 dark:text-blue-400 tabular-nums mt-0.5">
+          <div className="text-lg font-semibold text-blue-700 dark:text-blue-400 tabular-nums mt-0.5">
             {fmtCurrency(contingency, fmt)}{' '}
             <span className="text-sm font-medium text-blue-600/70 dark:text-blue-400/70">
               (+{fmtPercent(contingencyPct)})
@@ -225,12 +225,12 @@ function ContingencyCard({
           <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('boq.cost_risk_recommended_budget', { defaultValue: 'Recommended Budget' })}
           </div>
-          <div className="text-lg font-bold text-content-primary tabular-nums mt-0.5">
+          <div className="text-lg font-semibold text-content-primary tabular-nums mt-0.5">
             {fmtCurrency(recommendedBudget, fmt)}
           </div>
         </div>
       </div>
-      <p className="text-[11px] leading-snug text-content-secondary border-t border-blue-400/20 pt-2">
+      <p className="text-2xs leading-snug text-content-secondary border-t border-blue-400/20 pt-2">
         {t('boq.cost_risk_guidance', {
           defaultValue:
             'Budgeting at P{{p}} gives {{p}}% confidence the final cost will not exceed this amount. There is a {{base}}% chance it lands at or below the deterministic base estimate.',
@@ -296,8 +296,8 @@ function DistributionChart({
             const isRightOfP80 = binMid > p80;
 
             let barColor = 'bg-blue-400/60 hover:bg-blue-500';
-            if (isLeftOfP50) barColor = 'bg-emerald-400/50 hover:bg-emerald-500';
-            else if (isRightOfP80) barColor = 'bg-rose-400/50 hover:bg-rose-500';
+            if (isLeftOfP50) barColor = 'bg-emerald-400/50 hover:bg-semantic-success';
+            else if (isRightOfP80) barColor = 'bg-rose-400/50 hover:bg-semantic-error';
 
             return (
               <div
@@ -338,25 +338,25 @@ function DistributionChart({
 
         {/* P50 / P80 marker lines */}
         <div
-          className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-emerald-600 dark:border-emerald-400 pointer-events-none"
+          className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-semantic-success/60 pointer-events-none"
           style={{ left: `${Math.min(Math.max(p50Pct, 0), 100)}%` }}
         >
-          <span className="absolute -top-5 -translate-x-1/2 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap bg-surface-primary/80 px-1 rounded">
+          <span className="absolute -top-5 -translate-x-1/2 text-2xs font-semibold text-semantic-success whitespace-nowrap bg-surface-primary/80 px-1 rounded">
             P50
           </span>
         </div>
         <div
-          className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-amber-600 dark:border-amber-400 pointer-events-none"
+          className="absolute bottom-0 top-0 w-px border-l-2 border-dashed border-semantic-warning/60 pointer-events-none"
           style={{ left: `${Math.min(Math.max(p80Pct, 0), 100)}%` }}
         >
-          <span className="absolute -top-5 -translate-x-1/2 text-[10px] font-semibold text-amber-700 dark:text-amber-400 whitespace-nowrap bg-surface-primary/80 px-1 rounded">
+          <span className="absolute -top-5 -translate-x-1/2 text-2xs font-semibold text-semantic-warning whitespace-nowrap bg-surface-primary/80 px-1 rounded">
             P80
           </span>
         </div>
       </div>
 
       {/* X-axis labels */}
-      <div className="flex justify-between text-[10px] text-content-quaternary tabular-nums">
+      <div className="flex justify-between text-2xs text-content-quaternary tabular-nums">
         <span>{fmtCurrency(minVal, fmt)}</span>
         <span>{fmtCurrency(maxVal, fmt)}</span>
       </div>
@@ -432,9 +432,9 @@ function RiskDriversTable({
                 <td className="px-3 py-2 text-right tabular-nums text-content-secondary whitespace-nowrap">
                   {driver.swing_low != null && driver.swing_high != null ? (
                     <>
-                      <span className="text-emerald-600">{fmtCurrency(driver.swing_low, fmt)}</span>
+                      <span className="text-semantic-success">{fmtCurrency(driver.swing_low, fmt)}</span>
                       {' / '}
-                      <span className="text-rose-600">+{fmtCurrency(driver.swing_high, fmt)}</span>
+                      <span className="text-semantic-error">+{fmtCurrency(driver.swing_high, fmt)}</span>
                     </>
                   ) : (
                     '-'
@@ -444,7 +444,7 @@ function RiskDriversTable({
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-20 h-2 bg-surface-tertiary rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-rose-500/70 transition-all"
+                        className="h-full rounded-full bg-semantic-error/70 transition-all"
                         style={{ width: `${(driver.contribution_pct / maxContribution) * 100}%` }}
                       />
                     </div>

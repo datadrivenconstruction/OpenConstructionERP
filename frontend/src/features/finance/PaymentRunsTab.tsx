@@ -70,7 +70,7 @@ function IssueList({ issues }: { issues: PaymentRunIssue[] }) {
             'flex items-start gap-2 rounded-lg px-3 py-2 text-sm',
             issue.severity === 'error'
               ? 'bg-semantic-error/10 text-semantic-error'
-              : 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+              : 'bg-semantic-warning/10 text-semantic-warning',
           )}
         >
           {issue.severity === 'error' ? (

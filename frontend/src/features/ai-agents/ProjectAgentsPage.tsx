@@ -419,7 +419,7 @@ export function ProjectAgentsPage() {
         }
       />
       {state?.halted && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-700 dark:text-red-300">
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-semantic-error/5 p-3 text-sm text-semantic-error dark:text-red-300">
           <Octagon className="h-4 w-4" />
           {t('project_agents.halted', { defaultValue: 'All agents are stopped on this project. No run can start.' })}
         </div>

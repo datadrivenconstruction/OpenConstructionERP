@@ -1501,7 +1501,7 @@ function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: Pi
                         title={title}
                       >
                         {col.name}
-                        {!isNum && <span className="ml-1 opacity-60 text-[9px]">abc</span>}
+                        {!isNum && <span className="ml-1 opacity-60 text-2xs">abc</span>}
                       </button>
                     );
                   })}
@@ -1564,7 +1564,7 @@ function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: Pi
             {thresholdRules.length > 0 && (
               <span
                 data-testid="pivot-thresholds-badge"
-                className="ml-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-200 text-[10px] font-semibold tabular-nums"
+                className="ml-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-200 text-2xs font-semibold tabular-nums"
               >
                 {thresholdRules.length}
               </span>
@@ -2325,7 +2325,7 @@ function LazyRechart({ slices, kind, formatAxis, onSliceClick, onSliceDoubleClic
           <button
             type="button"
             onClick={() => onSliceClick(s)}
-            className="flex items-center gap-1.5 text-[11px] text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
+            className="flex items-center gap-1.5 text-2xs text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
             title={`${s.label}: ${formatAxis(s.value)}`}
           >
             <span
@@ -2749,20 +2749,20 @@ function DescribeSummary({
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.data_completeness', { defaultValue: 'Data Completeness' })}</p>
-          <p className={`text-lg font-bold tabular-nums ${qualityScore > 50 ? 'text-green-600' : qualityScore > 20 ? 'text-amber-600' : 'text-red-500'}`}>
+          <p className={`text-lg font-semibold tabular-nums ${qualityScore > 50 ? 'text-green-600' : qualityScore > 20 ? 'text-amber-600' : 'text-red-500'}`}>
             {fmtPercent(qualityScore)}
           </p>
         </div>
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.useful_columns', { defaultValue: 'Useful Columns' })}</p>
-          <p className="text-lg font-bold text-content-primary tabular-nums">
+          <p className="text-lg font-semibold text-content-primary tabular-nums">
             {describe.columns.filter((c) => c.non_null > describe.total_elements * 0.5).length}
             <span className="text-xs text-content-quaternary font-normal ml-1">/ {describe.total_columns}</span>
           </p>
         </div>
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.sparse_columns', { defaultValue: 'Sparse (<10%)' })}</p>
-          <p className="text-lg font-bold text-amber-600 tabular-nums">{lowCoverageCols}</p>
+          <p className="text-lg font-semibold text-amber-600 tabular-nums">{lowCoverageCols}</p>
         </div>
       </div>
 
@@ -3281,10 +3281,10 @@ function UploadConvertZone({
                 <p className="text-sm font-semibold text-content-primary truncate">{t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}</p>
                 <p className="text-2xs text-content-tertiary">{remaining > 0 ? t('explorer.seconds_remaining', { defaultValue: '~{{count}}s remaining', count: remaining }) : t('explorer.finalizing', { defaultValue: 'Finalizing...' })}</p>
               </div>
-              <span className="text-lg font-bold text-oe-blue tabular-nums shrink-0">{Math.round(progressPct)}%</span>
+              <span className="text-lg font-semibold text-oe-blue tabular-nums shrink-0">{Math.round(progressPct)}%</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-              <div className="h-full rounded-full bg-oe-blue transition-all duration-1000" style={{ width: `${progressPct}%` }} />
+              <div className="h-full rounded-full bg-oe-blue transition-all duration-500" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
         ) : done ? (
@@ -3299,7 +3299,7 @@ function UploadConvertZone({
                 <FileUp size={30} className="text-oe-blue" />
               </div>
               <div>
-                <p className="text-base font-bold text-content-primary mb-1">
+                <p className="text-base font-semibold text-content-primary mb-1">
                   {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT or DWG file here' })}
                 </p>
                 <p className="text-sm text-content-tertiary">
@@ -3308,7 +3308,7 @@ function UploadConvertZone({
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {CAD_FORMATS.map((fmt) => (
-                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-semibold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
                 ))}
               </div>
               <p className="text-2xs text-content-quaternary">
@@ -3664,10 +3664,10 @@ function KpiStrip({ describe }: { describe: DescribeResponse }) {
               <Icon size={14} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-content-quaternary truncate">
+              <p className="text-2xs font-semibold uppercase tracking-wide text-content-quaternary truncate">
                 {tile.label}
               </p>
-              <p className={`text-sm font-bold tabular-nums ${tile.accent}`}>{tile.value}</p>
+              <p className={`text-sm font-semibold tabular-nums ${tile.accent}`}>{tile.value}</p>
             </div>
           </div>
         );
@@ -4039,7 +4039,7 @@ export function CadDataExplorerPage() {
                       first thing a user sees on this route should be the
                       name they clicked. The subtitle below carries the
                       description; the heading only has to name the place. */}
-                  <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
+                  <h1 className="text-2xl font-semibold text-content-primary tracking-tight leading-tight">
                     {t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' })}
                   </h1>
                   <p className="text-base text-content-secondary mt-3 leading-relaxed">
@@ -4054,12 +4054,12 @@ export function CadDataExplorerPage() {
                       <span className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium">
                         {t('common.local_processing', { defaultValue: '100% Local Processing \u00B7 Your files never leave your computer' })}
                       </span>
-                      <span className="text-[10px] text-emerald-500/40">|</span>
+                      <span className="text-2xs text-emerald-500/40">|</span>
                       <a
                         href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
+                        className="text-2xs text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
                       >
                         {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                       </a>
@@ -4071,7 +4071,7 @@ export function CadDataExplorerPage() {
 
             {/* Feature cards */}
             <div className="mb-8">
-              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
+              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-widest mb-3">
                 {t('explorer.what_you_get', { defaultValue: 'What you get' })}
               </h2>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -4080,7 +4080,7 @@ export function CadDataExplorerPage() {
                     <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
                     <div className="min-w-0">
                       <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                      <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                      <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -4100,7 +4100,7 @@ export function CadDataExplorerPage() {
             <span className="text-xs font-semibold text-content-primary">
               {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
             </span>
-            <span className="text-[11px] text-content-quaternary ml-1.5">({allSessions.length})</span>
+            <span className="text-2xs text-content-quaternary ml-1.5">({allSessions.length})</span>
           </div>
           <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
             {recentSessions.map((s) => {
@@ -4135,7 +4135,7 @@ export function CadDataExplorerPage() {
                     }`} />
                     <div className="px-3.5 py-3">
                       <div className="flex items-center gap-2 mb-1.5 pr-6">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[9px] font-black tracking-tighter leading-none ${
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-2xs font-semibold tracking-tighter leading-none ${
                           fmt === 'RVT' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
                           fmt === 'IFC' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
                           fmt === 'DWG' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
@@ -4143,7 +4143,7 @@ export function CadDataExplorerPage() {
                         }`}>{fmt || '?'}</div>
                         <span className="text-xs font-semibold text-content-primary truncate">{s.display_name}</span>
                       </div>
-                      <div className="flex items-center gap-2.5 text-[11px] text-content-tertiary">
+                      <div className="flex items-center gap-2.5 text-2xs text-content-tertiary">
                         <span className="font-medium tabular-nums">{s.element_count.toLocaleString(getNumberLocale())} {t('explorer.elements_short', { defaultValue: 'elements' })}</span>
                         {s.is_permanent && <span className="text-emerald-500 font-medium">{t('explorer.saved_badge', { defaultValue: 'saved' })}</span>}
                         {timeAgo && <span className="ml-auto text-content-quaternary">{timeAgo}</span>}
@@ -4183,7 +4183,7 @@ export function CadDataExplorerPage() {
               <Database size={18} className="text-oe-blue" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-content-primary">
+              <h1 className="text-sm font-semibold text-content-primary">
                 {/* #149: was `explorer.title`, a second key holding the same
                     English words as `nav.cad_bim_explorer`. A second copy of
                     a translated name is what lets it drift - the shortcuts
@@ -4192,7 +4192,7 @@ export function CadDataExplorerPage() {
                 {describe ? describe.filename : t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' })}
               </h1>
               {describe?.format && (
-                <p className="text-[10px] text-content-tertiary truncate max-w-[160px]">{describe.format.toUpperCase()} {t('explorer.data_session', { defaultValue: 'Data Session' })}</p>
+                <p className="text-2xs text-content-tertiary truncate max-w-[160px]">{describe.format.toUpperCase()} {t('explorer.data_session', { defaultValue: 'Data Session' })}</p>
               )}
             </div>
           </div>
@@ -4200,19 +4200,19 @@ export function CadDataExplorerPage() {
             <div className="flex items-center gap-2 ms-2">
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
                 <Hash size={12} className="text-content-quaternary" />
-                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.elements', { defaultValue: 'Elements' })}</span>
-                <span className="text-[10px] font-bold text-content-primary tabular-nums">{describe.total_elements.toLocaleString(getNumberLocale())}</span>
+                <span className="text-2xs font-medium text-content-tertiary">{t('explorer.elements', { defaultValue: 'Elements' })}</span>
+                <span className="text-2xs font-semibold text-content-primary tabular-nums">{describe.total_elements.toLocaleString(getNumberLocale())}</span>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
                 <Columns3 size={12} className="text-content-quaternary" />
-                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.columns', { defaultValue: 'Parameter columns' })}</span>
-                <span className="text-[10px] font-bold text-content-primary tabular-nums">{describe.total_columns}</span>
+                <span className="text-2xs font-medium text-content-tertiary">{t('explorer.columns', { defaultValue: 'Parameter columns' })}</span>
+                <span className="text-2xs font-semibold text-content-primary tabular-nums">{describe.total_columns}</span>
               </div>
               {describe.format && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
                   <Database size={12} className="text-content-quaternary" />
-                  <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.format', { defaultValue: 'Format' })}</span>
-                  <span className="text-[10px] font-bold text-content-primary">{describe.format.toUpperCase()}</span>
+                  <span className="text-2xs font-medium text-content-tertiary">{t('explorer.format', { defaultValue: 'Format' })}</span>
+                  <span className="text-2xs font-semibold text-content-primary">{describe.format.toUpperCase()}</span>
                 </div>
               )}
             </div>
@@ -4230,7 +4230,7 @@ export function CadDataExplorerPage() {
                 if (modelId) navigate(`/bim/${encodeURIComponent(modelId)}`);
               }}
               data-testid="explorer-open-in-bim-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
               title={t('explorer.open_in_bim_title', { defaultValue: 'View 3D model' })}
               aria-label={t('explorer.open_in_bim', { defaultValue: 'Open in BIM viewer' })}
             >
@@ -4243,7 +4243,7 @@ export function CadDataExplorerPage() {
           <button
             onClick={handleSaveView}
             data-testid="explorer-save-view-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
             title={t('explorer.save_view', { defaultValue: 'Save view' })}
             aria-label={t('explorer.save_view', { defaultValue: 'Save view' })}
           >
@@ -4253,7 +4253,7 @@ export function CadDataExplorerPage() {
           <button
             onClick={() => setShowViewsDrawer(true)}
             data-testid="explorer-views-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
             title={t('explorer.views', { defaultValue: 'Views' })}
             aria-label={t('explorer.views', { defaultValue: 'Views' })}
           >
@@ -4267,7 +4267,7 @@ export function CadDataExplorerPage() {
           </button>
           <button
             onClick={() => setShowSaveDialog(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
             title={t('explorer.save_filters_hint', {
               defaultValue: 'Bookmark current filters, slicers, and chart settings so you can reopen this view later from the Views drawer.',
             })}
@@ -4278,7 +4278,7 @@ export function CadDataExplorerPage() {
           <button
             onClick={() => setShowSaveToProjectDialog(true)}
             data-testid="explorer-save-to-project-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
             title={t('explorer.save_to_project_hint', {
               defaultValue: 'Save these elements as a BIM model in a project so you can view them in the BIM Viewer.',
             })}
@@ -4290,7 +4290,7 @@ export function CadDataExplorerPage() {
           <button
             onClick={() => { setSearchParams({}); }}
             data-testid="explorer-new-file-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
             title={t('explorer.new_file_hint', {
               defaultValue: 'Close this session and upload a different CAD or BIM file',
             })}

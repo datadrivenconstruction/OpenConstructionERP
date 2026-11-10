@@ -50,13 +50,13 @@ export const PLOT_STATUS_VARIANT: Record<
 
 export const PLOT_STATUS_COLOR: Record<PlotStatus, string> = {
   planned: 'bg-slate-200 text-slate-700 border-slate-300',
-  reserved: 'bg-amber-100 text-amber-800 border-amber-300',
-  under_construction: 'bg-sky-100 text-sky-800 border-sky-300',
+  reserved: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
+  under_construction: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
   ready: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-  sold: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  handed_over: 'bg-emerald-200 text-emerald-900 border-emerald-400',
-  held: 'bg-amber-200 text-amber-900 border-amber-400',
-  blocked: 'bg-rose-100 text-rose-800 border-rose-300',
+  sold: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  handed_over: 'bg-emerald-200 text-semantic-success border-semantic-success/60',
+  held: 'bg-amber-200 text-semantic-warning border-semantic-warning/60',
+  blocked: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 
 export const BUYER_STAGE_ORDER: BuyerStatus[] = [

@@ -103,7 +103,7 @@ export function PunchListQualityCard() {
             {
               label: t('dashboard.punch_overdue', { defaultValue: 'Overdue' }),
               value: formatCount(overdue),
-              tone: hasOverdue ? 'text-rose-600' : 'text-content-secondary',
+              tone: hasOverdue ? 'text-semantic-error' : 'text-content-secondary',
             },
             {
               label: t('dashboard.punch_avg_label', { defaultValue: 'Avg to close' }),

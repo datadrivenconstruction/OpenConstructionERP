@@ -79,7 +79,7 @@ export function SeriesActionRegisterDialog({ seriesId, onClose }: SeriesActionRe
             <SummaryChip
               label={statusLabel('in_progress')}
               value={data?.in_progress ?? 0}
-              tone="text-amber-500"
+              tone="text-semantic-warning"
             />
             <SummaryChip
               label={statusLabel('done')}

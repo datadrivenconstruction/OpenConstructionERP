@@ -29,9 +29,9 @@ function ConfidenceBadge({ value, threshold }: { value: number; threshold: numbe
     <span
       className={clsx(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium',
-        tone === 'high' && 'bg-green-500/10 text-green-700 dark:text-green-300',
-        tone === 'medium' && 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-        tone === 'low' && 'bg-red-500/10 text-red-700 dark:text-red-300',
+        tone === 'high' && 'bg-semantic-success/10 text-semantic-success',
+        tone === 'medium' && 'bg-semantic-warning/10 text-semantic-warning',
+        tone === 'low' && 'bg-semantic-error/10 text-semantic-error',
       )}
       title={t('doc_assistant.confidence_hint', {
         defaultValue: 'How much of your question the best passage covers. Below {{threshold}}% the assistant does not answer.',
@@ -89,7 +89,7 @@ function AnswerView({ result }: { result: AskResponse }) {
   }
   if (result.status === 'not_found') {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+      <div className="rounded-xl border border-amber-500/30 bg-semantic-warning/5 p-4">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-medium text-content-primary">
             {t('doc_assistant.not_found', { defaultValue: 'Not found in project documents.' })}
@@ -296,7 +296,7 @@ export function DocAssistantPage() {
                   </div>
                   <p className="line-clamp-2 text-xs text-content-secondary">{s.answer}</p>
                   {s.validation?.status === 'warnings' && (
-                    <p className="mt-1 text-2xs text-amber-700 dark:text-amber-300">{s.validation.findings[0]?.message}</p>
+                    <p className="mt-1 text-2xs text-semantic-warning">{s.validation.findings[0]?.message}</p>
                   )}
                 </div>
               ))}

@@ -302,7 +302,7 @@ function SavedTab({
                 defaultValue: 'Delete {{name}}',
                 name: p.name,
               })}
-              className="rounded-md p-1.5 text-content-quaternary hover:bg-red-50 hover:text-semantic-error dark:hover:bg-red-950/30"
+              className="rounded-md p-1.5 text-content-quaternary hover:bg-semantic-error-bg hover:text-semantic-error"
             >
               <Trash2 size={15} aria-hidden="true" />
             </button>

@@ -128,7 +128,7 @@ export function FinanceSummaryCard() {
               <FileEdit size={12} className="text-violet-500" />
               {t('dashboard.finance_change_orders', { defaultValue: 'Open change orders' })}
             </div>
-            <div className="mt-1 text-base font-bold text-content-primary">
+            <div className="mt-1 text-base font-semibold text-content-primary">
               <MoneyChips
                 chips={coChips}
                 emptyLabel={t('dashboard.finance_no_change_orders', { defaultValue: 'None open' })}
@@ -155,21 +155,21 @@ export function FinanceSummaryCard() {
             className={[
               'group rounded-xl border p-3 text-left shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30',
               overBudgetCount > 0
-                ? 'border-amber-300/60 bg-amber-50 dark:bg-amber-900/10'
+                ? 'border-semantic-warning/30 bg-semantic-warning-bg'
                 : 'border-border-light bg-surface-elevated/90',
             ].join(' ')}
           >
             <div className="flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
               <AlertTriangle
                 size={12}
-                className={overBudgetCount > 0 ? 'text-amber-500' : 'text-content-quaternary'}
+                className={overBudgetCount > 0 ? 'text-semantic-warning' : 'text-content-quaternary'}
               />
               {t('dashboard.finance_budget_warnings', { defaultValue: 'Budget warnings' })}
             </div>
             <div
               className={[
-                'mt-1 text-xl font-bold tabular-nums',
-                overBudgetCount > 0 ? 'text-amber-600' : 'text-content-primary',
+                'mt-1 text-xl font-semibold tabular-nums',
+                overBudgetCount > 0 ? 'text-semantic-warning' : 'text-content-primary',
               ].join(' ')}
             >
               {overBudgetCount}

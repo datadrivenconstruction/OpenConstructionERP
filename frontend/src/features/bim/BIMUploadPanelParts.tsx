@@ -56,7 +56,7 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
           <button
             type="button"
             onClick={() => cancelUpload(job.id)}
-            className="shrink-0 text-[10px] font-medium text-content-tertiary hover:text-red-500"
+            className="shrink-0 text-2xs font-medium text-content-tertiary hover:text-red-500"
             title={
               job.serverConverting
                 ? t('bim_upload.cancel_server_tip', {
@@ -70,7 +70,7 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
         )}
       </div>
       {done ? (
-        <p className="text-[10px] text-green-600 dark:text-green-400">
+        <p className="text-2xs text-green-600 dark:text-green-400">
           {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
         </p>
       ) : (
@@ -139,7 +139,7 @@ export function BIMUploadDuplicatePrompt({
             pending.start(latest.model_id);
             onDone();
           }}
-          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
+          className="px-2.5 py-1 rounded-lg text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
         >
           {t('bim_upload.duplicate_as_version', {
             defaultValue: 'Upload as new version of "{{model}}"',
@@ -153,14 +153,14 @@ export function BIMUploadDuplicatePrompt({
             pending.start(null);
             onDone();
           }}
-          className="px-2.5 py-1 rounded-lg text-[11px] font-medium border border-border-light text-content-secondary hover:bg-surface-secondary"
+          className="px-2.5 py-1 rounded-lg text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-secondary"
         >
           {t('bim_upload.duplicate_as_separate', { defaultValue: 'Upload as a separate model' })}
         </button>
         <button
           type="button"
           onClick={onDone}
-          className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-content-tertiary hover:text-content-primary"
+          className="px-2.5 py-1 rounded-lg text-2xs font-medium text-content-tertiary hover:text-content-primary"
         >
           {t('common.cancel', { defaultValue: 'Cancel' })}
         </button>

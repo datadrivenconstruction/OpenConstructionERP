@@ -252,7 +252,7 @@ function AssigneeChip({
       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-oe-blue-subtle text-2xs text-oe-blue-text border border-oe-blue/30 max-w-[150px]"
       title={display}
     >
-      <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-oe-blue text-content-inverse text-[8px] font-semibold shrink-0">
+      <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-oe-blue text-content-inverse text-2xs font-semibold shrink-0">
         {initials}
       </span>
       <span className="truncate">{display}</span>

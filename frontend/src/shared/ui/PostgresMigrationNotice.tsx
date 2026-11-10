@@ -90,7 +90,7 @@ export function PostgresMigrationNotice() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new CustomEvent('oe:open-bug-report'))}
-        className="ml-1 shrink-0 whitespace-nowrap underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+        className="ml-1 shrink-0 whitespace-nowrap underline underline-offset-2 hover:text-semantic-warning"
       >
         {t('pg_notice.report', { defaultValue: 'Report a problem' })}
       </button>

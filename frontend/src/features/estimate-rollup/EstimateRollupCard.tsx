@@ -86,14 +86,14 @@ export function EstimateRollupCard({ projectId }: { projectId: string }) {
           <dt className="text-sm font-semibold text-content-primary">
             {t('estimate_rollup.total', { defaultValue: 'Estimate total' })}
           </dt>
-          <dd className="text-lg font-bold tabular-nums text-content-primary">
+          <dd className="text-lg font-semibold tabular-nums text-content-primary">
             {formatCurrency(data.estimate_total, currency)}
           </dd>
         </div>
       </dl>
 
       {data.allowances.unconverted_currencies.length > 0 && (
-        <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-amber-50 p-2 text-2xs text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+        <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-semantic-warning-bg p-2 text-2xs text-semantic-warning">
           <Info size={12} className="mt-0.5 shrink-0" />
           <span>
             {t('estimate_rollup.unconverted_note', {

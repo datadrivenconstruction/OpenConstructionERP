@@ -273,7 +273,7 @@ export default function SaveSmartViewModal({
                   defaultValue: 'Share with team',
                 })}
               </div>
-              <div className="text-content-tertiary text-[11px]">
+              <div className="text-content-tertiary text-2xs">
                 {t('bim.smartview.share_desc', {
                   defaultValue:
                     'Anyone with access to this project can see and apply it. Uncheck to keep it private to you.',
@@ -295,7 +295,7 @@ export default function SaveSmartViewModal({
                   defaultValue: 'Default for BIM module',
                 })}
               </div>
-              <div className="text-content-tertiary text-[11px]">
+              <div className="text-content-tertiary text-2xs">
                 {t('bim.smartview.default_desc', {
                   defaultValue:
                     'Auto-apply this view when the BIM page opens with no explicit selection.',
@@ -306,7 +306,7 @@ export default function SaveSmartViewModal({
         </div>
 
         {/* Match-count summary */}
-        <div className="flex items-center gap-2 text-[11px] text-content-tertiary">
+        <div className="flex items-center gap-2 text-2xs text-content-tertiary">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-oe-blue/10 text-oe-blue font-medium">
             {matchedCount.toLocaleString(getNumberLocale())}{' '}
             {t('bim.elements', { defaultValue: 'elements' })}

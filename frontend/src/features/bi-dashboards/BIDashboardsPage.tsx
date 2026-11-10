@@ -562,7 +562,7 @@ function DashboardsGrid({
     return (
       <Card padding="md">
         <div className="flex flex-col items-center text-center py-8 px-4 max-w-lg mx-auto">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-300">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-semantic-info-bg text-semantic-info">
             <Sparkles size={22} />
           </div>
           <h3 className="mt-3 text-base font-semibold text-content-primary">
@@ -808,7 +808,7 @@ function KpiLibraryCard({ kpi }: { kpi: KpiDefinition }) {
       {/* CONN-79: source-module chips — show which modules feed the number. */}
       {sourceModules.length > 0 && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-content-tertiary">
+          <span className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('bi.kpi_sources', { defaultValue: 'Sources' })}
           </span>
           {sourceModules.map((m) => (
@@ -822,7 +822,7 @@ function KpiLibraryCard({ kpi }: { kpi: KpiDefinition }) {
         </div>
       )}
       <div className="mt-2 flex items-center justify-between gap-2">
-        <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
+        <p className="text-2xs uppercase tracking-wide text-content-tertiary">
           {t('bi.last_n_periods', { defaultValue: 'Last {{n}} periods', n: values.length })}
         </p>
         <div className="flex items-center gap-1">
@@ -971,7 +971,7 @@ function KpiSourceRecordsDrawer({
       ) : (
         <div className="flex flex-col gap-2 p-3">
           {truncated && (
-            <p className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-2xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+            <p className="rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-2.5 py-1.5 text-2xs text-semantic-warning">
               {t('bi.source_records_truncated', {
                 defaultValue:
                   'Only the first {{n}} records are shown for performance. Narrow the scope or export the KPI to see the full set.',
@@ -1855,16 +1855,16 @@ function DashboardRenderPanel({
           )}
           {renderQ.isLoading && <SkeletonTable rows={4} columns={3} />}
           {renderQ.isError && (
-            <p className="text-sm text-rose-600">{getErrorMessage(renderQ.error)}</p>
+            <p className="text-sm text-semantic-error">{getErrorMessage(renderQ.error)}</p>
           )}
           {/* When the dashboard renders but evaluating the (filtered) widgets
               fails, surface it as a distinct alert below the still-visible
               cross-filter chips so the user understands the active filters are
               what failed and remain applied (clear them to recover). */}
           {evaluateQ.isError && !renderQ.isError && (
-            <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-900/40 dark:bg-rose-900/20">
-              <AlertOctagon size={16} className="mt-0.5 shrink-0 text-rose-600" />
-              <div className="text-sm text-rose-700 dark:text-rose-300">
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2">
+              <AlertOctagon size={16} className="mt-0.5 shrink-0 text-semantic-error" />
+              <div className="text-sm text-semantic-error">
                 <p className="font-medium">
                   {Object.keys(filtersForQuery).length > 0
                     ? t('bi.evaluate_error_filtered', {
@@ -2023,7 +2023,7 @@ function WidgetTile({
           type="button"
           onClick={onDelete}
           disabled={deleting}
-          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-rose-600 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-900/20"
+          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50"
           title={t('bi.remove_widget', { defaultValue: 'Remove widget' })}
         >
           {deleting ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
@@ -2473,7 +2473,7 @@ function HalfGauge({ value, threshold }: { value: number; threshold: number }) {
         fill="none"
         stroke="currentColor"
         strokeWidth={6}
-        className={pct > 0.85 ? 'text-rose-500' : pct > 0.6 ? 'text-amber-500' : 'text-oe-blue'}
+        className={pct > 0.85 ? 'text-semantic-error' : pct > 0.6 ? 'text-semantic-warning' : 'text-oe-blue'}
       />
       <line x1={cx} y1={cy} x2={nx} y2={ny} strokeWidth={2} className="stroke-content-primary" />
       <circle cx={cx} cy={cy} r={3} className="fill-content-primary" />

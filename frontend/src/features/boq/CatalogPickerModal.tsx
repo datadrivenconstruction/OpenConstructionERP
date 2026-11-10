@@ -51,11 +51,11 @@ const TYPE_FILTERS = [
 
 const TYPE_BADGE_STYLE: Record<string, string> = {
   material: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  labor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  labor: 'bg-semantic-warning-bg text-semantic-warning',
   equipment: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
-  operator: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  operator: 'bg-semantic-success-bg text-semantic-success',
   subcontractor: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
-  other: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  other: 'bg-surface-secondary text-content-secondary',
 };
 
 /* ── Component ───────────────────────────────────────────────────────── */
@@ -178,7 +178,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success">
               <Boxes size={18} />
             </div>
             <div>
@@ -212,7 +212,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
                 onClick={() => setTypeFilter(tf.key)}
                 className={`shrink-0 flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-semantic-success text-white'
                     : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
                 }`}
               >
@@ -240,7 +240,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
               aria-label={t('boq.search_catalog_resources', {
                 defaultValue: 'Search resources by name, code, or category...',
               })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-semantic-success/60"
             />
             {loading && (
               <div className="absolute inset-y-0 end-0 flex items-center pr-3">

@@ -67,10 +67,10 @@ export function outcomeHint(t: Translate, outcome: string): string | null {
 }
 
 const OUTCOME_TONE: Record<string, string> = {
-  approved: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
-  approved_as_noted: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+  approved: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  approved_as_noted: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   revise_and_resubmit: 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800',
-  rejected: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+  rejected: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 const NEUTRAL_TONE = 'bg-surface-secondary text-content-secondary border-border';
 
@@ -104,7 +104,7 @@ export function ReviewCodeChip({
         outcome: label,
       })}
       className={clsx(
-        'inline-flex h-5 min-w-5 items-center justify-center rounded border px-1 text-2xs font-bold tabular-nums',
+        'inline-flex h-5 min-w-5 items-center justify-center rounded border px-1 text-2xs font-semibold tabular-nums',
         (outcome && OUTCOME_TONE[outcome]) || NEUTRAL_TONE,
         className,
       )}
@@ -165,7 +165,7 @@ export function ReviewClock({ submittal }: { submittal: Submittal }) {
         <Hourglass size={10} className="me-1 inline-block" aria-hidden />
         {t('submittals.days_short', { defaultValue: '{{days}} d', days })}
         {late && (
-          <span className="ms-1 font-bold">
+          <span className="ms-1 font-semibold">
             +{over}
           </span>
         )}
@@ -194,7 +194,7 @@ export function ApprovalNeededBy({ submittal }: { submittal: Submittal }) {
         'Long-lead item without a lead time or a required-on-site date: the date its approval is needed by cannot be worked out.',
     });
     return (
-      <span title={reason} className="inline-flex text-amber-600 dark:text-amber-400">
+      <span title={reason} className="inline-flex text-semantic-warning">
         <AlertTriangle size={13} aria-hidden />
         <span className="sr-only">{reason}</span>
       </span>
@@ -228,7 +228,7 @@ export function LongLeadMark({ submittal }: { submittal: Submittal }) {
           weeks: submittal.lead_time_weeks,
         });
   return (
-    <span title={title} className="inline-flex shrink-0 text-amber-600 dark:text-amber-400">
+    <span title={title} className="inline-flex shrink-0 text-semantic-warning">
       <Truck size={13} aria-hidden />
       <span className="sr-only">{title}</span>
     </span>

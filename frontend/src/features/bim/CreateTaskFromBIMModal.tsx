@@ -133,7 +133,7 @@ export default function CreateTaskFromBIMModal({
             <h2 className="text-sm font-semibold text-content-primary">
               {t('bim.create_task_title', { defaultValue: 'Create task pinned to BIM' })}
             </h2>
-            <span className="text-[11px] text-content-tertiary">
+            <span className="text-2xs text-content-tertiary">
               {elements.length === 1
                 ? elements[0]!.name || elements[0]!.element_type
                 : t('bim.create_task_bulk', {
@@ -154,7 +154,7 @@ export default function CreateTaskFromBIMModal({
         {/* Form */}
         <div className="p-5 space-y-3">
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('bim.task_title', { defaultValue: 'Title' })}
               <span className="text-rose-500 ml-0.5">*</span>
             </label>
@@ -168,7 +168,7 @@ export default function CreateTaskFromBIMModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('bim.task_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -184,7 +184,7 @@ export default function CreateTaskFromBIMModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                 {t('bim.task_type', { defaultValue: 'Type' })}
               </label>
               <select
@@ -200,7 +200,7 @@ export default function CreateTaskFromBIMModal({
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
                 {t('bim.task_priority', { defaultValue: 'Priority' })}
               </label>
               <select
@@ -220,7 +220,7 @@ export default function CreateTaskFromBIMModal({
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('bim.task_due_date', { defaultValue: 'Due date (optional)' })}
             </label>
             <input
@@ -232,7 +232,7 @@ export default function CreateTaskFromBIMModal({
           </div>
 
           {/* Element pin info */}
-          <div className="rounded-md border border-amber-300/40 bg-amber-50/40 dark:bg-amber-950/20 px-2.5 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+          <div className="rounded-md border border-amber-300/40 bg-amber-50/40 dark:bg-amber-950/20 px-2.5 py-2 text-2xs text-amber-700 dark:text-amber-300">
             <div className="flex items-start gap-1.5">
               <CheckSquare size={11} className="shrink-0 mt-0.5" />
               <span>

@@ -22,10 +22,10 @@ import { clashApi, type ClashCluster } from './api';
 import { ClashGroupActionDialog } from './ClashGroupActionDialog';
 
 const DISCIPLINE_COLOR: Record<string, string> = {
-  Structural: 'bg-rose-100 text-rose-800 ring-rose-200 hover:bg-rose-200',
-  Architectural: 'bg-amber-100 text-amber-800 ring-amber-200 hover:bg-amber-200',
-  Mechanical: 'bg-emerald-100 text-emerald-800 ring-emerald-200 hover:bg-emerald-200',
-  Electrical: 'bg-sky-100 text-sky-800 ring-sky-200 hover:bg-sky-200',
+  Structural: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30 hover:bg-rose-200',
+  Architectural: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30 hover:bg-amber-200',
+  Mechanical: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30 hover:bg-emerald-200',
+  Electrical: 'bg-semantic-info-bg text-semantic-info ring-semantic-info/30 hover:bg-sky-200',
   Plumbing: 'bg-indigo-100 text-indigo-800 ring-indigo-200 hover:bg-indigo-200',
   Civil: 'bg-stone-100 text-stone-800 ring-stone-200 hover:bg-stone-200',
 };

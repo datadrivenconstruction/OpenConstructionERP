@@ -99,13 +99,13 @@ const REGIONS: MarkupRegion[] = [
 
 const CATEGORY_COLORS: Record<string, string> = {
   overhead: 'bg-blue-100 text-blue-700 dark:text-blue-300 dark:bg-blue-900/30',
-  profit: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  tax: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  profit: 'bg-semantic-success-bg text-semantic-success',
+  tax: 'bg-semantic-warning-bg text-semantic-warning',
   contingency: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   insurance: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   bond: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
   tender_adjustment: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
-  other: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
+  other: 'bg-surface-secondary text-content-secondary',
 };
 
 const CATEGORIES = ['overhead', 'profit', 'tax', 'contingency', 'insurance', 'bond', 'tender_adjustment', 'other'] as const;
@@ -816,7 +816,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                           <button
                             onClick={() => deleteMutation.mutate(markup.id)}
                             disabled={deleteMutation.isPending}
-                            className="text-content-quaternary hover:text-red-500 transition-colors"
+                            className="text-content-quaternary hover:text-semantic-error transition-colors"
                             aria-label={t('common.delete', { defaultValue: 'Delete' })}
                           >
                             <Trash2 size={14} />

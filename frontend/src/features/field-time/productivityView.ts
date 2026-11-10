@@ -64,9 +64,9 @@ export function fmtFactorPct(raw: string | null | undefined, locale?: string): s
 }
 
 export const LIGHT_DOT: Record<ProductivityLight, string> = {
-  green: 'bg-emerald-500',
+  green: 'bg-semantic-success',
   amber: 'bg-amber-400',
-  red: 'bg-rose-500',
+  red: 'bg-semantic-error',
   grey: 'bg-gray-300 dark:bg-gray-600',
 };
 

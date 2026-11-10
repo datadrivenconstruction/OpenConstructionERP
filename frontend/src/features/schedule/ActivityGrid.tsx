@@ -562,7 +562,7 @@ export function ActivityGrid({
                           <Minus size={11} className="shrink-0 text-content-tertiary" />
                         ) : null}
                         {isCritical && (
-                          <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                          <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-2xs font-semibold leading-none text-white">
                             CP
                           </span>
                         )}

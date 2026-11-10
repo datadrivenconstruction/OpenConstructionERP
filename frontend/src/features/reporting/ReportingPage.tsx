@@ -188,10 +188,10 @@ function kpiColor(value: number | null | undefined, thresholds: [number, number]
 }
 
 const trafficClasses: Record<TrafficLight, string> = {
-  green: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  yellow: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  red: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  gray: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  green: 'bg-semantic-success-bg text-semantic-success',
+  yellow: 'bg-semantic-warning-bg text-semantic-warning',
+  red: 'bg-semantic-error-bg text-semantic-error',
+  gray: 'bg-surface-secondary text-content-tertiary',
 };
 
 // Empty metrics render as a muted em-dash, never "N/A". A grid full of
@@ -330,11 +330,11 @@ function StatusBadge({ status }: { status: string }) {
   // verbatim.
   const map: Record<string, { color: string; label: string }> = {
     active: {
-      color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      color: 'bg-semantic-success-bg text-semantic-success',
       label: t('reporting.status_active', { defaultValue: 'Active' }),
     },
     on_hold: {
-      color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      color: 'bg-semantic-warning-bg text-semantic-warning',
       label: t('reporting.status_on_hold', { defaultValue: 'On Hold' }),
     },
     completed: {
@@ -342,7 +342,7 @@ function StatusBadge({ status }: { status: string }) {
       label: t('reporting.status_completed', { defaultValue: 'Completed' }),
     },
     archived: {
-      color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+      color: 'bg-surface-secondary text-content-tertiary',
       label: t('reporting.status_archived', { defaultValue: 'Archived' }),
     },
   };
@@ -350,7 +350,7 @@ function StatusBadge({ status }: { status: string }) {
     ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : t('reporting.status_unknown', { defaultValue: 'Unknown' });
   const s = map[status] ?? {
-    color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+    color: 'bg-surface-secondary text-content-tertiary',
     label: fallbackLabel,
   };
   return <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${s.color}`}>{s.label}</span>;
@@ -656,7 +656,7 @@ export function ReportingPage() {
       {recalcError && (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400"
+          className="flex items-center gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-4 py-3 text-sm text-semantic-error"
         >
           <AlertTriangle size={16} className="shrink-0" />
           <span>
@@ -704,7 +704,7 @@ export function ReportingPage() {
               role="alert"
               className="flex flex-col items-center justify-center gap-3 py-12 text-center"
             >
-              <AlertTriangle size={40} className="text-red-500" />
+              <AlertTriangle size={40} className="text-semantic-error" />
               <p className="text-sm text-content-secondary">
                 {t('reporting.load_error', {
                   defaultValue: 'Could not load reporting data. Check your connection and try again.',
@@ -861,7 +861,7 @@ function StatsErrorBlock({ onRetry }: { onRetry: () => void }) {
     <Card>
       <CardContent>
         <div role="alert" className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-          <AlertTriangle size={36} className="text-red-500" />
+          <AlertTriangle size={36} className="text-semantic-error" />
           <p className="max-w-sm text-sm text-content-secondary">
             {t('reporting.stats_load_failed', {
               defaultValue: 'Could not load this project’s metrics. Check your connection and try again.',
@@ -1108,15 +1108,15 @@ function TrafficDot({ color, label }: { color: TrafficLight; label: string }) {
   if (color === 'gray') {
     return (
       <span className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-full border border-gray-300 dark:border-gray-600" />
+        <span className="inline-block h-2.5 w-2.5 rounded-full border border-border" />
         <span className="text-sm text-content-secondary">{label}</span>
       </span>
     );
   }
   const dotColors: Record<Exclude<TrafficLight, 'gray'>, string> = {
-    green: 'bg-emerald-500',
-    yellow: 'bg-amber-500',
-    red: 'bg-red-500',
+    green: 'bg-semantic-success',
+    yellow: 'bg-semantic-warning',
+    red: 'bg-semantic-error',
   };
   return (
     <span className="inline-flex items-center gap-1.5">
@@ -1378,7 +1378,7 @@ function EstimatorDashboard({
               <Skeleton className="h-12 w-full rounded-lg" />
             </div>
           ) : boqsError ? (
-            <div role="alert" className="flex items-center gap-2 px-4 py-4 text-sm text-red-700 dark:text-red-400">
+            <div role="alert" className="flex items-center gap-2 px-4 py-4 text-sm text-semantic-error">
               <AlertTriangle size={16} className="shrink-0" />
               <span>{t('reporting.boqs_load_failed', { defaultValue: 'Could not load BOQs for this project.' })}</span>
               <button onClick={loadBoqs} className="ml-2 underline">
@@ -1773,9 +1773,9 @@ type StatColor = 'emerald' | 'amber' | 'red' | 'blue';
 // production purge drop every colored stat (they appear nowhere literal),
 // so the red/amber/green signalling silently disappeared in builds.
 const STAT_COLOR_CLASSES: Record<StatColor, string> = {
-  emerald: 'text-emerald-600 dark:text-emerald-400',
-  amber: 'text-amber-600 dark:text-amber-400',
-  red: 'text-red-600 dark:text-red-400',
+  emerald: 'text-semantic-success',
+  amber: 'text-semantic-warning',
+  red: 'text-semantic-error',
   blue: 'text-blue-600 dark:text-blue-400',
 };
 
@@ -2022,7 +2022,7 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
               <Skeleton className="h-12 w-full rounded-lg" />
             </div>
           ) : templatesError ? (
-            <div role="alert" className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
+            <div role="alert" className="flex items-center gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-4 py-3 text-sm text-semantic-error">
               <AlertTriangle size={16} className="shrink-0" />
               <span>{t('reporting.templates_load_failed', { defaultValue: 'Could not load report templates.' })}</span>
               <button onClick={fetchTemplates} className="ml-2 underline">
@@ -2100,7 +2100,7 @@ function ReportsTab({ project, projects }: { project?: Project; projects: Projec
               <Skeleton className="h-12 w-full rounded-lg" />
             </div>
           ) : reportsError ? (
-            <div role="alert" className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
+            <div role="alert" className="flex items-center gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-4 py-3 text-sm text-semantic-error">
               <AlertTriangle size={16} className="shrink-0" />
               <span>{t('reporting.reports_load_failed', { defaultValue: 'Could not load generated reports.' })}</span>
               <button onClick={fetchReports} className="ml-2 underline">
@@ -2387,7 +2387,7 @@ function ReportViewerModal({
               role="alert"
               className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
             >
-              <Clock size={36} className="text-amber-500" />
+              <Clock size={36} className="text-semantic-warning" />
               <p className="max-w-md text-sm text-content-secondary">
                 {t('reporting.report_not_rendered', {
                   defaultValue:
@@ -2402,7 +2402,7 @@ function ReportViewerModal({
               role="alert"
               className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
             >
-              <AlertTriangle size={36} className="text-red-500" />
+              <AlertTriangle size={36} className="text-semantic-error" />
               <p className="max-w-md text-sm text-content-secondary">
                 {t('reporting.report_not_found', {
                   defaultValue:
@@ -2417,7 +2417,7 @@ function ReportViewerModal({
               role="alert"
               className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
             >
-              <AlertTriangle size={36} className="text-amber-500" />
+              <AlertTriangle size={36} className="text-semantic-warning" />
               <p className="max-w-md text-sm text-content-secondary">
                 {t('reporting.report_permission_error', {
                   defaultValue:
@@ -2432,7 +2432,7 @@ function ReportViewerModal({
               role="alert"
               className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
             >
-              <AlertTriangle size={36} className="text-red-500" />
+              <AlertTriangle size={36} className="text-semantic-error" />
               <p className="max-w-md text-sm text-content-secondary">
                 {t('reporting.report_server_error', {
                   defaultValue:
@@ -2447,7 +2447,7 @@ function ReportViewerModal({
               role="alert"
               className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
             >
-              <AlertTriangle size={36} className="text-red-500" />
+              <AlertTriangle size={36} className="text-semantic-error" />
               <p className="max-w-md text-sm text-content-secondary">
                 {t('reporting.report_load_failed', {
                   defaultValue:

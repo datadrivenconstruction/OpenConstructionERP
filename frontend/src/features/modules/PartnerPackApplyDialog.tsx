@@ -990,7 +990,7 @@ export function PartnerPackApplyDialog({
   const failurePanel = failure && (
     <div
       role="alert"
-      className="flex items-start gap-2.5 rounded-lg border border-semantic-error/40 bg-red-50 px-3.5 py-3 text-sm text-red-900 dark:bg-red-900/20 dark:text-red-100"
+      className="flex items-start gap-2.5 rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-3.5 py-3 text-sm text-semantic-error"
     >
       {failure.kind === 'forbidden' ? (
         <ShieldAlert size={18} className="mt-0.5 shrink-0" aria-hidden />
@@ -1177,8 +1177,8 @@ export function PartnerPackApplyDialog({
             <div
               className={
                 finished.ok
-                  ? 'mt-4 flex items-start gap-2 rounded-lg border border-semantic-success/40 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100'
-                  : 'mt-4 flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-amber-50 px-3.5 py-3 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100'
+                  ? 'mt-4 flex items-start gap-2 rounded-lg border border-semantic-success/40 bg-semantic-success-bg px-3.5 py-3 text-sm text-semantic-success'
+                  : 'mt-4 flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3.5 py-3 text-sm text-semantic-warning'
               }
             >
               {finished.ok ? (
@@ -1213,7 +1213,7 @@ export function PartnerPackApplyDialog({
           {!canInstall && (
             <div
               role="note"
-              className="mb-3 flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-amber-50 px-3.5 py-3 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100"
+              className="mb-3 flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3.5 py-3 text-sm text-semantic-warning"
             >
               <ShieldAlert size={16} className="mt-0.5 shrink-0" />
               <span>
@@ -1236,7 +1236,7 @@ export function PartnerPackApplyDialog({
           )}
 
           {isError && (
-            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-amber-50 px-3.5 py-3 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3.5 py-3 text-sm text-semantic-warning">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />
               {t('modules.pack_preview_failed', {
                 defaultValue:
@@ -1312,7 +1312,7 @@ export function PartnerPackApplyDialog({
                 {costBases ? (
                   costBases.length === 0 || loadableBases.length === 0 ? (
                     <div className="space-y-1.5">
-                      <p className="text-amber-700 dark:text-amber-300" data-testid="pack-no-cost-base">
+                      <p className="text-semantic-warning" data-testid="pack-no-cost-base">
                         {t('modules.pp_data_no_base', {
                           defaultValue:
                             'No cost database is published for this country yet. The pack sets language, currency and rules; a cost database can be imported later under Cost databases.',
@@ -1385,7 +1385,7 @@ export function PartnerPackApplyDialog({
                         ),
                       )}
                       {selectedBases.size === 0 && (
-                        <p className="px-1 text-xs text-amber-700 dark:text-amber-300">
+                        <p className="px-1 text-xs text-semantic-warning">
                           {t('modules.pp_data_none_selected', {
                             defaultValue:
                               'No cost database selected. The pack will be applied without cost data.',
@@ -1456,7 +1456,7 @@ export function PartnerPackApplyDialog({
                     defaultValue: 'Modules switched on',
                   })}
                 >
-                  <span className="text-emerald-600 dark:text-emerald-400">
+                  <span className="text-semantic-success">
                     {fmtList(plan.modules_to_enable)}
                   </span>
                 </Row>
@@ -1464,15 +1464,15 @@ export function PartnerPackApplyDialog({
 
               {willDisable && (
                 <Row
-                  icon={<AlertTriangle size={15} className="text-amber-500" />}
+                  icon={<AlertTriangle size={15} className="text-semantic-warning" />}
                   label={t('modules.pack_modules_disable', {
                     defaultValue: 'Modules switched off',
                   })}
                 >
-                  <p className="text-amber-700 dark:text-amber-300">
+                  <p className="text-semantic-warning">
                     {fmtList(plan.modules_to_disable)}
                   </p>
-                  <label className="mt-2 flex cursor-pointer items-start gap-2 rounded-md bg-amber-50 px-2.5 py-2 text-xs text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+                  <label className="mt-2 flex cursor-pointer items-start gap-2 rounded-md bg-semantic-warning-bg px-2.5 py-2 text-xs text-semantic-warning">
                     <input
                       type="checkbox"
                       checked={confirmDisables}
@@ -1512,7 +1512,7 @@ export function PartnerPackApplyDialog({
 
               {plan.warnings.length > 0 && (
                 <div className="pt-3">
-                  <ul className="space-y-1 text-xs text-amber-700 dark:text-amber-300">
+                  <ul className="space-y-1 text-xs text-semantic-warning">
                     {plan.warnings.map((w, i) => (
                       <li key={i} className="flex items-start gap-1.5">
                         <AlertTriangle size={12} className="mt-0.5 shrink-0" />

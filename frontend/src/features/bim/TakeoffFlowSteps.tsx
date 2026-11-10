@@ -33,13 +33,13 @@ export function TakeoffFlowSteps() {
       className="mb-4 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3"
       data-testid="bim-rules-flow-steps"
     >
-      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-content-secondary">
+      <h2 className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
         {t('bim_rules.flow_title', { defaultValue: 'How automatic takeoff works' })}
       </h2>
       <ol className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {TAKEOFF_STEPS.map((step, i) => (
-          <li key={step.key} className="flex gap-2 text-[11px] leading-snug text-content-secondary">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-semibold text-oe-blue">
+          <li key={step.key} className="flex gap-2 text-2xs leading-snug text-content-secondary">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue">
               {fmtNumber(i + 1, 0)}
             </span>
             <span>{t(`bim_rules.flow_step_${step.key}`, { defaultValue: step.text })}</span>

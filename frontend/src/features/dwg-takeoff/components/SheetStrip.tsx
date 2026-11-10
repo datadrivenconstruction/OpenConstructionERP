@@ -83,14 +83,14 @@ export function SheetStrip({
             <div className="flex w-full items-center justify-between gap-2 px-0.5">
               <span
                 className={clsx(
-                  'max-w-[110px] truncate text-[10px] font-medium',
+                  'max-w-[110px] truncate text-2xs font-medium',
                   isActive ? 'text-oe-blue' : 'text-foreground',
                 )}
                 title={layout}
               >
                 {layout}
               </span>
-              <span className="text-[9px] text-muted-foreground tabular-nums">
+              <span className="text-2xs text-muted-foreground tabular-nums">
                 {count}
               </span>
             </div>

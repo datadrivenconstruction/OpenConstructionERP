@@ -101,7 +101,7 @@ function ChangeBadge({ type }: { type: DwgEntityDiffRow['change_type'] }) {
             : 'Unchanged',
   });
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-content-secondary">
+    <span className="inline-flex items-center gap-1 text-2xs font-medium text-content-secondary">
       <span className={clsx('h-2 w-2 rounded-full', CHANGE_DOT[type])} />
       {label}
     </span>
@@ -422,7 +422,7 @@ export function DwgDrawingCompareDrawer({
             drawing in the project (or a freshly uploaded one). */}
         <div className="flex items-end gap-2">
           <label className="flex-1 min-w-0">
-            <span className="block text-[11px] font-medium text-content-tertiary mb-1">
+            <span className="block text-2xs font-medium text-content-tertiary mb-1">
               {t('dwg_compare.compare_against', { defaultValue: 'Compare against' })}
             </span>
             <select
@@ -501,7 +501,7 @@ export function DwgDrawingCompareDrawer({
               </span>
             </button>
           </div>
-          <p className="text-[11px] leading-snug text-content-tertiary">
+          <p className="text-2xs leading-snug text-content-tertiary">
             {t('dwg_compare.upload_actions_hint', {
               defaultValue:
                 'A new revision adds a version to this drawing. Comparing a different file diffs this drawing against a separate upload.',
@@ -538,7 +538,7 @@ export function DwgDrawingCompareDrawer({
         {mode === 'version' && (
           <div className="flex items-end gap-2">
             <label className="flex-1 min-w-0">
-              <span className="block text-[11px] font-medium text-content-tertiary mb-1">
+              <span className="block text-2xs font-medium text-content-tertiary mb-1">
                 {t('dwg_compare.from_version', { defaultValue: 'Baseline (before)' })}
               </span>
               <select
@@ -557,7 +557,7 @@ export function DwgDrawingCompareDrawer({
             </label>
             <ArrowRight size={16} className="mb-2 shrink-0 text-content-tertiary" />
             <label className="flex-1 min-w-0">
-              <span className="block text-[11px] font-medium text-content-tertiary mb-1">
+              <span className="block text-2xs font-medium text-content-tertiary mb-1">
                 {t('dwg_compare.to_version', { defaultValue: 'Target (after)' })}
               </span>
               <select
@@ -688,7 +688,7 @@ export function DwgDrawingCompareDrawer({
               <Icon size={13} />
               <span className="truncate">{label}</span>
               {count > 0 && (
-                <Badge variant="neutral" className="ml-0.5 text-[9px]">
+                <Badge variant="neutral" className="ml-0.5 text-2xs">
                   {count}
                 </Badge>
               )}
@@ -764,7 +764,7 @@ function SummaryTab({
       </div>
 
       <div className="rounded-lg border border-border-light p-3">
-        <div className="text-[11px] font-medium text-content-tertiary mb-1">
+        <div className="text-2xs font-medium text-content-tertiary mb-1">
           {t('dwg_compare.net_cost_impact', { defaultValue: 'Net cost impact' })}
         </div>
         {summary.net_cost_impact != null && summary.cost_currency ? (
@@ -801,7 +801,7 @@ function SummaryTab({
           {t('dwg_compare.create_variation', { defaultValue: 'Create variation from delta' })}
         </button>
         {!canCreateVariation && (
-          <p className="mt-1 text-[10px] text-content-tertiary">
+          <p className="mt-1 text-2xs text-content-tertiary">
             {t('dwg_compare.create_variation_disabled', {
               defaultValue: 'Pick two revisions with at least one change to raise a variation.',
             })}
@@ -843,7 +843,7 @@ function SummaryCard({
   ];
   return (
     <div className="rounded-lg border border-border-light p-3">
-      <div className="text-[11px] font-medium text-content-tertiary mb-2 truncate">{title}</div>
+      <div className="text-2xs font-medium text-content-tertiary mb-2 truncate">{title}</div>
       <div className="flex flex-col gap-1">
         {rows.map(({ key, color, label }) => (
           <div key={key} className="flex items-center justify-between text-xs">
@@ -961,7 +961,7 @@ function AnnotationsTab({
           </div>
           {r.linked_boq_position_id && (
             <div className="mt-1.5 flex items-center justify-between gap-2">
-              <span className="text-[10px] text-content-tertiary">
+              <span className="text-2xs text-content-tertiary">
                 {t('dwg_compare.linked_boq', { defaultValue: 'Linked to BOQ position' })}
               </span>
               {r.cost_impact != null && r.cost_currency ? (
@@ -972,7 +972,7 @@ function AnnotationsTab({
                   className="text-xs font-semibold"
                 />
               ) : (
-                <span className="text-[10px] text-content-tertiary">
+                <span className="text-2xs text-content-tertiary">
                   {t('dwg_compare.no_value_change', { defaultValue: 'No value change' })}
                 </span>
               )}

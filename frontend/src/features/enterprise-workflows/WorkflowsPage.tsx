@@ -562,7 +562,7 @@ function WorkflowsExplainer() {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>

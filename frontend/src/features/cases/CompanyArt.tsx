@@ -89,7 +89,7 @@ export function CompanyArt({
         title={title}
         className={clsx(
           'relative inline-flex shrink-0 items-center justify-center rounded-xl ring-1 ring-inset',
-          tileClass ?? 'bg-white ring-border-light dark:bg-slate-100',
+          tileClass ?? 'bg-surface-primary ring-border-light',
           className,
         )}
       >
@@ -104,7 +104,7 @@ export function CompanyArt({
     // inner span - a single span would have to choose between clipping the
     // picture's corners and clipping the badge.
     <span title={title} className={clsx('relative inline-flex shrink-0', className)}>
-      <span className="flex h-full w-full overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-border-light dark:bg-slate-100">
+      <span className="flex h-full w-full overflow-hidden rounded-xl bg-surface-primary ring-1 ring-inset ring-border-light">
         <img
           src={src}
           alt=""

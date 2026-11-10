@@ -320,7 +320,7 @@ export function DocumentTemplatesSettingsPage() {
               <button
                 type="button"
                 onClick={() => setLocaleEditor('__new__')}
-                className="ml-1 rounded-full border border-dashed border-oe-blue/40 px-2 py-0.5 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/5"
+                className="ml-1 rounded-full border border-dashed border-oe-blue/40 px-2 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/5"
                 data-testid="open-locale-editor-new"
                 title={t('property_dev.doc_templates.add_locale_hint', {
                   defaultValue:
@@ -802,7 +802,7 @@ function UploadCustomTemplateForm({
       </p>
       <form className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12" onSubmit={submit}>
         <div className="md:col-span-4">
-          <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
             {t('property_dev.doc_templates.upload_field_file', {
               defaultValue: 'File',
             })}
@@ -816,7 +816,7 @@ function UploadCustomTemplateForm({
           />
         </div>
         <div className="md:col-span-4">
-          <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
             {t('property_dev.doc_templates.upload_field_name', {
               defaultValue: 'Display name',
             })}
@@ -835,7 +835,7 @@ function UploadCustomTemplateForm({
         <div className="md:col-span-2">
           <label
             htmlFor="custom-upload-doctype"
-            className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
           >
             {t('property_dev.doc_templates.upload_field_doctype', {
               defaultValue: 'Doc type',
@@ -858,7 +858,7 @@ function UploadCustomTemplateForm({
         <div className="md:col-span-2">
           <label
             htmlFor="custom-upload-entity"
-            className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
           >
             {t('property_dev.doc_templates.upload_field_entity', {
               defaultValue: 'Entity',
@@ -879,7 +879,7 @@ function UploadCustomTemplateForm({
           />
         </div>
         <div className="md:col-span-8">
-          <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
             {t('property_dev.doc_templates.upload_field_desc', {
               defaultValue: 'Description (optional)',
             })}
@@ -896,7 +896,7 @@ function UploadCustomTemplateForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+          <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
             {t('property_dev.doc_templates.upload_field_trigger', {
               defaultValue: 'Trigger',
             })}
@@ -1164,7 +1164,7 @@ function TemplateCard({
         {canPreview && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
             <div>
-              <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 <Globe2 size={10} className="mr-1 inline" />
                 {t('property_dev.doc_templates.locale', {
                   defaultValue: 'Locale',
@@ -1185,7 +1185,7 @@ function TemplateCard({
             <div>
               <label
                 htmlFor={`tpl-regulator-${docTypeKey}`}
-                className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
               >
                 <ShieldAlert size={10} className="mr-1 inline" />
                 {t('property_dev.doc_templates.regulator', {
@@ -1224,7 +1224,7 @@ function TemplateCard({
         {/* Per-development override for custom templates */}
         {isCustom && template.id && activeDevId && (
           <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2 py-1.5">
-            <span className="text-[11px] text-content-secondary">
+            <span className="text-2xs text-content-secondary">
               {t('property_dev.doc_templates.default_for_dev', {
                 defaultValue:
                   'Set as default for current development ({{dev}})',
@@ -1234,9 +1234,9 @@ function TemplateCard({
             <button
               type="button"
               onClick={toggleDefault}
-              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium ${
                 isDefault
-                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                  ? 'bg-semantic-success/15 text-semantic-success'
                   : 'bg-surface-tertiary text-content-tertiary hover:bg-surface-tertiary/80'
               }`}
               data-testid={`toggle-default-${template.id}`}
@@ -1677,7 +1677,7 @@ function TemplateEditorModal({
           {/* Metadata row */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
             <div className="md:col-span-4">
-              <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 {t('property_dev.doc_templates.upload_field_name', {
                   defaultValue: 'Display name',
                 })}
@@ -1693,7 +1693,7 @@ function TemplateEditorModal({
             <div className="md:col-span-3">
               <label
                 htmlFor="editor-doctype"
-                className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
               >
                 {t('property_dev.doc_templates.upload_field_doctype', {
                   defaultValue: 'Doc type',
@@ -1716,7 +1716,7 @@ function TemplateEditorModal({
             <div className="md:col-span-2">
               <label
                 htmlFor="editor-entity"
-                className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+                className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
               >
                 {t('property_dev.doc_templates.upload_field_entity', {
                   defaultValue: 'Entity',
@@ -1737,7 +1737,7 @@ function TemplateEditorModal({
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 {t('property_dev.doc_templates.editor_content_type', {
                   defaultValue: 'Source format',
                 })}
@@ -1758,7 +1758,7 @@ function TemplateEditorModal({
               </select>
             </div>
             <div className="md:col-span-12">
-              <label className="block text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <label className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 {t('property_dev.doc_templates.upload_field_desc', {
                   defaultValue: 'Description (optional)',
                 })}
@@ -1775,7 +1775,7 @@ function TemplateEditorModal({
 
           {/* Variable picker chips */}
           <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
-            <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-content-tertiary">
+            <div className="flex items-center gap-2 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
               <Code2 size={12} />
               {t('property_dev.doc_templates.editor_variables_picker', {
                 defaultValue: 'Insert a variable',
@@ -1783,7 +1783,7 @@ function TemplateEditorModal({
             </div>
             <div className="mt-2 max-h-40 overflow-auto space-y-2">
               {variableGroups.length === 0 ? (
-                <p className="text-[11px] text-content-tertiary">
+                <p className="text-2xs text-content-tertiary">
                   {t('property_dev.doc_templates.variables_empty', {
                     defaultValue:
                       'No variable documentation is available - load this page from a tenant with property-dev enabled.',
@@ -1792,7 +1792,7 @@ function TemplateEditorModal({
               ) : (
                 variableGroups.map((g) => (
                   <div key={g.group}>
-                    <p className="text-[11px] font-semibold text-content-secondary mb-1">
+                    <p className="text-2xs font-semibold text-content-secondary mb-1">
                       {g.label}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -1802,7 +1802,7 @@ function TemplateEditorModal({
                           type="button"
                           title={v.desc}
                           onClick={() => insertAtCursor(v.key)}
-                          className="inline-flex items-center rounded-full border border-oe-blue/30 bg-oe-blue/5 px-2 py-0.5 text-[11px] text-oe-blue hover:bg-oe-blue/15 hover:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="inline-flex items-center rounded-full border border-oe-blue/30 bg-oe-blue/5 px-2 py-0.5 text-2xs text-oe-blue hover:bg-oe-blue/15 hover:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
                           data-testid={`var-chip-${v.key}`}
                         >
                           <code>{v.key}</code>
@@ -1820,7 +1820,7 @@ function TemplateEditorModal({
               scroll-anchored at the metadata row. */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[55vh] min-h-[360px]">
             <div className="flex flex-col">
-              <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <div className="flex items-center justify-between text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 <span>
                   {t('property_dev.doc_templates.editor_source_pane', {
                     defaultValue: 'Source',
@@ -1833,12 +1833,12 @@ function TemplateEditorModal({
                 value={contentText}
                 onChange={(e) => setContentText(e.target.value)}
                 spellCheck={false}
-                className="flex-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2 font-mono text-[12px] leading-5 text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+                className="flex-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2 font-mono text-xs leading-5 text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
                 data-testid="editor-source"
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-wide text-content-tertiary mb-1">
+              <div className="flex items-center justify-between text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1">
                 <span>
                   {t('property_dev.doc_templates.editor_preview_pane', {
                     defaultValue: 'Live preview (advisory - final render is server-side)',
@@ -1901,7 +1901,7 @@ function VariablesModal({
                   className="flex flex-col rounded-md border border-border-light bg-surface-secondary px-2 py-1.5"
                 >
                   <code className="text-xs text-oe-blue">{v.key}</code>
-                  <span className="text-[11px] text-content-tertiary">
+                  <span className="text-2xs text-content-tertiary">
                     {v.desc}
                   </span>
                 </div>
@@ -1968,7 +1968,7 @@ function LocaleStatusList({
             >
               <Badge variant={variant}>
                 <span className="font-semibold">{s.code.toUpperCase()}</span>
-                <span className="ml-1 text-[10px] font-normal opacity-80">
+                <span className="ml-1 text-2xs font-normal opacity-80">
                   {label}
                 </span>
               </Badge>
@@ -2168,7 +2168,7 @@ function LocaleEditorModal({
           <div className="flex-1 min-w-[240px]">
             <label
               htmlFor="locale-editor-code"
-              className="block text-[11px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+              className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
             >
               {t('property_dev.doc_templates.locale_code_label', {
                 defaultValue: 'Locale code (e.g. de, ja, pt-BR)',
@@ -2239,7 +2239,7 @@ function LocaleEditorModal({
         <div>
           <label
             htmlFor="locale-editor-json"
-            className="block text-[11px] font-medium uppercase tracking-wide text-content-tertiary mb-1"
+            className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary mb-1"
           >
             {t('property_dev.doc_templates.locale_json_label', {
               defaultValue: 'Translation JSON',
@@ -2261,7 +2261,7 @@ function LocaleEditorModal({
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] text-content-tertiary max-w-md">
+          <p className="text-2xs text-content-tertiary max-w-md">
             {t('property_dev.doc_templates.locale_hint', {
               defaultValue:
                 'Tip: load English as a starter, translate the leaf values, keep the keys, then save. Empty keys silently fall back to English at render time.',

@@ -18,7 +18,7 @@ interface TagPillProps {
 
 export function TagPill({ tag, removable, onRemove, size = 'sm', className }: TagPillProps) {
   const { t } = useTranslation();
-  const dimensions = size === 'md' ? 'h-6 px-2 text-xs' : 'h-5 px-1.5 text-[10px]';
+  const dimensions = size === 'md' ? 'h-6 px-2 text-xs' : 'h-5 px-1.5 text-2xs';
 
   return (
     <span

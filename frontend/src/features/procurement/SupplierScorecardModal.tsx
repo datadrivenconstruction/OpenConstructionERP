@@ -72,16 +72,16 @@ function pctTone(
 }
 
 const TONE_BG: Record<TileTone, string> = {
-  success: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900',
-  warning: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900',
-  error: 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900',
+  success: 'bg-semantic-success-bg border-semantic-success/30',
+  warning: 'bg-semantic-warning-bg border-semantic-warning/30',
+  error: 'bg-semantic-error-bg border-semantic-error/30',
   neutral: 'bg-surface-secondary border-border',
 };
 
 const TONE_TEXT: Record<TileTone, string> = {
-  success: 'text-emerald-700 dark:text-emerald-400',
-  warning: 'text-amber-700 dark:text-amber-400',
-  error: 'text-rose-700 dark:text-rose-400',
+  success: 'text-semantic-success',
+  warning: 'text-semantic-warning',
+  error: 'text-semantic-error',
   neutral: 'text-content-primary',
 };
 
@@ -396,7 +396,7 @@ function KpiTile({
                 : '-'}
         </Badge>
       </div>
-      <div className={`mt-2 text-2xl font-bold tabular-nums ${TONE_TEXT[tone]}`}>
+      <div className={`mt-2 text-2xl font-semibold tabular-nums ${TONE_TEXT[tone]}`}>
         {value}
       </div>
       {detail && (

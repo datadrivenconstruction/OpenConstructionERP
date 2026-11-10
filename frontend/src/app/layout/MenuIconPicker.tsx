@@ -172,7 +172,7 @@ export default function MenuIconPicker({ route, label, defaultIcon, onClose }: M
           )}
           {groups.map((g) => (
             <section key={g.id} className="mb-3 last:mb-0" aria-label={groupLabel(g.id)}>
-              <h3 className="mb-1.5 text-[11px] font-semibold text-content-tertiary">{groupLabel(g.id)}</h3>
+              <h3 className="mb-1.5 text-2xs font-semibold text-content-tertiary">{groupLabel(g.id)}</h3>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(2.5rem,1fr))] gap-1">
                 {g.icons.map(({ name, icon: Icon }) => {
                   const active = current === name;

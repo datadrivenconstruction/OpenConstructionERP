@@ -31,12 +31,12 @@ import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 const LIMIT = 50;
 
 const ACTION_COLORS: Record<string, string> = {
-  created: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  created: 'bg-semantic-success-bg text-semantic-success',
   updated: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  deleted: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  status_changed: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-  approved: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+  deleted: 'bg-semantic-error-bg text-semantic-error',
+  status_changed: 'bg-semantic-warning-bg text-semantic-warning',
+  approved: 'bg-semantic-success-bg text-semantic-success',
+  rejected: 'bg-semantic-error-bg text-semantic-error',
   submitted: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
   imported: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
 };
@@ -45,7 +45,7 @@ function actionColor(action: string): string {
   for (const [key, cls] of Object.entries(ACTION_COLORS)) {
     if (action.toLowerCase().includes(key)) return cls;
   }
-  return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  return 'bg-surface-secondary text-content-primary';
 }
 
 // Event names arrive as `module.entity.verb` (`boq.boq.created_from_template`)
@@ -170,7 +170,7 @@ function TimelineExplainer() {
       <ol className="mt-3 space-y-2">
         {steps.map((s) => (
           <li key={s.num} className="flex gap-3 text-xs">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold text-oe-blue-text">
               {s.num}
             </span>
             <div>
@@ -391,12 +391,12 @@ export function TimelinePage() {
               className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors
                 ${hasActiveFilters
                   ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'}`}
+                  : 'border-border-light bg-surface-primary text-content-secondary hover:border-border'}`}
               aria-label={t('timeline.toggle_filters', { defaultValue: 'Toggle filters' })}
             >
               <Filter className="h-3.5 w-3.5" aria-hidden />
               {t('timeline.filters', { defaultValue: 'Filters' })}
-              {hasActiveFilters && <span className="ml-1 rounded-full bg-blue-500 px-1.5 py-0.5 text-2xs text-white font-bold">!</span>}
+              {hasActiveFilters && <span className="ml-1 rounded-full bg-blue-500 px-1.5 py-0.5 text-2xs text-white font-semibold">!</span>}
             </button>
 
             <button
@@ -413,14 +413,14 @@ export function TimelinePage() {
 
           {/* Advanced filters panel */}
           {showFilters && (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+            <div className="rounded-lg border border-border-light bg-surface-secondary p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <label className="mb-1 block text-2xs font-medium text-gray-500 uppercase">{t('timeline.action_type', { defaultValue: 'Action Type' })}</label>
                   <select
                     value={actionFilter}
                     onChange={(e) => setActionFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
                   >
                     <option value="">{t('timeline.all_actions', { defaultValue: 'All actions' })}</option>
                     {ACTION_OPTIONS.map((a) => (
@@ -434,7 +434,7 @@ export function TimelinePage() {
                     type="date"
                     value={sinceFilter}
                     onChange={(e) => setSinceFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -443,7 +443,7 @@ export function TimelinePage() {
                     type="date"
                     value={untilFilter}
                     onChange={(e) => setUntilFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="flex items-end gap-2">
@@ -456,7 +456,7 @@ export function TimelinePage() {
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                      className="rounded-lg border border-border-light px-3 py-2 text-sm text-content-tertiary hover:bg-surface-secondary"
                     >
                       {t('common.clear', { defaultValue: 'Clear' })}
                     </button>
@@ -475,7 +475,7 @@ export function TimelinePage() {
           )}
 
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+            <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-4 text-sm text-semantic-error">
               {t('timeline.load_error', { defaultValue: 'Could not load timeline' })}
             </div>
           )}
@@ -523,7 +523,7 @@ export function TimelinePage() {
                 <button
                   onClick={() => setOffset(Math.max(0, offset - LIMIT))}
                   disabled={offset === 0}
-                  className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+                  className="rounded p-1.5 hover:bg-surface-secondary disabled:opacity-30"
                   aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden />
@@ -532,7 +532,7 @@ export function TimelinePage() {
                 <button
                   onClick={() => setOffset(offset + LIMIT)}
                   disabled={offset + LIMIT >= total}
-                  className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+                  className="rounded p-1.5 hover:bg-surface-secondary disabled:opacity-30"
                   aria-label={t('common.next_page', { defaultValue: 'Next page' })}
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden />
@@ -547,7 +547,7 @@ export function TimelinePage() {
           {selectedEntry && (
             <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-sm font-semibold text-content-primary">
                   {t('timeline.event_details', { defaultValue: 'Event Details' })}
                 </h3>
                 <button onClick={() => setSelectedEntry(null)} aria-label={t('common.close', { defaultValue: 'Close' })}>
@@ -575,7 +575,7 @@ export function TimelinePage() {
                 {selectedEntry.metadata && Object.keys(selectedEntry.metadata).length > 0 && (
                   <div className="sm:col-span-2">
                     <p className="mb-1 text-gray-500">{t('timeline.detail_metadata', { defaultValue: 'Metadata' })}:</p>
-                    <pre className="max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    <pre className="max-h-48 overflow-auto rounded bg-surface-secondary p-2 text-xs text-content-secondary">
                       {JSON.stringify(selectedEntry.metadata, null, 2)}
                     </pre>
                   </div>
@@ -597,19 +597,19 @@ export function TimelinePage() {
 
           {/* Activity summary */}
           {!isLoading && entries.length > 0 && (
-            <div className="rounded-lg border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+            <div className="rounded-lg border border-border-light bg-surface-primary p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-2xs font-medium uppercase text-gray-500">{t('timeline.total_events', { defaultValue: 'Total Events' })}</p>
-                  <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100">{total}</p>
+                  <p className="mt-1 text-xl font-semibold text-content-primary">{total}</p>
                 </div>
                 <div>
                   <p className="text-2xs font-medium uppercase text-gray-500">{t('timeline.modules_active', { defaultValue: 'Modules Active' })}</p>
-                  <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100">{stats.topModules.length}</p>
+                  <p className="mt-1 text-xl font-semibold text-content-primary">{stats.topModules.length}</p>
                 </div>
               </div>
 
-              <ul className="mt-4 space-y-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+              <ul className="mt-4 space-y-2 border-t border-border-light pt-3">
                 {stats.topModules.map(([module, count]) => (
                   <li key={module}>
                     <button
@@ -618,10 +618,10 @@ export function TimelinePage() {
                       className="group w-full text-start"
                     >
                       <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="truncate font-medium text-gray-700 group-hover:text-blue-600 dark:text-gray-300">{moduleLabel(module, t)}</span>
+                        <span className="truncate font-medium text-content-secondary group-hover:text-blue-600">{moduleLabel(module, t)}</span>
                         <span className="tabular-nums text-gray-500">{count}</span>
                       </div>
-                      <div className="mt-1 h-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
+                      <div className="mt-1 h-1.5 rounded-full bg-surface-secondary">
                         <div
                           className="h-1.5 rounded-full bg-blue-500/70"
                           style={{ width: `${Math.max(4, Math.round((count / entries.length) * 100))}%` }}
@@ -632,7 +632,7 @@ export function TimelinePage() {
                 ))}
               </ul>
 
-              <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
+              <div className="mt-4 border-t border-border-light pt-3">
                 <p className="mb-1.5 text-2xs font-medium uppercase text-gray-500">{t('timeline.top_actions', { defaultValue: 'Top Actions' })}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {stats.topActions.map(([action, count]) => (
@@ -668,13 +668,13 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
         transition-colors cursor-pointer
         ${isSelected
           ? 'border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30'
-          : 'border-gray-100 bg-white hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50'}`}
+          : 'border-border-light bg-surface-primary hover:bg-surface-secondary'}`}
       onClick={onSelect}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
     >
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800" title={actorName ?? undefined}>
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-secondary" title={actorName ?? undefined}>
         {entry.actor_id ? (
           <UserIcon className="h-4 w-4 text-gray-500" />
         ) : (
@@ -684,7 +684,7 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
       <div className="min-w-0 flex-1">
         <div className="flex min-h-7 flex-wrap items-center gap-x-2 gap-y-1">
           {actorName && (
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{actorName}</span>
+            <span className="text-xs font-medium text-content-secondary">{actorName}</span>
           )}
           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${actionColor(entry.action)}`}>
             {formatAction(entry.action)}
@@ -699,9 +699,9 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
           )}
           {entry.from_status && entry.to_status && (
             <span className="flex items-center gap-1 text-xs text-gray-500">
-              <span className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-800">{entry.from_status}</span>
+              <span className="rounded bg-surface-secondary px-1.5 py-0.5">{entry.from_status}</span>
               <ArrowRight className="h-3 w-3" />
-              <span className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-800">{entry.to_status}</span>
+              <span className="rounded bg-surface-secondary px-1.5 py-0.5">{entry.to_status}</span>
             </span>
           )}
           {route && (
@@ -715,7 +715,7 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
           )}
         </div>
         {entry.reason && (
-          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{entry.reason}</p>
+          <p className="mt-0.5 text-sm text-content-secondary">{entry.reason}</p>
         )}
       </div>
       <div className="flex min-h-7 shrink-0 items-center text-right">

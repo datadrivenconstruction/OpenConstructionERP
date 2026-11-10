@@ -118,7 +118,7 @@ export function InventoryAgeing({ developmentId }: InventoryAgeingProps) {
                   <span
                     className={
                       isReservedBucket
-                        ? 'rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800'
+                        ? 'rounded bg-semantic-warning-bg px-1.5 py-0.5 font-medium text-semantic-warning'
                         : 'rounded bg-surface-secondary px-1.5 py-0.5 font-medium text-content-secondary'
                     }
                   >
@@ -142,7 +142,7 @@ export function InventoryAgeing({ developmentId }: InventoryAgeingProps) {
                   <span
                     className={
                       isReservedBucket
-                        ? 'absolute inset-y-0 left-0 rounded-full bg-amber-500'
+                        ? 'absolute inset-y-0 left-0 rounded-full bg-semantic-warning'
                         : 'absolute inset-y-0 left-0 rounded-full bg-oe-blue'
                     }
                     style={{ width: `${pct}%` }}

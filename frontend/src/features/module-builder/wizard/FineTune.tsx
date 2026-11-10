@@ -84,7 +84,7 @@ export function LockedMark({ testId }: { testId?: string }) {
   const { t } = useTranslation();
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-1.5 py-0.5 text-[11px] font-medium text-content-tertiary"
+      className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-tertiary"
       title={t('module_builder.locked_hint', {
         defaultValue: 'Entries already use this. Its wording can change. What it holds stays as it is.',
       })}

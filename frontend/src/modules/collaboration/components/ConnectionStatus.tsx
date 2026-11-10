@@ -20,10 +20,10 @@ export function ConnectionStatus({ connectionInfo }: ConnectionStatusProps) {
 
   const dotColor =
     status === 'connected'
-      ? 'bg-emerald-500'
+      ? 'bg-semantic-success'
       : status === 'connecting'
         ? 'bg-amber-400'
-        : 'bg-red-500';
+        : 'bg-semantic-error';
 
   const dotPulse = status === 'connecting' ? 'animate-pulse' : '';
 

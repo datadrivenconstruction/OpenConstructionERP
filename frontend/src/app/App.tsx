@@ -25,7 +25,7 @@ import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
 import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
-import { Logo, SkeletonTable, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
+import { Logo, SkeletonTable, ShortcutsDialog, CommandPalette, ToastContainer, GlobalTitleTooltip, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
 import { TableEnhancerHost } from '@/shared/ui/TableEnhancerHost';
 import { ChecksPanel } from '@/shared/ui/ChecksPanel';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
@@ -1970,6 +1970,7 @@ export default function App() {
         </Route>
       </Routes>
       <ToastContainer />
+      <GlobalTitleTooltip />
       {/* The public demonstration explaining that it will not keep a change,
           and offering the copy that would. Mounted once at the root because
           the refusal can arrive from any screen; renders nothing until the

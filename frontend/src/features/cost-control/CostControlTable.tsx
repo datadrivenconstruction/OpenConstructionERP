@@ -295,7 +295,7 @@ export function CostControlTable({
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border bg-surface-secondary/60 font-bold">
+          <tr className="border-t-2 border-border bg-surface-secondary/60 font-semibold">
             <td className="py-3 pl-4 pr-2 text-content-primary">
               {t('cost_control.total', { defaultValue: 'Project total' })}
             </td>

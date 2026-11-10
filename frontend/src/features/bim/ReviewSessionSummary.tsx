@@ -143,8 +143,8 @@ export function ReviewSessionSummary({
               <p
                 className={
                   tile.tone === 'warning'
-                    ? 'text-xl font-bold leading-none tabular-nums text-semantic-warning'
-                    : 'text-xl font-bold leading-none tabular-nums text-content-primary'
+                    ? 'text-xl font-semibold leading-none tabular-nums text-semantic-warning'
+                    : 'text-xl font-semibold leading-none tabular-nums text-content-primary'
                 }
               >
                 {tile.value}

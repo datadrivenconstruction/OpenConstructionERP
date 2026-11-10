@@ -69,12 +69,12 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
     <>
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} aria-hidden />
       <aside
-        className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-white dark:bg-slate-900 z-50 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-700"
+        className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-surface-primary z-50 shadow-2xl flex flex-col border-l border-border-light"
         role="dialog"
         aria-modal="true"
         aria-labelledby="templates-panel-heading"
       >
-        <header className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <header className="px-4 py-3 border-b border-border-light flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Library className="w-5 h-5 text-indigo-500" />
             <h2 id="templates-panel-heading" className="text-base font-semibold">
@@ -84,7 +84,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
               {listQ.data ? t('match_elements.templates.count', '{{count}} signatures', { count: listQ.data.length }) : ''}
             </span>
             {hitCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-2xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
                 <Sparkles className="h-3 w-3" />
                 {t('match_elements.templates.hit_count', {
                   defaultValue: '{{count}} in this session',
@@ -97,7 +97,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
             type="button"
             onClick={onClose}
             aria-label={t('match_elements.templates.close', 'Close template library')}
-            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1.5 rounded hover:bg-surface-secondary"
           >
             <X className="w-5 h-5" />
           </button>
@@ -126,7 +126,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
               className={
                 isHit
                   ? 'mb-3 p-3 rounded border border-indigo-300 dark:border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/10 transition'
-                  : 'mb-3 p-3 rounded border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition'
+                  : 'mb-3 p-3 rounded border border-border-light hover:border-indigo-300 dark:hover:border-indigo-600 transition'
               }
             >
               <div className="flex items-start justify-between gap-3">
@@ -136,7 +136,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                       {tpl.label ?? <span className="text-slate-400 italic">{t('match_elements.templates.unnamed', '(unnamed)')}</span>}
                     </div>
                     {isHit && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-indigo-100 px-1.5 py-0.5 text-2xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
                         <Sparkles className="h-2.5 w-2.5" />
                         {t('match_elements.templates.hit_badge', {
                           defaultValue: 'Matched here',
@@ -147,7 +147,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                   <div className="font-mono text-xs text-slate-500 truncate mt-0.5">
                     {t('match_elements.templates.sig', 'sig: {{prefix}}…', { prefix: tpl.signature.slice(0, 16) })}
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                  <div className="text-xs text-content-secondary mt-1">
                     {t('match_elements.templates.used', 'Used')} <strong className="tabular-nums">{tpl.use_count}</strong>×
                     {tpl.last_used_at && (
                       <> · {t('match_elements.templates.last', 'last {{date}}', { date: new Date(tpl.last_used_at).toLocaleDateString(getIntlLocale()) })}</>
@@ -157,7 +157,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                     {tpl.source_fields.map((f) => (
                       <span
                         key={f}
-                        className="px-1.5 py-0.5 text-[10px] rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono"
+                        className="px-1.5 py-0.5 text-2xs rounded bg-surface-secondary text-content-secondary font-mono"
                       >
                         {f}
                       </span>
@@ -169,7 +169,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                     if (confirm(t('match_elements.templates.remove_confirm', 'Remove this template from the library?'))) deleteMut.mutate(tpl.id);
                   }}
                   disabled={deleteMut.isPending}
-                  className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 disabled:opacity-50"
+                  className="p-1.5 rounded text-slate-400 hover:text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50"
                   title={t('match_elements.templates.remove_title', 'Remove from library')}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -180,7 +180,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
           })}
         </div>
 
-        <footer className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-500">
+        <footer className="px-4 py-3 border-t border-border-light text-xs text-content-tertiary">
           {t('match_elements.templates.footer', 'Templates are tenant-scoped. Confirmed signatures auto-suggest matches in future projects.')}
         </footer>
       </aside>

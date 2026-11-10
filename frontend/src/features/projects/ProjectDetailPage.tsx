@@ -607,7 +607,7 @@ function ProjectPhaseRibbon({ phase }: { phase: string | null }) {
             <React.Fragment key={step.key}>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
+                  className={`flex h-5 w-5 items-center justify-center rounded-full text-2xs font-semibold tabular-nums ${
                     isActive
                       ? 'bg-oe-blue text-white ring-2 ring-oe-blue/30'
                       : isPast
@@ -875,10 +875,10 @@ function ProjectHealthBar({
 
   // Color-code the progress ring based on completeness
   const ringColor = isComplete
-    ? 'text-emerald-500'
+    ? 'text-semantic-success'
     : completeness >= 0.6
     ? 'text-oe-blue'
-    : 'text-amber-500';
+    : 'text-semantic-warning';
 
   return (
     <Card padding="md" className="h-full flex flex-col justify-center">
@@ -908,7 +908,7 @@ function ProjectHealthBar({
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-bold text-content-primary tabular-nums">{percent}%</span>
+            <span className="text-sm font-semibold text-content-primary tabular-nums">{percent}%</span>
           </div>
         </div>
 
@@ -938,7 +938,7 @@ function ProjectHealthBar({
                 key={check.key}
                 title={check.label + (check.done ? ' (done)' : '')}
                 className={`h-1.5 flex-1 max-w-[60px] rounded-full transition-colors ${
-                  check.done ? (isComplete ? 'bg-emerald-500' : 'bg-oe-blue') : 'bg-surface-secondary'
+                  check.done ? (isComplete ? 'bg-semantic-success' : 'bg-oe-blue') : 'bg-surface-secondary'
                 }`}
               />
             ))}
@@ -987,7 +987,7 @@ function SummaryCard({
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide truncate">
             {label}
           </p>
-          <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+          <p className="mt-0.5 text-xl font-semibold text-content-primary tabular-nums leading-tight">
             {value}
           </p>
           {subtitle && (
@@ -1351,13 +1351,13 @@ function ImportDialog({
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                  <p className="text-lg font-bold text-content-primary">{result.imported}</p>
+                  <p className="text-lg font-semibold text-content-primary">{result.imported}</p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
                     {t('import.stat_imported', { defaultValue: 'Imported' })}
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                  <p className="text-lg font-bold text-content-primary">
+                  <p className="text-lg font-semibold text-content-primary">
                     {result.total_items ?? result.total_rows ?? result.imported + (result.updated ?? 0) + (result.skipped ?? 0)}
                   </p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
@@ -1365,7 +1365,7 @@ function ImportDialog({
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                  <p className="text-lg font-bold text-content-primary">{result.errors.length}</p>
+                  <p className="text-lg font-semibold text-content-primary">{result.errors.length}</p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('import.stat_errors', { defaultValue: 'Errors' })}</p>
                 </div>
               </div>
@@ -1388,13 +1388,13 @@ function ImportDialog({
               {/* What the reader left out and why: sheets not read, total lines,
                   numbers read with dot thousands. */}
               {(result.warnings ?? []).length > 0 && (
-                <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
-                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-2">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
+                  <p className="text-xs font-medium text-semantic-warning mb-2">
                     {t('import.notes_title', { defaultValue: 'Notes' })} ({(result.warnings ?? []).length})
                   </p>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {(result.warnings ?? []).map((w, i) => (
-                      <p key={`${w.sheet ?? ''}-${w.row ?? ''}-${i}`} className="text-xs text-amber-700 dark:text-amber-400">
+                      <p key={`${w.sheet ?? ''}-${w.row ?? ''}-${i}`} className="text-xs text-semantic-warning">
                         {importIssueText(w, t, (v) => fmtFixed(v, 2))}
                       </p>
                     ))}
@@ -2152,7 +2152,7 @@ export function ProjectDetailPage() {
                 <input
                   value={editForm.name}
                   onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full text-2xl font-bold text-content-primary bg-transparent border-b-2 border-oe-blue focus:outline-none pb-1"
+                  className="w-full text-2xl font-semibold text-content-primary bg-transparent border-b-2 border-oe-blue focus:outline-none pb-1"
                   placeholder={t('projects.project_name', 'Project name')}
                   autoFocus
                 />
@@ -2220,7 +2220,7 @@ export function ProjectDetailPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <h1 className="min-w-0 max-w-full break-words text-2xl font-bold text-content-primary">{project.name}</h1>
+                  <h1 className="min-w-0 max-w-full break-words text-2xl font-semibold text-content-primary">{project.name}</h1>
                   <ProjectStatusBadge status={project.status} size="md" />
                   {/* Owner/admin status picker (#274). Archiving stays its
                       own action (the project menu / list), so 'archived' is
@@ -2600,7 +2600,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_budget_consumed', { defaultValue: 'Budget Consumed' })}
                       </p>
-                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+                      <p className="mt-0.5 text-xl font-semibold text-content-primary tabular-nums leading-tight">
                         {fmtPercent(parseFloat(dashboardData.budget.consumed_pct))}
                       </p>
                       <p className="text-xs text-content-secondary mt-1 tabular-nums">
@@ -2613,7 +2613,7 @@ export function ProjectDetailPage() {
                       dashboardData.budget.warning_level === 'critical'
                         ? 'bg-semantic-error-bg text-semantic-error'
                         : dashboardData.budget.warning_level === 'warning'
-                        ? 'bg-amber-100 text-amber-600'
+                        ? 'bg-semantic-warning-bg text-semantic-warning'
                         : 'bg-oe-blue-subtle text-oe-blue-text'
                     }`}>
                       <DollarSign size={20} strokeWidth={1.75} />
@@ -2649,7 +2649,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_schedule_progress', { defaultValue: 'Schedule Progress' })}
                       </p>
-                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+                      <p className="mt-0.5 text-xl font-semibold text-content-primary tabular-nums leading-tight">
                         {fmtPercent(parseFloat(dashboardData.schedule.progress_pct))}
                       </p>
                       <p className="text-xs text-content-secondary mt-1">
@@ -2682,7 +2682,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_quality', { defaultValue: 'Quality Score' })}
                       </p>
-                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+                      <p className="mt-0.5 text-xl font-semibold text-content-primary tabular-nums leading-tight">
                         {fmtPercent(parseFloat(dashboardData.quality.validation_score) * 100, 0)}
                       </p>
                       <p className="text-xs text-content-secondary mt-1">
@@ -2695,7 +2695,7 @@ export function ProjectDetailPage() {
                       parseFloat(dashboardData.quality.validation_score) >= 0.8
                         ? 'bg-semantic-success-bg text-semantic-success'
                         : parseFloat(dashboardData.quality.validation_score) >= 0.5
-                        ? 'bg-amber-100 text-amber-600'
+                        ? 'bg-semantic-warning-bg text-semantic-warning'
                         : 'bg-surface-secondary text-content-tertiary'
                     }`}>
                       <ShieldCheck size={20} strokeWidth={1.75} />
@@ -2717,7 +2717,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_open_items', { defaultValue: 'Open Items' })}
                       </p>
-                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+                      <p className="mt-0.5 text-xl font-semibold text-content-primary tabular-nums leading-tight">
                         {dashboardData.communication.open_rfis +
                           dashboardData.communication.open_submittals +
                           dashboardData.communication.open_tasks +
@@ -2845,7 +2845,7 @@ export function ProjectDetailPage() {
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-base font-bold text-content-primary tabular-nums">
+                        <span className="text-base font-semibold text-content-primary tabular-nums">
                           {fmtPercent(parseFloat(dashboardData.schedule.progress_pct), 0)}
                         </span>
                       </div>
@@ -2944,7 +2944,7 @@ export function ProjectDetailPage() {
                           </div>
                           <span className="text-xs text-content-secondary">{item.label}</span>
                         </div>
-                        <p className="text-lg font-bold text-content-primary tabular-nums">{item.count}</p>
+                        <p className="text-lg font-semibold text-content-primary tabular-nums">{item.count}</p>
                         {'alert' in item && item.alert != null && item.alert > 0 && (
                           <p className="text-2xs text-semantic-error mt-0.5">
                             {item.alert} {item.alertLabel}
@@ -3014,7 +3014,7 @@ export function ProjectDetailPage() {
                         const typeColors: Record<string, string> = {
                           rfi_created: 'bg-oe-blue-subtle text-oe-blue-text',
                           task_created: 'bg-[#0891b2]/10 text-[#0891b2]',
-                          change_order: 'bg-amber-100 text-amber-600',
+                          change_order: 'bg-semantic-warning-bg text-semantic-warning',
                           document_uploaded: 'bg-[#7c3aed]/10 text-[#7c3aed]',
                           punch_item: 'bg-semantic-error-bg text-semantic-error',
                           field_report: 'bg-semantic-success-bg text-semantic-success',
@@ -3036,7 +3036,7 @@ export function ProjectDetailPage() {
                             className="flex items-center gap-3 px-5 py-3 w-full text-left transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:bg-surface-secondary focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue/40"
                             aria-label={`${typeLabels[item.type] || item.type}: ${item.title}`}
                           >
-                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-2xs font-bold ${typeColors[item.type] || 'bg-surface-secondary text-content-tertiary'}`}>
+                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-2xs font-semibold ${typeColors[item.type] || 'bg-surface-secondary text-content-tertiary'}`}>
                               {(typeLabels[item.type] || item.type).charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -3198,7 +3198,7 @@ export function ProjectDetailPage() {
                         </span>
                         {dashboardData.documents.pending_transmittals > 0 && (
                           <span className="flex flex-col">
-                            <strong className="text-lg leading-none text-amber-600">{dashboardData.documents.pending_transmittals}</strong>
+                            <strong className="text-lg leading-none text-semantic-warning">{dashboardData.documents.pending_transmittals}</strong>
                             <span className="mt-0.5 text-2xs text-amber-700/80 uppercase tracking-wide">{t('projects.dash_pending', { defaultValue: 'pending' })}</span>
                           </span>
                         )}

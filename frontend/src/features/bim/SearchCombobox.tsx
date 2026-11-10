@@ -175,7 +175,7 @@ export function SearchCombobox({
           close();
           onBlur?.();
         }}
-        className="w-full min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-[11px] focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+        className="w-full min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
         data-testid={testId}
       />
       {open && options.length > 0 && (
@@ -201,7 +201,7 @@ export function SearchCombobox({
                   choose(option);
                 }}
                 onMouseEnter={() => setActive(i)}
-                className={`flex cursor-pointer items-center gap-2 px-2 py-1 text-[11px] ${
+                className={`flex cursor-pointer items-center gap-2 px-2 py-1 text-2xs ${
                   isActive ? 'bg-surface-secondary' : ''
                 } ${isSelected ? 'text-oe-blue font-medium' : 'text-content-primary'}`}
               >
@@ -209,20 +209,20 @@ export function SearchCombobox({
                   {option.label}
                 </span>
                 {option.hint !== undefined && (
-                  <span className="shrink-0 text-[10px] tabular-nums text-content-tertiary">{option.hint}</span>
+                  <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">{option.hint}</span>
                 )}
               </li>
             );
           })}
           {visible.length === 0 && (
-            <li role="presentation" className="px-2 py-1.5 text-[11px] italic text-content-tertiary">
+            <li role="presentation" className="px-2 py-1.5 text-2xs italic text-content-tertiary">
               {emptyText ?? t('bim.property_search_no_option', { defaultValue: 'Nothing matches what you typed.' })}
             </li>
           )}
           {hidden > 0 && (
             <li
               role="presentation"
-              className="border-t border-border-light px-2 py-1.5 text-[10px] text-content-tertiary"
+              className="border-t border-border-light px-2 py-1.5 text-2xs text-content-tertiary"
               data-testid={`${testId}-more`}
             >
               {t('bim.property_search_more_options', {

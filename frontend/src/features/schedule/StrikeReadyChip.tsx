@@ -41,7 +41,7 @@ export function StrikeReadyChip({
   const pct = Math.round((sug.confidence ?? 0) * 100);
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-0.5 rounded border border-emerald-300 bg-emerald-50 px-1 py-0.5 text-[9px] font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+      className="inline-flex shrink-0 items-center gap-0.5 rounded border border-semantic-success/30 bg-semantic-success-bg px-1 py-0.5 text-2xs font-semibold text-semantic-success"
       title={t('schedule.strike_ready_tooltip', {
         defaultValue: 'Sensor estimate {{strength}} of {{target}} MPa ({{pct}}% confidence). Start the strike today?',
         strength: sug.strength_mpa ?? '-',
@@ -59,7 +59,7 @@ export function StrikeReadyChip({
           resolve.mutate('accept');
         }}
         aria-label={t('schedule.strike_accept', { defaultValue: 'Start strike today' })}
-        className="ml-0.5 rounded hover:bg-emerald-200/60 disabled:opacity-50"
+        className="ml-0.5 rounded hover:bg-semantic-success/10 disabled:opacity-50"
       >
         <Check size={9} />
       </button>
@@ -71,7 +71,7 @@ export function StrikeReadyChip({
           resolve.mutate('dismiss');
         }}
         aria-label={t('schedule.strike_dismiss', { defaultValue: 'Keep planned dates' })}
-        className="rounded hover:bg-emerald-200/60 disabled:opacity-50"
+        className="rounded hover:bg-semantic-success/10 disabled:opacity-50"
       >
         <X size={9} />
       </button>

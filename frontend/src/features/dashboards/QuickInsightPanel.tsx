@@ -193,7 +193,7 @@ export function QuickInsightPanel({
         )}
 
         {insightsQuery.isError && (
-          <div className="rounded border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+          <div className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300">
             {t('dashboards.quick_insights_error', {
               defaultValue: 'Could not load auto-charts for this snapshot.',
             })}

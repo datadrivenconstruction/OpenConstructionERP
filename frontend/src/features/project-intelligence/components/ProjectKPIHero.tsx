@@ -72,9 +72,9 @@ function formatMoney(value: number, currency: string): string {
 }
 
 const LEVEL_STYLE: Record<VarianceLevel, { ring: string; text: string; dot: string }> = {
-  green: { ring: 'ring-emerald-400/40', text: 'text-emerald-500', dot: 'bg-emerald-500' },
-  amber: { ring: 'ring-amber-400/40', text: 'text-amber-500', dot: 'bg-amber-500' },
-  red: { ring: 'ring-rose-400/40', text: 'text-rose-500', dot: 'bg-rose-500' },
+  green: { ring: 'ring-emerald-400/40', text: 'text-semantic-success', dot: 'bg-semantic-success' },
+  amber: { ring: 'ring-amber-400/40', text: 'text-semantic-warning', dot: 'bg-semantic-warning' },
+  red: { ring: 'ring-rose-400/40', text: 'text-semantic-error', dot: 'bg-semantic-error' },
 };
 
 export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
@@ -172,7 +172,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 1 — Budget variance */}
       <div
         data-testid="kpi-card-variance"
-        className={`rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4 ring-2 ${varianceStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${varianceStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">
@@ -185,7 +185,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
         <div className="flex items-baseline gap-2 mt-2">
           <VarianceIcon size={20} className={varianceStyle.text} />
           <span
-            className={`text-2xl font-bold tabular-nums ${varianceStyle.text}`}
+            className={`text-2xl font-semibold tabular-nums ${varianceStyle.text}`}
             data-testid="kpi-variance-pct"
           >
             {variancePct > 0 ? '+' : ''}
@@ -204,7 +204,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 2 — Schedule health */}
       <div
         data-testid="kpi-card-schedule"
-        className={`rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4 ring-2 ${scheduleStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${scheduleStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">
@@ -216,7 +216,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
         </div>
         <div className="flex items-baseline gap-2 mt-2">
           <CalendarCheck size={20} className={scheduleStyle.text} />
-          <span className={`text-2xl font-bold tabular-nums ${scheduleStyle.text}`}>
+          <span className={`text-2xl font-semibold tabular-nums ${scheduleStyle.text}`}>
             {fmtPercent(scheduleAdherence, 0)}
           </span>
         </div>
@@ -230,7 +230,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 3 — Risk-adjusted cost */}
       <div
         data-testid="kpi-card-risk"
-        className={`rounded-xl bg-white dark:bg-gray-800/60 border border-border-light shadow-sm p-4 ring-2 ${riskStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${riskStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">
@@ -242,7 +242,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
         </div>
         <div className="flex items-baseline gap-2 mt-2">
           <ShieldAlert size={20} className={riskStyle.text} />
-          <span className={`text-2xl font-bold tabular-nums ${riskStyle.text}`}>
+          <span className={`text-2xl font-semibold tabular-nums ${riskStyle.text}`}>
             {formatMoney(pointEstimate, variance?.currency ?? 'EUR')}
           </span>
         </div>

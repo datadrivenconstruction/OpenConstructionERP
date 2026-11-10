@@ -144,7 +144,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
                 })}
               </p>
               {overBudget ? (
-                <div role="alert" className="mt-2 rounded-lg bg-amber-500/10 p-2 text-amber-800 dark:text-amber-200">
+                <div role="alert" className="mt-2 rounded-lg bg-semantic-warning/10 p-2 text-semantic-warning">
                   <p className="flex items-start gap-1">
                     <AlertTriangle size={12} className="mt-0.5 shrink-0" aria-hidden />
                     {t('processes.profile_confirm', {
@@ -161,7 +161,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
                         onApply('all');
                       }}
                       data-testid="processes-profile-confirm"
-                      className="rounded-md bg-amber-600 px-2 py-1 font-medium text-white disabled:opacity-50"
+                      className="rounded-md bg-semantic-warning px-2 py-1 font-medium text-white disabled:opacity-50"
                     >
                       {t('processes.profile_confirm_yes', { defaultValue: 'Turn all on' })}
                     </button>

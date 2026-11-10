@@ -104,7 +104,7 @@ export function DrawingRefsDrawer({
                     <span className="truncate">{drawingRefLabel(r, t) || r.drawing_title}</span>
                   </button>
                   {r.outdated && (
-                    <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-2xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    <span className="shrink-0 rounded bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
                       {t('boq.drawing_ref.revised', { defaultValue: 'Revised' })}
                     </span>
                   )}
@@ -119,7 +119,7 @@ export function DrawingRefsDrawer({
                   })}
                 </p>
                 {r.outdated && (
-                  <p className="mt-1 flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300">
+                  <p className="mt-1 flex items-center gap-2 text-xs text-semantic-warning">
                     {t('boq.drawing_ref.newer_exists', {
                       defaultValue: 'A newer revision exists: {{rev}}.',
                       rev: r.current_revision ?? '',

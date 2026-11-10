@@ -101,7 +101,7 @@ function PackCardImpl({
       <div className="flex items-start gap-3">
         <PackEmblem pack={pack} size={44} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-[15px] font-semibold leading-snug text-content-primary">
+          <h3 className="text-base font-semibold leading-snug text-content-primary">
             {/* The whole card is the link to the pack's page; the action
                 button sits above the stretched area. */}
             <Link

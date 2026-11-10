@@ -87,7 +87,7 @@ const STATUS_CONFIG: Record<
 > = {
   draft: {
     variant: 'neutral',
-    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    cls: 'bg-surface-secondary text-content-secondary',
   },
   issued: { variant: 'blue', cls: '' },
   responded: { variant: 'success', cls: '' },
@@ -118,12 +118,12 @@ const PURPOSE_DESCRIPTIONS: Record<TransmittalPurpose, string> = {
 };
 
 const PURPOSE_COLORS: Record<TransmittalPurpose, string> = {
-  for_approval: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  for_approval: 'bg-semantic-warning-bg text-semantic-warning',
   for_information: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  for_construction: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  for_construction: 'bg-semantic-success-bg text-semantic-success',
   for_tender: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
   for_review: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  for_record: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  for_record: 'bg-surface-secondary text-content-secondary',
 };
 
 const inputCls =
@@ -282,7 +282,7 @@ function CreateTransmittalModal({
             className={clsx(
               inputCls,
               subjectError &&
-                'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
             )}
           />
         </WideModalField>
@@ -785,7 +785,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+                  className="text-semantic-error hover:bg-semantic-error-bg"
                   data-testid={`transmittal-delete-${transmittal.id}`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1467,7 +1467,7 @@ export function TransmittalsPage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
         </div>
       )}

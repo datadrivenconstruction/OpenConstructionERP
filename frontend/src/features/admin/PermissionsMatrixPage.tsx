@@ -152,9 +152,9 @@ function MatrixCell({
 }: CellProps) {
   const className = clsx(
     'flex items-center justify-center w-9 h-9 mx-auto rounded-md transition-colors relative',
-    state === 'allowed' && 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100',
-    state === 'denied' && 'text-rose-500 bg-rose-50 hover:bg-rose-100',
-    state === 'admin-bypass' && 'text-amber-700 bg-amber-50 hover:bg-amber-100',
+    state === 'allowed' && 'text-semantic-success bg-semantic-success-bg hover:bg-semantic-success-bg',
+    state === 'denied' && 'text-semantic-error bg-semantic-error-bg hover:bg-semantic-error-bg',
+    state === 'admin-bypass' && 'text-semantic-warning bg-semantic-warning-bg hover:bg-semantic-warning-bg',
     editable && 'cursor-pointer hover:ring-2 hover:ring-oe-blue/50 focus:outline-none focus:ring-2 focus:ring-oe-blue',
     !editable && 'cursor-default',
     pending && 'opacity-60',
@@ -386,7 +386,7 @@ function ModuleRows({
                 <ChevronDown size={16} aria-hidden />
               )}
               <span className="font-semibold">{friendlyName}</span>
-              <span className="font-mono text-[11px] font-normal text-content-tertiary">
+              <span className="font-mono text-2xs font-normal text-content-tertiary">
                 {module.name}
               </span>
               <span className="ml-auto text-xs text-content-tertiary font-normal tabular-nums">
@@ -426,7 +426,7 @@ function ModuleRows({
               <span className="block truncate max-w-[280px] font-medium text-content-primary" title={permissionAction(perm.key)}>
                 {permissionAction(perm.key)}
               </span>
-              <span className="block truncate max-w-[280px] font-mono text-[10px] text-content-tertiary" title={perm.key}>
+              <span className="block truncate max-w-[280px] font-mono text-2xs text-content-tertiary" title={perm.key}>
                 {perm.key}
                 <span className="ml-1.5 uppercase tracking-wider">
                   · {t('admin.permissions.min_role_label', { defaultValue: 'min' })}: {perm.min_role}
@@ -445,7 +445,7 @@ function ModuleRows({
                 });
                 return (
                   <span
-                    className="mt-0.5 block max-w-[280px] text-[11px] leading-snug text-content-tertiary line-clamp-2 font-normal normal-case"
+                    className="mt-0.5 block max-w-[280px] text-2xs leading-snug text-content-tertiary line-clamp-2 font-normal normal-case"
                     title={desc}
                   >
                     {desc}
@@ -1062,7 +1062,7 @@ export function PermissionsMatrixPage() {
     return (
       <div className="p-4">
         <EmptyState
-          icon={<ShieldCheck className="text-rose-500" size={48} aria-hidden />}
+          icon={<ShieldCheck className="text-semantic-error" size={48} aria-hidden />}
           title={t('admin.permissions.error_title', {
             defaultValue: 'Could not load permissions matrix',
           })}
@@ -1378,7 +1378,7 @@ export function PermissionsMatrixPage() {
                       {t(`admin.permissions.role_${role}`, {
                         defaultValue: role,
                       })}
-                      <div className="text-[10px] font-normal normal-case text-content-tertiary">
+                      <div className="text-2xs font-normal normal-case text-content-tertiary">
                         {role}
                       </div>
                     </th>
@@ -1432,21 +1432,21 @@ export function PermissionsMatrixPage() {
 
         <footer className="text-xs text-content-tertiary flex items-center gap-4 flex-wrap">
           <span className="inline-flex items-center gap-1">
-            <Check size={14} className="text-emerald-600" aria-hidden />
+            <Check size={14} className="text-semantic-success" aria-hidden />
             {t('admin.permissions.legend_allowed', { defaultValue: 'allowed' })}
           </span>
           <span className="inline-flex items-center gap-1">
-            <XIcon size={14} className="text-rose-500" aria-hidden />
+            <XIcon size={14} className="text-semantic-error" aria-hidden />
             {t('admin.permissions.legend_denied', { defaultValue: 'denied' })}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Lock size={12} className="text-amber-700" aria-hidden />
+            <Lock size={12} className="text-semantic-warning" aria-hidden />
             {t('admin.permissions.legend_admin_bypass', {
               defaultValue: 'admin-only by design',
             })}
           </span>
           {!isAdmin && (
-            <span className="ml-auto inline-flex items-center gap-1 text-amber-700">
+            <span className="ml-auto inline-flex items-center gap-1 text-semantic-warning">
               <Lock size={12} aria-hidden />
               {t('admin.permissions.read_only_notice', {
                 defaultValue: 'Read-only: admin role required to edit',

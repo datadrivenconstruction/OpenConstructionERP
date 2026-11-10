@@ -78,11 +78,11 @@ const ACTION_ICON: Record<string, LucideIcon> = {
 };
 
 const ACTION_CHIP: Record<string, string> = {
-  uploaded: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  uploaded: 'bg-semantic-success-bg text-semantic-success',
   renamed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   downloaded: 'bg-surface-secondary text-content-secondary',
-  deleted: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
-  cde_state_changed: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  deleted: 'bg-semantic-error-bg text-semantic-error',
+  cde_state_changed: 'bg-semantic-warning-bg text-semantic-warning',
 };
 
 /* The route's maximum page. It belongs in the query key as well as the
@@ -305,7 +305,7 @@ export function ActivityDrawer({
               });
               return (
                 <section key={bucket} data-testid={`activity-bucket-${bucket}`}>
-                  <h3 className="sticky top-0 z-10 border-b border-border-light/60 bg-surface-elevated/95 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-content-quaternary backdrop-blur">
+                  <h3 className="sticky top-0 z-10 border-b border-border-light/60 bg-surface-elevated/95 px-4 py-1.5 text-2xs font-semibold uppercase tracking-wider text-content-quaternary backdrop-blur">
                     {bucketLabel}
                   </h3>
                   <ol className="divide-y divide-border-light/60">
@@ -373,7 +373,7 @@ function ActivityRow({
         <div className="flex flex-wrap items-center gap-1.5">
           <span
             className={clsx(
-              'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+              'inline-flex items-center rounded-md px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide',
               chip,
             )}
           >
@@ -386,11 +386,11 @@ function ActivityRow({
           />
         </div>
         {summary && (
-          <p className="mt-1 break-words text-[11px] text-content-secondary">
+          <p className="mt-1 break-words text-2xs text-content-secondary">
             {summary}
           </p>
         )}
-        <p className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-content-quaternary">
+        <p className="mt-0.5 flex items-center gap-1 truncate text-2xs text-content-quaternary">
           <User size={9} strokeWidth={2} className="shrink-0" />
           <span className="truncate font-mono" title={actor}>
             {actor}

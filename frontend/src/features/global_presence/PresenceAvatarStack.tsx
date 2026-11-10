@@ -27,10 +27,10 @@ const MAX_VISIBLE = 5;
 /** Deterministic color palette for user avatars. */
 const AVATAR_COLORS = [
   'bg-blue-500',
-  'bg-emerald-500',
-  'bg-amber-500',
+  'bg-semantic-success',
+  'bg-semantic-warning',
   'bg-violet-500',
-  'bg-rose-500',
+  'bg-semantic-error',
   'bg-cyan-500',
   'bg-orange-500',
   'bg-indigo-500',
@@ -131,7 +131,7 @@ export function PresenceAvatarStack() {
         <span
           className={clsx(
             'flex h-7 items-center justify-center rounded-full px-1.5',
-            'bg-surface-secondary text-[10px] font-semibold text-content-tertiary',
+            'bg-surface-secondary text-2xs font-semibold text-content-tertiary',
             'select-none',
           )}
           title={t('presence.more_users', {
@@ -170,7 +170,7 @@ function AvatarButton({ user, isOpen, onClick }: AvatarButtonProps) {
       aria-label={user.user_name}
       className={clsx(
         'relative flex h-7 w-7 items-center justify-center rounded-full',
-        'text-[10px] font-semibold text-white',
+        'text-2xs font-semibold text-white',
         'ring-2 ring-surface-primary',
         'transition-opacity duration-fast ease-oe',
         color,
@@ -184,7 +184,7 @@ function AvatarButton({ user, isOpen, onClick }: AvatarButtonProps) {
         className={clsx(
           'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full',
           'border-2 border-surface-primary',
-          isIdle ? 'bg-content-quaternary' : 'bg-emerald-500',
+          isIdle ? 'bg-content-quaternary' : 'bg-semantic-success',
         )}
       />
     </button>
