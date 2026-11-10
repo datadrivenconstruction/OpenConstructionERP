@@ -1215,7 +1215,7 @@ export function PrefabPage() {
   // cost_basis comes from the linked BOQ position or assembly, and
   // earned_value is that basis times the stage machine's completed fraction.
   const projectCurrency = projects.find((p) => p.id === projectId)?.currency || 'EUR';
-  const insights = useModuleInsights('prefab', { defaultOpen: true });
+  const insights = useModuleInsights('prefab');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildPrefabInsights(allUnits, projectCurrency, t),
     [allUnits, projectCurrency, t],

@@ -774,7 +774,7 @@ export function SafetyPage() {
     select: (d): Incident[] => d.items.map(normaliseIncident),
     enabled: !!projectId,
   });
-  const insights = useModuleInsights('safety', { defaultOpen: true });
+  const insights = useModuleInsights('safety');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildSafetyInsights(insightIncidents, '', t),
     [insightIncidents, t],

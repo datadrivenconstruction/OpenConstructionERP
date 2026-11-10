@@ -1408,7 +1408,7 @@ export function MoCPage() {
   // fill it. The page has no early return, so this simply joins the other
   // top-level hooks. Currency comes from the first entry that carries one (the
   // MoC project record does not expose it).
-  const insights = useModuleInsights('moc', { defaultOpen: true });
+  const insights = useModuleInsights('moc');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildMocInsights(entries, entries.find((e) => e.currency)?.currency || '', t),
     [entries, t],

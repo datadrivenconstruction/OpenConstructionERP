@@ -280,7 +280,7 @@ export function FieldReportsPage() {
   // ── Module Insights ──────────────────────────────────────────────────
   // Built off the already-loaded list rows; until the list view has some the
   // panel draws nothing rather than inventing reports to fill it.
-  const insights = useModuleInsights('fieldreports', { defaultOpen: true });
+  const insights = useModuleInsights('fieldreports');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildFieldReportsInsights(listReports, '', t),
     [listReports, t],

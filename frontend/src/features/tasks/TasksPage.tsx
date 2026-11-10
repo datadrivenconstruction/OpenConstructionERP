@@ -1079,7 +1079,7 @@ export function TasksPage() {
   // project has none the panel draws nothing rather than inventing rows to fill
   // it. Declared among the top-level hooks, above the single return below, so
   // hook order stays stable on every render.
-  const insights = useModuleInsights('tasks', { defaultOpen: true });
+  const insights = useModuleInsights('tasks');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildTasksInsights(tasks, '', t),
     [tasks, t],

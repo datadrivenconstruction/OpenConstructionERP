@@ -224,7 +224,7 @@ function RegisterInner() {
     refetch,
   } = useApprovals(projectId, statusFilter || undefined);
 
-  const insights = useModuleInsights('file-approvals', { defaultOpen: true });
+  const insights = useModuleInsights('file-approvals');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildFileApprovalsInsights(workflows, t),
     [workflows, t],

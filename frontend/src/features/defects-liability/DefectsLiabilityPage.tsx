@@ -878,7 +878,7 @@ export function DefectsLiabilityPage() {
   // fill it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared among the top-level hooks (this component has
   // no early return) so the hook order stays stable.
-  const insights = useModuleInsights('defects-liability', { defaultOpen: true });
+  const insights = useModuleInsights('defects-liability');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildDefectsLiabilityInsights(defects, '', t),
     [defects, t],

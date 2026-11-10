@@ -1213,7 +1213,7 @@ export function CommissioningPage() {
     enabled: !!projectId,
   });
 
-  const insights = useModuleInsights('commissioning', { defaultOpen: true });
+  const insights = useModuleInsights('commissioning');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildCommissioningInsights(systems, t),
     [systems, t],

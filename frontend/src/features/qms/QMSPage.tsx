@@ -367,7 +367,7 @@ export function QMSPage() {
     queryFn: () => listPunchItems({ project_id: projectId, limit: 200 }),
     enabled: !!projectId,
   });
-  const insights = useModuleInsights('qms', { defaultOpen: true });
+  const insights = useModuleInsights('qms');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildQMSInsights(insightsPunchQ.data?.items ?? [], '', t),
     [insightsPunchQ.data, t],

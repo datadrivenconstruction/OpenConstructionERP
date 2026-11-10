@@ -702,7 +702,7 @@ export function VariationsPage() {
   // change's estimated cost and schedule impact); when the project has none the
   // panel draws nothing rather than inventing rows to fill it. Declared before
   // the no-project early return below so the hook order stays stable.
-  const insights = useModuleInsights('variations', { defaultOpen: true });
+  const insights = useModuleInsights('variations');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildVariationsInsights(requestsQ.data?.items ?? [], currency, t),
     [requestsQ.data, currency, t],

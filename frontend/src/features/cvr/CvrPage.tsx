@@ -660,7 +660,7 @@ export function CvrPage() {
   // fill it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared above the no-project early return below so the
   // hook order stays stable.
-  const insights = useModuleInsights('cvr', { defaultOpen: true });
+  const insights = useModuleInsights('cvr');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildCvrInsights(payapps, reportCurrency || payapps[0]?.currency || '', t),
     [payapps, reportCurrency, t],

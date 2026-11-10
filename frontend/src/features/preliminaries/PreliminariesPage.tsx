@@ -247,7 +247,7 @@ export function PreliminariesPage() {
   // it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared before the project-guard early return below so
   // the hook order stays stable.
-  const insights = useModuleInsights('preliminaries', { defaultOpen: true });
+  const insights = useModuleInsights('preliminaries');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildPreliminariesInsights(itemsData ?? [], '', t),
     [itemsData, t],

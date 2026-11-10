@@ -1326,7 +1326,7 @@ export function InspectionsPage() {
   // project has none the panel draws nothing rather than inventing rows to fill
   // it. Declared with the top-level hooks, above the single return, so the hook
   // order stays stable.
-  const insights = useModuleInsights('inspections', { defaultOpen: true });
+  const insights = useModuleInsights('inspections');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildInspectionsInsights(inspections, '', t),
     [inspections, t],

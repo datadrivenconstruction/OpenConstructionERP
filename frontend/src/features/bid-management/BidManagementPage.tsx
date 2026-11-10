@@ -625,7 +625,7 @@ export function BidManagementPage() {
   // it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared above the no-project early return below so the
   // hook order stays stable.
-  const insights = useModuleInsights('bid-management', { defaultOpen: true });
+  const insights = useModuleInsights('bid-management');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildBidManagementInsights(packagesQ.data ?? [], currentProject?.currency || '', t),
     [packagesQ.data, currentProject, t],

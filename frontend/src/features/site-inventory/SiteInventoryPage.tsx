@@ -1089,7 +1089,7 @@ export function SiteInventoryPage() {
     items.find((i) => i.currency)?.currency ||
     movements.find((m) => m.currency)?.currency ||
     '';
-  const insights = useModuleInsights('site-inventory', { defaultOpen: true });
+  const insights = useModuleInsights('site-inventory');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildSiteInventoryInsights(stockRows, movements, items, inventoryCurrency, t),
     [stockRows, movements, items, inventoryCurrency, t],

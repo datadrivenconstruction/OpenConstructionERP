@@ -1230,7 +1230,7 @@ export function InterfaceManagementPage() {
   // Module Insights - toggleable charts built client-side from the interfaces
   // already loaded; an empty project leaves the panel with nothing to draw.
   // Declared here, above the page's first return, so the hook order stays stable.
-  const insights = useModuleInsights('interface-management', { defaultOpen: true });
+  const insights = useModuleInsights('interface-management');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildInterfaceManagementInsights(interfaces, '', t),
     [interfaces, t],

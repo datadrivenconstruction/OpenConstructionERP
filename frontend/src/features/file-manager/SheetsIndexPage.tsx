@@ -502,7 +502,7 @@ export function SheetsIndexPage() {
      collapsed to one bar the moment a discipline chip was clicked would be
      answering a question the chip has already answered. Kept with the other
      top-level hooks so the hook order cannot change between renders. */
-  const insights = useModuleInsights('sheets', { defaultOpen: true });
+  const insights = useModuleInsights('sheets');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildSheetsInsights(sheets, t),
     [sheets, t],

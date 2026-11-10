@@ -2646,7 +2646,7 @@ export function TenderingPage() {
   // project has none the panel draws nothing rather than inventing rows to fill
   // it. Open state and any user-built charts persist per module via
   // useModuleInsights.
-  const insights = useModuleInsights('tendering', { defaultOpen: true });
+  const insights = useModuleInsights('tendering');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildTenderingInsights(packages ?? [], currency, t),
     [packages, currency, t],

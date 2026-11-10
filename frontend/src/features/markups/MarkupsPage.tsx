@@ -1958,7 +1958,7 @@ export function MarkupsPage() {
   // Open state and any user-built charts persist per module via
   // useModuleInsights. Declared among the top hooks so the hook order stays
   // stable.
-  const insights = useModuleInsights('markups', { defaultOpen: true });
+  const insights = useModuleInsights('markups');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildMarkupsInsights(markups, '', t),
     [markups, t],

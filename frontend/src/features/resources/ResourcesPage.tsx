@@ -541,7 +541,7 @@ export function ResourcesPage() {
   // are none the panel draws nothing rather than inventing rows to fill it.
   // Declared before the first return below so the hook order stays stable.
   const resourcesCurrency = allResources.find((r) => r.currency)?.currency || '';
-  const insights = useModuleInsights('resources', { defaultOpen: true });
+  const insights = useModuleInsights('resources');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildResourcesInsights(allResources, resourcesCurrency, t),
     [allResources, resourcesCurrency, t],

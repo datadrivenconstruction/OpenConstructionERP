@@ -1198,7 +1198,7 @@ export function TemporaryWorksPage() {
   // Module Insights - toggleable charts built client-side from the items already
   // loaded; an empty project leaves the panel with nothing to draw. Declared
   // here, above the page's first return, so the hook order stays stable.
-  const insights = useModuleInsights('temporary-works', { defaultOpen: true });
+  const insights = useModuleInsights('temporary-works');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildTemporaryWorksInsights(items, '', t),
     [items, t],

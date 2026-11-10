@@ -393,7 +393,7 @@ function TimesheetsTab({
 
   // Line level, not sheet level: cost code and daywork live on the line, and
   // the KPI band above already answers "how many sheets and how many hours".
-  const insights = useModuleInsights('field-time', { defaultOpen: true });
+  const insights = useModuleInsights('field-time');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildFieldTimeInsights(timesheets, t),
     [timesheets, t],

@@ -635,7 +635,7 @@ export function ContractsPage() {
   // Module Insights - reads the loaded contract register (charts, KPIs). Kept
   // among the top hooks, above every conditional render, so hook order is
   // stable no matter which tab or drawer is open.
-  const insights = useModuleInsights('contracts', { defaultOpen: true });
+  const insights = useModuleInsights('contracts');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () =>
       buildContractsInsights(

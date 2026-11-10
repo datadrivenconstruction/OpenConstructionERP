@@ -1637,7 +1637,7 @@ export function CorrespondencePage() {
   // ── Module Insights ──────────────────────────────────────────────────
   // Built off the already-loaded register rows; until the register has some
   // the panel draws nothing rather than inventing entries to fill it.
-  const insights = useModuleInsights('correspondence', { defaultOpen: true });
+  const insights = useModuleInsights('correspondence');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildCorrespondenceInsights(items, '', t),
     [items, t],

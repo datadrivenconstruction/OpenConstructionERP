@@ -2581,7 +2581,7 @@ export function ChangeOrdersPage() {
   // the project has none the panel draws nothing rather than inventing rows to
   // fill it. Declared here, above the detail-view early return further down, so
   // the hook order stays stable.
-  const insights = useModuleInsights('changeorders', { defaultOpen: true });
+  const insights = useModuleInsights('changeorders');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildChangeordersInsights(orders, project?.currency || summary?.currency || '', t),
     [orders, project, summary, t],

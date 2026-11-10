@@ -1240,7 +1240,7 @@ export function PunchListPage() {
 
   // Insights read the full register, never the search-narrowed list: a KPI
   // that moves while you type is not a KPI.
-  const insights = useModuleInsights('punchlist', { defaultOpen: true });
+  const insights = useModuleInsights('punchlist');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildPunchlistInsights(punchItems, t),
     [punchItems, t],

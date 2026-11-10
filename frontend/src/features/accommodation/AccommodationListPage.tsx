@@ -233,7 +233,7 @@ export function AccommodationListPage() {
   // fill it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared among the top hooks so the hook order stays
   // stable.
-  const insights = useModuleInsights('accommodation', { defaultOpen: true });
+  const insights = useModuleInsights('accommodation');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildAccommodationInsights(accommodations, '', t),
     [accommodations, t],

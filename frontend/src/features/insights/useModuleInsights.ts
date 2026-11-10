@@ -42,18 +42,32 @@ export function useModuleInsights(
   moduleId: string,
   opts?: { defaultOpen?: boolean },
 ): ModuleInsightsState {
-  const defaultOpen = opts?.defaultOpen ?? true;
-  const openKey = `oce.insights.${moduleId}.open`;
+  // Hidden unless the user opened it. The old `.open` key was written on every
+  // mount, so it records the former default rather than a choice; a new key starts clean.
+  const defaultOpen = opts?.defaultOpen ?? false;
+  const openKey = `oce.insights.${moduleId}.shown`;
   const customKey = `oce.insights.${moduleId}.custom`;
 
   const [open, setOpenState] = useState<boolean>(() => read<boolean>(openKey, defaultOpen));
   const [custom, setCustom] = useState<InsightDef[]>(() => read<InsightDef[]>(customKey, []));
 
-  useEffect(() => persist(openKey, open), [openKey, open]);
   useEffect(() => persist(customKey, custom), [customKey, custom]);
 
-  const setOpen = useCallback((v: boolean) => setOpenState(v), []);
-  const toggle = useCallback(() => setOpenState((v) => !v), []);
+  const setOpen = useCallback(
+    (v: boolean) => {
+      setOpenState(v);
+      persist(openKey, v);
+    },
+    [openKey],
+  );
+  const toggle = useCallback(
+    () =>
+      setOpenState((v) => {
+        persist(openKey, !v);
+        return !v;
+      }),
+    [openKey],
+  );
   const addCustom = useCallback((def: InsightDef) => setCustom((l) => [...l, def]), []);
   const updateCustom = useCallback(
     (def: InsightDef) => setCustom((l) => l.map((d) => (d.id === def.id ? def : d))),

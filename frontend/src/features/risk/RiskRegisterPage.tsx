@@ -741,7 +741,7 @@ export function RiskRegisterPage() {
   // fill it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared before the detail-view early return below so
   // the hook order stays stable.
-  const insights = useModuleInsights('risk', { defaultOpen: true });
+  const insights = useModuleInsights('risk');
   const currency = project?.currency || summary?.currency || '';
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildRiskInsights(risks, currency, t),

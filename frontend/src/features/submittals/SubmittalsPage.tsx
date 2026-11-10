@@ -1223,7 +1223,7 @@ export function SubmittalsPage() {
   // project has none the panel draws nothing rather than inventing rows to fill
   // it. Declared with the top-level hooks, above the single return, so the hook
   // order stays stable.
-  const insights = useModuleInsights('submittals', { defaultOpen: true });
+  const insights = useModuleInsights('submittals');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildSubmittalsInsights(submittals, '', t),
     [submittals, t],

@@ -384,7 +384,7 @@ export function EquipmentPage() {
   // Module Insights - reads the loaded fleet register (charts, KPIs). Kept
   // among the top hooks, above every conditional render, so hook order is
   // stable no matter which tab or drawer is open.
-  const insights = useModuleInsights('equipment', { defaultOpen: true });
+  const insights = useModuleInsights('equipment');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildEquipmentInsights(eqQ.data?.items ?? [], fleetCurrency || '', t),
     [eqQ.data, fleetCurrency, t],

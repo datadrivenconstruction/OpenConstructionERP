@@ -277,7 +277,7 @@ export function DeadlinesPage() {
   const overdueCount = query.data?.overdue_count ?? 0;
   const approachingCount = query.data?.approaching_count ?? 0;
 
-  const insights = useModuleInsights('deadlines', { defaultOpen: true });
+  const insights = useModuleInsights('deadlines');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildDeadlinesInsights(query.data?.items ?? [], t),
     [query.data, t],

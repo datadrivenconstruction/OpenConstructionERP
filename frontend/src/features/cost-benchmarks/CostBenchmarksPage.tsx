@@ -531,7 +531,7 @@ export default function CostBenchmarksPage() {
     onError,
   });
 
-  const insights = useModuleInsights('cost_benchmarks', { defaultOpen: true });
+  const insights = useModuleInsights('cost_benchmarks');
   const { datasets, builtins } = useMemo(() => buildInsights(completed, t), [completed, t]);
 
   const runCompare = () => {

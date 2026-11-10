@@ -2131,7 +2131,7 @@ export function RFIPage() {
   // client-side from the RFIs already loaded; when the project has none the
   // panel draws nothing rather than inventing rows to fill it. Declared with
   // the other top-of-component hooks so the hook order stays stable.
-  const insights = useModuleInsights('rfi', { defaultOpen: true });
+  const insights = useModuleInsights('rfi');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildRFIInsights(rfis, '', t),
     [rfis, t],

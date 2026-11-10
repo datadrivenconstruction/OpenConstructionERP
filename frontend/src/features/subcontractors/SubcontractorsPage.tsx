@@ -416,7 +416,7 @@ export function SubcontractorsPage() {
   // (money lives on the per-firm Agreement, which this page does not load), so
   // the charts use the register's own fields - trade, prequalification status,
   // insurance, rating.
-  const insights = useModuleInsights('subcontractors', { defaultOpen: true });
+  const insights = useModuleInsights('subcontractors');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildSubcontractorsInsights(subsQ.data?.items ?? [], '', t),
     [subsQ.data, t],

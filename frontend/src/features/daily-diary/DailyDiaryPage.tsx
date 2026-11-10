@@ -375,7 +375,7 @@ export function DailyDiaryPage() {
   // rows to fill it. Open state and any user-built charts persist per module
   // via useModuleInsights. Declared among the top-level hooks (this component
   // has no early return) so the hook order stays stable.
-  const insights = useModuleInsights('daily-diary', { defaultOpen: true });
+  const insights = useModuleInsights('daily-diary');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildDailyDiaryInsights(diariesQ.data?.items ?? [], '', t),
     [diariesQ.data, t],

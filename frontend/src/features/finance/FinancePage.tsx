@@ -971,7 +971,7 @@ export function FinancePage() {
       apiGet<FinanceDashboardData>(`/v1/finance/dashboard/?project_id=${projectId}`),
     enabled: !!projectId,
   });
-  const insights = useModuleInsights('finance', { defaultOpen: true });
+  const insights = useModuleInsights('finance');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildFinanceInsights(insightInvoices, insightDashboard?.currency || 'EUR', t),
     [insightInvoices, insightDashboard, t],

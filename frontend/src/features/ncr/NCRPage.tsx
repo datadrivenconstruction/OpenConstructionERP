@@ -1240,7 +1240,7 @@ export function NCRPage() {
   // client-side from the NCRs already loaded; when the project has none the
   // panel draws nothing rather than inventing rows to fill it. Declared with
   // the other top-of-component hooks so the hook order stays stable.
-  const insights = useModuleInsights('ncr', { defaultOpen: true });
+  const insights = useModuleInsights('ncr');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildNCRInsights(ncrs, projectCurrency, t),
     [ncrs, projectCurrency, t],

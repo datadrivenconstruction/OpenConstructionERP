@@ -506,7 +506,7 @@ export function ProcurementPage() {
       apiGet<{ currency: string }>(`/v1/finance/dashboard/?project_id=${projectId}`),
     enabled: !!projectId,
   });
-  const insights = useModuleInsights('procurement', { defaultOpen: true });
+  const insights = useModuleInsights('procurement');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildProcurementInsights(insightOrders, insightDashboard?.currency || 'EUR', t),
     [insightOrders, insightDashboard, t],

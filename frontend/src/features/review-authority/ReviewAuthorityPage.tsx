@@ -1511,7 +1511,7 @@ export function ReviewAuthorityPage() {
   // Cycle level, not remark level: remarks are fetched per cycle inside
   // CycleDetailPanel, so a remark dataset would need a query this page does
   // not make.
-  const insights = useModuleInsights('review-authority', { defaultOpen: true });
+  const insights = useModuleInsights('review-authority');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildReviewAuthorityInsights(cycles, t),
     [cycles, t],

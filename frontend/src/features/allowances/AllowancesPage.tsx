@@ -474,7 +474,7 @@ export function AllowancesPage() {
   // it. Open state and any user-built charts persist per module via
   // useModuleInsights. Declared before the project-guard early return below so
   // the hook order stays stable.
-  const insights = useModuleInsights('allowances', { defaultOpen: true });
+  const insights = useModuleInsights('allowances');
   const { datasets: insightDatasets, builtins: insightBuiltins } = useMemo(
     () => buildAllowancesInsights(allowances, summary?.primary_currency || '', t),
     [allowances, summary, t],
