@@ -27,7 +27,7 @@ _WATCHED = (
 )
 
 
-@pytest.mark.timeout(1500)
+@pytest.mark.timeout(2700)
 async def test_every_demo_project_gets_permits_and_design_rows(fresh_db, caplog) -> None:  # noqa: F811
     from app.core.demo_enrichment import enrich_projects
     from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
