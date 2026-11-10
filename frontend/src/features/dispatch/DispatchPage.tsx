@@ -216,14 +216,20 @@ export function DispatchPage() {
               <ClipboardList size={14} className="mr-1" />
               {t('dispatch.daily_plan', { defaultValue: 'Daily plan' })}
             </Button>
-            <div role="group" aria-label={t('dispatch.density', { defaultValue: 'Card size' })} className="flex rounded border border-border">
+            <div role="group" aria-label={t('dispatch.density', { defaultValue: 'Card size' })} className="inline-flex h-8 items-center rounded-lg border border-border bg-surface-primary p-0.5">
               {(['compact', 'detailed'] as Density[]).map((d) => (
                 <button
                   key={d}
+                  data-oe-segment
                   type="button"
                   aria-pressed={density === d}
                   onClick={() => densityMut.mutate(d)}
-                  className={clsx('px-2 py-1 text-xs', density === d ? 'bg-oe-blue text-white' : 'text-content-secondary')}
+                  className={clsx(
+                    'h-full px-2.5 text-xs font-medium rounded-md',
+                    density === d
+                      ? 'bg-surface-tertiary text-content-primary shadow-xs'
+                      : 'text-content-secondary hover:text-content-primary',
+                  )}
                 >
                   {d === 'compact'
                     ? t('dispatch.density_compact', { defaultValue: 'Compact' })

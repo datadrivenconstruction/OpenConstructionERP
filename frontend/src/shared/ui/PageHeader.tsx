@@ -3,6 +3,8 @@
 import { type ReactNode } from 'react';
 import clsx from 'clsx';
 
+import { ButtonSizeOverrideContext } from './Button';
+
 /**
  * Canonical module page top block (MODULE_STYLE_GUIDE.md section 2).
  *
@@ -72,7 +74,9 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
           scrolled the whole page sideways. The cap is inert whenever the row
           fits, so wide layouts are unchanged. */}
       {actions && (
-        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">
+          <ButtonSizeOverrideContext.Provider value="md">{actions}</ButtonSizeOverrideContext.Provider>
+        </div>
       )}
     </div>
   );

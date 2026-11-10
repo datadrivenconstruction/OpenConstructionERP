@@ -65,7 +65,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 
-import { Badge, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, EmptyState, SkeletonTable } from '@/shared/ui';
+import { Badge, Breadcrumb, Button, ConfirmDialog, DismissibleInfo, IntroRichText, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
@@ -4098,14 +4098,9 @@ export function BIMQuantityRulesPage() {
           }
           actions={
             activeTab === 'quantity_rules' ? (
-              <button
-                type="button"
-                onClick={openCreate}
-                className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark"
-              >
-                <Plus size={13} />
+              <Button type="button" variant="primary" onClick={openCreate} icon={<Plus size={16} />}>
                 {t('bim_rules.new_rule', { defaultValue: 'New rule' })}
-              </button>
+              </Button>
             ) : undefined
           }
         />

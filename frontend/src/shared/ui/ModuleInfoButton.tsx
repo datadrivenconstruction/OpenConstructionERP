@@ -59,7 +59,7 @@ export function ModuleInfoButton({ className }: ModuleInfoButtonProps) {
         // The class only ever runs once because the control is unmounted
         // whenever nothing is collapsed.
         'animate-scale-in',
-        'flex h-7 w-7 shrink-0 items-center justify-center rounded-md',
+        'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
         // The info block's own light-blue tint, carried onto the icon so the
         // pair reads as one thing in two states rather than as an unrelated
         // header button. Quiet until hover: it sits beside the module name and

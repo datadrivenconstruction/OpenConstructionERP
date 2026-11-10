@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
-import { Badge, CollapsibleSection, EmptyState, StatCard } from '@/shared/ui';
+import { Badge, Button, CollapsibleSection, EmptyState, StatCard } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -658,30 +658,25 @@ export function RebarSchedulePage() {
           })}
           actions={
             <>
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleCancelPreview}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary transition-colors"
+                icon={<X className="h-4 w-4" aria-hidden />}
               >
-                <X className="h-4 w-4" aria-hidden />
                 {t('common.cancel', { defaultValue: 'Cancel' })}
-              </button>
+              </Button>
               {canImport && (
-                <button
+                <Button
+                  variant={hasErrors ? 'danger' : 'primary'}
                   onClick={handleConfirmImport}
                   disabled={importing}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-content-inverse hover:opacity-90 disabled:opacity-40 transition-colors ${
-                    hasErrors ? 'bg-semantic-error' : 'bg-oe-blue'
-                  }`}
+                  loading={importing}
+                  icon={<Upload className="h-4 w-4" aria-hidden />}
                 >
-                  {importing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Upload className="h-4 w-4" aria-hidden />
-                  )}
                   {hasErrors
                     ? t('rebar_schedule.import_anyway', { defaultValue: 'Import with errors' })
                     : t('rebar_schedule.confirm_import', { defaultValue: 'Import' })}
-                </button>
+                </Button>
               )}
             </>
           }
@@ -760,28 +755,28 @@ export function RebarSchedulePage() {
           subtitle={selectedImport.filename}
           actions={
             <>
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleBackToList}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary transition-colors"
+                icon={<ArrowLeft className="h-4 w-4" aria-hidden />}
               >
-                <ArrowLeft className="h-4 w-4" aria-hidden />
                 {t('rebar_schedule.back_to_list', { defaultValue: 'All Imports' })}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
                 onClick={handleExport}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary transition-colors"
+                icon={<Download className="h-4 w-4" aria-hidden />}
               >
-                <Download className="h-4 w-4" aria-hidden />
                 {t('rebar_schedule.export', { defaultValue: 'Export .abs' })}
-              </button>
+              </Button>
               {canDelete && (
-                <button
+                <Button
+                  variant="danger"
                   onClick={() => setDeleteTarget(selectedImport)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm font-medium text-semantic-error hover:opacity-80 transition-colors"
+                  icon={<Trash2 className="h-4 w-4" aria-hidden />}
                 >
-                  <Trash2 className="h-4 w-4" aria-hidden />
                   {t('common.delete', { defaultValue: 'Delete' })}
-                </button>
+                </Button>
               )}
             </>
           }

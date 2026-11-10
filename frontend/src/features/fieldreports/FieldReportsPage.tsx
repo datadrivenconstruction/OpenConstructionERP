@@ -508,30 +508,32 @@ export function FieldReportsPage() {
           <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
           <ModuleGuideButton content={fieldreportsGuide} />
           {/* View toggle */}
-          <div className="flex rounded-lg border border-border-light bg-surface-primary p-0.5">
+          <div className="inline-flex h-8 items-center rounded-lg border border-border bg-surface-primary p-0.5">
             <button
+              data-oe-segment
               onClick={() => setView('calendar')}
               aria-label={t('fieldreports.calendar_view', { defaultValue: 'Calendar' })}
               aria-pressed={view === 'calendar'}
               className={clsx(
-                'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                'flex h-full items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors',
                 view === 'calendar'
-                  ? 'bg-oe-blue-subtle text-oe-blue-text'
-                  : 'text-content-tertiary hover:text-content-primary',
+                  ? 'bg-surface-tertiary text-content-primary shadow-xs'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
             >
               <Calendar size={15} />
               {t('fieldreports.calendar_view', { defaultValue: 'Calendar' })}
             </button>
             <button
+              data-oe-segment
               onClick={() => setView('list')}
               aria-label={t('fieldreports.list_view', { defaultValue: 'List' })}
               aria-pressed={view === 'list'}
               className={clsx(
-                'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                'flex h-full items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors',
                 view === 'list'
-                  ? 'bg-oe-blue-subtle text-oe-blue-text'
-                  : 'text-content-tertiary hover:text-content-primary',
+                  ? 'bg-surface-tertiary text-content-primary shadow-xs'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
             >
               <LayoutList size={15} />

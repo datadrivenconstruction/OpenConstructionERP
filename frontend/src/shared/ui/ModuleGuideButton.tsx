@@ -5,12 +5,8 @@
 // guide. Designed to sit immediately next to the existing ModuleHelpButton
 // (the Tour button) so the two read as a deliberate pair on a module header.
 //
-// Visual identity: this guide button is BLUE with a GraduationCap icon and
-// reads as the substantive "learn how this works" action (a little more
-// prominent than its neighbour); the sibling Tour button (ModuleHelpButton)
-// is violet with a Compass icon and reads as a quick walkthrough. Distinct
-// hue and icon so the two are never confused, same size and pill geometry so
-// they line up.
+// Visual identity: a standard secondary Button (same height and radius as
+// every header control); only the GraduationCap icon carries the brand blue.
 //
 // Mobile collapse: on `sm` and below the label hides and only the icon
 // shows, matching ModuleHelpButton; the button stays accessible via
@@ -19,8 +15,8 @@
 import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap } from 'lucide-react';
-import clsx from 'clsx';
 
+import { Button } from './Button';
 import { ModuleGuide, type ModuleGuideContent } from './ModuleGuide';
 
 // Lazy: the pill indexes every playbook, which must not ride in the entry chunk.
@@ -68,25 +64,19 @@ export function ModuleGuideButton({
           It is not rendered in both places: two controls for one action drift
           apart, and the point of the move was that the control stops shifting
           around with the width of each page's action row. */}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={() => setOpen(true)}
         data-testid="module-guide-button"
         aria-label={aria}
         aria-haspopup="dialog"
         aria-expanded={open}
         title={aria}
-        className={clsx(
-          'inline-flex items-center gap-1.5 rounded-full',
-          'border border-oe-blue/40 bg-oe-blue/10 hover:bg-oe-blue/20',
-          'px-2.5 h-7 text-xs font-semibold text-oe-blue',
-          'transition-colors focus:outline-none focus:ring-2 focus:ring-oe-blue/40',
-          className,
-        )}
+        className={className}
+        icon={<GraduationCap size={16} strokeWidth={2} className="text-oe-blue" />}
       >
-        <GraduationCap size={13} strokeWidth={2} />
         <span className="hidden sm:inline">{resolvedLabel}</span>
-      </button>
+      </Button>
 
       <ModuleGuide
         open={open}

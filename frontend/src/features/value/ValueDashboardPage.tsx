@@ -35,6 +35,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import {
+  Button,
   Card,
   Badge,
   EmptyState,
@@ -683,17 +684,19 @@ export function ValueDashboardPage() {
           <>
         <ModuleGuideButton content={valueGuide} className="print:hidden" />
         {isAdmin ? (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => setFactorsOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary print:hidden"
+            className="print:hidden"
+            icon={<SlidersHorizontal className="h-4 w-4" />}
           >
-            <SlidersHorizontal className="h-4 w-4" />
             {t('value.edit_factors', { defaultValue: 'Hours-saved factors' })}
-          </button>
+          </Button>
         ) : null}
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={async () => {
             // Exporting the value case is the "generate a value report" action:
             // record it (project scope only) so the adoption checklist can flip
@@ -711,11 +714,11 @@ export function ValueDashboardPage() {
             }
             window.print();
           }}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary print:hidden"
+          className="print:hidden"
+          icon={<Printer className="h-4 w-4" />}
         >
-          <Printer className="h-4 w-4" />
           {t('value.print_case', { defaultValue: 'Value case' })}
-        </button>
+        </Button>
           </>
         }
       />

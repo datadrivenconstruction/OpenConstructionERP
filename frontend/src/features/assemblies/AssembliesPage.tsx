@@ -422,7 +422,7 @@ export function AssembliesPage() {
               {t('common.export')}
             </Button>
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
+              <div className="absolute right-0 top-full mt-1 z-50 w-44 overflow-hidden rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
                 <button
                   onClick={async () => {
                     setShowExportMenu(false);
@@ -451,7 +451,7 @@ export function AssembliesPage() {
                       addToast({ type: 'error', title: t('common.export_failed', { defaultValue: 'Export failed' }) });
                     }
                   }}
-                  className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg"
+                  className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
                 >
                   <FileSpreadsheet size={15} className="text-content-tertiary" />
                   CSV (.csv)
@@ -467,7 +467,7 @@ export function AssembliesPage() {
                       addToast({ type: 'error', title: t('common.export_failed', { defaultValue: 'Export failed' }) });
                     }
                   }}
-                  className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg"
+                  className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
                 >
                   <Download size={15} className="text-content-tertiary" />
                   JSON (.json)

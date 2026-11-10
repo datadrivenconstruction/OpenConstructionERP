@@ -46,7 +46,7 @@ import {
   Square,
   X as XIcon,
 } from 'lucide-react';
-import { EmptyState } from '@/shared/ui';
+import { Button, EmptyState } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -1203,32 +1203,27 @@ export function PermissionsMatrixPage() {
           }
           actions={
             <>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={handleExportCsv}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/70 px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                icon={<Download size={16} aria-hidden />}
                 data-testid="permissions-matrix-export-csv"
               >
-                <Download size={14} aria-hidden />
                 {t('admin.permissions.export_csv', { defaultValue: 'Export CSV' })}
-              </button>
+              </Button>
               {isAdmin && (
-                <button
+                <Button
                   type="button"
+                  variant={canEdit ? 'primary' : 'secondary'}
                   onClick={() => setEditMode((v) => !v)}
-                  className={clsx(
-                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue',
-                    canEdit
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'border border-white/40 bg-white/70 text-content-secondary hover:bg-white/90',
-                  )}
                   data-testid="permissions-matrix-edit-toggle"
                   aria-pressed={canEdit}
                 >
                   {canEdit
                     ? t('admin.permissions.edit_off', { defaultValue: 'Done editing' })
                     : t('admin.permissions.edit_on', { defaultValue: 'Enable edit mode' })}
-                </button>
+                </Button>
               )}
             </>
           }
