@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { Search, SearchX, SlidersHorizontal, X } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
+import { Button } from '@/shared/ui/Button';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -250,18 +251,19 @@ export function CoursesPage() {
                 className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
               />
             </div>
-            <button
+            <Button
               type="button"
+              variant="secondary"
               aria-expanded={panelOpen}
               aria-controls="courses-filter-panel"
               onClick={() => setPanelOpen((v) => !v)}
               data-testid="courses-filters-toggle"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border-light bg-surface-primary px-3 py-2 text-sm font-medium text-content-secondary hover:border-oe-blue/40 md:hidden"
+              className="shrink-0 md:hidden"
+              icon={<SlidersHorizontal size={16} aria-hidden />}
             >
-              <SlidersHorizontal size={15} aria-hidden />
               {t('learn.filters', { defaultValue: 'Filters' })}
-              {panelCount > 0 && <span className="rounded-full bg-oe-blue px-1.5 text-2xs text-white">{panelCount}</span>}
-            </button>
+              {panelCount > 0 && <span className="ms-1.5 rounded-full bg-oe-blue px-1.5 text-2xs text-white">{panelCount}</span>}
+            </Button>
           </div>
         }
       />

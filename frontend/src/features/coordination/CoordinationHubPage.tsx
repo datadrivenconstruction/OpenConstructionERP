@@ -37,7 +37,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
 
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { BetaBanner, Breadcrumb, DismissibleInfo, EmptyState, IntroRichText, ModuleGuideButton, RecoveryCard } from '@/shared/ui';
+import { BetaBanner, Breadcrumb, Button, DismissibleInfo, EmptyState, IntroRichText, ModuleGuideButton, RecoveryCard } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useActiveProjectProfile } from '@/features/projects/useProjectProfile';
 import { projectsApi } from '@/features/projects/api';
@@ -446,37 +446,37 @@ export function CoordinationHubPage() {
                 </span>
               ) : null}
               {canEditThresholds ? (
-                <button
+                <Button
                   data-testid="coordination-configure-thresholds"
                   type="button"
+                  variant="secondary"
                   onClick={() => setThresholdEditorOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                  icon={<SlidersHorizontal size={16} />}
                 >
-                  <SlidersHorizontal size={13} />
                   {t('coordination_hub.configure_thresholds', {
                     defaultValue: 'Thresholds',
                   })}
-                </button>
+                </Button>
               ) : null}
-              <button
+              <Button
                 data-testid="coordination-export"
                 type="button"
+                variant="secondary"
                 onClick={handleExport}
                 disabled={exporting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                icon={<Download size={16} />}
               >
-                <Download size={13} />
                 {t('coordination.export_csv', { defaultValue: 'Export CSV' })}
-              </button>
-              <button
+              </Button>
+              <Button
                 data-testid="coordination-refresh"
                 type="button"
+                variant="secondary"
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                icon={<RefreshCw size={16} />}
               >
-                <RefreshCw size={13} />
                 {t('coordination.refresh', { defaultValue: 'Refresh' })}
-              </button>
+              </Button>
             </>
           }
         />

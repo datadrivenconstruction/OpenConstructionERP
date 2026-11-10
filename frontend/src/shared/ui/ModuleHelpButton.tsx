@@ -10,11 +10,8 @@
  * picks up the event, swaps to the matching playlist from
  * TOUR_REGISTRY, and runs the spotlight walkthrough.
  *
- * Visual identity: the Tour is a quick, interactive walkthrough, so it uses a
- * VIOLET pill with a Compass icon - deliberately a different hue and icon
- * from the sibling "How it works" guide button (blue, GraduationCap), so the
- * two never read as the same control. Tour = "show me around the screen",
- * Guide = "explain how this module works".
+ * Visual identity: a standard secondary Button like every header control;
+ * the Compass icon (vs the guide's GraduationCap) tells the two apart.
  *
  * Mobile collapse: on `sm` and below the label hides and only the
  * Compass icon shows — the button stays accessible via aria-label.
@@ -23,8 +20,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Compass } from 'lucide-react';
-import clsx from 'clsx';
 
+import { Button } from './Button';
 import { TOUR_START_EVENT, type TourId } from './ProductTour';
 
 export interface ModuleHelpButtonProps {
@@ -51,23 +48,16 @@ export function ModuleHelpButton({ tourId, className }: ModuleHelpButtonProps) {
   });
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="secondary"
       onClick={handleClick}
       data-testid={`module-help-button-${tourId}`}
       aria-label={aria}
       title={aria}
-      className={clsx(
-        'inline-flex items-center gap-1.5 rounded-full',
-        'border border-violet-300/70 bg-violet-50 hover:bg-violet-100',
-        'dark:border-violet-700/50 dark:bg-violet-950/30 dark:hover:bg-violet-900/40',
-        'px-2.5 h-7 text-xs font-medium text-violet-700 dark:text-violet-300',
-        'transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400/40',
-        className,
-      )}
+      className={className}
+      icon={<Compass size={16} strokeWidth={2} className="text-oe-blue" />}
     >
-      <Compass size={13} strokeWidth={2} />
       <span className="hidden sm:inline">{label}</span>
-    </button>
+    </Button>
   );
 }

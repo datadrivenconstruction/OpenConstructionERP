@@ -256,16 +256,18 @@ export function ResourceLevelingPage() {
                 above is dismissible and stays dismissed; this is the control
                 that is still there on the reader's second visit. */}
             <ModuleGuideButton content={levelingGuide} onCta={() => navigate('/resources')} />
-            <div className="inline-flex shrink-0 rounded-xl border border-border bg-surface-secondary/50 p-1">
+            <div className="shrink-0 inline-flex h-8 items-center rounded-lg border border-border bg-surface-primary p-0.5">
               {(['week', 'month'] as const).map((b) => (
                 <button
                   key={b}
                   type="button"
+                  data-oe-segment
+                  aria-pressed={bucket === b}
                   onClick={() => setBucket(b)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`h-full rounded-md px-2.5 text-xs font-medium transition-colors ${
                     bucket === b
-                      ? 'bg-surface-primary text-content-primary shadow-sm'
-                      : 'text-content-tertiary hover:text-content-secondary'
+                      ? 'bg-surface-tertiary text-content-primary shadow-xs'
+                      : 'text-content-secondary hover:text-content-primary'
                   }`}
                 >
                   {b === 'week'

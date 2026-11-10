@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getIntlLocale } from '@/shared/lib/formatters';
-import { Badge, CollapsibleSection, EmptyState, StatCard, TabBar, tabIds } from '@/shared/ui';
+import { Badge, Button, CollapsibleSection, EmptyState, StatCard, TabBar, tabIds } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
@@ -783,14 +783,13 @@ export function WorkflowsPage() {
           defaultValue: 'Configure approval workflows and manage pending requests across your projects.',
         })}
         actions={
-          <button
+          <Button
+            variant="primary"
             onClick={() => setShowCreateDialog(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-2 text-sm font-medium
-              text-white hover:bg-oe-blue/90"
+            icon={<Plus className="h-4 w-4" aria-hidden />}
           >
-            <Plus className="h-4 w-4" aria-hidden />
             {t('enterprise_workflows.new_workflow', { defaultValue: 'New Workflow' })}
-          </button>
+          </Button>
         }
       />
 

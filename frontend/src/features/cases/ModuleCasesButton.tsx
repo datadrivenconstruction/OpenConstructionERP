@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
 
+import { Button } from '@/shared/ui/Button';
 import { playbooksForRoute } from './playbookModules';
 
 const MAX_SHOWN = 6;
@@ -76,8 +77,8 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
       onMouseEnter={openNow}
       onMouseLeave={scheduleClose}
     >
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={() => setOpen((o) => !o)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') setOpen(false);
@@ -87,19 +88,13 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
         aria-expanded={open}
         aria-label={aria}
         title={aria}
-        className={clsx(
-          'inline-flex items-center gap-1.5 rounded-full',
-          'border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20',
-          'px-2.5 h-7 text-xs font-semibold text-emerald-700 dark:text-emerald-300',
-          'transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
-        )}
+        icon={<BookOpen size={16} strokeWidth={2} className="text-emerald-600 dark:text-emerald-400" />}
       >
-        <BookOpen size={13} strokeWidth={2} />
         <span className="hidden sm:inline">{label}</span>
-        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-[10px] font-bold min-w-[16px] h-4 px-1 leading-none">
+        <span className="ms-1.5 inline-flex items-center justify-center rounded-full bg-surface-tertiary text-content-secondary text-[10px] font-semibold min-w-[16px] h-4 px-1 leading-none">
           {cases.length}
         </span>
-      </button>
+      </Button>
 
       {open && (
         <div

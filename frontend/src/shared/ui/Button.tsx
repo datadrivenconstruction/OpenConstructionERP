@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { createContext, forwardRef, useContext, type ButtonHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -14,41 +14,53 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconPosition?: 'left' | 'right';
 }
 
+// One control system for the whole platform: every size shares the same 8px
+// radius (pills are for chips and badges only), and no hover scaling.
 const variantStyles: Record<ButtonVariant, string> = {
   primary: clsx(
     'bg-oe-blue text-content-inverse',
     'hover:bg-oe-blue-hover active:bg-oe-blue-active',
-    'shadow-xs hover:shadow-md',
+    'shadow-xs',
     'border border-transparent',
-    'hover:scale-[1.02] active:scale-[0.98]',
   ),
   secondary: clsx(
     'bg-surface-primary text-content-primary',
     'border border-border',
     'hover:bg-surface-secondary active:bg-surface-tertiary',
-    'shadow-xs hover:shadow-sm',
-    'active:scale-[0.98]',
+    'shadow-xs',
   ),
   ghost: clsx(
     'bg-transparent text-content-secondary',
-    'hover:bg-surface-secondary active:bg-surface-tertiary',
+    'hover:bg-surface-secondary hover:text-content-primary active:bg-surface-tertiary',
     'border border-transparent',
-    'active:scale-[0.98]',
   ),
   danger: clsx(
     'bg-semantic-error text-content-inverse',
     'hover:opacity-90 active:opacity-80',
-    'shadow-xs hover:shadow-md',
+    'shadow-xs',
     'border border-transparent',
-    'hover:scale-[1.02] active:scale-[0.98]',
   ),
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'h-7 px-2.5 text-xs gap-1.5 rounded-md',
-  md: 'h-8 px-3.5 text-sm gap-1.5 rounded-lg',
-  lg: 'h-10 px-5 text-sm gap-2 rounded-xl',
+  sm: 'h-7 px-2.5 text-xs gap-1.5 rounded-lg',
+  md: 'h-8 px-3 text-sm gap-1.5 rounded-lg',
+  lg: 'h-10 px-4 text-sm gap-2 rounded-lg',
 };
+
+/** Square icon-only geometry per size (used when a Button has no children). */
+const iconOnlyStyles: Record<ButtonSize, string> = {
+  sm: 'w-7 px-0',
+  md: 'w-8 px-0',
+  lg: 'w-10 px-0',
+};
+
+/**
+ * Set by `PageHeader` around its action row: every Button inside renders at
+ * the header size, whatever size the page asked for, so one row never mixes
+ * 28px and 32px controls.
+ */
+export const ButtonSizeOverrideContext = createContext<ButtonSize | null>(null);
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -65,7 +77,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    const forcedSize = useContext(ButtonSizeOverrideContext);
+    const effSize = forcedSize ?? size;
     const isDisabled = disabled || loading;
+    const iconOnly = !children && !!icon && !loading;
 
     return (
       <button
@@ -76,10 +91,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           'inline-flex items-center justify-center',
           'font-medium whitespace-nowrap select-none',
-          'transition-all duration-normal ease-oe transform-gpu will-change-transform',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
+          'transition-colors duration-normal ease-oe active:scale-[0.98]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60',
+          'focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary',
           variantStyles[variant],
-          sizeStyles[size],
+          sizeStyles[effSize],
+          iconOnly && iconOnlyStyles[effSize],
           isDisabled && 'pointer-events-none',
           isDisabled && !loading && 'opacity-40',
           className,
@@ -89,7 +106,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           // Keep the label beside the spinner: a bare spinner tells nobody what is running.
           <>
-            <Spinner size={size} />
+            <Spinner size={effSize} />
             {children && <span className="ms-2 inline-flex items-center">{children}</span>}
           </>
         ) : (

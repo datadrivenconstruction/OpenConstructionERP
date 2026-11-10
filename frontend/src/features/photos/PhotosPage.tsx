@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, Columns2, FolderPlus, Grid3x3, Images, Loader2, Map as MapIcon, Download, X } from 'lucide-react';
-import { AuthImage, EmptyState, ErrorState, ModuleGuideButton, Badge } from '@/shared/ui';
+import { AuthImage, Button, EmptyState, ErrorState, ModuleGuideButton, Badge } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { FieldItemsMap } from '@/shared/ui/FieldItemsMap';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -435,24 +435,26 @@ function PhotosArchive({ projectId }: { projectId: string }) {
                 {problems === 0 ? t('photoArchive.validation.clean') : t('photoArchive.validation.issues', { count: problems })}
               </Badge>
             )}
-            <button
+            <Button
               type="button"
+              variant="secondary"
               disabled={exporter.busy}
+              loading={exporter.busy}
               onClick={() => exporter.start(filters.album ? { album_id: filters.album } : {})}
-              className="inline-flex items-center gap-1 rounded-md border border-border-light px-3 py-1.5 text-sm disabled:opacity-50"
+              icon={<Download className="h-4 w-4" aria-hidden />}
             >
-              {exporter.busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
               {exporter.busy ? t('photoArchive.export.progress', { value: exporter.progress }) : t('photoArchive.export.all')}
-            </button>
+            </Button>
             {view === 'grid' && (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => (selectMode ? exitSelect() : setSelectMode(true))}
                 aria-pressed={selectMode}
-                className="rounded-md border border-border-light px-3 py-1.5 text-sm"
+                className={selectMode ? 'border-oe-blue/40 ring-1 ring-oe-blue/20' : ''}
               >
                 {selectMode ? t('photoArchive.bulk.done') : t('photoArchive.bulk.select')}
-              </button>
+              </Button>
             )}
             <ModuleGuideButton content={photosGuide} />
           </div>

@@ -22,7 +22,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { isModuleLoaded, _resetModuleProbeCache } from '@/shared/lib/moduleProbe';
 import { formatElapsed } from '@/shared/lib/duration';
-import { Breadcrumb, DismissibleInfo, ModuleGuideButton } from '@/shared/ui';
+import { Breadcrumb, Button, DismissibleInfo, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { project_intelligenceGuide } from './project_intelligenceGuide';
 import { ScoreRing } from './ScoreRing';
@@ -563,23 +563,24 @@ export function ProjectIntelligencePage() {
                 })}
               </option>
             </select>
-            <button
+            <Button
               data-testid="pi-refresh-button"
+              variant="ghost"
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="flex h-9 items-center gap-1.5 rounded-md px-2 text-xs text-content-secondary hover:text-content-primary transition-colors disabled:opacity-50"
+              loading={refreshing}
+              icon={<RefreshCw size={16} />}
               title={t('project_intelligence.refresh', {
                 defaultValue: 'Refresh analysis',
               })}
             >
-              <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
               {/* #174: this used to stop at hours, so an analysis left open
                   overnight reported "18h ago" and one from last week "172h
                   ago". The shared formatter climbs to days and months. */}
               {lastRefresh && (
                 <span>{formatElapsed(t, lastRefresh, { suffix: true })}</span>
               )}
-            </button>
+            </Button>
           </>
         }
       />
