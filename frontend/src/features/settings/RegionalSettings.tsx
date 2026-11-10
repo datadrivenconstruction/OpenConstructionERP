@@ -36,7 +36,9 @@ import {
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
-const TIMEZONES = [
+// Fallback only: the dropdown offers every IANA zone the browser knows (see
+// TIMEZONES below), so a country is never missing because nobody listed it.
+const FALLBACK_TIMEZONES = [
   'UTC',
   'Europe/London',
   'Europe/Berlin',
@@ -70,6 +72,21 @@ const TIMEZONES = [
   'America/Toronto',
   'America/Sao_Paulo',
 ] as const;
+
+/** Every IANA zone the runtime supports, UTC first; the short list when Intl cannot enumerate. */
+export function listTimezones(): readonly string[] {
+  const intl = Intl as typeof Intl & { supportedValuesOf?: (key: 'timeZone') => string[] };
+  let zones: string[] = [];
+  try {
+    zones = intl.supportedValuesOf?.('timeZone') ?? [];
+  } catch {
+    zones = [];
+  }
+  if (zones.length === 0) return FALLBACK_TIMEZONES;
+  return ['UTC', ...zones.filter((z) => z !== 'UTC')];
+}
+
+const TIMEZONES = listTimezones();
 
 // 'auto' is added in the component so its label can be translated; the four
 // explicit sizes are shown as their own dimensions, which need no translation.
@@ -571,7 +588,7 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
             </label>
             <SearchableSelect
               value={timezone}
-              options={TIMEZONES as unknown as readonly string[]}
+              options={TIMEZONES}
               onChange={(val) => handleChange('timezone', val)}
               renderOption={(tz) => tz.replace(/_/g, ' ')}
               placeholder={t('common.search', { defaultValue: 'Search...' })}
