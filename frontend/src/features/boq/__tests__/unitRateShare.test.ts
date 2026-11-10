@@ -147,11 +147,11 @@ describe('percentage_of_unit_rate divides by the unit rate', () => {
 
   it('marks the cell when the share cannot be true, and leaves it alone when it can', () => {
     const impossible = makePosition('a', 80, [{ type: 'labor', quantity: 1, unit_rate: 110 }]);
-    expect(renderClass(LOHN_ANTEIL, impossible, [impossible])).toContain('bg-red-50');
+    expect(renderClass(LOHN_ANTEIL, impossible, [impossible])).toContain('bg-semantic-error-bg');
 
     // Exactly 100 is a position built entirely of labour, not a contradiction.
     const allLabour = makePosition('b', 100, [{ type: 'labor', quantity: 1, unit_rate: 100 }]);
-    expect(renderClass(LOHN_ANTEIL, allLabour, [allLabour])).not.toContain('bg-red-50');
+    expect(renderClass(LOHN_ANTEIL, allLabour, [allLabour])).not.toContain('bg-semantic-error-bg');
     expect(render(LOHN_ANTEIL, allLabour, [allLabour])).toBe('100.00');
   });
 
@@ -212,7 +212,7 @@ describe('percentage_of_unit_rate divides by the unit rate', () => {
       { type: 'material', quantity: 1, unit_rate: 30 },
     ]);
     expect(render(sumCol, pos, [pos])).toBe('30.00');
-    expect(renderClass(sumCol, pos, [pos])).not.toContain('bg-red-50');
+    expect(renderClass(sumCol, pos, [pos])).not.toContain('bg-semantic-error-bg');
   });
 
   it('with no role set, reports the whole buildup against the rate', () => {

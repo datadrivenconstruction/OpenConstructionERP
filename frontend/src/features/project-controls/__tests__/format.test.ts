@@ -60,8 +60,8 @@ describe('currency grouping helpers', () => {
 
 describe('statusClasses', () => {
   it('maps each status to a traffic-light dot colour', () => {
-    expect(statusClasses('red').dot).toContain('rose');
-    expect(statusClasses('amber').dot).toContain('amber');
-    expect(statusClasses('green').dot).toContain('emerald');
+    expect(statusClasses('red').dot).toContain('semantic-error');
+    expect(statusClasses('amber').dot).toContain('semantic-warning');
+    expect(statusClasses('green').dot).toContain('semantic-success');
   });
 });

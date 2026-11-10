@@ -34,20 +34,20 @@ describe('cellClasses (leveling heatmap)', () => {
   it('renders capacity-unknown cells slate, never rose', () => {
     const c = cellClasses(cell({ allocation_percent: 250, capacity_unknown: true }));
     expect(c).toContain('bg-slate-300');
-    expect(c).not.toContain('rose');
+    expect(c).not.toContain('semantic-error');
   });
 
   it('renders over-allocated cells rose', () => {
     const c = cellClasses(
       cell({ allocation_percent: 130, capacity_percent: 100, over_allocated: true }),
     );
-    expect(c).toContain('bg-rose-500');
+    expect(c).toContain('bg-semantic-error');
   });
 
   it('scales colour by ratio to capacity (not a hardcoded 100)', () => {
     // Capacity 200, allocation 120 = 60% of capacity -> mid (emerald-500), not high.
     const mid = cellClasses(cell({ allocation_percent: 120, capacity_percent: 200 }));
-    expect(mid).toContain('bg-emerald-500');
+    expect(mid).toContain('bg-semantic-success');
     // Capacity 100, allocation 90 = 90% -> high (amber).
     const high = cellClasses(cell({ allocation_percent: 90, capacity_percent: 100 }));
     expect(high).toContain('bg-amber-400');

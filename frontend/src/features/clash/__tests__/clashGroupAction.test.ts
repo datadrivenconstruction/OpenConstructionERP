@@ -76,9 +76,9 @@ describe('confidenceBand / label / chip', () => {
   });
 
   it('returns a distinct class per band', () => {
-    expect(confidenceChipClass(0.9)).toContain('emerald');
-    expect(confidenceChipClass(0.6)).toContain('amber');
-    expect(confidenceChipClass(0.1)).toContain('rose');
+    expect(confidenceChipClass(0.9)).toContain('semantic-success');
+    expect(confidenceChipClass(0.6)).toContain('semantic-warning');
+    expect(confidenceChipClass(0.1)).toContain('semantic-error');
   });
 });
 
