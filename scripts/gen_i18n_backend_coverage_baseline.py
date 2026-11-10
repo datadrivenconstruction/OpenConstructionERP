@@ -53,7 +53,8 @@ def main() -> int:
     for code in codes:
         if code == "en":
             continue
-        missing = sorted(key for key in english if key not in load(code))
+        present = load(code)
+        missing = sorted(key for key in english if key not in present)
         locales[code] = {
             "missing": len(missing),
             "digest": hashlib.sha256("\n".join(missing).encode("utf-8")).hexdigest()[:16],

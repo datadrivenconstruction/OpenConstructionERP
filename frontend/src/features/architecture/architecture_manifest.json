@@ -28433,6 +28433,8 @@
         "markup_rule_inputs.py",
         "markup_templates.py",
         "models.py",
+        "pdf_details.py",
+        "pdf_details_router.py",
         "pdf_export.py",
         "permissions.py",
         "price_list_carry.py",
@@ -314862,10 +314864,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 270,
+      "ts_files": 272,
       "css_files": 0,
-      "test_files": 133,
-      "total_files": 270
+      "test_files": 134,
+      "total_files": 272
     },
     {
       "name": "buyer-portal",
@@ -318223,9 +318225,9 @@
     "total_relationships": 261,
     "total_routes": 5205,
     "total_schemas": 4718,
-    "total_python_files": 3340,
+    "total_python_files": 3342,
     "frontend_features": 237,
-    "frontend_ts_files": 4146,
+    "frontend_ts_files": 4148,
     "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {
