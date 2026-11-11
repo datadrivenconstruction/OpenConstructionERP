@@ -29,6 +29,7 @@ from app.modules.carbon.models import (
     Scope2Entry,
     Scope3Entry,
     SustainabilityReport,
+    epd_visible_to,
 )
 
 
@@ -84,8 +85,12 @@ class EPDRecordRepository(_BaseRepo):
         region: str | None = None,
         offset: int = 0,
         limit: int = 100,
+        visible_to: str | None = None,
+        scoped: bool = False,
     ) -> tuple[list[EPDRecord], int]:
         base = select(EPDRecord)
+        if scoped:
+            base = base.where(epd_visible_to(visible_to))
         if material_class is not None:
             base = base.where(EPDRecord.material_class == material_class)
         if region is not None:

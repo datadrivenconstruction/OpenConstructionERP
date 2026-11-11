@@ -72,7 +72,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import CurrentTenantId, CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.carbon.schemas import (
     AlternativeComparisonResponse,
     AlternativeMaterialOption,
@@ -136,6 +136,7 @@ async def list_epd(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     _user: CurrentUserId = None,  # type: ignore[assignment]
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> list[EPDRecordResponse]:
     items, _ = await service.list_epds(
@@ -143,6 +144,8 @@ async def list_epd(
         region=region,
         offset=offset,
         limit=limit,
+        tenant_id=tenant_id,
+        scoped=True,
     )
     return [EPDRecordResponse.model_validate(i) for i in items]
 
@@ -151,9 +154,10 @@ async def list_epd(
 async def create_epd(
     data: EPDRecordCreate,
     _perm: None = Depends(RequirePermission("carbon.import_epd")),
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> EPDRecordResponse:
-    epd = await service.create_epd(data)
+    epd = await service.create_epd(data, tenant_id=tenant_id)
     return EPDRecordResponse.model_validate(epd)
 
 
@@ -172,9 +176,10 @@ async def sync_epd(
 async def get_epd(
     epd_id: uuid.UUID,
     _user: CurrentUserId = None,  # type: ignore[assignment]
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> EPDRecordResponse:
-    epd = await service.get_epd(epd_id)
+    epd = await service.get_epd(epd_id, tenant_id=tenant_id, scoped=True)
     return EPDRecordResponse.model_validate(epd)
 
 
@@ -183,9 +188,10 @@ async def update_epd(
     epd_id: uuid.UUID,
     data: EPDRecordUpdate,
     _perm: None = Depends(RequirePermission("carbon.update")),
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> EPDRecordResponse:
-    epd = await service.update_epd(epd_id, data)
+    epd = await service.update_epd(epd_id, data, tenant_id=tenant_id, scoped=True)
     return EPDRecordResponse.model_validate(epd)
 
 
@@ -193,9 +199,10 @@ async def update_epd(
 async def delete_epd(
     epd_id: uuid.UUID,
     _perm: None = Depends(RequirePermission("carbon.delete")),
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> None:
-    await service.delete_epd(epd_id)
+    await service.delete_epd(epd_id, tenant_id=tenant_id, scoped=True)
 
 
 # ── Material factors ─────────────────────────────────────────────────────

@@ -845,6 +845,17 @@ const resource = {
     "sustainability.own_saved": "Material added. Pick it in the EPD Material column.",
     "sustainability.own_save_failed": "Could not save the material",
     "sustainability.own_empty_hint": "Missing a product? Add it with its EPD value (kg CO2e per unit) and pick it for any position. Edit or delete it later under Carbon & ESG, EPDs.",
+    "sustainability.cat_concrete": "Concrete & Cement",
+    "sustainability.cat_steel": "Steel & Metals",
+    "sustainability.cat_timber": "Timber & Wood",
+    "sustainability.cat_masonry": "Masonry & Brick",
+    "sustainability.cat_insulation": "Insulation",
+    "sustainability.cat_glass": "Glass",
+    "sustainability.cat_plastics": "Plastics & Membranes",
+    "sustainability.cat_finishes": "Finishes & Coatings",
+    "sustainability.cat_roofing": "Roofing",
+    "sustainability.cat_foundations": "Foundations & Earthworks",
+    "sustainability.cat_mep": "MEP Systems",
   }
 } as { translation: Record<string, string> };
 

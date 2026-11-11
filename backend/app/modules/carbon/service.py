@@ -1337,7 +1337,7 @@ class CarbonService:
         self.report_repo = SustainabilityReportRepository(session)
 
     # ── EPD ──────────────────────────────────────────────────────────────
-    async def create_epd(self, data: EPDRecordCreate) -> EPDRecord:
+    async def create_epd(self, data: EPDRecordCreate, *, tenant_id: str | None = None) -> EPDRecord:
         # ``EPDRecord.epd_id`` is unique. Reject a duplicate with a clean 409
         # instead of letting the DB raise an uncaught IntegrityError that
         # surfaces to the client as an opaque 500. We do BOTH a pre-flight
@@ -1352,6 +1352,8 @@ class CarbonService:
             )
         epd = EPDRecord(**data.model_dump(exclude={"metadata"}))
         epd.metadata_ = data.metadata
+        if data.source == "custom":
+            epd.tenant_id = tenant_id
         try:
             return await self.epd_repo.create(epd)
         except IntegrityError as exc:
@@ -1364,8 +1366,10 @@ class CarbonService:
                 detail=f"An EPD record with id '{data.epd_id}' already exists",
             ) from exc
 
-    async def get_epd(self, epd_id: uuid.UUID) -> EPDRecord:
+    async def get_epd(self, epd_id: uuid.UUID, *, tenant_id: str | None = None, scoped: bool = False) -> EPDRecord:
         epd = await self.epd_repo.get_by_id(epd_id)
+        if epd is not None and scoped and not _epd_visible(epd, tenant_id):
+            epd = None  # another tenant's custom record reads as absent
         if epd is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="EPD not found")
         return epd
@@ -1377,16 +1381,22 @@ class CarbonService:
         region: str | None = None,
         offset: int = 0,
         limit: int = 100,
+        tenant_id: str | None = None,
+        scoped: bool = False,
     ) -> tuple[list[EPDRecord], int]:
         return await self.epd_repo.list_filtered(
             material_class=material_class,
             region=region,
             offset=offset,
             limit=limit,
+            visible_to=tenant_id,
+            scoped=scoped,
         )
 
-    async def update_epd(self, epd_id: uuid.UUID, data: EPDRecordUpdate) -> EPDRecord:
-        epd = await self.get_epd(epd_id)
+    async def update_epd(
+        self, epd_id: uuid.UUID, data: EPDRecordUpdate, *, tenant_id: str | None = None, scoped: bool = False
+    ) -> EPDRecord:
+        epd = await self.get_epd(epd_id, tenant_id=tenant_id, scoped=scoped)
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
@@ -1395,10 +1405,10 @@ class CarbonService:
             )
         if fields:
             await self.epd_repo.update_fields(epd_id, **fields)
-        return await self.get_epd(epd_id)
+        return await self.get_epd(epd_id, tenant_id=tenant_id, scoped=scoped)
 
-    async def delete_epd(self, epd_id: uuid.UUID) -> None:
-        await self.get_epd(epd_id)
+    async def delete_epd(self, epd_id: uuid.UUID, *, tenant_id: str | None = None, scoped: bool = False) -> None:
+        await self.get_epd(epd_id, tenant_id=tenant_id, scoped=scoped)
         await self.epd_repo.delete(epd_id)
 
     async def sync_epds_from_external(
@@ -3327,3 +3337,10 @@ class CarbonService:
             "intensity_per_m2": None,
             "latest_report_id": latest_report_id,
         }
+
+
+def _epd_visible(epd: EPDRecord, tenant_id: str | None) -> bool:
+    """Python twin of ``models.epd_visible_to`` for a loaded row."""
+    if epd.tenant_id is None and epd.source != "custom":
+        return True
+    return bool(tenant_id) and epd.tenant_id == tenant_id

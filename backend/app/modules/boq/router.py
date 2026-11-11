@@ -10334,6 +10334,8 @@ async def enrich_resources(
     }
 
 
+from app.core.tenant_scope import resolve_tenant_id  # noqa: E402
+
 OWN_EPD_PREFIX = "own:"
 
 
@@ -10352,16 +10354,23 @@ def _own_epd_to_material(rec: Any) -> dict[str, Any]:
 
 
 async def _own_epd_materials(
-    session: Any, *, category: str | None = None, query: str | None = None, epd_id: str | None = None
+    session: Any,
+    *,
+    tenant_id: str | None,
+    category: str | None = None,
+    query: str | None = None,
+    epd_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """User-maintained EPD records (source=custom) from the carbon module; empty if it is not installed."""
+    """The caller's own EPD records (source=custom) from the carbon module; empty if it is not installed."""
+    if not tenant_id:
+        return []
     try:
         from sqlalchemy import select
 
         from app.modules.carbon.models import EPDRecord
     except ImportError:
         return []
-    stmt = select(EPDRecord).where(EPDRecord.source == "custom")
+    stmt = select(EPDRecord).where(EPDRecord.source == "custom", EPDRecord.tenant_id == tenant_id)
     if category:
         stmt = stmt.where(EPDRecord.material_class == category)
     if epd_id:
@@ -10381,11 +10390,12 @@ async def _own_epd_materials(
 )
 async def list_epd_materials(
     session: SessionDep,
+    payload: CurrentUserPayload,
     category: str | None = Query(default=None, description="Filter by category"),
     search: str | None = Query(default=None, description="Search by name or ID"),
 ) -> dict[str, Any]:
     """List EPD materials: user-added carbon EPD records first, then the embedded reference set."""
-    own = await _own_epd_materials(session, category=category, query=search)
+    own = await _own_epd_materials(session, tenant_id=resolve_tenant_id(payload), category=category, query=search)
     materials = own + search_epd_materials(category=category, query=search)
     return {
         "materials": materials,
@@ -10484,7 +10494,9 @@ async def assign_position_co2(
 
     epd = EPD_INDEX.get(payload.epd_id)
     if not epd and payload.epd_id.startswith(OWN_EPD_PREFIX):
-        own = await _own_epd_materials(session, epd_id=payload.epd_id[len(OWN_EPD_PREFIX) :])
+        own = await _own_epd_materials(
+            session, tenant_id=resolve_tenant_id(auth_payload), epd_id=payload.epd_id[len(OWN_EPD_PREFIX) :]
+        )
         epd = own[0] if own else None
     if not epd:
         raise HTTPException(

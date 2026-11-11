@@ -58,6 +58,8 @@ class EPDRecord(Base):
     # Supplier catalogue product this EPD declares (plain GUID, cross-module).
     supplier_catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     epd_format: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    # Owner of a user-added (source=custom) record; reference rows keep NULL and stay shared.
+    tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -692,3 +694,16 @@ class CarbonCompanyReport(Base):
 
     def __repr__(self) -> str:
         return f"<CarbonCompanyReport {self.template} {self.reporting_year}>"
+
+
+def epd_visible_to(tenant_id: str | None):  # type: ignore[no-untyped-def]
+    """SQL predicate: shared reference EPDs plus the caller's own custom records.
+
+    Custom records are private to their tenant; with no tenant only shared rows match.
+    """
+    from sqlalchemy import and_, or_
+
+    shared = and_(EPDRecord.tenant_id.is_(None), EPDRecord.source != "custom")
+    if not tenant_id:
+        return shared
+    return or_(shared, EPDRecord.tenant_id == tenant_id)
