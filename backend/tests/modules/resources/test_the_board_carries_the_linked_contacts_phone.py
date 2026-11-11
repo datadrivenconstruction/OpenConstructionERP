@@ -13,7 +13,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 import app.modules.projects.models  # noqa: F401
 import app.modules.users.models  # noqa: F401
-from app.database import Base
 from app.modules.contacts.models import Contact
 from app.modules.resources.models import Assignment, Resource
 from app.modules.resources.schemas import BoardEntry, ResourceResponse

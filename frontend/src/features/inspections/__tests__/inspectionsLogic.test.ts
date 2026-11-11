@@ -34,13 +34,13 @@ describe('inspections api', () => {
     apiMocks.apiGet.mockResolvedValue({ items: [] });
     await fetchInspections();
     expect(apiMocks.apiGet).toHaveBeenLastCalledWith('/v1/inspections/');
-    await fetchInspections({ project_id: 'p1', status: 'scheduled', result: 'fail', type: 'safety' });
+    await fetchInspections({ project_id: 'p1', status: 'scheduled', result: 'fail', type: 'fire_safety' });
     const url = apiMocks.apiGet.mock.calls[1]![0] as string;
     expect(Object.fromEntries(new URLSearchParams(url.split('?')[1]))).toEqual({
       project_id: 'p1',
       status: 'scheduled',
       result: 'fail',
-      type: 'safety',
+      type: 'fire_safety',
     });
   });
 
