@@ -53,13 +53,13 @@ describe('UsageBadge', () => {
     );
     const el = container.querySelector('[data-usage]');
     expect(el?.className).toMatch(/semantic-success/);
-    expect(el?.className).not.toMatch(/amber/);
+    expect(el?.className).not.toMatch(/semantic-warning/);
   });
 
   it('uses amber tinting for a yellow band - a used pill is never red', () => {
     const { container } = render(<UsageBadge count={2} band={band({ frequency: 2 })} />);
     const el = container.querySelector('[data-usage]');
-    expect(el?.className).toMatch(/amber/);
+    expect(el?.className).toMatch(/semantic-warning/);
     expect(el?.className).not.toMatch(/semantic-error|\bred\b/);
   });
 
@@ -71,7 +71,7 @@ describe('UsageBadge', () => {
     // The certainty band is exposed faithfully...
     expect(el?.getAttribute('data-band')).toBe('red');
     // ...but the visual tone is amber, not an error red.
-    expect(el?.className).toMatch(/amber/);
+    expect(el?.className).toMatch(/semantic-warning/);
     expect(el?.className).not.toMatch(/semantic-error/);
   });
 
