@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Cota de taxă pentru {label} nu poate fi folosită: {detail}.",
+      "suggestion": "Introduceți o cotă între 0 și 100 sau alegeți un cod fiscal înregistrat pentru țara proiectului la data stabilirii prețului."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} este impozabil, dar nu are nici cotă, nici cod fiscal.",
+      "suggestion": "Introduceți cota, alegeți un cod fiscal sau schimbați starea în scutit ori în afara domeniului."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} este scutit, dar are o cotă de {rate} %, care este ignorată.",
+      "suggestion": "Ștergeți cota sau schimbați starea în impozabil."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Prețul pentru {label} include taxa, dar nu se cunoaște nicio cotă pentru a o scoate.",
+      "suggestion": "Introduceți cota sau un cod fiscal ori debifați că prețul include taxa."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} este evaluat la {unit_cost}, prețul de bază este {master}.",
+      "suggestion": "Rulați recalcularea taxei pentru a prelua prețul de bază sau aprobați ansamblul pentru a-i păstra prețul."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Codul fiscal {code} pentru {label} nu are o cotă în vigoare la {date}.",
+      "suggestion": "Alegeți data de preț la care se aplică cota sau introduceți cota manual."
+    }
+  }
+}

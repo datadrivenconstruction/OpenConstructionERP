@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Stawka podatku dla {label} jest nieprawidłowa: {detail}.",
+      "suggestion": "Wprowadź stawkę od 0 do 100 albo wybierz kod podatku zarejestrowany dla kraju projektu na dzień wyceny."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} jest opodatkowany, ale nie ma ani stawki podatku, ani kodu podatku.",
+      "suggestion": "Wprowadź stawkę, wybierz kod podatku albo zmień status na zwolniony lub poza zakresem."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} jest zwolniony, ale ma stawkę podatku {rate} %, która jest ignorowana.",
+      "suggestion": "Wyczyść stawkę albo zmień status na opodatkowany."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Cena {label} zawiera podatek, ale nie jest znana stawka do jego wydzielenia.",
+      "suggestion": "Wprowadź stawkę lub kod podatku albo odznacz, że cena zawiera podatek."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} wyceniono na {unit_cost}, cena wzorcowa to {master}.",
+      "suggestion": "Uruchom ponowne przeliczenie podatku, aby przyjąć cenę wzorcową, albo zatwierdź zestaw, aby zachować jego cenę."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Kod podatku {code} dla {label} nie ma stawki obowiązującej w dniu {date}.",
+      "suggestion": "Wybierz datę wyceny, do której stawka się odnosi, albo wprowadź stawkę ręcznie."
+    }
+  }
+}

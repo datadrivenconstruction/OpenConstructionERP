@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Het belastingtarief van {label} is onbruikbaar: {detail}.",
+      "suggestion": "Voer een tarief tussen 0 en 100 in of kies een belastingcode die voor het land van het project op de prijsdatum is geregistreerd."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} is belastbaar, maar heeft geen belastingtarief en geen belastingcode.",
+      "suggestion": "Voer het tarief in, kies een belastingcode of zet de status op vrijgesteld of buiten bereik."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} is vrijgesteld maar heeft een belastingtarief van {rate} %, dat wordt genegeerd.",
+      "suggestion": "Wis het tarief of zet de status op belastbaar."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: De prijs van {label} is inclusief belasting, maar er is geen tarief bekend om die eruit te halen.",
+      "suggestion": "Voer het tarief of een belastingcode in, of vink uit dat de prijs belasting bevat."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} is geprijsd op {unit_cost}, de basisprijs is {master}.",
+      "suggestion": "Voer de belastingherberekening uit om de basisprijs over te nemen, of keur de samenstelling goed om de prijs te behouden."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Belastingcode {code} van {label} heeft geen geldend tarief op {date}.",
+      "suggestion": "Kies de prijsdatum waarop het tarief van toepassing is, of voer het tarief handmatig in."
+    }
+  }
+}

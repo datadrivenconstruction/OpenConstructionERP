@@ -51,7 +51,7 @@ from app.modules.assemblies.schemas import (
     ParameterValidationResponse,
     ProjectTaxRecalcResponse,
     ReorderComponentsRequest,
-    TaxFinding,
+    TaxFindingsResponse,
     TaxRecalcRequest,
     TaxRecalcResponse,
 )
@@ -727,7 +727,7 @@ async def recalculate_assembly_tax(
 
 @router.get(
     "/{assembly_id}/tax-findings/",
-    response_model=list[TaxFinding],
+    response_model=TaxFindingsResponse,
     dependencies=[Depends(RequirePermission("assemblies.read"))],
 )
 async def assembly_tax_findings(
@@ -736,12 +736,13 @@ async def assembly_tax_findings(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: AssemblyService = Depends(_get_service),
-) -> list[TaxFinding]:
+) -> TaxFindingsResponse:
     """Findings of the component-tax rules TAX-001..006; empty when the project does not use component tax."""
     await _verify_assembly_owner(session, assembly_id, user_id, payload)
     assembly = await service.get_assembly(assembly_id)
     ctx = await service.tax_context(assembly)
-    return await service.tax_findings(assembly, ctx) if ctx is not None else []
+    items = await service.tax_findings(assembly, ctx) if ctx is not None else []
+    return TaxFindingsResponse(items=items, total=len(items))
 
 
 @router.post(

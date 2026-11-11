@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Kohteen {label} veroprosenttia ei voi käyttää: {detail}.",
+      "suggestion": "Syötä prosentti väliltä 0–100 tai valitse verokoodi, joka on tallennettu hankkeen maalle hinnoittelupäivälle."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} on merkitty verolliseksi, mutta sillä ei ole veroprosenttia eikä verokoodia.",
+      "suggestion": "Syötä prosentti, valitse verokoodi tai vaihda tilaksi verovapaa tai soveltamisalan ulkopuolinen."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} on verovapaa, mutta sillä on veroprosentti {rate} %, joka ohitetaan.",
+      "suggestion": "Tyhjennä prosentti tai vaihda tilaksi verollinen."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Kohteen {label} hinta sisältää veron, mutta sen erottamiseen ei ole tiedossa prosenttia.",
+      "suggestion": "Syötä prosentti tai verokoodi tai poista valinta hinnan sisältämästä verosta."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: Kohteen {label} hinta on {unit_cost}, perushinta on {master}.",
+      "suggestion": "Suorita veron uudelleenlaskenta perushinnan hakemiseksi tai hyväksy kokoonpano hinnan säilyttämiseksi."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Kohteen {label} verokoodilla {code} ei ole voimassa olevaa prosenttia päivänä {date}.",
+      "suggestion": "Valitse hinnoittelupäivä, jolle prosentti pätee, tai syötä prosentti käsin."
+    }
+  }
+}

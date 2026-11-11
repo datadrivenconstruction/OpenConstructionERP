@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: {label} maksumäära ei saa kasutada: {detail}.",
+      "suggestion": "Sisestage määr vahemikus 0 kuni 100 või valige maksukood, mis on projekti riigi jaoks hinnastamise kuupäeval registreeritud."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} on maksustatav, kuid sellel pole ei maksumäära ega maksukoodi.",
+      "suggestion": "Sisestage määr, valige maksukood või muutke olek vabastatuks või reguleerimisalast väljaspool olevaks."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} on vabastatud, kuid sellel on maksumäär {rate} %, mida eiratakse.",
+      "suggestion": "Tühjendage määr või muutke olek maksustatavaks."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: {label} hind sisaldab maksu, kuid selle eraldamiseks pole teada määra.",
+      "suggestion": "Sisestage määr või maksukood või eemaldage märge, et hind sisaldab maksu."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} hind on {unit_cost}, põhihind on {master}.",
+      "suggestion": "Käivitage maksu ümberarvutus põhihinna võtmiseks või kinnitage koost, et selle hind säiliks."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: {label} maksukoodil {code} puudub kuupäeval {date} kehtiv määr.",
+      "suggestion": "Valige hinnastamise kuupäev, mille kohta määr kehtib, või sisestage määr käsitsi."
+    }
+  }
+}

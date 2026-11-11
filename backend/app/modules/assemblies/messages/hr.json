@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Porezna stopa za {label} nije upotrebljiva: {detail}.",
+      "suggestion": "Unesite stopu između 0 i 100 ili odaberite porezni kod evidentiran za zemlju projekta na datum određivanja cijene."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} je oporeziv, ali nema ni porezne stope ni poreznog koda.",
+      "suggestion": "Unesite stopu, odaberite porezni kod ili promijenite status u oslobođeno ili izvan opsega."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} je oslobođen, ali ima poreznu stopu {rate} %, koja se zanemaruje.",
+      "suggestion": "Obrišite stopu ili promijenite status u oporezivo."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Cijena za {label} uključuje porez, ali nije poznata stopa kojom bi se izdvojio.",
+      "suggestion": "Unesite stopu ili porezni kod ili uklonite oznaku da cijena uključuje porez."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} ima cijenu {unit_cost}, glavna cijena je {master}.",
+      "suggestion": "Pokrenite ponovni izračun poreza kako biste preuzeli glavnu cijenu ili odobrite sklop kako bi zadržao svoju cijenu."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Porezni kod {code} za {label} nema stopu na snazi na dan {date}.",
+      "suggestion": "Odaberite datum određivanja cijene na koji se stopa odnosi ili unesite stopu ručno."
+    }
+  }
+}

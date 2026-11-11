@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: {label} の税率は使用できません: {detail}。",
+      "suggestion": "0 から 100 の税率を入力するか、価格基準日にプロジェクトの国で登録されている税コードを選択してください。"
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} は課税対象ですが、税率も税コードもありません。",
+      "suggestion": "税率を入力するか、税コードを選択するか、ステータスを免税または対象外に変更してください。"
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} は免税ですが、無視される税率 {rate} % が設定されています。",
+      "suggestion": "税率をクリアするか、ステータスを課税に変更してください。"
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: {label} の価格は税込ですが、税を除くための税率が不明です。",
+      "suggestion": "税率または税コードを入力するか、価格が税込のチェックを外してください。"
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} の価格は {unit_cost} で、マスター価格は {master} です。",
+      "suggestion": "マスター価格を取り込むには税の再計算を実行し、価格を維持するにはアセンブリを承認してください。"
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: {label} の税コード {code} には {date} に有効な税率がありません。",
+      "suggestion": "税率が適用される価格基準日を選択するか、税率を手入力してください。"
+    }
+  }
+}

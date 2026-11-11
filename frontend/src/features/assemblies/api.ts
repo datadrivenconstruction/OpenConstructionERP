@@ -503,7 +503,8 @@ export const assembliesApi = {
     apiPatch<Assembly>(`/v1/assemblies/${assemblyId}/tags/`, { tags }).then(normalizeAssembly),
   recalculateTax: (id: string, asOf?: string) =>
     apiPost<TaxRecalcResult>(`/v1/assemblies/${id}/recalculate-tax/`, asOf ? { as_of: asOf } : {}),
-  taxFindings: (id: string) => apiGet<TaxFinding[]>(`/v1/assemblies/${id}/tax-findings/`),
+  taxFindings: (id: string) =>
+    apiGet<{ items: TaxFinding[]; total: number }>(`/v1/assemblies/${id}/tax-findings/`).then((r) => r.items),
   getStats: () => apiGet<AssemblyStats>(`/v1/assemblies/stats/`),
 
   // Assembly Library templates

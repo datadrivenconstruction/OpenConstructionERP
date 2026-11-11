@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Hindi magagamit ang tax rate ng {label}: {detail}.",
+      "suggestion": "Maglagay ng rate mula 0 hanggang 100, o pumili ng tax code na nakatala para sa bansa ng proyekto sa petsa ng pagpepresyo."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: Ang {label} ay may buwis ngunit walang tax rate o tax code.",
+      "suggestion": "Ilagay ang rate, pumili ng tax code, o gawing exempt o labas ng saklaw ang status."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: Exempt ang {label} ngunit may tax rate na {rate} %, na hindi isinasaalang-alang.",
+      "suggestion": "Burahin ang rate o gawing may buwis ang status."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Kasama ang buwis sa presyo ng {label}, ngunit walang kilalang rate para ito ay ibawas.",
+      "suggestion": "Maglagay ng rate o tax code, o alisin ang tsek na kasama ang buwis sa presyo."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: Ang {label} ay may presyong {unit_cost}, ang master price ay {master}.",
+      "suggestion": "Patakbuhin ang muling pagkalkula ng buwis para kunin ang master price, o aprubahan ang assembly para panatilihin ang presyo nito."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Ang tax code {code} ng {label} ay walang rate na may bisa sa {date}.",
+      "suggestion": "Piliin ang petsa ng pagpepresyo kung saan naaangkop ang rate, o ilagay ang rate nang mano-mano."
+    }
+  }
+}

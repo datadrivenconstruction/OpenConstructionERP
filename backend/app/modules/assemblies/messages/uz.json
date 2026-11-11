@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: {label} uchun soliq stavkasidan foydalanib bo'lmaydi: {detail}.",
+      "suggestion": "0 dan 100 gacha stavkani kiriting yoki narx belgilangan sanada loyiha mamlakati uchun qayd etilgan soliq kodini tanlang."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} soliqqa tortiladigan deb belgilangan, lekin soliq stavkasi ham, soliq kodi ham yo'q.",
+      "suggestion": "Stavkani kiriting, soliq kodini tanlang yoki holatni ozod qilingan yoki qamrovdan tashqari deb o'zgartiring."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} ozod qilingan, ammo e'tiborga olinmaydigan {rate} % soliq stavkasi bor.",
+      "suggestion": "Stavkani tozalang yoki holatni soliqqa tortiladigan deb o'zgartiring."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: {label} narxiga soliq kiritilgan, lekin uni ajratish uchun stavka noma'lum.",
+      "suggestion": "Stavkani yoki soliq kodini kiriting yoki narxga soliq kiritilgan belgisini olib tashlang."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} narxi {unit_cost}, asosiy narx {master}.",
+      "suggestion": "Asosiy narxni olish uchun soliqni qayta hisoblang yoki narxini saqlash uchun yig'masini tasdiqlang."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: {label} ning {code} soliq kodi uchun {date} sanasida amaldagi stavka yo'q.",
+      "suggestion": "Stavka amal qiladigan narx belgilash sanasini tanlang yoki stavkani qo'lda kiriting."
+    }
+  }
+}

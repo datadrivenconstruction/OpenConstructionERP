@@ -448,6 +448,13 @@ class TaxFinding(BaseModel):
     component_id: str = ""
 
 
+class TaxFindingsResponse(BaseModel):
+    """All tax findings of one assembly; the set is computed whole, never paged."""
+
+    items: list[TaxFinding] = Field(default_factory=list)
+    total: int = 0
+
+
 class TaxRecalcResponse(BaseModel):
     """What an explicit tax recalculation did to one assembly."""
 

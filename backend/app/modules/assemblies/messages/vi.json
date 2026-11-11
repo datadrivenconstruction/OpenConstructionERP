@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Thuế suất của {label} không dùng được: {detail}.",
+      "suggestion": "Nhập thuế suất từ 0 đến 100, hoặc chọn mã thuế đã đăng ký cho quốc gia của dự án tại ngày định giá."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} được đánh dấu chịu thuế nhưng không có thuế suất lẫn mã thuế.",
+      "suggestion": "Nhập thuế suất, chọn mã thuế, hoặc đổi trạng thái thành miễn thuế hoặc ngoài phạm vi."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} được miễn thuế nhưng có thuế suất {rate} %, giá trị này bị bỏ qua.",
+      "suggestion": "Xóa thuế suất hoặc đổi trạng thái thành chịu thuế."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Giá của {label} đã gồm thuế nhưng không biết thuế suất để tách ra.",
+      "suggestion": "Nhập thuế suất hoặc mã thuế, hoặc bỏ chọn giá đã gồm thuế."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} được định giá {unit_cost}, giá gốc là {master}.",
+      "suggestion": "Chạy tính lại thuế để lấy giá gốc, hoặc phê duyệt cụm để giữ nguyên giá."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Mã thuế {code} của {label} không có thuế suất hiệu lực vào ngày {date}.",
+      "suggestion": "Chọn ngày định giá mà thuế suất áp dụng, hoặc nhập thuế suất thủ công."
+    }
+  }
+}

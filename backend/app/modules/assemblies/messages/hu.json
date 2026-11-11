@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: A(z) {label} adókulcsa nem használható: {detail}.",
+      "suggestion": "Adjon meg 0 és 100 közötti kulcsot, vagy válasszon a projekt országához az árazás napján nyilvántartott adókódot."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: A(z) {label} adóköteles, de nincs sem adókulcsa, sem adókódja.",
+      "suggestion": "Adja meg a kulcsot, válasszon adókódot, vagy állítsa az állapotot mentesre vagy hatályon kívülire."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: A(z) {label} mentes, de {rate} % adókulcs tartozik hozzá, amelyet figyelmen kívül hagyunk.",
+      "suggestion": "Törölje a kulcsot, vagy állítsa az állapotot adókötelesre."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: A(z) {label} ára tartalmazza az adót, de nem ismert kulcs a kivonásához.",
+      "suggestion": "Adja meg a kulcsot vagy az adókódot, vagy vegye ki a jelölést, hogy az ár tartalmazza az adót."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: A(z) {label} ára {unit_cost}, az alapár {master}.",
+      "suggestion": "Futtassa az adó újraszámítását az alapár átvételéhez, vagy hagyja jóvá az összeállítást az ár megtartásához."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: A(z) {label} {code} adókódjához nincs érvényes kulcs {date} napon.",
+      "suggestion": "Válassza ki az árazási napot, amelyre a kulcs vonatkozik, vagy adja meg a kulcsot kézzel."
+    }
+  }
+}

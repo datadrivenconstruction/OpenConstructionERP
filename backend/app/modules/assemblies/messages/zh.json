@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: {label} 的税率不可用：{detail}。",
+      "suggestion": "请输入 0 到 100 之间的税率，或选择在计价日期为项目所在国家登记的税码。"
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} 被标记为应税，但既没有税率也没有税码。",
+      "suggestion": "请输入税率、选择税码，或将状态改为免税或不在范围内。"
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} 为免税，但带有税率 {rate} %，该税率将被忽略。",
+      "suggestion": "请清除税率或将状态改为应税。"
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: {label} 的价格含税，但没有已知税率可用于扣除。",
+      "suggestion": "请输入税率或税码，或取消勾选价格含税。"
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} 的定价为 {unit_cost}，主价格为 {master}。",
+      "suggestion": "请运行税额重算以采用主价格，或批准该组合以保留其价格。"
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: {label} 的税码 {code} 在 {date} 没有有效税率。",
+      "suggestion": "请选择税率适用的计价日期，或手动输入税率。"
+    }
+  }
+}

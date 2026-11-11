@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: A taxa de imposto de {label} não é utilizável: {detail}.",
+      "suggestion": "Introduza uma taxa entre 0 e 100 ou escolha um código de imposto registado para o país do projeto na data de preço."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} está marcado como tributável mas não tem taxa nem código de imposto.",
+      "suggestion": "Introduza a taxa, escolha um código de imposto ou altere o estado para isento ou fora do âmbito."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} está isento mas tem uma taxa de imposto de {rate} %, que é ignorada.",
+      "suggestion": "Limpe a taxa ou altere o estado para tributável."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: O preço de {label} inclui imposto, mas não há taxa conhecida para o retirar.",
+      "suggestion": "Introduza a taxa ou um código de imposto, ou desmarque que o preço inclui imposto."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} está preço a {unit_cost}, o preço mestre é {master}.",
+      "suggestion": "Execute o recálculo do imposto para adotar o preço mestre, ou aprove a composição para manter o seu preço."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: O código de imposto {code} de {label} não tem taxa em vigor em {date}.",
+      "suggestion": "Escolha a data de preço a que a taxa se aplica ou introduza a taxa manualmente."
+    }
+  }
+}

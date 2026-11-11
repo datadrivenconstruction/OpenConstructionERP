@@ -190,7 +190,7 @@ async def test_registry_code_resolves_for_project_country_and_date(env) -> None:
     assert money(red["total"]) == D("1080.00")
     assert money(red["metadata"]["tax"]["rate_pct"]) == D("8")
     assert "tax" not in old["metadata"]  # no rate in force: left untaxed, reported by the rules
-    findings = (await c.get(f"/v1/assemblies/{aid}/tax-findings/")).json()
+    findings = (await c.get(f"/v1/assemblies/{aid}/tax-findings/")).json()["items"]
     assert {f["rule_id"] for f in findings} >= {"assemblies.tax_006_rate_in_force"}
 
 
@@ -258,7 +258,7 @@ async def test_recalculation_takes_master_price_for_unapproved_and_never_touches
     before = await full(c, draft)
     assert before["total_rate"] == 110  # no silent re-pricing
 
-    drift = (await c.get(f"/v1/assemblies/{draft}/tax-findings/")).json()
+    drift = (await c.get(f"/v1/assemblies/{draft}/tax-findings/")).json()["items"]
     assert "assemblies.tax_005_master_price_drift" in {f["rule_id"] for f in drift}
 
     refused = await c.post(f"/v1/assemblies/{approved}/recalculate-tax/")
@@ -309,7 +309,7 @@ async def test_recalculate_without_the_switch_does_nothing(env) -> None:
     r = await c.post(f"/v1/assemblies/{aid}/recalculate-tax/")
     assert r.status_code == 200
     assert (r.json()["updated"], r.json()["skipped_reason"]) == (False, "component_tax_disabled")
-    assert (await c.get(f"/v1/assemblies/{aid}/tax-findings/")).json() == []
+    assert (await c.get(f"/v1/assemblies/{aid}/tax-findings/")).json()["items"] == []
 
 
 @pytest.mark.asyncio

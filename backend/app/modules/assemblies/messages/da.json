@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Skattesatsen for {label} kan ikke bruges: {detail}.",
+      "suggestion": "Angiv en sats mellem 0 og 100, eller vælg en skattekode, der er registreret for projektets land på prisdatoen."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} er markeret som skattepligtig, men har hverken skattesats eller skattekode.",
+      "suggestion": "Angiv satsen, vælg en skattekode, eller ændr status til fritaget eller uden for anvendelsesområde."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} er fritaget, men har en skattesats på {rate} %, som ignoreres.",
+      "suggestion": "Ryd satsen, eller ændr status til skattepligtig."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Prisen for {label} inkluderer skat, men der er ingen kendt sats til at trække den ud.",
+      "suggestion": "Angiv satsen eller en skattekode, eller fjern markeringen af, at prisen inkluderer skat."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} er prissat til {unit_cost}, mens masterprisen er {master}.",
+      "suggestion": "Kør skatteberegningen igen for at tage masterprisen, eller godkend samlingen for at beholde dens pris."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Skattekode {code} for {label} har ingen gældende sats den {date}.",
+      "suggestion": "Vælg den prisdato, satsen gælder for, eller angiv satsen manuelt."
+    }
+  }
+}

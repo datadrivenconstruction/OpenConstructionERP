@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: L'aliquota fiscale di {label} non è utilizzabile: {detail}.",
+      "suggestion": "Inserisci un'aliquota tra 0 e 100, oppure scegli un codice imposta registrato per il paese del progetto alla data di prezzo."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} è imponibile ma non ha né aliquota né codice imposta.",
+      "suggestion": "Inserisci l'aliquota, scegli un codice imposta oppure cambia lo stato in esente o fuori campo."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} è esente ma riporta un'aliquota del {rate} %, che viene ignorata.",
+      "suggestion": "Cancella l'aliquota oppure cambia lo stato in imponibile."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Il prezzo di {label} include l'imposta, ma non è nota alcuna aliquota per scorporarla.",
+      "suggestion": "Inserisci l'aliquota o un codice imposta, oppure deseleziona che il prezzo include l'imposta."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} è prezzato a {unit_cost}, il prezzo principale è {master}.",
+      "suggestion": "Esegui il ricalcolo dell'imposta per prendere il prezzo principale, oppure approva l'assieme per mantenerne il prezzo."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Il codice imposta {code} di {label} non ha aliquota in vigore il {date}.",
+      "suggestion": "Scegli la data di prezzo a cui si applica l'aliquota, oppure inserisci l'aliquota a mano."
+    }
+  }
+}

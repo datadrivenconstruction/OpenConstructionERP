@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Tarif pajak {label} tidak dapat digunakan: {detail}.",
+      "suggestion": "Masukkan tarif antara 0 dan 100, atau pilih kode pajak yang tercatat untuk negara proyek pada tanggal penetapan harga."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} ditandai kena pajak tetapi tidak memiliki tarif pajak maupun kode pajak.",
+      "suggestion": "Masukkan tarif, pilih kode pajak, atau ubah status menjadi bebas atau di luar cakupan."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} dibebaskan tetapi memiliki tarif pajak {rate} %, yang diabaikan.",
+      "suggestion": "Hapus tarif atau ubah status menjadi kena pajak."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Harga {label} sudah termasuk pajak, tetapi tidak ada tarif yang diketahui untuk memisahkannya.",
+      "suggestion": "Masukkan tarif atau kode pajak, atau hapus centang bahwa harga termasuk pajak."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} dihargai {unit_cost}, harga induk adalah {master}.",
+      "suggestion": "Jalankan perhitungan ulang pajak untuk mengambil harga induk, atau setujui rakitan agar harganya dipertahankan."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Kode pajak {code} milik {label} tidak memiliki tarif yang berlaku pada {date}.",
+      "suggestion": "Pilih tanggal penetapan harga yang berlaku untuk tarif, atau masukkan tarif secara manual."
+    }
+  }
+}

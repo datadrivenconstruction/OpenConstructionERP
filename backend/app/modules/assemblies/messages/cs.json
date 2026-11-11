@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Sazbu daně u {label} nelze použít: {detail}.",
+      "suggestion": "Zadejte sazbu mezi 0 a 100 nebo vyberte daňový kód evidovaný pro zemi projektu k datu ocenění."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} je zdanitelná, ale nemá ani sazbu daně, ani daňový kód.",
+      "suggestion": "Zadejte sazbu, vyberte daňový kód nebo změňte stav na osvobozeno či mimo rozsah."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} je osvobozena, ale nese sazbu daně {rate} %, která se ignoruje.",
+      "suggestion": "Smažte sazbu nebo změňte stav na zdanitelné."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Cena {label} zahrnuje daň, ale není známa sazba, kterou ji vyjmout.",
+      "suggestion": "Zadejte sazbu nebo daňový kód, nebo zrušte volbu, že cena zahrnuje daň."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} je oceněna na {unit_cost}, hlavní cena je {master}.",
+      "suggestion": "Spusťte přepočet daně, aby se převzala hlavní cena, nebo sestavu schvalte, aby si cenu ponechala."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Daňový kód {code} u {label} nemá k {date} platnou sazbu.",
+      "suggestion": "Vyberte datum ocenění, pro které sazba platí, nebo zadejte sazbu ručně."
+    }
+  }
+}

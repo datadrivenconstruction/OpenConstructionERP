@@ -28,6 +28,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy import select
 
+from app.core import cost_scope
 from app.modules.assemblies import component_tax as ct
 from app.modules.assemblies.models import Assembly, Component
 from app.modules.assemblies.schemas import ProjectTaxRecalcResponse, TaxFinding, TaxRecalcResponse
@@ -220,9 +221,7 @@ class AssemblyTaxMixin:
         if resource is not None:
             return ct.to_decimal(resource.base_price)
         if comp.cost_item_id is not None:
-            from app.modules.costs.models import CostItem  # noqa: PLC0415
-
-            item = await self.session.get(CostItem, comp.cost_item_id)
+            item = await cost_scope.get_cost_item(self.session, comp.cost_item_id)
             return ct.to_decimal(getattr(item, "rate", None)) if item is not None else None
         return None
 

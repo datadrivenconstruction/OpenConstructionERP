@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: {label} için vergi oranı kullanılamıyor: {detail}.",
+      "suggestion": "0 ile 100 arasında bir oran girin veya fiyatlandırma tarihinde proje ülkesi için kayıtlı bir vergi kodu seçin."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} vergiye tabi olarak işaretli ancak ne vergi oranı ne de vergi kodu var.",
+      "suggestion": "Oranı girin, bir vergi kodu seçin veya durumu muaf ya da kapsam dışı olarak değiştirin."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} muaf ancak yok sayılan %{rate} vergi oranı taşıyor.",
+      "suggestion": "Oranı temizleyin veya durumu vergiye tabi olarak değiştirin."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: {label} fiyatı vergiyi içeriyor ancak ayrıştırmak için bilinen bir oran yok.",
+      "suggestion": "Oranı veya bir vergi kodunu girin ya da fiyatın vergi içerdiği işaretini kaldırın."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} {unit_cost} olarak fiyatlandırılmış, ana fiyat {master}.",
+      "suggestion": "Ana fiyatı almak için vergi yeniden hesaplamasını çalıştırın veya fiyatını korumak için montajı onaylayın."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: {label} için {code} vergi kodunun {date} tarihinde geçerli bir oranı yok.",
+      "suggestion": "Oranın geçerli olduğu fiyatlandırma tarihini seçin veya oranı elle girin."
+    }
+  }
+}
