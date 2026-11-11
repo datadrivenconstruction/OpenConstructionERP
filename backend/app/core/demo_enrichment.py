@@ -27,6 +27,7 @@ No new DB tables: this only orchestrates seeders that already exist.
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -636,11 +637,13 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
                             _n = (await _chk.execute(_msel(_func.count()).select_from(_marker))).scalar_one()
                         if _n:
                             continue
+                    _t0 = time.perf_counter()
                     async with async_session_factory() as _ms:
                         _counts = await _build(_ms)
                         await _ms.commit()
                         if isinstance(_counts, dict) and any(_counts.values()):
                             logger.info("%s demo seed: %s", _name, _counts)
+                    logger.info("%s demo seed took %.1fs", _name, time.perf_counter() - _t0)
                 except Exception:
                     logger.warning("%s demo seed skipped (non-fatal)", _name, exc_info=True)
 

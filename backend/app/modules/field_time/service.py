@@ -178,6 +178,9 @@ class FieldTimeService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = FieldTimeRepository(session)
+        # Project-wide reads that do not change inside one service call chain (a request, or one seed run).
+        self._project_memo: dict[tuple[str, Any], Any] = {}
+        self._open_days: set[tuple[Any, Any]] = set()
 
     # ── Create ───────────────────────────────────────────────────────────────
 
@@ -207,8 +210,7 @@ class FieldTimeService:
             metadata_=metadata,
         )
         timesheet = await self.repo.create(timesheet)
-        for line in data.lines:
-            await self.repo.add_line(self._line_from_create(timesheet.id, line))
+        await self.repo.add_lines([self._line_from_create(timesheet.id, line) for line in data.lines])
 
         await self.session.refresh(timesheet)
         logger.info(
@@ -1418,6 +1420,15 @@ class FieldTimeService:
         self,
         project_id: uuid.UUID,
     ) -> tuple[set[str] | None, set[str] | None]:
+        key = ("cost_codes", project_id)
+        if key not in self._project_memo:
+            self._project_memo[key] = await self._resolve_cost_codes_uncached(project_id)
+        return self._project_memo[key]
+
+    async def _resolve_cost_codes_uncached(
+        self,
+        project_id: uuid.UUID,
+    ) -> tuple[set[str] | None, set[str] | None]:
         """Return ``(valid_cost_codes, valid_wbs)`` for a project's BOQ, or None.
 
         None means "could not resolve" (BOQ module absent, query failed, or the
@@ -1477,6 +1488,12 @@ class FieldTimeService:
         return candidates
 
     async def _project_country(self, project_id: uuid.UUID) -> str | None:
+        key = ("country", project_id)
+        if key not in self._project_memo:
+            self._project_memo[key] = await self._project_country_uncached(project_id)
+        return self._project_memo[key]
+
+    async def _project_country_uncached(self, project_id: uuid.UUID) -> str | None:
         """Return the project's ISO country code, or None when it names none.
 
         Only ``country_code`` is read: ``Project.region`` defaults to a market
@@ -1891,7 +1908,10 @@ class FieldTimeService:
         """Refuse a change to a day that a locked payroll period covers (409)."""
         from app.modules.payroll.period_service import assert_day_open
 
+        if (project_id, day) in self._open_days:
+            return
         await assert_day_open(self.session, project_id, day)
+        self._open_days.add((project_id, day))
 
     @staticmethod
     def _assert_draft(timesheet: FieldTimesheet, action: str) -> None:

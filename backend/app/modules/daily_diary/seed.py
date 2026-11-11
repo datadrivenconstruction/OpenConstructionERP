@@ -278,11 +278,14 @@ async def seed_daily_diary_demo(
 
         if status_in_archived := True:  # noqa: E712
             # Add archive signatures for archived/signed diaries
+            entries_by_diary: dict[uuid.UUID, list[DiaryEntry]] = {}
+            for entry in entries:
+                entries_by_diary.setdefault(entry.diary_id, []).append(entry)
             for (pid, d_date), diary in diary_index.items():
                 if pid != project_id:
                     continue
                 if diary.status in ("signed", "archived"):
-                    diary_entries = [e for e in entries if e.diary_id == diary.id]
+                    diary_entries = entries_by_diary.get(diary.id, [])
                     payload = compute_immutable_payload(diary, diary_entries, [])
                     signatures.append(
                         DiaryArchiveSignature(
