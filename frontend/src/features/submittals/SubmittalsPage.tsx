@@ -95,6 +95,7 @@ import {
   type ProcurementFormData,
 } from './SubmittalProcurementFields';
 import { SubmittalRegisterDetail } from './SubmittalRegisterDetail';
+import { SubmittalAttachments } from './SubmittalAttachments';
 import { SubmittalRegisterExport } from './SubmittalRegisterExport';
 import { SubmittalRegisterFilters, SubmittalTypeTabs } from './SubmittalRegisterFilters';
 import { SubmittalRegisterSummary } from './SubmittalRegisterSummary';
@@ -839,6 +840,8 @@ const SubmittalRow = React.memo(function SubmittalRow({
               revision chain and the checks. Each block is absent when it has
               nothing to say. */}
           <SubmittalRegisterDetail submittal={submittal} vocabulary={vocabulary} />
+
+          <SubmittalAttachments submittalId={submittal.id} />
 
           {/* Linked BOQ items — each id is a live pill that deep-links to
               the BOQ position it covers, closing CONN-13. */}

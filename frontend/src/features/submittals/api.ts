@@ -6,7 +6,15 @@
  * All endpoints are prefixed with /v1/submittals/.
  */
 
-import { apiGet, apiPost, apiPatch, downloadWithAuth } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPatch,
+  downloadWithAuth,
+  fetchWithAuth,
+} from '@/shared/lib/api';
 import { documentExportUrl, downloadRecordPdf, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -625,5 +633,57 @@ export function downloadSubmittalPdf(id: string, locale: string, submittalNumber
     `/v1/submittals/${encodeURIComponent(id)}/export/pdf/`,
     locale,
     submittalNumber || 'submittal',
+  );
+}
+
+/* ── Attachments ─────────────────────────────────────────────────────── */
+
+export interface SubmittalAttachment {
+  document_id: string;
+  label: string;
+  added_by: string;
+  added_at: string;
+  /** True for direct uploads; linked documents are fetched via the documents module. */
+  downloadable: boolean;
+  size_bytes: number | null;
+}
+
+const attachmentsPath = (id: string) => `/v1/submittals/${encodeURIComponent(id)}/attachments/`;
+
+export function fetchSubmittalAttachments(id: string): Promise<SubmittalAttachment[]> {
+  return apiGet<SubmittalAttachment[]>(attachmentsPath(id));
+}
+
+/** Upload one file (POST /{id}/attachments/upload/); the server checks the real file type. */
+export async function uploadSubmittalAttachment(id: string, file: File, label?: string): Promise<SubmittalAttachment> {
+  const form = new FormData();
+  form.append('file', file);
+  const qs = label ? `?label=${encodeURIComponent(label)}` : '';
+  const resp = await fetchWithAuth(`${API_BASE}${attachmentsPath(id)}upload/${qs}`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: form,
+  });
+  if (!resp.ok) {
+    let detail = `Upload failed (HTTP ${resp.status})`;
+    try {
+      const body = (await resp.json()) as { detail?: unknown };
+      if (typeof body.detail === 'string') detail = body.detail;
+    } catch {
+      // Body was not JSON; keep the status-based message.
+    }
+    throw new Error(detail);
+  }
+  return (await resp.json()) as SubmittalAttachment;
+}
+
+export function deleteSubmittalAttachment(id: string, documentId: string): Promise<void> {
+  return apiDelete(`${attachmentsPath(id)}${encodeURIComponent(documentId)}`);
+}
+
+export function downloadSubmittalAttachment(id: string, att: SubmittalAttachment): Promise<void> {
+  return downloadWithAuth(
+    `${API_BASE}${attachmentsPath(id)}${encodeURIComponent(att.document_id)}/download/`,
+    att.label || 'attachment',
   );
 }

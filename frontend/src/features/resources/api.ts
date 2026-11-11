@@ -155,6 +155,8 @@ export interface BoardConflict {
 export interface BoardEntry {
   resource: Resource;
   assignments: Assignment[];
+  /** Primary phone of the linked contact, when there is one. */
+  phone?: string | null;
 }
 
 export interface BoardResponse {

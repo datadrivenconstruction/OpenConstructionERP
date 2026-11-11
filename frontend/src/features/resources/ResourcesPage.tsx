@@ -38,6 +38,7 @@ import {
   Download,
   Filter,
 } from 'lucide-react';
+import { BOARD_PRINT_CSS, BOARD_PRINT_ID, BoardPhoneCell, BoardPrintButton } from './boardContact';
 import {
   Button,
   Card,
@@ -3019,6 +3020,14 @@ function AssignmentsTab({
     return out;
   }, [boardQ.data, idToName]);
 
+  const phoneByResource = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const entry of boardQ.data?.entries ?? []) {
+      if (entry.phone) m[entry.resource.id] = entry.phone;
+    }
+    return m;
+  }, [boardQ.data]);
+
   const [statusFilter, setStatusFilter] = useState<AssignmentStatus | ''>('');
   const filtered = useMemo(
     () => (statusFilter ? flat.filter((a) => a.status === statusFilter) : flat),
@@ -3139,7 +3148,8 @@ function AssignmentsTab({
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 space-y-3">
+        <div id={BOARD_PRINT_ID} className="lg:col-span-2 space-y-3">
+          <style>{BOARD_PRINT_CSS}</style>
           <Card padding="none">
             <div className="flex flex-wrap items-center gap-2 p-3 border-b border-border-light">
               <h3 className="text-sm font-semibold">
@@ -3148,7 +3158,8 @@ function AssignmentsTab({
               <span className="text-xs text-content-tertiary tabular-nums">
                 {filtered.length}
               </span>
-              <div className="ms-auto flex items-center gap-2">
+              <div className="ms-auto flex items-center gap-2 print:hidden">
+                <BoardPrintButton />
                 <select
                   value={statusFilter}
                   onChange={(e) =>
@@ -3235,7 +3246,7 @@ function AssignmentsTab({
                   <thead>
                     <tr>
                       {canEdit && (
-                        <th className="w-8">
+                        <th className="w-8 print:hidden">
                           <input
                             type="checkbox"
                             aria-label={t('common.select_all', {
@@ -3258,6 +3269,9 @@ function AssignmentsTab({
                         {t('resources.col_resource', { defaultValue: 'Resource' })}
                       </th>
                       <th>
+                        {t('resources.col_phone', { defaultValue: 'Phone' })}
+                      </th>
+                      <th>
                         {t('resources.col_project_task', {
                           defaultValue: 'Project / Task',
                         })}
@@ -3274,7 +3288,7 @@ function AssignmentsTab({
                       <th>
                         {t('resources.col_status', { defaultValue: 'Status' })}
                       </th>
-                      <th className="text-right">
+                      <th className="text-right print:hidden">
                         {t('resources.actions', { defaultValue: 'Actions' })}
                       </th>
                     </tr>
@@ -3303,7 +3317,7 @@ function AssignmentsTab({
                           data-testid={`assign-row-${a.id}`}
                         >
                           {canEdit && (
-                            <td>
+                            <td className="print:hidden">
                               <input
                                 type="checkbox"
                                 checked={isSelected}
@@ -3324,7 +3338,21 @@ function AssignmentsTab({
                               {a.resource_name}
                             </button>
                           </td>
-                          <td>
+                          <td className="text-xs">
+                            <BoardPhoneCell
+                              phone={phoneByResource[a.resource_id]}
+                              smsBody={t('resources.sms_body', {
+                                defaultValue:
+                                  '{{name}}, you are scheduled on {{project}} from {{date}}.',
+                                name: a.resource_name,
+                                project:
+                                  a.project_name ||
+                                  t('resources.untitled_project', { defaultValue: 'Project' }),
+                                date: new Date(a.start_at).toLocaleDateString(),
+                              })}
+                            />
+                          </td>
+                          <td className="text-xs">
                             <div className="flex flex-col gap-0.5">
                               {a.project_id ? (
                                 <button
@@ -3420,7 +3448,7 @@ function AssignmentsTab({
                               {assignmentStatusLabel(t, a.status)}
                             </Badge>
                           </td>
-                          <td className="text-right">
+                          <td className="text-right print:hidden">
                             {canEdit ? (
                               <div className="inline-flex gap-1">
                                 <button
