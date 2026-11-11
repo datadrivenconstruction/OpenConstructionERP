@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Any, Iterable
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -1504,6 +1504,7 @@ class ResourcesService:
         end: datetime,
         *,
         project_id: uuid.UUID | None = None,
+        tenant_id: str | None = None,
     ) -> list[dict[str, Any]]:
         """Flat dispatcher-board: resources + their assignments in [start, end).
 
@@ -1518,7 +1519,7 @@ class ResourcesService:
         by_resource: dict[uuid.UUID, list[Assignment]] = {}
         for a in assignments:
             by_resource.setdefault(a.resource_id, []).append(a)
-        phones = await self._contact_phones({r.contact_id for r in resources if r.contact_id is not None})
+        phones = await self._contact_phones({r.contact_id for r in resources if r.contact_id is not None}, tenant_id)
         entries: list[dict[str, Any]] = []
         for r in resources:
             entries.append(
@@ -1530,14 +1531,19 @@ class ResourcesService:
             )
         return entries
 
-    async def _contact_phones(self, contact_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
-        """Primary phones for the given contacts in one query (no per-row lookups)."""
-        if not contact_ids:
+    async def _contact_phones(self, contact_ids: set[uuid.UUID], tenant_id: str | None) -> dict[uuid.UUID, str]:
+        """Primary phones of the caller's own contacts in one query; other tenants' contacts yield none."""
+        if not contact_ids or tenant_id is None:
             return {}
         from app.modules.contacts.models import Contact
 
         rows = (
-            await self.session.execute(select(Contact.id, Contact.primary_phone).where(Contact.id.in_(contact_ids)))
+            await self.session.execute(
+                select(Contact.id, Contact.primary_phone).where(
+                    Contact.id.in_(contact_ids),
+                    or_(Contact.tenant_id == str(tenant_id), Contact.created_by == str(tenant_id)),
+                )
+            )
         ).all()
         return {cid: phone.strip() for (cid, phone) in rows if phone and phone.strip()}
 

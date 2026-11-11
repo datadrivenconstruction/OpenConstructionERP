@@ -32,8 +32,11 @@ async def session():
     await engine.dispose()
 
 
-def _contact(phone: str | None) -> Contact:
-    return Contact(id=uuid.uuid4(), contact_type="employee", primary_phone=phone)
+TENANT = "tenant-a"
+
+
+def _contact(phone: str | None, tenant: str = TENANT) -> Contact:
+    return Contact(id=uuid.uuid4(), contact_type="employee", primary_phone=phone, tenant_id=tenant)
 
 
 def _resource(code: str, contact_id: uuid.UUID | None) -> Resource:
@@ -61,12 +64,26 @@ async def test_phone_comes_from_the_linked_contact_in_one_query(session) -> None
 
     event.listen(session.bind.sync_engine, "before_cursor_execute", _count)
     entries = await ResourcesService(session).board(
-        datetime(2026, 11, 1, tzinfo=UTC), datetime(2026, 11, 8, tzinfo=UTC)
+        datetime(2026, 11, 1, tzinfo=UTC), datetime(2026, 11, 8, tzinfo=UTC), tenant_id=TENANT
     )
     phones = {e["resource"].code: e["phone"] for e in entries}
 
     assert phones == {"R1": "+49 170 1234567", "R2": None, "R3": None, "R4": "+49 170 1234567"}
     assert len(contact_selects) == 1
+
+
+async def test_a_contact_of_another_tenant_yields_no_phone(session) -> None:
+    foreign = _contact("+1 555 0100", tenant="tenant-b")
+    own = _contact("+1 555 0199")
+    session.add_all([foreign, own, _resource("R1", foreign.id), _resource("R2", own.id)])
+    await session.commit()
+    window = (datetime(2026, 11, 1, tzinfo=UTC), datetime(2026, 11, 8, tzinfo=UTC))
+
+    phones = {e["resource"].code: e["phone"] for e in await ResourcesService(session).board(*window, tenant_id=TENANT)}
+    assert phones == {"R1": None, "R2": "+1 555 0199"}
+
+    anonymous = await ResourcesService(session).board(*window, tenant_id=None)
+    assert all(e["phone"] is None for e in anonymous)
 
 
 def test_the_board_entry_exposes_an_optional_phone() -> None:

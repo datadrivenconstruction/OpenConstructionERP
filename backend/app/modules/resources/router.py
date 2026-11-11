@@ -14,6 +14,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import (
+    CurrentTenantId,
     CurrentUserId,
     RequirePermission,
     SessionDep,
@@ -803,6 +804,7 @@ async def board(
     start: datetime = Query(...),
     end: datetime = Query(...),
     project_id: uuid.UUID | None = Query(default=None),
+    tenant_id: CurrentTenantId = None,
     _perm: None = Depends(RequirePermission("resources.read")),
     service: ResourcesService = Depends(_get_service),
 ) -> BoardResponse:
@@ -816,7 +818,7 @@ async def board(
     # and is gated by ``resources.read`` only.
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
-    entries = await service.board(start, end, project_id=project_id)
+    entries = await service.board(start, end, project_id=project_id, tenant_id=tenant_id)
     return BoardResponse(
         period_start=start,
         period_end=end,
