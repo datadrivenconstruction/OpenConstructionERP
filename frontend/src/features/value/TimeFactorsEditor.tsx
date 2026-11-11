@@ -198,7 +198,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
                       aria-invalid={invalid}
                       value={value}
                       onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
-                      className="oe-input w-20 text-right" aria-invalid={!!(invalid)}
+                      className="oe-input w-20 text-right"
                     />
                     <span className="text-xs text-content-tertiary">
                       {t('value.factors.min_unit', { defaultValue: 'min' })}

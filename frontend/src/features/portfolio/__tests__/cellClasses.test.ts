@@ -45,7 +45,7 @@ describe('cellClasses (leveling heatmap)', () => {
   });
 
   it('scales colour by ratio to capacity (not a hardcoded 100)', () => {
-    // Capacity 200, allocation 120 = 60% of capacity -> mid (emerald-500), not high.
+    // Capacity 200, allocation 120 = 60% of capacity -> mid (semantic-success), not high.
     const mid = cellClasses(cell({ allocation_percent: 120, capacity_percent: 200 }));
     expect(mid).toContain('bg-semantic-success');
     // Capacity 100, allocation 90 = 90% -> high (amber).

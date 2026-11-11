@@ -1558,7 +1558,7 @@ function PurchaseOrdersTab({
                         setPoTaxRateTouched(true);
                         setPoTaxRateInput(e.target.value);
                       }}
-                      className={clsx('oe-input', 'oe-input-sm pr-7 text-right')} aria-invalid={!!poRateInvalid}
+                      className={clsx('oe-input', 'oe-input-sm pr-7 text-right')}
                       placeholder={t('procurement.vat_rate_none', { defaultValue: 'none' })}
                     />
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-2xs text-content-tertiary font-medium">
