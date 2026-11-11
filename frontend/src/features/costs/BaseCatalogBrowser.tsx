@@ -140,7 +140,7 @@ function DepthMeter({ positions }: { positions: number }) {
           />
         ))}
       </div>
-      <span className="text-2xs font-medium uppercase tracking-wide text-content-quaternary">
+      <span className="oe-overline">
         {t('costs.base_depth', { defaultValue: 'Depth' })}
       </span>
     </div>
@@ -218,7 +218,7 @@ function BaseVariantCard({
       data-testid="base-variant-card"
     >
       {/* Header: flag + title + top-right status badge */}
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         <CountryFlag code={variant.flag} size={30} className="mt-0.5 shrink-0 rounded shadow-xs border border-black/5" />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold text-content-primary" title={title}>
@@ -297,13 +297,13 @@ function BaseVariantCard({
             // not the active market -> switch; loaded + active -> a badge.
             loading ? (
               <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-oe-blue/10 px-2.5 py-1.5 text-xs font-medium text-oe-blue">
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
                 {t('costs.base_loading', { defaultValue: 'Loading' })}
                 {typeof elapsedSeconds === 'number' && elapsedSeconds > 0 ? ` ${elapsedSeconds}s` : ''}
               </div>
             ) : loaded && active ? (
               <div className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-oe-blue/10 px-2.5 py-1.5 text-xs font-semibold text-oe-blue">
-                <Check size={13} />
+                <Check size={14} />
                 {t('costs.base_market_active', { defaultValue: 'Active market' })}
               </div>
             ) : loaded ? (
@@ -322,7 +322,7 @@ function BaseVariantCard({
                 onClick={() => onReprice?.(variant)}
                 className={ACTION_PRIMARY_CLASS}
               >
-                <Download size={13} />
+                <Download size={14} />
                 {t('costs.base_market_load', { defaultValue: 'Price into {{market}}', market: variant.market })}
               </button>
             )
@@ -339,7 +339,7 @@ function BaseVariantCard({
             </button>
           ) : loading ? (
             <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-oe-blue/10 px-2.5 py-1.5 text-xs font-medium text-oe-blue">
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
               {t('costs.base_loading', { defaultValue: 'Loading' })}
               {typeof elapsedSeconds === 'number' && elapsedSeconds > 0 ? ` ${elapsedSeconds}s` : ''}
             </div>
@@ -350,7 +350,7 @@ function BaseVariantCard({
               onClick={() => onLoad?.(variant)}
               className={ACTION_PRIMARY_CLASS}
             >
-              <Download size={13} />
+              <Download size={14} />
               {variant.bundled
                 ? t('costs.base_load', { defaultValue: 'Load' })
                 : t('costs.base_download', { defaultValue: 'Download' })}
@@ -369,7 +369,7 @@ function BaseVariantCard({
               className={`mt-1.5 flex items-center justify-center gap-1.5 ${ACTION_SECONDARY_CLASS} disabled:opacity-50`}
               data-testid="base-restore-home"
             >
-              {loading ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
+              {loading ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
               {t('costs.base_restore_home', { defaultValue: 'Return to home market' })}
             </button>
           )}
@@ -378,7 +378,7 @@ function BaseVariantCard({
 
       {mode === 'select' && selected && (
         <div className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue/10 px-2.5 py-1.5 text-xs font-semibold text-oe-blue">
-          <Check size={13} />
+          <Check size={14} />
           {t('costs.base_selected', { defaultValue: 'Selected' })}
         </div>
       )}
@@ -520,7 +520,7 @@ export function BaseCatalogBrowser({
       {/* Search + summary */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1">
-          <Search size={15} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary" />
+          <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary" />
           <input
             type="search"
             value={query}
@@ -697,9 +697,9 @@ export function BaseCatalogBrowser({
                 // dialog the way a page-level `isolate` would
                 // (modal_relative_isolate_trap). The grid takes `relative` of its
                 // own so it paints above the absolutely-positioned backdrop.
-                <div className="relative mt-2.5 overflow-hidden rounded-xl border border-border-light/70 bg-surface-secondary/30 p-2.5">
+                <div className="relative mt-2.5 overflow-hidden rounded-xl border border-border-light/70 bg-surface-secondary/30 p-3">
                   <CountryFlagBackdrop code={flagCode} variant="panel" />
-                  <div className="relative grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  <div className="relative grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     {variants.map((v) => renderCard(v, v.market, v.language))}
                   </div>
                 </div>

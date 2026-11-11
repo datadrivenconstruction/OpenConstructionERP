@@ -169,8 +169,8 @@ export function IntakePanel({
       <Card className="border-violet-200/60">
         <CardContent>
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-violet-500" />
-            <h3 className="text-base font-semibold text-content-primary">
+            <Sparkles size={20} className="text-violet-500" />
+            <h3 className="oe-section-title">
               {t('aiest.intake.title', { defaultValue: 'Guided estimate' })}
             </h3>
             <Badge variant="blue" size="sm">
@@ -200,7 +200,7 @@ export function IntakePanel({
             placeholder={t('aiest.intake.request_placeholder', {
               defaultValue: 'e.g. kitchen renovation 8 m2, standard finish, replace plumbing',
             })}
-            className="mt-3 w-full rounded-xl border border-border bg-surface-primary px-4 py-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-textarea-lg mt-3 w-full"
           />
           {error && <ErrorNote message={error} onRetry={() => void handleStart()} />}
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -210,7 +210,7 @@ export function IntakePanel({
               loading={pending === 'start'}
               onClick={() => void handleStart()}
               disabled={!projectId}
-              icon={<ArrowRight size={15} />}
+              icon={<ArrowRight size={16} />}
               iconPosition="right"
             >
               {t('aiest.intake.start', { defaultValue: 'Start guided estimate' })}
@@ -220,7 +220,7 @@ export function IntakePanel({
               size="md"
               onClick={() => void handleStart('offline')}
               disabled={!projectId || pending === 'start'}
-              icon={<ClipboardList size={15} />}
+              icon={<ClipboardList size={16} />}
             >
               {t('aiest.intake.use_form', { defaultValue: "I'd rather fill a form" })}
             </Button>
@@ -253,7 +253,7 @@ export function IntakePanel({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles size={16} className="text-violet-500" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('aiest.intake.title', { defaultValue: 'Guided estimate' })}
             </h3>
             {state.detected_type && (
@@ -308,7 +308,7 @@ export function IntakePanel({
             {round.inRound && round.questions.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-content-secondary">
-                  {offline ? <ClipboardList size={15} /> : <MessageSquare size={15} />}
+                  {offline ? <ClipboardList size={16} /> : <MessageSquare size={16} />}
                   {offline
                     ? t('aiest.intake.form_heading', {
                         defaultValue: 'Answer these to compute quantities',
@@ -349,7 +349,7 @@ export function IntakePanel({
                     loading={pending === 'answer'}
                     disabled={!canAdvance}
                     onClick={() => void handleAnswer(true)}
-                    icon={<ArrowRight size={15} />}
+                    icon={<ArrowRight size={16} />}
                     iconPosition="right"
                   >
                     {finalRound
@@ -361,7 +361,7 @@ export function IntakePanel({
                     size="md"
                     onClick={() => void handleSkipToEstimate()}
                     disabled={pending === 'answer'}
-                    icon={<SkipForward size={15} />}
+                    icon={<SkipForward size={16} />}
                   >
                     {t('aiest.intake.skip', { defaultValue: 'Skip to estimate' })}
                   </Button>
@@ -382,7 +382,7 @@ export function IntakePanel({
             {round.onParameterSheet && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-content-secondary">
-                  <ClipboardList size={15} />
+                  <ClipboardList size={16} />
                   {t('aiest.intake.sheet_heading', {
                     defaultValue: 'Confirm the parameters',
                   })}

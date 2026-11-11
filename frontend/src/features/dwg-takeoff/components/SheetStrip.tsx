@@ -218,7 +218,7 @@ function SheetThumb({ entities }: { entities: DxfEntity[] }) {
     <canvas
       ref={canvasRef}
       data-testid="dwg-sheet-strip-canvas"
-      className="rounded border border-slate-200 bg-white dark:bg-slate-900"
+      className="rounded border border-border bg-white dark:bg-slate-900"
     />
   );
 }

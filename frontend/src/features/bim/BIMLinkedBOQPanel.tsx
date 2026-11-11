@@ -170,7 +170,7 @@ export default function BIMLinkedBOQPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-light shrink-0">
         <div className="flex items-center gap-2">
           <Link2 size={16} className="text-content-tertiary" />
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('bim.linked_boq_title', { defaultValue: 'Linked BOQ' })}
           </h2>
         </div>
@@ -193,7 +193,7 @@ export default function BIMLinkedBOQPanel({
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('bim.linked_boq_search', { defaultValue: 'Search positions...' })}
             aria-label={t('bim.linked_boq_search', { defaultValue: 'Search positions...' })}
-            className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
+            className="oe-input-sm w-full ps-8 pe-8"
           />
           {search && (
             <button aria-label={t('common.clear_search', { defaultValue: 'Clear search' })}
@@ -277,7 +277,7 @@ export default function BIMLinkedBOQPanel({
                         // Unmapped units (pcs, lsum, blank) pass through.
                         const dq = q.convert(pos.quantity, pos.unit ?? '');
                         return (
-                          <span className="text-2xs tabular-nums font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded">
+                          <span className="text-2xs tabular-nums font-medium text-semantic-success bg-semantic-success-bg px-1.5 py-0.5 rounded">
                             {dq.value.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                             {dq.unit ? ` ${dq.unit}` : ''}
                           </span>

@@ -1249,7 +1249,7 @@ export function PermissionsMatrixPage() {
                   defaultValue: 'Search permissions',
                 })}
                 data-testid="permissions-matrix-search"
-                className="w-full ps-9 pe-3 py-2 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-full ps-9 pe-3 bg-white/80"
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-content-secondary">
@@ -1260,7 +1260,7 @@ export function PermissionsMatrixPage() {
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as MatrixRole | 'all')}
                 data-testid="permissions-matrix-role-filter"
-                className="px-2 py-1.5 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select bg-white/80"
               >
                 <option value="all">
                   {t('admin.permissions.role_filter_all', { defaultValue: 'All roles' })}
@@ -1289,7 +1289,7 @@ export function PermissionsMatrixPage() {
                     className="inline-flex items-center gap-1 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-oe-blue"
                     data-testid={`permissions-matrix-preset-${preset}`}
                   >
-                    <RotateCcw size={11} aria-hidden />
+                    <RotateCcw size={12} aria-hidden />
                     {preset}
                   </button>
                 ))}
@@ -1313,9 +1313,9 @@ export function PermissionsMatrixPage() {
                 className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-oe-blue"
               >
                 {allExpanded ? (
-                  <ChevronsDownUp size={13} aria-hidden />
+                  <ChevronsDownUp size={14} aria-hidden />
                 ) : (
-                  <ChevronsUpDown size={13} aria-hidden />
+                  <ChevronsUpDown size={14} aria-hidden />
                 )}
                 {allExpanded
                   ? t('admin.permissions.collapse_all', { defaultValue: 'Collapse all' })
@@ -1345,14 +1345,14 @@ export function PermissionsMatrixPage() {
         <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04]">
           <div className="overflow-x-auto">
             <table
-              className="w-full text-sm border-collapse"
+              className="oe-table w-full"
               data-testid="permissions-matrix-table"
             >
               <thead>
-                <tr className="bg-surface-secondary border-b border-border-light">
+                <tr>
                   <th
                     scope="col"
-                    className="sticky left-0 z-20 bg-surface-secondary px-3 py-2 text-left text-xs uppercase tracking-wider text-content-tertiary border-r border-border-light min-w-[260px]"
+                    className="sticky left-0 z-20 min-w-[260px]"
                   >
                     {t('admin.permissions.col_permission', {
                       defaultValue: 'Permission',
@@ -1415,7 +1415,7 @@ export function PermissionsMatrixPage() {
                   <tr>
                     <td
                       colSpan={data.roles.length + 1}
-                      className="px-3 py-8 text-center text-sm text-content-tertiary"
+                      className="text-center text-content-tertiary"
                       data-testid="permissions-matrix-no-results"
                     >
                       {t('admin.permissions.no_results', {

@@ -45,7 +45,7 @@ export function FeaturedArticle() {
         {coverFailed ? (
           <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
             <div className="absolute -left-6 -top-8 h-32 w-32 rounded-full bg-oe-blue/20 blur-2xl" />
-            <div className="absolute -bottom-10 right-0 h-32 w-32 rounded-full bg-sky-400/20 blur-2xl" />
+            <div className="absolute -bottom-10 right-0 h-32 w-32 rounded-full bg-semantic-info/20 blur-2xl" />
             <span className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-primary/80 text-oe-blue shadow-sm ring-1 ring-oe-blue/20 dark:text-sky-300">
               <Newspaper size={26} strokeWidth={1.8} />
             </span>
@@ -72,7 +72,7 @@ export function FeaturedArticle() {
         <span className="text-sm leading-relaxed text-content-secondary">{subtitle}</span>
         <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-oe-blue group-hover:underline dark:text-sky-300">
           {read}
-          <ArrowUpRight size={15} className="shrink-0" aria-hidden="true" />
+          <ArrowUpRight size={16} className="shrink-0" aria-hidden="true" />
         </span>
       </div>
     </a>

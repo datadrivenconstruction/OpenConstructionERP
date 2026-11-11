@@ -394,7 +394,7 @@ export function AccommodationListPage() {
             data-testid="accommodation-block-filter-clear"
             className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-elevated px-2.5 py-1 text-2xs font-medium text-content-primary hover:bg-surface-secondary"
           >
-            <X size={11} aria-hidden="true" />
+            <X size={12} aria-hidden="true" />
             {t('accommodation.block_filter.clear', { defaultValue: 'Show all accommodations' })}
           </button>
         </div>
@@ -576,7 +576,7 @@ export function AccommodationListPage() {
         aria-label={t('accommodation.new', {
           defaultValue: 'New accommodation',
         })}
-        className="sm:hidden fixed bottom-4 right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-oe-blue text-white shadow-lg hover:bg-oe-blue/90 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2"
+        className="sm:hidden fixed bottom-4 right-4 z-dropdown inline-flex h-14 w-14 items-center justify-center rounded-full bg-oe-blue text-white shadow-lg hover:bg-oe-blue/90 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2"
       >
         <Plus size={22} aria-hidden="true" />
       </button>
@@ -676,7 +676,7 @@ function AccommodationCard({
             className="inline-flex min-h-[28px] items-center gap-1 rounded-full border border-border bg-surface-elevated px-2 py-1 text-2xs font-medium text-oe-blue shadow-sm hover:bg-oe-blue/5"
             data-testid="accommodation-card-geo-link"
           >
-            <Globe2 size={11} aria-hidden="true" />
+            <Globe2 size={12} aria-hidden="true" />
             {t('accommodation.geo.short', { defaultValue: 'Geo' })}
           </Link>
         )}
@@ -690,7 +690,7 @@ function AccommodationCard({
           className="inline-flex min-h-[28px] items-center gap-1 rounded-full border border-border bg-surface-elevated px-2 py-1 text-2xs font-medium text-content-primary shadow-sm hover:bg-surface-secondary"
         >
           {t('common.open', { defaultValue: 'Open' })}
-          <ArrowRight size={11} aria-hidden="true" />
+          <ArrowRight size={12} aria-hidden="true" />
         </button>
       </div>
 
@@ -700,7 +700,7 @@ function AccommodationCard({
             <Icon size={18} aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1 pr-20">
-            <h3 className="truncate text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title truncate">
               {a.name || t('common.unnamed', { defaultValue: '(unnamed)' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-tertiary truncate">
@@ -821,7 +821,7 @@ function CreateAccommodationModal({
   };
 
   const inputCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'w-full';
 
   return (
     <WideModal
@@ -858,7 +858,7 @@ function CreateAccommodationModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, project_id: e.target.value }))
               }
-              className={inputCls}
+              className={`oe-select-lg ${inputCls}`}
               data-testid="accommodation-create-project"
             >
               <option value="">
@@ -885,7 +885,7 @@ function CreateAccommodationModal({
                   kind: e.target.value as AccommodationKind,
                 }))
               }
-              className={inputCls}
+              className={`oe-select-lg ${inputCls}`}
               data-testid="accommodation-create-kind"
             >
               <option value="worker_camp">
@@ -912,7 +912,7 @@ function CreateAccommodationModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, name: e.target.value }))
               }
-              className={inputCls}
+              className={`oe-input-lg ${inputCls}`}
               placeholder={t('accommodation.name.placeholder', {
                 defaultValue: 'e.g. Camp North',
               })}
@@ -930,7 +930,7 @@ function CreateAccommodationModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, address: e.target.value }))
               }
-              className={inputCls}
+              className={`oe-input-lg ${inputCls}`}
             />
           </WideModalField>
           <WideModalField
@@ -945,7 +945,7 @@ function CreateAccommodationModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, capacity_total: e.target.value }))
               }
-              className={inputCls}
+              className={`oe-input-lg ${inputCls}`}
               data-testid="accommodation-create-capacity"
             />
           </WideModalField>
@@ -963,7 +963,7 @@ function CreateAccommodationModal({
                 setForm((f) => ({ ...f, notes: e.target.value }))
               }
               rows={3}
-              className="w-full rounded-lg border border-border bg-surface-primary p-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-textarea w-full"
             />
           </WideModalField>
         </WideModalSection>

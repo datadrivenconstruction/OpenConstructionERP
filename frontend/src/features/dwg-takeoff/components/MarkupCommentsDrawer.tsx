@@ -128,23 +128,23 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
 
   return (
     <aside
-      className="fixed inset-y-0 right-0 z-40 flex h-full w-96 max-w-full flex-col border-l border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+      className="fixed inset-y-0 right-0 z-drawer flex h-full w-96 max-w-full flex-col border-l border-border bg-white shadow-2xl dark:bg-zinc-900"
       role="dialog"
       aria-label={t('takeoff.markup.comments_drawer', {
         defaultValue: 'Markup comments',
       })}
     >
-      <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
+      <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-zinc-500" />
-          <h2 className="text-sm font-semibold">
+          <MessageSquare className="h-4 w-4 text-content-tertiary" />
+          <h2 className="oe-card-title">
             {t('takeoff.markup.comments_title', { defaultValue: 'Comments' })}
           </h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary"
           aria-label={t('takeoff.markup.close', { defaultValue: 'Close' })}
         >
           <X className="h-4 w-4" />
@@ -153,17 +153,17 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {isLoading ? (
-          <div className="flex items-center justify-center py-8 text-zinc-500">
+          <div className="flex items-center justify-center py-8 text-content-tertiary">
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         ) : error ? (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-semantic-error">
             {t('takeoff.markup.comments_load_failed', {
               defaultValue: 'Could not load comments.',
             })}
           </p>
         ) : !data || data.length === 0 ? (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-content-tertiary">
             {t('takeoff.markup.comments_empty', {
               defaultValue: 'No comments yet - be the first to add one.',
             })}
@@ -175,9 +175,9 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
               return (
                 <li
                   key={c.id}
-                  className="rounded border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800"
+                  className="rounded border border-border bg-surface-secondary p-3"
                 >
-                  <div className="mb-1 flex items-center justify-between text-xs text-zinc-500">
+                  <div className="mb-1 flex items-center justify-between text-xs text-content-tertiary">
                     <span className="font-medium">{c.user_id}</span>
                     <span>{formatTimestamp(c.created_at)}</span>
                   </div>
@@ -188,7 +188,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
                         type="button"
                         onClick={() => deleteMut.mutate(c.id)}
                         disabled={deleteMut.isPending}
-                        className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-red-600"
+                        className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-semantic-error"
                         aria-label={t('takeoff.markup.comment_delete', {
                           defaultValue: 'Delete comment',
                         })}
@@ -207,7 +207,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
         )}
       </div>
 
-      <footer className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-700">
+      <footer className="border-t border-border px-4 py-3">
         <label htmlFor="markup-comment-input" className="sr-only">
           {t('takeoff.markup.comment_placeholder', {
             defaultValue: 'Write a comment...',
@@ -221,7 +221,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
             defaultValue: 'Write a comment...',
           })}
           rows={3}
-          className="w-full resize-none rounded border border-zinc-300 px-3 py-2 text-sm focus:border-oe-blue focus:outline-none dark:border-zinc-600 dark:bg-zinc-800"
+          className="oe-textarea w-full resize-none"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();
@@ -230,7 +230,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
           }}
         />
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-content-tertiary">
             {t('takeoff.markup.comment_hint', {
               defaultValue: 'Ctrl/Cmd+Enter to send',
             })}

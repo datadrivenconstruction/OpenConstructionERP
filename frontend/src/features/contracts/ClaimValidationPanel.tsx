@@ -136,7 +136,7 @@ export function ClaimValidationPanel({ claimId, awaitingSubmit, aiaEligible }: C
   return (
     <Card padding="sm" data-testid="claim-validation-panel" data-light={light}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-2.5">
+        <div className="flex min-w-0 items-start gap-2">
           <span
             className={clsx(
               'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
@@ -150,7 +150,7 @@ export function ClaimValidationPanel({ claimId, awaitingSubmit, aiaEligible }: C
             <LightIcon size={15} />
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline">
               {t('contracts.claim_validation.title', { defaultValue: 'Submission check' })}
             </p>
             <p className="text-sm font-semibold text-content-primary" data-testid="claim-validation-state">
@@ -220,9 +220,9 @@ function FindingList({ tone, findings }: { tone: 'error' | 'warning'; findings: 
           )}
         >
           {isError ? (
-            <ShieldX size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
+            <ShieldX size={16} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
           ) : (
-            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
+            <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           )}
           <div className="min-w-0">
             <p className="text-content-primary">{f.message}</p>

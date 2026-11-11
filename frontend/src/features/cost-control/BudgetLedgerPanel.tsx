@@ -184,7 +184,7 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
     rejecting?.kind === kind && rejecting.id === id ? (
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <input
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-input min-w-0 flex-1"
           aria-label={t('cost_control.ledger.reject_reason', { defaultValue: 'Reason for rejecting' })}
           placeholder={t('cost_control.ledger.reject_reason', { defaultValue: 'Reason for rejecting' })}
           value={note}
@@ -265,7 +265,7 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         data-testid="ledger-search"
       />
       <select
-        className={fieldCls}
+        className="oe-select"
         value={statusFilter}
         onChange={(e) => setStatusFilter(e.target.value as LedgerStatusFilter)}
         aria-label={t('cost_control.ledger.filter_status', { defaultValue: 'Status' })}
@@ -279,7 +279,7 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         ))}
       </select>
       <select
-        className={fieldCls}
+        className="oe-select"
         value={sort}
         onChange={(e) => setSort(e.target.value as LedgerSort)}
         aria-label={t('cost_control.ledger.sort_label', { defaultValue: 'Sort by' })}
@@ -304,7 +304,7 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
   return (
     <section aria-label={t('cost_control.ledger.title', { defaultValue: 'Budget moves and changes' })}>
       <div className="flex flex-wrap items-center gap-3 px-4 pt-4">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('cost_control.ledger.title', { defaultValue: 'Budget moves and changes' })}
         </h3>
         {pending > 0 && (
@@ -416,17 +416,17 @@ function History({ data, currency }: { data: BudgetLedger; currency: string }) {
     <div className="space-y-4 p-4">
       {data.lines.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact w-full">
             <caption className="pb-1 text-start text-xs font-medium text-content-secondary">
               {t('cost_control.ledger.effect_title', { defaultValue: 'Revised budget of the lines that moved' })}
             </caption>
             <thead>
-              <tr className="text-xs text-content-tertiary">
-                <th className="py-1 text-start font-medium">
+              <tr>
+                <th>
                   {t('cost_control.ledger.col_line', { defaultValue: 'Cost line' })}
                 </th>
                 {(['original', 'transfers', 'modifications', 'revised', 'committed'] as const).map((k) => (
-                  <th key={k} className="py-1 text-end font-medium">
+                  <th key={k} className="text-end">
                     {t(`cost_control.ledger.col_${k}`, { defaultValue: k })}
                   </th>
                 ))}
@@ -434,10 +434,10 @@ function History({ data, currency }: { data: BudgetLedger; currency: string }) {
             </thead>
             <tbody>
               {data.lines.map((l) => (
-                <tr key={l.cost_line_id} className="border-t border-border-light tabular-nums">
-                  <td className="py-1 font-mono text-xs">{l.code}</td>
+                <tr key={l.cost_line_id} className="tabular-nums">
+                  <td className="font-mono">{l.code}</td>
                   {(['original', 'transfers', 'modifications', 'revised', 'committed'] as const).map((k) => (
-                    <td key={k} className="py-1 text-end">
+                    <td key={k} className="text-end">
                       {fmtCurrency(num(l[k]), currency)}
                     </td>
                   ))}
@@ -469,7 +469,7 @@ interface FormProps {
   onError: (e: unknown) => void;
 }
 
-const FIELD = 'w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm';
+const FIELD = 'oe-input w-full';
 
 function AmountInput({ value, onChange, currency }: { value: string; onChange: (v: string) => void; currency: string }) {
   return (
@@ -482,7 +482,7 @@ function AmountInput({ value, onChange, currency }: { value: string; onChange: (
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-xs font-medium text-content-secondary">
+    <label className="oe-label">
       {label}
       <div className="mt-1 font-normal">{children}</div>
     </label>

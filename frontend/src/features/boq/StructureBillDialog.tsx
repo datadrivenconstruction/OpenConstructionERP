@@ -63,7 +63,7 @@ export function StructureBillDialog({ open, boqId, positions, onClose, onDone, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg" onClick={onClose}>
       <div
         ref={panelRef}
         role="dialog"
@@ -74,9 +74,9 @@ export function StructureBillDialog({ open, boqId, positions, onClose, onDone, o
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
-            <ListTree size={18} className="text-oe-blue" />
+            <ListTree size={20} className="text-oe-blue" />
             <div>
-              <h2 id={titleId} className="text-base font-semibold">
+              <h2 id={titleId} className="oe-section-title">
                 {t('boq.structure_title', { defaultValue: 'Structure the bill' })}
               </h2>
               <p className="text-xs text-content-secondary">
@@ -92,7 +92,7 @@ export function StructureBillDialog({ open, boqId, positions, onClose, onDone, o
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="p-1.5 rounded-lg hover:bg-surface-secondary"
           >
-            <X size={18} className="text-content-tertiary" />
+            <X size={20} className="text-content-tertiary" />
           </button>
         </div>
 
@@ -101,26 +101,26 @@ export function StructureBillDialog({ open, boqId, positions, onClose, onDone, o
             {t('boq.structure_suggest', { defaultValue: 'Suggest from numbering' })}
           </Button>
           <div className="rounded-xl border border-border-light overflow-auto max-h-[55vh]">
-            <table className="w-full text-xs">
-              <tbody className="divide-y divide-border-light">
+            <table className="oe-table-compact w-full">
+              <tbody>
                 {ordered.map((p, i) => {
                   const level = levels[i] ?? 0;
                   return (
                     <tr key={p.id}>
-                      <td className="px-3 py-1.5 w-28">
+                      <td className="w-28">
                         <LevelSelect
                           value={level}
                           onChange={(v) => setLevels((prev) => prev.map((l, j) => (j === i ? v : l)))}
                         />
                       </td>
-                      <td className="px-3 py-1.5 font-mono text-content-tertiary whitespace-nowrap">{p.ordinal}</td>
+                      <td className="font-mono text-content-tertiary whitespace-nowrap">{p.ordinal}</td>
                       <td
                         className={`py-1.5 pr-3 max-w-[420px] truncate ${level > 0 ? 'font-semibold' : ''}`}
                         style={{ paddingLeft: `${0.75 + Math.max(level - 1, 0) * 0.75}rem` }}
                       >
                         {p.description}
                       </td>
-                      <td className="px-3 py-1.5 text-content-tertiary">{level > 0 ? '' : p.unit}</td>
+                      <td className="text-content-tertiary">{level > 0 ? '' : p.unit}</td>
                     </tr>
                   );
                 })}

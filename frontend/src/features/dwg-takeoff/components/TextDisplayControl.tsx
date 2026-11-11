@@ -39,8 +39,8 @@ export function TextDisplayControl({ value, onChange }: Props) {
   const isDefault = visible && scale === DEFAULT_TEXT_DISPLAY.scale;
 
   const btn = 'flex h-7 w-7 items-center justify-center rounded-md transition-colors';
-  const enabled = 'text-slate-800 hover:bg-slate-100';
-  const disabled = 'text-slate-300 cursor-not-allowed';
+  const enabled = 'text-content-primary hover:bg-surface-secondary';
+  const disabled = 'text-content-quaternary cursor-not-allowed';
 
   return (
     <div
@@ -59,16 +59,16 @@ export function TextDisplayControl({ value, onChange }: Props) {
         aria-pressed={!visible}
         className={clsx(
           'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
-          visible ? 'text-slate-700 hover:bg-slate-100' : 'bg-emerald-500/20 text-emerald-700',
+          visible ? 'text-content-secondary hover:bg-surface-secondary' : 'bg-semantic-success/20 text-semantic-success',
         )}
       >
-        {visible ? <Eye size={13} /> : <EyeOff size={13} />}
+        {visible ? <Eye size={14} /> : <EyeOff size={14} />}
         <span className="font-semibold">
           {t('dwg_takeoff.text_toggle_label', { defaultValue: 'Text' })}
         </span>
       </button>
 
-      <div className="mx-1 h-5 w-px bg-slate-300" />
+      <div className="mx-1 h-5 w-px bg-border" />
 
       <button
         type="button"
@@ -86,7 +86,7 @@ export function TextDisplayControl({ value, onChange }: Props) {
         data-testid="dwg-text-size"
         className={clsx(
           'w-10 text-center text-2xs font-semibold tabular-nums',
-          visible ? 'text-slate-700' : 'text-slate-300',
+          visible ? 'text-content-secondary' : 'text-content-quaternary',
         )}
       >
         {t('dwg_takeoff.text_size_percent', { defaultValue: '{{percent}}%', percent })}

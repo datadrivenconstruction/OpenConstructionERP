@@ -56,15 +56,15 @@ interface AssetDetailDrawerProps {
 }
 
 const STATUS_TONES: Record<string, string> = {
-  operational: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  under_maintenance: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  decommissioned: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-  planned: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+  operational: 'bg-semantic-success/15 text-semantic-success border-semantic-success/30',
+  under_maintenance: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30',
+  decommissioned: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30',
+  planned: 'bg-semantic-info/15 text-semantic-info border-semantic-info/30',
 };
 
 function statusTone(status?: string | null): string {
-  if (!status) return 'bg-neutral-700/40 text-neutral-300 border-neutral-600/50';
-  return STATUS_TONES[status] ?? 'bg-neutral-700/40 text-neutral-300 border-neutral-600/50';
+  if (!status) return 'bg-content-secondary text-content-quaternary border-border';
+  return STATUS_TONES[status] ?? 'bg-content-secondary text-content-quaternary border-border';
 }
 
 const PROP_PRIORITY: Record<string, number> = {
@@ -164,14 +164,14 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
+        className="fixed inset-0 z-modal bg-black/40 backdrop-blur-[1px]"
         onClick={onClose}
         data-testid="asset-detail-backdrop"
       />
 
       {/* Drawer */}
       <aside
-        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[460px] flex-col border-l border-border-light bg-surface-primary shadow-2xl"
+        className="fixed right-0 top-0 z-drawer flex h-full w-full max-w-[460px] flex-col border-l border-border-light bg-surface-primary shadow-2xl"
         data-testid="asset-detail-drawer"
       >
         {/* Header */}
@@ -192,7 +192,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
               )}
             </div>
             <h2
-              className="truncate text-lg font-semibold text-content-primary"
+              className="oe-section-title truncate"
               title={headerName}
             >
               {headerName}
@@ -263,7 +263,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
         <div className="flex-1 overflow-y-auto px-4 py-4 text-sm">
           {/* Asset info section */}
           <Section
-            icon={<Package size={13} className="text-primary-400" />}
+            icon={<Package size={14} className="text-primary-400" />}
             title={t('assets.detail.section.asset_info', { defaultValue: 'Asset info' })}
           >
             <KvList>
@@ -340,7 +340,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
             quantities.length ||
             quantities.height) && (
             <Section
-              icon={<Ruler size={13} className="text-emerald-400" />}
+              icon={<Ruler size={14} className="text-semantic-success" />}
               title={t('assets.detail.section.quantities', { defaultValue: 'Quantities' })}
             >
               <div className="grid grid-cols-2 gap-2">
@@ -368,7 +368,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
 
           {/* All BIM properties */}
           <Section
-            icon={<Box size={13} className="text-sky-400" />}
+            icon={<Box size={14} className="text-semantic-info" />}
             title={t('assets.detail.section.properties', { defaultValue: 'BIM properties' })}
             count={sortedProps.length || undefined}
           >
@@ -378,7 +378,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
                 {t('common.loading', { defaultValue: 'Loading…' })}
               </div>
             ) : propsQuery.isError ? (
-              <p className="py-2 text-xs text-rose-500">
+              <p className="py-2 text-xs text-semantic-error">
                 {t('assets.detail.props_error', {
                   defaultValue: 'Could not load BIM properties.',
                 })}

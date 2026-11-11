@@ -212,7 +212,7 @@ export function ClashGroupActionDialog({
                 value={target}
                 onChange={(e) => setTarget(e.target.value as ClashActionTarget)}
                 disabled={createMut.isPending}
-                className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+                className="oe-select"
               >
                 <option value="punchlist">
                   {t('clash.groupAction.targetPunch', { defaultValue: 'Punch item' })}
@@ -233,7 +233,7 @@ export function ClashGroupActionDialog({
                   setPriority(e.target.value as 'low' | 'medium' | 'high' | 'critical')
                 }
                 disabled={createMut.isPending}
-                className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+                className="oe-select"
               >
                 {PRIORITIES.map((p) => (
                   <option key={p} value={p}>
@@ -254,7 +254,7 @@ export function ClashGroupActionDialog({
                 maxLength={255}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={createMut.isPending}
-                className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm"
+                className="oe-input"
               />
             </WideModalField>
 
@@ -268,7 +268,7 @@ export function ClashGroupActionDialog({
                 maxLength={5000}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={createMut.isPending}
-                className="rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-mono"
+                className="oe-textarea font-mono"
               />
             </WideModalField>
           </WideModalSection>

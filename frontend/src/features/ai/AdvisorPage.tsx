@@ -339,7 +339,7 @@ function ChatBubble({
               bg-surface-elevated px-3 py-[6px] text-[12px] font-medium text-content-secondary
               transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/[0.06] hover:text-oe-blue"
           >
-            <Calculator size={13} />
+            <Calculator size={14} />
             {t('ai.advisor_use_in_estimate', { defaultValue: 'Use in Quick Estimate' })}
           </button>
         </div>
@@ -396,8 +396,8 @@ function AiToolsStrip() {
   ];
   return (
     <section aria-label={t('ai.cross_strip_label', { defaultValue: 'Other AI tools' })}>
-      <p className="flex items-center gap-1.5 text-2xs font-semibold text-content-tertiary uppercase tracking-wide mb-2">
-        <Sparkles size={11} />
+      <p className="oe-overline flex items-center gap-1.5 mb-2">
+        <Sparkles size={12} />
         {t('ai.cross_strip_title', { defaultValue: 'Other AI tools' })}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -411,7 +411,7 @@ function AiToolsStrip() {
             >
               <Icon size={14} className="shrink-0 text-oe-blue/70" />
               <span className="flex-1 truncate font-medium">{tool.label}</span>
-              <ArrowUpRight size={13} className="shrink-0 text-content-tertiary group-hover:text-oe-blue" />
+              <ArrowUpRight size={14} className="shrink-0 text-content-tertiary group-hover:text-oe-blue" />
             </Link>
           );
         })}
@@ -676,7 +676,7 @@ export function AdvisorPage() {
       {/* AI not configured warning */}
       {aiConfigured === false && (
         <div className="mb-3 shrink-0 flex items-center gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
-          <AlertTriangle size={18} className="text-semantic-warning shrink-0" />
+          <AlertTriangle size={20} className="text-semantic-warning shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-semantic-warning">
               {t('ai.not_configured_title', { defaultValue: 'AI is not configured' })}
@@ -690,14 +690,14 @@ export function AdvisorPage() {
             onClick={checkAiSettings}
             className="inline-flex items-center gap-1.5 rounded-lg border border-semantic-warning/30 bg-transparent px-3 py-1.5 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg transition-colors shrink-0"
           >
-            <RefreshCw size={13} />
+            <RefreshCw size={14} />
             {t('common.retry', { defaultValue: 'Retry' })}
           </button>
           <Link
             to="/settings"
             className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-warning px-3 py-1.5 text-xs font-medium text-white hover:bg-semantic-warning transition-colors shrink-0"
           >
-            <Settings size={13} />
+            <Settings size={14} />
             {t('ai.go_to_settings', { defaultValue: 'Configure AI' })}
           </Link>
         </div>
@@ -728,12 +728,12 @@ export function AdvisorPage() {
 
           {/* Region selector */}
           <div className="flex items-center gap-2 shrink-0">
-            <Globe size={13} className="text-content-tertiary" aria-hidden="true" />
+            <Globe size={14} className="text-content-tertiary" aria-hidden="true" />
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               aria-label={t('ai.advisor_region_filter', { defaultValue: 'Filter cost sources by region' })}
-              className="h-7 rounded-lg border border-border bg-surface-primary px-2 text-2xs text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+              className="oe-select-sm"
             >
               <option value="">{t('ai.all_regions', { defaultValue: 'All regions' })}</option>
               <option value="DE_BERLIN">{t('ai.region_de_berlin', { defaultValue: 'Germany (Berlin)' })}</option>
@@ -761,7 +761,7 @@ export function AdvisorPage() {
               className="flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-2xs font-medium text-content-secondary hover:text-content-primary hover:border-border transition-colors shrink-0"
               title={t('ai.advisor_new_chat', { defaultValue: 'Start a new conversation' })}
             >
-              <MessageSquarePlus size={13} />
+              <MessageSquarePlus size={14} />
               {t('ai.advisor_new_chat', { defaultValue: 'New chat' })}
             </button>
           )}
@@ -822,8 +822,8 @@ export function AdvisorPage() {
 
               {/* Cross-module: where to go next */}
               <div className="w-full max-w-lg rounded-xl border border-border-light bg-surface-secondary/40 px-4 py-3 text-left">
-                <p className="flex items-center gap-1.5 text-2xs font-semibold text-content-tertiary uppercase tracking-wide mb-2">
-                  <Info size={11} />
+                <p className="oe-overline flex items-center gap-1.5 mb-2">
+                  <Info size={12} />
                   {t('ai.advisor_next_steps', { defaultValue: 'Turn answers into an estimate' })}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -901,11 +901,7 @@ export function AdvisorPage() {
                   defaultValue: 'Ask about costs, materials, pricing...',
                 })}
                 rows={1}
-                className="w-full resize-none rounded-[22px] border border-border bg-surface-primary
-                  px-4 py-[10px] pe-10 text-[15px] leading-[1.35]
-                  placeholder:text-content-tertiary/60
-                  focus:outline-none focus:ring-2 focus:ring-oe-blue/20 focus:border-oe-blue/40
-                  transition-all duration-150"
+                className="oe-textarea w-full resize-none pe-10"
                 disabled={loading}
                 style={{ maxHeight: '120px' }}
               />
@@ -924,7 +920,7 @@ export function AdvisorPage() {
                 }`}
               aria-label={t('common.send', { defaultValue: 'Send' })}
             >
-              <ArrowUp size={18} strokeWidth={2.5} />
+              <ArrowUp size={20} strokeWidth={2.5} />
             </button>
           </div>
         </div>

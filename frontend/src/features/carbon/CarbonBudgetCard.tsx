@@ -53,7 +53,7 @@ export function CarbonBudgetCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('carbon.lc.widget_open', { defaultValue: 'Open carbon' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

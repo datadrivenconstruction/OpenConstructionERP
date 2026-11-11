@@ -103,18 +103,18 @@ export default function BIMSnapshotsPopover({
   return (
     <>
       <div
-        className="fixed inset-0 z-[45]"
+        className="fixed inset-0 z-dropdown"
         onClick={onClose}
         data-testid="bim-snapshots-backdrop"
       />
       <div
-        className="absolute right-4 top-16 z-[46] w-[380px] max-h-[70vh] overflow-hidden rounded-lg border border-border-light bg-surface-primary shadow-xl flex flex-col"
+        className="absolute right-4 top-16 z-dropdown w-[380px] max-h-[70vh] overflow-hidden rounded-lg border border-border-light bg-surface-primary shadow-xl flex flex-col"
         data-testid="bim-snapshots-popover"
       >
         <div className="flex items-center justify-between border-b border-border-light px-3 py-2">
           <div className="flex items-center gap-2">
             <Layers size={14} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboards.snapshots_title', { defaultValue: 'Data snapshots' })}
             </h3>
             {items.length > 0 && (
@@ -150,7 +150,7 @@ export default function BIMSnapshotsPopover({
             </div>
           )}
           {query.isError && (
-            <div className="p-4 text-xs text-rose-600">
+            <div className="p-4 text-xs text-semantic-error">
               {t('dashboards.snapshots_load_failed', {
                 defaultValue: 'Could not load snapshots.',
               })}
@@ -230,7 +230,7 @@ function SnapshotRow({ snapshot, onDelete, deleting }: SnapshotRowProps) {
         type="button"
         onClick={onDelete}
         disabled={deleting}
-        className="rounded p-1 text-content-tertiary hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
+        className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-40"
         aria-label={t('common.delete', { defaultValue: 'Delete' })}
         data-testid={`bim-snapshot-delete-${snapshot.id}`}
       >

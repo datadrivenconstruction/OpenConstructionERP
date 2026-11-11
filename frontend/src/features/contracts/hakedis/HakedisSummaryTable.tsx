@@ -119,7 +119,7 @@ export function HakedisSummaryTable({
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light" data-testid="hakedis-summary">
-      <table className="w-full text-sm">
+      <table className="oe-table w-full">
         <caption className="sr-only">{t('hakedis.section.summary', { defaultValue: 'Summary' })}</caption>
         <thead className="sr-only">
           <tr>
@@ -128,7 +128,7 @@ export function HakedisSummaryTable({
             <th scope="col">{t('hakedis.line.amount', { defaultValue: 'Amount' })}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {doc.summary.map((line, index) => {
             const previous = doc.summary[index - 1];
             const opensDeductions = line.section === 'deductions' && previous?.section !== 'deductions';
@@ -137,11 +137,10 @@ export function HakedisSummaryTable({
             return (
               <Fragment key={line.key}>
                 {opensDeductions && (
-                  <tr className="bg-surface-secondary/60" data-testid="hakedis-deductions-heading">
+                  <tr data-testid="hakedis-deductions-heading">
                     <th
                       scope="colgroup"
                       colSpan={3}
-                      className="px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-content-secondary"
                     >
                       {t('hakedis.section.deductions', { defaultValue: 'Deductions and set-offs' })}
                     </th>
@@ -159,8 +158,8 @@ export function HakedisSummaryTable({
                   onEdit={() => setEditingKey(line.key)}
                 />
                 {editing && (
-                  <tr className="bg-surface-secondary/40">
-                    <td colSpan={3} className="px-3 py-3">
+                  <tr>
+                    <td colSpan={3}>
                       <ManualLineEditor
                         key={line.key}
                         line={line}
@@ -262,7 +261,7 @@ function SummaryRow({
             className="mt-1 flex items-start gap-1.5 break-words text-xs text-semantic-warning"
             data-testid={`hakedis-line-reason-${line.key}`}
           >
-            <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span>{reasonSentence(t, line.reason_key, line.reason_params, context, line.reason_text[0])}</span>
           </p>
         )}
@@ -284,7 +283,7 @@ function SummaryRow({
             )}
             data-testid={`hakedis-line-finding-${line.key}`}
           >
-            <ShieldX size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <ShieldX size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span>{finding.message}</span>
           </p>
         ))}

@@ -141,7 +141,7 @@ export function EvidenceThreadPanel({ projectId, subjectType, subjectId, classNa
           <Layers className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('reconstruct.title', { defaultValue: 'Evidence thread' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -205,7 +205,7 @@ export function EvidenceThreadPanel({ projectId, subjectType, subjectId, classNa
           </div>
           {pack.sections.map((section) => (
             <div key={section.name} className="space-y-1.5">
-              <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <div className="oe-overline">
                 {/* Engine section / kind tokens are stable: translate them by
                     token and let an unknown one fall back to a humanized form. */}
                 {t(`claims_evidence.section.${section.name}`, { defaultValue: humanize(section.name) })}

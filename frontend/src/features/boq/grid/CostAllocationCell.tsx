@@ -69,7 +69,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
     });
     content = (
       <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-semantic-error">
-        <AlertTriangle size={11} className="shrink-0" />
+        <AlertTriangle size={12} className="shrink-0" />
         <span className="truncate font-mono">{view.label}</span>
       </span>
     );
@@ -80,7 +80,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
     });
     content = (
       <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-semantic-warning">
-        <AlertTriangle size={11} className="shrink-0" />
+        <AlertTriangle size={12} className="shrink-0" />
         <span className="shrink-0 font-medium">{t('boq.cost_allocation.suspense_cell', { defaultValue: 'No account' })}</span>
         <span className="truncate font-mono text-content-tertiary">{view.label}</span>
       </span>
@@ -104,7 +104,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
     const tone = !view.valid ? 'text-semantic-error' : view.suspense ? 'text-semantic-warning' : 'text-oe-blue';
     content = (
       <span className={`inline-flex items-center gap-1 text-2xs ${tone}`}>
-        {warn ? <AlertTriangle size={11} /> : <GitFork size={11} />}
+        {warn ? <AlertTriangle size={12} /> : <GitFork size={12} />}
         {t('boq.cost_allocation.split_cell', { defaultValue: 'Split ({{parts}})', parts: view.parts })}
       </span>
     );

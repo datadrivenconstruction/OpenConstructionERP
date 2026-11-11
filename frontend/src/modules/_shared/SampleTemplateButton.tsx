@@ -105,7 +105,7 @@ export function SampleTemplateButton({ template }: { template: CountryTemplate }
         />
       </button>
       {open && (
-        <div className="px-3 pb-3 pt-1 space-y-2.5">
+        <div className="px-3 pb-3 pt-1 space-y-2">
           <p className="text-2xs text-content-tertiary leading-relaxed">
             {t('exchange.layout_help', {
               defaultValue:

@@ -150,7 +150,7 @@ export function ComplianceGate({
     if (gateQ.isLoading) {
       return (
         <div className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-secondary px-4 py-3">
-          <RefreshCw size={18} className="animate-spin text-content-tertiary" />
+          <RefreshCw size={20} className="animate-spin text-content-tertiary" />
           <p className="text-sm text-content-secondary">
             {t('contracts.compliance.checking', {
               defaultValue: 'Running compliance checks…',
@@ -162,7 +162,7 @@ export function ComplianceGate({
     if (gateQ.isError) {
       return (
         <div className="flex items-center gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3">
-          <AlertTriangle size={18} className="text-semantic-warning" />
+          <AlertTriangle size={20} className="text-semantic-warning" />
           <p className="text-sm text-semantic-warning">
             {t('contracts.compliance.check_failed', {
               defaultValue:
@@ -442,12 +442,12 @@ function ViolationGroup({
             <div className="flex items-start gap-2">
               {isError ? (
                 <ShieldX
-                  size={15}
+                  size={16}
                   className="mt-0.5 shrink-0 text-semantic-error"
                 />
               ) : (
                 <AlertTriangle
-                  size={15}
+                  size={16}
                   className="mt-0.5 shrink-0 text-semantic-warning"
                 />
               )}

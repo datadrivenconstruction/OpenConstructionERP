@@ -132,7 +132,7 @@ const KPICard = memo(function KPICard({
       <div className={`absolute top-0 start-0 end-0 h-1 ${accentColor === 'green' ? 'bg-semantic-success' : accentColor === 'amber' ? 'bg-semantic-warning' : accentColor === 'rose' ? 'bg-semantic-error' : 'bg-oe-blue'}`} />
       <div className="p-5 pt-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
+          <span className="oe-overline">
             {label}
           </span>
           <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${
@@ -494,57 +494,57 @@ const BudgetTable = memo(function BudgetTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table w-full">
         <thead>
-          <tr className="border-b-2 border-border">
-            <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <tr>
+            <th className="pr-4">
               {t('costmodel.name_category', { defaultValue: 'Category' })}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.planned', 'Planned')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.committed', 'Committed')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.actual', 'Actual')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.forecast', 'Forecast')}
             </th>
-            <th className="py-3 px-2 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary" style={{ minWidth: 80 }}>
+            <th className="text-center" style={{ minWidth: 80 }}>
               {t('costmodel.spent_pct', { defaultValue: 'Spent %' })}
             </th>
-            <th className="py-3 pl-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="pl-4 text-right">
               {t('costmodel.variance', 'Variance')}
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {safeCategories.map((cat) => {
             const spentPct = cat.planned > 0 ? Math.min(100, (cat.actual / cat.planned) * 100) : 0;
             const spentOver = cat.planned > 0 && cat.actual > cat.planned;
             return (
-              <tr key={cat.category} className="transition-colors hover:bg-surface-secondary/50">
-                <td className="py-3.5 pr-4 font-medium text-content-primary">
+              <tr key={cat.category}>
+                <td className="pr-4 font-medium">
                   <span>{categoryLabels[cat.category] || cat.category}</span>
                   {cat.category && categoryLabels[cat.category] && cat.category !== categoryLabels[cat.category] && (
                     <span className="block text-2xs text-content-tertiary font-normal">{cat.category}</span>
                   )}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(cat.planned, currency)}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(cat.committed, currency)}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(cat.actual, currency)}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(cat.forecast, currency)}
                 </td>
-                <td className="py-3.5 px-2">
+                <td>
                   <div className="flex flex-col items-center gap-0.5">
                     <span className={`text-2xs font-semibold tabular-nums ${spentOver ? 'text-semantic-error' : 'text-content-secondary'}`}>
                       {fmtPercent(spentPct, 0)}
@@ -568,23 +568,23 @@ const BudgetTable = memo(function BudgetTable({
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border font-semibold">
-            <td className="py-3.5 pr-4 text-content-primary">
+          <tr>
+            <td className="pr-4">
               {t('costmodel.total', 'Total')}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(totals.planned, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(totals.committed, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(totals.actual, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(totals.forecast, currency)}
             </td>
-            <td className="py-3.5 px-2">
+            <td>
               {totals.planned > 0 && (
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="text-2xs font-semibold tabular-nums text-content-primary">
@@ -665,7 +665,7 @@ const EVMKPIBox = memo(function EVMKPIBox({
 
   return (
     <div className={`flex-1 min-w-[140px] rounded-xl p-4 ${bgClass}`}>
-      <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+      <div className="oe-overline mb-1">
         {label}
       </div>
       <div className={`text-xl font-semibold tabular-nums ${colorClass}`}>{displayValue}</div>
@@ -780,7 +780,7 @@ const EVMDashboard = memo(function EVMDashboard({
     return (
       <Card>
         <div className="flex items-start justify-between gap-4">
-          <h3 className="text-lg font-semibold text-content-primary truncate">
+          <h3 className="oe-section-title truncate">
             {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
             <span className="ml-1.5 inline-flex align-middle cursor-help" title={evmTooltip}>
               <Activity size={14} className="text-content-tertiary" />
@@ -808,7 +808,7 @@ const EVMDashboard = memo(function EVMDashboard({
   return (
     <Card>
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-lg font-semibold text-content-primary truncate">
+        <h3 className="oe-section-title truncate">
           {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
           <span className="ml-1.5 inline-flex align-middle cursor-help" title={evmTooltip}>
             <Activity size={14} className="text-content-tertiary" />
@@ -1153,19 +1153,19 @@ function BudgetLinesEditor({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table w-full">
         <thead>
-          <tr className="border-b-2 border-border">
-            <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <tr>
+            <th className="pr-4">
               {t('costmodel.bl_category', { defaultValue: 'Category' })}
             </th>
-            <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th>
               {t('costmodel.bl_description', { defaultValue: 'Description' })}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.planned', 'Planned')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               <span
                 className="inline-flex items-center gap-1 cursor-help"
                 title={t('costmodel.bl_earned_hint', {
@@ -1173,27 +1173,27 @@ function BudgetLinesEditor({
                 })}
               >
                 {t('costmodel.bl_earned', 'Earned')}
-                <Activity size={11} className="shrink-0 text-content-tertiary" />
+                <Activity size={12} className="shrink-0 text-content-tertiary" />
               </span>
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.committed', 'Committed')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.actual', 'Actual')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.forecast', 'Forecast')}
             </th>
-            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+            <th className="text-right">
               {t('costmodel.variance', 'Variance')}
             </th>
-            <th className="py-3 pl-4 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary w-20">
+            <th className="pl-4 text-center w-20">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {budgetLines.map((line) => {
             const isEditing = editingId === line.id;
             const variance = line.planned_amount - line.forecast_amount;
@@ -1206,25 +1206,25 @@ function BudgetLinesEditor({
               return (
                 <Fragment key={line.id}>
                 <tr className="bg-oe-blue-subtle/10">
-                  <td className="py-2 pr-4">
+                  <td className="pr-4">
                     <input
                       value={editForm.category}
                       onChange={(e) =>
                         setEditForm((f) => f && { ...f, category: e.target.value })
                       }
-                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input w-full"
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td>
                     <input
                       value={editForm.description}
                       onChange={(e) =>
                         setEditForm((f) => f && { ...f, description: e.target.value })
                       }
-                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input w-full"
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td>
                     <input
                       type="number"
                       step="0.01"
@@ -1234,23 +1234,23 @@ function BudgetLinesEditor({
                           f && { ...f, planned_amount: parseFloat(e.target.value) || 0 },
                         )
                       }
-                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input w-full text-right tabular-nums"
                     />
                   </td>
                   {/* Earned value is system-maintained (field progress), not editable. */}
                   <td
-                    className="py-2 px-4 text-right tabular-nums text-content-tertiary cursor-help"
+                    className="text-right tabular-nums text-content-tertiary cursor-help"
                     title={earnedHint}
                   >
                     {earned == null ? '-' : formatCurrency(earned, currency)}
                   </td>
                   {editForm.committed_from_documents ? (
-                    <td className="py-2 px-4 text-right tabular-nums text-content-tertiary">
+                    <td className="text-right tabular-nums text-content-tertiary">
                       {formatCurrency(editForm.committed_amount, currency)}
                       <span className="block text-2xs">{t('costmodel.bl_committed_from_documents', { defaultValue: 'From purchase orders and contracts' })}</span>
                     </td>
                   ) : (
-                    <td className="py-2 px-4">
+                    <td>
                       <input
                         type="number"
                         step="0.01"
@@ -1260,11 +1260,11 @@ function BudgetLinesEditor({
                             f && { ...f, committed_amount: parseFloat(e.target.value) || 0 },
                           )
                         }
-                        className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                        className="oe-input w-full text-right tabular-nums"
                       />
                     </td>
                   )}
-                  <td className="py-2 px-4">
+                  <td>
                     <input
                       type="number"
                       step="0.01"
@@ -1274,10 +1274,10 @@ function BudgetLinesEditor({
                           f && { ...f, actual_amount: parseFloat(e.target.value) || 0 },
                         )
                       }
-                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input w-full text-right tabular-nums"
                     />
                   </td>
-                  <td className="py-2 px-4">
+                  <td>
                     <input
                       type="number"
                       step="0.01"
@@ -1287,13 +1287,13 @@ function BudgetLinesEditor({
                           f && { ...f, forecast_amount: parseFloat(e.target.value) || 0 },
                         )
                       }
-                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input w-full text-right tabular-nums"
                     />
                   </td>
-                  <td className="py-2 px-4 text-right tabular-nums text-content-tertiary">
+                  <td className="text-right tabular-nums text-content-tertiary">
                     {formatCurrency(editForm.planned_amount - editForm.forecast_amount, currency)}
                   </td>
-                  <td className="py-2 pl-4">
+                  <td className="pl-4">
                     <div className="flex items-center justify-center gap-1">
                       <button
                         onClick={saveEditing}
@@ -1319,7 +1319,7 @@ function BudgetLinesEditor({
                   </td>
                 </tr>
                 <tr className="bg-oe-blue-subtle/10">
-                  <td colSpan={9} className="px-4 pb-3">
+                  <td colSpan={9} className="pb-3">
                     <BudgetLineThresholdEditor
                       lineId={line.id}
                       initialThresholdPct={line.overrun_alert_threshold_pct}
@@ -1333,10 +1333,10 @@ function BudgetLinesEditor({
             return (
               <tr
                 key={line.id}
-                className="transition-colors hover:bg-surface-secondary/50 group cursor-pointer"
+                className="group cursor-pointer"
                 onDoubleClick={() => startEditing(line)}
               >
-                <td className="py-3.5 pr-4 font-medium text-content-primary">
+                <td className="pr-4 font-medium">
                   <span className="flex items-center gap-1.5">
                     {line.category}
                     {parseThreshold(line.overrun_alert_threshold_pct) > 0 && (
@@ -1349,14 +1349,14 @@ function BudgetLinesEditor({
                     )}
                   </span>
                 </td>
-                <td className="py-3.5 px-4 text-content-secondary text-xs">
+                <td className="text-content-secondary">
                   {line.description || '-'}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.planned_amount, currency)}
                 </td>
                 <td
-                  className="py-3.5 px-4 text-right tabular-nums text-content-secondary cursor-help"
+                  className="text-right tabular-nums text-content-secondary cursor-help"
                   title={earnedHint}
                 >
                   {progressId === line.id && line.boq_position_id ? (
@@ -1374,7 +1374,7 @@ function BudgetLinesEditor({
                           if (e.key === 'Escape') setProgressId(null);
                         }}
                         placeholder="%"
-                        className="h-7 w-16 rounded border border-oe-blue/40 bg-surface-primary px-1.5 text-right text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                        className="oe-input-sm w-16 text-right tabular-nums"
                         aria-label={t('costmodel.record_progress', { defaultValue: 'Record progress' })}
                       />
                       <button
@@ -1384,9 +1384,9 @@ function BudgetLinesEditor({
                         title={t('common.save', { defaultValue: 'Save' })}
                       >
                         {progressMutation.isPending ? (
-                          <Loader2 size={13} className="animate-spin" />
+                          <Loader2 size={14} className="animate-spin" />
                         ) : (
-                          <Check size={13} />
+                          <Check size={14} />
                         )}
                       </button>
                       <button
@@ -1394,23 +1394,23 @@ function BudgetLinesEditor({
                         className="flex h-7 w-7 items-center justify-center rounded-md text-semantic-error hover:bg-semantic-error-bg transition-colors"
                         title={t('common.cancel', { defaultValue: 'Cancel' })}
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </span>
                   ) : (
                     (earned == null ? '-' : formatCurrency(earned, currency))
                   )}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.committed_amount, currency)}
                   {line.committed_from_documents && (
                     <span className="block text-2xs text-content-tertiary">{t('costmodel.bl_committed_from_documents', { defaultValue: 'From purchase orders and contracts' })}</span>
                   )}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.actual_amount, currency)}
                 </td>
-                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.forecast_amount, currency)}
                 </td>
                 <td
@@ -1419,7 +1419,7 @@ function BudgetLinesEditor({
                   {variance > 0 ? '+' : ''}
                   {formatCurrency(variance, currency)}
                 </td>
-                <td className="py-3.5 pl-4 text-center">
+                <td className="pl-4 text-center">
                   <span className="flex items-center justify-center gap-0.5">
                     {line.boq_position_id && (
                       <button
@@ -1430,7 +1430,7 @@ function BudgetLinesEditor({
                         className="invisible group-hover:visible flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
                         title={t('costmodel.record_progress', { defaultValue: 'Record progress' })}
                       >
-                        <Activity size={13} />
+                        <Activity size={14} />
                       </button>
                     )}
                     <button
@@ -1438,7 +1438,7 @@ function BudgetLinesEditor({
                       className="invisible group-hover:visible flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
                       title={t('common.edit', { defaultValue: 'Edit' })}
                     >
-                      <Pencil size={13} />
+                      <Pencil size={14} />
                     </button>
                   </span>
                 </td>
@@ -1447,23 +1447,23 @@ function BudgetLinesEditor({
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border font-semibold">
-            <td className="py-3.5 pr-4 text-content-primary" colSpan={2}>
+          <tr>
+            <td className="pr-4" colSpan={2}>
               {t('costmodel.total', 'Total')}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(lineTotal.planned, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {lineTotal.hasEarned ? formatCurrency(lineTotal.earned, currency) : '-'}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(lineTotal.committed, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(lineTotal.actual, currency)}
             </td>
-            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+            <td className="text-right tabular-nums">
               {formatCurrency(lineTotal.forecast, currency)}
             </td>
             <td
@@ -1551,48 +1551,48 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
       <CardHeader title={t('costmodel.snapshots_title', { defaultValue: 'Cost Snapshots' })} />
       <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table w-full">
             <thead>
-              <tr className="border-b border-border-light">
-                <th className="py-2 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              <tr>
+                <th className="pr-3">
                   {t('costmodel.period', { defaultValue: 'Period' })}
                 </th>
-                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="text-right">
                   {t('costmodel.planned', 'Planned')}
                 </th>
-                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="text-right">
                   {t('costmodel.snapshot_ev', { defaultValue: 'EV' })}
                 </th>
-                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="text-right">
                   {t('costmodel.snapshot_ac', { defaultValue: 'AC' })}
                 </th>
-                <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="text-center">
                   {t('costmodel.snapshot_spi', { defaultValue: 'SPI' })}
                 </th>
-                <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="text-center">
                   {t('costmodel.snapshot_cpi', { defaultValue: 'CPI' })}
                 </th>
-                <th className="py-2 pl-3 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                <th className="pl-3">
                   {t('costmodel.notes', { defaultValue: 'Notes' })}
                 </th>
-                <th className="py-2 pl-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary w-12">
+                <th className="pl-3 text-center w-12">
                   {t('common.actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {snapshots.map((snap) => (
-                <tr key={snap.id} className="hover:bg-surface-secondary/50 transition-colors group">
-                  <td className="py-2.5 pr-3 font-mono text-xs text-content-primary">
+                <tr key={snap.id} className="group">
+                  <td className="pr-3 font-mono">
                     {snap.period}
                   </td>
-                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                  <td className="text-right tabular-nums text-content-secondary">
                     {formatCompact(snap.planned_cost, currency)}
                   </td>
-                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                  <td className="text-right tabular-nums text-content-secondary">
                     {formatCompact(snap.earned_value, currency)}
                   </td>
-                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                  <td className="text-right tabular-nums text-content-secondary">
                     {formatCompact(snap.actual_cost, currency)}
                   </td>
                   <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.spi >= 1 ? 'text-semantic-success' : 'text-semantic-error'}`}>
@@ -1601,13 +1601,13 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
                   <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.cpi >= 1 ? 'text-semantic-success' : 'text-semantic-error'}`}>
                     {fmtFixed(snap.cpi, 2)}
                   </td>
-                  <td className="py-2.5 pl-3 min-w-[160px]">
+                  <td className="pl-3 min-w-[160px]">
                     {editingNotes === snap.id ? (
                       <div className="flex items-center gap-1">
                         <input
                           value={notesValue}
                           onChange={(e) => setNotesValue(e.target.value)}
-                          className="h-7 flex-1 rounded border border-oe-blue/40 bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="oe-input-sm flex-1"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -1646,13 +1646,13 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
                           {snap.notes || t('costmodel.click_to_add_notes', { defaultValue: 'Click to add notes...' })}
                         </span>
                         <Pencil
-                          size={11}
+                          size={12}
                           className="invisible group-hover/notes:visible shrink-0 text-content-quaternary"
                         />
                       </div>
                     )}
                   </td>
-                  <td className="py-2.5 pl-3 text-center">
+                  <td className="pl-3 text-center">
                     <button
                       type="button"
                       onClick={() => handleDeleteSnapshot(snap.id)}
@@ -1663,9 +1663,9 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
                     >
                       {deleteSnapshotMutation.isPending &&
                       deleteSnapshotMutation.variables === snap.id ? (
-                        <Loader2 size={13} className="animate-spin" />
+                        <Loader2 size={14} className="animate-spin" />
                       ) : (
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       )}
                     </button>
                   </td>
@@ -1908,7 +1908,7 @@ function WhatIfPanel({
                 </div>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div>
-                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                    <div className="oe-overline mb-0.5">
                       {t('costmodel.whatif_original_bac', { defaultValue: 'Original BAC' })}
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-content-primary">
@@ -1916,7 +1916,7 @@ function WhatIfPanel({
                     </div>
                   </div>
                   <div>
-                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                    <div className="oe-overline mb-0.5">
                       {t('costmodel.whatif_adjusted_bac', { defaultValue: 'Adjusted BAC' })}
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-content-primary">
@@ -1924,7 +1924,7 @@ function WhatIfPanel({
                     </div>
                   </div>
                   <div>
-                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                    <div className="oe-overline mb-0.5">
                       {t('costmodel.whatif_adjusted_eac', { defaultValue: 'Adjusted EAC' })}
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-content-primary">
@@ -1932,7 +1932,7 @@ function WhatIfPanel({
                     </div>
                   </div>
                   <div>
-                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                    <div className="oe-overline mb-0.5">
                       {t('costmodel.whatif_impact', { defaultValue: 'Impact' })}
                     </div>
                     <div
@@ -2066,7 +2066,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
                   { label: 'P95', value: result.p95, color: 'text-semantic-error' },
                 ].map((item) => (
                   <div key={item.label} className="rounded-xl border border-border-light bg-surface-secondary/50 px-3 py-2.5">
-                    <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">{item.label}</p>
+                    <p className="oe-overline">{item.label}</p>
                     <p className={`text-lg font-semibold tabular-nums ${item.color}`}>{fmt(item.value)}</p>
                   </div>
                 ))}
@@ -2074,7 +2074,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
 
               {/* Histogram */}
               <div>
-                <h4 className="text-xs font-medium text-content-secondary mb-2">
+                <h4 className="oe-card-title mb-2">
                   {t('costmodel.mc_distribution', { defaultValue: 'Cost Distribution' })}
                 </h4>
                 <div className="flex items-end gap-1 h-32">
@@ -2244,14 +2244,14 @@ function FiveDDashboard({ project }: { project: Project }) {
                 <DollarSign size={24} />
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-success-bg text-semantic-success">
-                <LineChart size={18} />
+                <LineChart size={20} />
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
-                <Gauge size={18} />
+                <Gauge size={20} />
               </div>
             </div>
 
-            <h2 className="text-xl font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('costmodel.empty_title', { defaultValue: '5D Cost Model' })}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-content-secondary">
@@ -2293,7 +2293,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                       <select
                         value={selectedBoqId}
                         onChange={(e) => setSelectedBoqId(e.target.value)}
-                        className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm"
+                        className="oe-select"
                       >
                         {boqs.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                       </select>
@@ -2327,7 +2327,7 @@ function FiveDDashboard({ project }: { project: Project }) {
         <Card padding="md">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={16} className="text-semantic-success" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('costmodel.workflow', { defaultValue: 'Cost Model Active' })}
             </h3>
           </div>
@@ -2413,14 +2413,14 @@ function FiveDDashboard({ project }: { project: Project }) {
             label={t('costmodel.total_budget', 'Total Budget')}
             amount={dashboard.total_budget}
             currency={currency}
-            icon={<DollarSign size={18} />}
+            icon={<DollarSign size={20} />}
           />
           <KPICard
             label={t('costmodel.committed', 'Committed')}
             amount={dashboard.total_committed}
             currency={currency}
             variance={dashboard.total_budget - dashboard.total_committed}
-            icon={<Banknote size={18} />}
+            icon={<Banknote size={20} />}
             accentColor="green"
           />
           <KPICard
@@ -2428,7 +2428,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             amount={dashboard.total_actual}
             currency={currency}
             variance={dashboard.total_budget - dashboard.total_actual}
-            icon={<TrendingUp size={18} />}
+            icon={<TrendingUp size={20} />}
             accentColor="amber"
           />
           <KPICard
@@ -2436,7 +2436,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             amount={dashboard.total_forecast}
             currency={currency}
             variance={dashboard.total_budget - dashboard.total_forecast}
-            icon={<Activity size={18} />}
+            icon={<Activity size={20} />}
             accentColor="rose"
           />
         </div>
@@ -2456,7 +2456,7 @@ function FiveDDashboard({ project }: { project: Project }) {
       ) : hasBudget ? (
         <Card>
           <div className="flex items-start justify-between gap-4">
-            <h3 className="text-lg font-semibold text-content-primary truncate">
+            <h3 className="oe-section-title truncate">
               {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
               <span className="ml-1.5 inline-flex align-middle cursor-help" title={t('costmodel.evm_tooltip', { defaultValue: 'Earned Value Management compares planned vs actual cost and schedule performance' })}>
                 <Activity size={14} className="text-content-tertiary" />
@@ -2546,7 +2546,7 @@ function FiveDDashboard({ project }: { project: Project }) {
               ) : hasBudget ? (
                 <div className="flex flex-col items-center py-8 text-center">
                   <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-quaternary">
-                    <Gauge size={18} />
+                    <Gauge size={20} />
                   </div>
                   <p className="text-sm font-medium text-content-secondary">
                     {t('costmodel.perf_needs_schedule', { defaultValue: 'Schedule not linked yet' })}
@@ -2565,7 +2565,7 @@ function FiveDDashboard({ project }: { project: Project }) {
               ) : (
                 <div className="flex flex-col items-center py-8 text-center">
                   <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-quaternary">
-                    <Gauge size={18} />
+                    <Gauge size={20} />
                   </div>
                   <p className="text-xs text-content-tertiary">
                     {t('costmodel.perf_needs_budget', { defaultValue: 'Generate a budget to see performance metrics.' })}
@@ -2662,7 +2662,7 @@ function FiveDDashboard({ project }: { project: Project }) {
       <div>
         <div className="mb-3 flex items-center gap-2">
           <Network size={16} className="text-oe-blue" />
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('costmodel.spine.section_title', { defaultValue: 'Cost Spine' })}
           </h2>
           <span className="rounded-full bg-oe-blue-subtle/60 px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
@@ -2700,7 +2700,7 @@ const ProjectCard = memo(function ProjectCard({
           {project.name.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-content-primary truncate">
+          <h2 className="oe-card-title truncate">
             {project.name}
           </h2>
           {project.description && (
@@ -2771,7 +2771,7 @@ function HowCostModelConnects() {
   return (
     <CollapsibleSection
       storageKey="costmodel.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('costmodel.flow_title', { defaultValue: 'How the 5D cost model connects' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -3011,7 +3011,7 @@ export function CostModelPage() {
                 <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${feat.color}`}>
                   {feat.icon}
                 </div>
-                <h3 className="text-sm font-semibold text-content-primary">{feat.title}</h3>
+                <h3 className="oe-card-title">{feat.title}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-content-tertiary">{feat.desc}</p>
               </div>
             ))}
@@ -3019,12 +3019,12 @@ export function CostModelPage() {
 
           {/* Prerequisites callout */}
           <div className="mt-6 flex items-start gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-4">
-            <Lock size={18} className="mt-0.5 shrink-0 text-semantic-warning" />
+            <Lock size={20} className="mt-0.5 shrink-0 text-semantic-warning" />
             <div>
               <p className="text-sm font-medium text-semantic-warning">
                 {t('costmodel.prereq_title', { defaultValue: 'Getting Started' })}
               </p>
-              <p className="mt-0.5 text-xs text-amber-700/80 dark:text-amber-400/70">
+              <p className="mt-0.5 text-xs text-semantic-warning">
                 {t('costmodel.prereq_desc', { defaultValue: 'Create a project and build your BOQ estimate first. Once your BOQ is ready, generate the project budget to unlock the full 5D cost model with all analytics capabilities.' })}
               </p>
             </div>

@@ -129,23 +129,23 @@ export function ClashRuleEditor({
         <div className="space-y-3">
           <table
             id={tableId}
-            className="w-full text-sm border-collapse"
+            className="oe-table w-full"
             data-testid="clash-rule-editor-table"
           >
             <thead>
-              <tr className="text-left text-content-tertiary text-xs uppercase">
-                <th className="px-2 py-2">{t('clash.rules.disc_a', { defaultValue: 'Discipline A' })}</th>
-                <th className="px-2 py-2">{t('clash.rules.disc_b', { defaultValue: 'Discipline B' })}</th>
-                <th className="px-2 py-2 w-32">
+              <tr className="text-left">
+                <th>{t('clash.rules.disc_a', { defaultValue: 'Discipline A' })}</th>
+                <th>{t('clash.rules.disc_b', { defaultValue: 'Discipline B' })}</th>
+                <th className="w-32">
                   {t('clash.rules.tolerance', { defaultValue: 'Tolerance (m)' })}
                 </th>
-                <th className="px-2 py-2 w-28">
+                <th className="w-28">
                   {t('clash.rules.severity', { defaultValue: 'Severity' })}
                 </th>
-                <th className="px-2 py-2 w-20 text-center">
+                <th className="w-20 text-center">
                   {t('clash.rules.enabled', { defaultValue: 'Enabled' })}
                 </th>
-                <th className="px-2 py-2 w-12" />
+                <th className="w-12" />
               </tr>
             </thead>
             <tbody>
@@ -153,7 +153,7 @@ export function ClashRuleEditor({
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-2 py-6 text-center text-content-tertiary"
+                    className="text-center text-content-tertiary"
                   >
                     {t('clash.rules.empty', {
                       defaultValue:
@@ -163,14 +163,14 @@ export function ClashRuleEditor({
                 </tr>
               ) : (
                 draft.map((r, i) => (
-                  <tr key={r.id} className="border-t border-border">
-                    <td className="px-2 py-2">
+                  <tr key={r.id}>
+                    <td>
                       <input
                         type="text"
                         aria-label={t('clash.rules.disc_a', {
                           defaultValue: 'Discipline A',
                         })}
-                        className="w-full rounded border border-border px-2 py-1 bg-surface-primary"
+                        className="oe-input-sm w-full"
                         value={r.discipline_a}
                         onChange={(e) =>
                           setDraft((d) =>
@@ -183,13 +183,13 @@ export function ClashRuleEditor({
                         }
                       />
                     </td>
-                    <td className="px-2 py-2">
+                    <td>
                       <input
                         type="text"
                         aria-label={t('clash.rules.disc_b', {
                           defaultValue: 'Discipline B',
                         })}
-                        className="w-full rounded border border-border px-2 py-1 bg-surface-primary"
+                        className="oe-input-sm w-full"
                         value={r.discipline_b}
                         onChange={(e) =>
                           setDraft((d) =>
@@ -202,7 +202,7 @@ export function ClashRuleEditor({
                         }
                       />
                     </td>
-                    <td className="px-2 py-2">
+                    <td>
                       <input
                         type="number"
                         min={0}
@@ -211,7 +211,7 @@ export function ClashRuleEditor({
                         aria-label={t('clash.rules.tolerance', {
                           defaultValue: 'Tolerance (m)',
                         })}
-                        className="w-full rounded border border-border px-2 py-1 bg-surface-primary text-right"
+                        className="oe-input-sm w-full text-right"
                         value={r.tolerance_m}
                         onChange={(e) =>
                           setDraft((d) =>
@@ -230,12 +230,12 @@ export function ClashRuleEditor({
                         }
                       />
                     </td>
-                    <td className="px-2 py-2">
+                    <td>
                       <select
                         aria-label={t('clash.rules.severity', {
                           defaultValue: 'Severity',
                         })}
-                        className="w-full rounded border border-border px-2 py-1 bg-surface-primary"
+                        className="oe-select-sm w-full"
                         value={r.severity_override ?? ''}
                         onChange={(e) =>
                           setDraft((d) =>
@@ -267,7 +267,7 @@ export function ClashRuleEditor({
                         <option value="low">low</option>
                       </select>
                     </td>
-                    <td className="px-2 py-2 text-center">
+                    <td className="text-center">
                       <input
                         type="checkbox"
                         aria-label={t('clash.rules.enabled', {
@@ -283,7 +283,7 @@ export function ClashRuleEditor({
                         }
                       />
                     </td>
-                    <td className="px-2 py-2">
+                    <td>
                       <button
                         type="button"
                         onClick={() =>

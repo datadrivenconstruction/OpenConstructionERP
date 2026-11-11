@@ -16,7 +16,7 @@ export const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
 export const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-y';
+  'oe-textarea w-full resize-y';
 
 export const labelCls = 'block text-sm font-medium text-content-primary mb-1.5';
 
@@ -84,7 +84,7 @@ export function SectionToolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 className="flex items-center gap-2 text-base font-semibold text-content-primary">
+      <h2 className="oe-section-title flex items-center gap-2">
         {title}
         {count !== undefined && (
           <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-normal text-content-tertiary">

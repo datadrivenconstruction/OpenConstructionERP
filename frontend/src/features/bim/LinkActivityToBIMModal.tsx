@@ -167,7 +167,7 @@ export default function LinkActivityToBIMModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -179,8 +179,8 @@ export default function LinkActivityToBIMModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-emerald-600" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <Calendar size={16} className="text-semantic-success" />
+            <h2 className="oe-card-title">
               {t('bim.link_act_title', { defaultValue: 'Link a schedule activity' })}
             </h2>
             <span className="text-2xs text-content-tertiary">
@@ -205,7 +205,7 @@ export default function LinkActivityToBIMModal({
         <div className="px-5 py-3 border-b border-border-light shrink-0">
           <div className="relative">
             <Search
-              size={13}
+              size={14}
               className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
             />
             <input
@@ -216,7 +216,7 @@ export default function LinkActivityToBIMModal({
                 defaultValue: 'Search activities by name…',
               })}
               autoFocus
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input w-full ps-8 pe-3"
             />
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function LinkActivityToBIMModal({
                       type="button"
                       onClick={() => linkMut.mutate(act)}
                       disabled={linkMut.isPending}
-                      className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-start hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-transparent hover:border-emerald-300/50 disabled:opacity-50 transition-colors"
+                      className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-start hover:bg-semantic-success-bg border border-transparent hover:border-semantic-success/50 disabled:opacity-50 transition-colors"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-medium text-content-primary truncate">
@@ -273,13 +273,13 @@ export default function LinkActivityToBIMModal({
                             <span>· {act.percent_complete}%</span>
                           )}
                           {linkedCount > 0 && (
-                            <span className="text-emerald-700 dark:text-emerald-400">
+                            <span className="text-semantic-success">
                               · {linkedCount} linked
                             </span>
                           )}
                         </div>
                       </div>
-                      <Link2 size={12} className="text-emerald-600 shrink-0" />
+                      <Link2 size={12} className="text-semantic-success shrink-0" />
                     </button>
                   </li>
                 );

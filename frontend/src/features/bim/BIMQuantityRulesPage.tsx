@@ -509,9 +509,9 @@ function formToFormulaFields(form: RuleFormState, numberLocale = 'en'): RuleForm
 
 /** Confidence pill colour by bucket. */
 const CONFIDENCE_STYLES: Record<'high' | 'medium' | 'low', string> = {
-  high: 'border-emerald-400/50 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
-  medium: 'border-amber-400/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
-  low: 'border-red-400/50 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
+  high: 'border-semantic-success/50 bg-semantic-success-bg text-semantic-success',
+  medium: 'border-semantic-warning/50 bg-semantic-warning-bg text-semantic-warning',
+  low: 'border-semantic-error/50 bg-semantic-error-bg text-semantic-error',
 };
 
 /** Renders the outcome of a sandbox dry-run: roll-up counters, a confidence
@@ -539,10 +539,10 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
     result.sidecar !== 'full' &&
     (matched === 0 || result.skips.some((s) => s.reason === 'missing_property')) ? (
       <p
-        className="flex items-start gap-1.5 rounded-md bg-amber-50 px-2 py-1.5 text-2xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+        className="flex items-start gap-1.5 rounded-md bg-semantic-warning-bg px-2 py-1.5 text-2xs text-semantic-warning"
         data-testid="rule-test-capped-properties"
       >
-        <AlertCircle size={11} className="mt-0.5 shrink-0" />
+        <AlertCircle size={12} className="mt-0.5 shrink-0" />
         {t('bim_rules.sandbox_capped_properties', {
           defaultValue:
             'This model only has the 30 properties per element kept in the database, because its full property table was rebuilt or is missing. Re-import the model to get every property back.',
@@ -569,7 +569,7 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
   }
 
   return (
-    <div className="mt-3 space-y-2.5">
+    <div className="mt-3 space-y-2">
       {cappedNotice}
       <div className="flex flex-wrap items-center gap-2 text-2xs">
         <span className="rounded-md bg-oe-blue/10 px-2 py-0.5 font-medium text-oe-blue" data-testid="rule-test-matched">
@@ -579,7 +579,7 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
           })}
         </span>
         {skipped > 0 && (
-          <span className="rounded-md bg-amber-100 px-2 py-0.5 font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+          <span className="rounded-md bg-semantic-warning-bg px-2 py-0.5 font-medium text-semantic-warning">
             {t('bim_rules.sandbox_skipped', {
               defaultValue: '{{n}} skipped (no quantity)',
               n: skipped,
@@ -614,20 +614,20 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
       </div>
 
       <div className="max-h-44 overflow-y-auto rounded-md border border-border-light">
-        <table className="w-full text-left text-2xs">
-          <thead className="sticky top-0 bg-surface-secondary text-content-secondary">
+        <table className="oe-table-compact w-full text-2xs">
+          <thead className="sticky top-0">
             <tr>
-              <th className="px-2 py-1 font-medium">
+              <th>
                 {t('bim_rules.col_element_type', { defaultValue: 'Type' })}
               </th>
-              <th className="px-2 py-1 font-medium">
+              <th>
                 {t('bim_rules.sandbox_col_name', { defaultValue: 'Name' })}
               </th>
-              <th className="px-2 py-1 text-right font-medium">
+              <th className="text-right">
                 {t('bim_rules.col_raw', { defaultValue: 'Raw' })}
                 {displayUnit ? ` (${displayUnit})` : ''}
               </th>
-              <th className="px-2 py-1 text-right font-medium">
+              <th className="text-right">
                 {t('bim_rules.col_adjusted', { defaultValue: 'Adjusted' })}
                 {displayUnit ? ` (${displayUnit})` : ''}
               </th>
@@ -639,12 +639,12 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
                 key={`${m.element_id}-${idx}`}
                 className="border-t border-border-light text-content-primary"
               >
-                <td className="truncate px-2 py-1">{m.element_type}</td>
-                <td className="max-w-[160px] truncate px-2 py-1 text-content-tertiary">
+                <td className="truncate">{m.element_type}</td>
+                <td className="max-w-[160px] truncate text-content-tertiary">
                   {m.name || m.stable_id || m.element_id}
                 </td>
-                <td className="px-2 py-1 text-right tabular-nums">{fmtFixed(conv(m.raw_quantity), 3)}</td>
-                <td className="px-2 py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">{fmtFixed(conv(m.raw_quantity), 3)}</td>
+                <td className="text-right tabular-nums">
                   {fmtFixed(conv(m.adjusted_quantity), 3)}
                 </td>
               </tr>
@@ -932,7 +932,7 @@ function RuleEditorModal({
         : t('bim_rules.new_rule', { defaultValue: 'New rule' });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -941,8 +941,8 @@ function RuleEditorModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
           <div className="flex items-center gap-2">
-            <SlidersHorizontal size={18} className="text-oe-blue" />
-            <h2 className="text-base font-semibold text-content-primary">{modeTitle}</h2>
+            <SlidersHorizontal size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">{modeTitle}</h2>
           </div>
           <button
             type="button"
@@ -961,10 +961,10 @@ function RuleEditorModal({
             <div>
               <label
                 htmlFor="rule-name"
-                className="mb-1 block text-xs font-medium text-content-secondary"
+                className="oe-label"
               >
                 {t('bim_rules.field_name', { defaultValue: 'Name' })}
-                <span className="ml-0.5 text-red-500">*</span>
+                <span className="ml-0.5 text-semantic-error">*</span>
               </label>
               <input
                 id="rule-name"
@@ -975,20 +975,20 @@ function RuleEditorModal({
                 placeholder={t('bim_rules.field_name_placeholder', {
                   defaultValue: 'e.g. Exterior walls - concrete',
                 })}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input w-full"
               />
             </div>
 
             {/* Saved group or Smart View as the element source */}
             <div>
-              <label htmlFor="rule-element-group" className="mb-1 block text-xs font-medium text-content-secondary">
+              <label htmlFor="rule-element-group" className="oe-label">
                 {t('bim_rules.field_element_group', { defaultValue: 'Elements from a saved group or Smart View' })}
               </label>
               <select
                 id="rule-element-group"
                 value={form.element_group_id}
                 onChange={(e) => updateField('element_group_id', e.target.value)}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('bim_rules.element_group_none', { defaultValue: 'None, the filters below select' })}
@@ -1013,7 +1013,7 @@ function RuleEditorModal({
                 })}
               </p>
               {form.element_group_id && !groupsQuery.isLoading && !groupOptions.some((g) => g.id === form.element_group_id) && (
-                <p role="alert" data-testid="rule-element-group-missing" className="mt-1 text-2xs text-red-600">
+                <p role="alert" data-testid="rule-element-group-missing" className="mt-1 text-2xs text-semantic-error">
                   {t('bim_rules.element_group_missing_hint', {
                     defaultValue: 'This group was deleted or belongs to another project. Choose another one or clear it.',
                   })}
@@ -1025,7 +1025,7 @@ function RuleEditorModal({
             <div>
               <label
                 htmlFor="rule-element-type"
-                className="mb-1 block text-xs font-medium text-content-secondary"
+                className="oe-label"
               >
                 {t('bim_rules.field_element_type', { defaultValue: 'Element type filter' })}
               </label>
@@ -1037,7 +1037,7 @@ function RuleEditorModal({
                 placeholder={t('bim_rules.field_element_type_placeholder', {
                   defaultValue: 'Wall*, IfcWall, Curtainwall*',
                 })}
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 font-mono text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input w-full font-mono"
               />
               <p className="mt-1 text-2xs text-content-tertiary">
                 {t('bim_rules.field_element_type_hint', {
@@ -1049,7 +1049,7 @@ function RuleEditorModal({
             {/* Property filter */}
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('bim_rules.field_property_filter', { defaultValue: 'Property filter' })}
                 </label>
                 <button
@@ -1114,7 +1114,7 @@ function RuleEditorModal({
               <div>
                 <label
                   htmlFor="rule-qsrc"
-                  className="mb-1 block text-xs font-medium text-content-secondary"
+                  className="oe-label"
                 >
                   {t('bim_rules.field_quantity_source', { defaultValue: 'Quantity source' })}
                 </label>
@@ -1122,7 +1122,7 @@ function RuleEditorModal({
                   id="rule-qsrc"
                   value={form.quantity_source}
                   onChange={(e) => updateField('quantity_source', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-select w-full"
                 >
                   <option value="area_m2">area_m2</option>
                   <option value="volume_m3">volume_m3</option>
@@ -1138,7 +1138,7 @@ function RuleEditorModal({
               <div>
                 <label
                   htmlFor="rule-unit"
-                  className="mb-1 block text-xs font-medium text-content-secondary"
+                  className="oe-label"
                 >
                   {t('bim_rules.field_unit', { defaultValue: 'Unit' })}
                 </label>
@@ -1147,7 +1147,7 @@ function RuleEditorModal({
                   type="text"
                   value={form.unit}
                   onChange={(e) => updateField('unit', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full"
                 />
               </div>
             </div>
@@ -1156,7 +1156,7 @@ function RuleEditorModal({
               <div>
                 <label
                   htmlFor="rule-custom-src"
-                  className="mb-1 block text-xs font-medium text-content-secondary"
+                  className="oe-label"
                 >
                   {t('bim_rules.field_custom_source', {
                     defaultValue: 'Custom source (e.g. property:net_area)',
@@ -1170,7 +1170,7 @@ function RuleEditorModal({
                   list={sourceListId}
                   autoComplete="off"
                   placeholder="property:net_area"
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 font-mono text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full font-mono"
                 />
               </div>
             )}
@@ -1179,7 +1179,7 @@ function RuleEditorModal({
               <div>
                 <label
                   htmlFor="rule-mult"
-                  className="mb-1 block text-xs font-medium text-content-secondary"
+                  className="oe-label"
                 >
                   {t('bim_rules.field_multiplier', { defaultValue: 'Multiplier' })}
                 </label>
@@ -1190,14 +1190,14 @@ function RuleEditorModal({
                   min="0"
                   value={form.multiplier}
                   onChange={(e) => updateField('multiplier', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="rule-waste"
-                  className="mb-1 block text-xs font-medium text-content-secondary"
+                  className="oe-label"
                 >
                   {t('bim_rules.field_waste', { defaultValue: 'Waste factor %' })}
                 </label>
@@ -1208,7 +1208,7 @@ function RuleEditorModal({
                   min="0"
                   value={form.waste_factor_pct}
                   onChange={(e) => updateField('waste_factor_pct', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full"
                 />
               </div>
             </div>
@@ -1223,7 +1223,7 @@ function RuleEditorModal({
                 disagrees with the quantity source (e.g. an area_m2 rule that
                 declares an m³ unit). Silent when either side is unknown. */}
             {unitSafety.mismatch && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-2xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+              <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning">
                 <ShieldAlert size={14} className="mt-0.5 shrink-0" />
                 <span>
                   {t('bim_rules.unit_mismatch', {
@@ -1257,7 +1257,7 @@ function RuleEditorModal({
                   className="flex items-center gap-1.5 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2.5 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10 disabled:cursor-not-allowed disabled:opacity-60"
                   data-testid="rule-test-run"
                 >
-                  {sandboxBusy ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+                  {sandboxBusy ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
                   {modelName
                     ? t('bim_rules.sandbox_run_named', {
                         defaultValue: 'Run on {{model}}',
@@ -1280,7 +1280,7 @@ function RuleEditorModal({
               )}
 
               {sandboxError && (
-                <div className="mt-2 flex items-center gap-1.5 text-2xs text-red-600" role="alert" data-testid="rule-test-error">
+                <div className="mt-2 flex items-center gap-1.5 text-2xs text-semantic-error" role="alert" data-testid="rule-test-error">
                   <AlertCircle size={12} />
                   {sandboxError}
                 </div>
@@ -1346,7 +1346,7 @@ function RuleEditorModal({
 
             {/* Target */}
             <div>
-              <label className="mb-2 block text-xs font-medium text-content-secondary">
+              <label className="oe-label mb-2">
                 {t('bim_rules.field_target', { defaultValue: 'Target' })}
               </label>
               <div className="mb-3 flex gap-4">
@@ -1388,7 +1388,7 @@ function RuleEditorModal({
                         updateField('target_boq_id', e.target.value);
                         updateField('target_position_id', '');
                       }}
-                      className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                      className="oe-select-sm w-full"
                     >
                       <option value="">
                         {t('bim_rules.select_boq', { defaultValue: 'Select a BOQ…' })}
@@ -1417,7 +1417,7 @@ function RuleEditorModal({
                         placeholder={t('bim_rules.search_positions', {
                           defaultValue: 'Search by ordinal or description…',
                         })}
-                        className="mb-2 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                        className="oe-input-sm mb-2 w-full"
                       />
                       <div className="max-h-40 overflow-y-auto rounded-lg border border-border-light bg-surface-primary">
                         {positionsQuery.isLoading ? (
@@ -1485,7 +1485,7 @@ function RuleEditorModal({
                         value={form.target_unit_rate}
                         onChange={(e) => updateField('target_unit_rate', e.target.value)}
                         placeholder="0.00"
-                        className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none tabular-nums"
+                        className="oe-input-sm w-full tabular-nums"
                       />
                     </div>
                     <button
@@ -1537,7 +1537,7 @@ function RuleEditorModal({
                           'Use the rule filter to look up a matching CWICR cost item and prefill its unit rate',
                       })}
                     >
-                      <Sparkles size={11} />
+                      <Sparkles size={12} />
                       {t('bim_rules.suggest_rate', {
                         defaultValue: 'Suggest from CWICR',
                       })}
@@ -1613,7 +1613,7 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
   if (!open) return null;
   const sample = result?.results.slice(0, 20) ?? [];
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -1621,8 +1621,8 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
       >
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
           <div className="flex items-center gap-2">
-            <Eye size={18} className="text-oe-blue" />
-            <h2 className="text-base font-semibold text-content-primary">
+            <Eye size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">
               {t('bim_rules.preview_title', { defaultValue: 'Dry-run preview' })}
             </h2>
           </div>
@@ -1638,7 +1638,7 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
         <div className="flex-1 overflow-y-auto p-5">
           {loading && (
             <div className="flex items-center justify-center py-8 text-sm text-content-secondary">
-              <Loader2 size={18} className="mr-2 animate-spin" />
+              <Loader2 size={20} className="mr-2 animate-spin" />
               {t('bim_rules.preview_loading', { defaultValue: 'Running dry-run…' })}
             </div>
           )}
@@ -1680,28 +1680,28 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
                 {t('bim_rules.sample_results', { defaultValue: 'Sample results (first 20)' })}
               </div>
               <div className="overflow-hidden rounded-lg border border-border-light">
-                <table className="w-full text-left text-2xs">
-                  <thead className="bg-surface-secondary text-content-secondary">
+                <table className="oe-table-compact w-full text-2xs">
+                  <thead>
                     <tr>
-                      <th className="px-2 py-1.5 font-medium">
+                      <th>
                         {t('bim_rules.col_stable_id', { defaultValue: 'Stable ID' })}
                       </th>
-                      <th className="px-2 py-1.5 font-medium">
+                      <th>
                         {t('bim_rules.col_element_type', { defaultValue: 'Type' })}
                       </th>
-                      <th className="px-2 py-1.5 font-medium">
+                      <th>
                         {t('bim_rules.col_rule', { defaultValue: 'Rule' })}
                       </th>
-                      <th className="px-2 py-1.5 font-medium">
+                      <th>
                         {t('bim_rules.col_source', { defaultValue: 'Source' })}
                       </th>
-                      <th className="px-2 py-1.5 text-right font-medium">
+                      <th className="text-right">
                         {t('bim_rules.col_raw', { defaultValue: 'Raw' })}
                       </th>
-                      <th className="px-2 py-1.5 text-right font-medium">
+                      <th className="text-right">
                         {t('bim_rules.col_adjusted', { defaultValue: 'Adjusted' })}
                       </th>
-                      <th className="px-2 py-1.5 font-medium">
+                      <th>
                         {t('bim_rules.col_unit', { defaultValue: 'Unit' })}
                       </th>
                     </tr>
@@ -1709,7 +1709,7 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
                   <tbody>
                     {sample.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="px-2 py-3 text-center text-content-tertiary">
+                        <td colSpan={7} className="text-center text-content-tertiary">
                           {t('bim_rules.no_sample', { defaultValue: 'No matches.' })}
                         </td>
                       </tr>
@@ -1719,21 +1719,21 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
                         key={`${item.element_id}-${idx}`}
                         className="border-t border-border-light text-content-primary"
                       >
-                        <td className="truncate px-2 py-1 font-mono text-content-tertiary">
+                        <td className="truncate font-mono text-content-tertiary">
                           {item.stable_id}
                         </td>
-                        <td className="truncate px-2 py-1">{item.element_type}</td>
-                        <td className="truncate px-2 py-1">{item.rule_name}</td>
-                        <td className="truncate px-2 py-1 font-mono text-content-tertiary">
+                        <td className="truncate">{item.element_type}</td>
+                        <td className="truncate">{item.rule_name}</td>
+                        <td className="truncate font-mono text-content-tertiary">
                           {item.quantity_source}
                         </td>
-                        <td className="px-2 py-1 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtFixed(q.convert(item.raw_quantity, item.unit).value, 3)}
                         </td>
-                        <td className="px-2 py-1 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtFixed(q.convert(item.adjusted_quantity, item.unit).value, 3)}
                         </td>
-                        <td className="px-2 py-1">{q.unitFor(item.unit)}</td>
+                        <td>{q.unitFor(item.unit)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1858,7 +1858,7 @@ function ConstraintValueInput({
           value={from}
           onChange={(e) => update({ from: e.target.value, to })}
           placeholder={t('bim_rules.req_range_from', { defaultValue: 'from' })}
-          className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-input-sm w-full"
         />
         <span className="text-2xs text-content-tertiary">–</span>
         <input
@@ -1867,7 +1867,7 @@ function ConstraintValueInput({
           value={to}
           onChange={(e) => update({ from, to: e.target.value })}
           placeholder={t('bim_rules.req_range_to', { defaultValue: 'to' })}
-          className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-input-sm w-full"
         />
       </div>
     );
@@ -1885,7 +1885,7 @@ function ConstraintValueInput({
             ? t('bim_rules.req_min_placeholder', { defaultValue: '≥ value' })
             : t('bim_rules.req_max_placeholder', { defaultValue: '≤ value' })
         }
-        className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+        className="oe-input-sm w-full"
       />
     );
   }
@@ -1907,15 +1907,15 @@ function ConstraintValueInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="^F[0-9]{2,3}$"
-          className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-input-sm w-full font-mono"
         />
         {regexValid === true && (
-          <p className="text-2xs text-green-600">
+          <p className="text-2xs text-semantic-success">
             {t('bim_rules.regex_valid', { defaultValue: 'Valid pattern' })}
           </p>
         )}
         {regexValid === false && (
-          <p className="text-2xs text-red-500">
+          <p className="text-2xs text-semantic-error">
             {t('bim_rules.regex_invalid', { defaultValue: 'Invalid pattern' })}
           </p>
         )}
@@ -1930,7 +1930,7 @@ function ConstraintValueInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={t('bim_rules.req_value_placeholder', { defaultValue: 'Value' })}
-      className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+      className="oe-input-sm w-full"
     />
   );
 }
@@ -2017,7 +2017,7 @@ function RequirementRuleEditor({
         : t('bim_rules.req_new', { defaultValue: 'New Requirement Rule' });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -2026,8 +2026,8 @@ function RequirementRuleEditor({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
           <div className="flex items-center gap-2">
-            <Shield size={18} className="text-oe-blue" />
-            <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+            <Shield size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">{title}</h2>
           </div>
           <button
             type="button"
@@ -2044,7 +2044,7 @@ function RequirementRuleEditor({
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
             {/* Format selection */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('bim_rules.req_format', { defaultValue: 'BIM Format' })}
               </label>
               <div className="flex gap-3">
@@ -2079,7 +2079,7 @@ function RequirementRuleEditor({
 
             {/* Three-column rule editor */}
             <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-4">
-              <p className="mb-3 text-xs font-semibold text-content-secondary uppercase tracking-wide">
+              <p className="oe-overline mb-3">
                 {t('bim_rules.req_rule_definition', { defaultValue: 'Rule Definition' })}
               </p>
               <div className="grid grid-cols-3 gap-4">
@@ -2094,7 +2094,7 @@ function RequirementRuleEditor({
                       set('filter_param', e.target.value);
                       set('filter_value', '');
                     }}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    className="oe-select-sm w-full"
                   >
                     {filterParams.map((p) => (
                       <option key={p} value={p}>
@@ -2106,7 +2106,7 @@ function RequirementRuleEditor({
                     <select
                       value={form.filter_value}
                       onChange={(e) => set('filter_value', e.target.value)}
-                      className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                      className="oe-select-sm w-full"
                     >
                       <option value="">
                         {t('bim_rules.req_select_value', { defaultValue: 'Select...' })}
@@ -2125,7 +2125,7 @@ function RequirementRuleEditor({
                       placeholder={t('bim_rules.req_filter_value', {
                         defaultValue: 'e.g. Walls, IfcWall',
                       })}
-                      className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                      className="oe-input-sm w-full"
                     />
                   )}
                 </div>
@@ -2142,14 +2142,14 @@ function RequirementRuleEditor({
                       value={paramSearch}
                       onChange={(e) => setParamSearch(e.target.value)}
                       placeholder={t('bim_rules.req_search_param', { defaultValue: 'Search parameter...' })}
-                      className="w-full rounded-lg border border-border-light bg-surface-primary pl-7 pr-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                      className="oe-input-sm w-full pl-7 pr-2"
                     />
                   </div>
                   <select
                     value={form.check_param}
                     onChange={(e) => set('check_param', e.target.value)}
                     size={5}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    className="oe-select-sm w-full"
                   >
                     {filteredPropertyNames.map((p) => (
                       <option key={p} value={p}>
@@ -2164,7 +2164,7 @@ function RequirementRuleEditor({
                     placeholder={t('bim_rules.req_custom_param', {
                       defaultValue: 'Or type custom...',
                     })}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    className="oe-input-sm w-full font-mono"
                   />
                 </div>
 
@@ -2176,7 +2176,7 @@ function RequirementRuleEditor({
                   <select
                     value={form.constraint_type}
                     onChange={(e) => set('constraint_type', e.target.value as ConstraintType)}
-                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    className="oe-select-sm w-full"
                   >
                     {CONSTRAINT_TYPES.map((ct) => (
                       <option key={ct} value={ct}>
@@ -2196,13 +2196,13 @@ function RequirementRuleEditor({
             {/* Category + Priority */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('bim_rules.req_category', { defaultValue: 'Category' })}
                 </label>
                 <select
                   value={form.category}
                   onChange={(e) => set('category', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                  className="oe-select w-full"
                 >
                   {REQ_CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -2212,16 +2212,16 @@ function RequirementRuleEditor({
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('bim_rules.req_priority', { defaultValue: 'Priority' })}
                 </label>
                 <div className="flex gap-2">
                   {REQ_PRIORITIES.map((p) => {
                     const color =
                       p === 'must'
-                        ? 'border-red-400/50 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                        ? 'border-semantic-error/50 bg-semantic-error-bg text-semantic-error'
                         : p === 'should'
-                          ? 'border-amber-400/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                          ? 'border-semantic-warning/50 bg-semantic-warning-bg text-semantic-warning'
                           : 'border-oe-blue/50 bg-oe-blue/5 text-oe-blue';
                     return (
                       <label
@@ -2252,7 +2252,7 @@ function RequirementRuleEditor({
             {/* Source + Notes */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('bim_rules.req_source_ref', { defaultValue: 'Source Reference' })}
                 </label>
                 <input
@@ -2262,18 +2262,18 @@ function RequirementRuleEditor({
                   placeholder={t('bim_rules.req_source_placeholder', {
                     defaultValue: 'e.g. Drawing A-101, DIN 4102',
                   })}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                  className="oe-input w-full"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('bim_rules.req_notes', { defaultValue: 'Notes' })}
                 </label>
                 <input
                   type="text"
                   value={form.notes}
                   onChange={(e) => set('notes', e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                  className="oe-input w-full"
                 />
               </div>
             </div>
@@ -2772,7 +2772,7 @@ function RequirementsTabContent({
           <select
             value={currentSetId}
             onChange={(e) => setActiveSetId(e.target.value)}
-            className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-2xs text-content-primary focus:border-oe-blue focus:outline-none"
+            className="oe-select"
           >
             {sets.map((s) => (
               <option key={s.id} value={s.id}>
@@ -2794,13 +2794,13 @@ function RequirementsTabContent({
         )}
 
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={13} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary" />
+          <Search size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('bim_rules.req_search', { defaultValue: 'Search entity, attribute, value...' })}
-            className="w-full rounded-lg border border-border-light bg-surface-primary ps-8 pe-3 py-1.5 text-2xs text-content-primary focus:border-oe-blue focus:outline-none"
+            className="oe-input w-full ps-8 pe-3"
           />
         </div>
 
@@ -2881,7 +2881,7 @@ function RequirementsTabContent({
               type="button"
               onClick={() => setPickModelOpen(true)}
               disabled={validateMut.isPending}
-              className="flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-50 px-3 py-1.5 text-2xs font-semibold text-emerald-700 shadow-sm hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex items-center gap-1.5 rounded-lg border border-semantic-success/40 bg-semantic-success-bg px-3 py-1.5 text-2xs font-semibold text-semantic-success shadow-sm hover:bg-semantic-success-bg disabled:cursor-not-allowed disabled:opacity-60"
             >
               {validateMut.isPending ? (
                 <Loader2 size={12} className="animate-spin" />
@@ -2910,7 +2910,7 @@ function RequirementsTabContent({
             disabled={!currentSetId}
             className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-2xs font-semibold text-white shadow-sm hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Plus size={13} />
+            <Plus size={14} />
             {t('bim_rules.req_new_rule', { defaultValue: 'New Rule' })}
           </button>
         </div>
@@ -2922,10 +2922,10 @@ function RequirementsTabContent({
           className={clsx(
             'rounded-xl border px-4 py-3 text-xs',
             lastValidation.errors > 0
-              ? 'border-red-300 bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+              ? 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error'
               : lastValidation.warnings > 0
-                ? 'border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'
-                : 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300',
+                ? 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning'
+                : 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success',
           )}
         >
           <div className="flex flex-wrap items-center gap-3">
@@ -2963,14 +2963,14 @@ function RequirementsTabContent({
       {/* Pick model modal */}
       {pickModelOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 px-4"
           onClick={() => !validateMut.isPending && setPickModelOpen(false)}
         >
           <div
             className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-1 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-1">
               {t('bim_rules.req_pick_model_title', {
                 defaultValue: 'Validate against which BIM model?',
               })}
@@ -3018,7 +3018,7 @@ function RequirementsTabContent({
         <div className="rounded-xl border border-dashed border-border-light bg-surface-secondary/30 px-6 py-8">
           <div className="text-center">
             <Shield size={28} className="mx-auto mb-2 text-content-tertiary" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('bim_rules.req_empty_title', {
                 defaultValue: 'Start with a ready-made pack',
               })}
@@ -3102,25 +3102,25 @@ function RequirementsTabContent({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-sm">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-border-light bg-surface-secondary text-content-secondary">
+          <table className="oe-table-compact w-full">
+            <thead>
               <tr>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('bim_rules.req_th_entity', { defaultValue: 'Entity (Filter)' })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('bim_rules.req_th_attribute', { defaultValue: 'Parameter' })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('bim_rules.req_th_constraint', { defaultValue: 'Constraint' })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('bim_rules.req_th_category', { defaultValue: 'Category' })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('bim_rules.req_th_priority', { defaultValue: 'Priority' })}
                 </th>
-                <th className="px-3 py-2 text-right font-medium">
+                <th className="text-right">
                   {t('bim_rules.col_actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
@@ -3129,13 +3129,12 @@ function RequirementsTabContent({
               {filteredReqs.map((req) => (
                 <tr
                   key={req.id}
-                  className="border-t border-border-light text-content-primary hover:bg-surface-secondary"
                 >
-                  <td className="px-3 py-2 font-medium">{req.entity}</td>
-                  <td className="px-3 py-2 font-mono text-2xs text-content-tertiary">
+                  <td className="font-medium">{req.entity}</td>
+                  <td className="font-mono text-content-tertiary">
                     {req.attribute}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <Badge variant="neutral" size="sm">
                       {req.constraint_type}
                     </Badge>
@@ -3143,17 +3142,17 @@ function RequirementsTabContent({
                       {req.constraint_value}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-2xs">
+                  <td>
                     {t(`requirements.cat_${req.category}`, {
                       defaultValue: req.category.replace(/_/g, ' '),
                     })}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <Badge variant={priorityColor(req.priority)} size="sm">
                       {req.priority}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
@@ -3161,15 +3160,15 @@ function RequirementsTabContent({
                         className="rounded p-1 text-content-secondary hover:bg-surface-tertiary hover:text-oe-blue"
                         title={t('common.edit')}
                       >
-                        <Pencil size={13} />
+                        <Pencil size={14} />
                       </button>
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteId(req.id)}
-                        className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600"
+                        className="rounded p-1 text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error"
                         title={t('common.delete', { defaultValue: 'Delete' })}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -3185,7 +3184,7 @@ function RequirementsTabContent({
               <button
                 type="button"
                 onClick={() => delSetMut.mutate(currentSetId)}
-                className="text-content-quaternary hover:text-red-600"
+                className="text-content-quaternary hover:text-semantic-error"
                 title={t('bim_rules.req_delete_set', { defaultValue: 'Delete set' })}
               >
                 <Trash2 size={12} />
@@ -3333,8 +3332,8 @@ function CoverageReportPanel({
           className={clsx(
             'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
             hasGaps
-              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+              ? 'bg-semantic-warning-bg text-semantic-warning'
+              : 'bg-semantic-success-bg text-semantic-success',
           )}
         >
           <ListChecks size={16} />
@@ -3369,19 +3368,19 @@ function CoverageReportPanel({
       {open && (
         <div className="border-t border-border-light px-4 py-3">
           <div className="overflow-hidden rounded-lg border border-border-light">
-            <table className="w-full text-left text-2xs">
-              <thead className="bg-surface-secondary text-content-secondary">
+            <table className="oe-table-compact w-full text-2xs">
+              <thead>
                 <tr>
-                  <th className="px-3 py-1.5 font-medium">
+                  <th>
                     {t('bim_rules.coverage_col_category', { defaultValue: 'Element type' })}
                   </th>
-                  <th className="px-3 py-1.5 text-right font-medium">
+                  <th className="text-right">
                     {t('bim_rules.coverage_col_count', { defaultValue: 'Elements' })}
                   </th>
-                  <th className="px-3 py-1.5 font-medium">
+                  <th>
                     {t('bim_rules.coverage_col_rules', { defaultValue: 'Covered by' })}
                   </th>
-                  <th className="px-3 py-1.5 text-right font-medium">
+                  <th className="text-right">
                     {t('bim_rules.col_actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -3390,9 +3389,8 @@ function CoverageReportPanel({
                 {report.rows.map((row) => (
                   <tr
                     key={row.category}
-                    className="border-t border-border-light text-content-primary"
                   >
-                    <td className="px-3 py-1.5">
+                    <td>
                       <span className="flex items-center gap-1.5">
                         <span
                           className={clsx(
@@ -3403,19 +3401,19 @@ function CoverageReportPanel({
                         {row.category}
                       </span>
                     </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-content-tertiary">
+                    <td className="text-right tabular-nums text-content-tertiary">
                       {row.elementCount}
                     </td>
-                    <td className="px-3 py-1.5 text-content-tertiary">
+                    <td className="text-content-tertiary">
                       {row.covered ? (
                         <span className="truncate">{fmtList(row.ruleNames)}</span>
                       ) : (
-                        <span className="text-amber-600">
+                        <span className="text-semantic-warning">
                           {t('bim_rules.coverage_no_rule', { defaultValue: 'No rule' })}
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-1.5 text-right">
+                    <td className="text-right">
                       {!row.covered && (
                         <button
                           type="button"
@@ -4145,7 +4143,7 @@ export function BIMQuantityRulesPage() {
                   : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
               )}
             >
-              <SlidersHorizontal size={13} />
+              <SlidersHorizontal size={14} />
               {t('bim_rules.tab_quantity_rules', { defaultValue: 'Quantity Rules' })}
             </button>
             )}
@@ -4160,7 +4158,7 @@ export function BIMQuantityRulesPage() {
                   : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
               )}
             >
-              <ClipboardCheck size={13} />
+              <ClipboardCheck size={14} />
               {t('bim_rules.tab_requirements', { defaultValue: 'Requirements' })}
             </button>
             )}
@@ -4176,7 +4174,7 @@ export function BIMQuantityRulesPage() {
                   : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
               )}
             >
-              <BookOpen size={13} />
+              <BookOpen size={14} />
               {t('rulePacks.title', { defaultValue: 'Rule Library' })}
             </button>
             )}
@@ -4196,7 +4194,7 @@ export function BIMQuantityRulesPage() {
               value={modelId}
               onChange={(e) => setModelId(e.target.value)}
               disabled={modelOptions.length === 0}
-              className="rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-50"
+              className="oe-select-sm"
             >
               {modelOptions.length === 0 ? (
                 <option value="">
@@ -4228,7 +4226,7 @@ export function BIMQuantityRulesPage() {
                 id="apply-boq-picker"
                 value={targetBoqId}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setApplyBoqId(e.target.value)}
-                className="rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:border-oe-blue focus:outline-none"
+                className="oe-select-sm"
               >
                 <option value="">
                   {t('bim_rules.select_boq', { defaultValue: 'Select a BOQ…' })}
@@ -4310,15 +4308,15 @@ export function BIMQuantityRulesPage() {
         ) : rulesQuery.isLoading ? (
           <SkeletonTable rows={6} columns={4} />
         ) : rulesQuery.error ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-red-600">
-            <AlertCircle size={18} />
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-semantic-error">
+            <AlertCircle size={20} />
             {t('bim_rules.load_error', { defaultValue: 'Failed to load rules.' })}
           </div>
         ) : rules.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border-light bg-surface-secondary/30 px-6 py-8">
             <div className="text-center">
               <SlidersHorizontal size={28} className="mx-auto mb-2 text-content-tertiary" />
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('bim_rules.empty_title_v2', {
                   defaultValue: 'Start from a template',
                 })}
@@ -4397,28 +4395,28 @@ export function BIMQuantityRulesPage() {
               />
             )}
           <div className="overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-sm">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-border-light bg-surface-secondary text-content-secondary">
+            <table className="oe-table-compact w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2 font-medium">
+                  <th>
                     {t('bim_rules.col_name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="px-4 py-2 font-medium">
+                  <th>
                     {t('bim_rules.col_pattern', { defaultValue: 'Element pattern' })}
                   </th>
-                  <th className="px-4 py-2 font-medium">
+                  <th>
                     {t('bim_rules.col_source', { defaultValue: 'Source' })}
                   </th>
-                  <th className="px-4 py-2 font-medium">
+                  <th>
                     {t('bim_rules.col_unit', { defaultValue: 'Unit' })}
                   </th>
-                  <th className="px-4 py-2 font-medium">
+                  <th>
                     {t('bim_rules.col_target', { defaultValue: 'Target' })}
                   </th>
-                  <th className="px-4 py-2 text-center font-medium">
+                  <th className="text-center">
                     {t('bim_rules.col_active', { defaultValue: 'Active' })}
                   </th>
-                  <th className="px-4 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('bim_rules.col_actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -4426,9 +4424,9 @@ export function BIMQuantityRulesPage() {
               <tbody>
                 {rules.map((rule) => (
                   <Fragment key={rule.id}>
-                    <tr className="border-t border-border-light text-content-primary hover:bg-surface-secondary">
-                      <td className="px-4 py-2 font-medium">{rule.name}</td>
-                      <td className="px-4 py-2 font-mono text-2xs text-content-tertiary">
+                    <tr>
+                      <td className="font-medium">{rule.name}</td>
+                      <td className="font-mono text-content-tertiary">
                         {rule.element_type_filter || '*'}
                         {rule.property_filter &&
                           Object.keys(rule.property_filter).length > 0 && (
@@ -4441,9 +4439,9 @@ export function BIMQuantityRulesPage() {
                             </div>
                           )}
                       </td>
-                      <td className="px-4 py-2 font-mono text-2xs">{rule.quantity_source}</td>
-                      <td className="px-4 py-2">{q.unitFor(rule.unit)}</td>
-                      <td className="px-4 py-2">
+                      <td className="font-mono">{rule.quantity_source}</td>
+                      <td>{q.unitFor(rule.unit)}</td>
+                      <td>
                         {rule.boq_target?.position_id ? (
                           <Badge variant="neutral">
                             {t('bim_rules.target_linked', { defaultValue: 'Linked position' })}
@@ -4458,7 +4456,7 @@ export function BIMQuantityRulesPage() {
                           <span className="text-content-tertiary">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-center">
+                      <td className="text-center">
                         <button
                           type="button"
                           onClick={() =>
@@ -4483,7 +4481,7 @@ export function BIMQuantityRulesPage() {
                           />
                         </button>
                       </td>
-                      <td className="px-4 py-2">
+                      <td>
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -4492,7 +4490,7 @@ export function BIMQuantityRulesPage() {
                             aria-label={t('common.edit', { defaultValue: 'Edit' })}
                             title={t('common.edit', { defaultValue: 'Edit' })}
                           >
-                            <Pencil size={13} />
+                            <Pencil size={14} />
                           </button>
                           <button
                             type="button"
@@ -4501,16 +4499,16 @@ export function BIMQuantityRulesPage() {
                             aria-label={t('common.duplicate', { defaultValue: 'Duplicate' })}
                             title={t('common.duplicate', { defaultValue: 'Duplicate' })}
                           >
-                            <Copy size={13} />
+                            <Copy size={14} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmDeleteId(rule.id)}
-                            className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600"
+                            className="rounded p-1 text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error"
                             aria-label={t('common.delete', { defaultValue: 'Delete' })}
                             title={t('common.delete', { defaultValue: 'Delete' })}
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

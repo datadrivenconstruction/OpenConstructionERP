@@ -78,38 +78,38 @@ export function AssetPortfolioStrip({ projectId, onFilter }: AssetPortfolioStrip
     <Card className="mb-4" data-testid="asset-portfolio-strip">
       <div className="flex flex-wrap gap-2 p-3">
         <Tile
-          icon={<Gauge size={18} />}
+          icon={<Gauge size={20} />}
           label={t('assets.kpi.total', { defaultValue: 'Tracked assets' })}
           value={s.total_assets}
           tone="border-border-medium bg-surface-secondary text-content-primary"
           testId="asset-kpi-total"
         />
         <Tile
-          icon={<ShieldAlert size={18} />}
+          icon={<ShieldAlert size={20} />}
           label={t('assets.kpi.warranty_expired', { defaultValue: 'Warranty expired' })}
           value={s.warranties_expired}
-          tone="border-rose-500/30 bg-semantic-error/10 text-rose-300"
+          tone="border-semantic-error/30 bg-semantic-error/10 text-semantic-error"
           onClick={onFilter ? () => onFilter({ warrantyStatus: 'expired' }) : undefined}
           testId="asset-kpi-warranty-expired"
         />
         <Tile
-          icon={<CalendarClock size={18} />}
+          icon={<CalendarClock size={20} />}
           label={t('assets.kpi.warranty_expiring', { defaultValue: 'Expiring soon' })}
           value={s.warranties_expiring_soon}
-          tone="border-amber-500/30 bg-semantic-warning/10 text-amber-300"
+          tone="border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning"
           onClick={onFilter ? () => onFilter({ warrantyStatus: 'expiring' }) : undefined}
           testId="asset-kpi-warranty-expiring"
         />
         <Tile
-          icon={<Wrench size={18} />}
+          icon={<Wrench size={20} />}
           label={t('assets.kpi.maintenance_overdue', { defaultValue: 'Maintenance overdue' })}
           value={s.maintenance_overdue}
-          tone="border-rose-500/30 bg-semantic-error/10 text-rose-300"
+          tone="border-semantic-error/30 bg-semantic-error/10 text-semantic-error"
           onClick={onFilter ? () => onFilter({ maintenanceStatus: 'overdue' }) : undefined}
           testId="asset-kpi-maint-overdue"
         />
         <Tile
-          icon={<AlertTriangle size={18} />}
+          icon={<AlertTriangle size={20} />}
           label={t('assets.kpi.needs_attention', { defaultValue: 'Needs attention' })}
           value={s.needs_attention}
           tone="border-oe-blue/30 bg-oe-blue/10 text-oe-blue"
@@ -118,7 +118,7 @@ export function AssetPortfolioStrip({ projectId, onFilter }: AssetPortfolioStrip
         />
         {s.avg_age_years != null && (
           <Tile
-            icon={<Gauge size={18} />}
+            icon={<Gauge size={20} />}
             label={t('assets.kpi.avg_age', { defaultValue: 'Avg age (yrs)' })}
             value={s.avg_age_years}
             tone="border-border-medium bg-surface-secondary text-content-secondary"

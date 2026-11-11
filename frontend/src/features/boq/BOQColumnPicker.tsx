@@ -88,13 +88,13 @@ export function BOQColumnPicker({
             : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary'
         }`}
       >
-        <SlidersHorizontal size={15} />
+        <SlidersHorizontal size={16} />
       </button>
       {open && (
         <div
           role="dialog"
           aria-label={title}
-          className="absolute right-0 top-full z-30 mt-1 w-64 rounded-lg border border-border bg-surface-elevated p-2 shadow-lg"
+          className="absolute right-0 top-full z-dropdown mt-1 w-64 rounded-lg border border-border bg-surface-elevated p-2 shadow-lg"
         >
           <ul className="flex flex-col">
             {entries.map((e, i) => {

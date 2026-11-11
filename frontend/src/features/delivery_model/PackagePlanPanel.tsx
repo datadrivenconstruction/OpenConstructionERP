@@ -258,21 +258,21 @@ export function PackagePlanPanel({ projectId, model, packages, consistency, cata
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full min-w-[860px] text-sm" data-testid="package-table">
-            <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+          <table className="oe-table w-full min-w-[860px]" data-testid="package-table">
+            <thead className="text-left">
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_package', { defaultValue: 'Package' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_duties', { defaultValue: 'Does' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_party', { defaultValue: 'Done by' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_contract', { defaultValue: 'Contract with' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_price', { defaultValue: 'Price basis' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.packages.col_status', { defaultValue: 'Status' })}</th>
-                <th scope="col" className="px-3 py-2" />
+                <th scope="col">{t('delivery_model.ui.packages.col_package', { defaultValue: 'Package' })}</th>
+                <th scope="col">{t('delivery_model.ui.packages.col_duties', { defaultValue: 'Does' })}</th>
+                <th scope="col">{t('delivery_model.ui.packages.col_party', { defaultValue: 'Done by' })}</th>
+                <th scope="col">{t('delivery_model.ui.packages.col_contract', { defaultValue: 'Contract with' })}</th>
+                <th scope="col">{t('delivery_model.ui.packages.col_price', { defaultValue: 'Price basis' })}</th>
+                <th scope="col">{t('delivery_model.ui.packages.col_status', { defaultValue: 'Status' })}</th>
+                <th scope="col" />
               </tr>
             </thead>
             <tbody>
               {rows.map(({ pkg, depth }) => (
-                <tr key={pkg.id} className="border-t border-border-light align-top" data-testid="package-row">
+                <tr key={pkg.id} className="align-top" data-testid="package-row">
                   <th scope="row" className="px-3 py-2 text-left font-normal" style={{ paddingInlineStart: `${0.75 + depth * 1.25}rem` }}>
                     <span className="block font-medium text-content-primary">{pkg.title}</span>
                     <span className="block text-xs text-content-tertiary">
@@ -285,7 +285,7 @@ export function PackagePlanPanel({ projectId, model, packages, consistency, cata
                       </span>
                     )}
                   </th>
-                  <td className="px-3 py-2">
+                  <td>
                     <span className="flex flex-wrap gap-1">
                       {DUTIES.filter((d) => pkg[d]).map((d) => (
                         <span key={d} className="rounded bg-surface-secondary px-1.5 py-0.5 text-2xs text-content-secondary">
@@ -294,13 +294,13 @@ export function PackagePlanPanel({ projectId, model, packages, consistency, cata
                       ))}
                     </span>
                   </td>
-                  <td className="px-3 py-2">{partyName(pkg.party)}</td>
-                  <td className="px-3 py-2">{vocab(labels.t, CONTRACTING_PARTY, pkg.contracting_party)}</td>
-                  <td className="px-3 py-2">
+                  <td>{partyName(pkg.party)}</td>
+                  <td>{vocab(labels.t, CONTRACTING_PARTY, pkg.contracting_party)}</td>
+                  <td>
                     {pkg.price_basis ? vocab(labels.t, PRICE_BASIS, pkg.price_basis) : ''}
                     {pkg.standard_form && <span className="block text-xs text-content-tertiary">{pkg.standard_form}</span>}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <ToneBadge tone={PACKAGE_TONE[pkg.effective_status]} testId="package-status">
                       {vocab(labels.t, PACKAGE_STATUS, pkg.effective_status)}
                     </ToneBadge>
@@ -318,7 +318,7 @@ export function PackagePlanPanel({ projectId, model, packages, consistency, cata
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {!editV && (
                       <span className="flex justify-end gap-0.5">
                         <IconAction

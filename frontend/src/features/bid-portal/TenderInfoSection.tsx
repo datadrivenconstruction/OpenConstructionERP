@@ -68,7 +68,7 @@ export function TenderInfoSection({ token }: { token: string }) {
 
   return (
     <section className="mt-4 space-y-3 rounded-lg border border-border-light p-4" data-testid="tender-info">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title flex items-center gap-2">
         <Megaphone size={16} aria-hidden />
         {t('bid_portal.addenda.title', { defaultValue: 'Addenda and clarifications' })}
       </h2>
@@ -126,7 +126,7 @@ export function TenderInfoSection({ token }: { token: string }) {
           <div className="mt-2">
             {a.acknowledged ? (
               <span className="inline-flex items-center gap-1 text-xs text-semantic-success">
-                <CheckCircle2 size={13} aria-hidden />
+                <CheckCircle2 size={14} aria-hidden />
                 {t('bid_portal.addenda.acknowledged', { defaultValue: 'Acknowledged' })}
               </span>
             ) : (
@@ -148,7 +148,7 @@ export function TenderInfoSection({ token }: { token: string }) {
       ))}
 
       <div className="space-y-2 border-t border-border-light pt-3">
-        <label className="text-xs font-medium text-content-secondary" htmlFor="bid-portal-question">
+        <label className="oe-label" htmlFor="bid-portal-question">
           {t('bid_portal.addenda.ask', { defaultValue: 'Ask a question' })}
         </label>
         <textarea
@@ -156,7 +156,7 @@ export function TenderInfoSection({ token }: { token: string }) {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           rows={2}
-          className="w-full resize-none rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          className="oe-textarea w-full resize-none"
         />
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="primary" size="sm" disabled={busy || !question.trim()} onClick={() => void ask()}>

@@ -363,11 +363,11 @@ export function LoginPage() {
 
   /* Benefits list - reserved for future hero section layout
   const benefits = [
-    { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
+    { icon: HardDrive, color: 'text-semantic-success bg-semantic-success/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
     { icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10', title: t('login.benefit.open_source', '100% open source'), desc: t('login.benefit.open_source_desc', 'Transparent code. No vendor lock-in.') },
     { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'International standards'), desc: t('login.benefit.standards_desc', '120,000+ cost items across 9 cost bases worldwide.') },
-    { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
-    { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
+    { icon: Brain, color: 'text-semantic-warning bg-semantic-warning/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
+    { icon: Zap, color: 'text-semantic-error bg-semantic-error/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
     { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
   ]; */
 
@@ -478,13 +478,13 @@ export function LoginPage() {
           column so the headline / stats sit on a near-white field.
           Dark mode keeps the original richer blob set for depth. */}
       <div className="absolute inset-y-0 start-0 end-1/2 z-0 pointer-events-none overflow-hidden hidden lg:block">
-        <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-sky-300/10 dark:bg-oe-blue/35 blur-[120px] animate-blob-slow-1 mix-blend-screen" />
+        <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-semantic-info/10 dark:bg-oe-blue/35 blur-[120px] animate-blob-slow-1 mix-blend-screen" />
         <div className="absolute bottom-[-18%] right-[2%] w-[400px] h-[400px] rounded-full bg-cyan-200/10 dark:bg-violet-500/35 blur-[110px] animate-blob-slow-4 mix-blend-screen hidden dark:block" />
       </div>
 
       {/* Mobile-only ambient blobs (single column layout) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden lg:hidden">
-        <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-sky-300/10 dark:bg-oe-blue/35 blur-[110px] animate-blob-slow-1 mix-blend-screen" />
+        <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-semantic-info/10 dark:bg-oe-blue/35 blur-[110px] animate-blob-slow-1 mix-blend-screen" />
       </div>
 
       {/* Theme + Language - top right (enlarged for /login so discoverable). */}
@@ -509,7 +509,7 @@ export function LoginPage() {
                 <button
                   key={lang.code}
                   onClick={() => { i18n.changeLanguage(lang.code); setLangOpen(false); }}
-                  className={`flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors ${isActive ? 'bg-oe-blue/10 text-oe-blue font-medium' : 'text-content-primary hover:bg-surface-secondary'}`}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors ${isActive ? 'bg-oe-blue/10 text-oe-blue font-medium' : 'text-content-primary hover:bg-surface-secondary'}`}
                 >
                   <CountryFlag code={lang.country} size={18} />
                   <span className="truncate">
@@ -552,7 +552,7 @@ export function LoginPage() {
                 'radial-gradient(ellipse 70% 60% at 30% 90%, rgba(139,92,246,0.18), transparent 60%)',
             }}
           />
-          <div className="absolute top-[8%] right-[8%] w-[420px] h-[420px] rounded-full bg-sky-300/45 dark:bg-sky-500/35 blur-[100px] login-orb-a" />
+          <div className="absolute top-[8%] right-[8%] w-[420px] h-[420px] rounded-full bg-semantic-info/45 blur-[100px] login-orb-a" />
           <div className="absolute bottom-[6%] left-[10%] w-[360px] h-[360px] rounded-full bg-cyan-200/40 dark:bg-violet-500/30 blur-[100px] login-orb-b" />
           <div className="absolute top-[42%] right-[34%] w-[280px] h-[280px] rounded-full bg-white/55 dark:bg-white/0 blur-[80px] login-orb-c" />
           <div
@@ -566,12 +566,12 @@ export function LoginPage() {
 
         {/* Eyebrow pill */}
         <div className="mb-5 animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-400/[0.1] px-3.5 py-1.5">
+          <span className="inline-flex items-center gap-2 rounded-full bg-semantic-success/[0.08]/[0.1] px-3.5 py-1.5">
             <span className="relative flex h-[6px] w-[6px]">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-60" />
+              <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-semantic-success" />
             </span>
-            <span className="text-2xs font-medium tracking-wider text-emerald-700 dark:text-emerald-300">Open Source</span>
+            <span className="text-2xs font-medium tracking-wider text-semantic-success">Open Source</span>
           </span>
         </div>
 
@@ -663,7 +663,7 @@ export function LoginPage() {
               >
                 <div
                   className={`relative flex flex-col items-center justify-center w-[88px] animate-fade-in transition-transform duration-300 hover:scale-[1.05] ${
-                    isAccent ? 'text-white' : 'text-slate-900'
+                    isAccent ? 'text-white' : 'text-content-primary'
                   }`}
                   style={{
                     animationDelay: `${280 + idx * 35}ms`,
@@ -687,7 +687,7 @@ export function LoginPage() {
                   />
                   <span
                     className={`mt-[5px] text-2xs font-semibold tracking-tight ${
-                      isAccent ? 'text-white/95' : 'text-slate-800'
+                      isAccent ? 'text-white/95' : 'text-content-primary'
                     }`}
                   >
                     {cell.label}
@@ -751,7 +751,7 @@ export function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-l from-white/0 via-white/60 to-white dark:from-[#070912]/0 dark:via-[#070912]/60 dark:to-[#070912]" />
           {/* Tiny far-corner sky tint just to soften the edge - the glass
               still has something to lift off, but the field reads white. */}
-          <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full bg-sky-100/55 dark:bg-sky-500/10 blur-[110px]" />
+          <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full bg-semantic-info-bg blur-[110px]" />
         </div>
         <div className="w-full max-w-[380px] relative z-10">
           {/* Logo - tenant white-label (logo / company name) when set via
@@ -796,7 +796,7 @@ export function LoginPage() {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <Logo size="md" animate />
                   <span
                     className="text-2xl font-medium text-content-primary whitespace-nowrap"
@@ -817,7 +817,7 @@ export function LoginPage() {
                 aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
                 title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
               >
-                <Pencil size={13} strokeWidth={2.25} />
+                <Pencil size={14} strokeWidth={2.25} />
               </button>
               )}
             </div>
@@ -831,10 +831,10 @@ export function LoginPage() {
             <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-semantic-success" />
                 </span>
-                <span className="text-2xs font-semibold uppercase tracking-wider text-emerald-600">Open Source</span>
+                <span className="oe-overline text-semantic-success">Open Source</span>
               </div>
               <p className="text-sm font-semibold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
                 {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
@@ -871,25 +871,25 @@ export function LoginPage() {
             {/* Visually hidden h1 for screen readers + a11y tools - visible text uses h2 below */}
             <h1 className="sr-only">{t('auth.login', 'Sign in')}</h1>
             <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
-              <h2 className="text-base font-semibold text-content-primary mb-0.5">{t('auth.login', 'Sign in')}</h2>
+              <h2 className="oe-section-title mb-0.5">{t('auth.login', 'Sign in')}</h2>
               <p className="text-xs text-content-secondary mb-4">{t('auth.login_subtitle', 'Enter your credentials to access your workspace')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3" aria-label={t('auth.login', 'Sign in')}>
               <div className="animate-stagger-in" style={{ animationDelay: '280ms' }}>
-                <Input id="login-email" name="email" label={t('auth.email', 'Email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoComplete="email" required aria-required="true" autoFocus icon={<Mail size={15} />} />
+                <Input id="login-email" name="email" label={t('auth.email', 'Email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoComplete="email" required aria-required="true" autoFocus icon={<Mail size={16} />} />
               </div>
 
               <div className="flex flex-col gap-1 animate-stagger-in" style={{ animationDelay: '340ms' }}>
                 <div className="flex items-center justify-between">
-                  <label htmlFor="login-password" className="text-sm font-medium text-content-primary">{t('auth.password', 'Password')}</label>
+                  <label htmlFor="login-password" className="oe-label">{t('auth.password', 'Password')}</label>
                   <Link to="/forgot-password" className="text-2xs font-medium text-oe-blue hover:text-oe-blue-hover transition-colors">{t('auth.forgot_password', 'Forgot password?')}</Link>
                 </div>
                 <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary"><Lock size={15} /></div>
-                  <input id="login-password" name="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.password_placeholder', 'Enter your password')} autoComplete="current-password" required aria-required="true" minLength={8} className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-9 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary"><Lock size={16} /></div>
+                  <input id="login-password" name="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.password_placeholder', 'Enter your password')} autoComplete="current-password" required aria-required="true" minLength={8} className="oe-input w-full pl-9 pr-9" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? t('auth.hide_password', 'Hide password') : t('auth.show_password', 'Show password')} className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-tertiary hover:text-content-secondary transition-colors" tabIndex={-1}>
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
@@ -1008,7 +1008,7 @@ export function LoginPage() {
                         <div className="text-sm font-semibold text-content-primary">{acct.name}</div>
                         <div className="text-2xs text-content-tertiary dark:text-content-secondary truncate">{acct.email} · {acct.role}</div>
                       </div>
-                      <ChevronDown size={15} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
+                      <ChevronDown size={16} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -1068,7 +1068,7 @@ export function LoginPage() {
                 </span>
               </span>
               <ArrowUpRight
-                size={15}
+                size={16}
                 className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
               />
             </a>
@@ -1091,7 +1091,7 @@ export function LoginPage() {
                 </span>
               </span>
               <ArrowUpRight
-                size={15}
+                size={16}
                 className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
               />
             </a>
@@ -1117,7 +1117,7 @@ export function LoginPage() {
 
       {/* ── About modal ── */}
       {showInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowInfo(false)} />
 
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-2xl">
@@ -1125,13 +1125,13 @@ export function LoginPage() {
               onClick={() => setShowInfo(false)}
               className="sticky top-0 float-right m-3 p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors z-10 bg-surface-elevated/80 backdrop-blur-sm"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
 
             {/* Header */}
             <div className="px-6 pt-5 pb-4 border-b border-border-light clear-both">
               <LogoWithText size="sm" className="mb-3" />
-              <h3 className="text-base font-semibold text-content-primary mb-2">
+              <h3 className="oe-section-title mb-2">
                 {t('about.title', 'Professional construction cost estimation - free and open source')}
               </h3>
               <p className="text-sm text-content-secondary leading-relaxed">
@@ -1144,16 +1144,16 @@ export function LoginPage() {
 
             {/* What you can do */}
             <div className="px-6 py-4">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
+              <h3 className="oe-card-title mb-3">
                 {t('about.capabilities_title', 'What you can do')}
               </h3>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {[
-                  { icon: FileSpreadsheet, color: 'text-emerald-500 bg-emerald-500/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Works with regional classification systems or your own custom schema.') },
+                  { icon: FileSpreadsheet, color: 'text-semantic-success bg-semantic-success/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Works with regional classification systems or your own custom schema.') },
                   { icon: Database, color: 'text-blue-500 bg-blue-500/10', title: t('about.cap.costs', 'Cost Databases'), desc: t('about.cap.costs_desc', '55,000+ cost items across 48 regional databases worldwide. Add your own rates, import from Excel, or build a custom database from scratch.') },
-                  { icon: CalendarClock, color: 'text-amber-500 bg-amber-500/10', title: t('about.cap.schedule', '4D Scheduling'), desc: t('about.cap.schedule_desc', 'Create project schedules with CPM critical path calculation, interactive Gantt charts, Monte Carlo risk analysis, resource assignment, and auto-generation of activities from your BOQ.') },
+                  { icon: CalendarClock, color: 'text-semantic-warning bg-semantic-warning/10', title: t('about.cap.schedule', '4D Scheduling'), desc: t('about.cap.schedule_desc', 'Create project schedules with CPM critical path calculation, interactive Gantt charts, Monte Carlo risk analysis, resource assignment, and auto-generation of activities from your BOQ.') },
                   { icon: TrendingUp, color: 'text-violet-500 bg-violet-500/10', title: t('about.cap.costmodel', '5D Cost Model'), desc: t('about.cap.costmodel_desc', 'Track budgets over time with Earned Value Management (SPI, CPI), S-curve visualization, cash flow projections, cost snapshots, and what-if scenario modeling for informed decision-making.') },
-                  { icon: Boxes, color: 'text-rose-500 bg-rose-500/10', title: t('about.cap.catalog', 'Resource Catalog'), desc: t('about.cap.catalog_desc', '7,000+ resources - materials, equipment, labor, operators, and utilities. Build reusable assemblies (composite rates) from catalog items and apply them directly to BOQ positions.') },
+                  { icon: Boxes, color: 'text-semantic-error bg-semantic-error/10', title: t('about.cap.catalog', 'Resource Catalog'), desc: t('about.cap.catalog_desc', '7,000+ resources - materials, equipment, labor, operators, and utilities. Build reusable assemblies (composite rates) from catalog items and apply them directly to BOQ positions.') },
                   { icon: BarChart3, color: 'text-cyan-500 bg-cyan-500/10', title: t('about.cap.tendering', 'Tendering & Bids'), desc: t('about.cap.tendering_desc', 'Create tender packages with scope and positions, distribute to subcontractors, collect and compare bids side-by-side in a price mirror, and make award decisions based on data.') },
                   { icon: Upload, color: 'text-orange-500 bg-orange-500/10', title: t('about.cap.import', 'Import & Export'), desc: t('about.cap.import_desc', 'Full support for GAEB XML (X83), Excel, and CSV import/export. Generate professional PDF reports. Seamlessly integrate with your existing tools and workflows.') },
                   { icon: FileCheck, color: 'text-teal-500 bg-teal-500/10', title: t('about.cap.validation', 'Quality Validation'), desc: t('about.cap.validation_desc', 'Built-in quality engine automatically checks for missing quantities, zero prices, duplicate positions, classification compliance, and rate anomalies - with a traffic-light dashboard.') },
@@ -1176,7 +1176,7 @@ export function LoginPage() {
 
             {/* Why open source */}
             <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
+              <h3 className="oe-card-title mb-2">
                 {t('about.why_title', 'Why open source matters')}
               </h3>
               <div className="space-y-2 text-sm text-content-secondary leading-relaxed">
@@ -1188,7 +1188,7 @@ export function LoginPage() {
 
             {/* Who is it for */}
             <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
+              <h3 className="oe-card-title mb-2">
                 {t('about.who_title', 'Who is it for')}
               </h3>
               <p className="text-sm text-content-secondary leading-relaxed mb-3">
@@ -1216,7 +1216,7 @@ export function LoginPage() {
 
             {/* Key facts */}
             <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
+              <h3 className="oe-card-title mb-3">
                 {t('about.numbers_title', 'Platform in numbers')}
               </h3>
               <div className="grid grid-cols-4 gap-3 text-center">
@@ -1236,7 +1236,7 @@ export function LoginPage() {
 
             {/* AI note */}
             <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
+              <h3 className="oe-card-title mb-2">
                 {t('about.ai_title', 'About AI features')}
               </h3>
               <p className="text-sm text-content-secondary leading-relaxed">

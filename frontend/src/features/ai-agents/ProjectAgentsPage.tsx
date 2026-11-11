@@ -106,7 +106,7 @@ function AgentCard({
     >
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t(`project_agents.agent.${agent.name}.name`, { defaultValue: agent.display_name })}
           </h3>
           <p className="text-xs text-content-secondary">
@@ -141,7 +141,7 @@ function AgentCard({
               step={500}
               value={tokens}
               onChange={(e) => setTokens(Number(e.target.value))}
-              className="h-8 rounded border border-border-light bg-surface-primary px-2"
+              className="oe-input"
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -152,7 +152,7 @@ function AgentCard({
               max={90}
               value={reviewDays}
               onChange={(e) => setReviewDays(Number(e.target.value))}
-              className="h-8 rounded border border-border-light bg-surface-primary px-2"
+              className="oe-input"
             />
           </label>
         </div>
@@ -185,7 +185,7 @@ function AgentCard({
                           c.map((x, i) => (i === idx ? { ...x, max_payment_days: Number(e.target.value) } : x)),
                         )
                       }
-                      className="h-7 w-16 rounded border border-border-light bg-surface-primary px-1"
+                      className="oe-input-sm w-16"
                     />
                   </label>
                 )}
@@ -202,7 +202,7 @@ function AgentCard({
                           c.map((x, i) => (i === idx ? { ...x, max_retention_percent: Number(e.target.value) } : x)),
                         )
                       }
-                      className="h-7 w-16 rounded border border-border-light bg-surface-primary px-1"
+                      className="oe-input-sm w-16"
                     />
                   </label>
                 )}
@@ -224,7 +224,7 @@ function AgentCard({
               type={f.kind === 'date' ? 'date' : 'text'}
               value={inputs[f.key] ?? ''}
               onChange={(e) => setInputs((s) => ({ ...s, [f.key]: e.target.value }))}
-              className="h-8 min-w-[10rem] rounded border border-border-light bg-surface-primary px-2 text-sm text-content-primary"
+              className="oe-input min-w-[10rem]"
             />
           </label>
         ))}
@@ -261,7 +261,7 @@ function DraftCard({ draft, projectId }: { draft: AgentDraft; projectId: string 
     <article className="space-y-2 rounded-xl border border-border-light bg-surface-primary p-3">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h4 className="text-sm font-medium text-content-primary">{draft.title}</h4>
+          <h4 className="oe-card-title">{draft.title}</h4>
           <p className="text-2xs text-content-tertiary">
             {t(`project_agents.agent.${draft.agent_name}.name`, { defaultValue: draft.agent_name })}
             {draft.created_at ? ` · ${fmtDate(draft.created_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ''}
@@ -419,7 +419,7 @@ export function ProjectAgentsPage() {
         }
       />
       {state?.halted && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-semantic-error/5 p-3 text-sm text-semantic-error dark:text-red-300">
+        <div className="flex items-center gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/5 p-3 text-sm text-semantic-error">
           <Octagon className="h-4 w-4" />
           {t('project_agents.halted', { defaultValue: 'All agents are stopped on this project. No run can start.' })}
         </div>
@@ -451,7 +451,7 @@ export function ProjectAgentsPage() {
       )}
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('project_agents.drafts_to_review', { defaultValue: 'Drafts to review ({{count}})', count: pending.length })}
         </h2>
         {pending.length === 0 ? (
@@ -480,28 +480,28 @@ export function ProjectAgentsPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('project_agents.history', { defaultValue: 'Run history' })}
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="text-content-tertiary">
+          <table className="oe-table-compact w-full">
+            <thead>
               <tr>
-                <th className="py-1 pr-2">{t('project_agents.col_agent', { defaultValue: 'Agent' })}</th>
-                <th className="py-1 pr-2">{t('project_agents.col_status', { defaultValue: 'Status' })}</th>
-                <th className="py-1 pr-2">{t('project_agents.col_tokens', { defaultValue: 'Tokens' })}</th>
-                <th className="py-1 pr-2">{t('project_agents.col_started', { defaultValue: 'Started' })}</th>
-                <th className="py-1">{t('project_agents.col_audit', { defaultValue: 'Audit' })}</th>
+                <th className="pr-2">{t('project_agents.col_agent', { defaultValue: 'Agent' })}</th>
+                <th className="pr-2">{t('project_agents.col_status', { defaultValue: 'Status' })}</th>
+                <th className="pr-2">{t('project_agents.col_tokens', { defaultValue: 'Tokens' })}</th>
+                <th className="pr-2">{t('project_agents.col_started', { defaultValue: 'Started' })}</th>
+                <th>{t('project_agents.col_audit', { defaultValue: 'Audit' })}</th>
               </tr>
             </thead>
             <tbody>
               {(runs.data ?? []).map((r) => (
-                <tr key={r.id} className="border-t border-border-light">
-                  <td className="py-1 pr-2">{t(`project_agents.agent.${r.agent_name}.name`, { defaultValue: r.agent_name })}</td>
-                  <td className="py-1 pr-2">{r.failure_reason ? `${r.status} (${r.failure_reason})` : r.status}</td>
-                  <td className="py-1 pr-2">{r.total_tokens}</td>
-                  <td className="py-1 pr-2">{r.started_at ? fmtDate(r.started_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</td>
-                  <td className="py-1">
+                <tr key={r.id}>
+                  <td className="pr-2">{t(`project_agents.agent.${r.agent_name}.name`, { defaultValue: r.agent_name })}</td>
+                  <td className="pr-2">{r.failure_reason ? `${r.status} (${r.failure_reason})` : r.status}</td>
+                  <td className="pr-2">{r.total_tokens}</td>
+                  <td className="pr-2">{r.started_at ? fmtDate(r.started_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</td>
+                  <td>
                     <Link to={`/ai-agents?run=${r.id}`} className="text-oe-blue hover:underline">
                       {t('project_agents.open_timeline', { defaultValue: 'Timeline' })}
                     </Link>

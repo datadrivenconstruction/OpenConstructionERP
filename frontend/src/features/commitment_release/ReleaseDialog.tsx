@@ -237,7 +237,7 @@ export function ReleaseDialog({
           className="rounded-lg border border-border-light p-3 text-sm"
           data-testid="release-preview"
         >
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('commitment.release.who_decides', { defaultValue: 'Who will decide' })}
           </h3>
           {!askable ? (

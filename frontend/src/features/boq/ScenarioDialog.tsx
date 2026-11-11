@@ -112,7 +112,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
   const showsPreview = parsedPct !== null && parsedPct !== 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onClose}
@@ -131,7 +131,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               <FlaskConical size={16} />
             </span>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('boq.scenario_title', { defaultValue: 'New what-if scenario' })}
             </h2>
           </div>
@@ -165,7 +165,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
               autoComplete="off"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input mt-1 w-full"
               aria-label={t('boq.scenario_name_label', { defaultValue: 'Scenario name' })}
             />
           </label>
@@ -183,7 +183,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
               value={pct}
               onChange={(e) => setPct(e.target.value)}
               placeholder="0"
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm font-mono text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input mt-1 w-full font-mono"
               aria-label={t('boq.scenario_pct_label', { defaultValue: 'Adjust all unit rates by (%)' })}
             />
             <span
@@ -219,7 +219,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder={t('boq.scenario_region_ph', { defaultValue: 'e.g. Berlin' })}
-                className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input mt-1 w-full"
                 aria-label={t('boq.scenario_region_label', { defaultValue: 'Region (optional)' })}
               />
             </label>
@@ -235,7 +235,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={t('boq.scenario_note_ph', { defaultValue: 'What are you testing?' })}
-                className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input mt-1 w-full"
                 aria-label={t('boq.scenario_note_label', { defaultValue: 'Note (optional)' })}
               />
             </label>
@@ -256,7 +256,7 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
             disabled={mutation.isPending || !name.trim() || pctInvalid}
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-oe-blue hover:bg-oe-blue-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FlaskConical size={15} />
+            <FlaskConical size={16} />
             {mutation.isPending
               ? t('boq.scenario_creating', { defaultValue: 'Creating...' })
               : t('boq.scenario_create', { defaultValue: 'Create scenario' })}

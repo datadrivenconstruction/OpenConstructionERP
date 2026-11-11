@@ -305,28 +305,28 @@ export function MeasurementDrawer({
         <p className="text-xs text-content-secondary">{t('boq.measurement.intro')}</p>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[46rem] text-xs">
+          <table className="oe-table-compact w-full min-w-[46rem]">
             <thead>
-              <tr className="text-content-secondary">
-                <th className="px-2 py-1 text-left font-medium">
+              <tr>
+                <th>
                   {t('boq.measurement.description')}
                 </th>
-                <th className="w-16 px-2 py-1 text-right font-medium">
+                <th className="w-16 text-right">
                   {t('boq.measurement.units')}
                 </th>
-                <th className="w-20 px-2 py-1 text-right font-medium">
+                <th className="w-20 text-right">
                   {t('boq.measurement.length')}
                 </th>
-                <th className="w-20 px-2 py-1 text-right font-medium">
+                <th className="w-20 text-right">
                   {t('boq.measurement.width')}
                 </th>
-                <th className="w-20 px-2 py-1 text-right font-medium">
+                <th className="w-20 text-right">
                   {t('boq.measurement.height')}
                 </th>
-                <th className="w-10 px-2 py-1 text-center font-medium">
+                <th className="w-10 text-center">
                   {t('boq.measurement.sign')}
                 </th>
-                <th className="w-28 px-2 py-1 text-right font-medium">
+                <th className="w-28 text-right">
                   {t('boq.measurement.subtotal')}
                 </th>
                 <th className="w-8" />
@@ -336,14 +336,14 @@ export function MeasurementDrawer({
               {rows.map((row, index) => {
                 const line = sheet?.lines?.[index];
                 return (
-                  <tr key={row.key} className="border-t border-border-light align-top">
-                    <td className="px-2 py-1">
+                  <tr key={row.key} className="align-top">
+                    <td>
                       <input
                         value={row.description}
                         onChange={(e) => patch(index, 'description', e.target.value)}
                         disabled={readOnly}
                         placeholder={t('boq.measurement.description_placeholder')}
-                        className="w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-xs focus:border-border-focus focus:outline-none disabled:opacity-60"
+                        className="oe-input-sm w-full"
                       />
                       {row.formula && (
                         // Shown, not hidden: this row came from a sheet whose
@@ -354,14 +354,14 @@ export function MeasurementDrawer({
                           onChange={(e) => patch(index, 'formula', e.target.value)}
                           disabled={readOnly}
                           aria-label={t('boq.measurement.formula')}
-                          className="mt-1 w-full rounded border border-border-light bg-surface-secondary px-2 py-1 font-mono text-2xs focus:border-border-focus focus:outline-none disabled:opacity-60"
+                          className="oe-input-sm mt-1 w-full font-mono"
                         />
                       )}
                       {line?.error && (
                         <p className="mt-1 text-2xs text-semantic-error">{line.error}</p>
                       )}
                     </td>
-                    <td className="px-2 py-1">
+                    <td>
                       <input
                         value={row.units}
                         onChange={(e) => patch(index, 'units', e.target.value)}
@@ -372,7 +372,7 @@ export function MeasurementDrawer({
                         className={numberCell}
                       />
                     </td>
-                    <td className="px-2 py-1">
+                    <td>
                       <input
                         value={row.length}
                         onChange={(e) => patch(index, 'length', e.target.value)}
@@ -382,7 +382,7 @@ export function MeasurementDrawer({
                         className={numberCell}
                       />
                     </td>
-                    <td className="px-2 py-1">
+                    <td>
                       <input
                         value={row.width}
                         onChange={(e) => patch(index, 'width', e.target.value)}
@@ -392,7 +392,7 @@ export function MeasurementDrawer({
                         className={numberCell}
                       />
                     </td>
-                    <td className="px-2 py-1">
+                    <td>
                       <input
                         value={row.height}
                         onChange={(e) => patch(index, 'height', e.target.value)}
@@ -402,7 +402,7 @@ export function MeasurementDrawer({
                         className={numberCell}
                       />
                     </td>
-                    <td className="px-2 py-1 text-center">
+                    <td className="text-center">
                       <button
                         type="button"
                         disabled={readOnly}
@@ -426,10 +426,10 @@ export function MeasurementDrawer({
                         {row.sign === '-' ? <Minus size={12} /> : <Plus size={12} />}
                       </button>
                     </td>
-                    <td className="px-2 py-1 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       {line && !line.error ? fmtQuantity(line.quantity) : ''}
                     </td>
-                    <td className="px-2 py-1 text-right">
+                    <td className="text-right">
                       <button
                         type="button"
                         disabled={readOnly || rows.length === 1}
@@ -437,7 +437,7 @@ export function MeasurementDrawer({
                         aria-label={t('boq.measurement.remove_line')}
                         className="text-content-secondary hover:text-semantic-error disabled:opacity-40"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     </td>
                   </tr>

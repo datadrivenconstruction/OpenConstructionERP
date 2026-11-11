@@ -95,7 +95,7 @@ export function QualityScoreRing({
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg ${bgColor} cursor-default transition-colors`}>
+      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${bgColor} cursor-default transition-colors`}>
         {/* SVG ring */}
         <svg width="40" height="40" viewBox="0 0 44 44" className="shrink-0 -rotate-90">
           <circle
@@ -126,7 +126,7 @@ export function QualityScoreRing({
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+          <span className="oe-overline">
             {t('boq.quality', { defaultValue: 'Quality' })}
           </span>
           <span className="text-xs font-semibold text-content-primary">{label}</span>
@@ -135,28 +135,28 @@ export function QualityScoreRing({
 
       {/* Tooltip breakdown */}
       {showTooltip && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 rounded-xl border border-border-light bg-surface-elevated shadow-lg p-4 animate-fade-in">
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-dropdown w-64 rounded-xl border border-border-light bg-surface-elevated shadow-lg p-4 animate-fade-in">
           <p className="text-xs font-semibold text-content-primary mb-3">
             {t('boq.quality_breakdown', { defaultValue: 'Quality Breakdown' })}
           </p>
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <QualityRow
-              icon={<FileText size={13} />}
+              icon={<FileText size={14} />}
               label={t('boq.quality_descriptions', { defaultValue: 'Descriptions filled' })}
               value={breakdown.withDescription}
             />
             <QualityRow
-              icon={<Hash size={13} />}
+              icon={<Hash size={14} />}
               label={t('boq.quality_quantities', { defaultValue: 'Quantities set' })}
               value={breakdown.withQuantity}
             />
             <QualityRow
-              icon={<DollarSign size={13} />}
+              icon={<DollarSign size={14} />}
               label={t('boq.quality_rates', { defaultValue: 'Rates set' })}
               value={breakdown.withRate}
             />
             <div className="flex items-center gap-2">
-              <Percent size={13} className="text-content-tertiary shrink-0" />
+              <Percent size={14} className="text-content-tertiary shrink-0" />
               <span className="flex-1 text-xs text-content-secondary">
                 {t('boq.quality_markups', { defaultValue: 'Markups added' })}
               </span>
@@ -234,7 +234,7 @@ export function TipsPanel({
         className="flex w-full items-center justify-between px-4 py-3 hover:bg-surface-secondary/50 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Lightbulb size={15} className="text-[#eab308]" />
+          <Lightbulb size={16} className="text-[#eab308]" />
           <span className="text-xs font-semibold text-content-primary">
             {t('boq.tips_title', { defaultValue: 'Tips & Hints' })}
           </span>
@@ -364,7 +364,7 @@ export function QuickAddFAB({
             : 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover hover:scale-105 hover:shadow-lg active:scale-95'
         }`}
       >
-        <Plus size={18} strokeWidth={2.5} />
+        <Plus size={20} strokeWidth={2.5} />
       </button>
     </div>
   );
@@ -436,7 +436,7 @@ export function EmptyBOQOnboarding({
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle">
             <Sparkles size={24} className="text-oe-blue" />
           </div>
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('boq.start_building', { defaultValue: 'Start building your estimate' })}
           </h3>
           <p className="mt-1.5 text-sm text-content-secondary max-w-sm mx-auto">
@@ -483,7 +483,7 @@ export function EmptyBOQOnboarding({
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >
-                {step.complete ? <CheckCircle2 size={18} /> : step.icon}
+                {step.complete ? <CheckCircle2 size={20} /> : step.icon}
               </div>
 
               {/* Content */}
@@ -531,14 +531,14 @@ export function ExportWarningDialog({
   t: (key: string, options?: Record<string, string | number>) => string;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30">
       <div className="w-96 rounded-xl border border-border bg-surface-elevated p-5 shadow-2xl animate-fade-in">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-warning-bg">
             <ShieldCheck size={20} className="text-semantic-warning" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.low_quality_warning', { defaultValue: 'Low Quality Score' })}
             </h3>
             <p className="text-xs text-content-tertiary">
@@ -566,7 +566,7 @@ export function ExportWarningDialog({
             onClick={() => onConfirm(exportWarning.format)}
             className="flex h-8 items-center gap-1.5 rounded-lg bg-semantic-warning px-4 text-xs font-medium text-white hover:bg-semantic-warning transition-colors"
           >
-            <Download size={13} />
+            <Download size={14} />
             {t('boq.export_anyway', { defaultValue: 'Export Anyway' })}
           </button>
         </div>

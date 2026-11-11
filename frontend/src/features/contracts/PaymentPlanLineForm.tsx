@@ -319,7 +319,7 @@ export function PaymentPlanLineForm({
   };
 
   const inputCls =
-    'rounded-md border border-border-light bg-surface-elevated px-2 py-1.5 text-sm';
+    '';
   const labelCls = 'text-xs text-content-tertiary';
   const hintCls = 'text-2xs text-content-tertiary';
   const errCls = 'text-2xs text-semantic-error';
@@ -334,7 +334,7 @@ export function PaymentPlanLineForm({
         submit();
       }}
     >
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+      <p className="oe-overline mb-2">
         {line
           ? t('contracts.plan_form_title_edit', { defaultValue: 'Change instalment' })
           : t('contracts.plan_form_title_new', { defaultValue: 'New instalment' })}
@@ -346,7 +346,7 @@ export function PaymentPlanLineForm({
             {t('contracts.plan_field_name', { defaultValue: 'What is it for' })}
           </span>
           <input
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             value={draft.name}
             onChange={(e) => set('name', e.target.value)}
             placeholder={t('contracts.plan_field_name_placeholder', {
@@ -366,7 +366,7 @@ export function PaymentPlanLineForm({
             {t('contracts.plan_field_kind', { defaultValue: 'Type of payment' })}
           </span>
           <select
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
             value={draft.kind}
             onChange={(e) => set('kind', asKind(e.target.value))}
           >
@@ -424,7 +424,7 @@ export function PaymentPlanLineForm({
               })}
             </span>
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               value={draft.amount}
               onChange={(e) => set('amount', e.target.value)}
               inputMode="decimal"
@@ -444,7 +444,7 @@ export function PaymentPlanLineForm({
               {t('contracts.plan_field_percent', { defaultValue: 'Percent of the contract' })}
             </span>
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               value={draft.percent}
               onChange={(e) => set('percent', e.target.value)}
               inputMode="decimal"
@@ -474,7 +474,7 @@ export function PaymentPlanLineForm({
             {t('contracts.plan_field_trigger', { defaultValue: 'Becomes payable' })}
           </span>
           <select
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
             value={draft.trigger}
             onChange={(e) => set('trigger', asTrigger(e.target.value))}
           >
@@ -530,7 +530,7 @@ export function PaymentPlanLineForm({
           </span>
           <input
             type="date"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             value={draft.planned_date}
             onChange={(e) => set('planned_date', e.target.value)}
           />
@@ -547,7 +547,7 @@ export function PaymentPlanLineForm({
             {t('contracts.plan_field_lag', { defaultValue: 'Days after the milestone you can claim' })}
           </span>
           <input
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             value={draft.lag_days}
             onChange={(e) => set('lag_days', e.target.value)}
             inputMode="numeric"
@@ -572,7 +572,7 @@ export function PaymentPlanLineForm({
             {t('contracts.plan_field_terms', { defaultValue: 'Days the client has to pay' })}
           </span>
           <input
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             value={draft.payment_terms_days}
             onChange={(e) => set('payment_terms_days', e.target.value)}
             placeholder={defaultTermsDays != null ? String(defaultTermsDays) : ''}

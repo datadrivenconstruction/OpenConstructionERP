@@ -26,7 +26,7 @@ import {
   type PaymentTermsBody,
 } from './paymentsApi';
 
-const INPUT = 'h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm disabled:opacity-60';
+const INPUT = 'w-full';
 
 function bodyOf(terms: PaymentTerms): PaymentTermsBody {
   const { contract_id: _c, terms_set: _s, currency: _cur, ...body } = terms;
@@ -181,7 +181,7 @@ export function TermsDrawer({
           )}
 
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('cost_control.pay.terms_invoicing', { defaultValue: 'Invoicing' })}
             </h3>
             <Field
@@ -198,7 +198,7 @@ export function TermsDrawer({
               }
             >
               <select
-                className={INPUT}
+                className={`oe-select ${INPUT}`}
                 value={form.invoice_mode}
                 disabled={disabled}
                 onChange={(e) => set('invoice_mode', e.target.value as PaymentTermsBody['invoice_mode'])}
@@ -214,7 +214,7 @@ export function TermsDrawer({
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('cost_control.pay.terms_interim_due', { defaultValue: 'Interim invoice due after (days)' })}>
                 <input
-                  className={INPUT}
+                  className={`oe-input ${INPUT}`}
                   inputMode="numeric"
                   value={form.interim_due_days ?? ''}
                   disabled={disabled}
@@ -223,7 +223,7 @@ export function TermsDrawer({
               </Field>
               <Field label={t('cost_control.pay.terms_final_due', { defaultValue: 'Final invoice due after (days)' })}>
                 <input
-                  className={INPUT}
+                  className={`oe-input ${INPUT}`}
                   inputMode="numeric"
                   value={form.final_due_days ?? ''}
                   disabled={disabled}
@@ -234,13 +234,13 @@ export function TermsDrawer({
           </section>
 
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('cost_control.pay.terms_retention', { defaultValue: 'Retention on interim invoices' })}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('cost_control.pay.terms_retention_percent', { defaultValue: 'Rate (%)' })}>
                 <input
-                  className={INPUT}
+                  className={`oe-input ${INPUT}`}
                   inputMode="decimal"
                   value={form.retention_percent}
                   disabled={disabled}
@@ -250,7 +250,7 @@ export function TermsDrawer({
               </Field>
               <Field label={t('cost_control.pay.terms_retention_basis', { defaultValue: 'Taken on' })}>
                 <select
-                  className={INPUT}
+                  className={`oe-select ${INPUT}`}
                   value={form.retention_basis}
                   disabled={disabled}
                   onChange={(e) => set('retention_basis', e.target.value as PaymentTermsBody['retention_basis'])}
@@ -264,7 +264,7 @@ export function TermsDrawer({
             </div>
             <Field label={t('cost_control.pay.terms_retention_event', { defaultValue: 'Paid back at' })}>
               <select
-                className={INPUT}
+                className={`oe-select ${INPUT}`}
                 value={form.retention_release_event}
                 disabled={disabled}
                 onChange={(e) => set('retention_release_event', e.target.value)}
@@ -293,7 +293,7 @@ export function TermsDrawer({
               <div className="grid grid-cols-2 gap-3 ps-7">
                 <Field label={t('cost_control.pay.terms_retention_percent', { defaultValue: 'Rate (%)' })}>
                   <input
-                    className={INPUT}
+                    className={`oe-input ${INPUT}`}
                     inputMode="decimal"
                     value={form.warranty_percent}
                     disabled={disabled}
@@ -302,7 +302,7 @@ export function TermsDrawer({
                 </Field>
                 <Field label={t('cost_control.pay.terms_warranty_months', { defaultValue: 'Defects period (months)' })}>
                   <input
-                    className={INPUT}
+                    className={`oe-input ${INPUT}`}
                     inputMode="numeric"
                     value={form.warranty_period_months ?? ''}
                     disabled={disabled}
@@ -312,7 +312,7 @@ export function TermsDrawer({
                 <div className="col-span-2">
                   <Field label={t('cost_control.pay.terms_retention_event', { defaultValue: 'Paid back at' })}>
                     <select
-                      className={INPUT}
+                      className={`oe-select ${INPUT}`}
                       value={form.warranty_release_event}
                       disabled={disabled}
                       onChange={(e) => set('warranty_release_event', e.target.value)}
@@ -344,7 +344,7 @@ export function TermsDrawer({
               <div className="grid grid-cols-3 gap-3 ps-7">
                 <Field label={t('cost_control.pay.terms_retention_percent', { defaultValue: 'Rate (%)' })}>
                   <input
-                    className={INPUT}
+                    className={`oe-input ${INPUT}`}
                     inputMode="decimal"
                     value={form.discount_percent}
                     disabled={disabled}
@@ -353,7 +353,7 @@ export function TermsDrawer({
                 </Field>
                 <Field label={t('cost_control.pay.terms_discount_days', { defaultValue: 'Within (days)' })}>
                   <input
-                    className={INPUT}
+                    className={`oe-input ${INPUT}`}
                     inputMode="numeric"
                     value={form.discount_days}
                     disabled={disabled}
@@ -362,7 +362,7 @@ export function TermsDrawer({
                 </Field>
                 <Field label={t('cost_control.pay.terms_discount_scope', { defaultValue: 'On' })}>
                   <select
-                    className={INPUT}
+                    className={`oe-select ${INPUT}`}
                     value={form.discount_applies_to}
                     disabled={disabled}
                     onChange={(e) =>
@@ -400,7 +400,7 @@ export function TermsDrawer({
                   })}
                 >
                   <input
-                    className={INPUT}
+                    className={`oe-input ${INPUT}`}
                     inputMode="decimal"
                     value={form.rounding_step}
                     disabled={disabled}

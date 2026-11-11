@@ -60,7 +60,7 @@ export interface FormDialogProps {
   testId?: string;
 }
 
-const CONTROL = 'w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+const CONTROL = 'w-full';
 
 export function str(values: FormValues, name: string): string {
   const v = values[name];
@@ -133,7 +133,7 @@ export function FormDialog({
     const common = { id, 'data-testid': `field-${f.name}`, 'aria-required': f.required || undefined };
     switch (f.type) {
       case 'textarea':
-        return <textarea {...common} rows={3} className={CONTROL} value={str(values, f.name)} onChange={(e) => set(f.name, e.target.value)} />;
+        return <textarea {...common} rows={3} className={`oe-textarea ${CONTROL}`} value={str(values, f.name)} onChange={(e) => set(f.name, e.target.value)} />;
       case 'checkbox':
         return (
           <input
@@ -146,7 +146,7 @@ export function FormDialog({
         );
       case 'select':
         return (
-          <select {...common} className={CONTROL} value={str(values, f.name)} onChange={(e) => set(f.name, e.target.value)}>
+          <select {...common} className={`oe-select ${CONTROL}`} value={str(values, f.name)} onChange={(e) => set(f.name, e.target.value)}>
             {(!f.required || isEmpty(values[f.name])) && <option value="">{ui(t, 'design.ui.form.none')}</option>}
             {(f.options ?? []).map((o) => (
               <option key={o.value} value={o.value}>
@@ -183,7 +183,7 @@ export function FormDialog({
             type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
             min={f.type === 'number' ? 0 : undefined}
             autoComplete="off"
-            className={CONTROL}
+            className={`oe-input ${CONTROL}`}
             value={str(values, f.name)}
             onChange={(e) => set(f.name, e.target.value)}
           />

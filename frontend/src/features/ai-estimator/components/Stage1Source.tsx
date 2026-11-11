@@ -146,7 +146,7 @@ export function Stage1Intake(props: Stage1IntakeProps) {
       )}
 
       {/* Source-kind tab grid */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {SOURCE_TABS.map((tab) => {
           const active = tab.id === sourceKind;
           return (
@@ -188,7 +188,7 @@ export function Stage1Intake(props: Stage1IntakeProps) {
               defaultValue:
                 'Describe the scope, e.g. "Two-storey office, 1200 m2 GFA, reinforced concrete frame, brick facade, suspended ceilings, full MEP fit-out."',
             })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-textarea-lg w-full"
           />
         )}
 
@@ -285,7 +285,7 @@ export function Stage1Intake(props: Stage1IntakeProps) {
                   const checked = selectedDocIds.includes(d.id);
                   return (
                     <li key={d.id}>
-                      <label className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface-secondary">
+                      <label className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-surface-secondary">
                         <input
                           type="checkbox"
                           checked={checked}
@@ -430,13 +430,13 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('aiest.confirm1.catalogue', { defaultValue: 'Cost catalogue' })}
           </label>
           <select
             value={effCatalogue}
             onChange={(e) => onChange({ catalogue_id: e.target.value || null })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+            className="oe-select w-full"
           >
             <option value="">
               {t('aiest.confirm1.catalogue_auto', {
@@ -461,13 +461,13 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('aiest.confirm1.currency', { defaultValue: 'Currency' })}
           </label>
           <select
             value={effCurrency}
             onChange={(e) => onChange({ currency: e.target.value || null })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+            className="oe-select w-full"
           >
             <option value="">{t('common.auto', { defaultValue: 'Auto' })}</option>
             {currencyMenu.map((c) => (
@@ -485,7 +485,7 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('aiest.confirm1.region', { defaultValue: 'Region' })}
           </label>
           <input
@@ -493,14 +493,14 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
             value={effRegion}
             onChange={(e) => onChange({ region: e.target.value || null })}
             placeholder={t('aiest.confirm1.region_placeholder', { defaultValue: 'e.g. de, us' })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+            className="oe-input w-full"
           />
         </div>
 
         <div>
           <label
             htmlFor="aiest-construction-stage"
-            className="mb-1.5 block text-sm font-medium text-content-primary"
+            className="oe-label"
           >
             {t('aiest.confirm1.stage', { defaultValue: 'Construction stage' })}
           </label>
@@ -508,7 +508,7 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
             id="aiest-construction-stage"
             value={effStage}
             onChange={(e) => onChange({ construction_stage: e.target.value || null })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+            className="oe-select w-full"
           >
             <option value="">{t('aiest.stage_all', { defaultValue: 'All stages' })}</option>
             {stageOptions.map((s) => (

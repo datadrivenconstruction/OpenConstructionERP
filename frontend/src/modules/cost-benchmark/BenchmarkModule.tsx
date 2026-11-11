@@ -367,7 +367,7 @@ export default function BenchmarkModule() {
         {projects.length > 0 && (
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-content-tertiary">
+              <label className="oe-label">
                 <span className="inline-flex items-center gap-1.5">
                   <FolderOpen className="h-3.5 w-3.5" />
                   {t('benchmarks.pick_project', { defaultValue: 'Compare a project' })}
@@ -376,7 +376,7 @@ export default function BenchmarkModule() {
               <select
                 value={selectedProjectId ?? ''}
                 onChange={(e) => setSelectedProjectId(e.target.value || null)}
-                className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('benchmarks.pick_project_manual', { defaultValue: 'Manual entry' })}
@@ -415,13 +415,13 @@ export default function BenchmarkModule() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Building type */}
           <div>
-            <label className="block text-xs font-medium text-content-tertiary mb-1">
+            <label className="oe-label">
               {t('benchmarks.building_type', { defaultValue: 'Building Type' })}
             </label>
             <select
               value={buildingType}
               onChange={(e) => setBuildingType(e.target.value as BuildingType)}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+              className="oe-select w-full"
             >
               {BUILDING_TYPES.map((bt) => (
                 <option key={bt.id} value={bt.id}>{bt.label}</option>
@@ -431,13 +431,13 @@ export default function BenchmarkModule() {
 
           {/* Region */}
           <div>
-            <label className="block text-xs font-medium text-content-tertiary mb-1">
+            <label className="oe-label">
               {t('benchmarks.region', { defaultValue: 'Region' })}
             </label>
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value as BenchmarkRegion)}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+              className="oe-select w-full"
             >
               {BENCHMARK_REGIONS.map((r) => (
                 <option key={r.id} value={r.id}>{r.label} ({r.currency})</option>
@@ -447,27 +447,27 @@ export default function BenchmarkModule() {
 
           {/* GFA */}
           <div>
-            <label className="block text-xs font-medium text-content-tertiary mb-1">
+            <label className="oe-label">
               {t('benchmarks.gfa', { defaultValue: 'Gross Floor Area (m2)' })}
             </label>
             <input
               type="number"
               value={gfa}
               onChange={(e) => setGfa(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+              className="oe-input w-full"
             />
           </div>
 
           {/* Total cost */}
           <div>
-            <label className="block text-xs font-medium text-content-tertiary mb-1">
+            <label className="oe-label">
               {t('benchmarks.total_cost', { defaultValue: 'Your Total Cost' })} ({regionInfo.currency})
             </label>
             <input
               type="number"
               value={totalCost}
               onChange={(e) => setTotalCost(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+              className="oe-input w-full"
             />
           </div>
         </div>
@@ -610,7 +610,7 @@ export default function BenchmarkModule() {
 
       {/* Visual benchmark bar */}
       <div data-guide="benchmarks-bar" className="rounded-xl border border-border bg-surface-primary p-5">
-        <h3 className="text-sm font-semibold text-content-primary mb-4">
+        <h3 className="oe-card-title mb-4">
           {buildingInfo.label}, {regionInfo.label} ({benchmarkRange.source} {benchmarkRange.sourceYear})
         </h3>
 
@@ -618,10 +618,10 @@ export default function BenchmarkModule() {
         <div className="relative">
           {/* Colored segments */}
           <div className="flex h-8 rounded-lg overflow-hidden">
-            <div className="bg-emerald-400 dark:bg-emerald-600" style={{ width: `${segments.q1W}%` }} />
-            <div className="bg-green-400 dark:bg-green-600" style={{ width: `${segments.q2W}%` }} />
-            <div className="bg-amber-400 dark:bg-amber-600" style={{ width: `${segments.q3W}%` }} />
-            <div className="bg-red-400 dark:bg-red-600" style={{ width: `${segments.q4W}%` }} />
+            <div className="bg-semantic-success" style={{ width: `${segments.q1W}%` }} />
+            <div className="bg-semantic-success" style={{ width: `${segments.q2W}%` }} />
+            <div className="bg-semantic-warning" style={{ width: `${segments.q3W}%` }} />
+            <div className="bg-semantic-error" style={{ width: `${segments.q4W}%` }} />
           </div>
 
           {/* Marker */}
@@ -688,7 +688,7 @@ export default function BenchmarkModule() {
         return (
           <div className="rounded-xl border border-border bg-surface-primary p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('benchmarks.portfolio_title', { defaultValue: 'Your own portfolio distribution' })}
               </h3>
               <span className={`text-xs font-medium ${confMeta.className}`}>
@@ -752,7 +752,7 @@ export default function BenchmarkModule() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* KG split strip */}
         <div data-guide="benchmarks-split" className={`rounded-xl border border-border bg-surface-primary p-5 ${buildingInfo.secondaryUnitId ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
-          <h3 className="mb-1 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-1">
             {t('benchmarks.kg_split_title_v2', { defaultValue: 'Cost group split of your cost / {{unit}}', unit: rateUnit })}
           </h3>
           <p className="mb-4 text-xs text-content-tertiary">
@@ -815,7 +815,7 @@ export default function BenchmarkModule() {
         {/* Secondary metric card (only when the type defines one) */}
         {buildingInfo.secondaryUnitId && benchmarkRange.secondary && (
           <div className="rounded-xl border border-border bg-surface-primary p-5">
-            <h3 className="mb-1 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-1">
               {t('benchmarks.secondary_title', { defaultValue: 'Per-unit benchmark' })}
             </h3>
             <p className="text-xs text-content-tertiary">
@@ -847,7 +847,7 @@ export default function BenchmarkModule() {
       <div className="rounded-xl border border-border bg-surface-primary p-5">
         <div className="mb-1 flex items-center gap-2">
           <Layers className="h-4 w-4 text-content-tertiary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('benchmarks.elements_title', { defaultValue: 'Cost breakdown by DIN 276 element group' })}
           </h3>
         </div>
@@ -926,7 +926,7 @@ export default function BenchmarkModule() {
 
       {/* All building types comparison */}
       <div className="rounded-xl border border-border bg-surface-primary p-5">
-        <h3 className="text-sm font-semibold text-content-primary mb-3">
+        <h3 className="oe-card-title mb-3">
           {t('benchmarks.all_types', { defaultValue: 'All Building Types' })}, {regionInfo.label}
         </h3>
         <div className="space-y-2">

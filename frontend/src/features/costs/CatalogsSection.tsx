@@ -214,7 +214,7 @@ function CatalogFormDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -225,7 +225,7 @@ function CatalogFormDialog({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 id="catalog-form-dialog-title" className="text-base font-semibold text-content-primary">
+            <h2 id="catalog-form-dialog-title" className="oe-section-title">
               {isEdit
                 ? t('costs_catalogs.edit_title', { defaultValue: 'Edit catalog' })
                 : t('costs_catalogs.create_title', { defaultValue: 'Create catalog' })}
@@ -247,7 +247,7 @@ function CatalogFormDialog({
 
         <div className="px-6 py-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs_catalogs.name_label', { defaultValue: 'Name' })} *
             </label>
             <input
@@ -256,19 +256,19 @@ function CatalogFormDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('costs_catalogs.name_placeholder', { defaultValue: 'e.g. My price book 2026' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs_catalogs.currency_label', { defaultValue: 'Currency' })} *
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
               disabled={currencyLocked}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:opacity-60 disabled:cursor-not-allowed"
+              className="oe-select w-full"
             >
               <option value="">
                 {t('costs_catalogs.import_currency_select', { defaultValue: 'Select currency...' })}
@@ -291,7 +291,7 @@ function CatalogFormDialog({
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs_catalogs.description_label', { defaultValue: 'Description (optional)' })}
             </label>
             <input
@@ -299,7 +299,7 @@ function CatalogFormDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('costs_catalogs.description_placeholder', { defaultValue: 'What this catalog contains' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
         </div>
@@ -381,14 +381,14 @@ function DeleteCatalogDialog({
   });
 
   const optionClass = (active: boolean) =>
-    `flex items-start gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
+    `flex items-start gap-2 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
       active
         ? 'border-oe-blue/50 bg-oe-blue-subtle/15'
         : 'border-border-light hover:bg-surface-secondary/50'
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -398,7 +398,7 @@ function DeleteCatalogDialog({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 id="delete-catalog-dialog-title" className="text-base font-semibold text-content-primary">
+            <h2 id="delete-catalog-dialog-title" className="oe-section-title">
               {t('costs_catalogs.delete_title', { defaultValue: 'Delete catalog' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -417,7 +417,7 @@ function DeleteCatalogDialog({
           </button>
         </div>
 
-        <div className="px-6 py-4 space-y-2.5">
+        <div className="px-6 py-4 space-y-2">
           <label className={optionClass(mode === 'keep_items')}>
             <input
               type="radio"
@@ -670,7 +670,7 @@ export function CatalogsSection({
           onClick={() => setShowCreate(true)}
           className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-medium text-content-tertiary hover:text-oe-blue-text hover:border-oe-blue/40 hover:bg-oe-blue-subtle/10 transition-colors"
         >
-          <Plus size={13} />
+          <Plus size={14} />
           {t('costs_catalogs.new_catalog', { defaultValue: 'New catalog' })}
         </button>
       </div>

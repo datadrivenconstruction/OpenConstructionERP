@@ -129,7 +129,7 @@ export default function LinkDocumentToBIMModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -142,7 +142,7 @@ export default function LinkDocumentToBIMModal({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
             <FileText size={16} className="text-violet-600" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('bim.link_doc_title', { defaultValue: 'Link a document' })}
             </h2>
             <span className="text-2xs text-content-tertiary">
@@ -167,7 +167,7 @@ export default function LinkDocumentToBIMModal({
         <div className="px-5 py-3 border-b border-border-light shrink-0">
           <div className="relative">
             <Search
-              size={13}
+              size={14}
               className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
             />
             <input
@@ -178,7 +178,7 @@ export default function LinkDocumentToBIMModal({
                 defaultValue: 'Search by name, category, drawing number, discipline…',
               })}
               autoFocus
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input w-full ps-8 pe-3"
             />
           </div>
         </div>

@@ -552,7 +552,7 @@ export function AnalyticsPage() {
       {/* Projects Comparison Table */}
       <Card padding="none">
         <div className="px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('analytics.project_comparison', { defaultValue: 'Project Comparison' })}
           </h2>
         </div>
@@ -562,13 +562,13 @@ export function AnalyticsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
-            className="h-8 w-48 rounded-lg border border-border-light bg-surface-primary px-3 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input w-48"
             aria-label={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
           />
           <select
             value={regionFilter}
             onChange={(e) => setRegionFilter(e.target.value)}
-            className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-select"
             aria-label={t('analytics.filter_region', { defaultValue: 'Filter by region' })}
           >
             <option value="">{t('analytics.all_regions', { defaultValue: 'All Regions' })}</option>
@@ -577,7 +577,7 @@ export function AnalyticsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-select"
             aria-label={t('analytics.filter_status', { defaultValue: 'Filter by status' })}
           >
             <option value="">{t('analytics.all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -617,9 +617,9 @@ export function AnalyticsPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary/50">
+                <tr>
                   <SortHeader
                     field="name"
                     label={t('analytics.col_project', { defaultValue: 'Project' })}
@@ -627,7 +627,7 @@ export function AnalyticsPage() {
                     dir={sortDir}
                     onClick={handleSort}
                   />
-                  <th className="px-4 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+                  <th>
                     {t('analytics.col_region', { defaultValue: 'Region' })}
                   </th>
                   <SortHeader
@@ -670,15 +670,15 @@ export function AnalyticsPage() {
                     onClick={handleSort}
                     align="right"
                   />
-                  <th className="px-4 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider">
+                  <th className="text-center">
                     {t('analytics.col_status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-content-tertiary uppercase tracking-wider">
+                  <th className="text-right">
                     {t('analytics.col_finance', { defaultValue: 'Finance' })}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {pagedProjects.map((p) => (
                   <tr
                     key={p.id}
@@ -687,7 +687,7 @@ export function AnalyticsPage() {
                       defaultValue: 'Open project {{name}}',
                       name: p.name,
                     })}
-                    className="hover:bg-surface-secondary/30 transition-colors cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-oe-blue"
+                    className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-oe-blue"
                     onClick={() => void openProject(p.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -696,16 +696,16 @@ export function AnalyticsPage() {
                       }
                     }}
                   >
-                    <td className="px-4 py-3 font-medium text-content-primary whitespace-nowrap">
+                    <td className="font-medium whitespace-nowrap">
                       {p.name}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary whitespace-nowrap">
+                    <td className="text-content-secondary whitespace-nowrap">
                       {p.region}
                     </td>
-                    <td className="px-4 py-3 text-right text-content-primary tabular-nums whitespace-nowrap">
+                    <td className="text-right tabular-nums whitespace-nowrap">
                       {fmtCurrency(p.budget, p.currency)}
                     </td>
-                    <td className="px-4 py-3 text-right text-content-secondary tabular-nums whitespace-nowrap">
+                    <td className="text-right text-content-secondary tabular-nums whitespace-nowrap">
                       {fmtCurrency(p.actual, p.currency)}
                     </td>
                     <td
@@ -734,14 +734,14 @@ export function AnalyticsPage() {
                         </>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap text-content-secondary">
+                    <td className="text-right tabular-nums whitespace-nowrap text-content-secondary">
                       {p.cost_per_sqm != null ? (
                         <>{fmtNumber(p.cost_per_sqm, 0)} {p.currency}/m²</>
                       ) : (
                         <span className="text-content-tertiary">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="text-center">
                       <Badge
                         variant={p.status === 'on_budget' ? 'success' : 'error'}
                         size="sm"
@@ -755,7 +755,7 @@ export function AnalyticsPage() {
                     {/* Per-row Finance deep link: the row itself opens the
                         project, this opens that project's Finance module so the
                         budget-vs-actual figure traces to its source (CONN-76). */}
-                    <td className="px-4 py-3 text-right">
+                    <td className="text-right">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -826,7 +826,7 @@ export function AnalyticsPage() {
           line up with the visible rows and never render hundreds at once. */}
       {pagedProjects.length > 0 && (
         <Card>
-          <h2 className="text-lg font-semibold text-content-primary mb-4">
+          <h2 className="oe-section-title mb-4">
             {t('analytics.budget_breakdown', { defaultValue: 'Budget Breakdown' })}
           </h2>
           <div className="space-y-4">
@@ -929,7 +929,7 @@ function KPICard({
           {icon}
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-start">
-          <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">{label}</p>
+          <p className="oe-overline">{label}</p>
           {valueNode ? (
             <div className="mt-1">{valueNode}</div>
           ) : (

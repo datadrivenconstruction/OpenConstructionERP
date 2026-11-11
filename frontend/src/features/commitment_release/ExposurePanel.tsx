@@ -84,7 +84,7 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
     <div className="space-y-5" data-testid="exposure-panel">
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label htmlFor="exposure-as-of" className="mb-1 block text-sm font-medium text-content-primary">
+          <label htmlFor="exposure-as-of" className="oe-label">
             {t('commitment.exposure.as_of', { defaultValue: 'If the project stopped on' })}
           </label>
           <input
@@ -115,7 +115,7 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
       {saving && (
         <div className="space-y-2 rounded-lg bg-surface-secondary p-3" data-testid="scenario-form">
           {save.isError && <RefusalBox message={refusalText(t, save.error)} />}
-          <label htmlFor="scenario-label" className="block text-sm font-medium text-content-primary">
+          <label htmlFor="scenario-label" className="oe-label">
             {t('commitment.exposure.scenario_label', { defaultValue: 'Name for this view' })}
           </label>
           <input
@@ -156,23 +156,23 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full min-w-[56rem] text-sm" data-testid="exposure-table">
+          <table className="oe-table w-full min-w-[56rem]" data-testid="exposure-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary text-left text-xs text-content-tertiary">
-                <th scope="col" className="px-3 py-2 font-medium">{t('commitment.grid.item', { defaultValue: 'Item' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.exposure.sunk', { defaultValue: 'Already spent' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.exposure.committed_not_spent', { defaultValue: 'Committed, not yet spent' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.exposure.cancellation_charge', { defaultValue: 'Cancellation charge' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.exposure.recoverable', { defaultValue: 'Recoverable (transfer and salvage)' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.exposure.residual_loss', { defaultValue: 'Residual loss' })}</th>
+              <tr className="text-left">
+                <th scope="col">{t('commitment.grid.item', { defaultValue: 'Item' })}</th>
+                <th scope="col" className="text-right">{t('commitment.exposure.sunk', { defaultValue: 'Already spent' })}</th>
+                <th scope="col" className="text-right">{t('commitment.exposure.committed_not_spent', { defaultValue: 'Committed, not yet spent' })}</th>
+                <th scope="col" className="text-right">{t('commitment.exposure.cancellation_charge', { defaultValue: 'Cancellation charge' })}</th>
+                <th scope="col" className="text-right">{t('commitment.exposure.recoverable', { defaultValue: 'Recoverable (transfer and salvage)' })}</th>
+                <th scope="col" className="text-right">{t('commitment.exposure.residual_loss', { defaultValue: 'Residual loss' })}</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((row) => {
                 const nothing = nothingCommitted(row);
                 return (
-                  <tr key={row.item_id} className="border-b border-border-light/60 align-top" data-testid="exposure-row">
-                    <td className="px-3 py-2">
+                  <tr key={row.item_id} className="align-top" data-testid="exposure-row">
+                    <td>
                       <button
                         type="button"
                         className="text-left font-medium text-content-primary hover:text-oe-blue focus:outline-none focus-visible:underline"
@@ -185,11 +185,11 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
                         <ToneBadge tone={ITEM_STATUS_TONE[row.status] ?? 'neutral'}>{vocab(t, ITEM_STATUS, row.status)}</ToneBadge>
                       </p>
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums"><Amount value={row.sunk} currency={row.currency} /></td>
-                    <td className="px-3 py-2 text-right tabular-nums"><Amount value={row.committed_not_spent} currency={row.currency} /></td>
-                    <td className="px-3 py-2 text-right tabular-nums"><Amount value={row.cancellation_charge} currency={row.currency} /></td>
-                    <td className="px-3 py-2 text-right tabular-nums"><Amount value={row.recoverable} currency={row.currency} /></td>
-                    <td className="px-3 py-2 text-right font-semibold tabular-nums" data-testid="exposure-row-residual">
+                    <td className="text-right tabular-nums"><Amount value={row.sunk} currency={row.currency} /></td>
+                    <td className="text-right tabular-nums"><Amount value={row.committed_not_spent} currency={row.currency} /></td>
+                    <td className="text-right tabular-nums"><Amount value={row.cancellation_charge} currency={row.currency} /></td>
+                    <td className="text-right tabular-nums"><Amount value={row.recoverable} currency={row.currency} /></td>
+                    <td className="text-right font-semibold tabular-nums" data-testid="exposure-row-residual">
                       {nothing ? (
                         <span className="font-normal text-content-tertiary">
                           {t('commitment.grid.nothing_committed', { defaultValue: 'Nothing committed' })}
@@ -211,8 +211,8 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-surface-secondary font-semibold text-content-primary">
-                <th scope="row" colSpan={5} className="px-3 py-2 text-left">
+              <tr>
+                <th scope="row" colSpan={5}>
                   {t('commitment.exposure.total', {
                     defaultValue: 'Residual loss of the items with known terms, {{date}}',
                     date: fmtDate(data.as_of),
@@ -226,7 +226,7 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
                     </p>
                   )}
                 </th>
-                <td className="px-3 py-2 text-right tabular-nums" data-testid="exposure-total">
+                <td className="text-right tabular-nums" data-testid="exposure-total">
                   <Amount value={unknown > 0 && known === 0 ? null : data.total_residual_loss} currency={data.currency} />
                 </td>
               </tr>
@@ -242,7 +242,7 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
       </p>
 
       <section data-testid="scenarios">
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {t('commitment.exposure.scenarios', { defaultValue: 'Saved views' })}
         </h3>
         {scenariosQ.isLoading ? (
@@ -268,7 +268,7 @@ export function ExposurePanel({ projectId, items, can, onOpenItem }: ExposurePan
                 <li
                   key={s.id}
                   data-testid="scenario-row"
-                  className="flex flex-wrap items-baseline justify-between gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-2.5 text-sm"
+                  className="flex flex-wrap items-baseline justify-between gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm"
                 >
                   <span className="text-content-primary">
                     {s.label || t('commitment.exposure.scenario_unnamed', { defaultValue: 'Unnamed view' })}

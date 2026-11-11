@@ -563,7 +563,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         applyDefaultsMutation.mutate(region.code);
                       }}
                       disabled={applyDefaultsMutation.isPending}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-surface-secondary transition-colors flex items-center gap-2.5"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-surface-secondary transition-colors flex items-center gap-2"
                     >
                       <span className="text-base leading-none">{region.flag}</span>
                       <div className="min-w-0">
@@ -640,16 +640,16 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
           {/* Markup table */}
           {markups.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm whitespace-nowrap">
+              <table className="oe-table w-full whitespace-nowrap">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/20 text-content-tertiary text-xs">
-                    <th className="w-6 px-2 py-2" />
-                    <th className="text-left px-3 py-2 font-medium">{t('boq.markup_name', { defaultValue: 'Name' })}</th>
-                    <th className="text-left px-3 py-2 font-medium">{t('boq.markup_category', { defaultValue: 'Category' })}</th>
-                    <th className="text-right px-3 py-2 font-medium w-20">{t('boq.markup_percentage', { defaultValue: '%' })}</th>
-                    <th className="text-right px-3 py-2 font-medium w-32">{t('boq.markup_amount', { defaultValue: 'Amount' })}</th>
-                    <th className="text-center px-3 py-2 font-medium w-16">{t('boq.markup_active', { defaultValue: 'Active' })}</th>
-                    <th className="w-10 px-2 py-2" />
+                  <tr>
+                    <th className="w-6" />
+                    <th>{t('boq.markup_name', { defaultValue: 'Name' })}</th>
+                    <th>{t('boq.markup_category', { defaultValue: 'Category' })}</th>
+                    <th className="text-right w-20">{t('boq.markup_percentage', { defaultValue: '%' })}</th>
+                    <th className="text-right w-32">{t('boq.markup_amount', { defaultValue: 'Amount' })}</th>
+                    <th className="text-center w-16">{t('boq.markup_active', { defaultValue: 'Active' })}</th>
+                    <th className="w-10" />
                   </tr>
                 </thead>
                 <tbody>
@@ -662,9 +662,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         key={markup.id}
                         data-markup-id={markup.id}
                         className={clsx(
-                          'group border-b border-border-light last:border-b-0 transition-colors',
+                          'group last:border-b-0',
                           !markup.is_active && 'opacity-50',
-                          'hover:bg-surface-secondary/30',
+                          '',
                         )}
                       >
                         {/* Grip. Rests at `secondary`, the same step the assembly
@@ -673,13 +673,13 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                             resting at either one is a grey the user never sees. */}
                         <td
                           data-testid="markup-drag-grip"
-                          className="px-2 py-2 text-content-secondary group-hover:text-content-primary transition-colors"
+                          className="text-content-secondary group-hover:text-content-primary transition-colors"
                         >
                           <GripVertical size={14} className="cursor-grab" />
                         </td>
 
                         {/* Name */}
-                        <td className="px-3 py-2">
+                        <td>
                           {isEditing && editState.field === 'name' ? (
                             <input
                               autoFocus
@@ -687,7 +687,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                               onChange={(e) => setEditState({ ...editState, value: e.target.value })}
                               onBlur={handleCommitEdit}
                               onKeyDown={handleKeyDown}
-                              className="w-full rounded border border-oe-blue px-1.5 py-0.5 text-sm bg-surface-primary outline-none"
+                              className="oe-input-sm w-full"
                             />
                           ) : (
                             <span className="flex items-center gap-1.5 min-w-0">
@@ -727,7 +727,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         </td>
 
                         {/* Category badge */}
-                        <td className="px-3 py-2">
+                        <td>
                           {isEditing && editState.field === 'category' ? (
                             <select
                               autoFocus
@@ -736,7 +736,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                                 setEditState({ ...editState, value: e.target.value });
                               }}
                               onBlur={handleCommitEdit}
-                              className="rounded border border-oe-blue px-1 py-0.5 text-xs bg-surface-primary outline-none"
+                              className="oe-select-sm"
                             >
                               {CATEGORIES.map((cat) => (
                                 <option key={cat} value={cat}>
@@ -763,7 +763,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                             decided. Offering an editable percentage on those
                             would take a number the estimator typed and price
                             nothing with it. */}
-                        <td className="px-3 py-2 text-right">
+                        <td className="text-right">
                           {isEditing && editState.field === 'percentage' ? (
                             <input
                               autoFocus
@@ -773,7 +773,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                               onChange={(e) => setEditState({ ...editState, value: e.target.value })}
                               onBlur={handleCommitEdit}
                               onKeyDown={handleKeyDown}
-                              className="w-16 rounded border border-oe-blue px-1.5 py-0.5 text-sm text-right bg-surface-primary outline-none"
+                              className="oe-input-sm w-16 text-right"
                             />
                           ) : markup.markup_type === 'percentage' ? (
                             <span
@@ -788,17 +788,17 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         </td>
 
                         {/* Amount */}
-                        <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {fmtWithCurrency(amount, locale, currencyCode)}
                         </td>
 
                         {/* Active toggle */}
-                        <td className="px-3 py-2 text-center">
+                        <td className="text-center">
                           <button
                             onClick={() => handleToggleActive(markup)}
                             className={clsx(
                               'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
-                              markup.is_active ? 'bg-oe-blue' : 'bg-gray-300 dark:bg-gray-600',
+                              markup.is_active ? 'bg-oe-blue' : 'bg-border',
                             )}
                             aria-label={t('boq.markup_active', { defaultValue: 'Active' })}
                           >
@@ -812,7 +812,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         </td>
 
                         {/* Delete */}
-                        <td className="px-2 py-2 text-center">
+                        <td className="text-center">
                           <button
                             onClick={() => deleteMutation.mutate(markup.id)}
                             disabled={deleteMutation.isPending}

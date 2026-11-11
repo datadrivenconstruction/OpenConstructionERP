@@ -101,7 +101,7 @@ export function LinkedPositionsModal({
     >
       {isLoading && (
         <div className="flex items-center justify-center gap-2 py-12 text-content-tertiary">
-          <Loader2 size={18} className="animate-spin" />
+          <Loader2 size={20} className="animate-spin" />
           <span className="text-sm">
             {t('common.loading', { defaultValue: 'Loading…' })}
           </span>
@@ -168,9 +168,9 @@ export function LinkedPositionsModal({
                       }
                     >
                       {m.is_master ? (
-                        <Crown size={13} />
+                        <Crown size={14} />
                       ) : (
-                        <Link2 size={13} />
+                        <Link2 size={14} />
                       )}
                     </span>
                     <span className="w-20 shrink-0 font-mono text-xs text-content-secondary">

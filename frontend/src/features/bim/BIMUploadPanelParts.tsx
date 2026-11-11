@@ -39,15 +39,15 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
   const cancelUpload = useBIMUploadStore((s) => s.cancelUpload);
   const done = job.status === 'ready';
   const frame = done
-    ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20'
+    ? 'border-semantic-success/30 bg-semantic-success-bg'
     : variant === 'landing'
       ? 'border-oe-blue/30 bg-white dark:bg-gray-900 shadow-sm'
       : 'border-oe-blue/30 bg-oe-blue/5';
   return (
-    <div data-testid="bim-upload-job-row" className={`rounded-xl border ${variant === 'landing' ? 'p-3.5' : 'p-3'} ${frame}`}>
+    <div data-testid="bim-upload-job-row" className={`rounded-xl border ${variant === 'landing' ? 'p-3' : 'p-3'} ${frame}`}>
       <div className="flex items-center gap-2 mb-1.5">
         {done ? (
-          <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+          <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
         ) : (
           <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
         )}
@@ -56,7 +56,7 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
           <button
             type="button"
             onClick={() => cancelUpload(job.id)}
-            className="shrink-0 text-2xs font-medium text-content-tertiary hover:text-red-500"
+            className="shrink-0 text-2xs font-medium text-content-tertiary hover:text-semantic-error"
             title={
               job.serverConverting
                 ? t('bim_upload.cancel_server_tip', {
@@ -70,7 +70,7 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
         )}
       </div>
       {done ? (
-        <p className="text-2xs text-green-600 dark:text-green-400">
+        <p className="text-2xs text-semantic-success">
           {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
         </p>
       ) : (
@@ -119,10 +119,10 @@ export function BIMUploadDuplicatePrompt({
       role="alertdialog"
       aria-live="polite"
       data-testid="bim-upload-duplicate-prompt"
-      className="rounded-xl border border-amber-300/70 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-950/20 p-3 space-y-2"
+      className="rounded-xl border border-semantic-warning/70 bg-semantic-warning-bg p-3 space-y-2"
     >
       <div className="flex items-start gap-2">
-        <Copy size={14} className="text-amber-600 shrink-0 mt-0.5" />
+        <Copy size={14} className="text-semantic-warning shrink-0 mt-0.5" />
         <p className="text-xs text-content-primary">
           {t('bim_upload.duplicate_found', {
             defaultValue: '"{{file}}" was already uploaded to this project as "{{model}}".',

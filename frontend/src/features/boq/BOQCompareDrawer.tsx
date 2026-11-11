@@ -145,7 +145,7 @@ export function BOQCompareDrawer({
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <GitCompare size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.compare_title', { defaultValue: 'Compare estimates' })}
             </h3>
           </div>
@@ -167,7 +167,7 @@ export function BOQCompareDrawer({
             <select
               value={otherId}
               onChange={(e) => setOtherId(e.target.value)}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select w-full"
             >
               <option value="">
                 {t('boq.compare_pick', { defaultValue: '- Select a BOQ -' })}
@@ -264,7 +264,7 @@ export function BOQCompareDrawer({
               <span className="text-content-tertiary">
                 {fmt(cmp.summary.old_direct_cost_base)}
               </span>
-              <ArrowRight size={11} className="text-content-quaternary" />
+              <ArrowRight size={12} className="text-content-quaternary" />
               <span className="text-content-primary font-semibold">
                 {fmt(cmp.summary.new_direct_cost_base)}
               </span>
@@ -327,32 +327,31 @@ export function BOQCompareDrawer({
               </p>
             </div>
           ) : (
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-surface-elevated border-b border-border-light">
-                <tr className="text-2xs text-content-tertiary text-left">
-                  <th className="px-3 py-2 font-medium">
+            <table className="oe-table-compact w-full">
+              <thead className="sticky top-0 bg-surface-elevated">
+                <tr className="text-2xs text-left">
+                  <th>
                     {t('boq.compare_col_line', { defaultValue: 'Line' })}
                   </th>
-                  <th className="px-2 py-2 font-medium text-right">
+                  <th className="text-right">
                     {t('boq.compare_col_qty', { defaultValue: 'Qty' })}
                   </th>
-                  <th className="px-2 py-2 font-medium text-right">
+                  <th className="text-right">
                     {t('boq.compare_col_rate', { defaultValue: 'Rate' })}
                   </th>
-                  <th className="px-2 py-2 font-medium text-right">
+                  <th className="text-right">
                     {t('boq.compare_col_delta', { defaultValue: 'Δ base' })}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {visibleRows.map((r) => {
                   const d = Number(r.total_delta_base);
                   return (
                     <tr
                       key={r.match_key}
-                      className="hover:bg-surface-secondary/40"
                     >
-                      <td className="px-3 py-2 align-top">
+                      <td className="align-top">
                         <div className="flex items-center gap-1.5">
                           <Badge
                             variant={CHANGE_VARIANT[r.change_type]}
@@ -370,7 +369,7 @@ export function BOQCompareDrawer({
                           {r.description}
                         </p>
                       </td>
-                      <td className="px-2 py-2 align-top text-right font-mono text-2xs">
+                      <td className="align-top text-right font-mono">
                         {showsPair(r.change_type, 'qty') ? (
                           <span>
                             <span className="text-content-tertiary">
@@ -387,7 +386,7 @@ export function BOQCompareDrawer({
                           </span>
                         )}
                       </td>
-                      <td className="px-2 py-2 align-top text-right font-mono text-2xs">
+                      <td className="align-top text-right font-mono">
                         {showsPair(r.change_type, 'rate') ? (
                           <span>
                             <span className="text-content-tertiary">
@@ -406,7 +405,7 @@ export function BOQCompareDrawer({
                       </td>
                       <td
                         className={clsx(
-                          'px-2 py-2 align-top text-right font-mono text-2xs font-medium',
+                          'align-top text-right font-mono font-medium',
                           Number.isFinite(d) && d > 0
                             ? 'text-semantic-success'
                             : Number.isFinite(d) && d < 0

@@ -117,7 +117,7 @@ export function SubmittalsPendingCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('dashboard.submittals_open', { defaultValue: 'Open submittals' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

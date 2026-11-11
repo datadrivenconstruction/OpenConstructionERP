@@ -28,7 +28,7 @@ export function CDEHistoryDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/40 animate-fade-in"
+      className="fixed inset-0 z-modal flex justify-end bg-black/40 animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-label={t('cde.history_title', { defaultValue: 'State transition history' })}
@@ -40,9 +40,9 @@ export function CDEHistoryDrawer({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <History size={18} className="text-oe-blue" />
+            <History size={20} className="text-oe-blue" />
             <div>
-              <h3 className="text-base font-semibold">
+              <h3 className="oe-section-title">
                 {t('cde.history_title', { defaultValue: 'State transition history' })}
               </h3>
               <p className="text-xs text-content-tertiary mt-0.5 font-mono">

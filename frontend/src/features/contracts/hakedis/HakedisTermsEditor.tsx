@@ -250,7 +250,7 @@ export function HakedisTermsCard({ contract }: { contract: ContractItem }) {
   return (
     <Card padding="sm" data-testid="hakedis-terms">
       <div className="mb-2 flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <p className="oe-overline">
           {t('hakedis.terms.title', { defaultValue: 'Payment certificate settings' })}
         </p>
         {draft && !editing && (
@@ -602,7 +602,7 @@ function TermsEditor({
                     aria-label={t('hakedis.terms.role_up', { defaultValue: 'Move {{role}} up', role: name })}
                     className="rounded p-1 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
                   >
-                    <ArrowUp size={13} aria-hidden="true" />
+                    <ArrowUp size={14} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
@@ -614,7 +614,7 @@ function TermsEditor({
                     className="rounded p-1 text-content-secondary hover:bg-surface-secondary"
                     data-testid={`hakedis-terms-role-remove-${role}`}
                   >
-                    <X size={13} aria-hidden="true" />
+                    <X size={14} aria-hidden="true" />
                   </button>
                 </li>
               );

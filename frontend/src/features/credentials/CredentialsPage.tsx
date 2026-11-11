@@ -170,7 +170,7 @@ function HowCredentialsWork() {
   return (
     <CollapsibleSection
       storageKey="credentials.how"
-      icon={<BadgeCheck size={15} className="text-oe-blue" />}
+      icon={<BadgeCheck size={16} className="text-oe-blue" />}
       title={t('credentials.flow_title', {
         defaultValue: 'How the Credentials register fits together',
       })}
@@ -289,7 +289,7 @@ function GapLine({ gap, typeName }: { gap: ComplianceGap; typeName: string }) {
   if (stopsWork) {
     consequence = {
       text: t('credentials.gap_stops_work', { defaultValue: 'Stops work today' }),
-      icon: <Ban size={11} />,
+      icon: <Ban size={12} />,
       className: 'bg-semantic-error/10 text-semantic-error',
     };
   } else if (gap.is_blocking && gap.within_grace) {
@@ -301,19 +301,19 @@ function GapLine({ gap, typeName }: { gap: ComplianceGap; typeName: string }) {
               count: graceLeft,
               defaultValue: 'grace ends in {{count}} d',
             }),
-      icon: <AlertTriangle size={11} />,
+      icon: <AlertTriangle size={12} />,
       className: 'bg-semantic-warning/10 text-semantic-warning',
     };
   } else if (gap.is_blocking) {
     consequence = {
       text: t('credentials.gap_will_stop_work', { defaultValue: 'Will stop work when it lapses' }),
-      icon: <AlertTriangle size={11} />,
+      icon: <AlertTriangle size={12} />,
       className: 'bg-semantic-warning/10 text-semantic-warning',
     };
   } else {
     consequence = {
       text: t('credentials.gap_advisory', { defaultValue: 'Worth knowing, does not stop work' }),
-      icon: <Info size={11} />,
+      icon: <Info size={12} />,
       className: 'bg-oe-blue-subtle text-oe-blue-text',
     };
   }
@@ -375,7 +375,7 @@ function HolderCard({
           )}
         </div>
         {row.is_blocked ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-white">
+          <span className="oe-overline inline-flex items-center gap-1 rounded-full bg-semantic-error px-2.5 py-1 text-white">
             <Ban size={12} />
             {t('credentials.holder_blocked', { defaultValue: 'May not work today' })}
           </span>
@@ -907,8 +907,8 @@ export function CredentialsPage() {
             {unmatchedRequirements.length > 0 && (
               <div className="mt-4 rounded-xl border border-semantic-warning/40 bg-semantic-warning/5 p-4">
                 <div className="flex items-center gap-2">
-                  <Users size={15} className="text-semantic-warning" />
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <Users size={16} className="text-semantic-warning" />
+                  <h3 className="oe-card-title">
                     {t('credentials.unmatched_title', {
                       count: unmatchedRequirements.length,
                       defaultValue: '{{count}} requirements bind nobody',
@@ -937,8 +937,8 @@ export function CredentialsPage() {
             {(expiringQuery.data?.length ?? 0) > 0 && (
               <div className="mt-4 rounded-xl border border-border-light bg-surface-elevated p-4">
                 <div className="flex items-center gap-2">
-                  <CalendarClock size={15} className="text-oe-blue" />
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <CalendarClock size={16} className="text-oe-blue" />
+                  <h3 className="oe-card-title">
                     {t('credentials.renewals_title', { defaultValue: 'Renewals ahead' })}
                   </h3>
                 </div>
@@ -979,7 +979,7 @@ export function CredentialsPage() {
                 />
               </div>
               <select
-                className="h-9 rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as CredentialStatus | '')}
                 aria-label={t('credentials.field.status', { defaultValue: 'Standing' })}
@@ -994,7 +994,7 @@ export function CredentialsPage() {
                 ))}
               </select>
               <select
-                className="h-9 rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select"
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
                 aria-label={t('credentials.field.credential_type', { defaultValue: 'Credential type' })}
@@ -1030,8 +1030,8 @@ export function CredentialsPage() {
             {(validationQuery.data?.findings.length ?? 0) > 0 && (
               <div className="mb-3 rounded-xl border border-border-light bg-surface-elevated p-4">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle size={15} className="text-semantic-warning" />
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <AlertTriangle size={16} className="text-semantic-warning" />
+                  <h3 className="oe-card-title">
                     {t('credentials.validation_title', { defaultValue: 'What the rules flag' })}
                   </h3>
                 </div>
@@ -1078,51 +1078,51 @@ export function CredentialsPage() {
               />
             ) : (
               <div className="overflow-x-auto rounded-xl border border-border-light bg-surface-elevated">
-                <table className="w-full min-w-[900px] text-sm">
+                <table className="oe-table w-full min-w-[900px]">
                   <thead>
-                    <tr className="border-b border-border-light text-start text-xs uppercase tracking-wide text-content-tertiary">
-                      <th className="px-4 py-2.5 text-start font-medium">
+                    <tr className="text-start">
+                      <th>
                         {t('credentials.col_holder', { defaultValue: 'Holder' })}
                       </th>
-                      <th className="px-4 py-2.5 text-start font-medium">
+                      <th>
                         {t('credentials.col_type', { defaultValue: 'Type' })}
                       </th>
-                      <th className="px-4 py-2.5 text-start font-medium">
+                      <th>
                         {t('credentials.col_authority', { defaultValue: 'Authority' })}
                       </th>
-                      <th className="px-4 py-2.5 text-start font-medium">
+                      <th>
                         {t('credentials.col_jurisdiction', { defaultValue: 'Jurisdiction' })}
                       </th>
-                      <th className="px-4 py-2.5 text-start font-medium">
+                      <th>
                         {t('credentials.col_valid_until', { defaultValue: 'Valid until' })}
                       </th>
-                      <th className="px-4 py-2.5 text-start font-medium">
+                      <th>
                         {t('credentials.col_status', { defaultValue: 'Standing' })}
                       </th>
-                      <th className="px-4 py-2.5 text-end font-medium">
+                      <th className="text-end">
                         {t('credentials.col_actions', { defaultValue: 'Actions' })}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {visibleCredentials.map((c) => (
-                      <tr key={c.id} className="border-b border-border-light/60 last:border-0">
-                        <td className="px-4 py-2.5">
+                      <tr key={c.id} className="last:border-0">
+                        <td>
                           <div className="font-medium text-content-primary">{c.holder_name}</div>
                           <div className="text-2xs text-content-tertiary">
                             {holderKindLabel(c.holder_kind, t)}
                             {c.discipline ? ` · ${c.discipline}` : ''}
                           </div>
                         </td>
-                        <td className="px-4 py-2.5 text-content-secondary">
+                        <td className="text-content-secondary">
                           <div>{typeName(c.credential_type)}</div>
                           {c.identifier && (
                             <div className="text-2xs text-content-tertiary">{c.identifier}</div>
                           )}
                         </td>
-                        <td className="px-4 py-2.5 text-content-secondary">{c.authority ?? '-'}</td>
-                        <td className="px-4 py-2.5 text-content-secondary">{c.jurisdiction ?? '-'}</td>
-                        <td className="whitespace-nowrap px-4 py-2.5">
+                        <td className="text-content-secondary">{c.authority ?? '-'}</td>
+                        <td className="text-content-secondary">{c.jurisdiction ?? '-'}</td>
+                        <td className="whitespace-nowrap">
                           {c.valid_until === null ? (
                             <span className="text-2xs text-content-tertiary">
                               {t('credentials.no_expiry', { defaultValue: 'Does not expire' })}
@@ -1134,14 +1134,14 @@ export function CredentialsPage() {
                             </div>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-2.5">
+                        <td className="whitespace-nowrap">
                           <Badge variant={badgeVariant(c.status)} size="sm" dot>
                             {statusName(c.status)}
                           </Badge>
                           <div className="mt-1 text-2xs text-content-tertiary">
                             {c.verified_at ? (
                               <span className="inline-flex items-center gap-1 text-semantic-success">
-                                <CheckCircle2 size={11} />
+                                <CheckCircle2 size={12} />
                                 <DateDisplay value={c.verified_at} />
                               </span>
                             ) : (
@@ -1149,7 +1149,7 @@ export function CredentialsPage() {
                             )}
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-end">
+                        <td className="whitespace-nowrap text-end">
                           <div className="inline-flex items-center gap-1">
                             <Button
                               variant="ghost"
@@ -1262,12 +1262,12 @@ export function CredentialsPage() {
                           </span>
                           {r.is_blocking ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error/10 px-2 py-0.5 text-2xs font-semibold text-semantic-error">
-                              <Ban size={11} />
+                              <Ban size={12} />
                               {t('credentials.req_blocking', { defaultValue: 'Stops work' })}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-semibold text-oe-blue-text">
-                              <Info size={11} />
+                              <Info size={12} />
                               {t('credentials.req_advisory', { defaultValue: 'Worth knowing' })}
                             </span>
                           )}

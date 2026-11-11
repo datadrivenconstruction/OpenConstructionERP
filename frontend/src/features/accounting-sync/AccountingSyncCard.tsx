@@ -38,7 +38,7 @@ export function AccountingSyncCard() {
         action={
           <Link to="/accounting-sync" className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline">
             {t('accountingSync.card_open', { defaultValue: 'Open accounting sync' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </Link>
         }
       />

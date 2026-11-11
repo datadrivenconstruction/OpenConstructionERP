@@ -148,8 +148,8 @@ export function RulePackLibrary({ projectId, testId = 'rule-pack-library' }: Rul
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-base font-semibold text-content-primary">
-            <BookOpenCheck size={18} className="text-oe-blue" />
+          <h2 className="oe-section-title flex items-center gap-2">
+            <BookOpenCheck size={20} className="text-oe-blue" />
             {t('rulePacks.title', { defaultValue: 'Rule Library' })}
           </h2>
         </div>

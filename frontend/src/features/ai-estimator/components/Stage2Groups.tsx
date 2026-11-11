@@ -59,7 +59,7 @@ export function Stage2Groups({
 
   if (loading) {
     return (
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
@@ -202,21 +202,21 @@ export function Stage2Groups({
 
       {/* Group rows */}
       <div className="overflow-hidden rounded-lg border border-border-light">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-secondary">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
-              <th className="w-10 px-3 py-2" />
-              <th className="w-10 px-3 py-2" />
-              <th className="px-3 py-2 text-left font-medium">
+              <th className="w-10" />
+              <th className="w-10" />
+              <th>
                 {t('aiest.groups.group', { defaultValue: 'Group' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('aiest.groups.quantity', { defaultValue: 'Quantity' })}
               </th>
-              <th className="px-3 py-2 text-left font-medium">
+              <th>
                 {t('aiest.groups.unit', { defaultValue: 'Unit' })}
               </th>
-              <th className="w-12 px-3 py-2" />
+              <th className="w-12" />
             </tr>
           </thead>
           <tbody>
@@ -229,10 +229,10 @@ export function Stage2Groups({
               return (
                 <tr
                   key={g.id}
-                  className={clsx('border-t border-border-light/60', excluded && 'opacity-50')}
+                  className={clsx('', excluded && 'opacity-50')}
                 >
                   {/* Merge select */}
-                  <td className="px-3 py-2 text-center">
+                  <td className="text-center">
                     <input
                       type="checkbox"
                       checked={selected.has(g.id)}
@@ -242,7 +242,7 @@ export function Stage2Groups({
                     />
                   </td>
                   {/* Include toggle */}
-                  <td className="px-3 py-2 text-center">
+                  <td className="text-center">
                     <input
                       type="checkbox"
                       checked={!excluded}
@@ -253,7 +253,7 @@ export function Stage2Groups({
                       aria-label={t('aiest.groups.toggle', { defaultValue: 'Include group' })}
                     />
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex items-center gap-2">
                       <Boxes className="h-4 w-4 shrink-0 text-content-tertiary" />
                       <div className="min-w-0 flex-1">
@@ -277,7 +277,7 @@ export function Stage2Groups({
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <input
                       type="number"
                       value={qtyVal}
@@ -286,11 +286,11 @@ export function Stage2Groups({
                         setDraftQty((p) => ({ ...p, [g.id]: e.target.value }))
                       }
                       onBlur={() => commitQty(g)}
-                      className="w-28 rounded border border-border-light bg-surface-elevated px-2 py-1 text-right text-sm tabular-nums disabled:opacity-50"
+                      className="oe-input-sm w-28 text-right tabular-nums"
                       aria-label={t('aiest.groups.quantity', { defaultValue: 'Quantity' })}
                     />
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <input
                       type="text"
                       value={unitVal}
@@ -299,11 +299,11 @@ export function Stage2Groups({
                         setDraftUnit((p) => ({ ...p, [g.id]: e.target.value }))
                       }
                       onBlur={() => commitUnit(g)}
-                      className="w-20 rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm disabled:opacity-50"
+                      className="oe-input-sm w-20"
                       aria-label={t('aiest.groups.unit', { defaultValue: 'Unit' })}
                     />
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="text-center">
                     {g.element_count > 1 && !excluded && (
                       <button
                         type="button"

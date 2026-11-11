@@ -166,7 +166,7 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
         : t('boq.branch.action_update', { defaultValue: 'Update' });
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"
@@ -183,7 +183,7 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               {isMerge ? <GitMerge size={16} /> : <GitPullRequestArrow size={16} />}
             </span>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {isMerge
                 ? t('boq.branch.merge_title', { defaultValue: 'Merge into the main estimate' })
                 : t('boq.branch.pick_title', { defaultValue: 'Carry changes into this estimate' })}
@@ -217,7 +217,7 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
               <select
                 value={sourceId}
                 onChange={(e) => setSourceId(e.target.value)}
-                className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select mt-1 w-full"
               >
                 <option value="">{t('boq.branch.pick', { defaultValue: '- Select -' })}</option>
                 {sources.map((n) => (
@@ -326,17 +326,17 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
                       )}
                     </label>
                     {Object.keys(item.fields).length > 0 && (
-                      <table className="mt-1.5 w-full text-2xs">
+                      <table className="oe-table-compact mt-1.5 w-full text-2xs">
                         <thead>
-                          <tr className="text-content-tertiary">
-                            <th className="w-32 py-0.5 text-left font-medium" />
-                            <th className="py-0.5 text-left font-medium">
+                          <tr>
+                            <th className="w-32" />
+                            <th>
                               {t('boq.branch.col_base', { defaultValue: 'At branch point' })}
                             </th>
-                            <th className="py-0.5 text-left font-medium">
+                            <th>
                               {t('boq.branch.col_source', { defaultValue: 'Incoming' })}
                             </th>
-                            <th className="py-0.5 text-left font-medium">
+                            <th>
                               {t('boq.branch.col_target', { defaultValue: 'Here now' })}
                             </th>
                           </tr>
@@ -345,10 +345,10 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
                           {Object.entries(item.fields).map(([field, values]) => {
                             return (
                               <tr key={field}>
-                                <td className="py-0.5 text-content-tertiary">{fieldLabel(field)}</td>
-                                <td className="py-0.5 font-mono text-content-tertiary">{planValueText(values.base)}</td>
-                                <td className="py-0.5 font-mono text-content-primary">{planValueText(values.source)}</td>
-                                <td className="py-0.5 font-mono text-content-secondary">{planValueText(values.target)}</td>
+                                <td className="text-content-tertiary">{fieldLabel(field)}</td>
+                                <td className="font-mono text-content-tertiary">{planValueText(values.base)}</td>
+                                <td className="font-mono">{planValueText(values.source)}</td>
+                                <td className="font-mono text-content-secondary">{planValueText(values.target)}</td>
                               </tr>
                             );
                           })}
@@ -420,7 +420,7 @@ export function CherryPickDialog({ mode, nodes, currentBoqId, isOpen, onClose, o
               onClick={() => mutation.mutate()}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-oe-blue hover:bg-oe-blue-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isMerge ? <GitMerge size={15} /> : <GitPullRequestArrow size={15} />}
+              {isMerge ? <GitMerge size={16} /> : <GitPullRequestArrow size={16} />}
               {mutation.isPending
                 ? t('boq.branch.applying', { defaultValue: 'Applying...' })
                 : isMerge

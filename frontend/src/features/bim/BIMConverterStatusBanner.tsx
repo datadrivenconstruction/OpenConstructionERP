@@ -591,8 +591,8 @@ export function BIMConverterStatusBanner({
         className={clsx(
           'inline-flex items-center gap-1 px-2 py-1 rounded-full border text-2xs font-medium',
           allHealthy
-            ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors'
-            : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors',
+            ? 'bg-semantic-success-bg border-semantic-success/30 text-semantic-success hover:bg-semantic-success-bg transition-colors'
+            : 'bg-surface-secondary border-border text-content-secondary hover:bg-surface-secondary transition-colors',
           className,
         )}
       >
@@ -614,20 +614,20 @@ export function BIMConverterStatusBanner({
   //      the fold (audit P2-1).
   if (collapsed) {
     const stripTone = anyFailed
-      ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800'
+      ? 'bg-semantic-error-bg border-semantic-error/30'
       : allHealthy
-        ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
+        ? 'bg-semantic-success-bg border-semantic-success/30'
         : uncheckedOk
-          ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700'
-          : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800';
+          ? 'bg-surface-secondary border-border'
+          : 'bg-semantic-warning-bg border-semantic-warning/30';
     const stripIcon = anyFailed ? (
-      <ShieldAlert size={14} className="text-rose-600 dark:text-rose-400" />
+      <ShieldAlert size={14} className="text-semantic-error" />
     ) : allHealthy ? (
-      <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
+      <CheckCircle2 size={14} className="text-semantic-success" />
     ) : uncheckedOk ? (
-      <Check size={14} className="text-slate-500 dark:text-slate-400" />
+      <Check size={14} className="text-content-tertiary" />
     ) : (
-      <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400" />
+      <AlertTriangle size={14} className="text-semantic-warning" />
     );
     return (
       <div
@@ -685,30 +685,30 @@ export function BIMConverterStatusBanner({
   //    amber is the install nag, and showing it to a user with nothing to
   //    install is a false alarm (#416).
   const toneClass = anyFailed
-    ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800'
+    ? 'bg-semantic-error-bg border-semantic-error/30'
     : allHealthy
-      ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
+      ? 'bg-semantic-success-bg border-semantic-success/30'
       : uncheckedOk
-        ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700'
-        : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800';
+        ? 'bg-surface-secondary border-border'
+        : 'bg-semantic-warning-bg border-semantic-warning/30';
 
   const headerIcon = anyFailed ? (
-    <ShieldAlert size={16} className="text-rose-600 dark:text-rose-400" />
+    <ShieldAlert size={16} className="text-semantic-error" />
   ) : allHealthy ? (
-    <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" />
+    <CheckCircle2 size={16} className="text-semantic-success" />
   ) : uncheckedOk ? (
-    <Check size={16} className="text-slate-500 dark:text-slate-400" />
+    <Check size={16} className="text-content-tertiary" />
   ) : (
-    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />
+    <AlertTriangle size={16} className="text-semantic-warning" />
   );
 
   const headerTextTone = anyFailed
-    ? 'text-rose-900 dark:text-rose-200'
+    ? 'text-semantic-error'
     : allHealthy
-      ? 'text-emerald-900 dark:text-emerald-200'
+      ? 'text-semantic-success'
       : uncheckedOk
-        ? 'text-slate-700 dark:text-slate-200'
-        : 'text-amber-900 dark:text-amber-200';
+        ? 'text-content-secondary'
+        : 'text-semantic-warning';
 
   return (
     <div className={clsx('rounded-xl border p-3', toneClass, className)} role="status">
@@ -725,12 +725,12 @@ export function BIMConverterStatusBanner({
               className={clsx(
                 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-2xs font-semibold border tabular-nums',
                 anyFailed
-                  ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                  ? 'bg-semantic-error-bg text-semantic-error border-semantic-error/30'
                   : allHealthy
-                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                    ? 'bg-semantic-success-bg text-semantic-success border-semantic-success/30'
                     : nothingChecked
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                      : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+                      ? 'bg-surface-secondary text-content-secondary border-border'
+                      : 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
               )}
             >
               {anyFailed
@@ -786,7 +786,7 @@ export function BIMConverterStatusBanner({
               data-testid="bim-converters-check"
             >
               <RefreshCw
-                size={11}
+                size={12}
                 className={isFetching ? 'animate-spin' : undefined}
               />
               {/* The control that used to just reload a list the page had
@@ -801,7 +801,7 @@ export function BIMConverterStatusBanner({
               <button
                 type="button"
                 onClick={() => setCollapsedPersist(true)}
-                className="ms-auto text-2xs underline-offset-2 hover:underline text-emerald-700 dark:text-emerald-300"
+                className="ms-auto text-2xs underline-offset-2 hover:underline text-semantic-success"
               >
                 {t('bim.converters_collapse', { defaultValue: 'Collapse' })}
               </button>
@@ -820,10 +820,10 @@ export function BIMConverterStatusBanner({
                   'p-1 rounded-md transition-colors',
                   !allHealthy && 'ms-auto',
                   anyFailed
-                    ? 'text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40'
+                    ? 'text-semantic-error hover:bg-semantic-error-bg'
                     : allHealthy
-                      ? 'text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-                      : 'text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40',
+                      ? 'text-semantic-success hover:bg-semantic-success-bg'
+                      : 'text-semantic-warning hover:bg-semantic-warning-bg',
                 )}
                 title={t('bim.converters_dismiss', {
                   defaultValue: 'Dismiss',
@@ -873,12 +873,12 @@ export function BIMConverterStatusBanner({
           </p>
           {versionCheck?.any_outdated && !updateBannerDismissed && (
             <div
-              className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1.5 text-2xs text-amber-900 dark:text-amber-200"
+              className="mt-2 flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-2.5 py-1.5 text-2xs text-semantic-warning"
               data-testid="bim-converters-update-banner"
             >
               <AlertTriangle
-                size={13}
-                className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-300"
+                size={14}
+                className="shrink-0 mt-0.5 text-semantic-warning"
               />
               <div className="flex-1 leading-snug">
                 <span className="font-semibold">
@@ -901,7 +901,7 @@ export function BIMConverterStatusBanner({
                 aria-label={t('bim.converter_panel_update_dismiss', {
                   defaultValue: 'Hide until next session',
                 })}
-                className="shrink-0 -m-1 p-1 rounded-md text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                className="shrink-0 -m-1 p-1 rounded-md text-semantic-warning hover:bg-semantic-warning-bg"
               >
                 <X size={12} />
               </button>
@@ -946,19 +946,19 @@ function CollapsedConverterPill({
   let tone: string;
   let label: string;
   if (health === 'ok') {
-    tone = 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800';
+    tone = 'bg-semantic-success-bg text-semantic-success border-semantic-success/30';
     label = conv.id.toUpperCase();
   } else if (health === 'failed') {
-    tone = 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800';
+    tone = 'bg-semantic-error-bg text-semantic-error border-semantic-error/30';
     label = conv.id.toUpperCase();
   } else if (health === 'unknown') {
-    tone = 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+    tone = 'bg-surface-secondary text-content-secondary border-border';
     label = conv.id.toUpperCase();
   } else if (hasFallback) {
-    tone = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900';
+    tone = 'bg-semantic-success-bg text-semantic-success border-semantic-success/30';
     label = `${conv.id.toUpperCase()} (fallback)`;
   } else {
-    tone = 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800';
+    tone = 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30';
     label = conv.id.toUpperCase();
   }
   const titleSuffix =
@@ -1032,36 +1032,36 @@ function ConverterRow({
       if (updateAvailable) {
         icon = (
           <AlertTriangle
-            size={13}
-            className="text-amber-600 dark:text-amber-400"
+            size={14}
+            className="text-semantic-warning"
           />
         );
-        labelTone = 'text-amber-900 dark:text-amber-200';
+        labelTone = 'text-semantic-warning';
         pillTone =
-          'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+          'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30';
         pillText = t('bim.converter_row_ok_outdated', {
           defaultValue: 'Working · update available',
         });
       } else {
         icon = (
           <Check
-            size={13}
-            className="text-emerald-600 dark:text-emerald-400"
+            size={14}
+            className="text-semantic-success"
           />
         );
-        labelTone = 'text-emerald-900 dark:text-emerald-200';
+        labelTone = 'text-semantic-success';
         pillTone =
-          'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+          'bg-semantic-success-bg text-semantic-success border-semantic-success/30';
         pillText = t('bim.converter_row_ok', { defaultValue: 'Working' });
       }
       break;
     case 'failed':
       icon = (
-        <XCircle size={13} className="text-rose-600 dark:text-rose-400" />
+        <XCircle size={14} className="text-semantic-error" />
       );
-      labelTone = 'text-rose-900 dark:text-rose-200';
+      labelTone = 'text-semantic-error';
       pillTone =
-        'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        'bg-semantic-error-bg text-semantic-error border-semantic-error/30';
       pillText = t('bim.converter_row_failed', {
         defaultValue: 'Broken',
       });
@@ -1069,13 +1069,13 @@ function ConverterRow({
     case 'unknown':
       icon = (
         <Check
-          size={13}
-          className="text-slate-500 dark:text-slate-400"
+          size={14}
+          className="text-content-tertiary"
         />
       );
-      labelTone = 'text-slate-700 dark:text-slate-200';
+      labelTone = 'text-content-secondary';
       pillTone =
-        'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+        'bg-surface-secondary text-content-secondary border-border';
       pillText = t('bim.converter_row_unknown', {
         defaultValue: 'Installed',
       });
@@ -1090,26 +1090,26 @@ function ConverterRow({
         // longer scares users into thinking the format is broken.
         icon = (
           <CheckCircle2
-            size={13}
-            className="text-emerald-600 dark:text-emerald-400"
+            size={14}
+            className="text-semantic-success"
           />
         );
-        labelTone = 'text-emerald-900 dark:text-emerald-200';
+        labelTone = 'text-semantic-success';
         pillTone =
-          'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+          'bg-semantic-success-bg text-semantic-success border-semantic-success/30';
         pillText = t('bim.converter_row_fallback', {
           defaultValue: 'Works without DDC (fallback)',
         });
       } else {
         icon = (
           <Download
-            size={13}
-            className="text-amber-600 dark:text-amber-400"
+            size={14}
+            className="text-semantic-warning"
           />
         );
-        labelTone = 'text-amber-900 dark:text-amber-200';
+        labelTone = 'text-semantic-warning';
         pillTone =
-          'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+          'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30';
         pillText = t('bim.converter_row_missing', {
           defaultValue: 'Install required',
         });
@@ -1122,18 +1122,18 @@ function ConverterRow({
   // (2026-05-07): make it visually cleaner and easier to read.
   const rowBg =
     health === 'failed'
-      ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200/70 dark:border-rose-900/60'
+      ? 'bg-semantic-error-bg border-semantic-error/70'
       : health === 'ok'
         ? updateAvailable
-          ? 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-200/70 dark:border-amber-900/60'
-          : 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200/70 dark:border-emerald-900/60'
+          ? 'bg-semantic-warning-bg border-semantic-warning/70'
+          : 'bg-semantic-success-bg border-semantic-success/70'
         : health === 'unknown'
-          ? 'bg-slate-50/60 dark:bg-slate-900/40 border-slate-200/70 dark:border-slate-700/60'
-          : 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-200/70 dark:border-amber-900/60';
+          ? 'bg-surface-secondary/60 border-border'
+          : 'bg-semantic-warning-bg border-semantic-warning/70';
 
   return (
     <li className={clsx('text-2xs rounded-lg border px-2.5 py-2', rowBg)}>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <span className="shrink-0">{icon}</span>
         <span className={clsx('font-semibold tracking-tight', labelTone)}>
           {converterName(t, conv)}
@@ -1142,10 +1142,10 @@ function ConverterRow({
           className={clsx(
             'tabular-nums text-2xs opacity-70',
             health === 'ok' && !updateAvailable
-              ? 'text-emerald-700 dark:text-emerald-300'
+              ? 'text-semantic-success'
               : health === 'failed'
-                ? 'text-rose-700 dark:text-rose-300'
-                : 'text-amber-700 dark:text-amber-300',
+                ? 'text-semantic-error'
+                : 'text-semantic-warning',
           )}
         >
           {t('bim.converter_panel_size', {
@@ -1165,7 +1165,7 @@ function ConverterRow({
             yet (offline / GitHub rate-limited / pre-Linux). */}
         {conv.installed && (
           <span
-            className="hidden lg:inline text-2xs text-content-quaternary dark:text-zinc-400 font-mono"
+            className="hidden lg:inline text-2xs text-content-quaternary font-mono"
             title={
               versionEntry?.installed_sha
                 ? t('bim.converter_sha_tooltip', {
@@ -1178,7 +1178,7 @@ function ConverterRow({
           >
             {converterVersionLabel(versionEntry?.installed_version, conv.version)}
             {updateAvailable && versionEntry?.latest_version && (
-              <span className="text-sky-600 dark:text-sky-400">
+              <span className="text-semantic-info">
                 {' '}→ v{versionEntry.latest_version}
               </span>
             )}
@@ -1193,12 +1193,12 @@ function ConverterRow({
               defaultValue:
                 'A newer build of this converter is available. Click to download and replace the installed copy.',
             })}
-            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-semantic-info/30 bg-semantic-info-bg text-semantic-info hover:bg-semantic-info-bg disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {installing ? (
-              <Loader2 size={11} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" />
             ) : (
-              <Download size={11} />
+              <Download size={12} />
             )}
             {installing
               ? t('bim.converter_updating', { defaultValue: 'Updating…' })
@@ -1214,9 +1214,9 @@ function ConverterRow({
               defaultValue:
                 'A newer build of this converter is available on GitHub. Open the file there to download manually.',
             })}
-            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
+            className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold border border-semantic-info/30 bg-semantic-info-bg text-semantic-info hover:bg-semantic-info-bg transition-colors"
           >
-            <Download size={11} />
+            <Download size={12} />
             {t('bim.converter_update_available', {
               defaultValue: 'Update available',
             })}
@@ -1241,12 +1241,12 @@ function ConverterRow({
             type="button"
             onClick={onVerify}
             disabled={verifying}
-            className="ms-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="ms-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-border text-content-secondary bg-white dark:bg-slate-800 hover:bg-surface-secondary disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {verifying ? (
-              <Loader2 size={11} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" />
             ) : (
-              <RefreshCw size={11} />
+              <RefreshCw size={12} />
             )}
             {t('bim.converter_row_recheck', { defaultValue: 'Re-check' })}
           </button>
@@ -1259,14 +1259,14 @@ function ConverterRow({
           className={clsx(
             'ms-5 mt-1 rounded-md border px-2 py-1.5 space-y-1.5',
             health === 'failed'
-              ? 'border-rose-200 dark:border-rose-800 bg-rose-100/40 dark:bg-rose-900/20'
+              ? 'border-semantic-error/30 bg-semantic-error-bg'
               : CONVERTERS_WITH_FALLBACK.has(conv.id)
-                ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-100/40 dark:bg-emerald-900/20'
-                : 'border-amber-200 dark:border-amber-800 bg-amber-100/40 dark:bg-amber-900/20',
+                ? 'border-semantic-success/30 bg-semantic-success-bg'
+                : 'border-semantic-warning/30 bg-semantic-warning-bg',
           )}
         >
           {health === 'not_installed' && CONVERTERS_WITH_FALLBACK.has(conv.id) && (
-            <p className="text-2xs text-emerald-800 dark:text-emerald-200">
+            <p className="text-2xs text-semantic-success">
               {t('bim.converter_row_fallback_msg', {
                 defaultValue:
                   'IFC files are parsed by a built-in fallback. Install the DDC binary to upgrade placeholder boxes to real meshes.',
@@ -1278,8 +1278,8 @@ function ConverterRow({
               className={clsx(
                 'text-2xs',
                 health === 'failed'
-                  ? 'text-rose-800 dark:text-rose-200'
-                  : 'text-amber-800 dark:text-amber-200',
+                  ? 'text-semantic-error'
+                  : 'text-semantic-warning',
               )}
             >
               {conv.health_message}
@@ -1304,12 +1304,12 @@ function ConverterRow({
                 type="button"
                 onClick={onVerify}
                 disabled={verifying}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-border text-content-secondary bg-white dark:bg-slate-800 hover:bg-surface-secondary disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {verifying ? (
-                  <Loader2 size={11} className="animate-spin" />
+                  <Loader2 size={12} className="animate-spin" />
                 ) : (
-                  <RefreshCw size={11} />
+                  <RefreshCw size={12} />
                 )}
                 {t('bim.converter_row_recheck', {
                   defaultValue: 'Re-check',
@@ -1364,18 +1364,18 @@ function ActionButton({
           type="button"
           onClick={onInstall}
           disabled={installing}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-semantic-warning hover:bg-semantic-warning disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
         >
           {installing ? (
             <>
-              <Loader2 size={11} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" />
               {t('bim.converter_panel_installing', {
                 defaultValue: 'Downloading…',
               })}
             </>
           ) : (
             <>
-              <Download size={11} />
+              <Download size={12} />
               {t('bim.converter_panel_install_btn', {
                 defaultValue: 'Install',
               })}
@@ -1389,18 +1389,18 @@ function ActionButton({
           type="button"
           onClick={onInstall}
           disabled={installing}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-semantic-error hover:bg-semantic-error disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
         >
           {installing ? (
             <>
-              <Loader2 size={11} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" />
               {t('bim.converter_panel_installing', {
                 defaultValue: 'Downloading…',
               })}
             </>
           ) : (
             <>
-              <Download size={11} />
+              <Download size={12} />
               {t('bim.converter_panel_reinstall_btn', {
                 defaultValue: 'Reinstall',
               })}
@@ -1414,9 +1414,9 @@ function ActionButton({
           href={VC_REDIST_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-border text-content-secondary bg-white dark:bg-slate-800 hover:bg-surface-secondary transition-colors"
         >
-          <ExternalLink size={11} />
+          <ExternalLink size={12} />
           {t('bim.converter_panel_vcredist_btn', {
             defaultValue: 'Install VC++ Redist',
           })}
@@ -1428,9 +1428,9 @@ function ActionButton({
           href={DDC_REPO_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-border text-content-secondary bg-white dark:bg-slate-800 hover:bg-surface-secondary transition-colors"
         >
-          <ExternalLink size={11} />
+          <ExternalLink size={12} />
           {t('bim.converter_panel_manual_install_btn', {
             defaultValue: 'Manual install on GitHub',
           })}
@@ -1439,7 +1439,7 @@ function ActionButton({
     case 'unblock_files':
       return (
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-content-secondary bg-surface-secondary border border-border"
           title={t('bim.converter_panel_unblock_help', {
             defaultValue:
               'Right-click each .exe and .dll → Properties → tick "Unblock" → OK',
@@ -1453,7 +1453,7 @@ function ActionButton({
     case 'check_permissions':
       return (
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs text-content-secondary bg-surface-secondary border border-border"
           title={t('bim.converter_panel_perms_help', {
             defaultValue:
               'Run the converter once as Administrator, or move the install dir somewhere your user can write to.',

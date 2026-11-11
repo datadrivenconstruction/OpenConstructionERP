@@ -147,7 +147,7 @@ export function ConnectorsPage() {
       {sources.length > 0 ? <ConnectorsSummary sources={sources} /> : null}
 
       <Card className="space-y-3 p-4">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <FolderPlus className="h-4 w-4" />
           {t('connectors.add_title', { defaultValue: 'Add a watched folder' })}
         </h2>
@@ -158,7 +158,7 @@ export function ConnectorsPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('connectors.name_ph', { defaultValue: 'Site drop folder' })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input-sm"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-content-secondary">
@@ -167,7 +167,7 @@ export function ConnectorsPage() {
               value={rootPath}
               onChange={(e) => setRootPath(e.target.value)}
               placeholder={t('connectors.root_path_ph', { defaultValue: '/data/inbound/site-a' })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input-sm"
             />
           </label>
         </div>
@@ -195,7 +195,7 @@ export function ConnectorsPage() {
       </Card>
 
       <div className="space-y-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <FolderSync className="h-4 w-4" />
           {t('connectors.sources', { defaultValue: 'Connectors' })}
         </h2>
@@ -210,14 +210,14 @@ export function ConnectorsPage() {
                 placeholder={t('connectors.filter_search_ph', {
                   defaultValue: 'Search by name or path',
                 })}
-                className="w-full rounded-md border border-border-light bg-surface-primary py-1.5 ps-8 pe-2 text-sm text-content-primary"
+                className="oe-input w-full ps-8 pe-2"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
               aria-label={t('connectors.filter_status_label', { defaultValue: 'Filter by status' })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+              className="oe-select"
             >
               <option value="all">{t('connectors.filter_all', { defaultValue: 'All' })}</option>
               <option value="enabled">{t('connectors.enabled', { defaultValue: 'Enabled' })}</option>

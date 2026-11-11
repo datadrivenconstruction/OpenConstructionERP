@@ -170,7 +170,7 @@ export function SchedulePanel({
   return (
     <div className="space-y-3">
       {/* Enable toggle */}
-      <label className="flex cursor-pointer items-center gap-2.5">
+      <label className="flex cursor-pointer items-center gap-2">
         <input
           type="checkbox"
           checked={on}
@@ -218,7 +218,7 @@ export function SchedulePanel({
             <div className="flex flex-wrap items-end gap-3">
               {/* Time */}
               <div>
-                <span className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <span className="oe-overline mb-1 block">
                   {t('agents.schedule.time', { defaultValue: 'Time (UTC)' })}
                 </span>
                 <div className="flex items-center gap-1">
@@ -252,7 +252,7 @@ export function SchedulePanel({
 
               {freq === 'weekly' && (
                 <div>
-                  <span className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                  <span className="oe-overline mb-1 block">
                     {t('agents.schedule.day', { defaultValue: 'Day of week' })}
                   </span>
                   <select
@@ -271,7 +271,7 @@ export function SchedulePanel({
 
               {freq === 'monthly' && (
                 <div>
-                  <span className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                  <span className="oe-overline mb-1 block">
                     {t('agents.schedule.dom', { defaultValue: 'Day of month' })}
                   </span>
                   <select

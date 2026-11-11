@@ -42,7 +42,7 @@ export function moneyPayload(raw: string): string {
   return toDecimalPayloadString(stripCurrencySigns(raw), '0');
 }
 
-const INPUT = 'h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm disabled:opacity-60';
+const INPUT = 'w-full';
 
 interface Step {
   key: string;
@@ -116,7 +116,7 @@ export function releaseSteps(t: TFunction, f: ReleaseFigures, currency: string):
 
 export function StepTable({ steps, currency, testId }: { steps: Step[]; currency: string; testId?: string }) {
   return (
-    <table className="w-full text-sm" data-testid={testId}>
+    <table className="oe-table-compact w-full" data-testid={testId}>
       <tbody>
         {steps.map((s) => (
           <tr
@@ -124,7 +124,7 @@ export function StepTable({ steps, currency, testId }: { steps: Step[]; currency
             className={s.sign === '=' ? 'border-t border-border-light' : undefined}
             data-testid={testId ? `${testId}-${s.key}` : undefined}
           >
-            <td className="w-5 py-1.5 text-center text-content-tertiary">{s.sign === '=' ? '' : s.sign}</td>
+            <td className="w-5 text-center text-content-tertiary">{s.sign === '=' ? '' : s.sign}</td>
             <td className={`py-1.5 pe-3 ${s.strong ? 'font-semibold text-content-primary' : 'text-content-secondary'}`}>
               {s.label}
               {s.note && <span className="block text-2xs text-content-tertiary">{s.note}</span>}
@@ -271,7 +271,7 @@ export function ReleaseDrawer({
         </div>
 
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('cost_control.pay.steps_title', { defaultValue: 'From the invoice to the release' })}
           </h3>
           <StepTable steps={steps} currency={currency} testId="release-steps" />
@@ -298,7 +298,7 @@ export function ReleaseDrawer({
 
         {findings.length > 0 && (
           <section>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-2">
               {t('cost_control.pay.invoice_checks', { defaultValue: 'Checks on this invoice' })}
             </h3>
             <ul className="space-y-2">
@@ -310,7 +310,7 @@ export function ReleaseDrawer({
         )}
 
         <section className="space-y-3 border-t border-border-light pt-4">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('cost_control.pay.adjust_title', { defaultValue: 'Kind and agreed deductions' })}
           </h3>
           <label className="block">
@@ -318,7 +318,7 @@ export function ReleaseDrawer({
               {t('cost_control.pay.kind', { defaultValue: 'Invoice kind' })}
             </span>
             <select
-              className={INPUT}
+              className={`oe-select ${INPUT}`}
               value={kind}
               disabled={!editable || busy}
               onChange={(e) => setKind(e.target.value as InvoiceKind)}
@@ -337,7 +337,7 @@ export function ReleaseDrawer({
                 {t('cost_control.pay.net_deduction', { defaultValue: 'Deduction on the net' })}
               </span>
               <input
-                className={INPUT}
+                className={`oe-input ${INPUT}`}
                 inputMode="decimal"
                 value={netDeduction}
                 disabled={!editable || busy}
@@ -350,7 +350,7 @@ export function ReleaseDrawer({
                 {t('cost_control.pay.deduction_reason', { defaultValue: 'Why' })}
               </span>
               <input
-                className={INPUT}
+                className={`oe-input ${INPUT}`}
                 value={netNote}
                 maxLength={500}
                 disabled={!editable || busy}
@@ -362,7 +362,7 @@ export function ReleaseDrawer({
                 {t('cost_control.pay.gross_deduction', { defaultValue: 'Deduction on the gross' })}
               </span>
               <input
-                className={INPUT}
+                className={`oe-input ${INPUT}`}
                 inputMode="decimal"
                 value={grossDeduction}
                 disabled={!editable || busy}
@@ -374,7 +374,7 @@ export function ReleaseDrawer({
                 {t('cost_control.pay.deduction_reason', { defaultValue: 'Why' })}
               </span>
               <input
-                className={INPUT}
+                className={`oe-input ${INPUT}`}
                 value={grossNote}
                 maxLength={500}
                 disabled={!editable || busy}

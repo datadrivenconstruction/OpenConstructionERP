@@ -67,7 +67,7 @@ export function SyncReportDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex justify-end bg-black/40"
+      className="fixed inset-0 z-modal flex justify-end bg-black/40"
       role="dialog"
       aria-modal="true"
       data-testid="sync-report-drawer"
@@ -78,7 +78,7 @@ export function SyncReportDrawer({
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between border-b border-border-light px-4 py-3">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('dashboards.sync.drawer_title', {
               defaultValue: 'Preset sync report',
             })}
@@ -192,7 +192,7 @@ function IssueGroup({ title, issues, testId }: IssueGroupProps) {
   if (issues.length === 0) return null;
   return (
     <section data-testid={`sync-issue-group-${testId}`}>
-      <h4 className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h4 className="oe-overline mb-1">
         {title}
       </h4>
       <ul className="space-y-1.5">

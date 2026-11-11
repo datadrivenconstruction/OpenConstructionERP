@@ -94,7 +94,7 @@ import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 type Tab = 'dashboards' | 'kpis' | 'reports' | 'schedules' | 'alerts';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 // Legacy `labelCls` removed when CreateModal moved to <WideModalField>.
 
 const SEVERITY_VARIANT: Record<AlertSeverity, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
@@ -565,7 +565,7 @@ function DashboardsGrid({
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-semantic-info-bg text-semantic-info">
             <Sparkles size={22} />
           </div>
-          <h3 className="mt-3 text-base font-semibold text-content-primary">
+          <h3 className="oe-section-title mt-3">
             {t('bi.starter_title', {
               defaultValue: 'Install the starter pack to see your data live',
             })}
@@ -982,7 +982,7 @@ function KpiSourceRecordsDrawer({
           {records.map((rec, idx) => (
             <div
               key={(rec['id'] as string) ?? idx}
-              className="rounded-md border border-border-subtle bg-surface-secondary p-2.5"
+              className="rounded-md border border-border-subtle bg-surface-secondary p-3"
             >
               <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 text-2xs text-content-tertiary">
                 {Object.entries(rec)
@@ -1147,24 +1147,24 @@ function ReportList({
   return (
     <Card padding="none">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
-              <th className="px-4 py-2.5 text-left">{t('bi.code', { defaultValue: 'Code' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.name', { defaultValue: 'Name' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.scope', { defaultValue: 'Visibility scope' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('common.format')}</th>
-              <th className="px-4 py-2.5 text-right">{t('common.actions')}</th>
+              <th>{t('bi.code', { defaultValue: 'Code' })}</th>
+              <th>{t('bi.name', { defaultValue: 'Name' })}</th>
+              <th>{t('bi.scope', { defaultValue: 'Visibility scope' })}</th>
+              <th>{t('common.format')}</th>
+              <th className="text-right">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-border-light">
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary">{r.code}</td>
-                <td className="px-4 py-2 font-medium">{r.name}</td>
-                <td className="px-4 py-2"><Badge variant="neutral">{r.scope}</Badge></td>
-                <td className="px-4 py-2 text-xs text-content-secondary uppercase">{r.output_format}</td>
-                <td className="px-4 py-2">
+              <tr key={r.id}>
+                <td className="font-mono text-content-secondary">{r.code}</td>
+                <td className="font-medium">{r.name}</td>
+                <td><Badge variant="neutral">{r.scope}</Badge></td>
+                <td className="text-content-secondary">{r.output_format}</td>
+                <td>
                   <div className="flex items-center justify-end gap-2">
                     {lastRun[r.id] && (
                       <Button
@@ -1326,31 +1326,31 @@ function SchedulesList({
       </div>
       <Card padding="none" className="mt-3">
         <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">{t('bi.report', { defaultValue: 'Report' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('bi.frequency', { defaultValue: 'Frequency' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('bi.next_run', { defaultValue: 'Next run' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('bi.recipients', { defaultValue: 'Recipients' })}</th>
-                  <th className="px-4 py-2.5 text-left">{t('bi.enabled', { defaultValue: 'Enabled' })}</th>
-                  <th className="px-4 py-2.5 text-right">{t('common.actions')}</th>
+                  <th>{t('bi.report', { defaultValue: 'Report' })}</th>
+                  <th>{t('bi.frequency', { defaultValue: 'Frequency' })}</th>
+                  <th>{t('bi.next_run', { defaultValue: 'Next run' })}</th>
+                  <th>{t('bi.recipients', { defaultValue: 'Recipients' })}</th>
+                  <th>{t('bi.enabled', { defaultValue: 'Enabled' })}</th>
+                  <th className="text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {schedules.map((s) => (
-                  <tr key={s.id} className="border-t border-border-light">
-                    <td className="px-4 py-2 font-medium">
+                  <tr key={s.id}>
+                    <td className="font-medium">
                       {reportName(s.report_definition_id)}
                     </td>
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       {freqLabel(s.frequency)}{' '}
                       <span className="text-content-tertiary">· {s.time_of_day} {s.timezone}</span>
                     </td>
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       {s.next_run_at ? <DateDisplay value={s.next_run_at} format="datetime" /> : '—'}
                     </td>
-                    <td className="px-4 py-2 text-xs text-content-secondary">
+                    <td className="text-content-secondary">
                       {recipientCount(s) > 0
                         ? t('bi.recipients_count', {
                             defaultValue: '{{count}} recipients',
@@ -1358,7 +1358,7 @@ function SchedulesList({
                           })
                         : '—'}
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <label className="inline-flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
@@ -1380,7 +1380,7 @@ function SchedulesList({
                         </span>
                       </label>
                     </td>
-                    <td className="px-4 py-2 text-right">
+                    <td className="text-right">
                       <Button
                         variant="secondary"
                         icon={<Play size={12} />}
@@ -1493,7 +1493,7 @@ function NewScheduleModal({
           <select
             value={form.report_definition_id}
             onChange={(e) => setForm({ ...form, report_definition_id: e.target.value })}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {reports.map((r) => (
               <option key={r.id} value={r.id}>
@@ -1508,7 +1508,7 @@ function NewScheduleModal({
             onChange={(e) =>
               setForm({ ...form, frequency: e.target.value as ReportFrequency })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="daily">{t('bi.freq_daily', { defaultValue: 'Daily' })}</option>
             <option value="weekly">{t('bi.freq_weekly', { defaultValue: 'Weekly' })}</option>
@@ -1526,14 +1526,14 @@ function NewScheduleModal({
             type="time"
             value={form.time_of_day}
             onChange={(e) => setForm({ ...form, time_of_day: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('bi.timezone', { defaultValue: 'Timezone' })} span={2}>
           <input
             value={form.timezone}
             onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder="UTC"
           />
         </WideModalField>
@@ -1631,34 +1631,34 @@ function AlertsList({
     </div>
     <Card padding="none" className="mt-3">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
-              <th className="px-4 py-2.5 text-left">{t('bi.name', { defaultValue: 'Name' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.kpi', { defaultValue: 'KPI' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.condition', { defaultValue: 'Condition' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.severity', { defaultValue: 'Severity' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('bi.last_triggered', { defaultValue: 'Last fired' })}</th>
-              <th className="px-4 py-2.5 text-right">{t('bi.enabled', { defaultValue: 'Enabled' })}</th>
+              <th>{t('bi.name', { defaultValue: 'Name' })}</th>
+              <th>{t('bi.kpi', { defaultValue: 'KPI' })}</th>
+              <th>{t('bi.condition', { defaultValue: 'Condition' })}</th>
+              <th>{t('bi.severity', { defaultValue: 'Severity' })}</th>
+              <th>{t('bi.last_triggered', { defaultValue: 'Last fired' })}</th>
+              <th className="text-right">{t('bi.enabled', { defaultValue: 'Enabled' })}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((a) => (
-              <tr key={a.id} className="border-t border-border-light">
-                <td className="px-4 py-2 font-medium">{a.name}</td>
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary">{a.kpi_code}</td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+              <tr key={a.id}>
+                <td className="font-medium">{a.name}</td>
+                <td className="font-mono text-content-secondary">{a.kpi_code}</td>
+                <td className="text-content-secondary">
                   {a.condition} {String(a.threshold_value)}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant={SEVERITY_VARIANT[a.severity]} dot>
                     {a.severity}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {a.last_triggered_at ? <DateDisplay value={a.last_triggered_at} /> : '—'}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="text-right">
                   <label
                     className="inline-flex items-center gap-2 cursor-pointer"
                     title={
@@ -1807,7 +1807,7 @@ function DashboardRenderPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1818,7 +1818,7 @@ function DashboardRenderPanel({
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
           <div>
-            <h2 id="bi-dashboard-drawer-title" className="text-base font-semibold">
+            <h2 id="bi-dashboard-drawer-title" className="oe-section-title">
               {data?.dashboard.name ?? t('bi.dashboard', { defaultValue: 'Dashboard' })}
             </h2>
             {data?.rendered_at && (
@@ -2006,7 +2006,7 @@ function WidgetTile({
           title={t('bi.export_csv', { defaultValue: 'Export data as CSV' })}
           data-widget-id={widgetId}
         >
-          {exporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+          {exporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
           CSV
         </button>
         <button
@@ -2016,7 +2016,7 @@ function WidgetTile({
           className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-50"
           title={t('bi.export_svg', { defaultValue: 'Export chart as SVG' })}
         >
-          <Download size={11} />
+          <Download size={12} />
           SVG
         </button>
         <button
@@ -2026,7 +2026,7 @@ function WidgetTile({
           className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50"
           title={t('bi.remove_widget', { defaultValue: 'Remove widget' })}
         >
-          {deleting ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+          {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
           {t('bi.remove', { defaultValue: 'Remove' })}
         </button>
       </div>
@@ -2140,7 +2140,7 @@ function AddWidgetModal({
             <select
               value={form.kpi_code}
               onChange={(e) => setForm({ ...form, kpi_code: e.target.value })}
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               {kpis.map((k) => (
                 <option key={k.id} value={k.code}>
@@ -2166,7 +2166,7 @@ function AddWidgetModal({
             onChange={(e) =>
               setForm({ ...form, widget_type: e.target.value as WidgetType })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {ADD_WIDGET_TYPES.map((wt) => (
               <option key={wt} value={wt}>
@@ -2228,7 +2228,7 @@ function CrossFilterChips({
   if (entries.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2">
-      <span className="text-xs font-medium uppercase tracking-wide text-content-tertiary">
+      <span className="oe-overline">
         {t('bi.active_filters', { defaultValue: 'Active filters' })}
       </span>
       {entries.map(([key, value]) => (
@@ -2368,11 +2368,11 @@ function WidgetCard({
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-content-tertiary">
+            <table className="oe-table-compact w-full">
+              <thead>
                 <tr>
                   {cols.map((c) => (
-                    <th key={c} className="px-2 py-1 text-left font-medium">{c}</th>
+                    <th key={c}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -2386,12 +2386,12 @@ function WidgetCard({
                     key={rowKey}
                     onClick={rowClickable ? () => onCellClick?.(row) : undefined}
                     className={clsx(
-                      'border-t border-border-light',
-                      rowClickable && 'cursor-pointer hover:bg-surface-secondary/60',
+                      '',
+                      rowClickable && 'cursor-pointer',
                     )}
                   >
                     {cols.map((c) => (
-                      <td key={c} className="px-2 py-1">{String(row[c] ?? '')}</td>
+                      <td key={c}>{String(row[c] ?? '')}</td>
                     ))}
                   </tr>
                   );
@@ -2636,7 +2636,7 @@ function CreateModal({
             <input
               value={dashForm.name}
               onChange={(e) => setDashForm({ ...dashForm, name: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder={t('bi.dashboard_name_placeholder', {
                 defaultValue: 'PM weekly overview',
               })}
@@ -2653,7 +2653,7 @@ function CreateModal({
               value={dashForm.description}
               onChange={(e) => setDashForm({ ...dashForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2 resize-y')}
+              className={clsx('oe-textarea', inputCls, 'h-auto resize-y')}
             />
           </WideModalField>
           <WideModalField
@@ -2667,7 +2667,7 @@ function CreateModal({
             <select
               value={dashForm.scope}
               onChange={(e) => setDashForm({ ...dashForm, scope: e.target.value as DashboardScope })}
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="personal">{t('bi.scope_personal', { defaultValue: 'Personal - only me' })}</option>
               <option value="role">{t('bi.scope_role', { defaultValue: 'Role - my team' })}</option>
@@ -2712,7 +2712,7 @@ function CreateModal({
             <input
               value={reportForm.code}
               onChange={(e) => setReportForm({ ...reportForm, code: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder="weekly_cost_summary"
             />
           </WideModalField>
@@ -2723,7 +2723,7 @@ function CreateModal({
             <input
               value={reportForm.name}
               onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder={t('bi.report_name_placeholder', {
                 defaultValue: 'Weekly cost summary',
               })}
@@ -2737,7 +2737,7 @@ function CreateModal({
               value={reportForm.description}
               onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
               rows={3}
-              className={clsx(inputCls, 'h-auto py-2 resize-y')}
+              className={clsx('oe-textarea', inputCls, 'h-auto resize-y')}
             />
           </WideModalField>
           <WideModalField
@@ -2755,7 +2755,7 @@ function CreateModal({
                   output_format: e.target.value as 'pdf' | 'xlsx' | 'csv' | 'json',
                 })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="pdf">PDF</option>
               <option value="xlsx">Excel (XLSX)</option>
@@ -2776,7 +2776,7 @@ function CreateModal({
             <input
               value={alertForm.name}
               onChange={(e) => setAlertForm({ ...alertForm, name: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder={t('bi.alert_name_placeholder', {
                 defaultValue: 'CPI dropped below 0.9',
               })}
@@ -2791,7 +2791,7 @@ function CreateModal({
               <select
                 value={alertForm.kpi_code}
                 onChange={(e) => setAlertForm({ ...alertForm, kpi_code: e.target.value })}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 {kpis.map((k) => (
                   <option key={k.id} value={k.code}>
@@ -2803,7 +2803,7 @@ function CreateModal({
               <input
                 value={alertForm.kpi_code}
                 onChange={(e) => setAlertForm({ ...alertForm, kpi_code: e.target.value })}
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
                 placeholder="cost_variance_pct"
               />
             )}
@@ -2814,7 +2814,7 @@ function CreateModal({
               onChange={(e) =>
                 setAlertForm({ ...alertForm, condition: e.target.value as AlertCondition })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="above">{t('bi.cond_above', { defaultValue: 'Above threshold' })}</option>
               <option value="below">{t('bi.cond_below', { defaultValue: 'Below threshold' })}</option>
@@ -2830,7 +2830,7 @@ function CreateModal({
               onChange={(e) =>
                 setAlertForm({ ...alertForm, threshold_value: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField
@@ -2846,7 +2846,7 @@ function CreateModal({
               onChange={(e) =>
                 setAlertForm({ ...alertForm, severity: e.target.value as AlertSeverity })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="info">{t('bi.sev_info_v2', { defaultValue: 'Info - informational' })}</option>
               <option value="warning">{t('bi.sev_warning_v2', { defaultValue: 'Warning - needs attention' })}</option>

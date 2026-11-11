@@ -93,7 +93,7 @@ export function InspectionsQualityCard() {
       <CardHeader
         title={
           <span className="inline-flex items-center gap-2">
-            <ClipboardCheck size={18} strokeWidth={1.75} className="text-oe-blue" />
+            <ClipboardCheck size={20} strokeWidth={1.75} className="text-oe-blue" />
             {t('dashboard.inspections_title', { defaultValue: 'Inspection quality' })}
           </span>
         }
@@ -107,7 +107,7 @@ export function InspectionsQualityCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('dashboard.inspections_open', { defaultValue: 'Open inspections' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

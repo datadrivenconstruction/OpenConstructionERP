@@ -255,7 +255,7 @@ export function CustomAgentBuilder({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} />
 
       <div
@@ -279,7 +279,7 @@ export function CustomAgentBuilder({
               <PreviewIcon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {editing
                   ? t('agents.builder.edit_title', { defaultValue: 'Edit your agent' })
                   : t('agents.builder.create_title', { defaultValue: 'Create your own agent' })}
@@ -305,7 +305,7 @@ export function CustomAgentBuilder({
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-2">
             {/* Name */}
             <div>
-              <label htmlFor="ca-name" className="mb-1 block text-xs font-medium text-content-secondary">
+              <label htmlFor="ca-name" className="oe-label">
                 {t('agents.builder.name_label', { defaultValue: 'Agent name' })}
                 <span className="ml-0.5 text-semantic-error">*</span>
               </label>
@@ -326,7 +326,7 @@ export function CustomAgentBuilder({
 
             {/* Tagline */}
             <div>
-              <label htmlFor="ca-tagline" className="mb-1 block text-xs font-medium text-content-secondary">
+              <label htmlFor="ca-tagline" className="oe-label">
                 {t('agents.builder.tagline_label', { defaultValue: 'Short description' })}
               </label>
               <input
@@ -505,7 +505,7 @@ export function CustomAgentBuilder({
 
             {/* Example prompts */}
             <div>
-              <label htmlFor="ca-examples" className="mb-1 block text-xs font-medium text-content-secondary">
+              <label htmlFor="ca-examples" className="oe-label">
                 {t('agents.builder.examples_label', { defaultValue: 'Example prompts (optional)' })}
               </label>
               <textarea

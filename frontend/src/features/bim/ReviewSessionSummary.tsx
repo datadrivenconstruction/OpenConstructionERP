@@ -157,8 +157,8 @@ export function ReviewSessionSummary({
         </div>
 
         <div>
-          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-            <ClipboardCheck size={13} />
+          <p className="oe-overline mb-1 flex items-center gap-1.5">
+            <ClipboardCheck size={14} />
             {t('bim.review_summary_decisions', { defaultValue: 'Decisions taken' })}
           </p>
           {decisions.length === 0 ? (

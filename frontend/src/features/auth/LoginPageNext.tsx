@@ -49,9 +49,9 @@ interface ModuleTile {
 const TONE_STYLES: Record<ModuleTile['tone'], { bg: string; fg: string; ring: string }> = {
   blue:    { bg: 'bg-[#007AFF]/12',  fg: 'text-[#007AFF]',  ring: 'ring-[#007AFF]/15' },
   violet:  { bg: 'bg-violet-500/10', fg: 'text-violet-600', ring: 'ring-violet-500/15' },
-  emerald: { bg: 'bg-emerald-500/10',fg: 'text-emerald-600',ring: 'ring-emerald-500/15' },
-  amber:   { bg: 'bg-amber-500/10',  fg: 'text-amber-600',  ring: 'ring-amber-500/15' },
-  rose:    { bg: 'bg-rose-500/10',   fg: 'text-rose-600',   ring: 'ring-rose-500/15' },
+  emerald: { bg: 'bg-semantic-success/10',fg: 'text-semantic-success',ring: 'ring-semantic-success/15' },
+  amber:   { bg: 'bg-semantic-warning/10',  fg: 'text-semantic-warning',  ring: 'ring-semantic-warning/15' },
+  rose:    { bg: 'bg-semantic-error/10',   fg: 'text-semantic-error',   ring: 'ring-semantic-error/15' },
   cyan:    { bg: 'bg-cyan-500/10',   fg: 'text-cyan-600',   ring: 'ring-cyan-500/15' },
   indigo:  { bg: 'bg-indigo-500/10', fg: 'text-indigo-600', ring: 'ring-indigo-500/15' },
   teal:    { bg: 'bg-teal-500/10',   fg: 'text-teal-600',   ring: 'ring-teal-500/15' },
@@ -183,7 +183,7 @@ export function LoginPageNext() {
   // install. The tiles sign in through /auth/demo-login/ instead.
   const demoAccounts = [
     { email: 'demo@openconstructionerp.com', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
+    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-semantic-warning', letter: 'M' },
   ];
 
   const handleDemoLogin = async (demoEmail: string) => {
@@ -457,10 +457,10 @@ export function LoginPageNext() {
 
       {/* Preview badge — top-left so users know this is /login-next. */}
       <div className="absolute top-4 left-4 z-30">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-white/60 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/70">
+        <span className="oe-overline inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-white/60 px-2.5 py-1 backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/70">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-semantic-warning opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-semantic-warning" />
           </span>
           Preview · /login-next
         </span>
@@ -472,7 +472,7 @@ export function LoginPageNext() {
           onClick={() => setLangOpen(!langOpen)}
           className="flex items-center gap-2 rounded-xl border border-border-light bg-surface-primary px-3.5 py-2.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary hover:border-oe-blue/30 transition-all shadow-sm"
         >
-          <Globe size={15} className="text-content-tertiary" />
+          <Globe size={16} className="text-content-tertiary" />
           <CountryFlag code={currentLang.country} size={18} />
           <span className="hidden sm:inline">{currentLang.name}</span>
           <ChevronDown size={14} className={`text-content-tertiary transition-transform ${langOpen ? 'rotate-180' : ''}`} />
@@ -485,7 +485,7 @@ export function LoginPageNext() {
                 <button
                   key={lang.code}
                   onClick={() => { i18n.changeLanguage(lang.code); setLangOpen(false); }}
-                  className={`flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors ${isActive ? 'bg-oe-blue/10 text-oe-blue font-medium' : 'text-content-primary hover:bg-surface-secondary'}`}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors ${isActive ? 'bg-oe-blue/10 text-oe-blue font-medium' : 'text-content-primary hover:bg-surface-secondary'}`}
                 >
                   <CountryFlag code={lang.country} size={16} />
                   <span className="truncate">{lang.name}</span>
@@ -511,7 +511,7 @@ export function LoginPageNext() {
 
           {/* Eyebrow */}
           <div className="oe-font-display relative mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-2xs font-semibold tracking-wider uppercase text-content-secondary backdrop-blur-md dark:border-white/10 dark:bg-white/10 dark:text-white/80">
-            <span className="oe-pulse relative flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="oe-pulse relative flex h-1.5 w-1.5 rounded-full bg-semantic-success" />
             <span>{t('login.welcome_eyebrow', 'First-time setup')}</span>
           </div>
 
@@ -540,7 +540,7 @@ export function LoginPageNext() {
               return (
                 <div
                   key={m.label}
-                  className={`oe-tile oe-font-display ${floatClass} rounded-2xl p-3.5 animate-stagger-in`}
+                  className={`oe-tile oe-font-display ${floatClass} rounded-2xl p-3 animate-stagger-in`}
                   style={{ animationDelay: `${80 + i * 40}ms` }}
                 >
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${tone.bg} ${tone.fg} ${tone.ring}`}>
@@ -553,7 +553,7 @@ export function LoginPageNext() {
                     <span className={`text-xl font-semibold tracking-tight leading-none ${m.stat === '—' ? 'text-content-quaternary/60' : 'text-content-primary dark:text-white'}`}>
                       {m.stat}
                     </span>
-                    <span className="text-2xs uppercase tracking-wider font-medium text-content-tertiary">
+                    <span className="oe-overline">
                       {m.hint}
                     </span>
                   </div>
@@ -599,7 +599,7 @@ export function LoginPageNext() {
               </div>
 
               {/* Brand row (desktop) */}
-              <div className="hidden lg:flex items-center gap-2.5 mb-7">
+              <div className="hidden lg:flex items-center gap-2 mb-7">
                 <Logo size="sm" animate />
                 <span
                   className="text-base font-medium tracking-tight text-content-primary dark:text-white"
@@ -621,7 +621,7 @@ export function LoginPageNext() {
 
               <form
                 onSubmit={handleSubmit}
-                className="mt-7 space-y-3.5 animate-stagger-in"
+                className="mt-7 space-y-3 animate-stagger-in"
                 style={{ animationDelay: '160ms' }}
                 aria-label={t('auth.login', 'Sign in')}
               >
@@ -636,7 +636,7 @@ export function LoginPageNext() {
                   autoComplete="email"
                   required aria-required="true"
                   autoFocus
-                  icon={<Mail size={15} />}
+                  icon={<Mail size={16} />}
                 />
 
                 <div className="flex flex-col gap-1">
@@ -653,7 +653,7 @@ export function LoginPageNext() {
                   </div>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
-                      <Lock size={15} />
+                      <Lock size={16} />
                     </div>
                     <input
                       id="login-password-next"
@@ -665,7 +665,7 @@ export function LoginPageNext() {
                       autoComplete="current-password"
                       required aria-required="true"
                       minLength={8}
-                      className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-9 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+                      className="oe-input w-full pl-9 pr-9"
                     />
                     <button
                       type="button"
@@ -674,7 +674,7 @@ export function LoginPageNext() {
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-tertiary hover:text-content-secondary transition-colors"
                       tabIndex={-1}
                     >
-                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
@@ -750,7 +750,7 @@ export function LoginPageNext() {
                           <div className="text-sm font-semibold text-content-primary dark:text-white">{acct.name}</div>
                           <div className="text-2xs text-content-tertiary truncate">{acct.email} · {acct.role}</div>
                         </div>
-                        <ArrowUpRight size={15} className="text-content-quaternary group-hover:text-oe-blue transition-colors shrink-0" />
+                        <ArrowUpRight size={16} className="text-content-quaternary group-hover:text-oe-blue transition-colors shrink-0" />
                       </button>
                     ))}
                   </div>

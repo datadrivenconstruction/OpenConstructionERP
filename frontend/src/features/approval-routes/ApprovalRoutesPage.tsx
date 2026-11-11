@@ -245,7 +245,7 @@ export function ApprovalRoutesPage() {
             <select
               value={kindFilter}
               onChange={(e) => setKindFilter(e.target.value)}
-              className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+              className="oe-select cursor-pointer"
               aria-label={t('approvalRoutes.filter_kind', {
                 defaultValue: 'Filter by kind',
               })}
@@ -291,36 +291,36 @@ export function ApprovalRoutesPage() {
           ) : (
             groupedRoutes.map(([kind, rows]) => (
               <div key={kind}>
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-1.5">
+                <h2 className="oe-overline mb-1.5">
                   {kindLabel(t, kind)}
                 </h2>
                 <Card padding="none" className="overflow-hidden">
-                  <table className="w-full text-sm">
+                  <table className="oe-table w-full">
                     <thead>
-                      <tr className="border-b border-border-light bg-surface-secondary/40">
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                      <tr>
+                        <th>
                           {t('approvalRoutes.col_name', { defaultValue: 'Name' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[80px]">
+                        <th className="w-[80px]">
                           {t('approvalRoutes.col_steps', { defaultValue: 'Steps' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[110px]">
+                        <th className="w-[110px]">
                           {t('approvalRoutes.col_scope', { defaultValue: 'Scope' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[90px]">
+                        <th className="w-[90px]">
                           {t('approvalRoutes.col_active', { defaultValue: 'Active' })}
                         </th>
-                        <th className="px-3 py-2 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[80px]">
+                        <th className="text-right w-[80px]">
                           {t('common.actions', { defaultValue: 'Actions' })}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {rows
                         .sort((a, b) => compareNames(a.name, b.name))
                         .map((r) => (
                           <tr key={r.id}>
-                            <td className="px-3 py-2.5">
+                            <td>
                               <div className="flex flex-col gap-1">
                                 <span className="text-sm font-medium text-content-primary">
                                   {r.name}
@@ -328,7 +328,7 @@ export function ApprovalRoutesPage() {
                                 {r.system_key && (
                                   <span>
                                     <Badge variant="blue" size="sm">
-                                      <ShieldCheck size={11} />
+                                      <ShieldCheck size={12} />
                                       {t('approvalRoutes.preset_badge', {
                                         defaultValue: 'ISO 19650 preset',
                                       })}
@@ -337,13 +337,13 @@ export function ApprovalRoutesPage() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-3 py-2.5 text-xs text-content-secondary tabular-nums">
+                            <td className="text-content-secondary tabular-nums">
                               <span className="inline-flex items-center gap-1">
-                                <ShieldCheck size={11} className="text-content-tertiary" />
+                                <ShieldCheck size={12} className="text-content-tertiary" />
                                 {r.steps.length}
                               </span>
                             </td>
-                            <td className="px-3 py-2.5 text-xs text-content-secondary">
+                            <td className="text-content-secondary">
                               {r.project_id ? (
                                 <span
                                   className="truncate"
@@ -364,7 +364,7 @@ export function ApprovalRoutesPage() {
                                 </Badge>
                               )}
                             </td>
-                            <td className="px-3 py-2.5">
+                            <td>
                               {r.is_active ? (
                                 <Badge variant="success" size="sm">
                                   {t('approvalRoutes.active', {
@@ -379,7 +379,7 @@ export function ApprovalRoutesPage() {
                                 </Badge>
                               )}
                             </td>
-                            <td className="px-3 py-2.5 text-right">
+                            <td className="text-right">
                               <div className="inline-flex items-center gap-0.5">
                                 <button
                                   onClick={() => setSimTarget(r)}
@@ -389,7 +389,7 @@ export function ApprovalRoutesPage() {
                                   })}
                                   data-testid="route-dry-run"
                                 >
-                                  <FlaskConical size={13} />
+                                  <FlaskConical size={14} />
                                 </button>
                                 {r.system_key ? (
                                   // Presets are read-only tenant-wide templates;
@@ -418,7 +418,7 @@ export function ApprovalRoutesPage() {
                                         defaultValue: 'Edit',
                                       })}
                                     >
-                                      <Edit3 size={13} />
+                                      <Edit3 size={14} />
                                     </button>
                                     <button
                                       onClick={() => setDeleteTarget(r)}
@@ -427,7 +427,7 @@ export function ApprovalRoutesPage() {
                                         defaultValue: 'Delete',
                                       })}
                                     >
-                                      <Trash2 size={13} />
+                                      <Trash2 size={14} />
                                     </button>
                                   </>
                                 )}
@@ -470,7 +470,7 @@ export function ApprovalRoutesPage() {
             <select
               value={analyticsProjectId ?? ''}
               onChange={(e) => setAnalyticsProjectId(e.target.value || null)}
-              className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+              className="oe-select cursor-pointer"
               aria-label={t('approvalRoutes.analytics_project_label', {
                 defaultValue: 'Project',
               })}

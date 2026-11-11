@@ -465,7 +465,7 @@ function ImportDemoModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg"
@@ -482,7 +482,7 @@ function ImportDemoModal({
               <Download size={16} className="text-oe-blue" strokeWidth={2} />
             </div>
             <div>
-              <h3 id="demo-modal-title" className="text-base font-semibold text-content-primary">
+              <h3 id="demo-modal-title" className="oe-section-title">
                 {t('demo.modal_title', 'Import Demo Project')}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -557,9 +557,9 @@ function ImportDemoModal({
                     onClick={() => handleInstall(demo.demo_id)}
                     icon={
                       isInstalling ? (
-                        <Loader2 size={13} className="animate-spin" />
+                        <Loader2 size={14} className="animate-spin" />
                       ) : (
-                        <Download size={13} />
+                        <Download size={14} />
                       )
                     }
                   >
@@ -736,7 +736,7 @@ function OnboardingSteps({
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue-subtle">
             <Zap size={14} className="text-oe-blue" strokeWidth={2} />
           </div>
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('dashboard.getting_started', { defaultValue: 'Getting Started' })}
           </h2>
           <Badge variant="blue" size="sm">
@@ -821,7 +821,7 @@ function OnboardingSteps({
                         size="sm"
                         onClick={step.onClick}
                         className="flex-[3]"
-                        icon={<ArrowRight size={13} strokeWidth={2} />}
+                        icon={<ArrowRight size={14} strokeWidth={2} />}
                         iconPosition="right"
                       >
                         {t(step.buttonKey, { defaultValue: step.buttonDefault })}
@@ -832,7 +832,7 @@ function OnboardingSteps({
                         onClick={() => setDemoModalOpen(true)}
                         className="flex-1 !px-2"
                         title={t('demo.import_demo', 'Import Demo')}
-                        icon={<Download size={13} strokeWidth={2} />}
+                        icon={<Download size={14} strokeWidth={2} />}
                       >
                         {t('dashboard.demo', { defaultValue: 'Demo' })}
                       </Button>
@@ -846,9 +846,9 @@ function OnboardingSteps({
                       className="w-full"
                       icon={
                         step.done ? (
-                          <CheckCircle2 size={13} strokeWidth={2} />
+                          <CheckCircle2 size={14} strokeWidth={2} />
                         ) : (
-                          <ArrowRight size={13} strokeWidth={2} />
+                          <ArrowRight size={14} strokeWidth={2} />
                         )
                       }
                       iconPosition="right"
@@ -1053,7 +1053,7 @@ function KpiRibbon({
         ? null
         : priced.pct !== null
           ? `${priced.pct}%`
-          : (<CircleDashed size={18} strokeWidth={1.75} className="text-content-quaternary opacity-70" />),
+          : (<CircleDashed size={20} strokeWidth={1.75} className="text-content-quaternary opacity-70" />),
       // The counts are shown at every size, including "0 of 0 priced". They
       // say what the percentage would have said, without the false
       // precision, so zero needs no special case of its own.
@@ -1325,7 +1325,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
       value: totals.tasks,
       label: t('dashboard.today_tasks', { defaultValue: 'Open tasks' }),
       sublabel: t('dashboard.today_tasks_sub', { defaultValue: 'awaiting your attention' }),
-      icon: <CheckCircle2 size={18} strokeWidth={1.75} />,
+      icon: <CheckCircle2 size={20} strokeWidth={1.75} />,
       tone: tone(totals.tasks, 10, 3),
       url: tileUrl('/tasks'),
     },
@@ -1334,7 +1334,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
       value: totals.rfis,
       label: t('dashboard.today_rfis', { defaultValue: 'Open RFIs' }),
       sublabel: t('dashboard.today_rfis_sub', { defaultValue: 'awaiting response' }),
-      icon: <FileText size={18} strokeWidth={1.75} />,
+      icon: <FileText size={20} strokeWidth={1.75} />,
       tone: tone(totals.rfis, 5, 1),
       url: tileUrl('/rfi'),
     },
@@ -1343,7 +1343,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
       value: totals.incidents,
       label: t('dashboard.today_incidents', { defaultValue: 'Safety incidents' }),
       sublabel: t('dashboard.today_incidents_sub', { defaultValue: 'open this week' }),
-      icon: <AlertTriangle size={18} strokeWidth={1.75} />,
+      icon: <AlertTriangle size={20} strokeWidth={1.75} />,
       tone: tone(totals.incidents, 1, 1),
       url: tileUrl('/safety'),
     },
@@ -1477,7 +1477,7 @@ function NextSteps({
     if (hasProjects && !hasBoqs) {
       items.push({
         id: 'create-boq',
-        icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
+        icon: <FileSpreadsheet size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_create_boq', { defaultValue: 'Create your first Bill of Quantities' }),
         description: t('dashboard.next_create_boq_desc', { defaultValue: 'A BOQ is the foundation of your estimate. Add sections and positions to start building your cost breakdown.' }),
         actionLabel: t('dashboard.next_create_boq_action', { defaultValue: 'Create BOQ' }),
@@ -1490,7 +1490,7 @@ function NextSteps({
       const firstBoq = boqs!.find((b) => !b.hasPositions) ?? boqs![0];
       items.push({
         id: 'add-positions',
-        icon: <FileText size={18} strokeWidth={1.75} />,
+        icon: <FileText size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_add_positions', { defaultValue: 'Add positions to your estimate' }),
         description: t('dashboard.next_add_positions_desc', { defaultValue: 'Your BOQ is empty. Add trade sections and work item positions with quantities and unit descriptions.' }),
         actionLabel: t('dashboard.next_add_positions_action', { defaultValue: 'Open BOQ Editor' }),
@@ -1502,7 +1502,7 @@ function NextSteps({
     if (hasPositions && !hasRates) {
       items.push({
         id: 'import-costs',
-        icon: <Database size={18} strokeWidth={1.75} />,
+        icon: <Database size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_import_costs', { defaultValue: 'Import cost database to auto-fill rates' }),
         description: t('dashboard.next_import_costs_desc', { defaultValue: 'Load regional pricing data with 55,000+ items to automatically match unit rates to your BOQ positions.' }),
         actionLabel: t('dashboard.next_import_costs_action', { defaultValue: 'Import Database' }),
@@ -1514,7 +1514,7 @@ function NextSteps({
     if (hasRates) {
       items.push({
         id: 'run-validation',
-        icon: <ShieldCheck size={18} strokeWidth={1.75} />,
+        icon: <ShieldCheck size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_validate', { defaultValue: 'Run validation to check quality' }),
         description: t('dashboard.next_validate_desc', { defaultValue: 'Check your estimate for missing quantities, zero prices, duplicates, and compliance with industry standards.' }),
         actionLabel: t('dashboard.next_validate_action', { defaultValue: 'Run Validation' }),
@@ -1526,7 +1526,7 @@ function NextSteps({
     if (hasProjects && !hasSchedules) {
       items.push({
         id: 'create-schedule',
-        icon: <Calendar size={18} strokeWidth={1.75} />,
+        icon: <Calendar size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_create_schedule', { defaultValue: 'Create a project schedule' }),
         description: t('dashboard.next_create_schedule_desc', { defaultValue: 'Plan your project timeline with activities, dependencies, and milestones. The Gantt chart updates automatically.' }),
         actionLabel: t('dashboard.next_create_schedule_action', { defaultValue: 'Go to Schedule' }),
@@ -1538,7 +1538,7 @@ function NextSteps({
     if (!hasContacts) {
       items.push({
         id: 'add-contacts',
-        icon: <Users size={18} strokeWidth={1.75} />,
+        icon: <Users size={20} strokeWidth={1.75} />,
         title: t('dashboard.next_add_contacts', { defaultValue: 'Add your team contacts' }),
         description: t('dashboard.next_add_contacts_desc', { defaultValue: 'Store clients, subcontractors, and suppliers in your contacts directory. Import from CSV or add manually.' }),
         actionLabel: t('dashboard.next_add_contacts_action', { defaultValue: 'Add Contacts' }),
@@ -1552,7 +1552,7 @@ function NextSteps({
     // the user's setup. (Added 2026-05-11.)
     items.push({
       id: 'try-ai-estimate',
-      icon: <Sparkles size={18} strokeWidth={1.75} />,
+      icon: <Sparkles size={20} strokeWidth={1.75} />,
       title: t('dashboard.next_ai_estimate', { defaultValue: 'Try the AI Quick Estimate' }),
       description: t('dashboard.next_ai_estimate_desc', { defaultValue: 'Describe a project in plain language and get a draft BOQ in seconds - review, adjust, and ship.' }),
       actionLabel: t('dashboard.next_ai_estimate_action', { defaultValue: 'Open AI Estimate' }),
@@ -1561,7 +1561,7 @@ function NextSteps({
 
     items.push({
       id: 'upload-cad',
-      icon: <Layers size={18} strokeWidth={1.75} />,
+      icon: <Layers size={20} strokeWidth={1.75} />,
       title: t('dashboard.next_upload_cad', { defaultValue: 'Upload a CAD or BIM model' }),
       description: t('dashboard.next_upload_cad_desc', { defaultValue: 'Drop a RVT, IFC or DWG file, the converter extracts quantities and matches elements to cost positions.' }),
       actionLabel: t('dashboard.next_upload_cad_action', { defaultValue: 'Open BIM' }),
@@ -1570,7 +1570,7 @@ function NextSteps({
 
     items.push({
       id: 'explore-costs',
-      icon: <Database size={18} strokeWidth={1.75} />,
+      icon: <Database size={20} strokeWidth={1.75} />,
       title: t('dashboard.next_explore_costs', { defaultValue: 'Explore the cost database' }),
       description: t('dashboard.next_explore_costs_desc', { defaultValue: 'Browse 55,000+ regional unit rates with semantic search across CWICR / GAEB sources.' }),
       actionLabel: t('dashboard.next_explore_costs_action', { defaultValue: 'Open Costs' }),
@@ -1731,7 +1731,7 @@ function ProjectMetricCards({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={showAllProjects ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  icon={showAllProjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   iconPosition="right"
                   onClick={() => setShowAllProjects((v) => !v)}
                   data-testid="dashboard-projects-show-more"
@@ -2062,7 +2062,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
               <select
                 value={uploadProjectId ?? ''}
                 onChange={(e) => setPickedProjectId(e.target.value)}
-                className="mt-2 h-8 w-full max-w-xs rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select mt-2 w-full max-w-xs"
                 aria-label={t('dashboard.upload_pick_project', { defaultValue: 'Pick a project to upload into.' })}
               >
                 {selectableProjects.map((p) => (
@@ -2079,7 +2079,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
                 onClick={() => navigate('/projects/new')}
               >
                 <span>{t('dashboard.upload_create_project', { defaultValue: 'Create a project' })}</span>
-                <ArrowRight size={11} />
+                <ArrowRight size={12} />
               </button>
             )}
             <div className="mt-2 flex items-center gap-3 text-2xs text-content-tertiary">
@@ -2089,7 +2089,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
                 onClick={() => navigate('/documents')}
                 disabled={!hasProject}
               >
-                <FileText size={11} />
+                <FileText size={12} />
                 <span>
                   {t('dashboard.upload_count_link', {
                     defaultValue: '{{count}} documents · open in Documents →',
@@ -2103,7 +2103,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
             <Button
               variant="primary"
               size="sm"
-              icon={<Upload size={13} />}
+              icon={<Upload size={14} />}
               disabled={!hasProject || uploading}
               onClick={() => fileInputRef.current?.click()}
             >
@@ -2608,7 +2608,7 @@ function DashboardPageInner() {
     map:
       projects && projects.length > 0 ? (
         <div className="animate-card-in" style={{ animationDelay: '220ms' }}>
-          <div className="rounded-xl border border-border-light bg-surface-primary/70 p-3.5">
+          <div className="rounded-xl border border-border-light bg-surface-primary/70 p-3">
             <div className="mb-2.5 flex items-center gap-2">
               <MapPin size={16} className="text-oe-blue" />
               <h3 className="text-sm font-semibold text-content-primary">
@@ -2649,7 +2649,7 @@ function DashboardPageInner() {
       projects && projects.length > 0 ? (
         <div className="animate-card-in" style={{ animationDelay: '180ms' }}>
           <div className="mb-4 flex items-center gap-2">
-            <BarChart3 size={18} className="text-content-tertiary" strokeWidth={1.75} />
+            <BarChart3 size={20} className="text-content-tertiary" strokeWidth={1.75} />
             <h2 className="text-lg font-semibold text-content-primary">
               {t('dashboard.analytics', { defaultValue: 'Analytics' })}
             </h2>
@@ -2819,7 +2819,7 @@ function DashboardPageInner() {
           <Button
             variant="secondary"
             size="md"
-            icon={<FileSpreadsheet size={15} />}
+            icon={<FileSpreadsheet size={16} />}
             onClick={() => {
               // The project in the top-bar switcher is the one the reader is
               // working in; the first project in the list is only a fallback.
@@ -2858,7 +2858,7 @@ function DashboardPageInner() {
           <Button
             variant={customizing ? 'primary' : 'ghost'}
             size="md"
-            icon={<LayoutGrid size={15} />}
+            icon={<LayoutGrid size={16} />}
             onClick={() => setCustomizing((v) => !v)}
             aria-pressed={customizing}
             title={t('dashboard.layout.customize_hint', {
@@ -2916,11 +2916,11 @@ function DashboardPageInner() {
           className="group/oss inline-flex items-center gap-2 text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
         >
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-semantic-success" />
           </span>
           <span>{t('dashboard.open_source_badge', { defaultValue: 'Open-source construction ERP' })}</span>
-          <ExternalLink size={11} className="text-content-quaternary group-hover/oss:text-oe-blue transition-colors" />
+          <ExternalLink size={12} className="text-content-quaternary group-hover/oss:text-oe-blue transition-colors" />
         </a>
 
         <span aria-hidden className="h-3 w-px bg-border-light" />
@@ -3016,7 +3016,7 @@ function DashboardPageInner() {
           setup wizard or just continue with the new version. */}
       {showUpdateWelcome && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="update-welcome-title"
@@ -3037,7 +3037,7 @@ function DashboardPageInner() {
                   <Sparkles size={28} className="text-oe-blue" />
                 </div>
               </div>
-              <h2 id="update-welcome-title" className="text-xl font-semibold text-content-primary">
+              <h2 id="update-welcome-title" className="oe-section-title">
                 {t('dashboard.update_welcome_title', {
                   defaultValue: 'Welcome to v{{version}}',
                   version: APP_VERSION,
@@ -3311,7 +3311,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
         {/* Aggregate Stats */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-6">
           <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline">
               {t('dashboard.total_projects', { defaultValue: 'Total Projects' })}
             </div>
             <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
@@ -3319,7 +3319,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
             </div>
           </div>
           <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline">
               {t('dashboard.total_boqs', { defaultValue: 'Total BOQs' })}
             </div>
             <div className="mt-1 text-xl font-semibold tabular-nums text-content-primary">
@@ -3327,7 +3327,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
             </div>
           </div>
           <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm sm:col-span-2">
-            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline flex items-center gap-1.5">
               {t('dashboard.total_value', { defaultValue: 'Total Value' })}
               {stats.multiCurrency && (
                 <span className="rounded bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium normal-case tracking-normal text-content-tertiary">
@@ -3365,7 +3365,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
             (vanity metric - nobody asks "how many of my BOQs are drafts?").
             Bars now span full-width with slimmer height (h-2 vs h-6) and
             use the oe-blue brand color instead of a 10-colour rainbow. */}
-        <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary mb-3">
+        <div className="oe-overline mb-3">
           {t('dashboard.value_by_project', 'Value by Project')}
         </div>
         <div className="space-y-3">
@@ -3489,21 +3489,21 @@ function SystemStatus() {
       name: t('dashboard.api_server', { defaultValue: 'API Server' }),
       status: apiStatus,
       detail: status?.api?.version ? `v${status.api.version}` : '',
-      icon: <Zap size={13} />,
+      icon: <Zap size={14} />,
       delay: 400,
     },
     {
       name: t('dashboard.database', { defaultValue: 'Database' }),
       status: dbStatus,
       detail: status?.database?.engine === 'sqlite' ? 'SQLite' : status?.database?.engine ?? '',
-      icon: <Layers size={13} />,
+      icon: <Layers size={14} />,
       delay: 460,
     },
     {
       name: t('dashboard.vector_db', { defaultValue: 'Vector DB' }),
       status: vectorStatus,
       detail: vectorDetail,
-      icon: <Globe size={13} />,
+      icon: <Globe size={14} />,
       delay: 520,
     },
     {
@@ -3514,7 +3514,7 @@ function SystemStatus() {
         (hasUserAiKey
           ? t('dashboard.status_user_keys', { defaultValue: 'User keys' })
           : t('dashboard.not_configured', { defaultValue: 'Not configured' })),
-      icon: <ShieldCheck size={13} />,
+      icon: <ShieldCheck size={14} />,
       delay: 580,
     },
   ];

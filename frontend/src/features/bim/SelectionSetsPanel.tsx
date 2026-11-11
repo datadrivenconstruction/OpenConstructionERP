@@ -402,7 +402,7 @@ export default function SelectionSetsPanel({
             data-testid={`bim-selection-set-folder-btn-${set.id}`}
             className="shrink-0 inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary"
           >
-            <Folder size={11} />
+            <Folder size={12} />
           </button>
         </div>
 
@@ -433,9 +433,9 @@ export default function SelectionSetsPanel({
               type="button"
               onClick={() => handleCommitFolderEdit(set)}
               aria-label={t('common.confirm', { defaultValue: 'Confirm' })}
-              className="inline-flex h-5 w-5 items-center justify-center rounded text-emerald-600 hover:bg-emerald-50"
+              className="inline-flex h-5 w-5 items-center justify-center rounded text-semantic-success hover:bg-semantic-success-bg"
             >
-              <Check size={11} />
+              <Check size={12} />
             </button>
             <button
               type="button"
@@ -443,7 +443,7 @@ export default function SelectionSetsPanel({
               aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
               className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary"
             >
-              <X size={11} />
+              <X size={12} />
             </button>
           </div>
         )}
@@ -529,7 +529,7 @@ export default function SelectionSetsPanel({
                 type="button"
                 onClick={() => handleDeleteConfirm(set.id)}
                 data-testid={`bim-selection-set-delete-confirm-${set.id}`}
-                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-2xs text-white bg-rose-600 hover:bg-rose-700"
+                className="inline-flex items-center justify-center px-2 py-0.5 rounded text-2xs text-white bg-semantic-error hover:bg-semantic-error"
               >
                 {t('common.confirm', { defaultValue: 'Confirm' })}
               </button>
@@ -547,7 +547,7 @@ export default function SelectionSetsPanel({
               onClick={() => setConfirmingDeleteId(set.id)}
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               data-testid={`bim-selection-set-delete-${set.id}`}
-              className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-rose-50 hover:text-rose-600"
+              className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
             >
               <Trash2 size={10} />
             </button>
@@ -564,7 +564,7 @@ export default function SelectionSetsPanel({
     >
       {/* Header */}
       <section className="flex flex-col gap-2">
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.selection_sets_title', { defaultValue: 'Selection sets' })}
         </h3>
         {!showCreate ? (
@@ -618,14 +618,14 @@ export default function SelectionSetsPanel({
                   defaultValue: 'e.g. Level 3 Columns',
                 })}
                 data-testid="bim-selection-set-name-input"
-                className="flex-1 min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input-sm flex-1 min-w-0"
               />
               <button
                 type="button"
                 onClick={handleSubmitCreate}
                 aria-label={t('common.confirm', { defaultValue: 'Confirm' })}
                 data-testid="bim-selection-set-create-confirm"
-                className="inline-flex h-6 w-6 items-center justify-center rounded text-emerald-600 hover:bg-emerald-50"
+                className="inline-flex h-6 w-6 items-center justify-center rounded text-semantic-success hover:bg-semantic-success-bg"
               >
                 <Check size={12} />
               </button>
@@ -653,10 +653,10 @@ export default function SelectionSetsPanel({
                 defaultValue: 'Folder (optional)',
               })}
               data-testid="bim-selection-set-folder-input"
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input-sm"
             />
             {createError ? (
-              <p className="text-2xs text-rose-600">{createError}</p>
+              <p className="text-2xs text-semantic-error">{createError}</p>
             ) : (
               <p className="text-2xs text-content-tertiary">
                 {t('bim.selection_sets_create_hint', {
@@ -721,11 +721,11 @@ export default function SelectionSetsPanel({
                   className="flex items-center gap-1 px-1 py-0.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary hover:bg-surface-tertiary rounded"
                 >
                   {isCollapsed ? (
-                    <ChevronRight size={11} />
+                    <ChevronRight size={12} />
                   ) : (
-                    <ChevronDown size={11} />
+                    <ChevronDown size={12} />
                   )}
-                  <Folder size={11} />
+                  <Folder size={12} />
                   <span className="truncate" title={folderName}>
                     {folderName}
                   </span>

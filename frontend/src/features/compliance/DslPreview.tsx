@@ -67,7 +67,7 @@ export function DslPreview({ yaml, onCopy }: DslPreviewProps) {
       aria-label={t('compliance.nl.preview_title', { defaultValue: 'DSL Preview' })}
     >
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('compliance.nl.preview_title', { defaultValue: 'DSL Preview' })}
         </h3>
         {yaml && onCopy && (

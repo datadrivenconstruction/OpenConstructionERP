@@ -179,7 +179,7 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
       >
         {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <FileCode2 size={16} className="text-oe-blue" />
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('contracts.gaeb_invoice.title', { defaultValue: 'GAEB X89 invoice' })}
         </h2>
       </button>
@@ -201,7 +201,7 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
               value={vatRate}
               onChange={(e) => setVatRate(e.target.value)}
               placeholder={preview?.figures.vat_rate ?? ''}
-              className="w-20 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+              className="oe-input-sm w-20"
             />
           </label>
 
@@ -297,7 +297,7 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
               {missing.length > 0 && (
                 <div className="rounded-lg bg-semantic-warning-bg p-3 text-xs" data-testid="gaeb-invoice-missing">
                   <div className="mb-1 flex items-center gap-1.5 font-medium text-content-primary">
-                    <AlertTriangle size={13} className="text-semantic-warning" />
+                    <AlertTriangle size={14} className="text-semantic-warning" />
                     {t('contracts.gaeb_invoice.missing_title', {
                       defaultValue: 'The invoice cannot be written until these are filled in:',
                     })}

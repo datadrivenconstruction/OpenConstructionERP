@@ -135,7 +135,7 @@ export function FieldImageToggle({
         className ?? '',
       ].join(' ')}
     >
-      {busy ? <Loader2 size={11} className="animate-spin" /> : <MapPin size={11} />}
+      {busy ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
       {!compact && label}
     </button>
   );

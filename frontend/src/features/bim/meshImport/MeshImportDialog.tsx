@@ -397,7 +397,7 @@ export default function MeshImportDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={uploading ? undefined : onClose}
@@ -410,7 +410,7 @@ export default function MeshImportDialog({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <Boxes size={16} className="text-oe-blue shrink-0" />
-            <h2 className="text-sm font-semibold text-content-primary truncate">
+            <h2 className="oe-card-title truncate">
               {t('bim.mesh_import.title', { defaultValue: 'Import 3D geometry' })}
             </h2>
             <span className="text-2xs text-content-tertiary uppercase font-mono shrink-0">
@@ -441,16 +441,16 @@ export default function MeshImportDialog({
           )}
 
           {!loading && loadError && (
-            <div className="rounded-lg border border-red-300/50 bg-red-50/60 dark:bg-red-950/20 px-3 py-2.5 text-xs text-red-700 dark:text-red-300">
+            <div className="rounded-lg border border-semantic-error/50 bg-semantic-error-bg px-3 py-2.5 text-xs text-semantic-error">
               <div className="flex items-start gap-2">
-                <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <span>{loadError}</span>
               </div>
             </div>
           )}
 
           {!loading && !loadError && experimental && (
-            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-2xs text-amber-700 dark:text-amber-300">
+            <div className="rounded-lg border border-semantic-warning/50 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning">
               <div className="flex items-start gap-2">
                 <Info size={12} className="shrink-0 mt-0.5" />
                 <span>
@@ -464,9 +464,9 @@ export default function MeshImportDialog({
           )}
 
           {!loading && !loadError && display && !hasObjects && (
-            <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
+            <div className="rounded-lg border border-semantic-warning/50 bg-semantic-warning-bg px-3 py-2.5 text-xs text-semantic-warning">
               <div className="flex items-start gap-2">
-                <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <span>
                   {t('bim.mesh_import.no_meshes', {
                     defaultValue:
@@ -503,7 +503,7 @@ export default function MeshImportDialog({
               {/* The real wrong-unit check. Sits immediately above the unit
                   control so the report and the fix are the same glance. */}
               {scaleSuspect && (
-                <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2 text-2xs text-amber-700 dark:text-amber-300">
+                <div className="rounded-lg border border-semantic-warning/50 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning">
                   <div className="flex items-start gap-2">
                     <AlertTriangle size={12} className="shrink-0 mt-0.5" />
                     <div className="space-y-1">
@@ -542,7 +542,7 @@ export default function MeshImportDialog({
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as UnitCode)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-select w-full"
                   >
                     {UNIT_CODES.map((u) => (
                       <option key={u} value={u}>
@@ -558,7 +558,7 @@ export default function MeshImportDialog({
                   <select
                     value={upAxis}
                     onChange={(e) => setUpAxis(e.target.value as UpAxis)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-select w-full"
                   >
                     <option value="y">
                       {t('bim.mesh_import.up_y', { defaultValue: 'Y up (glTF, OBJ, FBX)' })}
@@ -602,12 +602,12 @@ export default function MeshImportDialog({
                     <span className="text-content-primary font-medium flex items-center gap-1.5">
                       {`${fmtNum(totals?.volume_m3 ?? 0, 3)} m3`}
                       {allWatertight ? (
-                        <span className="inline-flex items-center gap-0.5 text-2xs text-green-600 dark:text-green-400">
+                        <span className="inline-flex items-center gap-0.5 text-2xs text-semantic-success">
                           <CheckCircle2 size={10} />
                           {t('bim.mesh_import.exact', { defaultValue: 'exact' })}
                         </span>
                       ) : (
-                        <span className="text-2xs px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300/40">
+                        <span className="text-2xs px-1 py-0.5 rounded bg-semantic-warning-bg text-semantic-warning border border-semantic-warning/40">
                           {t('bim.mesh_import.approximate', { defaultValue: 'approximate' })}
                         </span>
                       )}
@@ -636,7 +636,7 @@ export default function MeshImportDialog({
                     type="text"
                     value={modelName}
                     onChange={(e) => setModelName(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-input w-full"
                   />
                 </div>
                 <div>
@@ -646,7 +646,7 @@ export default function MeshImportDialog({
                   <select
                     value={discipline}
                     onChange={(e) => setDiscipline(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-select w-full"
                   >
                     {DISCIPLINE_KEYS.map((d) => (
                       <option key={d.v} value={d.v}>
@@ -676,7 +676,7 @@ export default function MeshImportDialog({
             disabled={!hasObjects || uploading || loading}
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {uploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
+            {uploading ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
             {uploading
               ? t('bim.mesh_import.importing', { defaultValue: 'Importing...' })
               : t('bim.mesh_import.import_btn', { defaultValue: 'Import model' })}

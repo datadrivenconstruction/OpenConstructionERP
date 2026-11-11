@@ -82,7 +82,7 @@ export function ExportButton({ snapshotId, query }: ExportButtonProps) {
       </Button>
       {open && (
         <div
-          className="absolute right-0 z-30 mt-1 w-44 rounded border border-border-light bg-surface-primary shadow-lg"
+          className="absolute right-0 z-dropdown mt-1 w-44 rounded border border-border-light bg-surface-primary shadow-lg"
           data-testid="export-button-dropdown"
           role="menu"
         >

@@ -116,7 +116,7 @@ export function PreconditionList({ projectId, item, editVerdict, personName, onC
   return (
     <section data-testid="preconditions">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('commitment.drawer.preconditions', { defaultValue: 'Preconditions' })}
         </h3>
         {!adding && (
@@ -144,7 +144,7 @@ export function PreconditionList({ projectId, item, editVerdict, personName, onC
                 key={pre.id}
                 data-testid="precondition-row"
                 data-state={met ? 'met' : 'open'}
-                className="rounded-lg border border-border bg-surface-elevated shadow-sm p-2.5 text-sm"
+                className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm"
               >
                 <div className="flex flex-wrap items-start gap-2">
                   {met ? (

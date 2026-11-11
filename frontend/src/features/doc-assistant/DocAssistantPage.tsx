@@ -89,7 +89,7 @@ function AnswerView({ result }: { result: AskResponse }) {
   }
   if (result.status === 'not_found') {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-semantic-warning/5 p-4">
+      <div className="rounded-xl border border-semantic-warning/30 bg-semantic-warning/5 p-4">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-medium text-content-primary">
             {t('doc_assistant.not_found', { defaultValue: 'Not found in project documents.' })}
@@ -237,7 +237,7 @@ export function DocAssistantPage() {
                   defaultValue: 'e.g. What concrete cover is required for foundations?',
                 })}
                 aria-label={t('doc_assistant.question', { defaultValue: 'Your question' })}
-                className="h-10 flex-1 rounded-lg border border-border-light bg-surface-primary px-3 text-sm"
+                className="oe-input-lg flex-1"
               />
               <Button type="submit" disabled={ask.isPending || question.trim().length < 2}>
                 {ask.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}

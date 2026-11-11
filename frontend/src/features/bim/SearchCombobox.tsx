@@ -175,7 +175,7 @@ export function SearchCombobox({
           close();
           onBlur?.();
         }}
-        className="w-full min-w-0 rounded border border-border-light bg-surface-primary px-2 py-1 text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+        className="oe-input-sm w-full min-w-0"
         data-testid={testId}
       />
       {open && options.length > 0 && (
@@ -183,7 +183,7 @@ export function SearchCombobox({
           id={listId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute z-40 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute z-dropdown mt-1 max-h-64 w-full overflow-auto rounded-md border border-border-light bg-surface-primary py-1 shadow-lg"
           data-testid={`${testId}-listbox`}
         >
           {visible.map((option, i) => {

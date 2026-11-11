@@ -111,7 +111,7 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
     <div className="space-y-4" data-testid="compliance-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('compliance.page.title', {
               defaultValue: 'Compliance documents',
             })}
@@ -128,7 +128,7 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+            className="oe-select-sm"
             data-testid="compliance-filter-type"
             aria-label={t('compliance.filter.type', {
               defaultValue: 'Filter by type',
@@ -146,7 +146,7 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+            className="oe-select-sm"
             data-testid="compliance-filter-status"
             aria-label={t('compliance.filter.status', {
               defaultValue: 'Filter by status',
@@ -207,29 +207,29 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
       ) : (
         <Card padding="none">
           <table
-            className="w-full text-sm"
+            className="oe-table w-full"
             data-testid="compliance-table"
           >
-            <thead className="bg-surface-secondary text-xs text-content-tertiary">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left font-medium">
+                <th>
                   {t('compliance.col.name', { defaultValue: 'Name' })}
                 </th>
-                <th className="px-3 py-2 text-left font-medium">
+                <th>
                   {t('compliance.col.type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-3 py-2 text-left font-medium">
+                <th>
                   {t('compliance.col.expires_at', { defaultValue: 'Expires' })}
                 </th>
-                <th className="px-3 py-2 text-left font-medium">
+                <th>
                   {t('compliance.col.days_left', {
                     defaultValue: 'Days left',
                   })}
                 </th>
-                <th className="px-3 py-2 text-left font-medium">
+                <th>
                   {t('compliance.col.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-3 py-2" />
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -239,7 +239,7 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
                   className="border-t border-border-light"
                   data-testid={`compliance-row-${row.id}`}
                 >
-                  <td className="px-3 py-2 font-medium text-content-primary">
+                  <td className="font-medium">
                     {row.name}
                     {row.issuer ? (
                       <span className="ml-2 text-xs text-content-tertiary">
@@ -247,21 +247,21 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {t(`compliance.doc_type.${row.doc_type}`, {
                       defaultValue: row.doc_type,
                     })}
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-content-secondary">
+                  <td className="tabular-nums text-content-secondary">
                     {row.expires_at}
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-content-secondary">
+                  <td className="tabular-nums text-content-secondary">
                     {row.days_until_expiry}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <ComplianceStatusBadge status={row.status} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       onClick={async () => {

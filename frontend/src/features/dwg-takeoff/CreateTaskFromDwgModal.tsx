@@ -39,8 +39,8 @@ interface CreateTaskFromDwgModalProps {
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
   low: 'text-content-tertiary',
   normal: 'text-content-secondary',
-  high: 'text-amber-600',
-  urgent: 'text-rose-600',
+  high: 'text-semantic-warning',
+  urgent: 'text-semantic-error',
 };
 
 export default function CreateTaskFromDwgModal({
@@ -128,7 +128,7 @@ export default function CreateTaskFromDwgModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -140,8 +140,8 @@ export default function CreateTaskFromDwgModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
-            <ListChecks size={16} className="text-amber-600" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <ListChecks size={16} className="text-semantic-warning" />
+            <h2 className="oe-card-title">
               {t('dwg_takeoff.create_task_title', {
                 defaultValue: 'Create task pinned to DWG entity',
               })}
@@ -169,14 +169,14 @@ export default function CreateTaskFromDwgModal({
           <div>
             <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
               {t('dwg_takeoff.task_title', { defaultValue: 'Title' })}
-              <span className="text-rose-500 ml-0.5">*</span>
+              <span className="text-semantic-error ml-0.5">*</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
-              className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
@@ -191,7 +191,7 @@ export default function CreateTaskFromDwgModal({
               placeholder={t('dwg_takeoff.task_description_placeholder', {
                 defaultValue: 'What needs to be done?',
               })}
-              className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue resize-none"
+              className="oe-textarea w-full resize-none"
             />
           </div>
 
@@ -203,7 +203,7 @@ export default function CreateTaskFromDwgModal({
               <select
                 value={taskType}
                 onChange={(e) => setTaskType(e.target.value as TaskType)}
-                className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 {TASK_TYPES.map((tt) => (
                   <option key={tt.value} value={tt.value}>
@@ -240,14 +240,14 @@ export default function CreateTaskFromDwgModal({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           {/* Entity pin info */}
-          <div className="rounded-md border border-amber-300/40 bg-amber-50/40 dark:bg-amber-950/20 px-2.5 py-2 text-2xs text-amber-700 dark:text-amber-300">
+          <div className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-2.5 py-2 text-2xs text-semantic-warning">
             <div className="flex items-start gap-1.5">
-              <ListChecks size={11} className="shrink-0 mt-0.5" />
+              <ListChecks size={12} className="shrink-0 mt-0.5" />
               <span>
                 {t('dwg_takeoff.task_pin_note', {
                   defaultValue:
@@ -272,7 +272,7 @@ export default function CreateTaskFromDwgModal({
             type="button"
             onClick={() => createMut.mutate()}
             disabled={!canSubmit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-semantic-warning text-white hover:bg-semantic-warning disabled:opacity-50"
           >
             {createMut.isPending ? (
               <Loader2 size={12} className="animate-spin" />

@@ -48,7 +48,7 @@ function monogramColor(seed: string): string {
   for (let i = 0; i < seed.length; i += 1) {
     hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
   }
-  return MONOGRAM_COLORS[hash % MONOGRAM_COLORS.length] ?? 'bg-slate-500';
+  return MONOGRAM_COLORS[hash % MONOGRAM_COLORS.length] ?? 'bg-content-tertiary';
 }
 
 function monogramInitials(name: string): string {
@@ -78,7 +78,7 @@ function AckAvatar({ entry, prominent = false }: { entry: Acknowledged; prominen
       <span
         className={clsx(
           'relative flex items-center justify-center overflow-hidden rounded-full shadow-sm transition-transform group-hover:scale-105',
-          prominent ? 'h-24 w-24 ring-2 ring-emerald-400/60' : 'h-11 w-11 ring-1 ring-border-light',
+          prominent ? 'h-24 w-24 ring-2 ring-semantic-success/60' : 'h-11 w-11 ring-1 ring-border-light',
         )}
       >
         {showImg ? (
@@ -207,13 +207,13 @@ export function AboutPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-oe-blue hover:text-oe-blue-text transition-colors mb-4"
           >
-            <Globe size={13} />
+            <Globe size={14} />
             openconstructionerp.com
-            <ExternalLink size={11} />
+            <ExternalLink size={12} />
           </a>
           <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-semantic-success" />
             </span>
             <span className="text-xs font-semibold uppercase tracking-widest text-semantic-success">Open Source</span>
@@ -245,7 +245,7 @@ export function AboutPage() {
               into the Changelog further down. */}
           <div className="rounded-xl border border-border-light bg-surface-secondary/40 px-4 py-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <p className="oe-overline">
                 {t('about.header_recent_label', { defaultValue: 'Recent releases' })}
               </p>
               <a
@@ -289,8 +289,8 @@ export function AboutPage() {
       <Card className="animate-card-in h-full flex flex-col" style={{ animationDelay: '50ms' }}>
         <div className="p-6 flex flex-col flex-1">
           <div className="flex items-center gap-2 mb-4">
-            <Award size={18} className="text-semantic-warning" />
-            <h2 className="text-lg font-semibold text-content-primary">
+            <Award size={20} className="text-semantic-warning" />
+            <h2 className="oe-section-title">
               {t('about.platform_title', { defaultValue: 'Platform Capabilities' })}
             </h2>
           </div>
@@ -298,7 +298,7 @@ export function AboutPage() {
               stays compact and lines up vertically with the right-hand
               Community card. Smaller tile padding + value font keep the
               shorter tile readable at narrower widths. */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {[
               { value: '120K+', label: t('about.stat_costs', { defaultValue: 'Cost Items' }) },
               { value: String(SUPPORTED_LANGUAGES.length), label: t('about.stat_langs', { defaultValue: 'Languages' }) },
@@ -332,7 +332,7 @@ export function AboutPage() {
               {/* Plain Stroke — community icon, no chip wrapper. r-cleanup 2026-05-11. */}
               <MessageCircle size={20} strokeWidth={1.75} className="shrink-0 mt-0.5 text-oe-blue" />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('about.community_title', { defaultValue: 'Join the community - your feedback shapes the roadmap' })}
                 </h3>
                 <p className="text-xs text-content-secondary mt-1 leading-relaxed">
@@ -350,7 +350,7 @@ export function AboutPage() {
                 stretches vertically to match the Platform Capabilities card
                 on wide screens. Each tile carries a 2-line copy block instead
                 of a 1-line truncated string. */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
 
               {/* Featured row — Telegram, primary live channel. */}
               <a
@@ -377,17 +377,17 @@ export function AboutPage() {
                     {t('about.community_telegram_v2', { defaultValue: 'Fastest replies from the maintainers - questions, ideas, bug reports, partnerships.' })}
                   </p>
                 </div>
-                <ExternalLink size={13} className="text-content-quaternary group-hover:text-[#26A5E4] shrink-0" />
+                <ExternalLink size={14} className="text-content-quaternary group-hover:text-[#26A5E4] shrink-0" />
               </a>
 
               {/* LinkedIn + X — paired on one row so the Community card stays
                   compact and matches the Platform Capabilities card's height. */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 <a
                   href="https://www.linkedin.com/company/78381569"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-[#0A66C2]/50 hover:bg-[#0A66C2]/[0.04] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-[#0A66C2]/50 hover:bg-[#0A66C2]/[0.04] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <span className="shrink-0 h-9 w-9 rounded-lg bg-[#0A66C2]/10 text-[#0A66C2] flex items-center justify-center">
                     <Linkedin size={16} />
@@ -406,7 +406,7 @@ export function AboutPage() {
                   href="https://x.com/datadrivenconst"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-slate-700/50 hover:bg-slate-900/[0.04] dark:hover:border-slate-300/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-border hover:bg-slate-900/[0.04] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <span className="shrink-0 h-9 w-9 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center">
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5" aria-hidden>
@@ -433,7 +433,7 @@ export function AboutPage() {
                 className="group flex items-center gap-3 rounded-lg border border-[#FF492C]/25 bg-[#FF492C]/[0.04] px-3.5 py-3 hover:border-[#FF492C]/50 hover:bg-[#FF492C]/[0.08] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
               >
                 <span className="shrink-0 h-10 w-10 rounded-lg bg-[#FF492C]/15 text-[#FF492C] flex items-center justify-center">
-                  <MessageSquareQuote size={18} />
+                  <MessageSquareQuote size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -448,7 +448,7 @@ export function AboutPage() {
                     {t('about.community_g2_desc', { defaultValue: 'We would be grateful if you rate us or write a short review - it helps other construction teams find and trust the platform.' })}
                   </p>
                 </div>
-                <ExternalLink size={13} className="text-content-quaternary group-hover:text-[#FF492C] shrink-0" />
+                <ExternalLink size={14} className="text-content-quaternary group-hover:text-[#FF492C] shrink-0" />
               </a>
             </div>
 
@@ -473,8 +473,8 @@ export function AboutPage() {
           <div className="lg:col-span-3">
           {/* Block heading — short, sets context for the bio below. */}
           <div className="mb-5 flex items-center gap-2">
-            <BookOpen size={18} className="text-oe-blue" />
-            <h2 className="text-lg font-semibold text-content-primary">
+            <BookOpen size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">
               {t('about.story_title', { defaultValue: 'About the project' })}
             </h2>
           </div>
@@ -569,7 +569,7 @@ export function AboutPage() {
                   loading="lazy"
                 />
                 <div className="min-w-0 flex-1">
-                  <h3 className="flex items-center gap-1.5 text-base font-semibold text-content-primary leading-tight">
+                  <h3 className="oe-section-title flex items-center gap-1.5">
                     {t('about.team_name', { defaultValue: 'DataDrivenConstruction' })}
                     <a
                       href="https://www.linkedin.com/company/datadrivenconstruction/"
@@ -579,7 +579,7 @@ export function AboutPage() {
                       title={t('about.team_linkedin', { defaultValue: 'DataDrivenConstruction on LinkedIn' })}
                       aria-label={t('about.team_linkedin', { defaultValue: 'DataDrivenConstruction on LinkedIn' })}
                     >
-                      <Linkedin size={15} />
+                      <Linkedin size={16} />
                     </a>
                   </h3>
                   <p className="text-xs text-oe-blue font-medium mt-0.5">
@@ -604,7 +604,7 @@ export function AboutPage() {
           <aside className="lg:col-span-2 lg:border-l lg:border-border-light lg:pl-8 flex flex-col h-full">
             <div className="mb-5 flex items-center gap-2">
               <Globe size={16} className="text-oe-blue" />
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('about.ddc_ecosystem_title', { defaultValue: 'DDC Ecosystem' })}
               </h3>
             </div>
@@ -613,10 +613,10 @@ export function AboutPage() {
             </p>
 
             {/* ── Subsection 1: Flagship products ── */}
-            <p className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <p className="oe-overline mb-2">
               {t('about.ddc_flagship_label', { defaultValue: 'Flagship products · datadrivenconstruction.io' })}
             </p>
-            <ul className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <ul className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 { href: 'https://datadrivenconstruction.io', label: 'DataDrivenConstruction', desc: t('about.ddc_link_lab', { defaultValue: 'Lab homepage - research & consulting' }) },
                 { href: 'https://datadrivenconstruction.io/books/', label: 'DDC Guidebook', desc: t('about.ddc_link_book', { defaultValue: 'Reference reading, free, 16 languages' }) },
@@ -645,10 +645,10 @@ export function AboutPage() {
             </ul>
 
             {/* ── Subsection 2: Open source on GitHub ── */}
-            <p className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <p className="oe-overline mb-2">
               {t('about.ddc_oss_label', { defaultValue: 'Open source on GitHub · @datadrivenconstruction' })}
             </p>
-            <ul className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <ul className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 { href: 'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto', label: 'DDC Pipeline', desc: t('about.ddc_gh_cad2data', { defaultValue: 'Revit® · IFC · DWG · DGN → structured quantities' }) },
                 { href: 'https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR', label: 'OpenConstructionEstimate', desc: t('about.ddc_gh_cwicr', { defaultValue: '55,000+ cost items · 27 languages · 48 regions' }) },
@@ -680,7 +680,7 @@ export function AboutPage() {
                 mt-auto so the right column visually fills the same height
                 as the left bio + attribution. ── */}
             <div className="mt-auto">
-              <p className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <p className="oe-overline mb-2">
                 {t('about.ddc_network_label', { defaultValue: 'Find us across the network' })}
               </p>
               <div className="flex flex-wrap items-center gap-2">
@@ -716,8 +716,8 @@ export function AboutPage() {
       <Card>
         <div className="p-6">
           <div className="flex items-center gap-2 mb-2">
-            <Briefcase size={18} className="text-oe-blue" />
-            <h2 className="text-lg font-semibold text-content-primary">
+            <Briefcase size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">
               {t('about.services_title', { defaultValue: 'Consulting & Professional Services' })}
             </h2>
           </div>
@@ -777,7 +777,7 @@ export function AboutPage() {
                   <svc.icon size={18} className="text-content-tertiary group-hover:text-oe-blue transition-colors" />
                 </div>
 
-                <h3 className="text-base font-semibold text-content-primary mb-0.5">{svc.title}</h3>
+                <h3 className="oe-section-title mb-0.5">{svc.title}</h3>
                 <p className="text-2xs font-semibold uppercase tracking-wider text-oe-blue mb-3">
                   {svc.tagline}
                 </p>
@@ -788,7 +788,7 @@ export function AboutPage() {
                 <ul className="mt-auto space-y-1.5">
                   {svc.bullets.map((b, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-content-secondary">
-                      <ArrowRight size={11} className="mt-1 shrink-0 text-oe-blue" />
+                      <ArrowRight size={12} className="mt-1 shrink-0 text-oe-blue" />
                       <span>{b}</span>
                     </li>
                   ))}
@@ -799,7 +799,7 @@ export function AboutPage() {
 
           {/* Trusted-by chip list — public client engagements from the site */}
           <div className="mt-6 pt-5 border-t border-border-light">
-            <p className="mb-3 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <p className="oe-overline mb-3">
               {t('about.svc_trusted_label', { defaultValue: 'Selected engagements' })}
             </p>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -831,7 +831,7 @@ export function AboutPage() {
               user request 2026-05-20). */}
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <a href="https://datadrivenconstruction.io/contact-support/" target="_blank" rel="noopener noreferrer">
-              <Button variant="primary" size="md" icon={<Mail size={15} />}>
+              <Button variant="primary" size="md" icon={<Mail size={16} />}>
                 {t('about.contact_us', { defaultValue: 'Contact Us' })}
               </Button>
             </a>
@@ -858,11 +858,11 @@ export function AboutPage() {
 
             {/* ── Left column — hero + 3 stacked action cards ── */}
             <div>
-              <div className="flex items-center gap-2.5 mb-3">
+              <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 dark:bg-white/5 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
-                  <Handshake size={18} className="text-oe-blue" />
+                  <Handshake size={20} className="text-oe-blue" />
                 </div>
-                <h2 className="text-xl font-semibold tracking-tight text-content-primary">
+                <h2 className="oe-section-title">
                   {t('about.support_title', { defaultValue: 'Support OpenConstructionERP' })}
                 </h2>
               </div>
@@ -884,7 +884,7 @@ export function AboutPage() {
                   href="https://github.com/datadrivenconstruction/OpenConstructionERP"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-amber-400/60 hover:bg-semantic-warning/10 dark:hover:bg-amber-900/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-semantic-warning/60 hover:bg-semantic-warning/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <Star size={22} className="shrink-0 text-semantic-warning group-hover:scale-110 group-hover:-rotate-6 transition-transform" fill="currentColor" />
                   <div className="min-w-0 flex-1">
@@ -902,7 +902,7 @@ export function AboutPage() {
                   href={GITHUB_SPONSORS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-rose-400/60 hover:bg-semantic-error/10 dark:hover:bg-rose-900/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-semantic-error/60 hover:bg-semantic-error/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <Coffee size={22} className="shrink-0 text-semantic-error group-hover:scale-110 transition-transform" />
                   <div className="min-w-0 flex-1">
@@ -920,7 +920,7 @@ export function AboutPage() {
                   href={PAYPAL_DONATE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-emerald-400/60 hover:bg-semantic-success/10 dark:hover:bg-emerald-900/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-semantic-success/60 hover:bg-semantic-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <HandCoins size={22} className="shrink-0 text-semantic-success group-hover:scale-110 transition-transform" />
                   <div className="min-w-0 flex-1">
@@ -955,7 +955,7 @@ export function AboutPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/inside')}
-                  className="group flex w-full items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-emerald-400/60 hover:bg-semantic-success/10 dark:hover:bg-emerald-900/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                  className="group flex w-full items-center gap-3 rounded-lg border border-border-light bg-surface-primary/80 backdrop-blur-sm px-3.5 py-3 hover:border-semantic-success/60 hover:bg-semantic-success/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                 >
                   <Sparkles size={22} className="shrink-0 text-semantic-success group-hover:scale-110 transition-transform" />
                   <div className="min-w-0 flex-1 text-left">
@@ -979,11 +979,11 @@ export function AboutPage() {
                 column's hero block, so the two halves match height on wide
                 screens without leaving a gap below the bullets. ── */}
             <div className="lg:border-l lg:border-border-light/60 dark:lg:border-white/[0.08] lg:pl-6 flex flex-col">
-              <p className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3 flex items-center gap-1.5">
+              <p className="oe-overline mb-3 flex items-center gap-1.5">
                 <Rocket size={12} className="text-oe-blue" />
                 {t('about.support_impact_label', { defaultValue: 'Impact so far' })}
               </p>
-              <div className="grid grid-cols-2 gap-2.5 mb-4">
+              <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
                   { value: String(SUPPORTED_LANGUAGES.length), label: t('about.support_kpi_langs', { defaultValue: 'Languages translated' }) },
                   { value: '47', label: t('about.support_kpi_regions', { defaultValue: 'Countries covered' }) },
@@ -997,7 +997,7 @@ export function AboutPage() {
                 ))}
               </div>
 
-              <p className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3 flex items-center gap-1.5">
+              <p className="oe-overline mb-3 flex items-center gap-1.5">
                 <ArrowRight size={12} className="text-oe-blue" />
                 {t('about.support_enables', { defaultValue: 'Your support enables:' })}
               </p>
@@ -1011,7 +1011,7 @@ export function AboutPage() {
                   t('about.support_e6', { defaultValue: 'Free workshops and documentation' }),
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-content-secondary">
-                    <ArrowRight size={11} className="mt-1 shrink-0 text-oe-blue" />
+                    <ArrowRight size={12} className="mt-1 shrink-0 text-oe-blue" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -1031,8 +1031,8 @@ export function AboutPage() {
           {/* ── Left column — larger book cover + headline + download CTA ── */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <BookOpen size={18} className="text-oe-blue" />
-              <h2 className="text-lg font-semibold text-content-primary">
+              <BookOpen size={20} className="text-oe-blue" />
+              <h2 className="oe-section-title">
                 {t('about.book_title', { defaultValue: 'Data-Driven Construction' })}
               </h2>
               <Badge variant="blue" size="sm">Free</Badge>
@@ -1069,10 +1069,10 @@ export function AboutPage() {
 
           {/* ── Right column — Part-level table of contents (narrower) ── */}
           <div className="lg:col-span-3">
-            <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+            <p className="oe-overline mb-3">
               {t('about.book_toc_label', { defaultValue: 'Inside the book - 10 parts' })}
             </p>
-            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 { num: 'I',    title: t('about.book_p1',  { defaultValue: 'How information has evolved in construction' }) },
                 { num: 'II',   title: t('about.book_p2',  { defaultValue: 'How the construction business is drowning in data chaos' }) },
@@ -1085,7 +1085,7 @@ export function AboutPage() {
                 { num: 'IX',   title: t('about.book_p9',  { defaultValue: 'Big Data, machine learning and forecasts' }) },
                 { num: 'X',    title: t('about.book_p10', { defaultValue: 'The construction industry in the digital age - opportunities & challenges' }) },
               ].map(p => (
-                <li key={p.num} className="group flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/30 px-3 py-2.5 hover:border-oe-blue/30 hover:bg-oe-blue/[0.025] transition-colors">
+                <li key={p.num} className="group flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-3 py-2.5 hover:border-oe-blue/30 hover:bg-oe-blue/[0.025] transition-colors">
                   <span className="shrink-0 inline-flex h-6 min-w-[2rem] items-center justify-center rounded-md bg-oe-blue/10 text-oe-blue font-mono text-2xs font-semibold ring-1 ring-oe-blue/20 px-1.5">
                     {p.num}
                   </span>
@@ -1118,7 +1118,7 @@ export function AboutPage() {
                 <BookOpen size={20} className="text-oe-blue" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t('about.docs_title', { defaultValue: 'Documentation' })}
                 </h2>
                 <p className="text-xs text-content-tertiary">
@@ -1134,7 +1134,7 @@ export function AboutPage() {
                 t('about.docs_b4', { defaultValue: 'Module SDK - write your own plugin' }),
               ].map((b, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <ArrowRight size={11} className="mt-1 shrink-0 text-oe-blue" />
+                  <ArrowRight size={12} className="mt-1 shrink-0 text-oe-blue" />
                   <span>{b}</span>
                 </li>
               ))}
@@ -1144,7 +1144,7 @@ export function AboutPage() {
                 GitHub (the marketing-site docs.html 404s). Topics with a
                 dedicated doc file link straight to it; the rest fall back to
                 the browsable docs/ tree root. ── */}
-            <p className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <p className="oe-overline mb-2">
               {t('about.docs_popular_label', { defaultValue: 'Popular topics' })}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1166,14 +1166,14 @@ export function AboutPage() {
                   <span className="text-2xs text-content-secondary group-hover:text-content-primary leading-snug">
                     {topic.label}
                   </span>
-                  <ArrowRight size={11} className="shrink-0 text-content-quaternary group-hover:text-oe-blue group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight size={12} className="shrink-0 text-content-quaternary group-hover:text-oe-blue group-hover:translate-x-0.5 transition-all" />
                 </a>
               ))}
             </div>
 
             <div className="mt-auto pt-4">
               <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs" target="_blank" rel="noopener noreferrer">
-                <Button variant="primary" size="md" icon={<BookOpen size={15} />}>
+                <Button variant="primary" size="md" icon={<BookOpen size={16} />}>
                   {t('about.docs_open', { defaultValue: 'Open Docs' })}
                 </Button>
               </a>
@@ -1191,7 +1191,7 @@ export function AboutPage() {
                 <Shield size={20} className="text-semantic-success" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t('about.license_title', { defaultValue: 'License & Open Source' })}
                 </h2>
                 <p className="text-xs text-content-tertiary">
@@ -1263,7 +1263,7 @@ export function AboutPage() {
                 {t('about.license_commercial_short', { defaultValue: 'Need a commercial licence (without AGPL obligations) or an enterprise SLA?' })}
               </p>
               <a href="https://datadrivenconstruction.io/contact-support/" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="md" icon={<Shield size={15} />}>
+                <Button variant="secondary" size="md" icon={<Shield size={16} />}>
                   {t('about.license_commercial_cta', { defaultValue: 'Commercial licensing' })}
                 </Button>
               </a>
@@ -1281,11 +1281,11 @@ export function AboutPage() {
           sync with /docs/legal/ACKNOWLEDGMENTS.md via acknowledgments.ts. */}
       <Card className="animate-card-in" style={{ animationDelay: '280ms' }}>
         <div className="p-6" data-community-anchor style={{ scrollMarginTop: '80px' }}>
-          <div className="flex items-center gap-2.5 mb-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-semantic-error/10 ring-1 ring-rose-500/20">
-              <Heart size={18} className="text-semantic-error" fill="currentColor" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-semantic-error/10 ring-1 ring-semantic-error/20">
+              <Heart size={20} className="text-semantic-error" fill="currentColor" />
             </div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('about.thanks_title', { defaultValue: 'Built with our community' })}
             </h2>
           </div>
@@ -1300,20 +1300,20 @@ export function AboutPage() {
               single inviting line stands in for an empty group. */}
           {SPONSORS.length > 0 ? (
             <div className="mb-6">
-              <p className="mb-3 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <p className="oe-overline mb-3">
                 {t('about.thanks_sponsors_label', { defaultValue: 'Sponsors and donors' })}
               </p>
               {/* Text-only nickname chips - no avatars or remote images, so the
                   wall stays self-contained and reads cleanly offline. When a
                   sponsor supplies a handle or url the chip links to it. */}
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 {SPONSORS.map(s => {
                   const url = acknowledgedUrl(s);
                   const chipCls =
                     'inline-flex items-center gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success/10 px-4 py-2 text-sm font-semibold text-content-primary';
                   const label = (
                     <>
-                      <HandCoins size={18} className="shrink-0 text-semantic-success" />
+                      <HandCoins size={20} className="shrink-0 text-semantic-success" />
                       <span>{s.name}</span>
                     </>
                   );
@@ -1324,7 +1324,7 @@ export function AboutPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={s.name}
-                      className={clsx(chipCls, 'transition-colors hover:border-emerald-400/70 hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1')}
+                      className={clsx(chipCls, 'transition-colors hover:border-semantic-success/70 hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1')}
                     >
                       {label}
                     </a>
@@ -1364,7 +1364,7 @@ export function AboutPage() {
           )}
 
           {/* Contributors and reporters - everyone tracked in ACKNOWLEDGMENTS.md. */}
-          <p className="mb-3 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <p className="oe-overline mb-3">
             {t('about.thanks_contributors_label', { defaultValue: 'Contributors and reporters' })}
           </p>
           <div className="flex flex-wrap gap-3">
@@ -1440,7 +1440,7 @@ export function AboutPage() {
 
       {/* Development and Contribution Model */}
       <Card padding="md" className="mt-6">
-        <h2 className="text-lg font-semibold text-content-primary mb-3">
+        <h2 className="oe-section-title mb-3">
           {t('about.dev_model_title', { defaultValue: 'Development and Contribution Model' })}
         </h2>
         <div className="space-y-2 text-sm text-content-secondary leading-relaxed">

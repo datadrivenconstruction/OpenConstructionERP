@@ -393,7 +393,7 @@ export function CostControlPage() {
           />
 
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3">
               {t('cost_control.findings_title', { defaultValue: 'Worth a look' })}
             </h2>
             <Findings
@@ -444,7 +444,7 @@ export function CostControlPage() {
             <label className="relative ms-auto flex items-center">
               <Search size={14} className="pointer-events-none absolute start-2.5 text-content-quaternary" />
               <input
-                className="h-8 w-56 rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm"
+                className="oe-input w-56 ps-8 pe-3"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('cost_control.search', { defaultValue: 'Find a code or name' })}
@@ -483,7 +483,7 @@ export function CostControlPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3">
               {t('cost_control.history_section', { defaultValue: 'Saved forecasts' })}
             </h2>
             <ForecastHistory
@@ -496,7 +496,7 @@ export function CostControlPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3">
               {t('cost_control.compare_section', { defaultValue: 'How the forecast moved' })}
             </h2>
             <SnapshotCompare projectId={projectId} snapshots={snapshots.data?.items ?? []} currency={currency} />

@@ -47,7 +47,7 @@ export function ComparePanel({ code, onCodeChange }: { code: string; onCodeChang
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="ce-compare-code" className="mb-1.5 block text-sm font-medium text-content-primary">
+        <label htmlFor="ce-compare-code" className="oe-label">
           {t('costExplorer.compare.label', { defaultValue: 'Rate code' })}
         </label>
         <div className="flex gap-2">
@@ -115,22 +115,22 @@ export function ComparePanel({ code, onCodeChange }: { code: string; onCodeChang
           )}
 
           <div className="overflow-x-auto rounded-lg border border-border-light bg-surface-primary">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary text-left text-xs text-content-tertiary">
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.compare.region', { defaultValue: 'Region' })}</th>
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.compare.unit', { defaultValue: 'Unit' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('costExplorer.compare.rate', { defaultValue: 'Rate' })}</th>
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.compare.source', { defaultValue: 'Source' })}</th>
+                <tr className="text-left">
+                  <th>{t('costExplorer.compare.region', { defaultValue: 'Region' })}</th>
+                  <th>{t('costExplorer.compare.unit', { defaultValue: 'Unit' })}</th>
+                  <th className="text-right">{t('costExplorer.compare.rate', { defaultValue: 'Rate' })}</th>
+                  <th>{t('costExplorer.compare.source', { defaultValue: 'Source' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.cost_item_id} className="border-b border-border-light last:border-0">
-                    <td className="px-3 py-2 font-medium text-content-primary">{r.region ?? '-'}</td>
-                    <td className="px-3 py-2 text-content-secondary">{r.unit || '-'}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-content-primary">{fmtMoney(r.rate, r.currency)}</td>
-                    <td className="px-3 py-2 text-content-tertiary">{r.source || '-'}</td>
+                  <tr key={r.cost_item_id} className="last:border-0">
+                    <td className="font-medium">{r.region ?? '-'}</td>
+                    <td className="text-content-secondary">{r.unit || '-'}</td>
+                    <td className="text-right tabular-nums">{fmtMoney(r.rate, r.currency)}</td>
+                    <td className="text-content-tertiary">{r.source || '-'}</td>
                   </tr>
                 ))}
               </tbody>

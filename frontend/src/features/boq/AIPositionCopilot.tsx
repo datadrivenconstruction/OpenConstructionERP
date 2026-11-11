@@ -433,7 +433,7 @@ export function AIPositionCopilot({
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/40">
         <div className="flex min-w-0 items-center gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle/40">
-            <Sparkles size={15} className="text-oe-blue" />
+            <Sparkles size={16} className="text-oe-blue" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -537,7 +537,7 @@ export function AIPositionCopilot({
                       href="/settings"
                       className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-oe-blue hover:underline"
                     >
-                      <Settings size={11} />
+                      <Settings size={12} />
                       {t('boq.go_to_settings', { defaultValue: 'Go to Settings' })}
                     </a>
                   )}
@@ -618,7 +618,7 @@ export function AIPositionCopilot({
             aria-label={t('boq.copilot.input_label', {
               defaultValue: 'Message the position copilot',
             })}
-            className="flex-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary outline-none focus:ring-2 focus:ring-oe-blue/20 focus:border-oe-blue/40 disabled:opacity-50 transition-all"
+            className="oe-input flex-1"
           />
           <button
             onClick={() => send(inputValue)}
@@ -676,7 +676,7 @@ function ReviewList({
       {pendingIdx.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline">
               {t('boq.copilot.review_title', { defaultValue: 'Suggested changes' })}
             </p>
             <p className="text-2xs text-content-tertiary">
@@ -733,7 +733,7 @@ function ReviewList({
             disabled={busy || selectedIdx.length === 0}
             className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white hover:bg-oe-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <Check size={11} strokeWidth={3} />
+            <Check size={12} strokeWidth={3} />
             {busy
               ? t('boq.copilot.applying', { defaultValue: 'Applying…' })
               : t('boq.copilot.apply_selected', { defaultValue: 'Apply selected' })}
@@ -812,7 +812,7 @@ function ActionCard({
               className="h-3.5 w-3.5 shrink-0 accent-oe-blue"
             />
           )}
-          <span className="truncate text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <span className="oe-overline truncate">
             {title}
           </span>
         </label>
@@ -853,7 +853,7 @@ function ActionCard({
       {/* Why the last attempt did not land (kept open for a retry). */}
       {isFailed && (
         <div className="mt-1.5 flex items-start gap-1 text-2xs text-semantic-error">
-          <AlertCircle size={11} className="mt-px shrink-0" />
+          <AlertCircle size={12} className="mt-px shrink-0" />
           <span>
             {action.error || t('boq.copilot.failed', { defaultValue: 'Could not be applied' })}
           </span>
@@ -872,7 +872,7 @@ function ActionCard({
         )}
         {undoable && (
           <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
-            <Undo2 size={11} />
+            <Undo2 size={12} />
             {t('boq.copilot.undo_hint', { defaultValue: 'Press Ctrl+Z to undo' })}
           </span>
         )}
@@ -884,7 +884,7 @@ function ActionCard({
               disabled={busy}
               className="inline-flex items-center gap-1 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white hover:bg-oe-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              <Check size={11} strokeWidth={3} />
+              <Check size={12} strokeWidth={3} />
               {t('boq.copilot.accept', { defaultValue: 'Accept' })}
             </button>
             <button
@@ -893,7 +893,7 @@ function ActionCard({
               disabled={busy}
               className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              <X size={11} />
+              <X size={12} />
               {t('boq.copilot.reject', { defaultValue: 'Reject' })}
             </button>
           </>

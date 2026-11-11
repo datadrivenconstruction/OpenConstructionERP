@@ -528,7 +528,7 @@ function ProfileDetail({
     <Card padding="none" className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-content-primary truncate">
+          <h2 className="oe-section-title truncate">
             {profile.name}
           </h2>
           {profile.description && (
@@ -615,12 +615,12 @@ function ProfileEditor({
     setForm({ ...form, [key]: value });
 
   const inputCls =
-    'w-full rounded-lg border border-border-subtle bg-surface-1 px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
+    'w-full';
   const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
   return (
     <Card padding="none" className="p-5">
-      <h2 className="text-lg font-semibold text-content-primary mb-4">
+      <h2 className="oe-section-title mb-4">
         {creating
           ? t('clash.profiles.createTitle', { defaultValue: 'New profile' })
           : t('clash.profiles.editTitle', { defaultValue: 'Edit profile' })}
@@ -633,7 +633,7 @@ function ProfileEditor({
           </label>
           <input
             id="profile-name"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             value={form.name}
             maxLength={255}
             onChange={(e) => set('name', e.target.value)}
@@ -651,7 +651,7 @@ function ProfileEditor({
           </label>
           <textarea
             id="profile-desc"
-            className={clsx(inputCls, 'min-h-[64px] resize-y')}
+            className={clsx('oe-textarea', inputCls, 'min-h-[64px] resize-y')}
             value={form.description}
             maxLength={2000}
             onChange={(e) => set('description', e.target.value)}
@@ -665,7 +665,7 @@ function ProfileEditor({
             </label>
             <select
               id="profile-type"
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
               value={form.clash_type}
               onChange={(e) => set('clash_type', e.target.value as ClashType)}
             >
@@ -682,7 +682,7 @@ function ProfileEditor({
             </label>
             <select
               id="profile-mode"
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
               value={form.mode}
               onChange={(e) => set('mode', e.target.value)}
             >
@@ -707,7 +707,7 @@ function ProfileEditor({
               type="number"
               min={0}
               max={10000}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               value={form.toleranceMm}
               onChange={(e) =>
                 set('toleranceMm', Math.max(0, Number(e.target.value) || 0))
@@ -725,7 +725,7 @@ function ProfileEditor({
               type="number"
               min={0}
               max={50000}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               value={form.clearanceMm}
               onChange={(e) =>
                 set('clearanceMm', Math.max(0, Number(e.target.value) || 0))
@@ -743,7 +743,7 @@ function ProfileEditor({
               type="number"
               min={100}
               max={5000}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               value={form.spatial_grid_mm}
               onChange={(e) =>
                 set(
@@ -841,7 +841,7 @@ function ApplyModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -851,7 +851,7 @@ function ApplyModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
-          <h2 className="text-base font-semibold text-content-primary flex items-center gap-2">
+          <h2 className="oe-section-title flex items-center gap-2">
             <Play className="w-4 h-4 text-oe-blue" />
             {t('clash.profiles.applyTitle', {
               defaultValue: 'Run "{{name}}"',
@@ -870,14 +870,14 @@ function ApplyModal({
 
         <div className="px-5 py-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1" htmlFor="apply-run-name">
+            <label className="oe-label" htmlFor="apply-run-name">
               {t('clash.profiles.runName', {
                 defaultValue: 'Run name (optional)',
               })}
             </label>
             <input
               id="apply-run-name"
-              className="w-full rounded-lg border border-border-subtle bg-surface-1 px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+              className="oe-input w-full"
               value={runName}
               maxLength={255}
               onChange={(e) => setRunName(e.target.value)}
@@ -908,7 +908,7 @@ function ApplyModal({
                 {models.map((m) => (
                   <label
                     key={m.id}
-                    className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-surface-1 cursor-pointer"
+                    className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-surface-1 cursor-pointer"
                   >
                     <input
                       type="checkbox"

@@ -80,7 +80,7 @@ export function SaveForecastDialog({ open, busy, onClose, onSave }: SaveForecast
         <label className="block text-sm">
           <span className="text-content-secondary">{t('cost_control.save_label', { defaultValue: 'Title (optional)' })}</span>
           <input
-            className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-3"
+            className="oe-input mt-1 w-full"
             value={label}
             maxLength={200}
             onChange={(e) => setLabel(e.target.value)}
@@ -90,7 +90,7 @@ export function SaveForecastDialog({ open, busy, onClose, onSave }: SaveForecast
         <label className="block text-sm">
           <span className="text-content-secondary">{t('cost_control.save_note', { defaultValue: 'Note (optional)' })}</span>
           <textarea
-            className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2"
+            className="oe-textarea mt-1 w-full"
             rows={3}
             value={note}
             maxLength={4000}

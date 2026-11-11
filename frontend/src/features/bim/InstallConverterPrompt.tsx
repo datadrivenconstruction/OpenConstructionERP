@@ -134,7 +134,7 @@ export function InstallConverterPrompt({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-lg"
       role="dialog"
       aria-modal="true"
       aria-labelledby="install-converter-prompt-title"
@@ -148,16 +148,16 @@ export function InstallConverterPrompt({
         {/* Header */}
         <div className="flex items-start justify-between px-5 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-semantic-warning-bg border border-semantic-warning/30 flex items-center justify-center">
               <Download
-                size={18}
-                className="text-amber-600 dark:text-amber-400"
+                size={20}
+                className="text-semantic-warning"
               />
             </div>
             <div>
               <h2
                 id="install-converter-prompt-title"
-                className="text-sm font-semibold text-content-primary"
+                className="oe-card-title"
               >
                 {t('bim.install_prompt_title', {
                   defaultValue: 'Install {{format}} converter',
@@ -205,10 +205,10 @@ export function InstallConverterPrompt({
 
           {installing && (
             <div
-              className="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/30 px-3 py-2.5"
+              className="rounded-lg border border-semantic-info/30 bg-semantic-info-bg px-3 py-2.5"
               data-testid="install-prompt-progress"
             >
-              <p className="text-2xs font-semibold text-sky-700 dark:text-sky-300 mb-1.5">
+              <p className="text-2xs font-semibold text-semantic-info mb-1.5">
                 {t('bim.install_prompt_in_progress', {
                   defaultValue: 'Installing {{converterName}}…',
                   converterName,
@@ -223,12 +223,12 @@ export function InstallConverterPrompt({
           )}
 
           {localError && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-semantic-error-bg border border-semantic-error/30">
               <AlertCircle
                 size={14}
-                className="text-red-500 mt-0.5 shrink-0"
+                className="text-semantic-error mt-0.5 shrink-0"
               />
-              <p className="text-2xs text-red-700 dark:text-red-300">
+              <p className="text-2xs text-semantic-error">
                 {localError}
               </p>
             </div>
@@ -256,14 +256,14 @@ export function InstallConverterPrompt({
           >
             {installing ? (
               <>
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
                 {t('bim.install_prompt_installing', {
                   defaultValue: 'Installing… (1–2 minutes)',
                 })}
               </>
             ) : (
               <>
-                <Download size={13} />
+                <Download size={14} />
                 {t('bim.install_prompt_confirm', {
                   defaultValue: 'Install converter & retry upload',
                 })}

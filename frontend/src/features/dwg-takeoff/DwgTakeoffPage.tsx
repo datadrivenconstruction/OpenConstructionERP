@@ -524,7 +524,7 @@ function OfflineReadyBadge({
         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light text-2xs text-content-tertiary"
         data-testid={testId}
       >
-        <Loader2 size={11} className="animate-spin" />
+        <Loader2 size={12} className="animate-spin" />
         {t('dwg_takeoff.offline_checking', { defaultValue: 'Checking...' })}
       </div>
     );
@@ -555,8 +555,8 @@ function OfflineReadyBadge({
         className={clsx(
           'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-2xs font-medium transition-colors',
           ready
-            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/15'
-            : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/15',
+            ? 'bg-semantic-success/10 border-semantic-success/30 text-semantic-success hover:bg-semantic-success/15'
+            : 'bg-semantic-warning/10 border-semantic-warning/30 text-semantic-warning hover:bg-semantic-warning/15',
         )}
         title={
           ready
@@ -572,7 +572,7 @@ function OfflineReadyBadge({
             : t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })
         }
       >
-        {ready ? <Wifi size={11} /> : <WifiOff size={11} />}
+        {ready ? <Wifi size={12} /> : <WifiOff size={12} />}
         <span className="relative flex h-1.5 w-1.5">
           <span
             className={clsx(
@@ -594,7 +594,7 @@ function OfflineReadyBadge({
 
       {showHint && (
         <div
-          className="absolute top-full right-0 mt-1.5 z-30 w-72 rounded-lg border border-border-light bg-surface-elevated shadow-xl p-3 text-2xs"
+          className="absolute top-full right-0 mt-1.5 z-dropdown w-72 rounded-lg border border-border-light bg-surface-elevated shadow-xl p-3 text-2xs"
           data-testid="dwg-offline-hint"
         >
           <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -618,7 +618,7 @@ function OfflineReadyBadge({
           </p>
           {converterMissing && (
             <>
-              <div className="mt-2 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-1.5 text-2xs text-amber-300">
+              <div className="mt-2 rounded-md bg-semantic-warning/10 border border-semantic-warning/20 px-2 py-1.5 text-2xs text-semantic-warning">
                 {t('dwg_takeoff.offline_install_hint', {
                   defaultValue:
                     'Upload DXF files to continue without the converter, or install it to enable .dwg support.',
@@ -3302,16 +3302,16 @@ export function DwgTakeoffPage() {
               <div className="relative z-10 flex flex-col items-center gap-4 rounded-2xl bg-[#22252b]/90 backdrop-blur-sm border border-[#333842] shadow-2xl shadow-black/30 px-10 py-9 text-center">
                 <Loader2 size={36} className="text-blue-400 animate-spin" />
                 <div>
-                  <p className="text-base font-semibold text-gray-200">
+                  <p className="text-base font-semibold text-content-quaternary">
                     {t('dwg_takeoff.opening_document', { defaultValue: 'Opening document…' })}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1.5 max-w-xs">
+                  <p className="text-sm text-content-tertiary mt-1.5 max-w-xs">
                     {t('dwg_takeoff.opening_document_hint', {
                       defaultValue: 'Preparing this drawing for takeoff. This can take a few minutes for large DWG files.',
                     })}
                   </p>
                   {deepLinkDocName && (
-                    <p className="text-xs font-mono text-gray-600 mt-3 truncate max-w-xs">
+                    <p className="text-xs font-mono text-content-secondary mt-3 truncate max-w-xs">
                       {decodeURIComponent(deepLinkDocName)}
                     </p>
                   )}
@@ -3383,15 +3383,15 @@ export function DwgTakeoffPage() {
                           <Upload size={36} className="text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-base font-semibold text-gray-200">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
-                          <p className="text-sm text-gray-500 mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
+                          <p className="text-base font-semibold text-content-quaternary">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
+                          <p className="text-sm text-content-tertiary mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
                         </div>
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dwg</span>
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dxf</span>
                         </div>
                         {dwgRange && (
-                          <p className="text-2xs text-gray-600 leading-relaxed mt-1 text-center">
+                          <p className="text-2xs text-content-secondary leading-relaxed mt-1 text-center">
                             {dwgRange}
                           </p>
                         )}
@@ -3403,7 +3403,7 @@ export function DwgTakeoffPage() {
                   <div className="flex flex-col justify-center gap-4">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h1 className="text-2xl font-semibold text-gray-100 tracking-tight leading-tight">
+                        <h1 className="text-2xl font-semibold text-content-quaternary tracking-tight leading-tight">
                           {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
                         </h1>
                         <OfflineReadyBadge
@@ -3413,11 +3413,11 @@ export function DwgTakeoffPage() {
                         />
                         <ModuleGuideButton content={dwgTakeoffGuide} />
                       </div>
-                      <p className="text-base text-gray-400 mt-3 leading-relaxed">
+                      <p className="text-base text-content-quaternary mt-3 leading-relaxed">
                         {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
                       </p>
                       {dwgRange && (
-                        <p className="text-xs text-gray-600 mt-3 leading-relaxed">
+                        <p className="text-xs text-content-secondary mt-3 leading-relaxed">
                           {dwgRange}
                         </p>
                       )}
@@ -3430,8 +3430,8 @@ export function DwgTakeoffPage() {
                         <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-[#22252b]/80 backdrop-blur-sm border border-[#333842] hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.06)] transition-all">
                           <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"><f.icon size={15} className="text-orange-400" /></div>
                           <div className="min-w-0">
-                            <h3 className="text-xs font-semibold text-gray-200 leading-tight">{f.title}</h3>
-                            <p className="text-2xs text-gray-500 leading-snug mt-1">{f.desc}</p>
+                            <h3 className="oe-card-title text-content-quaternary">{f.title}</h3>
+                            <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -3443,19 +3443,19 @@ export function DwgTakeoffPage() {
                         + server on the same machine). On the hosted demo we
                         show honest "processed on your own server" copy. */}
                     <div className="mt-3 flex items-center justify-start">
-                      <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                        <ShieldCheck size={14} className="text-emerald-400 shrink-0" />
-                        <span className="text-xs text-emerald-300/90 font-medium">
+                      <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-semantic-success/10 border border-semantic-success/20">
+                        <ShieldCheck size={14} className="text-semantic-success shrink-0" />
+                        <span className="text-xs text-semantic-success font-medium">
                           {offlineReadiness?.local_only
                             ? t('common.local_processing', { defaultValue: '100% Local Processing · Your files never leave your computer' })
                             : t('dwg_takeoff.processed_on_your_server', { defaultValue: 'Processed on your OpenConstructionERP server · never sent to third parties' })}
                         </span>
-                        <span className="text-2xs text-emerald-500/30">|</span>
+                        <span className="text-2xs text-semantic-success">|</span>
                         <a
                           href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-2xs text-emerald-400/70 hover:text-emerald-300 hover:underline whitespace-nowrap"
+                          className="text-2xs text-semantic-success hover:text-semantic-success hover:underline whitespace-nowrap"
                         >
                           {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                         </a>
@@ -3529,7 +3529,7 @@ export function DwgTakeoffPage() {
             <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
               {unresolvedXrefs.length > 0 && (
                 <div
-                  className="absolute inset-x-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-2xs text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
+                  className="absolute inset-x-3 top-3 z-20 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-2xs text-semantic-warning shadow"
                   role="status"
                   data-testid="dwg-xref-notice"
                 >
@@ -3667,8 +3667,8 @@ export function DwgTakeoffPage() {
                       className={clsx(
                         'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
                         canUndoFn(undoState)
-                          ? 'text-slate-800 hover:bg-slate-100'
-                          : 'text-slate-300 cursor-not-allowed',
+                          ? 'text-content-primary hover:bg-surface-secondary'
+                          : 'text-content-quaternary cursor-not-allowed',
                       )}
                     >
                       <Undo2 size={14} />
@@ -3685,14 +3685,14 @@ export function DwgTakeoffPage() {
                       className={clsx(
                         'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
                         canRedoFn(undoState)
-                          ? 'text-slate-800 hover:bg-slate-100'
-                          : 'text-slate-300 cursor-not-allowed',
+                          ? 'text-content-primary hover:bg-surface-secondary'
+                          : 'text-content-quaternary cursor-not-allowed',
                       )}
                     >
                       <Redo2 size={14} />
                     </button>
 
-                    <div className="mx-1 h-5 w-px bg-slate-300" />
+                    <div className="mx-1 h-5 w-px bg-border" />
 
                     <div className="relative">
                       <button
@@ -3708,11 +3708,11 @@ export function DwgTakeoffPage() {
                         className={clsx(
                           'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
                           snapModes.endpoint || snapModes.midpoint || snapModes.intersection
-                            ? 'bg-emerald-500/20 text-emerald-700'
-                            : 'text-slate-700 hover:bg-slate-100',
+                            ? 'bg-semantic-success/20 text-semantic-success'
+                            : 'text-content-secondary hover:bg-surface-secondary',
                         )}
                       >
-                        <Target size={13} />
+                        <Target size={14} />
                         <span className="font-semibold">
                           {t('dwg_takeoff.snap_label', { defaultValue: 'Snap' })}
                         </span>
@@ -3720,10 +3720,10 @@ export function DwgTakeoffPage() {
                       {snapMenuOpen && (
                         <div
                           data-testid="dwg-snap-menu"
-                          className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-slate-200 bg-white p-2 shadow-xl"
+                          className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-border bg-white p-2 shadow-xl"
                           onMouseLeave={() => setSnapMenuOpen(false)}
                         >
-                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-secondary hover:bg-surface-secondary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-endpoint"
@@ -3736,7 +3736,7 @@ export function DwgTakeoffPage() {
                               defaultValue: 'Endpoint snap',
                             })}
                           </label>
-                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-secondary hover:bg-surface-secondary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-midpoint"
@@ -3749,7 +3749,7 @@ export function DwgTakeoffPage() {
                               defaultValue: 'Midpoint snap',
                             })}
                           </label>
-                          <label className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-400">
+                          <label className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-xs text-content-quaternary">
                             <input
                               type="checkbox"
                               data-testid="dwg-snap-intersection"
@@ -3790,10 +3790,10 @@ export function DwgTakeoffPage() {
                       'border border-white/60 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       !selectedDrawingId
-                        ? 'bg-white/85 dark:bg-white/90 text-slate-400 cursor-not-allowed'
+                        ? 'bg-white/85 dark:bg-white/90 text-content-quaternary cursor-not-allowed'
                         : findOpen
                           ? 'bg-oe-blue text-white hover:bg-oe-blue-dark'
-                          : 'bg-white/85 dark:bg-white/90 text-slate-800 hover:bg-white',
+                          : 'bg-white/85 dark:bg-white/90 text-content-primary hover:bg-white',
                     )}
                     title={t('dwg_takeoff.find_text_title', {
                       defaultValue: 'Find text on the drawing (Ctrl+F)',
@@ -3812,8 +3812,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-quaternary cursor-not-allowed',
                     )}
                     title={t('dwg_compare.compare_revisions', {
                       defaultValue: 'Compare revisions with cost delta',
@@ -3832,8 +3832,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-quaternary cursor-not-allowed',
                     )}
                     title={t('dwg_takeoff.upload_revision_title', {
                       defaultValue: 'Upload a new revision of this drawing (adds a version)',
@@ -3872,8 +3872,8 @@ export function DwgTakeoffPage() {
                       'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
                       'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
                       selectedDrawingId
-                        ? 'text-slate-800 hover:bg-white'
-                        : 'text-slate-400 cursor-not-allowed',
+                        ? 'text-content-primary hover:bg-white'
+                        : 'text-content-quaternary cursor-not-allowed',
                     )}
                     title={t('dwg_takeoff.download_pdf', {
                       defaultValue: 'Download current viewport as PDF',
@@ -3900,20 +3900,20 @@ export function DwgTakeoffPage() {
                   data-testid="dwg-find-bar"
                 >
                   <div className="flex items-center gap-1 rounded-lg border border-white/60 bg-white/90 px-2 py-1.5 shadow-xl shadow-black/30 ring-1 ring-black/5 backdrop-blur-md dark:bg-slate-800/95">
-                    <Search size={14} className="shrink-0 text-slate-500 dark:text-slate-300" />
+                    <Search size={14} className="shrink-0 text-content-tertiary" />
                     <input
                       ref={findInputRef}
                       value={findQuery}
                       onChange={(e) => setFindQuery(e.target.value)}
                       onKeyDown={handleFindKeyDown}
                       placeholder={t('dwg_takeoff.find_placeholder', { defaultValue: 'Find text…' })}
-                      className="w-44 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                      className="w-44 bg-transparent text-xs text-content-primary outline-none placeholder:text-content-quaternary"
                       data-testid="dwg-find-input"
                       spellCheck={false}
                       autoComplete="off"
                     />
                     <span
-                      className="min-w-[52px] text-center text-2xs tabular-nums text-slate-500 dark:text-slate-300"
+                      className="min-w-[52px] text-center text-2xs tabular-nums text-content-tertiary"
                       data-testid="dwg-find-count"
                     >
                       {textMatches.length > 0
@@ -3926,7 +3926,7 @@ export function DwgTakeoffPage() {
                       type="button"
                       onClick={prevMatch}
                       disabled={textMatches.length === 0}
-                      className="rounded p-1 text-slate-600 hover:bg-black/5 disabled:opacity-40 dark:text-slate-300 dark:hover:bg-white/10"
+                      className="rounded p-1 text-content-secondary hover:bg-black/5 disabled:opacity-40 dark:hover:bg-white/10"
                       title={t('dwg_takeoff.find_prev', { defaultValue: 'Previous (Shift+Enter)' })}
                       data-testid="dwg-find-prev"
                     >
@@ -3936,7 +3936,7 @@ export function DwgTakeoffPage() {
                       type="button"
                       onClick={nextMatch}
                       disabled={textMatches.length === 0}
-                      className="rounded p-1 text-slate-600 hover:bg-black/5 disabled:opacity-40 dark:text-slate-300 dark:hover:bg-white/10"
+                      className="rounded p-1 text-content-secondary hover:bg-black/5 disabled:opacity-40 dark:hover:bg-white/10"
                       title={t('dwg_takeoff.find_next', { defaultValue: 'Next (Enter)' })}
                       data-testid="dwg-find-next"
                     >
@@ -3948,7 +3948,7 @@ export function DwgTakeoffPage() {
                         setFindOpen(false);
                         setFindQuery('');
                       }}
-                      className="rounded p-1 text-slate-600 hover:bg-black/5 dark:text-slate-300 dark:hover:bg-white/10"
+                      className="rounded p-1 text-content-secondary hover:bg-black/5 dark:hover:bg-white/10"
                       title={t('common.close', { defaultValue: 'Close' })}
                       data-testid="dwg-find-close"
                     >
@@ -3969,7 +3969,7 @@ export function DwgTakeoffPage() {
                             'block w-full truncate px-2.5 py-1 text-left text-2xs',
                             i === safeMatchIdx
                               ? 'bg-oe-blue/15 font-semibold text-oe-blue'
-                              : 'text-slate-700 hover:bg-black/5 dark:text-slate-200 dark:hover:bg-white/10',
+                              : 'text-content-secondary hover:bg-black/5 dark:hover:bg-white/10',
                           )}
                           data-testid="dwg-find-result-row"
                         >
@@ -4093,11 +4093,11 @@ export function DwgTakeoffPage() {
                     && a.linked_boq_position_id,
                 );
                 return (
-                  <div className="absolute top-3 right-3 z-20 flex flex-col w-80 max-h-[calc(100%-1.5rem)] rounded-lg border border-[#3a3a3a] bg-[#2f2f2f] text-slate-100 shadow-2xl">
+                  <div className="absolute top-3 right-3 z-20 flex flex-col w-80 max-h-[calc(100%-1.5rem)] rounded-lg border border-[#3a3a3a] bg-[#2f2f2f] text-content-quaternary shadow-2xl">
                     {/* Header */}
                     <div className="flex items-center justify-between px-3 py-2 border-b border-[#3a3a3a]">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-100">
-                        <Link2 size={13} className="text-blue-400" />
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-content-quaternary">
+                        <Link2 size={14} className="text-blue-400" />
                         {alreadyLinked
                           ? t('dwg_takeoff.relink_title', { defaultValue: 'Linked - pick new' })
                           : t('dwg_takeoff.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
@@ -4106,7 +4106,7 @@ export function DwgTakeoffPage() {
                         onClick={() => setLinkingEntityId(null)}
                         aria-label={t('common.close', { defaultValue: 'Close' })}
                         title={t('common.close', { defaultValue: 'Close' })}
-                        className="text-slate-400 hover:text-slate-100 transition-colors"
+                        className="text-content-quaternary hover:text-content-quaternary transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -4115,9 +4115,9 @@ export function DwgTakeoffPage() {
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                       {/* Already-linked badge */}
                       {alreadyLinked && (
-                        <div className="flex items-center gap-1.5 rounded-sm bg-emerald-950/40 border border-emerald-800/40 px-2 py-1 text-2xs">
-                          <Link2 size={11} className="text-emerald-400 shrink-0" />
-                          <span className="text-emerald-300 truncate">
+                        <div className="flex items-center gap-1.5 rounded-sm bg-semantic-success/40 border border-semantic-success/40 px-2 py-1 text-2xs">
+                          <Link2 size={12} className="text-semantic-success shrink-0" />
+                          <span className="text-semantic-success truncate">
                             {t('dwg_takeoff.already_linked', { defaultValue: 'Already linked to a BOQ position' })}
                           </span>
                         </div>
@@ -4126,16 +4126,16 @@ export function DwgTakeoffPage() {
                       {/* Entity summary */}
                       <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-2xs space-y-0.5">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">{t('dwg_takeoff.prop_type', 'Type')}</span>
-                          <span className="font-mono text-slate-100">{selectedEntity.type}</span>
+                          <span className="text-content-quaternary">{t('dwg_takeoff.prop_type', 'Type')}</span>
+                          <span className="font-mono text-content-quaternary">{selectedEntity.type}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
-                          <span className="font-mono text-slate-100 truncate ml-2">{selectedEntity.layer}</span>
+                          <span className="text-content-quaternary">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
+                          <span className="font-mono text-content-quaternary truncate ml-2">{selectedEntity.layer}</span>
                         </div>
                         {measurement && (
                           <div className="flex justify-between">
-                            <span className="text-slate-400">
+                            <span className="text-content-quaternary">
                               {measurement.kind === 'area'
                                 ? t('dwg_takeoff.area', 'Area')
                                 : measurement.kind === 'radius'
@@ -4154,7 +4154,7 @@ export function DwgTakeoffPage() {
                         <select
                           value={linkPickerProjectId}
                           onChange={(e) => handlePickerProjectChange(e.target.value)}
-                          className="text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100"
+                          className="oe-select-sm bg-[#262626]"
                         >
                           <option value="">
                             {t('dwg_takeoff.pick_project', { defaultValue: '- project -' })}
@@ -4167,7 +4167,7 @@ export function DwgTakeoffPage() {
                           value={linkPickerBoqId}
                           onChange={(e) => handlePickerBoqChange(e.target.value)}
                           disabled={!linkPickerProjectId || linkBoqsLoading}
-                          className="text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100 disabled:opacity-60"
+                          className="oe-select-sm bg-[#262626]"
                         >
                           <option value="">
                             {linkBoqsLoading
@@ -4189,7 +4189,7 @@ export function DwgTakeoffPage() {
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors',
                             linkPickerMode === 'pick'
                               ? 'bg-oe-blue text-white'
-                              : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
+                              : 'bg-[#363636] text-content-quaternary hover:bg-[#404040]',
                           )}
                         >
                           {t('dwg_takeoff.mode_pick', { defaultValue: 'Pick existing' })}
@@ -4202,7 +4202,7 @@ export function DwgTakeoffPage() {
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors disabled:opacity-50',
                             linkPickerMode === 'create'
                               ? 'bg-oe-blue text-white'
-                              : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
+                              : 'bg-[#363636] text-content-quaternary hover:bg-[#404040]',
                           )}
                         >
                           {t('dwg_takeoff.mode_create', { defaultValue: '+ Create new' })}
@@ -4211,7 +4211,7 @@ export function DwgTakeoffPage() {
 
                       {linkPickerMode === 'pick' ? (
                         !linkPickerBoqId ? (
-                          <p className="text-2xs text-slate-400 py-2 text-center">
+                          <p className="text-2xs text-content-quaternary py-2 text-center">
                             {t('dwg_takeoff.link_need_project_boq', {
                               defaultValue: 'Pick a project and BOQ above.',
                             })}
@@ -4219,12 +4219,12 @@ export function DwgTakeoffPage() {
                         ) : linkPositionsLoading ? (
                           <div className="flex items-center justify-center gap-1.5 py-3">
                             <Loader2 size={12} className="animate-spin text-blue-400" />
-                            <span className="text-2xs text-slate-400">
+                            <span className="text-2xs text-content-quaternary">
                               {t('common.loading', 'Loading...')}
                             </span>
                           </div>
                         ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
-                          <p className="text-2xs text-slate-400 py-2 text-center">
+                          <p className="text-2xs text-content-quaternary py-2 text-center">
                             {t('dwg_takeoff.link_boq_empty', {
                               defaultValue: 'BOQ is empty - switch to "Create new".',
                             })}
@@ -4238,7 +4238,7 @@ export function DwgTakeoffPage() {
                               placeholder={t('dwg_takeoff.link_search_placeholder', {
                                 defaultValue: 'Search ordinal or description...',
                               })}
-                              className="w-full text-2xs rounded-sm border border-[#3a3a3a] bg-[#262626] px-2 py-1 text-slate-100 placeholder:text-slate-500"
+                              className="oe-input-sm w-full bg-[#262626]"
                             />
                             <div className="max-h-56 overflow-y-auto space-y-0.5">
                               {linkBoqPositions
@@ -4269,10 +4269,10 @@ export function DwgTakeoffPage() {
                                     <span className="font-mono text-blue-300 shrink-0">
                                       {pos.ordinal}
                                     </span>
-                                    <span className="text-slate-100 truncate flex-1">
+                                    <span className="text-content-quaternary truncate flex-1">
                                       {pos.description}
                                     </span>
-                                    <span className="text-slate-400 shrink-0 text-2xs">
+                                    <span className="text-content-quaternary shrink-0 text-2xs">
                                       {pos.unit}
                                     </span>
                                   </button>
@@ -4284,19 +4284,19 @@ export function DwgTakeoffPage() {
                         /* Create new position */
                         <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 space-y-1.5">
                           <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-2xs">
-                            <span className="text-slate-400">
+                            <span className="text-content-quaternary">
                               {t('dwg_takeoff.description', { defaultValue: 'Description' })}:
                             </span>
-                            <span className="text-slate-100 truncate">
+                            <span className="text-content-quaternary truncate">
                               {t('dwg_takeoff.position_default_desc', {
                                 defaultValue: 'From DWG: {{layer}}',
                                 layer: selectedEntity.layer,
                               })}
                             </span>
-                            <span className="text-slate-400">
+                            <span className="text-content-quaternary">
                               {t('dwg_takeoff.quantity', { defaultValue: 'Quantity' })}:
                             </span>
-                            <span className="text-slate-100 font-mono">
+                            <span className="text-content-quaternary font-mono">
                               {measurement
                                 ? `${measurement.value} ${measurement.unit}`
                                 : `0 ${normalizeUnit('pcs')}`}
@@ -4308,7 +4308,7 @@ export function DwgTakeoffPage() {
                             disabled={linkingInProgress || !linkPickerBoqId}
                             className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
                           >
-                            {linkingInProgress && <Loader2 size={11} className="animate-spin" />}
+                            {linkingInProgress && <Loader2 size={12} className="animate-spin" />}
                             {t('dwg_takeoff.create_and_link', {
                               defaultValue: 'Create position & link',
                             })}
@@ -4353,7 +4353,7 @@ export function DwgTakeoffPage() {
           <button
             type="button"
             onClick={() => setMobilePanelOpen(true)}
-            className="md:hidden fixed bottom-24 right-3 z-30 flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated px-3 py-2 text-xs font-medium text-content-primary shadow-lg"
+            className="md:hidden fixed bottom-24 right-3 z-dropdown flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated px-3 py-2 text-xs font-medium text-content-primary shadow-lg"
             aria-label={t('dwg_takeoff.open_side_panel', { defaultValue: 'Layers and details' })}
           >
             <PanelRightOpen size={14} />
@@ -4365,7 +4365,7 @@ export function DwgTakeoffPage() {
             className={clsx(
               'w-72 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary shadow-xl shadow-black/30',
               mobilePanelOpen
-                ? 'flex fixed inset-y-0 right-0 z-40 w-[85vw] max-w-xs md:static md:z-auto md:w-72'
+                ? 'flex fixed inset-y-0 right-0 z-drawer w-[85vw] max-w-xs md:static md:z-auto md:w-72'
                 : 'hidden md:flex',
             )}
           >
@@ -4383,12 +4383,12 @@ export function DwgTakeoffPage() {
             {/* Group aggregation panel (RFC 11 §4.5) - visible when 2+ entities selected */}
             {selectedEntityIds.size > 1 && (
               <div
-                className="border-b border-border-light px-3 py-2.5 bg-amber-950/20"
+                className="border-b border-border-light px-3 py-2.5 bg-semantic-warning/20"
                 data-testid="dwg-group-panel"
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Sigma size={13} className="text-amber-400" />
+                    <Sigma size={14} className="text-semantic-warning" />
                     <span className="text-2xs font-semibold text-content-primary">
                       {t('dwg_takeoff.group_selection', { defaultValue: 'Group selection' })}
                     </span>
@@ -4455,7 +4455,7 @@ export function DwgTakeoffPage() {
                       defaultValue: 'Book the group total as one BOQ position',
                     })}
                   >
-                    <Link2 size={11} />
+                    <Link2 size={12} />
                     {t('dwg_takeoff.add_n_to_boq', {
                       defaultValue: 'Add {{count}} to BOQ',
                       count: selectedEntityIds.size,
@@ -4467,7 +4467,7 @@ export function DwgTakeoffPage() {
                     title={t('dwg_takeoff.save_as_group', { defaultValue: 'Save as group' })}
                     data-testid="dwg-group-save"
                   >
-                    <FolderPlus size={11} />
+                    <FolderPlus size={12} />
                   </button>
                 </div>
               </div>
@@ -4477,7 +4477,7 @@ export function DwgTakeoffPage() {
             {hiddenEntityIds.size > 0 && (
               <div className="flex items-center justify-between border-b border-border-light bg-surface-secondary/60 px-3 py-1.5">
                 <span className="text-2xs text-content-tertiary flex items-center gap-1">
-                  <EyeOff size={11} />
+                  <EyeOff size={12} />
                   {t('dwg_takeoff.hidden_count', {
                     defaultValue: '{{count}} hidden',
                     count: hiddenEntityIds.size,
@@ -4487,7 +4487,7 @@ export function DwgTakeoffPage() {
                   onClick={handleShowAllEntities}
                   className="text-2xs font-medium text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
                 >
-                  <Eye size={11} />
+                  <Eye size={12} />
                   {t('dwg_takeoff.show_all', { defaultValue: 'Show all' })}
                 </button>
               </div>
@@ -4526,7 +4526,7 @@ export function DwgTakeoffPage() {
               return (
                 <div className="border-b border-border-light px-3 py-2 bg-surface-secondary/40">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                    <span className="oe-overline">
                       {t('dwg_takeoff.summary', 'Summary')}
                     </span>
                     <button
@@ -4616,7 +4616,7 @@ export function DwgTakeoffPage() {
 
               {rightTab === 'annotations' && (
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">
+                  <h3 className="oe-card-title text-foreground">
                     {t('dwg_takeoff.annotations', 'Annotations')}
                     {annotations.length > 0 && (
                       <Badge variant="neutral" className="ml-2">
@@ -4678,7 +4678,7 @@ export function DwgTakeoffPage() {
                           }}
                           aria-label={t('dwg_takeoff.delete_annotation', { defaultValue: 'Delete annotation' })}
                           title={t('dwg_takeoff.delete_annotation', { defaultValue: 'Delete annotation' })}
-                          className="text-muted-foreground hover:text-red-500"
+                          className="text-muted-foreground hover:text-semantic-error"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -4690,7 +4690,7 @@ export function DwgTakeoffPage() {
 
               {rightTab === 'properties' && (
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">
+                  <h3 className="oe-card-title text-foreground">
                     {t('dwg_takeoff.properties', 'Properties')}
                   </h3>
                   {selectedEntity ? (
@@ -4749,7 +4749,7 @@ export function DwgTakeoffPage() {
                             className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-task"
                           >
-                            <ListChecks size={12} className="text-amber-500 shrink-0" />
+                            <ListChecks size={12} className="text-semantic-warning shrink-0" />
                             <span className="flex-1">
                               {t('dwg_takeoff.attach_task', { defaultValue: '+ New task' })}
                             </span>
@@ -4783,7 +4783,7 @@ export function DwgTakeoffPage() {
                             className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-2xs text-content-primary hover:bg-surface-tertiary transition-colors"
                             data-testid="dwg-attach-activity"
                           >
-                            <CalendarDays size={12} className="text-emerald-500 shrink-0" />
+                            <CalendarDays size={12} className="text-semantic-success shrink-0" />
                             <span className="flex-1">
                               {t('dwg_takeoff.attach_activity', { defaultValue: '+ Link activity' })}
                             </span>
@@ -4825,7 +4825,7 @@ export function DwgTakeoffPage() {
                         }
                         return (
                           <div className="mt-2 pt-2 border-t border-[#3a3a3a]">
-                            <p className="text-2xs font-semibold uppercase tracking-widest text-blue-300 mb-1.5">
+                            <p className="oe-overline text-blue-300 mb-1.5">
                               {t('match.apply_section_title', { defaultValue: 'Find a cost position' })}
                             </p>
                             <div className="h-96 rounded-sm border border-[#3a3a3a] overflow-hidden bg-surface-primary">
@@ -4886,11 +4886,11 @@ export function DwgTakeoffPage() {
                             <div className="font-semibold text-xs text-foreground border-b border-border pb-1">
                               {t('dwg_takeoff.measurements', 'Measurements')}
                             </div>
-                            <div className="flex items-center justify-between rounded-md bg-emerald-950/30 px-2.5 py-1.5 border border-emerald-800/40">
-                              <span className="text-emerald-400 font-medium">
+                            <div className="flex items-center justify-between rounded-md bg-semantic-success/30 px-2.5 py-1.5 border border-semantic-success/40">
+                              <span className="text-semantic-success font-medium">
                                 {t('dwg_takeoff.perimeter', 'Perimeter')}
                               </span>
-                              <span className="font-mono font-semibold text-emerald-300">
+                              <span className="font-mono font-semibold text-semantic-success">
                                 {formatMeasurement(perimeter, 'm')}
                               </span>
                             </div>
@@ -4905,7 +4905,7 @@ export function DwgTakeoffPage() {
                               </div>
                             )}
                             {closed && areaDegenerate && (
-                              <div className="rounded-md bg-amber-950/30 px-2.5 py-1.5 border border-amber-800/40 text-amber-300 text-2xs">
+                              <div className="rounded-md bg-semantic-warning/30 px-2.5 py-1.5 border border-semantic-warning/40 text-semantic-warning text-2xs">
                                 {areaDegenerate === 'self_intersecting'
                                   ? t('dwg_takeoff.area_self_intersecting', {
                                       defaultValue:
@@ -4928,7 +4928,7 @@ export function DwgTakeoffPage() {
                                 : t('common.no', 'No')}
                             />
                             <div className="mt-2">
-                              <div className="font-medium text-2xs text-muted-foreground uppercase tracking-wider mb-1">
+                              <div className="oe-overline text-muted-foreground mb-1">
                                 {t('dwg_takeoff.segments', 'Segments')} ({segLengths.length})
                               </div>
                               <div className="space-y-0.5 max-h-48 overflow-y-auto">
@@ -4997,7 +4997,7 @@ export function DwgTakeoffPage() {
       {/* Upload form modal overlay */}
       {showUpload && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 backdrop-blur-sm"
           onClick={closeUploadModal}
           onKeyDown={(e) => { if (e.key === 'Escape') closeUploadModal(); }}
           role="dialog"
@@ -5015,7 +5015,7 @@ export function DwgTakeoffPage() {
                   <FileUp size={20} className="text-oe-blue" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <h3 className="oe-card-title">
                     {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
                   </h3>
                   <p className="text-2xs text-content-tertiary">
@@ -5085,7 +5085,7 @@ export function DwgTakeoffPage() {
               {uploadFile ? (
                 <>
                   <div className="w-10 h-10 rounded-lg bg-oe-blue/10 flex items-center justify-center">
-                    <FileText size={18} className="text-oe-blue" />
+                    <FileText size={20} className="text-oe-blue" />
                   </div>
                   <p className="text-sm font-semibold text-content-primary">{uploadFile.name}</p>
                   <p className="text-2xs text-content-quaternary">
@@ -5095,7 +5095,7 @@ export function DwgTakeoffPage() {
               ) : (
                 <>
                   <div className="w-10 h-10 rounded-lg bg-surface-secondary flex items-center justify-center">
-                    <Upload size={18} className="text-content-tertiary" />
+                    <Upload size={20} className="text-content-tertiary" />
                   </div>
                   <p className="text-sm font-medium text-content-primary">
                     {t('dwg_takeoff.click_or_drop', 'Click or drag a file here')}
@@ -5157,17 +5157,17 @@ export function DwgTakeoffPage() {
                 empty-state CTA that takes the user to /projects/new instead
                 of leaving them stuck. */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('dwg_takeoff.project_label', { defaultValue: 'Project' })}
               </label>
               {noProjects ? (
-                <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-300">
+                <div className="flex items-start gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2.5 text-xs text-semantic-warning">
                   <Info size={14} className="shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-1.5">
                     <p className="font-semibold">
                       {t('dwg_takeoff.no_project_title', { defaultValue: 'Create a project first' })}
                     </p>
-                    <p className="leading-relaxed text-amber-700/85 dark:text-amber-200/85">
+                    <p className="leading-relaxed text-semantic-warning">
                       {t('dwg_takeoff.no_project_body', {
                         defaultValue:
                           'Drawings have to live inside a project. Create one and you can come back to upload your DWG.',
@@ -5179,7 +5179,7 @@ export function DwgTakeoffPage() {
                         closeUploadModal();
                         navigate('/projects/new');
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/90 hover:bg-amber-600 text-white px-2.5 py-1 text-2xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-semantic-warning/90 hover:bg-semantic-warning text-white px-2.5 py-1 text-2xs font-semibold transition-colors"
                     >
                       <Plus size={12} />
                       {t('dwg_takeoff.create_project_cta', { defaultValue: 'Create project' })}
@@ -5194,7 +5194,7 @@ export function DwgTakeoffPage() {
                     if (picked) setActiveProject(picked.id, picked.name);
                   }}
                   disabled={projectsLoading || projects.length === 0}
-                  className="w-full rounded-xl border border-border-light bg-surface-secondary px-3.5 py-2.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all disabled:opacity-60"
+                  className="oe-select-lg w-full"
                 >
                   {projectsLoading && (
                     <option value="">{t('common.loading', { defaultValue: 'Loading…' })}</option>
@@ -5210,7 +5210,7 @@ export function DwgTakeoffPage() {
 
             {/* Drawing name */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('dwg_takeoff.drawing_name', 'Drawing name')}
               </label>
               <input
@@ -5218,19 +5218,19 @@ export function DwgTakeoffPage() {
                 value={uploadName}
                 onChange={(e) => setUploadName(e.target.value)}
                 placeholder={t('dwg_takeoff.drawing_name_placeholder', 'e.g. Floor Plan Level 1')}
-                className="w-full rounded-xl border border-border-light bg-surface-secondary px-3.5 py-2.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                className="oe-input-lg w-full"
               />
             </div>
 
             {/* Discipline */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('dwg_takeoff.discipline_label', 'Discipline')}
               </label>
               <select
                 value={uploadDiscipline}
                 onChange={(e) => setUploadDiscipline(e.target.value)}
-                className="w-full rounded-xl border border-border-light bg-surface-secondary px-3.5 py-2.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                className="oe-select-lg w-full"
               >
                 <option value="architectural">{t('dwg_takeoff.discipline_arch', 'Architectural')}</option>
                 <option value="structural">{t('dwg_takeoff.discipline_struct', 'Structural')}</option>
@@ -5438,22 +5438,22 @@ function DrawingFilmstrip({
 
   return (
     <div
-      className="shrink-0 border-t border-[#2a2a2a] bg-[#2f2f2f] text-slate-200"
+      className="shrink-0 border-t border-[#2a2a2a] bg-[#2f2f2f] text-content-quaternary"
       data-testid="dwg-filmstrip"
     >
       {/* Header -- always visible, no longer acts as a collapse toggle. */}
       <div className="flex items-center w-full px-3 py-1">
-        <Layers size={12} className="text-slate-300 mr-1.5 shrink-0" />
-        <span className="text-2xs font-semibold text-slate-100">
+        <Layers size={12} className="text-content-quaternary mr-1.5 shrink-0" />
+        <span className="text-2xs font-semibold text-content-quaternary">
           {t('dwg_takeoff.drawings', 'Drawings')}
         </span>
-        <span className="text-2xs text-slate-400 ml-1">({drawings.length})</span>
+        <span className="text-2xs text-content-quaternary ml-1">({drawings.length})</span>
       </div>
 
       {/* Drawing cards - always visible, horizontally scrolling if needed. */}
       <div className="flex items-center gap-1.5 px-3 pb-2 pt-0.5 overflow-x-auto">
         {isLoading ? (
-          <Loader2 size={12} className="animate-spin text-slate-400" />
+          <Loader2 size={12} className="animate-spin text-content-quaternary" />
         ) : drawings.length > 0 ? (
           drawings.map((d) => {
             // Prefer date-fns' formatDistanceToNow for the upload label;
@@ -5509,19 +5509,19 @@ function DrawingFilmstrip({
                       size={10}
                       className={clsx(
                         'shrink-0',
-                        activeDrawingId === d.id ? 'text-blue-400' : 'text-slate-400',
+                        activeDrawingId === d.id ? 'text-blue-400' : 'text-content-quaternary',
                       )}
                     />
                     <span
                       className={clsx(
                         'text-2xs font-semibold truncate',
-                        activeDrawingId === d.id ? 'text-blue-300' : 'text-slate-100',
+                        activeDrawingId === d.id ? 'text-blue-300' : 'text-content-quaternary',
                       )}
                     >
                       {d.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-2xs text-slate-400">
+                  <div className="flex items-center gap-1 text-2xs text-content-quaternary">
                     <span className="capitalize truncate">{d.discipline}</span>
                     <span>&middot;</span>
                     <span className="tabular-nums">
@@ -5532,7 +5532,7 @@ function DrawingFilmstrip({
                   </div>
                   {uploadedLabel && (
                     <div
-                      className="text-2xs text-slate-500 truncate"
+                      className="text-2xs text-content-tertiary truncate"
                       title={uploadedLabel}
                     >
                       {uploadedLabel}
@@ -5549,7 +5549,7 @@ function DrawingFilmstrip({
                   aria-label={t('dwg_takeoff.delete_drawing', { defaultValue: 'Delete drawing' })}
                   title={t('dwg_takeoff.delete_drawing', { defaultValue: 'Delete drawing' })}
                   className="absolute top-0.5 right-0.5 h-4 w-4 rounded flex items-center justify-center
-                             text-transparent group-hover:text-slate-400 hover:!text-red-400 hover:bg-red-500/20
+                             text-transparent group-hover:text-content-quaternary hover:!text-semantic-error hover:bg-semantic-error/20
                              transition-all"
                 >
                   <Trash2 size={9} />
@@ -5558,7 +5558,7 @@ function DrawingFilmstrip({
             );
           })
         ) : (
-          <span className="text-2xs text-slate-400">
+          <span className="text-2xs text-content-quaternary">
             {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
           </span>
         )}
@@ -5569,7 +5569,7 @@ function DrawingFilmstrip({
                      border-[#4a4a4a] hover:border-blue-400/60 hover:bg-blue-500/10 transition-all group"
           title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
         >
-          <Plus size={14} className="text-slate-400 group-hover:text-blue-300 transition-colors" />
+          <Plus size={14} className="text-content-quaternary group-hover:text-blue-300 transition-colors" />
         </button>
       </div>
     </div>
@@ -5600,8 +5600,8 @@ interface SummaryKpiCardProps {
 function SummaryKpiCard({ label, value, unit, accent }: SummaryKpiCardProps) {
   const accentMap: Record<SummaryKpiCardProps['accent'], string> = {
     blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-    emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    emerald: 'text-semantic-success bg-semantic-success/10 border-semantic-success/20',
+    amber: 'text-semantic-warning bg-semantic-warning/10 border-semantic-warning/20',
     violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
   };
   return (
@@ -5763,7 +5763,7 @@ function ScaleTab({
     <div className="flex flex-col gap-4" data-testid="dwg-scale-tab">
       <div className="flex items-center gap-1.5">
         <Ruler size={14} className="text-oe-blue" />
-        <h3 className="text-sm font-semibold text-foreground">
+        <h3 className="oe-card-title text-foreground">
           {t('dwg_takeoff.scale_title', { defaultValue: 'Drawing scale' })}
         </h3>
       </div>
@@ -5775,8 +5775,8 @@ function ScaleTab({
         className={clsx(
           'flex items-center justify-between rounded-md border px-2.5 py-1.5 text-2xs',
           unitKnown
-            ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300'
-            : 'border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-300',
+            ? 'border-semantic-success/30 bg-semantic-success/5 text-semantic-success'
+            : 'border-semantic-warning/30 bg-semantic-warning/5 text-semantic-warning',
         )}
         data-testid="dwg-scale-unit-info"
       >
@@ -5800,7 +5800,7 @@ function ScaleTab({
           </span>
           {isImplausibleSpan(spanMetres) && (
             <span
-              className="rounded-md border border-amber-500/30 bg-amber-500/5 px-2.5 py-1.5 text-amber-700 dark:text-amber-300"
+              className="rounded-md border border-semantic-warning/30 bg-semantic-warning/5 px-2.5 py-1.5 text-semantic-warning"
               data-testid="dwg-scale-span-warning"
             >
               {t('dwg_takeoff.drawing_span_implausible', {
@@ -5814,7 +5814,7 @@ function ScaleTab({
 
       {/* Mode picker - 3 strategies */}
       <div className="flex flex-col gap-1.5">
-        <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <span className="oe-overline">
           {t('dwg_takeoff.scale_mode_label', { defaultValue: 'Scale mode' })}
         </span>
         <div className="flex gap-1.5">
@@ -5900,7 +5900,7 @@ function ScaleTab({
                   step={1}
                   value={customInput}
                   onChange={(e) => handleCustomChange(e.target.value)}
-                  className="w-20 ml-auto px-1.5 py-0.5 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input-sm w-20 ml-auto font-mono text-foreground"
                   data-testid="dwg-scale-custom-input"
                   aria-label={t('dwg_takeoff.scale_input_aria', {
                     defaultValue: 'Drawing scale denominator',
@@ -5931,7 +5931,7 @@ function ScaleTab({
 
           <div className="rounded-md border border-border bg-surface-secondary px-3 py-2.5 text-2xs flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-content-tertiary uppercase tracking-wider text-2xs font-semibold">
+              <span className="oe-overline">
                 {t('dwg_takeoff.scale_calibrate_measured', { defaultValue: 'Measured (raw)' })}
               </span>
               <span className="font-mono font-semibold text-content-primary tabular-nums">
@@ -5946,7 +5946,7 @@ function ScaleTab({
                 onClick={onStartCalibration}
                 className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-2xs font-semibold text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
               >
-                <Ruler size={11} />
+                <Ruler size={12} />
                 {calibrationPixels !== null
                   ? t('dwg_takeoff.scale_calibrate_repick', { defaultValue: 'Pick two points again' })
                   : t('dwg_takeoff.scale_calibrate_pick', { defaultValue: 'Pick two points on drawing' })}
@@ -5963,7 +5963,7 @@ function ScaleTab({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="oe-overline">
               {t('dwg_takeoff.scale_calibrate_real_label', { defaultValue: 'Real-world distance' })}
             </span>
             <div className="flex items-center gap-2">
@@ -5974,13 +5974,13 @@ function ScaleTab({
                 value={realDistance}
                 onChange={(e) => setRealDistance(e.target.value)}
                 placeholder="5.00"
-                className="flex-1 px-2 py-1 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input-sm flex-1 font-mono text-foreground"
                 data-testid="dwg-scale-calibrate-distance"
               />
               <select
                 value={realUnit}
                 onChange={(e) => setRealUnit(e.target.value as typeof realUnit)}
-                className="px-2 py-1 text-xs rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select-sm text-foreground"
                 data-testid="dwg-scale-calibrate-unit"
               >
                 <option value="m">m</option>
@@ -5992,7 +5992,7 @@ function ScaleTab({
               type="button"
               onClick={applyCalibration}
               disabled={!calibrationPixels || !Number(realDistance)}
-              className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-2xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-2xs font-semibold text-white bg-semantic-success hover:bg-semantic-success disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               data-testid="dwg-scale-calibrate-apply"
             >
               {t('dwg_takeoff.scale_calibrate_apply', { defaultValue: 'Apply calibration' })}
@@ -6021,7 +6021,7 @@ function ScaleTab({
               step={1}
               value={customInput || String(drawingScale)}
               onChange={(e) => handleCustomChange(e.target.value)}
-              className="w-24 ml-auto px-1.5 py-0.5 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input-sm w-24 ml-auto font-mono text-foreground"
               data-testid="dwg-scale-per-annotation-input"
             />
           </label>
@@ -6121,7 +6121,7 @@ function SummaryTab({
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5 pt-0.5">
           <BarChart3 size={14} className="text-oe-blue shrink-0" />
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="oe-card-title text-foreground">
             {t('dwg_takeoff.summary_title', { defaultValue: 'Measurements Summary' })}
           </h3>
         </div>
@@ -6130,13 +6130,13 @@ function SummaryTab({
           <button
             type="button"
             onClick={onExportExcel}
-            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-2xs font-semibold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+            className="inline-flex items-center gap-1 rounded-md border border-semantic-success/30 bg-semantic-success/10 px-2 py-1 text-2xs font-semibold text-semantic-success hover:bg-semantic-success/20 transition-colors"
             data-testid="dwg-summary-export-excel"
             title={t('dwg_takeoff.export_excel', {
               defaultValue: 'Export quantities as Excel (.xlsx)',
             })}
           >
-            <Download size={11} />
+            <Download size={12} />
             {t('dwg_takeoff.export_excel_short', { defaultValue: 'Excel' })}
           </button>
           <button
@@ -6148,7 +6148,7 @@ function SummaryTab({
               defaultValue: 'Export measurements as CSV',
             })}
           >
-            <Download size={11} />
+            <Download size={12} />
             {t('dwg_takeoff.export_csv_short', { defaultValue: 'CSV' })}
           </button>
           <button
@@ -6160,7 +6160,7 @@ function SummaryTab({
               defaultValue: 'Export current viewport as PDF',
             })}
           >
-            <Download size={11} />
+            <Download size={12} />
             {t('dwg_takeoff.export_pdf_short', { defaultValue: 'PDF' })}
           </button>
         </div>
@@ -6243,8 +6243,8 @@ function SummaryTab({
           can override per layer. */}
       <div data-testid="dwg-summary-by-layer">
         <div className="flex items-center gap-1.5 mb-0.5">
-          <Zap size={12} className="text-amber-400" />
-          <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+          <Zap size={12} className="text-semantic-warning" />
+          <h4 className="oe-overline">
             {t('dwg_takeoff.quantify_title', { defaultValue: 'Auto-quantify by layer' })}
           </h4>
           <span className="text-2xs text-content-quaternary tabular-nums">
@@ -6259,11 +6259,11 @@ function SummaryTab({
 
         {/* Grand totals strip */}
         <div className="grid grid-cols-3 gap-1 mb-2" data-testid="dwg-quantify-totals">
-          <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-1.5">
-            <div className="text-2xs uppercase tracking-wide text-emerald-500/80">
+          <div className="rounded-md bg-semantic-success/10 border border-semantic-success/20 px-2 py-1.5">
+            <div className="text-2xs uppercase tracking-wide text-semantic-success">
               {t('dwg_takeoff.area', 'Area')}
             </div>
-            <div className="text-2xs font-semibold tabular-nums text-emerald-300">
+            <div className="text-2xs font-semibold tabular-nums text-semantic-success">
               {quantifyTotals.area > 0
                 ? q.convert(quantifyTotals.area, 'm²').value.toLocaleString(getNumberLocale(), { maximumFractionDigits: 2 })
                 : '-'}
@@ -6281,11 +6281,11 @@ function SummaryTab({
               <span className="text-2xs font-medium opacity-70"> {q.unitFor('m')}</span>
             </div>
           </div>
-          <div className="rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-1.5">
-            <div className="text-2xs uppercase tracking-wide text-sky-400/80">
+          <div className="rounded-md bg-semantic-info/10 border border-semantic-info/20 px-2 py-1.5">
+            <div className="text-2xs uppercase tracking-wide text-semantic-info">
               {t('dwg_takeoff.count', 'Count')}
             </div>
-            <div className="text-2xs font-semibold tabular-nums text-sky-300">
+            <div className="text-2xs font-semibold tabular-nums text-semantic-info">
               {quantifyTotals.count.toLocaleString(getNumberLocale())}
               <span className="text-2xs font-medium opacity-70"> nr</span>
             </div>
@@ -6388,8 +6388,8 @@ function SummaryTab({
       {/* By Type */}
       <div data-testid="dwg-summary-by-type">
         <div className="flex items-center gap-1.5 mb-1.5">
-          <Sigma size={11} className="text-content-tertiary" />
-          <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <Sigma size={12} className="text-content-tertiary" />
+          <h4 className="oe-overline">
             {t('dwg_takeoff.summary_by_type', { defaultValue: 'By entity type' })}
           </h4>
           <span className="text-2xs text-content-quaternary tabular-nums">
@@ -6418,8 +6418,8 @@ function SummaryTab({
       {byBlock.length > 0 && (
         <div data-testid="dwg-summary-by-block">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <Hash size={11} className="text-content-tertiary" />
-            <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <Hash size={12} className="text-content-tertiary" />
+            <h4 className="oe-overline">
               {t('dwg_takeoff.summary_by_block', { defaultValue: 'Count by block' })}
             </h4>
             <span className="text-2xs text-content-quaternary tabular-nums">
@@ -6489,7 +6489,7 @@ function DwgContextMenu({
     <div
       id="dwg-context-menu"
       data-testid="dwg-context-menu"
-      className="absolute z-40 min-w-[180px] rounded-lg border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md py-1"
+      className="absolute z-dropdown min-w-[180px] rounded-lg border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md py-1"
       style={{ left: screenX, top: screenY }}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -6682,7 +6682,7 @@ function ConversionProgressCard({
             <Loader2 size={20} className="text-oe-blue animate-spin" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-content-primary leading-tight">
+            <h2 className="oe-section-title">
               {t('dwg_takeoff.conv_title', { defaultValue: 'Converting your drawing…' })}
             </h2>
             <p className="text-xs text-content-tertiary mt-1 truncate" title={filename}>
@@ -6717,7 +6717,7 @@ function ConversionProgressCard({
               type="button"
               onClick={onCancel}
               data-testid="dwg-conversion-cancel"
-              className="text-2xs font-medium text-content-tertiary hover:text-red-500 transition-colors underline-offset-2 hover:underline"
+              className="text-2xs font-medium text-content-tertiary hover:text-semantic-error transition-colors underline-offset-2 hover:underline"
             >
               {t('dwg_takeoff.conv_cancel', {
                 defaultValue: 'Cancel - remove this drawing',
@@ -6790,11 +6790,11 @@ function InstallDwgConverterCTA({
 
   if (unsupportedMessage) {
     return (
-      <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-2xs text-amber-700 dark:text-amber-200">
+      <div className="mt-4 rounded-md border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-2xs text-semantic-warning">
         <p>{unsupportedMessage}</p>
         <a
           href="/settings?tab=converters"
-          className="mt-2 inline-flex items-center gap-1 text-amber-700 dark:text-amber-200 underline hover:no-underline"
+          className="mt-2 inline-flex items-center gap-1 text-semantic-warning underline hover:no-underline"
         >
           {t('dwg_takeoff.conv_open_settings', {
             defaultValue: 'Open Converters settings →',
@@ -6822,7 +6822,7 @@ function InstallDwgConverterCTA({
         type="button"
         onClick={() => installMutation.mutate()}
         data-testid="dwg-install-converter-cta"
-        className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 text-white text-2xs font-semibold px-3 py-1.5 hover:bg-emerald-700 transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-md bg-semantic-success text-white text-2xs font-semibold px-3 py-1.5 hover:bg-semantic-success transition-colors"
       >
         <Download size={12} />
         {t('dwg_takeoff.conv_install_cta', {
@@ -6869,16 +6869,16 @@ function ConversionErrorCard({
     <div className="flex flex-1 items-center justify-center p-6">
       <div
         data-testid="dwg-conversion-error-card"
-        className="w-full max-w-xl rounded-2xl border border-red-500/30 bg-red-500/5 p-6 shadow-xl"
+        className="w-full max-w-xl rounded-2xl border border-semantic-error/30 bg-semantic-error/5 p-6 shadow-xl"
         role="alert"
         aria-live="assertive"
       >
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
-            <X size={20} className="text-red-500" />
+          <div className="w-10 h-10 rounded-xl bg-semantic-error/15 border border-semantic-error/30 flex items-center justify-center shrink-0">
+            <X size={20} className="text-semantic-error" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-content-primary leading-tight">
+            <h2 className="oe-section-title">
               {isMissingConverter
                 ? t('dwg_takeoff.conv_missing_title', {
                     defaultValue: 'DWG converter not installed',
@@ -6932,7 +6932,7 @@ function ConversionErrorCard({
                     type="button"
                     onClick={onDelete}
                     data-testid="dwg-conversion-error-delete"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 text-red-500 text-2xs font-medium px-3 py-1.5 hover:bg-red-500/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-semantic-error/30 text-semantic-error text-2xs font-medium px-3 py-1.5 hover:bg-semantic-error/10 transition-colors"
                   >
                     <Trash2 size={12} />
                     {t('dwg_takeoff.conv_delete', {
@@ -6965,16 +6965,16 @@ function ConversionEmptyCard({
     <div className="flex flex-1 items-center justify-center p-6">
       <div
         data-testid="dwg-conversion-empty-card"
-        className="w-full max-w-xl rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xl"
+        className="w-full max-w-xl rounded-2xl border border-semantic-warning/30 bg-semantic-warning/5 p-6 shadow-xl"
         role="status"
         aria-live="polite"
       >
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <Info size={20} className="text-amber-500" />
+          <div className="w-10 h-10 rounded-xl bg-semantic-warning/15 border border-semantic-warning/30 flex items-center justify-center shrink-0">
+            <Info size={20} className="text-semantic-warning" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-content-primary leading-tight">
+            <h2 className="oe-section-title">
               {t('dwg_takeoff.conv_empty_title', { defaultValue: 'No entities found' })}
             </h2>
             <p className="text-xs text-content-tertiary mt-1 truncate" title={drawingName}>
@@ -7007,7 +7007,7 @@ function ConversionEmptyCard({
                     type="button"
                     onClick={onDelete}
                     data-testid="dwg-conversion-empty-delete"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 text-amber-700 dark:text-amber-300 text-2xs font-medium px-3 py-1.5 hover:bg-amber-500/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-semantic-warning/30 text-semantic-warning text-2xs font-medium px-3 py-1.5 hover:bg-semantic-warning/10 transition-colors"
                   >
                     <Trash2 size={12} />
                     {t('dwg_takeoff.conv_delete', {
@@ -7066,7 +7066,7 @@ function NeedsConversionCard({
             <FileUp size={20} className="text-oe-blue" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-content-primary leading-tight">
+            <h2 className="oe-section-title">
               {t('dwg_takeoff.needs_conv_title', {
                 defaultValue: 'This drawing needs conversion',
               })}

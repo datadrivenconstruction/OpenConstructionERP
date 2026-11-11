@@ -73,9 +73,9 @@ const ISSUE_TONE: Record<IntegrityIssueCode, 'danger' | 'warning' | 'info'> = {
 };
 
 const TONE_CLASSES: Record<'danger' | 'warning' | 'info', string> = {
-  danger: 'bg-semantic-error/15 text-rose-300 border border-rose-500/30',
-  warning: 'bg-semantic-warning/15 text-amber-300 border border-amber-500/30',
-  info: 'bg-semantic-info/15 text-sky-300 border border-sky-500/30',
+  danger: 'bg-semantic-error/15 text-semantic-error border border-semantic-error/30',
+  warning: 'bg-semantic-warning/15 text-semantic-warning border border-semantic-warning/30',
+  info: 'bg-semantic-info/15 text-semantic-info border border-semantic-info/30',
 };
 
 export function IntegrityOverview({
@@ -110,7 +110,7 @@ export function IntegrityOverview({
     <Card data-testid="integrity-overview">
       <div className="flex items-center justify-between border-b border-border-light px-4 py-2">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('dashboards.integrity_title', {
               defaultValue: 'Dataset integrity',
             })}
@@ -152,7 +152,7 @@ export function IntegrityOverview({
 
         {reportQuery.isError && (
           <div
-            className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300"
+            className="rounded border border-semantic-error/30 bg-semantic-error/10 p-3 text-xs text-semantic-error"
             data-testid="integrity-error"
           >
             {t('dashboards.integrity_error', {
@@ -166,7 +166,7 @@ export function IntegrityOverview({
           reportQuery.data &&
           visibleColumns.length === 0 && (
             <EmptyState
-              icon={<ShieldCheck className="h-8 w-8 text-emerald-400" />}
+              icon={<ShieldCheck className="h-8 w-8 text-semantic-success" />}
               title={t('dashboards.integrity_empty_title', {
                 defaultValue: 'No integrity issues found',
               })}
@@ -201,9 +201,9 @@ function CompletenessChip({ score }: CompletenessChipProps) {
   const pct = Math.round(score * 100);
   const tone = score >= 0.95 ? 'emerald' : score >= 0.7 ? 'amber' : 'rose';
   const colour = {
-    emerald: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
-    amber: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
-    rose: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
+    emerald: 'bg-semantic-success/15 text-semantic-success border-semantic-success/30',
+    amber: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30',
+    rose: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30',
   }[tone];
   return (
     <span

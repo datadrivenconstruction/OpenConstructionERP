@@ -147,7 +147,7 @@ function CheckSummary({ report }: { report: BIMCheckReport }) {
   return (
     <Card padding="sm">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <span className="oe-overline">
           {t('bim.checks_summary', { defaultValue: 'Check summary' })}
         </span>
         <Badge variant={meta.variant} size="sm" dot>
@@ -251,8 +251,8 @@ function ScorecardCard({
   return (
     <Card padding="sm">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-          <Gauge size={13} className="text-content-tertiary" />
+        <span className="oe-overline flex items-center gap-1.5">
+          <Gauge size={14} className="text-content-tertiary" />
           {t('bim.checks_scorecard', { defaultValue: 'Model maturity' })}
         </span>
         <span className="flex items-center gap-1.5">
@@ -281,9 +281,9 @@ function ScorecardCard({
 /* ── Finding row ───────────────────────────────────────────────────────── */
 
 function severityIcon(sev: Severity) {
-  if (sev === 'error') return <XCircle size={15} className="mt-0.5 shrink-0 text-semantic-error" />;
-  if (sev === 'info') return <Info size={15} className="mt-0.5 shrink-0 text-oe-blue" />;
-  return <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />;
+  if (sev === 'error') return <XCircle size={16} className="mt-0.5 shrink-0 text-semantic-error" />;
+  if (sev === 'info') return <Info size={16} className="mt-0.5 shrink-0 text-oe-blue" />;
+  return <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />;
 }
 
 function FindingRow({
@@ -411,7 +411,7 @@ function FindingsList({
   if (total === 0 && report.total_rules > 0) {
     return (
       <div className="flex items-center gap-2 rounded-xl bg-semantic-success-bg px-4 py-3">
-        <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
+        <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
         <p className="text-xs font-medium text-semantic-success">
           {t('bim.checks_all_passed', { defaultValue: 'Every automated check passed.' })}
         </p>
@@ -432,7 +432,7 @@ function FindingsList({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <span className="oe-overline">
           {t('bim.checks_findings', { defaultValue: 'Findings' })}
         </span>
         <span className="text-2xs text-content-tertiary tabular-nums">{total}</span>
@@ -445,7 +445,7 @@ function FindingsList({
           <div key={sev} className="space-y-2">
             <div className="flex items-center gap-1.5">
               {severityIcon(sev)}
-              <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <span className="oe-overline">
                 {label}
               </span>
               <span className="text-2xs text-content-quaternary tabular-nums">{items.length}</span>
@@ -603,7 +603,7 @@ export function ModelChecksPanel({
       {/* Header: title + run action */}
       <div className="flex items-center gap-2 border-b border-border-light px-4 py-2.5">
         <ListChecks size={16} className="shrink-0 text-oe-blue" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('bim.checks_title', { defaultValue: 'Checks' })}
         </h3>
         <div className="flex-1" />
@@ -651,7 +651,7 @@ export function ModelChecksPanel({
         ) : runMut.isError ? (
           <Card className="border-semantic-error/30 bg-semantic-error-bg" padding="sm">
             <div className="flex items-start gap-2">
-              <XCircle size={18} className="mt-0.5 shrink-0 text-semantic-error" />
+              <XCircle size={20} className="mt-0.5 shrink-0 text-semantic-error" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-semantic-error">
                   {t('bim.checks_run_failed', { defaultValue: 'Checks could not run' })}

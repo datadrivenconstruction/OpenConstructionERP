@@ -115,7 +115,7 @@ const VALIDATION_DOT_STYLES: Record<string, string> = {
   passed: 'bg-semantic-success',
   warnings: 'bg-semantic-warning',
   errors: 'bg-semantic-error',
-  pending: 'bg-gray-300 dark:bg-gray-600',
+  pending: 'bg-border',
 };
 
 /**
@@ -316,14 +316,14 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         }
       >
         {isCollapsed ? (
-          <Folder size={15} className="text-content-tertiary" />
+          <Folder size={16} className="text-content-tertiary" />
         ) : (
-          <FolderOpen size={15} className="text-oe-blue" />
+          <FolderOpen size={16} className="text-oe-blue" />
         )}
       </button>
 
       <span className="shrink-0 text-content-tertiary">
-        {isCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
+        {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
       </span>
 
       {ordinal && (
@@ -419,7 +419,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           title={t('boq.add_sub_section', { defaultValue: 'Add sub-section nested under this section' })}
           aria-label={t('boq.add_sub_section', { defaultValue: 'Add sub-section' })}
         >
-          <FolderPlus size={11} />
+          <FolderPlus size={12} />
           {t('boq.sub_section_short', { defaultValue: 'Sub' })}
         </button>
       )}
@@ -444,7 +444,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         title={t('boq.add_position_to_section', { defaultValue: 'Add position to this section' })}
         aria-label={t('boq.add_position_to_section', { defaultValue: 'Add position to this section' })}
       >
-        <Plus size={11} />
+        <Plus size={12} />
         {t('boq.add_position', { defaultValue: 'Add Position' })}
       </button>
       )}
@@ -462,10 +462,10 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           // does not exist on a touch screen, and a section once added could
           // not be removed there. Full strength on hover and keyboard focus.
           className="shrink-0 h-6 w-6 flex items-center justify-center rounded
-                     text-content-tertiary hover:text-red-600
-                     bg-transparent hover:bg-red-50 dark:hover:bg-red-950/30
+                     text-content-tertiary hover:text-semantic-error
+                     bg-transparent hover:bg-semantic-error-bg
                      opacity-50 group-hover/section:opacity-100 focus-visible:opacity-100
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-semantic-error/60
                      transition-all"
           title={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
           aria-label={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
@@ -541,9 +541,9 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
             }}
             className="shrink-0 inline-flex items-center gap-1 h-5 px-2 rounded
                        text-[10px] font-semibold
-                       bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200
-                       hover:bg-amber-200 dark:hover:bg-amber-800/70
-                       ring-1 ring-amber-300 dark:ring-amber-700/60
+                       bg-semantic-warning-bg text-semantic-warning
+                       hover:bg-semantic-warning-bg
+                       ring-1 ring-semantic-warning
                        transition-colors"
             title={t('boq.section_fx_missing_tooltip', {
               defaultValue:
@@ -556,7 +556,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
               codes: fmtList((data as { _fxWarnings: string[] })._fxWarnings),
             })}
           >
-            <AlertTriangle size={11} strokeWidth={2.2} />
+            <AlertTriangle size={12} strokeWidth={2.2} />
             <span>
               {t('boq.section_fx_missing_short', {
                 defaultValue: 'set FX: {{codes}}',
@@ -828,9 +828,9 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
             e.stopPropagation();
             ctx?.onAddComment?.(data.id as string);
           }}
-          className="flex h-4 items-center gap-0.5 px-1 rounded bg-amber-100 text-amber-600
+          className="flex h-4 items-center gap-0.5 px-1 rounded bg-semantic-warning-bg text-semantic-warning
                      dark:bg-amber-900/30 dark:text-amber-400
-                     hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors shrink-0"
+                     hover:bg-semantic-warning-bg transition-colors shrink-0"
           title={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
           aria-label={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
         >
@@ -1005,13 +1005,13 @@ function ScopeOfWorkHint({
         <div
           ref={popRef}
           role="tooltip"
-          className="fixed z-[2000] w-[320px] max-w-[90vw]
+          className="fixed z-tooltip w-[320px] max-w-[90vw]
                      rounded-lg border border-border-light bg-surface-primary
                      shadow-lg p-3 text-xs text-content-secondary"
           style={{ top: pos.top, left: pos.left }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <div className="oe-overline mb-1.5">
             {label}
           </div>
           <ul className="list-disc pl-4 space-y-1 leading-relaxed max-h-[280px] overflow-auto">
@@ -1328,7 +1328,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     provis === 'withouttotal' || provis === 'withtotal' ? (
       <span
         className="shrink-0 inline-flex items-center rounded text-[10px] font-medium px-1 py-0.5
-                   bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 cursor-help"
+                   bg-semantic-warning-bg text-semantic-warning cursor-help"
         title={
           provis === 'withouttotal'
             ? t('boq.provis_without_total_tip', {
@@ -1425,8 +1425,8 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
       {provenanceChip}
       <span
         className="shrink-0 inline-flex items-center gap-1 rounded
-                   bg-amber-100 dark:bg-amber-900/40
-                   text-amber-700 dark:text-amber-300
+                   bg-semantic-warning-bg
+                   text-semantic-warning
                    px-1.5 py-0.5 text-2xs font-medium cursor-help"
         title={tooltip}
         data-testid="boq-variant-default-pill"
@@ -1695,7 +1695,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
           title={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked - click to preview', count: bimLinkCount })}
           aria-label={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked - click to preview', count: bimLinkCount })}
         >
-          <Cuboid size={11} />
+          <Cuboid size={12} />
           {bimLinkCount}
         </button>
       )}
@@ -1705,8 +1705,8 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
           onClick={handleOpenPdf}
           onMouseDown={(e) => e.stopPropagation()}
           className="h-6 w-6 inline-flex items-center justify-center rounded
-                     bg-rose-500/10 text-rose-600 dark:text-rose-400
-                     hover:bg-rose-500/25 transition-colors cursor-pointer"
+                     bg-semantic-error/10 text-semantic-error
+                     hover:bg-semantic-error/25 transition-colors cursor-pointer"
           title={pdfSource
             ? `${t('boq.pdf_link_tooltip_v2', { defaultValue: 'PDF takeoff - click for details & navigation' })} - ${pdfSource}`
             : t('boq.pdf_link_tooltip_v2', { defaultValue: 'PDF takeoff - click for details & navigation' })}
@@ -1721,8 +1721,8 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
           onClick={handleOpenDwg}
           onMouseDown={(e) => e.stopPropagation()}
           className="h-6 w-6 inline-flex items-center justify-center rounded
-                     bg-amber-500/10 text-amber-600 dark:text-amber-400
-                     hover:bg-amber-500/25 transition-colors cursor-pointer"
+                     bg-semantic-warning/10 text-semantic-warning
+                     hover:bg-semantic-warning/25 transition-colors cursor-pointer"
           title={dwgSource
             ? `${t('boq.dwg_link_tooltip_v2', { defaultValue: 'DWG drawing - click for details & navigation' })} - ${dwgSource}`
             : t('boq.dwg_link_tooltip_v2', { defaultValue: 'DWG drawing - click for details & navigation' })}
@@ -1737,7 +1737,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
         createPortal(
           <>
             <div
-              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] animate-fade-in"
+              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-modal animate-fade-in"
               onClick={() => setShowPdfPopover(false)}
             />
             <PdfDwgSourcePopover
@@ -1765,7 +1765,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
         createPortal(
           <>
             <div
-              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] animate-fade-in"
+              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-modal animate-fade-in"
               onClick={() => setShowDwgPopover(false)}
             />
             <PdfDwgSourcePopover
@@ -1792,7 +1792,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
           <>
             {/* Backdrop blur overlay */}
             <div
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] animate-fade-in"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-modal animate-fade-in"
               onClick={() => setShowPreview(false)}
             />
             <BimLinkPopover
@@ -2150,7 +2150,7 @@ const BimLinkPopover = forwardRef<
                        text-oe-blue hover:bg-oe-blue/10 transition-colors"
             title={t('boq.open_in_bim_title', { defaultValue: 'Open in 3D viewer with the linked element pre-selected' })}
           >
-            <ExternalLink size={11} />
+            <ExternalLink size={12} />
             {t('boq.open_in_bim', { defaultValue: 'Open in BIM' })}
           </button>
           <button
@@ -2173,8 +2173,8 @@ const BimLinkPopover = forwardRef<
         {canApply && (
           <div className="w-[260px] shrink-0 flex flex-col border-r border-border-light dark:border-border-dark">
             <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
-              <Info size={11} className="text-blue-600 shrink-0" />
-              <span className="text-2xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
+              <Info size={12} className="text-blue-600 shrink-0" />
+              <span className="oe-overline text-blue-700 dark:text-blue-400 flex-1 text-left">
                 {t('boq.bim_properties', { defaultValue: 'Properties' })}
               </span>
               <button
@@ -2251,9 +2251,9 @@ const BimLinkPopover = forwardRef<
                                     handleUseQuantity(value, `BIM: ${paramLabel}`);
                                   }}
                                   className="inline-flex items-center gap-0.5 px-1.5 h-4 rounded-sm text-[9px] font-semibold
-                                             text-emerald-700 dark:text-emerald-300
-                                             bg-emerald-100/70 dark:bg-emerald-900/30
-                                             hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500
+                                             text-semantic-success
+                                             bg-semantic-success-bg
+                                             hover:bg-semantic-success hover:text-white
                                              opacity-0 group-hover/prow:opacity-100 transition-all"
                                   title={t('boq.set_as_quantity_title', { defaultValue: 'Push this value into the BOQ quantity field' })}
                                 >
@@ -2308,7 +2308,7 @@ const BimLinkPopover = forwardRef<
           ) : (
             <div
               className="flex flex-col items-center justify-center gap-2 px-6 text-center
-                         bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
+                         bg-surface-secondary border-b border-border-light dark:border-border-dark"
               style={{ width: canApply ? 380 : '100%', height: 220 }}
               data-testid="bim-link-no-geometry"
             >
@@ -2337,7 +2337,7 @@ const BimLinkPopover = forwardRef<
                 className="mt-1 inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold
                            text-oe-blue bg-oe-blue/10 hover:bg-oe-blue/20 transition-colors"
               >
-                <ExternalLink size={11} />
+                <ExternalLink size={12} />
                 {t('boq.open_in_bim', { defaultValue: 'Open in BIM' })}
               </button>
             </div>
@@ -2353,7 +2353,7 @@ const BimLinkPopover = forwardRef<
             {!isLoading && elements.map((el) => (
               <div key={el.id} className="px-3 py-2 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
                 <div className="flex items-center gap-2">
-                  <Cuboid size={11} className="text-oe-blue/60 shrink-0" />
+                  <Cuboid size={12} className="text-oe-blue/60 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="text-2xs font-medium text-content-primary truncate">
                       {el.name || el.element_type}
@@ -2375,12 +2375,12 @@ const BimLinkPopover = forwardRef<
         {canApply && (
           <div className="w-[260px] shrink-0 flex flex-col">
             <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-semantic-success/10 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
-              <Ruler size={11} className="text-semantic-success shrink-0" />
+              <Ruler size={12} className="text-semantic-success shrink-0" />
               <span className="text-2xs font-semibold uppercase tracking-wider text-semantic-success flex-1 text-left">
                 {t('boq.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
               </span>
               {isEnriching && (
-                <Loader2 size={10} className="animate-spin text-emerald-600/60 shrink-0" />
+                <Loader2 size={10} className="animate-spin text-semantic-success shrink-0" />
               )}
               <button
                 type="button"
@@ -2464,7 +2464,7 @@ const BimLinkPopover = forwardRef<
                         <div className="flex items-center gap-1">
                           <span className="text-2xs text-content-secondary truncate">{s.label}</span>
                           <span
-                            className="text-2xs font-semibold uppercase text-emerald-600/80 tracking-wider shrink-0"
+                            className="oe-overline text-semantic-success shrink-0"
                             title={t('boq.bim_agg_sum_title', { defaultValue: 'Summed across all linked elements' })}
                           >
                             Σ
@@ -2492,7 +2492,7 @@ const BimLinkPopover = forwardRef<
                           className="shrink-0 h-6 flex items-center gap-1 px-2.5 rounded-md text-[10px] font-semibold
                                      text-white bg-gradient-to-r from-emerald-500 to-emerald-600
                                      hover:from-emerald-600 hover:to-emerald-700
-                                     shadow-sm hover:shadow-md ring-1 ring-emerald-500/20 hover:ring-emerald-500/40
+                                     shadow-sm hover:shadow-md ring-1 ring-semantic-success/20 hover:ring-semantic-success/40
                                      active:scale-[0.97] transition-all"
                           title={t('boq.bim_qty_use_as_quantity', { defaultValue: 'Set as quantity' })}
                         >
@@ -2518,7 +2518,7 @@ const BimLinkPopover = forwardRef<
                     <div className="flex items-center gap-1 mb-0.5">
                       <span className="text-2xs text-content-secondary truncate">{s.label}</span>
                       <span
-                        className="text-2xs font-semibold uppercase text-sky-600/80 tracking-wider shrink-0"
+                        className="oe-overline text-semantic-info shrink-0"
                         title={t('boq.bim_agg_distinct_title', {
                           defaultValue:
                             'Per-element value - summing is meaningless, so each unique value is listed. Click one to apply it.',
@@ -2723,8 +2723,8 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
   };
 
   const accent = kind === 'pdf'
-    ? 'from-rose-500 to-rose-600 ring-rose-500/20'
-    : 'from-amber-500 to-amber-600 ring-amber-500/20';
+    ? 'from-rose-500 to-rose-600 ring-semantic-error/20'
+    : 'from-amber-500 to-amber-600 ring-semantic-warning/20';
   const accentBg = kind === 'pdf'
     ? 'bg-semantic-error/10 text-semantic-error'
     : 'bg-semantic-warning/10 text-semantic-warning';
@@ -2746,7 +2746,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
           <span className={`h-5 w-5 inline-flex items-center justify-center rounded ${accentBg}`}>
             {kind === 'pdf' ? <FileText size={12} /> : <FileBox size={12} />}
           </span>
-          <span className="text-2xs font-semibold text-content-primary uppercase tracking-wide">
+          <span className="oe-overline">
             {kind === 'pdf'
               ? t('boq.source_pdf', { defaultValue: 'PDF takeoff' })
               : t('boq.source_dwg', { defaultValue: 'DWG drawing' })}
@@ -2764,10 +2764,10 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
       </div>
 
       {/* Body */}
-      <div className="px-3.5 py-3 space-y-2.5">
+      <div className="px-3.5 py-3 space-y-2">
         {/* Source document name */}
         <div>
-          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+          <div className="oe-overline mb-0.5">
             {t('boq.source_doc_label', { defaultValue: 'Source document' })}
           </div>
           <div className="text-xs font-medium text-content-primary truncate" title={sourceName || ''}>
@@ -2787,7 +2787,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
 
         {/* Measurement value(s) */}
         <div>
-          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+          <div className="oe-overline mb-1">
             {t('boq.source_measurement_label', { defaultValue: 'Measurement' })}
           </div>
           {measurementValue !== null ? (
@@ -2814,7 +2814,7 @@ function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
         {/* Identifier (debug-friendly but readable) */}
         {(measurementId || annotationId) && (
           <div>
-            <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+            <div className="oe-overline mb-0.5">
               {t('boq.source_id_label', { defaultValue: 'Item id' })}
             </div>
             <div className="text-2xs font-mono text-content-tertiary truncate">
@@ -3402,7 +3402,7 @@ function ResourceTypePicker({
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const baseBadge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+  const baseBadge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-surface-secondary text-content-secondary', label: '?' };
   const baseLabel = getResourceTypeLabel(value, t);
   const variantLabel = t('boq.resource_type_variant_chip', { defaultValue: 'Variant' });
   const label = isVariant ? variantLabel : baseLabel;
@@ -3479,13 +3479,13 @@ function ResourceTypePicker({
       {open && pos && createPortal(
         <div
           role="listbox"
-          className="fixed z-[2000] bg-surface-primary border border-border-light rounded-md
+          className="fixed z-popover bg-surface-primary border border-border-light rounded-md
                      shadow-lg py-1 min-w-[160px] max-h-[260px] overflow-auto"
           style={{ top: pos.top, left: pos.left }}
           onMouseDown={(e) => e.stopPropagation()}
         >
           {RESOURCE_TYPES.map((rt) => {
-            const b = RESOURCE_TYPE_BADGE[rt.value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+            const b = RESOURCE_TYPE_BADGE[rt.value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-surface-secondary text-content-secondary', label: '?' };
             const selected = rt.value === value;
             return (
               <button
@@ -3509,7 +3509,7 @@ function ResourceTypePicker({
                 <span className="text-content-primary uppercase tracking-wider font-medium">
                   {getResourceTypeLabel(rt.value, t)}
                 </span>
-                {selected && <Check size={11} strokeWidth={2.5} className="ml-auto text-oe-blue" />}
+                {selected && <Check size={12} strokeWidth={2.5} className="ml-auto text-oe-blue" />}
               </button>
             );
           })}
@@ -3660,7 +3660,7 @@ function ResourceCurrencyCombobox({
         <div
           id="oe-currency-popover"
           role="listbox"
-          className="fixed z-[2000] bg-surface-primary border border-border-light rounded-md
+          className="fixed z-popover bg-surface-primary border border-border-light rounded-md
                      shadow-lg w-[220px] max-h-[320px] flex flex-col"
           style={{ top: pos.top, left: pos.left }}
           onMouseDown={(e) => e.stopPropagation()}
@@ -3690,8 +3690,8 @@ function ResourceCurrencyCombobox({
                 type="button"
                 onClick={() => commit(q)}
                 className="mt-1.5 w-full h-6 rounded text-[10px] font-bold uppercase tracking-wide
-                           bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-900/50
-                           text-amber-800 dark:text-amber-200 border border-amber-400
+                           bg-semantic-warning-bg hover:bg-semantic-warning-bg
+                           text-semantic-warning border border-semantic-warning
                            flex items-center justify-center gap-1"
               >
                 <Plus size={10} />
@@ -3750,7 +3750,7 @@ function ResourceCurrencyCombobox({
           </div>
           <div className="overflow-auto flex-1 py-1">
             {matchProject.length > 0 && (
-              <div className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <div className="oe-overline px-2 py-1">
                 {t('boq.currency_group_project', { defaultValue: 'Project' })}
               </div>
             )}
@@ -3764,7 +3764,7 @@ function ResourceCurrencyCombobox({
               />
             ))}
             {matchOther.length > 0 && (
-              <div className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary border-t border-border-light/60">
+              <div className="oe-overline px-2 py-1 border-t border-border-light/60">
                 {t('boq.currency_group_world', { defaultValue: 'World currencies' })}
               </div>
             )}
@@ -3942,7 +3942,7 @@ function CurrencyOption({
       <span className={`font-mono uppercase tracking-wide ${custom ? 'text-semantic-warning font-semibold' : 'text-content-primary'}`}>
         {code}
       </span>
-      {selected && <Check size={11} strokeWidth={2.5} className="ml-auto text-oe-blue" />}
+      {selected && <Check size={12} strokeWidth={2.5} className="ml-auto text-oe-blue" />}
     </button>
   );
 }
@@ -4550,7 +4550,7 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
                           resourceVariant
                             ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
                             : resourceVariantDefault
-                            ? 'bg-semantic-warning-bg dark:bg-amber-900/40 text-semantic-warning dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                            ? 'bg-semantic-warning-bg text-semantic-warning hover:bg-semantic-warning-bg'
                             : 'bg-surface-tertiary/60 text-content-secondary hover:bg-surface-tertiary'
                         }`}
             title={variantPillTooltip}
@@ -4609,10 +4609,10 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
             }}
             className="inline-flex items-center justify-center h-3 px-1 rounded
                        text-[8px] font-bold uppercase cursor-pointer
-                       bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300
-                       hover:bg-amber-200 hover:text-amber-900
+                       bg-semantic-warning-bg text-semantic-warning
+                       hover:bg-semantic-warning-bg hover:text-semantic-warning
                        dark:hover:bg-amber-800/60 dark:hover:text-amber-100
-                       focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-500
+                       focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-semantic-warning
                        transition-colors"
             title={ctx.t('boq.resource_no_fx_rate_click', {
               defaultValue: 'No FX rate configured for {{code}} - click to set one in Project Settings',
@@ -4629,7 +4629,7 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
           <span
             className="inline-flex items-center justify-center h-3 px-1 rounded
                        text-[8px] font-bold uppercase
-                       bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                       bg-semantic-warning-bg text-semantic-warning"
             title={ctx.t('boq.resource_no_fx_rate', {
               defaultValue: 'No FX rate configured for {{code}} - total shown in {{code}}',
               code: resourceCurrency,
@@ -4746,7 +4746,7 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
             variantBarTone === 'blue'
               ? 'bg-oe-blue/70'
               : variantBarTone === 'amber'
-              ? 'bg-amber-400 dark:bg-amber-500'
+              ? 'bg-semantic-warning'
               : 'bg-gradient-to-b from-violet-500 to-purple-600'
           }`}
         />
@@ -5347,7 +5347,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
             ctx.onOpenCostDbForPosition?.(data._parentPositionId);
           }}
           className="flex items-center gap-1.5 h-5 px-2 rounded text-[10px] font-medium
-                     text-content-tertiary hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                     text-content-tertiary hover:text-semantic-success hover:bg-semantic-success-bg transition-all"
         >
           <Plus size={10} />
           {ctx.t('boq.add_from_database', { defaultValue: 'From Database' })}
@@ -5690,7 +5690,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
       >
         <span
           className="shrink-0 inline-flex items-center h-4 px-1 rounded text-[9px] font-semibold
-                     bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
+                     bg-semantic-error-bg text-semantic-error"
         >
           {t('boq.deduction_badge', { defaultValue: 'Deduction' })}
         </span>
@@ -5719,7 +5719,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
         >
           <span
             className="shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-bold
-                       bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300
+                       bg-semantic-warning-bg text-semantic-warning
                        font-mono uppercase tracking-wide"
             data-testid={`boq-position-currency-${data.id}`}
           >
@@ -5787,7 +5787,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
                       transition-colors cursor-pointer disabled:cursor-default ${
                         variant
                           ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
-                          : 'bg-semantic-warning-bg dark:bg-amber-900/40 text-semantic-warning dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                          : 'bg-semantic-warning-bg text-semantic-warning hover:bg-semantic-warning-bg'
                       }`}
           title={tooltip}
           aria-label={tooltip}
@@ -5804,7 +5804,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
       {isForeignCurrency && (
         <span
           className="shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-bold
-                     bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300
+                     bg-semantic-warning-bg text-semantic-warning
                      font-mono uppercase tracking-wide"
           title={t('boq.position_currency_tooltip', {
             defaultValue:
@@ -5977,7 +5977,7 @@ export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
           title={label}
           aria-label={label}
         >
-          <Cuboid size={13} />
+          <Cuboid size={14} />
         </button>
       </div>
     );
@@ -5989,12 +5989,12 @@ export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
         ref={btnRef}
         onClick={handleOpen}
         className="h-6 w-6 flex items-center justify-center rounded
-                   text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-50
+                   text-semantic-success hover:text-semantic-success hover:bg-semantic-success-bg
                    dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
         title={t('boq.pick_qty_from_bim', { defaultValue: 'Pick quantity from BIM' })}
         aria-label={t('boq.pick_qty_from_bim', { defaultValue: 'Pick quantity from BIM' })}
       >
-        <Ruler size={13} />
+        <Ruler size={14} />
       </button>
       {showPicker && bimModelId && anchorRect && (
         <BIMQuantityPicker

@@ -365,32 +365,32 @@ export function PopulatePreviewModal({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" data-testid="populate-preview-table">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table w-full" data-testid="populate-preview-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     <span className="sr-only">
                       {t('contracts.populate_include', { defaultValue: 'Include' })}
                     </span>
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('contracts.line', { defaultValue: 'Line' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {editable
                       ? t('contracts.populate_pct_to_date', { defaultValue: '% to date' })
                       : t('contracts.pct_complete', { defaultValue: '% complete' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('contracts.line_value', { defaultValue: 'Line value' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('contracts.populate_billed_before', { defaultValue: 'Billed before' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('contracts.period_value', { defaultValue: 'Period value' })}
                   </th>
-                  <th className="px-3 py-2 text-right">
+                  <th className="text-right">
                     {t('contracts.populate_to_date', { defaultValue: 'To date' })}
                   </th>
                 </tr>
@@ -506,7 +506,7 @@ function PreviewRow({
                   })}
                   className="rounded p-1 text-content-tertiary hover:text-content-primary"
                 >
-                  <RotateCcw size={13} aria-hidden />
+                  <RotateCcw size={14} aria-hidden />
                 </button>
               )}
             </div>

@@ -195,7 +195,7 @@ export default function SustainabilityModule() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* ── Left: EPD Material Database Browser ─────────────────────── */}
         <div className="xl:col-span-1 rounded-xl border border-border bg-surface-primary p-4">
-          <h2 className="text-sm font-semibold text-content-primary mb-3">
+          <h2 className="oe-card-title mb-3">
             {t('sustainability.material_database', { defaultValue: 'EPD Material Database' })}
           </h2>
 
@@ -207,7 +207,7 @@ export default function SustainabilityModule() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('common.search', { defaultValue: 'Search materials...' })}
-              className="w-full rounded-lg border border-border bg-surface-secondary py-2 ps-9 pe-8 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+              className="oe-input w-full ps-9 pe-8"
             />
             {search && (
               <button
@@ -224,7 +224,7 @@ export default function SustainabilityModule() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as EPDCategory | 'all')}
-            className="w-full mb-3 rounded-lg border border-border bg-surface-secondary py-1.5 px-3 text-sm text-content-primary"
+            className="oe-select w-full mb-3"
             aria-label={t('sustainability.filter_category', { defaultValue: 'Filter by category' })}
           >
             <option value="all">{t('common.all_categories', { defaultValue: 'All Categories' })}</option>
@@ -291,7 +291,7 @@ export default function SustainabilityModule() {
                 type="number"
                 value={gfa}
                 onChange={(e) => setGfa(Number(e.target.value) || 0)}
-                className="w-28 rounded-lg border border-border bg-surface-secondary px-3 py-1.5 text-sm text-content-primary"
+                className="oe-input w-28"
               />
             </label>
 
@@ -307,31 +307,31 @@ export default function SustainabilityModule() {
 
           {/* Positions table */}
           <div className="rounded-xl border border-border bg-surface-primary overflow-hidden">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary/50">
-                  <th className="px-3 py-2 text-left text-xs font-medium text-content-tertiary">
+                <tr>
+                  <th>
                     {t('common.description', { defaultValue: 'Description' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-content-tertiary">
+                  <th>
                     {t('sustainability.material', { defaultValue: 'Material' })}
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-content-tertiary">
+                  <th className="text-right">
                     {t('common.quantity', { defaultValue: 'Qty' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-content-tertiary">
+                  <th>
                     {t('common.unit')}
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-content-tertiary">
+                  <th className="text-right">
                     {t('sustainability.gwp_column', { defaultValue: 'GWP (kg CO2e)' })}
                   </th>
-                  <th className="px-3 py-2 w-8" />
+                  <th className="w-8" />
                 </tr>
               </thead>
               <tbody>
                 {carbonBreakdown.items.map((item) => (
-                  <tr key={item.id} className="border-b border-border/50 hover:bg-surface-secondary/30">
-                    <td className="px-3 py-2">
+                  <tr key={item.id}>
+                    <td>
                       <input
                         type="text"
                         value={item.description}
@@ -341,11 +341,11 @@ export default function SustainabilityModule() {
                         aria-label={t('common.description', { defaultValue: 'Description' })}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <select
                         value={item.materialId}
                         onChange={(e) => updatePosition(item.id, 'materialId', e.target.value)}
-                        className="w-full rounded border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
+                        className="oe-select-sm w-full"
                         aria-label={t('sustainability.material', { defaultValue: 'Material' })}
                       >
                         {EPD_CATEGORIES.map((cat) => (
@@ -359,7 +359,7 @@ export default function SustainabilityModule() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <input
                         type="number"
                         value={item.quantity}
@@ -368,11 +368,11 @@ export default function SustainabilityModule() {
                         aria-label={t('common.quantity', { defaultValue: 'Quantity' })}
                       />
                     </td>
-                    <td className="px-3 py-2 text-xs text-content-tertiary">{item.unit}</td>
+                    <td className="text-content-tertiary">{item.unit}</td>
                     <td className={`px-3 py-2 text-right font-mono text-xs ${item.gwp < 0 ? 'text-semantic-success' : 'text-content-primary'}`}>
                       {item.gwp < 0 ? '' : '+'}{item.gwp.toLocaleString(getNumberLocale(), { maximumFractionDigits: 0 })}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <button
                         onClick={() => removePosition(item.id)}
                         className="text-content-quaternary hover:text-semantic-error"
@@ -385,8 +385,8 @@ export default function SustainabilityModule() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-border bg-surface-secondary/30">
-                  <td colSpan={4} className="px-3 py-2 text-sm font-semibold text-content-primary">
+                <tr>
+                  <td colSpan={4} className="font-semibold">
                     {t('common.total', { defaultValue: 'Total' })}
                   </td>
                   <td className={`px-3 py-2 text-right font-mono text-sm font-semibold ${carbonBreakdown.totalGWP < 0 ? 'text-semantic-success' : 'text-content-primary'}`}>
@@ -436,7 +436,7 @@ export default function SustainabilityModule() {
           {/* Category breakdown chart */}
           {categoryTotals.length > 0 && (
             <div className="rounded-xl border border-border bg-surface-primary p-4">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
+              <h3 className="oe-card-title mb-3">
                 {t('sustainability.breakdown', { defaultValue: 'Carbon Breakdown by Category' })}
               </h3>
               <div className="space-y-2">

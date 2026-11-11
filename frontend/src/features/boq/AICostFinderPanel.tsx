@@ -170,7 +170,7 @@ export function AICostFinderPanel({
   const offTranslate = isRTL ? '-translate-x-full' : 'translate-x-full';
   return (
     <div
-      className={`fixed right-0 top-[52px] z-50 h-[calc(100%-52px)] w-[380px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-[52px] z-dropdown h-[calc(100%-52px)] w-[380px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : offTranslate
       }`}
     >
@@ -187,7 +187,7 @@ export function AICostFinderPanel({
           className="p-1.5 rounded-md hover:bg-semantic-error-bg text-content-tertiary hover:text-semantic-error transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
-          <X size={18} />
+          <X size={20} />
         </button>
       </div>
 
@@ -209,7 +209,7 @@ export function AICostFinderPanel({
             placeholder={t('boq.cost_finder_search_placeholder', {
               defaultValue: 'Search cost items by description...',
             })}
-            className="w-full ps-8 pe-3 py-2 text-sm border border-border-light rounded-md bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
+            className="oe-input w-full ps-8 pe-3 bg-surface"
           />
         </div>
 
@@ -218,7 +218,7 @@ export function AICostFinderPanel({
           <select
             value={unitFilter}
             onChange={(e) => setUnitFilter(e.target.value)}
-            className="flex-1 text-xs border border-border-light rounded px-2 py-1.5 bg-surface"
+            className="oe-select-sm flex-1 bg-surface"
           >
             <option value="">
               {t('boq.cost_finder_all_units', { defaultValue: 'All units' })}
@@ -232,7 +232,7 @@ export function AICostFinderPanel({
           <select
             value={regionFilter}
             onChange={(e) => setRegionFilter(e.target.value)}
-            className="flex-1 text-xs border border-border-light rounded px-2 py-1.5 bg-surface"
+            className="oe-select-sm flex-1 bg-surface"
           >
             <option value="">
               {t('boq.cost_finder_all_regions', { defaultValue: 'All regions' })}

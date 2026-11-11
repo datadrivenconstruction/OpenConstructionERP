@@ -54,7 +54,7 @@ export function ContractCodeRename({ contract }: { contract: ContractItem }) {
         title={t('contracts.rename_code', { defaultValue: 'Change the contract code' })}
         className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
       >
-        <PenLine size={13} />
+        <PenLine size={14} />
       </button>
     );
   }
@@ -69,7 +69,7 @@ export function ContractCodeRename({ contract }: { contract: ContractItem }) {
         autoFocus
         onChange={(e) => setCode(e.target.value)}
         aria-label={t('contracts.code', { defaultValue: 'Code' })}
-        className="w-36 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+        className="oe-input-sm w-36"
       />
       <Button
         size="sm"

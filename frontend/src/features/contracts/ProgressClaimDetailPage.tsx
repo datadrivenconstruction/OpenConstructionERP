@@ -276,7 +276,7 @@ export function ProgressClaimDetailPage() {
               className="text-content-tertiary hover:text-oe-blue"
               aria-label={t('common.back', { defaultValue: 'Back' })}
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={20} />
             </Link>
             <h1 className="text-2xl font-semibold text-content-primary">
               {t('contracts.claim_title', {
@@ -454,7 +454,7 @@ export function ProgressClaimDetailPage() {
 
       {/* Line items */}
       <Card padding="sm">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <p className="oe-overline mb-2">
           {t('contracts.claim_lines', { defaultValue: 'Claim lines' })}
           <span className="ml-2 normal-case text-content-tertiary">
             ({(linesQ.data ?? []).length})

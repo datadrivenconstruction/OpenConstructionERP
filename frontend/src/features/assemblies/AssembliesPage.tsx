@@ -422,7 +422,7 @@ export function AssembliesPage() {
               {t('common.export')}
             </Button>
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-44 overflow-hidden rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
+              <div className="absolute right-0 top-full mt-1 z-dropdown w-44 overflow-hidden rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
                 <button
                   onClick={async () => {
                     setShowExportMenu(false);
@@ -453,7 +453,7 @@ export function AssembliesPage() {
                   }}
                   className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
                 >
-                  <FileSpreadsheet size={15} className="text-content-tertiary" />
+                  <FileSpreadsheet size={16} className="text-content-tertiary" />
                   CSV (.csv)
                 </button>
                 <button
@@ -469,7 +469,7 @@ export function AssembliesPage() {
                   }}
                   className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
                 >
-                  <Download size={15} className="text-content-tertiary" />
+                  <Download size={16} className="text-content-tertiary" />
                   JSON (.json)
                 </button>
               </div>
@@ -682,7 +682,7 @@ export function AssembliesPage() {
                     }`}
                     title={t('assemblies.filter_by_tag', { defaultValue: 'Filter by tag' })}
                   >
-                    <Tag size={11} />
+                    <Tag size={12} />
                     {tag}
                     <span className={active ? 'text-white/80' : 'text-violet-400'}>({count})</span>
                   </button>
@@ -714,7 +714,7 @@ export function AssembliesPage() {
                 'Search by name or code...',
               )}
               aria-label={t('assemblies.search_placeholder', { defaultValue: 'Search by name or code...' })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-9 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+              className="oe-input-lg w-full ps-10 pe-9"
             />
             {query && (
               <button
@@ -735,7 +735,7 @@ export function AssembliesPage() {
               aria-label={t('a11y.assemblies.category_filter', {
                 defaultValue: 'Filter assemblies by category',
               })}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-44"
+              className="oe-select-lg w-full ps-3 sm:w-44"
             >
               {CATEGORY_VALUES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -758,7 +758,7 @@ export function AssembliesPage() {
               value={tagFilter}
               onChange={(e) => { setTagFilter(e.target.value); setOffset(0); }}
               placeholder={t('assemblies.filter_by_tag', { defaultValue: 'Filter by tag...' })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-40"
+              className="oe-input-lg w-full ps-9 pe-3 sm:w-40"
             />
           </div>
 
@@ -768,7 +768,7 @@ export function AssembliesPage() {
               {t('assemblies.sort_label', { defaultValue: 'Sort' })}
             </label>
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2.5 text-content-tertiary">
-              <ArrowUpDown size={13} />
+              <ArrowUpDown size={14} />
             </div>
             <select
               id="assemblies-sort"
@@ -793,7 +793,7 @@ export function AssembliesPage() {
               <option value="component_count:desc">{t('assemblies.sort_comp_hi', { defaultValue: 'Most components' })}</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2 text-content-tertiary">
-              <ChevronDown size={13} />
+              <ChevronDown size={14} />
             </div>
           </div>
 
@@ -846,16 +846,16 @@ export function AssembliesPage() {
             {t('common.clear', { defaultValue: 'Clear' })}
           </button>
           <span className="ml-auto flex flex-wrap items-center gap-1.5">
-            <Button variant="secondary" size="sm" icon={<Download size={13} />} onClick={handleBulkExport}>
+            <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleBulkExport}>
               {t('assemblies.bulk_export', { defaultValue: 'Export selected' })}
             </Button>
-            <Button variant="secondary" size="sm" icon={<Tag size={13} />} onClick={() => setShowBulkTag(true)}>
+            <Button variant="secondary" size="sm" icon={<Tag size={14} />} onClick={() => setShowBulkTag(true)}>
               {t('assemblies.bulk_tag', { defaultValue: 'Add tag' })}
             </Button>
             <Button
               variant="secondary"
               size="sm"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={() => setShowBulkConfirmDelete(true)}
               className="text-semantic-error border-semantic-error/30 hover:bg-semantic-error-bg"
             >
@@ -895,7 +895,7 @@ export function AssembliesPage() {
       ) : (
         <>
           {viewMode === 'grid' ? (
-            <div data-testid="assemblies-grid" className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div data-testid="assemblies-grid" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {items.map((assembly) => (
                 <AssemblyCard
                   key={assembly.id}
@@ -1178,8 +1178,8 @@ function AssemblyTable({
   return (
     <div data-testid="assemblies-table" className="overflow-hidden rounded-xl border border-border-light bg-surface-primary">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary border-b border-border-light">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
               <th className={`${headerCellBase} w-10`}>
                 <BulkCheckbox checked={allSelected} indeterminate={someSelected} onChange={onToggleAll} />
@@ -1198,7 +1198,7 @@ function AssemblyTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {items.map((a) => {
               const isSel = selected.has(a.id);
               return (
@@ -1210,47 +1210,47 @@ function AssemblyTable({
                   }`}
                   onClick={() => onOpen(a.id)}
                 >
-                  <td className="px-3 py-2 align-middle" onClick={(e) => e.stopPropagation()}>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <BulkCheckbox
                       checked={isSel}
                       indeterminate={false}
                       onChange={() => onToggleSelect(a.id)}
                     />
                   </td>
-                  <td className="px-3 py-2 align-middle">
+                  <td>
                     <span className="font-medium text-content-primary group-hover:text-oe-blue transition-colors">
                       {a.name}
                     </span>
                   </td>
-                  <td className="px-3 py-2 align-middle font-mono text-xs text-content-tertiary">{a.code}</td>
-                  <td className="px-3 py-2 align-middle">
+                  <td className="font-mono text-content-tertiary">{a.code}</td>
+                  <td>
                     {a.category ? (
                       <Badge variant={CATEGORY_COLORS[a.category] ?? 'neutral'} size="sm">{a.category}</Badge>
                     ) : (
                       <span className="text-content-quaternary">—</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 align-middle text-content-secondary uppercase text-xs">{a.unit}</td>
-                  <td className="px-3 py-2 align-middle text-right tabular-nums font-semibold text-content-primary">
+                  <td className="text-content-secondary">{a.unit}</td>
+                  <td className="text-right tabular-nums font-semibold">
                     {a.total_rate > 0 ? fmt(a.total_rate) : <span className="text-content-quaternary font-normal">—</span>}
                   </td>
-                  <td className="px-3 py-2 align-middle text-xs text-content-tertiary">
+                  <td className="text-content-tertiary">
                     {a.currency || (
                       <span title={t('projects.currency_not_set', { defaultValue: 'Currency not set' })}>—</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 align-middle text-right tabular-nums text-content-secondary">{a.component_count ?? 0}</td>
-                  <td className="px-3 py-2 align-middle text-right tabular-nums">
+                  <td className="text-right tabular-nums text-content-secondary">{a.component_count ?? 0}</td>
+                  <td className="text-right tabular-nums">
                     {(a.usage_count ?? 0) > 0 ? (
                       <span className="text-oe-blue font-medium">{a.usage_count}</span>
                     ) : (
                       <span className="text-content-quaternary">0</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 align-middle text-xs text-content-tertiary whitespace-nowrap">
+                  <td className="text-content-tertiary whitespace-nowrap">
                     {new Date(a.updated_at).toLocaleDateString(getIntlLocale())}
                   </td>
-                  <td className="px-3 py-2 align-middle text-right" onClick={(e) => e.stopPropagation()}>
+                  <td className="text-right" onClick={(e) => e.stopPropagation()}>
                     {confirmId === a.id ? (
                       <span className="inline-flex items-center gap-1">
                         <button
@@ -1333,7 +1333,7 @@ function BulkTagModal({
   const { t } = useTranslation();
   const [input, setInput] = useState('');
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}
@@ -1341,7 +1341,7 @@ function BulkTagModal({
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
           <div className="flex items-center gap-2">
             <Tag size={16} className="text-violet-500" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('assemblies.bulk_tag_title', { defaultValue: `Add tag to ${count} assemblies`, count })}
             </h2>
           </div>
@@ -1365,7 +1365,7 @@ function BulkTagModal({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t('assemblies.bulk_tag_placeholder', { defaultValue: 'e.g. reviewed, q2-2026' })}
-            className="w-full h-10 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input-lg w-full"
           />
         </div>
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-light">
@@ -1402,16 +1402,16 @@ function BulkDeleteConfirm({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onCancel}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onCancel}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg mb-3">
-            <Trash2 size={18} className="text-semantic-error" />
+            <Trash2 size={20} className="text-semantic-error" />
           </div>
-          <h2 className="text-sm font-semibold text-content-primary mb-1">
+          <h2 className="oe-card-title mb-1">
             {t('assemblies.bulk_delete_title', { defaultValue: `Delete ${count} assemblies?`, count })}
           </h2>
           <p className="text-xs text-content-tertiary">
@@ -1528,7 +1528,7 @@ function AIGenerateModal({
     : '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -1537,10 +1537,10 @@ function AIGenerateModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 text-violet-600 dark:from-violet-900/30 dark:to-blue-900/30">
-              <Sparkles size={18} />
+              <Sparkles size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('assemblies.ai_generate_title', { defaultValue: 'AI Assembly Generator' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -1560,7 +1560,7 @@ function AIGenerateModal({
         {/* Input form */}
         <div className="px-6 py-4 border-b border-border-light shrink-0 space-y-3">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('assemblies.ai_description_label', { defaultValue: 'Description' })}
             </label>
             <input
@@ -1568,7 +1568,7 @@ function AIGenerateModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('assemblies.ai_description_placeholder', { defaultValue: 'e.g. Reinforced concrete wall C30/37, 25cm thickness' })}
-              className="w-full h-10 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400"
+              className="oe-input-lg w-full"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && description.trim().length >= 3 && !generateMutation.isPending) {
@@ -1579,13 +1579,13 @@ function AIGenerateModal({
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-content-tertiary mb-1">
+              <label className="oe-label">
                 {t('assemblies.unit', { defaultValue: 'Unit' })}
               </label>
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full h-9 px-2.5 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-violet-500/30 appearance-none cursor-pointer"
+                className="oe-select w-full cursor-pointer"
               >
                 {UNIT_OPTIONS.map((u) => (
                   <option key={u} value={u}>{unitLabel(u, t)}</option>
@@ -1593,7 +1593,7 @@ function AIGenerateModal({
               </select>
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-medium text-content-tertiary mb-1">
+              <label className="oe-label">
                 {t('assemblies.region', { defaultValue: 'Region (optional)' })}
               </label>
               <input
@@ -1601,7 +1601,7 @@ function AIGenerateModal({
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder={t('assemblies.region_placeholder', { defaultValue: 'e.g. Berlin' })}
-                className="w-full h-9 px-2.5 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                className="oe-input w-full"
               />
             </div>
             <div className="flex items-end">
@@ -1647,7 +1647,7 @@ function AIGenerateModal({
               {/* Summary */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-content-primary">{result.name}</h3>
+                  <h3 className="oe-card-title">{result.name}</h3>
                   <p className="text-xs text-content-tertiary mt-0.5">
                     {result.source_items_count} {t('assemblies.items_found', { defaultValue: 'items found' })}
                     {' / '}
@@ -1674,18 +1674,18 @@ function AIGenerateModal({
               {/* Components table */}
               {result.components.length > 0 ? (
                 <div className="rounded-lg border border-border-light overflow-hidden">
-                  <table className="w-full text-xs">
+                  <table className="oe-table-compact w-full">
                     <thead>
-                      <tr className="border-b border-border-light bg-surface-tertiary">
-                        <th className="px-3 py-2 text-left font-medium text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
-                        <th className="px-3 py-2 text-center font-medium text-content-secondary w-16">{t('assemblies.type', { defaultValue: 'Type' })}</th>
-                        <th className="px-3 py-2 text-center font-medium text-content-secondary w-14">{t('boq.unit', { defaultValue: 'Unit' })}</th>
-                        <th className="px-3 py-2 text-right font-medium text-content-secondary w-14">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
-                        <th className="px-3 py-2 text-right font-medium text-content-secondary w-20">{t('assemblies.rate', { defaultValue: 'Rate' })}</th>
-                        <th className="px-3 py-2 text-right font-medium text-content-secondary w-20">{t('boq.total', { defaultValue: 'Total' })}</th>
+                      <tr className="bg-surface-tertiary">
+                        <th>{t('boq.description', { defaultValue: 'Description' })}</th>
+                        <th className="text-center w-16">{t('assemblies.type', { defaultValue: 'Type' })}</th>
+                        <th className="text-center w-14">{t('boq.unit', { defaultValue: 'Unit' })}</th>
+                        <th className="text-right w-14">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
+                        <th className="text-right w-20">{t('assemblies.rate', { defaultValue: 'Rate' })}</th>
+                        <th className="text-right w-20">{t('boq.total', { defaultValue: 'Total' })}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {result.components.map((comp, idx) => {
                         const typeBadge = comp.type === 'labor'
                           ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
@@ -1694,16 +1694,16 @@ function AIGenerateModal({
                             : 'bg-semantic-success-bg text-semantic-success';
                         return (
                           <tr key={`${comp.name}-${comp.type}-${idx}`} className="hover:bg-surface-secondary/50">
-                            <td className="px-3 py-2 text-content-primary truncate max-w-[250px]">{comp.name}</td>
-                            <td className="px-3 py-2 text-center">
+                            <td className="truncate max-w-[250px]">{comp.name}</td>
+                            <td className="text-center">
                               <span className={`inline-block px-1.5 py-0.5 rounded text-2xs font-medium ${typeBadge}`}>
                                 {comp.type}
                               </span>
                             </td>
-                            <td className="px-3 py-2 text-center text-content-secondary font-mono uppercase">{comp.unit}</td>
-                            <td className="px-3 py-2 text-right text-content-primary tabular-nums">{comp.quantity}</td>
-                            <td className="px-3 py-2 text-right text-content-primary tabular-nums">{fmt(comp.unit_rate)}</td>
-                            <td className="px-3 py-2 text-right font-semibold text-content-primary tabular-nums">{fmt(comp.total)}</td>
+                            <td className="text-center text-content-secondary font-mono">{comp.unit}</td>
+                            <td className="text-right tabular-nums">{comp.quantity}</td>
+                            <td className="text-right tabular-nums">{fmt(comp.unit_rate)}</td>
+                            <td className="text-right font-semibold tabular-nums">{fmt(comp.total)}</td>
                           </tr>
                         );
                       })}
@@ -1803,7 +1803,7 @@ function AssemblyCard({
         >
           <div className="text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg mx-auto mb-3">
-              <Trash2 size={18} className="text-semantic-error" />
+              <Trash2 size={20} className="text-semantic-error" />
             </div>
             <p className="text-sm font-semibold text-content-primary mb-1">{t('assemblies.delete_confirm', { defaultValue: 'Delete assembly?' })}</p>
             <p className="text-xs text-content-tertiary mb-4 max-w-[180px] mx-auto line-clamp-1">{assembly.name}</p>
@@ -1931,7 +1931,7 @@ function AssemblyCard({
         )}
 
         {/* Name */}
-        <h3 className="text-sm font-semibold text-content-primary leading-snug line-clamp-2 group-hover:text-oe-blue transition-colors">
+        <h3 className="oe-card-title line-clamp-2 group-hover:text-oe-blue transition-colors">
           {assembly.name}
         </h3>
 
@@ -2110,7 +2110,7 @@ function HoverComponentsPopover({
       </p>
       {isLoading ? (
         <div className="flex items-center gap-2 py-1 text-xs text-content-tertiary">
-          <Loader2 size={11} className="animate-spin" />
+          <Loader2 size={12} className="animate-spin" />
           {t('common.loading')}
         </div>
       ) : top.length === 0 ? (
@@ -2187,7 +2187,7 @@ function ImportAssemblyModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -2196,10 +2196,10 @@ function ImportAssemblyModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-              <Upload size={18} />
+              <Upload size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('assemblies.import_title', { defaultValue: 'Import Assembly' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -2231,7 +2231,7 @@ function ImportAssemblyModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('assemblies.or_paste_json', { defaultValue: 'Or paste JSON' })}
             </label>
             <textarea
@@ -2239,7 +2239,7 @@ function ImportAssemblyModal({
               onChange={(e) => { setJsonText(e.target.value); setError(''); }}
               rows={8}
               placeholder='{"code": "ASM-001", "name": "...", "unit": "m2", "components": [...]}'
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs font-mono text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue-light/50 focus:border-oe-blue-light resize-none"
+              className="oe-textarea w-full font-mono resize-none"
             />
           </div>
           {error && (
@@ -2259,7 +2259,7 @@ function ImportAssemblyModal({
             onClick={handleImport}
             disabled={!jsonText.trim()}
             loading={importing}
-            icon={<Upload size={15} />}
+            icon={<Upload size={16} />}
           >
             {t('assemblies.import_btn', { defaultValue: 'Import' })}
           </Button>

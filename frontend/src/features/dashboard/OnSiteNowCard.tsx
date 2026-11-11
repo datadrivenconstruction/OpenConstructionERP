@@ -41,7 +41,7 @@ export function OnSiteNowCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('field_clock.widget_open', { defaultValue: 'Open approvals' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

@@ -148,7 +148,7 @@ export function AssemblyLibraryPage() {
 
       {/* Search bar */}
       <div className="relative">
-        <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-content-quaternary" />
         <input
           type="search"
           value={search}
@@ -157,7 +157,7 @@ export function AssemblyLibraryPage() {
             'assemblies.library.search_placeholder',
             'Search by name, tag, or translation…'
           )}
-          className="w-full rounded-lg border border-border bg-surface-primary py-2.5 ps-10 pe-10 text-sm text-content-primary placeholder:text-zinc-400 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-input-lg w-full ps-10 pe-10"
         />
         {search && (
           <button
@@ -182,7 +182,7 @@ export function AssemblyLibraryPage() {
               'rounded-full border px-3 py-1 text-sm transition-colors ' +
               (category === c.value
                 ? 'border-oe-blue bg-oe-blue text-white'
-                : 'border-border bg-surface-primary text-content-secondary hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600')
+                : 'border-border bg-surface-primary text-content-secondary hover:border-border')
             }
           >
             {t(c.key, c.value || 'All')}
@@ -255,7 +255,7 @@ function TemplateCard({
     >
       <div className="flex h-full flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title line-clamp-2">
             {localisedName}
           </h3>
           <Badge variant={badgeColor}>{categoryLabel(template.category, t)}</Badge>
@@ -533,7 +533,7 @@ function TemplateDrawer({
   const currencyBuckets = result?.totals_by_currency ?? [];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
+    <div className="fixed inset-0 z-modal flex justify-end bg-black/40">
       <div
         className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface-primary shadow-xl"
         role="dialog"
@@ -543,7 +543,7 @@ function TemplateDrawer({
           <div>
             <h2
               id="template-drawer-title"
-              className="text-lg font-semibold text-content-primary"
+              className="oe-section-title"
             >
               {localisedName}
             </h2>
@@ -570,14 +570,14 @@ function TemplateDrawer({
           {/* Translations */}
           {Object.keys(template.name_translations || {}).length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-2">
                 <Globe className="mr-1 inline h-3.5 w-3.5" />
                 {t('assemblies.library.translations', 'Translations')}
               </h3>
               <ul className="space-y-1 text-sm">
                 {Object.entries(template.name_translations).map(([k, v]) => (
                   <li key={k} className="flex gap-2">
-                    <span className="w-8 font-mono text-zinc-400">{k}</span>
+                    <span className="w-8 font-mono text-content-quaternary">{k}</span>
                     <span className="text-content-secondary">{v}</span>
                   </li>
                 ))}
@@ -590,7 +590,7 @@ function TemplateDrawer({
             template.classification?.masterformat ||
             template.classification?.nrm) && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-2">
                 {t('assemblies.library.classification', 'Classification')}
               </h3>
               <div className="flex gap-2">
@@ -613,7 +613,7 @@ function TemplateDrawer({
 
           {/* Components */}
           <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <h3 className="oe-overline mb-2">
               {t('assemblies.library.components', 'Components')}
             </h3>
             <ul className="divide-y divide-border-light rounded-md border border-border-light">
@@ -621,7 +621,7 @@ function TemplateDrawer({
                 <li key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
                   <div>
                     <div className="text-content-primary">{c.description}</div>
-                    <div className="text-xs text-zinc-500">{roleLabel(c.role, t)}</div>
+                    <div className="text-xs text-content-tertiary">{roleLabel(c.role, t)}</div>
                   </div>
                   <div className="text-right font-mono text-xs text-content-secondary">
                     {c.factor} {unitGlyph(c.unit)}
@@ -634,7 +634,7 @@ function TemplateDrawer({
           {/* Tags */}
           {template.tags.length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-2">
                 {t('assemblies.library.tags', 'Tags')}
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -649,7 +649,7 @@ function TemplateDrawer({
 
           {/* Apply form */}
           <section className="rounded-md border border-border-light bg-surface-secondary p-4">
-            <h3 className="mb-1 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-1">
               {t('assemblies.library.preview_heading', 'Preview against a project')}
             </h3>
             <p className="mb-3 text-xs text-content-tertiary">
@@ -666,7 +666,7 @@ function TemplateDrawer({
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-select w-full"
                 >
                   <option value="">
                     {t('assemblies.library.pick_project', '- pick a project -')}
@@ -688,7 +688,7 @@ function TemplateDrawer({
                   step="any"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full"
                 />
               </label>
               <Button
@@ -709,7 +709,7 @@ function TemplateDrawer({
           {/* Result */}
           {result && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-2">
                 {t('assemblies.library.preview', 'Preview')}
               </h3>
               {result.warnings.length > 0 && (
@@ -722,29 +722,29 @@ function TemplateDrawer({
                   </div>
                 </div>
               )}
-              <table className="w-full text-xs">
-                <thead className="text-left text-zinc-500">
+              <table className="oe-table-compact w-full">
+                <thead className="text-left text-content-tertiary">
                   <tr>
-                    <th className="py-1 pr-2">
+                    <th className="pr-2">
                       {t('assemblies.library.component', 'Component')}
                     </th>
-                    <th className="py-1 pr-2 text-right">
+                    <th className="pr-2 text-right">
                       {t('assemblies.library.qty', 'Qty')}
                     </th>
-                    <th className="py-1 pr-2 text-right">
+                    <th className="pr-2 text-right">
                       {t('assemblies.library.rate', 'Rate')}
                     </th>
-                    <th className="py-1 text-right">
+                    <th className="text-right">
                       {t('assemblies.library.total', 'Total')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {result.components.map((c, i) => {
                     const matched = Boolean(c.matched_cost_item_id);
                     return (
-                      <tr key={i} className={matched ? '' : 'bg-zinc-50/60 dark:bg-zinc-800/30'}>
-                        <td className="py-1.5 pr-2">
+                      <tr key={i} className={matched ? '' : 'bg-surface-secondary/60'}>
+                        <td className="pr-2">
                           <div className="flex items-center gap-1.5 text-content-primary">
                             {c.description}
                             {!matched && (
@@ -754,23 +754,23 @@ function TemplateDrawer({
                             )}
                           </div>
                           {c.matched_code && (
-                            <div className="font-mono text-2xs text-zinc-500">
+                            <div className="font-mono text-2xs text-content-tertiary">
                               {c.matched_code}
                             </div>
                           )}
                         </td>
-                        <td className="py-1.5 pr-2 text-right font-mono">
+                        <td className="pr-2 text-right font-mono">
                           {(() => {
                             const d = q.convert(c.scaled_quantity, c.unit || '');
                             return `${fmtFixed(d.value, 2)} ${c.unit ? d.unit : ''}`.trim();
                           })()}
                         </td>
-                        <td className="py-1.5 pr-2 text-right font-mono">
+                        <td className="pr-2 text-right font-mono">
                           {matched
                             ? `${fmtFixed(q.convertRate(Number(c.unit_rate), c.unit || ''), currencyFractionDigits(rowCurrency(c)))} ${rowCurrency(c)}`.trim()
                             : '—'}
                         </td>
-                        <td className="py-1.5 text-right font-mono">
+                        <td className="text-right font-mono">
                           {matched
                             ? `${fmtFixed(c.total, currencyFractionDigits(rowCurrency(c)))} ${rowCurrency(c)}`.trim()
                             : '—'}

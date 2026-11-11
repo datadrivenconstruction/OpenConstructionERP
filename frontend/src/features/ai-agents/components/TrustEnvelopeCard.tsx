@@ -92,7 +92,7 @@ function SourceRow({ source }: { source: TrustSource }): JSX.Element {
   return (
     <li className="flex items-center gap-2 rounded-md bg-surface-secondary/50 px-2.5 py-1.5 text-xs">
       <Icon className="h-3.5 w-3.5 shrink-0 text-content-tertiary" aria-hidden="true" />
-      <span className="shrink-0 rounded bg-surface-elevated px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+      <span className="oe-overline shrink-0 rounded bg-surface-elevated px-1.5 py-0.5">
         {source.kind || 'ref'}
       </span>
       <code className="min-w-0 flex-1 truncate font-mono text-content-secondary" title={source.ref}>
@@ -210,7 +210,7 @@ export function TrustEnvelopeCard({ run }: { run: AgentRun }): JSX.Element | nul
       {/* Cited sources (real ids / paths the user can open) */}
       {sources.length > 0 && (
         <div>
-          <div className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <div className="oe-overline flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" aria-hidden="true" />
             {t('agents.trust.sources', { defaultValue: 'Sources cited' })}
           </div>
@@ -278,7 +278,7 @@ export function TrustEnvelopeCard({ run }: { run: AgentRun }): JSX.Element | nul
         )}
 
         {showControls && (
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <p className="text-xs font-medium text-content-primary">
               {t('agents.trust.verdict_prompt', { defaultValue: 'Did this answer turn out correct?' })}
             </p>

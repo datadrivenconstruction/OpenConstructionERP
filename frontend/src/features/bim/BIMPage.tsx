@@ -195,8 +195,8 @@ const RAW_GEOMETRY_EXTENSIONS = new Set<string>(RAW_GEOMETRY_FORMATS);
  *  import it never performed. */
 const TIER_BADGE_CLASS: Record<UploadTier, string> = {
   bim: 'bg-oe-blue/10 text-oe-blue border-oe-blue/20',
-  mesh: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-  handoff: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+  mesh: 'bg-semantic-success/10 text-semantic-success border-semantic-success/20',
+  handoff: 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/20',
 };
 
 function getFileExtension(filename: string): string {
@@ -362,12 +362,12 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
   const isError = model.status === 'error' || model.status === 'needs_converter';
   const isProcessing = model.status === 'processing';
 
-  let statusDot = 'bg-gray-400';
-  if (model.status === 'ready') statusDot = 'bg-emerald-500';
-  else if (model.status === 'degraded') statusDot = 'bg-amber-500';
-  else if (model.status === 'empty_model') statusDot = 'bg-amber-500';
-  else if (isProcessing) statusDot = 'bg-amber-400 animate-pulse';
-  else if (isError) statusDot = 'bg-red-400';
+  let statusDot = 'bg-content-quaternary';
+  if (model.status === 'ready') statusDot = 'bg-semantic-success';
+  else if (model.status === 'degraded') statusDot = 'bg-semantic-warning';
+  else if (model.status === 'empty_model') statusDot = 'bg-semantic-warning';
+  else if (isProcessing) statusDot = 'bg-semantic-warning animate-pulse';
+  else if (isError) statusDot = 'bg-semantic-error';
 
   let statusLabel: string = model.status;
   if (model.status === 'ready') {
@@ -413,18 +413,18 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onDelete?.(); } }}
           aria-label={t('bim.delete_model', { defaultValue: 'Delete model' })}
-          className="absolute top-2.5 end-2 p-1 rounded-md text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
+          className="absolute top-2.5 end-2 p-1 rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
         >
-          <Trash2 size={11} />
+          <Trash2 size={12} />
         </button>
       )}
 
       <div className="p-3 space-y-2">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
             isActive ? 'bg-oe-blue/10' : 'bg-surface-secondary'
           }`}>
-            <Cuboid size={15} className={isActive ? 'text-oe-blue' : 'text-content-tertiary'} />
+            <Cuboid size={16} className={isActive ? 'text-oe-blue' : 'text-content-tertiary'} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold text-content-primary truncate">{model.name}</p>
@@ -507,7 +507,7 @@ function ConverterVersionBadge({
       title={tooltip}
       data-testid="ddc-converter-version-badge"
     >
-      <span className="inline-block w-1 h-1 rounded-full bg-emerald-400" />
+      <span className="inline-block w-1 h-1 rounded-full bg-semantic-success" />
       <span>
         {t('bim.converter_version_label', {
           defaultValue: 'DDC v{{version}}',
@@ -900,15 +900,15 @@ function UploadPanel({
 
   return (
     <>
-    <div className="absolute top-0 end-0 h-full w-[380px] bg-surface-primary/95 backdrop-blur-sm border-s border-border-light shadow-lg z-30 flex flex-col">
+    <div className="absolute top-0 end-0 h-full w-[380px] bg-surface-primary/95 backdrop-blur-sm border-s border-border-light shadow-lg z-drawer flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-oe-blue/10 flex items-center justify-center">
             <Upload size={16} className="text-oe-blue" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">{t('bim.upload_panel_title')}</h2>
+            <h2 className="oe-card-title">{t('bim.upload_panel_title')}</h2>
             <p className="text-2xs text-content-quaternary">{t('bim.upload_panel_subtitle')}</p>
           </div>
         </div>
@@ -969,7 +969,7 @@ function UploadPanel({
                 <div className="w-10 h-10 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={20} className="text-oe-blue" /></div>
                 <p className="text-sm font-medium text-content-primary">{file.name}</p>
                 <p className="text-2xs text-content-quaternary">{formatFileSize(file.size)}</p>
-                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-2xs text-content-tertiary hover:text-red-500 underline">{t('bim.upload_remove_file')}</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-2xs text-content-tertiary hover:text-semantic-error underline">{t('bim.upload_remove_file')}</button>
               </>
             ) : (
               <>
@@ -1084,11 +1084,11 @@ function UploadPanel({
 
         <div>
           <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_model_name_label')}</label>
-          <input type="text" className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder={t('bim.upload_model_name_placeholder')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
+          <input type="text" className="oe-input w-full" placeholder={t('bim.upload_model_name_placeholder')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
         </div>
         <div>
           <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_discipline_label')}</label>
-          <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
+          <select className="oe-select w-full" value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
             {disciplines.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
           </select>
         </div>
@@ -1098,7 +1098,7 @@ function UploadPanel({
             <select
               id="bim-upload-version-of"
               data-testid="bim-upload-version-of"
-              className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-select w-full"
               value={parentModelId}
               onChange={(e) => {
                 const next = e.target.value;
@@ -1124,7 +1124,7 @@ function UploadPanel({
           <>
             <div>
               <label className="block text-2xs font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
-              <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
+              <select className="oe-select w-full" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
                 <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
                 <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
                 <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
@@ -1165,9 +1165,9 @@ function UploadPanel({
           </div>
         )}
         {uploadError && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
-            <AlertCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-            <p className="text-2xs text-red-700 dark:text-red-300">{uploadError}</p>
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-semantic-error-bg border border-semantic-error/30">
+            <AlertCircle size={14} className="text-semantic-error mt-0.5 shrink-0" />
+            <p className="text-2xs text-semantic-error">{uploadError}</p>
           </div>
         )}
         <button type="button" onClick={() => { setAdvancedMode((p) => !p); setFile(null); setDataFile(null); setGeometryFile(null); }} className="flex items-center gap-1.5 text-2xs text-content-tertiary hover:text-content-secondary transition-colors">
@@ -1245,7 +1245,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
           <div className="mx-auto w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 flex items-center justify-center mb-5">
             <Loader2 size={32} className="text-blue-500 animate-spin" />
           </div>
-          <h2 className="text-lg font-semibold text-content-primary mb-2">
+          <h2 className="oe-section-title mb-2">
             {t('bim.overlay_loading_model_title', { defaultValue: 'Loading model…' })}
           </h2>
           <p className="text-sm text-content-secondary">
@@ -1297,14 +1297,14 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     desc: t('bim.overlay_processing_desc', { format: fmt }),
   };
   const needsConverterConfig = {
-    icon: <AlertTriangle size={32} className="text-amber-500" />,
-    bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
+    icon: <AlertTriangle size={32} className="text-semantic-warning" />,
+    bg: 'bg-semantic-warning-bg border-semantic-warning/30',
     title: t('bim.overlay_needs_converter_title'),
     desc: t('bim.overlay_needs_converter_desc', { format: fmt }),
   };
   const errorConfig = {
-    icon: <AlertCircle size={32} className="text-red-500" />,
-    bg: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800',
+    icon: <AlertCircle size={32} className="text-semantic-error" />,
+    bg: 'bg-semantic-error-bg border-semantic-error/30',
     title: t('bim.overlay_error_title'),
     desc: t('bim.overlay_error_desc'),
   };
@@ -1313,8 +1313,8 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
   // calm, informational state - amber, not red - so the user understands the
   // file simply has nothing to convert rather than thinking it broke (#197).
   const emptyModelConfig = {
-    icon: <AlertTriangle size={32} className="text-amber-500" />,
-    bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
+    icon: <AlertTriangle size={32} className="text-semantic-warning" />,
+    bg: 'bg-semantic-warning-bg border-semantic-warning/30',
     title: t('bim.overlay_empty_model_title', { defaultValue: 'No model elements found' }),
     desc: t('bim.overlay_empty_model_desc', {
       defaultValue:
@@ -1487,7 +1487,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role={isProcessing ? 'status' : 'alert'}>
       <div className="text-center max-w-md px-6 w-full">
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
-        <h2 className="text-lg font-semibold text-content-primary mb-2">{headlineTitle}</h2>
+        <h2 className="oe-section-title mb-2">{headlineTitle}</h2>
         <p className="text-sm text-content-secondary mb-2 whitespace-pre-line">{description}</p>
         {technicalDetails && (
           <div className="mb-3 mx-auto max-w-sm">
@@ -1538,9 +1538,9 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
                 onClick={handleInstall}
                 disabled={isInstalling}
                 aria-label={installButtonLabel}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-semantic-warning text-white text-sm font-semibold hover:bg-semantic-warning transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isInstalling ? <Loader2 size={15} className="animate-spin" /> : <DownloadCloud size={15} />}
+                {isInstalling ? <Loader2 size={16} className="animate-spin" /> : <DownloadCloud size={16} />}
                 {installButtonLabel}
               </button>
             )}
@@ -1551,17 +1551,17 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
                 aria-label={t('bim.overlay_retry_btn', { defaultValue: 'Retry conversion' })}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isRetrying ? <Loader2 size={15} className="animate-spin" /> : <RotateCcw size={15} />}
+                {isRetrying ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}
                 {isRetrying
                   ? t('bim.overlay_retry_in_progress', { defaultValue: 'Retrying…' })
                   : t('bim.overlay_retry_btn', { defaultValue: 'Retry conversion' })}
               </button>
             )}
             <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-surface-secondary transition-colors">
-              <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
+              <UploadCloud size={16} /> {t('bim.overlay_upload_converted_btn')}
             </button>
-            <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-              <Trash2 size={15} /> {t('bim.overlay_delete_btn')}
+            <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-semantic-error-bg hover:text-semantic-error hover:border-semantic-error/30 transition-colors">
+              <Trash2 size={16} /> {t('bim.overlay_delete_btn')}
             </button>
           </div>
         )}
@@ -1671,7 +1671,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
   const features = [
     { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: t('bim.landing_feat_3d_title'), desc: t('bim.landing_feat_3d_desc') },
-    { icon: Layers, color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800', ic: 'text-emerald-500', title: t('bim.landing_feat_extract_title'), desc: t('bim.landing_feat_extract_desc') },
+    { icon: Layers, color: 'bg-semantic-success-bg border-semantic-success/30', ic: 'text-semantic-success', title: t('bim.landing_feat_extract_title'), desc: t('bim.landing_feat_extract_desc') },
     { icon: Link2, color: 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-800', ic: 'text-violet-500', title: t('bim.landing_feat_boq_title'), desc: t('bim.landing_feat_boq_desc') },
     { icon: Ruler, color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800', ic: 'text-orange-500', title: t('bim.landing_feat_qty_title'), desc: t('bim.landing_feat_qty_desc') },
     { icon: Building2, color: 'bg-pink-50 dark:bg-pink-950/20 border-pink-100 dark:border-pink-800', ic: 'text-pink-500', title: t('bim.landing_feat_compare_title'), desc: t('bim.landing_feat_compare_desc') },
@@ -1695,7 +1695,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             inside its own inner area instead. */}
         <svg
           aria-hidden
-          className="pointer-events-none absolute inset-0 w-full h-full z-0 text-slate-500 dark:text-slate-300"
+          className="pointer-events-none absolute inset-0 w-full h-full z-0 text-content-tertiary"
           preserveAspectRatio="xMidYMid slice"
         >
           <defs>
@@ -1843,7 +1843,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 </label>
                 {file && (
                   <div className="mt-4 space-y-3">
-                    <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
+                    <input type="text" className="oe-input-lg w-full" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
                     {/* RVT-only options - RVT category extraction depth
                         and sheet-to-PDF export don't apply to IFC uploads. */}
                     {getFileExtension(file.name) === '.rvt' && (
@@ -1853,7 +1853,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                             {t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}
                           </label>
                           <select
-                            className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                            className="oe-select-lg w-full"
                             value={conversionDepth}
                             onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}
                           >
@@ -1888,7 +1888,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <ConverterReleaseNotice format={file?.name.split('.').pop()?.toUpperCase()} />
                     <AutoInstallConverterNotice state={autoInstall} />
                     {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
-                    {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+                    {uploadError && <p className="text-xs text-semantic-error">{uploadError}</p>}
                     <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">
                       {uploading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                       {uploading ? t('bim.landing_processing') : t('bim.landing_upload_process')}
@@ -1941,17 +1941,17 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   {t('bim.landing_formats_detailed', { defaultValue: 'RVT and IFC models, 3D mesh formats, and element data as CSV or Excel. DWG and DXF drawings are routed to DWG Takeoff.' })}
                 </p>
                 <div className="mt-4 flex items-center justify-start">
-                  <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
-                    <span className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium">
+                  <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-semantic-success/10 border border-semantic-success/20">
+                    <ShieldCheck size={14} className="text-semantic-success shrink-0" />
+                    <span className="text-xs text-semantic-success font-medium">
                       {t('common.local_processing', { defaultValue: '100% Local Processing \u00B7 Your files never leave your computer' })}
                     </span>
-                    <span className="text-2xs text-emerald-500/40">|</span>
+                    <span className="text-2xs text-semantic-success">|</span>
                     <a
                       href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-2xs text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
+                      className="text-2xs text-semantic-success hover:text-semantic-success hover:underline whitespace-nowrap"
                     >
                       {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                     </a>
@@ -1963,7 +1963,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
           {/* Row 2: Feature cards - 3x2 grid */}
           <div>
-            <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-widest mb-3">
+            <h2 className="oe-overline mb-3">
               {t('bim.landing_what_you_get', { defaultValue: 'What you get' })}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1971,7 +1971,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
                   <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
                   <div className="min-w-0">
-                    <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                    <h3 className="oe-card-title">{f.title}</h3>
                     <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
                   </div>
                 </div>
@@ -1990,12 +1990,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   const isReady = m.status === 'ready';
 
                   const statusColor = isReady
-                    ? 'bg-emerald-500'
+                    ? 'bg-semantic-success'
                     : isProcessing
-                      ? 'bg-amber-400 animate-pulse'
+                      ? 'bg-semantic-warning animate-pulse'
                       : isError
-                        ? 'bg-red-400'
-                        : 'bg-gray-400';
+                        ? 'bg-semantic-error'
+                        : 'bg-content-quaternary';
 
                   const statusLabel = isReady
                     ? t('bim.status_ready', { defaultValue: 'Ready' })
@@ -2008,11 +2008,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           : m.status;
 
                   const statusTextColor = isReady
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-semantic-success'
                     : isProcessing
-                      ? 'text-amber-600 dark:text-amber-400'
+                      ? 'text-semantic-warning'
                       : isError
-                        ? 'text-red-600 dark:text-red-400'
+                        ? 'text-semantic-error'
                         : 'text-content-tertiary';
 
                   const borderAccent = isReady
@@ -2047,16 +2047,16 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           onClick={(e) => { e.stopPropagation(); onDeleteModel(m.id, m.name); }}
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onDeleteModel(m.id, m.name); } }}
                           aria-label={t('bim.delete_model', { defaultValue: 'Delete model' })}
-                          className="absolute top-3 end-3 p-1.5 rounded-lg text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
+                          className="absolute top-3 end-3 p-1.5 rounded-lg text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       )}
 
                       {/* Card content */}
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:to-blue-950/20 border border-oe-blue/15 flex items-center justify-center shrink-0">
-                          <Cuboid size={18} className="text-oe-blue" />
+                          <Cuboid size={20} className="text-oe-blue" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-content-primary truncate pe-6" title={m.name}>{m.name}</p>
@@ -2082,12 +2082,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           ) : (
                             <>
                               <span className="flex items-center gap-1">
-                                <Layers size={11} className="text-content-quaternary" />
+                                <Layers size={12} className="text-content-quaternary" />
                                 {t('bim.element_count', { defaultValue: '{{count}} elements', count: m.element_count ?? 0 })}
                               </span>
                               {(m.storey_count ?? 0) > 0 && (
                                 <span className="flex items-center gap-1">
-                                  <Building2 size={11} className="text-content-quaternary" />
+                                  <Building2 size={12} className="text-content-quaternary" />
                                   {t('bim.storey_count', { defaultValue: '{{count}} levels', count: m.storey_count })}
                                 </span>
                               )}
@@ -2126,7 +2126,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             </span>
             <span className="text-2xs text-content-quaternary ml-1.5">({(landingModels ?? []).length})</span>
           </div>
-          <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
+          <div className="flex items-center gap-2 px-4 pb-2.5 overflow-x-auto">
             {(!landingModels || landingModels.length === 0) && (
               <span className="text-2xs text-content-quaternary italic py-1">
                 {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
@@ -2140,11 +2140,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
               const isEmptyModel = status === 'empty_model';
               const isProcessing = status === 'processing';
               const isError = status === 'error' || status === 'needs_converter';
-              let statusDot = 'bg-gray-400';
-              if (isReady) statusDot = 'bg-emerald-500';
-              else if (isDegraded || isEmptyModel) statusDot = 'bg-amber-500';
-              else if (isProcessing) statusDot = 'bg-amber-400 animate-pulse';
-              else if (isError) statusDot = 'bg-red-400';
+              let statusDot = 'bg-content-quaternary';
+              if (isReady) statusDot = 'bg-semantic-success';
+              else if (isDegraded || isEmptyModel) statusDot = 'bg-semantic-warning';
+              else if (isProcessing) statusDot = 'bg-semantic-warning animate-pulse';
+              else if (isError) statusDot = 'bg-semantic-error';
 
               let statusText: string = m.status;
               if (isReady) statusText = t('bim.status_ready', { defaultValue: 'Ready' });
@@ -2165,9 +2165,9 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       aria-label={t('bim.delete_model', { defaultValue: 'Delete model' })}
                       onClick={(e) => { e.stopPropagation(); onDeleteModel(m.id, m.name); }}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onDeleteModel(m.id, m.name); } }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all z-10"
+                      className="absolute top-1.5 right-1.5 p-1 rounded text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all z-10"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={12} />
                     </span>
                   )}
                   <div className="px-3 py-2.5">
@@ -3632,9 +3632,9 @@ export function BIMPage() {
       {/* ── Header ── */}
       <div className="relative z-20 px-3 py-2.5 flex items-center justify-between border-b border-border-light bg-surface-primary">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:to-blue-950/20 border border-oe-blue/15 flex items-center justify-center">
-              <Cuboid size={18} className="text-oe-blue" />
+              <Cuboid size={20} className="text-oe-blue" />
             </div>
             <div>
               <h1 className="text-sm font-semibold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
@@ -3704,7 +3704,7 @@ export function BIMPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
             data-testid="bim-add-model-top"
           >
-            <Plus size={13} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
+            <Plus size={14} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
           </button>
           <ModuleHelpButton tourId="bim" />
           <ModuleGuideButton
@@ -3735,7 +3735,7 @@ export function BIMPage() {
                 data-testid="bim-rules-link-top"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
+                <SlidersHorizontal size={14} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
             </span>
           )}
@@ -3753,7 +3753,7 @@ export function BIMPage() {
                 aria-pressed={filterPanelOpen}
                 data-testid="bim-tour-filter-button"
               >
-                <Filter size={13} />
+                <Filter size={14} />
                 {t('bim.filter_button', { defaultValue: 'Filter' })}
                 {visibleElementCount !== null && visibleElementCount < elements.length && (
                   <span className="text-2xs bg-oe-blue text-white rounded-full px-1.5 py-0 tabular-nums">
@@ -3778,7 +3778,7 @@ export function BIMPage() {
                 aria-pressed={summaryPanelOpen}
                 data-guide="bim-summary-button"
               >
-                <LayoutGrid size={13} />
+                <LayoutGrid size={14} />
                 {t('bim.summary_button', { defaultValue: 'Summary' })}
               </button>
 
@@ -3802,7 +3802,7 @@ export function BIMPage() {
                 aria-pressed={propertySearchOpen}
                 data-testid="bim-property-search-toggle"
               >
-                <Search size={13} />
+                <Search size={14} />
                 <span className="hidden min-[1900px]:inline">
                   {t('bim.property_search_button', { defaultValue: 'Property search' })}
                 </span>
@@ -3825,7 +3825,7 @@ export function BIMPage() {
                   aria-pressed={snapshotsOpen}
                   data-testid="bim-snapshots-toggle"
                 >
-                  <Layers size={13} />
+                  <Layers size={14} />
                   <span className="hidden 2xl:inline">{t('bim.snapshots_button', { defaultValue: 'Snapshots' })}</span>
                 </button>
               )}
@@ -3846,7 +3846,7 @@ export function BIMPage() {
                   aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   data-testid="bim-view-on-map"
                 >
-                  <Globe2 size={13} />
+                  <Globe2 size={14} />
                   <span className="hidden min-[1900px]:inline">
                     {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   </span>
@@ -3871,7 +3871,7 @@ export function BIMPage() {
                   })}
                   data-testid="bim-open-in-data-explorer"
                 >
-                  <Database size={13} />
+                  <Database size={14} />
                   <span className="hidden min-[1900px]:inline">
                     {t('bim.open_in_data_explorer', {
                       defaultValue: 'Open in Data Explorer',
@@ -3907,7 +3907,7 @@ export function BIMPage() {
                 })}
                 aria-pressed={dimensionsVisible}
               >
-                <Maximize2 size={13} />
+                <Maximize2 size={14} />
                 <span className="hidden min-[1900px]:inline">
                   {t('bim.dimensions_button', { defaultValue: 'BBox Dimensions' })}
                 </span>
@@ -3935,7 +3935,7 @@ export function BIMPage() {
                 aria-pressed={assetCardEnabled}
                 data-testid="bim-asset-card-toggle"
               >
-                <Package size={13} />
+                <Package size={14} />
                 <span className="hidden 2xl:inline">{t('bim.asset_card_button', { defaultValue: 'Asset Card' })}</span>
               </button>
 
@@ -3951,7 +3951,7 @@ export function BIMPage() {
                 aria-pressed={boqPanelOpen}
                 data-testid="bim-tour-linked-boq-button"
               >
-                <ClipboardList size={13} />
+                <ClipboardList size={14} />
                 <span className="hidden 2xl:inline">{t('bim.linked_boq_button', { defaultValue: 'Linked BOQ' })}</span>
               </button>
 
@@ -3971,7 +3971,7 @@ export function BIMPage() {
                 aria-pressed={diffPanelOpen}
                 data-testid="bim-diff-toggle"
               >
-                <GitCompare size={13} />
+                <GitCompare size={14} />
                 {t('bim.diff_button', { defaultValue: 'Compare' })}
               </button>
 
@@ -3987,7 +3987,7 @@ export function BIMPage() {
                 aria-pressed={smartViewsPanelOpen}
                 data-testid="bim-smart-views-toggle"
               >
-                <Sparkles size={13} />
+                <Sparkles size={14} />
                 <span className="hidden 2xl:inline">{t('smartViews.title', { defaultValue: 'Smart Views' })}</span>
               </button>
 
@@ -4016,7 +4016,7 @@ export function BIMPage() {
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 aria-label={t('bim.color_by', { defaultValue: 'Color by' })}
                 data-testid="bim-color-mode-select"
-                className="text-2xs py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select"
               >
                 <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
                   <option value="default">{t('bim.color_default', { defaultValue: 'Default' })}</option>
@@ -4132,7 +4132,7 @@ export function BIMPage() {
                   }
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
                     isolatedIds
-                      ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'
+                      ? 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30'
                       : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
                   }`}
                   title={t('bim.isolate_selection', { defaultValue: 'Isolate selection' })}
@@ -4194,7 +4194,7 @@ export function BIMPage() {
           hits (Revit ElementIds) into the element ids the viewer keys by. */}
       {propertySearchOpen && activeModelId && (
         <div
-          className="fixed right-6 z-30 w-72 rounded-xl border border-border-light bg-surface-primary shadow-lg"
+          className="fixed right-6 z-dropdown w-72 rounded-xl border border-border-light bg-surface-primary shadow-lg"
           style={{ top: 116 }}
           data-testid="property-search-popover"
         >
@@ -4259,7 +4259,7 @@ export function BIMPage() {
             bounding_box in metres. */}
         {dimensionsVisible && selectedDimensions && (
           <div
-            className="absolute top-[60px] z-30 pointer-events-none select-none
+            className="absolute top-[60px] z-dropdown pointer-events-none select-none
                        rounded-lg border border-oe-blue/30 bg-surface-primary/95
                        backdrop-blur-sm shadow-md px-3 py-2 min-w-[180px]
                        transition-[inset-inline-start] duration-200"
@@ -4268,7 +4268,7 @@ export function BIMPage() {
           >
             <div className="flex items-center gap-1.5 mb-1.5">
               <Maximize2 size={12} className="text-oe-blue shrink-0" />
-              <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <span className="oe-overline">
                 {t('bim.dimensions_title', { defaultValue: 'BBox dimensions' })}
               </span>
             </div>
@@ -4390,9 +4390,9 @@ export function BIMPage() {
           return (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
               <div className={clsx(
-                'flex items-center gap-2.5 px-3.5 py-2 rounded-full border shadow-md backdrop-blur-sm',
+                'flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-md backdrop-blur-sm',
                 failed
-                  ? 'bg-red-50/95 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-200'
+                  ? 'bg-semantic-error-bg border-semantic-error/30 text-semantic-error'
                   : 'bg-blue-50/95 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-200',
               )}>
                 {failed ? (
@@ -4406,7 +4406,7 @@ export function BIMPage() {
                     : t('bim.pdf_status_generating', { defaultValue: 'Generating PDF sheets in background…' })}
                 </span>
                 {failed && pdfJob.pdfError && (
-                  <span className="text-2xs text-red-500/80 max-w-xs truncate">
+                  <span className="text-2xs text-semantic-error max-w-xs truncate">
                     {pdfJob.pdfError}
                   </span>
                 )}
@@ -4622,7 +4622,7 @@ export function BIMPage() {
             Tools / Groups.
             z-index 15 keeps it below the upload panel (z-30) when both are open. */}
         {activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen && (
-          <div className="absolute top-0 end-0 h-full z-[25] w-[380px] bg-surface-primary border-s border-border-light flex flex-col">
+          <div className="absolute top-0 end-0 h-full z-drawer w-[380px] bg-surface-primary border-s border-border-light flex flex-col">
             <BIMRightPanelTabs
               modelId={activeModelId}
               elements={elements}
@@ -4654,7 +4654,7 @@ export function BIMPage() {
             long as a model is loaded; the panel itself handles the no-
             project case for the "Project views" tab. */}
         {activeModelId && smartViewsPanelOpen && currentUserId && (
-          <div className="absolute top-0 start-0 h-full z-[24] w-[360px] bg-surface-primary border-e border-border-light flex flex-col">
+          <div className="absolute top-0 start-0 h-full z-drawer w-[360px] bg-surface-primary border-e border-border-light flex flex-col">
             <SmartViewsPanel
               modelId={activeModelId}
               projectId={projectId || null}
@@ -4668,7 +4668,7 @@ export function BIMPage() {
             collides with the right-panel tabs.  Read-only consumer of the
             backend per-element diff. */}
         {activeModelId && !isModelNonReady && elements.length > 0 && diffPanelOpen && (
-          <div className="absolute top-0 start-0 h-full z-[25] w-[360px] bg-surface-primary border-e border-border-light flex flex-col">
+          <div className="absolute top-0 start-0 h-full z-drawer w-[360px] bg-surface-primary border-e border-border-light flex flex-col">
             <BIMDiffPanel
               activeModelId={activeModelId}
               models={models}

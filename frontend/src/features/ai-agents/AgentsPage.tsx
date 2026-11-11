@@ -98,7 +98,7 @@ export function AiToolsStrip({ current }: { current: string }): JSX.Element | nu
 
   return (
     <section aria-label={t('ai.cross_strip_label', { defaultValue: 'Other AI tools' })}>
-      <h2 className="mb-2 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h2 className="oe-overline mb-2 flex items-center gap-1.5">
         <Sparkles className="h-3.5 w-3.5" />
         {t('ai.cross_strip_title', { defaultValue: 'Other AI tools' })}
       </h2>
@@ -567,14 +567,14 @@ export function AgentsPage(): JSX.Element {
                   placeholder={t('agents.input_placeholder', {
                     defaultValue: 'Describe what you want the agent to do…',
                   })}
-                  className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+                  className="oe-textarea w-full"
                 />
               </div>
 
               {/* Example-prompt chips for the selected agent — never a bare box. */}
               {selectedPrompts.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <span className="oe-overline">
                     {t('agents.try_asking', { defaultValue: 'Try asking' })}
                   </span>
                   {selectedPrompts.map((prompt) => (

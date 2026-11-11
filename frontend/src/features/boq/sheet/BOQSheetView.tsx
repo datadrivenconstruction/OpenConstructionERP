@@ -703,7 +703,7 @@ export function BOQSheetView({
           className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5 disabled:opacity-40"
           aria-label={t('boq.sheet.undo', { defaultValue: 'Undo' })}
         >
-          <Undo2 size={13} />
+          <Undo2 size={14} />
         </button>
         <button
           type="button"
@@ -712,14 +712,14 @@ export function BOQSheetView({
           className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5 disabled:opacity-40"
           aria-label={t('boq.sheet.redo', { defaultValue: 'Redo' })}
         >
-          <Redo2 size={13} />
+          <Redo2 size={14} />
         </button>
         <button
           type="button"
           onClick={() => setFindOpen(findOpen ? null : 'replace')}
           className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5"
         >
-          <Search size={13} />
+          <Search size={14} />
           {t('boq.sheet.find_replace', { defaultValue: 'Find and replace' })}
         </button>
         <div className="relative">
@@ -729,7 +729,7 @@ export function BOQSheetView({
             onClick={() => setChooserOpen((v) => !v)}
             className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5"
           >
-            <Columns3 size={13} />
+            <Columns3 size={14} />
             {t('boq.sheet.columns', { defaultValue: 'Columns' })}
           </button>
           {chooserOpen && (
@@ -761,7 +761,7 @@ export function BOQSheetView({
           <select
             value={frozen}
             onChange={(e) => setFrozen(Number(e.target.value))}
-            className="rounded border border-border-light bg-surface-primary px-1 py-0.5"
+            className="oe-select-sm"
           >
             {[0, 1, 2, 3].map((n) => (
               <option key={n} value={n}>
@@ -809,14 +809,14 @@ export function BOQSheetView({
             }}
             aria-label={t('boq.sheet.find', { defaultValue: 'Find' })}
             placeholder={t('boq.sheet.find', { defaultValue: 'Find' })}
-            className="h-7 w-44 rounded-md border border-border-light bg-surface-primary px-2"
+            className="oe-input-sm w-44"
           />
           <input
             value={replaceText}
             onChange={(e) => setReplaceText(e.target.value)}
             aria-label={t('boq.sheet.replace_with', { defaultValue: 'Replace with' })}
             placeholder={t('boq.sheet.replace_with', { defaultValue: 'Replace with' })}
-            className="h-7 w-44 rounded-md border border-border-light bg-surface-primary px-2"
+            className="oe-input-sm w-44"
           />
           <button type="button" onClick={findNext} className="rounded border border-border-light px-2 py-0.5">
             {t('boq.sheet.find_next', { defaultValue: 'Find next' })}
@@ -1016,16 +1016,16 @@ function PastePreview({
     });
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="boq-sheet-preview-title" className="rounded-lg border border-border-light bg-surface-primary p-3 shadow-lg">
-      <h3 id="boq-sheet-preview-title" className="mb-2 text-sm font-semibold">
+      <h3 id="boq-sheet-preview-title" className="oe-card-title mb-2">
         {t('boq.sheet.preview_title', { defaultValue: 'New positions to create: {{count}}', count: valid.length })}
       </h3>
       <div className="max-h-64 overflow-auto">
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
-            <tr className="text-start text-content-tertiary">
-              <th className="text-start">{t('boq.sheet.col_ordinal', { defaultValue: 'Item' })}</th>
-              <th className="text-start">{t('boq.sheet.col_description', { defaultValue: 'Description' })}</th>
-              <th className="text-start">{t('boq.sheet.col_unit', { defaultValue: 'Unit' })}</th>
+            <tr className="text-start">
+              <th>{t('boq.sheet.col_ordinal', { defaultValue: 'Item' })}</th>
+              <th>{t('boq.sheet.col_description', { defaultValue: 'Description' })}</th>
+              <th>{t('boq.sheet.col_unit', { defaultValue: 'Unit' })}</th>
               <th className="text-end">{t('boq.sheet.col_quantity', { defaultValue: 'Quantity' })}</th>
               <th className="text-end">{t('boq.sheet.col_unit_rate', { defaultValue: 'Unit rate' })}</th>
               <th />

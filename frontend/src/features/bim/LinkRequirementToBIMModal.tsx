@@ -46,10 +46,10 @@ interface LinkRequirementToBIMModalProps {
 }
 
 const PRIORITY_COLOR: Record<string, string> = {
-  must: 'text-rose-700 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60',
+  must: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30',
   should:
-    'text-amber-700 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60',
-  may: 'text-slate-700 bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800',
+    'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30',
+  may: 'text-content-secondary bg-surface-secondary border-border',
 };
 
 export default function LinkRequirementToBIMModal({
@@ -173,7 +173,7 @@ export default function LinkRequirementToBIMModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -186,7 +186,7 @@ export default function LinkRequirementToBIMModal({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
             <ClipboardCheck size={16} className="text-violet-600" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('bim.link_req_title', { defaultValue: 'Link a requirement' })}
             </h2>
             <span className="text-2xs text-content-tertiary">
@@ -211,7 +211,7 @@ export default function LinkRequirementToBIMModal({
         <div className="px-5 py-3 border-b border-border-light shrink-0">
           <div className="relative">
             <Search
-              size={13}
+              size={14}
               className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
             />
             <input
@@ -222,7 +222,7 @@ export default function LinkRequirementToBIMModal({
                 defaultValue: 'Search by entity, attribute, constraint, notes…',
               })}
               autoFocus
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input w-full ps-8 pe-3"
             />
           </div>
         </div>
@@ -291,19 +291,19 @@ export default function LinkRequirementToBIMModal({
                           {req.status === 'verified' && (
                             <CheckCircle2
                               size={9}
-                              className="text-emerald-500 shrink-0"
+                              className="text-semantic-success shrink-0"
                             />
                           )}
                           {req.status === 'conflict' && (
                             <AlertOctagon
                               size={9}
-                              className="text-rose-500 shrink-0"
+                              className="text-semantic-error shrink-0"
                             />
                           )}
                           {req.status === 'open' && (
                             <AlertTriangle
                               size={9}
-                              className="text-amber-500 shrink-0"
+                              className="text-semantic-warning shrink-0"
                             />
                           )}
                         </div>

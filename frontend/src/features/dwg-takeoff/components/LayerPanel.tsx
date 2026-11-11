@@ -32,7 +32,7 @@ export function LayerPanel({ layers, visibleLayers, onToggleLayer, onShowAll, on
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
+        <h3 className="oe-card-title text-foreground">
           {t('dwg_takeoff.layers', 'Layers')}
         </h3>
         <div className="flex gap-1">
@@ -61,7 +61,7 @@ export function LayerPanel({ layers, visibleLayers, onToggleLayer, onShowAll, on
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('dwg_takeoff.search_layers', 'Filter layers...')}
-          className="w-full rounded-md border border-border bg-surface-secondary py-1 pl-7 pr-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-input-sm w-full pl-7 pr-2 text-foreground"
         />
       </div>
 
@@ -79,7 +79,7 @@ export function LayerPanel({ layers, visibleLayers, onToggleLayer, onShowAll, on
                   : 'text-muted-foreground hover:bg-surface-secondary',
               )}
             >
-              {visible ? <Eye size={13} /> : <EyeOff size={13} />}
+              {visible ? <Eye size={14} /> : <EyeOff size={14} />}
               <span
                 className="h-2.5 w-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: resolveColor(layer.color) }}

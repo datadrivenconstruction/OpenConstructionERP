@@ -247,7 +247,7 @@ export function AutocompleteTooltip({
               className="flex items-start gap-1.5 text-2xs text-content-secondary"
               data-testid="autocomplete-tooltip-classification"
             >
-              <Layers size={11} className="mt-0.5 shrink-0 text-content-tertiary" />
+              <Layers size={12} className="mt-0.5 shrink-0 text-content-tertiary" />
               <span className="leading-snug">
                 <span className="text-2xs uppercase tracking-wider text-content-tertiary mr-1">
                   {t('boq.autocomplete_tooltip_classification', {
@@ -263,7 +263,7 @@ export function AutocompleteTooltip({
               className="flex items-center gap-1.5 text-2xs text-violet-600 dark:text-violet-400"
               data-testid="autocomplete-tooltip-variants"
             >
-              <Sparkles size={11} className="shrink-0" />
+              <Sparkles size={12} className="shrink-0" />
               <span>
                 {t('boq.autocomplete_tooltip_variants_available', {
                   count: variantCount,
@@ -276,7 +276,7 @@ export function AutocompleteTooltip({
       )}
 
       <div className="px-3 py-1.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/40 rounded-b-lg flex items-center gap-1.5 text-2xs text-content-tertiary">
-        <CornerDownLeft size={11} className="shrink-0" />
+        <CornerDownLeft size={12} className="shrink-0" />
         <span>
           {t('boq.autocomplete_tooltip_tab_to_insert', {
             defaultValue: 'Tab or Enter to insert',

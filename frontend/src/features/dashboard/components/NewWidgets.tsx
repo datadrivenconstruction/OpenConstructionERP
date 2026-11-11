@@ -90,7 +90,7 @@ function WidgetCard({
         <div className="px-4 pt-3 pb-1 flex items-center gap-2">
           {icon}
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-content-primary truncate">{title}</h3>
+            <h3 className="oe-card-title truncate">{title}</h3>
             {subtitle && (
               <p className="text-2xs text-content-tertiary truncate">{subtitle}</p>
             )}
@@ -477,7 +477,7 @@ export function BudgetVarianceWidget({ projects }: { projects?: ProjectRef[] }) 
                 </p>
               </div>
               <Badge variant={b.pct > 20 ? 'error' : 'warning'} size="sm">
-                <TrendingUp size={11} className="mr-1" />
+                <TrendingUp size={12} className="mr-1" />
                 +{b.pct}%
               </Badge>
             </li>

@@ -319,7 +319,7 @@ export function GaebSiteExchangeDialog({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -328,7 +328,7 @@ export function GaebSiteExchangeDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h3 id="boq-gaeb-site-title" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 id="boq-gaeb-site-title" className="oe-card-title flex items-center gap-2">
             <Ruler size={16} />
             {t('boq.gaeb_site.title', { defaultValue: 'GAEB X31 / X89' })}
           </h3>
@@ -438,10 +438,10 @@ export function GaebSiteExchangeDialog({
 
                   {preview.matched.length > 0 && (
                     <div className="border border-border-light rounded-lg overflow-x-auto">
-                      <table className="w-full text-xs">
+                      <table className="oe-table-compact w-full">
                         <thead>
-                          <tr className="bg-surface-secondary/50">
-                            <th className="px-2 py-1.5 w-8">
+                          <tr>
+                            <th className="w-8">
                               <input
                                 type="checkbox"
                                 aria-label={t('boq.gaeb_site.select_all', { defaultValue: 'Select all' })}
@@ -455,33 +455,33 @@ export function GaebSiteExchangeDialog({
                                 }
                               />
                             </th>
-                            <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                            <th>
                               {t('boq.gaeb_site.col_oz', { defaultValue: 'OZ' })}
                             </th>
-                            <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                            <th>
                               {t('boq.description', { defaultValue: 'Description' })}
                             </th>
-                            <th className="px-2 py-1.5 text-center font-medium text-content-secondary">
+                            <th className="text-center">
                               {t('boq.unit', { defaultValue: 'Unit' })}
                             </th>
-                            <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                            <th className="text-right">
                               {t('boq.gaeb_site.col_bill_qty', { defaultValue: 'Bill qty' })}
                             </th>
-                            <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                            <th className="text-right">
                               {t('boq.gaeb_site.col_measured_now', { defaultValue: 'Measured now' })}
                             </th>
-                            <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                            <th className="text-right">
                               {t('boq.gaeb_site.col_from_file', { defaultValue: 'From file' })}
                             </th>
-                            <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                            <th className="text-right">
                               {t('boq.gaeb_site.col_difference', { defaultValue: 'Difference' })}
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {preview.matched.map((m) => (
-                            <tr key={m.position_id} className="border-t border-border-light">
-                              <td className="px-2 py-1.5 text-center">
+                            <tr key={m.position_id}>
+                              <td className="text-center">
                                 <input
                                   type="checkbox"
                                   aria-label={m.oz}
@@ -496,8 +496,8 @@ export function GaebSiteExchangeDialog({
                                   }
                                 />
                               </td>
-                              <td className="px-2 py-1.5 font-mono">{m.oz}</td>
-                              <td className="px-2 py-1.5 max-w-[16rem]">
+                              <td className="font-mono">{m.oz}</td>
+                              <td className="max-w-[16rem]">
                                 <div className="truncate" title={m.description}>
                                   {m.description}
                                 </div>
@@ -506,7 +506,7 @@ export function GaebSiteExchangeDialog({
                                     className="flex items-center gap-1 text-2xs text-semantic-warning"
                                     data-testid="gaeb-x31-replaces-take-off"
                                   >
-                                    <AlertTriangle size={11} className="shrink-0" />
+                                    <AlertTriangle size={12} className="shrink-0" />
                                     {t('boq.gaeb_site.replaces_take_off', {
                                       defaultValue: 'Replaces {{count}} measurement line',
                                       defaultValue_other: 'Replaces {{count}} measurement lines',
@@ -515,12 +515,12 @@ export function GaebSiteExchangeDialog({
                                   </div>
                                 )}
                               </td>
-                              <td className="px-2 py-1.5 text-center">{m.unit}</td>
-                              <td className="px-2 py-1.5 text-right tabular-nums">{num(m.current_quantity, 3)}</td>
-                              <td className="px-2 py-1.5 text-right tabular-nums">
+                              <td className="text-center">{m.unit}</td>
+                              <td className="text-right tabular-nums">{num(m.current_quantity, 3)}</td>
+                              <td className="text-right tabular-nums">
                                 {num(m.current_measured_quantity, 3)}
                               </td>
-                              <td className="px-2 py-1.5 text-right tabular-nums font-medium">
+                              <td className="text-right tabular-nums font-medium">
                                 {num(m.proposed_quantity, 3)}
                                 {m.unchanged && (
                                   <CheckCircle2
@@ -530,7 +530,7 @@ export function GaebSiteExchangeDialog({
                                   />
                                 )}
                               </td>
-                              <td className="px-2 py-1.5 text-right tabular-nums">
+                              <td className="text-right tabular-nums">
                                 {num(m.difference_to_quantity, 3)}
                               </td>
                             </tr>
@@ -697,7 +697,7 @@ export function GaebSiteExchangeDialog({
                       className="flex items-start gap-2 rounded-lg bg-semantic-warning-bg p-2 text-xs text-content-primary"
                       data-testid="gaeb-x89-currency-mismatch"
                     >
-                      <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
+                      <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
                       {t('boq.gaeb_site.currency_mismatch', {
                         defaultValue:
                           'The invoice is in {{invoice}}, the bill in {{bill}}. The differences compare two currencies and mean nothing until one is converted.',
@@ -733,31 +733,31 @@ export function GaebSiteExchangeDialog({
                     </ul>
                   )}
                   <div className="border border-border-light rounded-lg overflow-x-auto">
-                    <table className="w-full text-xs">
+                    <table className="oe-table-compact w-full">
                       <thead>
-                        <tr className="bg-surface-secondary/50">
-                          <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                        <tr>
+                          <th>
                             {t('boq.gaeb_site.col_oz', { defaultValue: 'OZ' })}
                           </th>
-                          <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          <th>
                             {t('boq.description', { defaultValue: 'Description' })}
                           </th>
-                          <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                          <th className="text-right">
                             {t('boq.quantity', { defaultValue: 'Qty' })}
                           </th>
-                          <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                          <th className="text-right">
                             {t('boq.unit_rate', { defaultValue: 'Rate' })}
                           </th>
-                          <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                          <th className="text-right">
                             {t('boq.gaeb_site.col_amount', { defaultValue: 'Amount' })}
                           </th>
-                          <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                          <th className="text-right">
                             {t('boq.gaeb_site.expected', { defaultValue: 'At bill rates' })}
                           </th>
-                          <th className="px-2 py-1.5 text-right font-medium text-content-secondary">
+                          <th className="text-right">
                             {t('boq.gaeb_site.col_difference', { defaultValue: 'Difference' })}
                           </th>
-                          <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          <th>
                             {t('boq.gaeb_site.col_issues', { defaultValue: 'Findings' })}
                           </th>
                         </tr>
@@ -765,8 +765,8 @@ export function GaebSiteExchangeDialog({
                       <tbody>
                         {report.lines.map((line, i) => (
                           <tr key={`${line.oz}-${i}`} className="border-t border-border-light">
-                            <td className="px-2 py-1.5 font-mono">{line.oz}</td>
-                            <td className="px-2 py-1.5 truncate max-w-[14rem]" title={line.description}>
+                            <td className="font-mono">{line.oz}</td>
+                            <td className="truncate max-w-[14rem]" title={line.description}>
                               {line.kind === 'markup' && (
                                 <Badge variant="neutral" size="sm" className="mr-1">
                                   {t('boq.gaeb_site.markup_line', {
@@ -777,14 +777,14 @@ export function GaebSiteExchangeDialog({
                               )}
                               {line.description}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">
+                            <td className="text-right tabular-nums">
                               {line.kind === 'markup' ? '-' : `${num(line.bill_qty, 3)} ${line.unit}`}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">{num(line.unit_price, 2)}</td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">{num(line.amount, 2)}</td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">{num(line.expected_amount, 2)}</td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">{num(line.difference, 2)}</td>
-                            <td className="px-2 py-1.5">
+                            <td className="text-right tabular-nums">{num(line.unit_price, 2)}</td>
+                            <td className="text-right tabular-nums">{num(line.amount, 2)}</td>
+                            <td className="text-right tabular-nums">{num(line.expected_amount, 2)}</td>
+                            <td className="text-right tabular-nums">{num(line.difference, 2)}</td>
+                            <td>
                               <div className="flex flex-wrap gap-1">
                                 {line.issues.map((issue) => (
                                   <Badge key={issue} variant="warning" size="sm">

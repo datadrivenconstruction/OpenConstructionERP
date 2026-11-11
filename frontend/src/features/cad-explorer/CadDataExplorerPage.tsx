@@ -558,7 +558,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
             value={globalSearch}
             onChange={(e) => setGlobalSearch(e.target.value)}
             placeholder={t('explorer.search_all', { defaultValue: 'Search all columns...' })}
-            className="h-7 w-full rounded-md border border-border bg-surface-primary pl-7 pr-2 text-xs focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue outline-none"
+            className="oe-input-sm w-full pl-7 pr-2"
           />
           {globalSearch && (
             <button aria-label={t('common.clear_search', { defaultValue: 'Clear search' })} onClick={() => setGlobalSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-content-quaternary hover:text-content-secondary">
@@ -570,7 +570,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
         {/* Column filter */}
         <div className="flex items-center gap-1">
           <Filter size={13} className="text-content-tertiary" />
-          <select value={filterCol} onChange={(e) => setFilterCol(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs max-w-[120px]">
+          <select value={filterCol} onChange={(e) => setFilterCol(e.target.value)} className="oe-select-sm max-w-[120px]">
             <option value="">{t('explorer.filter_by', { defaultValue: 'Filter...' })}</option>
             {describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200).map((c) => (
               <option key={c.name} value={c.name}>{c.name}</option>
@@ -581,7 +581,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
               value={filterVal}
               onChange={(e) => setFilterVal(e.target.value)}
               placeholder="="
-              className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs w-24"
+              className="oe-input-sm w-24"
               onKeyDown={(e) => e.key === 'Enter' && applyFilter()}
             />
           )}
@@ -1445,7 +1445,7 @@ function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: Pi
               <select
                 value=""
                 onChange={(e) => { if (e.target.value) toggleGroupBy(e.target.value); }}
-                className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                className="oe-select-sm cursor-pointer"
               >
                 <option value="">+{stringCols.length - 12} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
                 {stringCols.slice(12).map((col) => (
@@ -1509,7 +1509,7 @@ function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: Pi
                     <select
                       value=""
                       onChange={(e) => { if (e.target.value) toggleAggCol(e.target.value); }}
-                      className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                      className="oe-select-sm cursor-pointer"
                     >
                       <option value="">+{overflowCols.length} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
                       {overflowCols.map((col) => (
@@ -1526,7 +1526,7 @@ function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: Pi
                   value={aggFn}
                   onChange={(e) => setAggFn(e.target.value)}
                   data-testid="pivot-aggfn-select"
-                  className="h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-xs font-medium"
+                  className="oe-select"
                 >
                   {AGG_FUNCTIONS.map((fn) => (
                     <option key={fn} value={fn}>{AGG_FUNCTION_LABELS[fn]}</option>
@@ -2067,7 +2067,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
             <select
               value={chart.category}
               onChange={(e) => setChartConfig({ category: e.target.value })}
-              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs max-w-[220px]"
+              className="oe-select-sm max-w-[220px]"
               data-testid="chart-category-select"
             >
               {stringCols.map((c) => (
@@ -2090,7 +2090,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                 <select
                   value={chart.value}
                   onChange={(e) => setChartConfig({ value: e.target.value })}
-                  className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs max-w-[220px]"
+                  className="oe-select-sm max-w-[220px]"
                   data-testid="chart-value-select"
                 >
                   {valueCols.map((c) => (
@@ -2113,7 +2113,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
             <select
               value={chart.aggFn || 'sum'}
               onChange={(e) => setChartConfig({ aggFn: e.target.value })}
-              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              className="oe-select-sm"
               data-testid="chart-aggfn-select"
             >
               {SUPPORTED_AGG_FUNCTIONS.map((fn) => (
@@ -2150,7 +2150,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
             <select
               value={chart.format}
               onChange={(e) => setChartConfig({ format: e.target.value as ChartFormat })}
-              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              className="oe-select-sm"
               data-testid="chart-format-select"
             >
               <option value="number">{t('explorer.format_number', { defaultValue: 'Number' })}</option>
@@ -3006,7 +3006,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
             <select
               value={projectId}
               onChange={(e) => { setProjectId(e.target.value); setBoqId(''); }}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              className="oe-select-lg w-full"
             >
               <option value="">{t('projects.select_project', { defaultValue: 'Select project...' })}</option>
               {projects?.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -3023,7 +3023,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
               <select
                 value={boqId}
                 onChange={(e) => setBoqId(e.target.value)}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select-lg w-full"
               >
                 <option value="">{t('boq.select_boq', { defaultValue: 'Select BOQ...' })}</option>
                 {boqs?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -3405,7 +3405,7 @@ function SaveDialog({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full"
               autoFocus
             />
           </div>
@@ -3414,7 +3414,7 @@ function SaveDialog({
             <select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-select w-full"
             >
               <option value="" disabled>{t('explorer.select_project', { defaultValue: 'Select project...' })}</option>
               {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -3509,7 +3509,7 @@ function SaveToProjectDialog({
             <input
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full"
               autoFocus
             />
           </div>
@@ -3518,7 +3518,7 @@ function SaveToProjectDialog({
             <select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-select w-full"
             >
               <option value="" disabled>{t('explorer.select_project', { defaultValue: 'Select project...' })}</option>
               {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}

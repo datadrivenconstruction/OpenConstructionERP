@@ -396,7 +396,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
               >
                 <span className="absolute inset-0 rounded-full bg-oe-blue/25 opacity-0 group-hover:opacity-100 transition-opacity animate-ping" />
                 <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-md shadow-oe-blue/40 ring-2 ring-white">
-                  <MapPin size={11} fill="currentColor" strokeWidth={0} />
+                  <MapPin size={12} fill="currentColor" strokeWidth={0} />
                 </span>
               </div>
             </Marker>
@@ -410,7 +410,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
 
       {/* Legend chip */}
       <div className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md bg-surface-elevated/90 backdrop-blur-sm px-2 py-1 shadow-sm">
-        <MapIcon size={11} className="text-oe-blue" strokeWidth={2} />
+        <MapIcon size={12} className="text-oe-blue" strokeWidth={2} />
         <span className="text-2xs font-medium text-content-primary">
           {t('dashboard.map_title', { defaultValue: 'Project locations' })}
         </span>

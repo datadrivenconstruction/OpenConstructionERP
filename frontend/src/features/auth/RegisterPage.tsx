@@ -135,11 +135,11 @@ export function RegisterPage() {
   };
 
   const benefits = [
-    { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
+    { icon: HardDrive, color: 'text-semantic-success bg-semantic-success/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
     { icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10', title: t('login.benefit.open_source', '100% open source'), desc: t('login.benefit.open_source_desc', 'Transparent code. No vendor lock-in.') },
     { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'Global cost databases'), desc: t('login.benefit.standards_desc', '55,000+ cost items, 48 databases.') },
-    { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
-    { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
+    { icon: Brain, color: 'text-semantic-warning bg-semantic-warning/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
+    { icon: Zap, color: 'text-semantic-error bg-semantic-error/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
     { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
   ];
 
@@ -181,7 +181,7 @@ export function RegisterPage() {
       {/* ── Left: benefits (desktop) ── */}
       <div className="hidden lg:flex lg:w-[460px] xl:w-[500px] shrink-0 relative z-10 flex-col justify-center ps-14 xl:ps-20 pe-8 xl:pe-10 py-6">
         <div className="mb-4 animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <h2 className="text-xl font-semibold text-content-primary leading-snug">
+          <h2 className="oe-section-title">
             {t('login.hero_title', 'Construction cost estimation,')}{' '}
             <span className="gradient-text">{t('login.hero_highlight', 'reimagined')}</span>
           </h2>
@@ -211,8 +211,8 @@ export function RegisterPage() {
           })}
         </div>
 
-        <div className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 animate-stagger-in" style={{ animationDelay: '320ms' }}>
-          <HardDrive size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-semantic-success/20 bg-semantic-success/5 px-3 py-2 animate-stagger-in" style={{ animationDelay: '320ms' }}>
+          <HardDrive size={14} className="text-semantic-success shrink-0 mt-0.5" />
           <div>
             <p className="text-2xs text-content-secondary leading-snug">
               {t('login.privacy', 'All data is processed and stored locally on your machine. Nothing is sent to external servers. You own your data - always.')}
@@ -246,7 +246,7 @@ export function RegisterPage() {
             {/* Visually hidden h1 for screen readers + a11y tools — visible text uses h2 below */}
             <h1 className="sr-only">{t('auth.create_account', 'Create account')}</h1>
             <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
-              <h2 className="text-base font-semibold text-content-primary mb-0.5">
+              <h2 className="oe-section-title mb-0.5">
                 {t('auth.create_account', 'Create account')}
               </h2>
               <p className="text-xs text-content-secondary mb-4">
@@ -267,7 +267,7 @@ export function RegisterPage() {
                   required aria-required="true"
                   autoFocus
                   autoComplete="name"
-                  icon={<User size={15} />}
+                  icon={<User size={16} />}
                 />
               </div>
 
@@ -282,7 +282,7 @@ export function RegisterPage() {
                   placeholder="you@company.com"
                   autoComplete="email"
                   required aria-required="true"
-                  icon={<Mail size={15} />}
+                  icon={<Mail size={16} />}
                 />
               </div>
 
@@ -296,7 +296,7 @@ export function RegisterPage() {
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder={t('auth.company_placeholder', 'Your company or organisation')}
                   autoComplete="organization"
-                  icon={<Building2 size={15} />}
+                  icon={<Building2 size={16} />}
                 />
               </div>
 
@@ -310,22 +310,22 @@ export function RegisterPage() {
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder={t('auth.job_title_placeholder', 'e.g. Estimator')}
                   autoComplete="organization-title"
-                  icon={<Briefcase size={15} />}
+                  icon={<Briefcase size={16} />}
                 />
                 <div>
-                  <label htmlFor="register-how-found" className="text-sm font-medium text-content-primary block mb-1">
+                  <label htmlFor="register-how-found" className="oe-label">
                     {t('auth.how_found_us', 'How did you find us?')}
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
-                      <Search size={15} />
+                      <Search size={16} />
                     </div>
                     <select
                       id="register-how-found"
                       name="how_found_us"
                       value={howFoundUs}
                       onChange={(e) => setHowFoundUs(e.target.value)}
-                      className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-9 pe-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary appearance-none cursor-pointer"
+                      className="oe-select w-full ps-9 cursor-pointer"
                     >
                       <option value="">{t('auth.how_found_select', '- Select -')}</option>
                       <option value="google">{t('auth.how_found_google', 'Google Search')}</option>
@@ -342,12 +342,12 @@ export function RegisterPage() {
               </div>
 
               <div className="flex flex-col gap-1 animate-stagger-in" style={{ animationDelay: '340ms' }}>
-                <label htmlFor="register-password" className="text-sm font-medium text-content-primary">
+                <label htmlFor="register-password" className="oe-label">
                   {t('auth.password', 'Password')}
                 </label>
                 <div className="relative">
                   <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
-                    <Lock size={15} />
+                    <Lock size={16} />
                   </div>
                   <input
                     id="register-password"
@@ -359,7 +359,7 @@ export function RegisterPage() {
                     autoComplete="new-password"
                     required aria-required="true"
                     minLength={8}
-                    className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-9 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+                    className="oe-input w-full pl-9 pr-9"
                   />
                   <button
                     type="button"
@@ -368,7 +368,7 @@ export function RegisterPage() {
                     className="absolute inset-y-0 end-0 flex items-center pe-3 text-content-tertiary hover:text-content-secondary transition-colors"
                     tabIndex={-1}
                   >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
                 {password && (
@@ -395,7 +395,7 @@ export function RegisterPage() {
                   autoComplete="new-password"
                   required aria-required="true"
                   error={confirmPassword && !passwordsMatch ? t('auth.passwords_mismatch', 'Passwords do not match') : undefined}
-                  icon={<Lock size={15} />}
+                  icon={<Lock size={16} />}
                 />
               </div>
 

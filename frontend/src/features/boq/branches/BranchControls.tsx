@@ -134,7 +134,7 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2">
                 <GitBranch size={16} className="text-oe-blue" />
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('boq.branch.panel_title', { defaultValue: 'Estimate branches' })}
                 </h3>
               </div>
@@ -150,11 +150,11 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
 
             <div className="flex flex-wrap gap-1.5 border-b border-border px-4 py-3">
               <Button size="sm" variant="secondary" onClick={() => setCreateOpen(true)} disabled={!currentOpen}>
-                <Plus size={13} className="mr-1" />
+                <Plus size={14} className="mr-1" />
                 {t('boq.branch.new', { defaultValue: 'New branch' })}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setCompareOpen(true)} disabled={nodes.length < 2}>
-                <GitCompare size={13} className="mr-1" />
+                <GitCompare size={14} className="mr-1" />
                 {t('boq.branch.compare', { defaultValue: 'Compare' })}
               </Button>
               <Button
@@ -163,7 +163,7 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
                 onClick={() => setPickMode('cherry-pick')}
                 disabled={nodes.length < 2 || !currentOpen || (!!current?.is_main && !tree?.can_merge)}
               >
-                <GitPullRequestArrow size={13} className="mr-1" />
+                <GitPullRequestArrow size={14} className="mr-1" />
                 {t('boq.branch.carry', { defaultValue: 'Carry changes here' })}
               </Button>
               {isBranch && current?.status === 'open' && (
@@ -180,7 +180,7 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
                         })
                   }
                 >
-                  <GitMerge size={13} className="mr-1" />
+                  <GitMerge size={14} className="mr-1" />
                   {t('boq.branch.merge', { defaultValue: 'Merge into main' })}
                 </Button>
               )}
@@ -192,9 +192,9 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
                   disabled={statusMutation.isPending}
                 >
                   {current.status === 'archived' ? (
-                    <ArchiveRestore size={13} className="mr-1" />
+                    <ArchiveRestore size={14} className="mr-1" />
                   ) : (
-                    <Archive size={13} className="mr-1" />
+                    <Archive size={14} className="mr-1" />
                   )}
                   {current.status === 'archived'
                     ? t('boq.branch.reopen', { defaultValue: 'Reopen' })
@@ -212,7 +212,7 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
                   value={current?.design_option?.id ?? ''}
                   disabled={optionMutation.isPending}
                   onChange={(e) => optionMutation.mutate(e.target.value || null)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-select w-full"
                 >
                   <option value="">{t('boq.branch.design_option_none', { defaultValue: 'None' })}</option>
                   {tree?.design_options.map((o) => (
@@ -258,12 +258,12 @@ export function BranchControls({ boqId, boqName, branchOfId, onNavigate, onChang
                           )}
                           style={{ paddingLeft: 16 + Math.min(depth, 6) * 16 }}
                         >
-                          <GitBranch size={13} className="mt-0.5 shrink-0 text-content-tertiary" />
+                          <GitBranch size={14} className="mt-0.5 shrink-0 text-content-tertiary" />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
                               <span className="truncate text-sm font-medium text-content-primary">{node.name}</span>
                               <StatusBadge node={node} />
-                              {node.is_locked && <Lock size={11} className="text-content-tertiary" />}
+                              {node.is_locked && <Lock size={12} className="text-content-tertiary" />}
                             </div>
                             <p className="mt-0.5 text-2xs text-content-tertiary">
                               {[node.author, node.created_at ? fmtDate(node.created_at) : '']

@@ -108,14 +108,14 @@ export function ThresholdAlertBanner({
 
   const palette = {
     emerald: {
-      ring: 'ring-emerald-400/20',
+      ring: 'ring-semantic-success/20',
       bg: 'from-emerald-50 to-teal-50/40 dark:from-emerald-500/10 dark:to-teal-500/5',
       icon: 'text-semantic-success',
       Icon: CheckCircle2,
       title: t('coordination.health_ok_title', { defaultValue: 'All clear' }),
     },
     amber: {
-      ring: 'ring-amber-400/20',
+      ring: 'ring-semantic-warning/20',
       bg: 'from-amber-50 to-orange-50/40 dark:from-amber-500/10 dark:to-orange-500/5',
       icon: 'text-semantic-warning',
       Icon: Activity,
@@ -124,7 +124,7 @@ export function ThresholdAlertBanner({
       }),
     },
     rose: {
-      ring: 'ring-rose-400/30',
+      ring: 'ring-semantic-error/30',
       bg: 'from-rose-50 to-orange-50/50 dark:from-rose-500/10 dark:to-orange-500/5',
       icon: 'text-semantic-error',
       Icon: AlertTriangle,
@@ -168,7 +168,7 @@ export function ThresholdAlertBanner({
           <Icon size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {palette.title}
           </h3>
           <p className="text-xs text-content-secondary">{subtitle}</p>
@@ -394,7 +394,7 @@ export function ThresholdEditorModal({
                     value={d.warn}
                     disabled={!d.enabled}
                     onChange={(e) => setField(r.metric, { warn: e.target.value })}
-                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:opacity-50"
+                    className="oe-input bg-surface"
                   />
                 </WideModalField>
                 <WideModalField
@@ -409,7 +409,7 @@ export function ThresholdEditorModal({
                     value={d.error}
                     disabled={!d.enabled}
                     onChange={(e) => setField(r.metric, { error: e.target.value })}
-                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:opacity-50"
+                    className="oe-input bg-surface"
                   />
                 </WideModalField>
               </div>

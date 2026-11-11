@@ -255,8 +255,8 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
 
   if (error) {
     return (
-      <Card className="p-4 border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900">
-        <p className="text-xs text-red-700 dark:text-red-300">
+      <Card className="p-4 border-semantic-error/30 bg-semantic-error-bg">
+        <p className="text-xs text-semantic-error">
           {t('explorer.missingness_error', {
             defaultValue: 'Unable to compute column fill-rates for this session.',
           })}
@@ -285,13 +285,13 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
         <div className="flex flex-wrap items-center gap-3">
           {categoryCol && (
             <label className="flex items-center gap-2">
-              <span className="text-2xs font-semibold text-content-secondary uppercase tracking-wide">
+              <span className="oe-overline">
                 {t('explorer.missingness_category', { defaultValue: 'Category' })}
               </span>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-7 px-2 text-xs rounded-md border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select-sm"
                 data-testid="missingness-category-filter"
               >
                 <option value="">
@@ -307,13 +307,13 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
           )}
           {typeCol && (
             <label className="flex items-center gap-2">
-              <span className="text-2xs font-semibold text-content-secondary uppercase tracking-wide">
+              <span className="oe-overline">
                 {t('explorer.missingness_element_type', { defaultValue: 'Element Type' })}
               </span>
               <select
                 value={elementTypeFilter}
                 onChange={(e) => setElementTypeFilter(e.target.value)}
-                className="h-7 px-2 text-xs rounded-md border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select-sm"
                 data-testid="missingness-type-filter"
               >
                 <option value="">
@@ -329,13 +329,13 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
           )}
 
           <label className="flex items-center gap-2">
-            <span className="text-2xs font-semibold text-content-secondary uppercase tracking-wide">
+            <span className="oe-overline">
               {t('explorer.missingness_sort', { defaultValue: 'Sort columns' })}
             </span>
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as MissingnessSortKey)}
-              className="h-7 px-2 text-xs rounded-md border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-select-sm"
               data-testid="missingness-sort"
             >
               <option value="fill_desc">
@@ -379,7 +379,7 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
       {/* ── Matrix ─────────────────────────────────────────────── */}
       <Card padding="none" className="overflow-hidden">
         <div className="px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 flex items-center gap-2">
-          <h3 className="text-xs font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('explorer.missingness_title', { defaultValue: 'Column Fill-Rate Matrix' })}
           </h3>
           <Badge size="sm" variant="neutral">

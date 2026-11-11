@@ -952,7 +952,7 @@ function CasesList() {
               stay on the first screen. ────────────────────────────────────── */}
           {trackSummaries.length > 0 && (
             <section
-              className="rounded-2xl border border-border-light bg-surface-primary p-3.5"
+              className="rounded-2xl border border-border-light bg-surface-primary p-3"
               data-testid="case-tracks"
             >
               <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -961,7 +961,7 @@ function CasesList() {
                   className="shrink-0 text-content-tertiary"
                   aria-hidden="true"
                 />
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                <h2 className="oe-overline">
                   {t("cases.tracks.heading", {
                     defaultValue: "Start here: what do you want to get done?",
                   })}
@@ -992,7 +992,7 @@ function CasesList() {
                       onClick={() => pickTrack(track)}
                       aria-pressed={active}
                       className={clsx(
-                        "flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 motion-reduce:transition-none",
+                        "flex items-start gap-2 rounded-xl border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 motion-reduce:transition-none",
                         active
                           ? track.tint.chip
                           : "border-border-light bg-surface-primary text-content-primary hover:border-oe-blue/30",
@@ -1043,7 +1043,7 @@ function CasesList() {
           )}
 
           {regions.length > 0 && (
-            <section className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-primary p-3.5">
+            <section className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-primary p-3">
               {/* The founder's own visual language for "this surface is scoped
                   to a country", already carrying /costs and /catalog.
                   Composition contract: this block owns the `relative`, this is
@@ -1061,7 +1061,7 @@ function CasesList() {
                     className="shrink-0 text-content-tertiary"
                     aria-hidden="true"
                   />
-                  <h2 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                  <h2 className="oe-overline">
                     {t("cases.region_selector.heading", {
                       defaultValue: "Market",
                     })}
@@ -1126,7 +1126,7 @@ function CasesList() {
                         onClick={() => setRegion(active ? "all" : r)}
                         aria-pressed={active}
                         className={clsx(
-                          "flex items-center gap-2.5 rounded-xl border p-2.5 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 motion-reduce:transition-none",
+                          "flex items-center gap-2 rounded-xl border p-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 motion-reduce:transition-none",
                           active
                             ? "border-oe-blue bg-oe-blue/10 text-oe-blue shadow-sm"
                             : isHome
@@ -1251,7 +1251,7 @@ function CasesList() {
                 className="shrink-0 text-content-tertiary"
                 aria-hidden="true"
               />
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <h2 className="oe-overline">
                 {t("cases.finder.heading", { defaultValue: "Find your case" })}
               </h2>
               <p className="min-w-0 flex-1 text-2xs leading-relaxed text-content-tertiary">
@@ -1303,7 +1303,7 @@ function CasesList() {
                       className="text-content-tertiary"
                       aria-hidden="true"
                     />
-                    <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+                    <h3 className="oe-overline">
                       {t("cases.stage_selector.heading", {
                         defaultValue: "Project lifecycle",
                       })}
@@ -1617,7 +1617,7 @@ function CasesList() {
                 else clearActiveProject();
                 if (!nextId) setShowOnlyPinned(false);
               }}
-              className="h-8 rounded-lg border border-border-light bg-surface-primary px-2.5 text-xs text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+              className="oe-select"
             >
               <option value="">
                 {t("cases.project_pin.picker_none", {
@@ -1703,11 +1703,11 @@ function CasesList() {
                 aria-label={t("cases.search_placeholder", {
                   defaultValue: "Search cases...",
                 })}
-                className="w-full rounded-lg border border-border-light bg-surface-primary py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+                className="oe-input w-full ps-9 pe-3"
               />
             </div>
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-              <span className="mr-0.5 inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+              <span className="oe-overline mr-0.5 inline-flex items-center gap-1.5">
                 <Layers
                   size={13}
                   className="text-content-tertiary"
@@ -1843,7 +1843,7 @@ function CasesList() {
               className="shrink-0 shadow-md ring-1 ring-inset ring-black/10"
             />
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold tracking-tight text-content-primary">
+              <h2 className="oe-section-title">
                 {regionDisplayName(activeRegion, i18n.language)}
               </h2>
               <p className="mt-1 max-w-2xl text-sm leading-relaxed text-content-secondary">
@@ -1898,10 +1898,10 @@ function CasesList() {
             <ActiveTrackIcon size={24} strokeWidth={1.9} aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t("cases.tracks.eyebrow", { defaultValue: "Path" })}
             </span>
-            <h2 className="text-lg font-semibold tracking-tight text-content-primary">
+            <h2 className="oe-section-title">
               {t(activeTrackSummary.track.titleKey, {
                 defaultValue: activeTrackSummary.track.titleDefault,
               })}
@@ -1975,7 +1975,7 @@ function CasesList() {
         <>
           <div
             className={clsx(
-              "grid grid-cols-2 gap-2.5 sm:grid-cols-3",
+              "grid grid-cols-2 gap-2 sm:grid-cols-3",
               // A market band above the grid is a promise that these cases are
               // worth a closer look, and eight columns underneath it reads as
               // the same dense list with a banner stuck on top. The largest
@@ -2356,7 +2356,7 @@ function CaseCard({
                 the accessible name; the picture alone never carries it. */}
             {pb.region && (
               <span
-                className="inline-flex h-6 items-center gap-1 rounded-md bg-white/90 px-1.5 text-2xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
+                className="inline-flex h-6 items-center gap-1 rounded-md bg-white/90 px-1.5 text-2xs font-semibold text-content-primary shadow-sm ring-1 ring-inset ring-slate-900/10"
                 title={regionDisplayName(pb.region, i18n.language)}
                 aria-label={regionDisplayName(pb.region, i18n.language)}
               >
@@ -2477,8 +2477,8 @@ function CaseCard({
 
       {/* Resting content: illustration + a tight title keep the grid dense; the
           fuller story surfaces in the hover overlay below. */}
-      <div className="flex flex-1 flex-col gap-1.5 p-2.5">
-        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-content-primary">
+      <div className="flex flex-1 flex-col gap-1.5 p-2">
+        <h3 className="oe-card-title line-clamp-2">
           {t(pb.titleKey, { defaultValue: pb.titleDefault })}
         </h3>
 

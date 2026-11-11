@@ -174,8 +174,8 @@ export function FederationPanel({
       data-testid="federation-panel"
     >
       <header className="flex items-center gap-2">
-        <Layers className="h-4 w-4 text-emerald-400" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <Layers className="h-4 w-4 text-semantic-success" />
+        <h3 className="oe-card-title">
           {t('dashboards.federation.title', {
             defaultValue: 'Multi-Source Federation',
           })}
@@ -184,7 +184,7 @@ export function FederationPanel({
 
       {/* ── Snapshot picker ─────────────────────────────────────────── */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('dashboards.federation.pick_snapshots', {
             defaultValue: 'Pick snapshots to federate',
           })}
@@ -200,7 +200,7 @@ export function FederationPanel({
           {selected.map((id) => (
             <span
               key={id}
-              className="inline-flex items-center gap-1 rounded bg-semantic-success/10 px-2 py-0.5 text-xs text-emerald-300"
+              className="inline-flex items-center gap-1 rounded bg-semantic-success/10 px-2 py-0.5 text-xs text-semantic-success"
               data-testid={`federation-chip-${id}`}
             >
               <span className="max-w-[140px] truncate">
@@ -245,11 +245,11 @@ export function FederationPanel({
                   onClick={() => toggleSnapshot(opt.id)}
                   data-testid={`federation-snapshot-option-${opt.id}`}
                   className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-surface-secondary ${
-                    isSelected ? 'bg-semantic-success/5 text-emerald-200' : 'text-content-primary'
+                    isSelected ? 'bg-semantic-success/5 text-semantic-success' : 'text-content-primary'
                   }`}
                 >
                   <span className="flex h-3 w-3 flex-shrink-0 items-center justify-center">
-                    {isSelected && <Check className="h-3 w-3 text-emerald-400" />}
+                    {isSelected && <Check className="h-3 w-3 text-semantic-success" />}
                   </span>
                   <span className="flex-1 truncate">{opt.label}</span>
                   {opt.projectLabel && (
@@ -266,13 +266,13 @@ export function FederationPanel({
 
       {/* ── Schema-align mode ───────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('dashboards.federation.schema_align', {
             defaultValue: 'Schema alignment',
           })}
         </label>
         <select
-          className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+          className="oe-select-sm"
           value={schemaAlign}
           onChange={(e) => {
             setSchemaAlign(e.target.value as FederationSchemaAlign);
@@ -326,7 +326,7 @@ export function FederationPanel({
               {t('dashboards.federation.group_by', { defaultValue: 'Group by' })}
             </label>
             <select
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+              className="oe-select-sm"
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value)}
               data-testid="federation-group-by"
@@ -347,7 +347,7 @@ export function FederationPanel({
               {t('dashboards.federation.measure', { defaultValue: 'Measure' })}
             </label>
             <select
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+              className="oe-select-sm"
               value={measure}
               onChange={(e) => {
                 const next = e.target.value;
@@ -369,7 +369,7 @@ export function FederationPanel({
             </select>
 
             <select
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+              className="oe-select-sm"
               value={agg}
               onChange={(e) => setAgg(e.target.value as FederationAggKind)}
               data-testid="federation-agg"
@@ -403,7 +403,7 @@ export function FederationPanel({
 
       {errorMsg && (
         <div
-          className="rounded border border-rose-500/40 bg-semantic-error/10 px-3 py-2 text-xs text-rose-300"
+          className="rounded border border-semantic-error/40 bg-semantic-error/10 px-3 py-2 text-xs text-semantic-error"
           role="alert"
           data-testid="federation-error"
         >

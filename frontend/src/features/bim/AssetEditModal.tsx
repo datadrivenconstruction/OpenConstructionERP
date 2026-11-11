@@ -166,7 +166,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
@@ -191,7 +191,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
             className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -235,7 +235,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
             <select
               value={form.operational_status ?? ''}
               onChange={(e) => patch('operational_status', e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+              className="oe-select-sm"
               data-testid="asset-field-status"
             >
               <option value="">—</option>
@@ -261,7 +261,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
               value={form.notes ?? ''}
               onChange={(e) => patch('notes', e.target.value)}
               rows={3}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+              className="oe-textarea-sm"
               data-testid="asset-field-notes"
             />
           </div>
@@ -293,7 +293,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
                 <button
                   type="button"
                   onClick={() => removeCustomField(k)}
-                  className="mb-1 rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-rose-600"
+                  className="mb-1 rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
                   aria-label={t('assets.custom.remove', {
                     defaultValue: 'Remove {{key}}',
                     key: k,

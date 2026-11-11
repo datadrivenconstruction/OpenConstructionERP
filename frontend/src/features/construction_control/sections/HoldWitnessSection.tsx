@@ -226,25 +226,25 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
       ) : (
         <Card>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                  <th className="px-4 py-2.5 font-medium">
+                <tr className="text-left">
+                  <th>
                     {t('construction_control.col.number', { defaultValue: 'Number' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.title', { defaultValue: 'Title' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.point_type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.required_role', { defaultValue: 'Required role' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-4 py-2.5 text-right font-medium">
+                  <th className="text-right">
                     {t('construction_control.col.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -259,10 +259,10 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                       className="border-b border-border-light/60 last:border-b-0 align-top"
                       data-testid={`cc-gate-row-${gate.id}`}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                      <td className="font-mono text-content-secondary whitespace-nowrap">
                         {gate.gate_number}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="font-medium text-content-primary">{gate.title}</div>
                         <div className="mt-0.5 flex items-center gap-1 text-xs text-content-tertiary">
                           {gate.blocks_progress ? (
@@ -285,7 +285,7 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <StatusBadge
                           status={gate.point_type}
                           variants={POINT_TYPE_VARIANTS}
@@ -294,10 +294,10 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                           })}
                         />
                       </td>
-                      <td className="px-4 py-3 uppercase text-xs text-content-secondary">
+                      <td className="text-content-secondary">
                         {gate.required_party_role}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <StatusBadge status={gate.status} variants={GATE_STATUS_VARIANTS} />
                         {gate.status === 'released' && gate.released_party_role && (
                           <div className="mt-1 text-2xs text-content-tertiary">
@@ -316,7 +316,7 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="flex items-center justify-end gap-2">
                           {isPending && (
                             <Button
@@ -405,7 +405,7 @@ function ModalShell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -413,7 +413,7 @@ function ModalShell({
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           <button
             type="button"
             onClick={onClose}

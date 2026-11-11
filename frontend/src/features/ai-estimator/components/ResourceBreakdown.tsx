@@ -66,22 +66,22 @@ export function ResourceBreakdown({
 
   return (
     <div className={clsx('overflow-hidden rounded-lg border border-border-light', className)}>
-      <table className="w-full text-xs">
-        <thead className="bg-surface-secondary text-content-tertiary">
+      <table className="oe-table-compact w-full">
+        <thead>
           <tr>
-            <th className="px-2.5 py-1.5 text-left font-medium">
+            <th>
               {t('aiest.resources.resource', { defaultValue: 'Resource' })}
             </th>
-            <th className="px-2.5 py-1.5 text-left font-medium">
+            <th>
               {t('aiest.resources.type', { defaultValue: 'Type' })}
             </th>
-            <th className="px-2.5 py-1.5 text-right font-medium">
+            <th className="text-right">
               {t('aiest.resources.qty', { defaultValue: 'Qty' })}
             </th>
-            <th className="px-2.5 py-1.5 text-right font-medium">
+            <th className="text-right">
               {t('aiest.resources.rate', { defaultValue: 'Rate' })}
             </th>
-            <th className="px-2.5 py-1.5 text-right font-medium">
+            <th className="text-right">
               {t('aiest.resources.cost', { defaultValue: 'Cost' })}
             </th>
           </tr>
@@ -89,7 +89,7 @@ export function ResourceBreakdown({
         <tbody>
           {rows.map((r, i) => (
             <tr key={`${r.code ?? r.name}-${i}`} className="border-t border-border-light/60">
-              <td className="px-2.5 py-1.5">
+              <td>
                 <span className="font-medium text-content-primary">{r.name}</span>
                 {r.code && (
                   <span className="ml-1.5 font-mono text-2xs text-content-tertiary">
@@ -97,7 +97,7 @@ export function ResourceBreakdown({
                   </span>
                 )}
               </td>
-              <td className="px-2.5 py-1.5">
+              <td>
                 <span
                   className={clsx(
                     'inline-block rounded px-1.5 py-0.5 text-2xs font-medium capitalize',
@@ -107,13 +107,13 @@ export function ResourceBreakdown({
                   {r.type}
                 </span>
               </td>
-              <td className="px-2.5 py-1.5 text-right tabular-nums text-content-secondary">
+              <td className="text-right tabular-nums text-content-secondary">
                 {r.quantity} {r.unit}
               </td>
-              <td className="px-2.5 py-1.5 text-right tabular-nums text-content-secondary">
+              <td className="text-right tabular-nums text-content-secondary">
                 {fmtMoneyStr(r.unit_rate, currency, locale)}
               </td>
-              <td className="px-2.5 py-1.5 text-right tabular-nums font-medium text-content-primary">
+              <td className="text-right tabular-nums font-medium">
                 {fmtMoneyStr(r.cost, currency, locale)}
               </td>
             </tr>

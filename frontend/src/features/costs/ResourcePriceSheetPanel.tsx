@@ -372,10 +372,10 @@ export function ResourcePriceSheetPanel({
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5 pb-3">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue text-white">
-            <Wallet size={18} />
+            <Wallet size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('costs.resource_prices.title', { defaultValue: 'Resource prices' })}
             </h3>
             <p className="text-xs text-content-tertiary max-w-xl">
@@ -457,7 +457,7 @@ export function ResourcePriceSheetPanel({
             <div className="mt-2 flex items-center gap-1.5 text-2xs text-content-tertiary">
               {stats.unpriced > 0 ? (
                 <>
-                  <AlertTriangle size={11} className="text-semantic-warning" />
+                  <AlertTriangle size={12} className="text-semantic-warning" />
                   <span>
                     {t('costs.resource_prices.still_unpriced', {
                       defaultValue: '{{count}} resources still need a local price.',
@@ -467,7 +467,7 @@ export function ResourcePriceSheetPanel({
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={11} className="text-semantic-success" />
+                  <CheckCircle2 size={12} className="text-semantic-success" />
                   <span>
                     {t('costs.resource_prices.all_priced', {
                       defaultValue: 'Every resource has a price. Apply the re-price to refresh rates.',
@@ -537,13 +537,13 @@ export function ResourcePriceSheetPanel({
                 placeholder={t('costs.resource_prices.search_placeholder', {
                   defaultValue: 'Search resources by name…',
                 })}
-                className="w-full rounded-lg border border-border-light bg-surface-primary py-1.5 ps-8 pe-2.5 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue/40 focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+                className="oe-input w-full ps-8 pe-2.5"
               />
             </div>
             <select
               value={resourceType}
               onChange={(e) => setResourceType(e.target.value)}
-              className="rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue/40 focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+              className="oe-select"
               aria-label={t('costs.resource_prices.filter_type', { defaultValue: 'Resource type' })}
             >
               <option value="">
@@ -566,29 +566,29 @@ export function ResourcePriceSheetPanel({
               )}
               aria-pressed={onlyUnpriced}
             >
-              <AlertTriangle size={13} />
+              <AlertTriangle size={14} />
               {t('costs.resource_prices.only_unpriced', { defaultValue: 'Only unpriced' })}
             </button>
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto border-t border-border-light">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="oe-table w-full min-w-[640px]">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary/40 text-left">
-                  <th className="px-5 py-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <tr className="text-left">
+                  <th>
                     {t('costs.resource_prices.col_resource', { defaultValue: 'Resource' })}
                   </th>
-                  <th className="px-3 py-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <th>
                     {t('costs.resource_prices.col_type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="px-3 py-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <th>
                     {t('costs.resource_prices.col_unit', { defaultValue: 'Unit' })}
                   </th>
-                  <th className="px-3 py-2 text-right text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <th className="text-right">
                     {t('costs.resource_prices.col_price', { defaultValue: 'Unit price' })}
                   </th>
-                  <th className="px-5 py-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <th>
                     {t('costs.resource_prices.col_source', { defaultValue: 'Source' })}
                   </th>
                 </tr>
@@ -596,7 +596,7 @@ export function ResourcePriceSheetPanel({
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-content-tertiary">
+                    <td colSpan={5} className="text-center text-content-tertiary">
                       {t('costs.resource_prices.no_rows', {
                         defaultValue: 'No resources match these filters.',
                       })}
@@ -616,15 +616,15 @@ export function ResourcePriceSheetPanel({
                       <tr
                         key={row.resource_key}
                         className={clsx(
-                          'border-b border-border-light/70 transition-colors',
+                          '',
                           dirty
                             ? 'bg-oe-blue-subtle/20'
                             : unpriced
                               ? 'bg-semantic-warning-bg/20'
-                              : 'hover:bg-surface-secondary/40',
+                              : '',
                         )}
                       >
-                        <td className="px-5 py-2 align-top">
+                        <td className="align-top">
                           <div className="font-medium text-content-primary">{row.resource_name}</div>
                           {row.resource_code && (
                             <div className="text-2xs text-content-quaternary tabular-nums">
@@ -632,15 +632,15 @@ export function ResourcePriceSheetPanel({
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="align-top">
                           <Badge variant={resourceTypeVariant(row.resource_type)} size="sm">
                             {resourceTypeLabel(row.resource_type)}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2 align-top text-content-secondary">
+                        <td className="align-top text-content-secondary">
                           {row.unit || '-'}
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="align-top">
                           <div className="flex items-center justify-end gap-1.5">
                             <input
                               type="text"
@@ -653,13 +653,13 @@ export function ResourcePriceSheetPanel({
                                 name: row.resource_name,
                               })}
                               className={clsx(
-                                'w-28 rounded-md border bg-surface-primary px-2 py-1 text-right text-sm tabular-nums',
-                                'focus:outline-none focus:ring-2 focus:ring-oe-blue/30',
+                                'oe-input-sm w-28 text-right tabular-nums',
+                                '',
                                 invalid
-                                  ? 'border-semantic-error'
+                                  ? ''
                                   : dirty
-                                    ? 'border-oe-blue/60'
-                                    : 'border-border-light',
+                                    ? ''
+                                    : '',
                               )}
                             />
                             <span className="w-10 shrink-0 text-2xs text-content-tertiary">
@@ -667,7 +667,7 @@ export function ResourcePriceSheetPanel({
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-2 align-top">
+                        <td className="align-top">
                           {row.source === 'user' ? (
                             <Badge variant="blue" size="sm">
                               {t('costs.resource_prices.source_edited', { defaultValue: 'Edited' })}
@@ -762,7 +762,7 @@ export function ResourcePriceSheetPanel({
             <div className="min-w-0 text-xs">
               {hasInvalidEdit ? (
                 <span className="inline-flex items-center gap-1.5 text-semantic-error">
-                  <AlertTriangle size={13} />
+                  <AlertTriangle size={14} />
                   {t('costs.resource_prices.has_invalid', {
                     defaultValue: 'Some prices are not valid numbers.',
                   })}

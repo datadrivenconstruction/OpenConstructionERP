@@ -81,11 +81,11 @@ export function DemoChooserPage() {
               <HexMark src={face.src} kind={face.kind} accent={accent} size={64} className="-top-4 -start-4" />
               <div className="h-2 w-full rounded-t-2xl" style={{ backgroundColor: accent }} />
               <div className="flex flex-1 flex-col p-6">
-                <p className="ps-12 text-xs font-semibold uppercase tracking-wide" style={{ color: accent }}>
+                <p className="oe-overline ps-12" style={{ color: accent }}>
                   {t(`${profile.stem}.audience`)}
                 </p>
                 <h2
-                  className="mt-1 ps-12 text-xl font-semibold text-content-primary"
+                  className="oe-section-title mt-1 ps-12"
                   style={{ fontFamily: FONT_STACK[profile.appearance.font] }}
                 >
                   {t(`${profile.stem}.title`)}
@@ -111,7 +111,7 @@ export function DemoChooserPage() {
                     })}
                   </span>
                   <span
-                    className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition group-hover:gap-2.5"
+                    className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition group-hover:gap-2"
                     style={{ backgroundColor: accent }}
                   >
                     {t('demo_chooser.open', { defaultValue: 'Open this demo' })}

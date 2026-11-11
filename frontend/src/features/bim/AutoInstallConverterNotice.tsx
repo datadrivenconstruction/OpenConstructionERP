@@ -59,11 +59,11 @@ export function AutoInstallConverterNotice({
   if (errored) {
     return (
       <div
-        className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-2xs text-amber-900 dark:text-amber-200"
+        className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5 text-2xs text-semantic-warning"
         data-testid={`auto-install-error-${converterId}`}
         role="status"
       >
-        <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+        <AlertCircle size={14} className="shrink-0 mt-0.5 text-semantic-warning" />
         <div className="flex-1 space-y-1.5 leading-relaxed">
           <p className="font-semibold">
             {t('bim.auto_install_failed_title', {
@@ -81,18 +81,18 @@ export function AutoInstallConverterNotice({
             <button
               type="button"
               onClick={retry}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-semibold bg-semantic-warning hover:bg-semantic-warning text-white transition-colors"
             >
-              <RefreshCw size={11} />
+              <RefreshCw size={12} />
               {t('bim.auto_install_retry', { defaultValue: 'Retry install' })}
             </button>
             <a
               href={DDC_REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-semibold border border-semantic-warning/30 text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
             >
-              <ExternalLink size={11} />
+              <ExternalLink size={12} />
               {t('bim.auto_install_manual_link', {
                 defaultValue: 'Install manually on GitHub',
               })}
@@ -106,8 +106,8 @@ export function AutoInstallConverterNotice({
   // ── In-progress (default) — reassuring, no manual steps ────────────────
   const tone =
     variant === 'dark'
-      ? 'border-sky-500/30 bg-sky-500/10 text-sky-200'
-      : 'border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/30 text-sky-800 dark:text-sky-200';
+      ? 'border-semantic-info/30 bg-semantic-info/10 text-semantic-info'
+      : 'border-semantic-info/30 bg-semantic-info-bg text-semantic-info';
 
   return (
     <div

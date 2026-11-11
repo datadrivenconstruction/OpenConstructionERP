@@ -123,7 +123,7 @@ interface Project {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
@@ -634,25 +634,25 @@ function InventoryTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_name', { defaultValue: 'Inventory' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_scope', { defaultValue: 'Scope' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_as_of', { defaultValue: 'As of' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_total', { defaultValue: 'Total' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -670,13 +670,13 @@ function InventoryTable({
               <tr
                 key={r.id}
                 onClick={() => onSelect(r.id)}
-                className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+                className="cursor-pointer"
               >
-                <td className="px-4 py-2 font-medium text-content-primary">{r.name}</td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="font-medium">{r.name}</td>
+                <td className="text-content-secondary">
                   {scopeLabel(r.scope, t)}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge
                     variant={
                       r.status === 'baseline'
@@ -693,13 +693,13 @@ function InventoryTable({
                     {inventoryStatusLabel(r.status, t)}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {r.as_of_date ? <DateDisplay value={r.as_of_date} /> : '—'}
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums font-medium">
+                <td className="text-right tabular-nums font-medium">
                   {total > 0 ? formatKg(total) : '—'}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="text-right">
                   <RowActions
                     onEdit={() => onEdit(r)}
                     onDelete={() => onDelete(r)}
@@ -772,7 +772,7 @@ function EPDsTab() {
             value={materialClass}
             onChange={(e) => setMaterialClass(e.target.value)}
             placeholder="concrete, steel…"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
         <div className="max-w-[140px]">
@@ -784,7 +784,7 @@ function EPDsTab() {
             onChange={(e) => setRegion(e.target.value)}
             placeholder="DE, EU…"
             maxLength={8}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
       </div>
@@ -840,50 +840,50 @@ function EPDTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table-compact w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_product', { defaultValue: 'Product' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_class', { defaultValue: 'Class' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_region', { defaultValue: 'Region' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_source', { defaultValue: 'Source' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_gwp', { defaultValue: 'GWP A1–A3' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_unit', { defaultValue: 'Unit' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[260px]">
+            <tr key={r.id}>
+              <td className="font-medium truncate max-w-[260px]">
                 {r.product_name}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{r.material_class}</td>
-              <td className="px-4 py-2 text-xs text-content-secondary">{r.region || '—'}</td>
-              <td className="px-4 py-2 text-xs">
+              <td className="text-content-secondary">{r.material_class}</td>
+              <td className="text-content-secondary">{r.region || '—'}</td>
+              <td>
                 <Badge variant="neutral" size="sm">
                   {r.source}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-right tabular-nums font-medium">
+              <td className="text-right tabular-nums font-medium">
                 {fmtFixed(toNum(r.gwp_a1a3), 3)}
               </td>
-              <td className="px-4 py-2 text-xs text-content-tertiary">kg/{r.declared_unit}</td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-content-tertiary">kg/{r.declared_unit}</td>
+              <td className="text-right">
                 <RowActions
                   onEdit={() => onEdit(r)}
                   onDelete={() => onDelete(r)}
@@ -1074,7 +1074,7 @@ function TargetRow({
         {fmtPercent(pct, 0)}
         {met && (
           <span className="ms-1 inline-flex items-center gap-0.5 text-semantic-success">
-            <CheckCircle2 size={11} />
+            <CheckCircle2 size={12} />
             {t('carbon.met', { defaultValue: 'Met' })}
           </span>
         )}
@@ -1164,22 +1164,22 @@ function ReportTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_period', { defaultValue: 'Period' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_framework', { defaultValue: 'Framework' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('carbon.col_generated', { defaultValue: 'Generated' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_total', { defaultValue: 'Total kg CO2e' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('carbon.col_actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -1194,22 +1194,22 @@ function ReportTable({
                 | undefined,
             );
             return (
-              <tr key={r.id} className="border-t border-border-light hover:bg-surface-secondary">
-                <td className="px-4 py-2 text-xs text-content-secondary">
+              <tr key={r.id}>
+                <td className="text-content-secondary">
                   {r.period_start} → {r.period_end}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant="blue" size="sm">
                     {frameworkLabel(r.framework, t)}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {r.generated_at ? <DateDisplay value={r.generated_at} /> : '—'}
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums font-medium">
+                <td className="text-right tabular-nums font-medium">
                   {total > 0 ? formatKg(total) : '—'}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="text-right">
                   <button
                     type="button"
                     onClick={() => onDelete(r)}
@@ -1368,7 +1368,7 @@ function InventoryDrawer({
   }, [embodiedQ.data]);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1378,7 +1378,7 @@ function InventoryDrawer({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 id="carbon-inv-drawer-title" className="text-base font-semibold">
+          <h2 id="carbon-inv-drawer-title" className="oe-section-title">
             {t('carbon.inventory_detail', { defaultValue: 'Inventory detail' })}
           </h2>
           <button
@@ -1410,7 +1410,7 @@ function InventoryDrawer({
             totals && (
               <>
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h3 className="oe-overline mb-2">
                     {t('carbon.scope_breakdown', { defaultValue: 'Scope 1 / 2 / 3 breakdown' })}
                   </h3>
                   <ScopeBar
@@ -1455,7 +1455,7 @@ function InventoryDrawer({
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h3 className="oe-overline mb-2 flex items-center gap-1.5">
                     <TrendingDown size={12} />
                     {t('carbon.embodied_lifecycle', { defaultValue: 'Embodied (A1–D)' })}
                   </h3>
@@ -1470,7 +1470,7 @@ function InventoryDrawer({
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h3 className="oe-overline mb-2 flex items-center gap-1.5">
                     <AlertTriangle size={12} />
                     {t('carbon.top_emitters', { defaultValue: 'Top emitters' })}
                   </h3>
@@ -1501,7 +1501,7 @@ function InventoryDrawer({
                 {/* Embodied entries - full management */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                    <h3 className="oe-overline">
                       {t('carbon.embodied_entries', {
                         defaultValue: 'Embodied entries',
                       })}
@@ -1510,7 +1510,7 @@ function InventoryDrawer({
                       <Button
                         variant="secondary"
                         size="sm"
-                        icon={<Sparkles size={13} />}
+                        icon={<Sparkles size={14} />}
                         onClick={() => setAutoEnrichOpen(true)}
                         disabled={!inventoryProjectId}
                       >
@@ -1521,7 +1521,7 @@ function InventoryDrawer({
                       <Button
                         variant="secondary"
                         size="sm"
-                        icon={<FileSpreadsheet size={13} />}
+                        icon={<FileSpreadsheet size={14} />}
                         onClick={() => setAssignBoqOpen(true)}
                       >
                         {t('carbon.add_from_boq', { defaultValue: 'Add from BOQ' })}
@@ -1529,7 +1529,7 @@ function InventoryDrawer({
                       <Button
                         variant="secondary"
                         size="sm"
-                        icon={<Plus size={13} />}
+                        icon={<Plus size={14} />}
                         onClick={() => setEmbodiedModal({ mode: 'create' })}
                       >
                         {t('carbon.add_entry', { defaultValue: 'Add entry' })}
@@ -1683,13 +1683,13 @@ function ScopeSection({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h3 className="oe-overline">
           {title}
         </h3>
         <Button
           variant="secondary"
           size="sm"
-          icon={<Plus size={13} />}
+          icon={<Plus size={14} />}
           onClick={onAdd}
         >
           {t('carbon.add_entry', { defaultValue: 'Add entry' })}
@@ -1758,7 +1758,7 @@ function TopEmitterRow({
       >
         <span className="flex min-w-0 items-center gap-1.5">
           <ChevronRight
-            size={13}
+            size={14}
             className={clsx(
               'shrink-0 text-content-tertiary transition-transform',
               open && 'rotate-90',
@@ -1933,7 +1933,7 @@ function EmbodiedProvenance({ entry }: { entry: EmbodiedEntry }) {
             name: elementName,
           })}
         >
-          <Box size={11} className="shrink-0" />
+          <Box size={12} className="shrink-0" />
           <span className="truncate">{elementName}</span>
         </span>
       )}
@@ -2045,7 +2045,7 @@ function CreateInventoryModal({
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
         <div>
@@ -2063,7 +2063,7 @@ function CreateInventoryModal({
                   | 'operational',
               })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="cradle_to_gate">{scopeLabel('cradle_to_gate', t)}</option>
             <option value="cradle_to_grave">{scopeLabel('cradle_to_grave', t)}</option>
@@ -2080,7 +2080,7 @@ function CreateInventoryModal({
               onChange={(e) =>
                 setForm({ ...form, status: e.target.value as InventoryStatus })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="draft">{inventoryStatusLabel('draft', t)}</option>
               <option value="baseline">{inventoryStatusLabel('baseline', t)}</option>
@@ -2096,7 +2096,7 @@ function CreateInventoryModal({
               type="date"
               value={form.as_of_date ?? ''}
               onChange={(e) => setForm({ ...form, as_of_date: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -2108,7 +2108,7 @@ function CreateInventoryModal({
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
         </div>
       </div>
@@ -2230,7 +2230,7 @@ function CreateTargetModal({
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder="e.g. Net-zero by 2030"
           />
         </div>
@@ -2249,7 +2249,7 @@ function CreateTargetModal({
                   | 'intensity_per_unit',
               })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
             disabled={isEdit}
           >
             <option value="absolute">absolute (kg CO2e)</option>
@@ -2266,7 +2266,7 @@ function CreateTargetModal({
               type="number"
               value={form.baseline_value}
               onChange={(e) => setForm({ ...form, baseline_value: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -2277,7 +2277,7 @@ function CreateTargetModal({
               type="number"
               value={form.target_value}
               onChange={(e) => setForm({ ...form, target_value: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -2292,7 +2292,7 @@ function CreateTargetModal({
               onChange={(e) =>
                 setForm({ ...form, baseline_year: Number(e.target.value) || 2020 })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               disabled={isEdit}
             />
           </div>
@@ -2306,7 +2306,7 @@ function CreateTargetModal({
               onChange={(e) =>
                 setForm({ ...form, target_year: Number(e.target.value) || 2030 })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               disabled={isEdit}
             />
           </div>
@@ -2321,7 +2321,7 @@ function CreateTargetModal({
               onChange={(e) =>
                 setForm({ ...form, status: e.target.value as TargetStatus })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="active">{targetStatusLabel('active', t)}</option>
               <option value="met">{targetStatusLabel('met', t)}</option>
@@ -2411,7 +2411,7 @@ function GenerateReportModal({
           <select
             value={form.inventory_id}
             onChange={(e) => setForm({ ...form, inventory_id: e.target.value })}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">
               — {t('carbon.optional', { defaultValue: 'optional' })} —
@@ -2435,7 +2435,7 @@ function GenerateReportModal({
                 framework: e.target.value as 'ghg_protocol' | 'gri' | 'issb' | 'custom',
               })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="ghg_protocol">{frameworkLabel('ghg_protocol', t)}</option>
             <option value="gri">{frameworkLabel('gri', t)}</option>
@@ -2452,7 +2452,7 @@ function GenerateReportModal({
               type="date"
               value={form.period_start}
               onChange={(e) => setForm({ ...form, period_start: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -2463,7 +2463,7 @@ function GenerateReportModal({
               type="date"
               value={form.period_end}
               onChange={(e) => setForm({ ...form, period_end: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -2475,7 +2475,7 @@ function GenerateReportModal({
             type="number"
             value={form.project_area_m2}
             onChange={(e) => setForm({ ...form, project_area_m2: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
       </div>
@@ -2616,7 +2616,7 @@ function EmbodiedEntryModal({
           <input
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -2629,7 +2629,7 @@ function EmbodiedEntryModal({
               onChange={(e) =>
                 setForm({ ...form, element_ref: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -2641,7 +2641,7 @@ function EmbodiedEntryModal({
               onChange={(e) =>
                 setForm({ ...form, stage: e.target.value as Stage })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="a1a3">a1a3</option>
               <option value="a4">a4</option>
@@ -2662,7 +2662,7 @@ function EmbodiedEntryModal({
               step="any"
               value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -2672,7 +2672,7 @@ function EmbodiedEntryModal({
             <input
               value={form.unit}
               onChange={(e) => setForm({ ...form, unit: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -2690,7 +2690,7 @@ function EmbodiedEntryModal({
               onChange={(e) =>
                 setForm({ ...form, factor_value_used: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -2704,7 +2704,7 @@ function EmbodiedEntryModal({
               step="any"
               value={form.carbon_kg}
               onChange={(e) => setForm({ ...form, carbon_kg: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder={fmtFixed(autoCarbon, 2)}
             />
           </div>
@@ -2909,7 +2909,7 @@ function AssignBoqModal({
                 setPosition(null);
               }}
               disabled={boqsQ.isLoading}
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="">
                 {boqsQ.isLoading
@@ -2934,7 +2934,7 @@ function AssignBoqModal({
               </label>
               <div className="relative mb-2">
                 <Search
-                  size={13}
+                  size={14}
                   className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
                 />
                 <input
@@ -2943,7 +2943,7 @@ function AssignBoqModal({
                   placeholder={t('carbon.boq_search_placeholder', {
                     defaultValue: 'Filter by description or ordinal…',
                   })}
-                  className={clsx(inputCls, 'pl-8')}
+                  className={clsx('oe-input', inputCls, 'pl-8')}
                   autoComplete="off"
                 />
               </div>
@@ -2957,21 +2957,21 @@ function AssignBoqModal({
                 </p>
               ) : (
                 <div className="max-h-64 overflow-y-auto rounded-lg border border-border-light">
-                  <table className="w-full text-sm">
+                  <table className="oe-table w-full">
                     <tbody>
                       {positions.map((p) => (
                         <tr
                           key={p.id}
                           onClick={() => pickPosition(p)}
-                          className="cursor-pointer border-t border-border-light first:border-t-0 hover:bg-surface-secondary"
+                          className="cursor-pointer first:border-t-0"
                         >
-                          <td className="px-3 py-2 font-mono text-xs text-content-secondary whitespace-nowrap align-top">
+                          <td className="font-mono text-content-secondary whitespace-nowrap align-top">
                             {p.ordinal}
                           </td>
-                          <td className="px-3 py-2 text-content-primary">
+                          <td>
                             {p.description}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary whitespace-nowrap align-top">
+                          <td className="text-right tabular-nums text-content-secondary whitespace-nowrap align-top">
                             {(() => {
                               const d = displayQty.convert(toNum(p.quantity), p.unit || '');
                               return `${d.value.toLocaleString(getNumberLocale())} ${d.unit}`;
@@ -3015,7 +3015,7 @@ function AssignBoqModal({
                   value={factorId}
                   onChange={(e) => setFactorId(e.target.value)}
                   disabled={factorsQ.isLoading}
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   <option value="">
                     {factorsQ.isLoading
@@ -3050,7 +3050,7 @@ function AssignBoqModal({
                     step="any"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className={inputCls}
+                    className={`oe-input ${inputCls}`}
                   />
                 </div>
                 <div>
@@ -3060,7 +3060,7 @@ function AssignBoqModal({
                   <select
                     value={quantityUnit}
                     onChange={(e) => setQuantityUnit(e.target.value)}
-                    className={inputCls}
+                    className={`oe-select ${inputCls}`}
                   >
                     {['kg', 't', 'm3', 'm2', 'm', 'pcs'].map((u) => (
                       <option key={u} value={u}>
@@ -3076,7 +3076,7 @@ function AssignBoqModal({
                   <select
                     value={stage}
                     onChange={(e) => setStage(e.target.value as Stage)}
-                    className={inputCls}
+                    className={`oe-select ${inputCls}`}
                   >
                     {(['a1a3', 'a4', 'a5', 'b', 'c', 'd'] as Stage[]).map((s) => (
                       <option key={s} value={s}>
@@ -3099,7 +3099,7 @@ function AssignBoqModal({
                     step="any"
                     value={density}
                     onChange={(e) => setDensity(e.target.value)}
-                    className={inputCls}
+                    className={`oe-input ${inputCls}`}
                     placeholder="e.g. 2400"
                   />
                 </div>
@@ -3509,7 +3509,7 @@ function ScopeEntryModal({
               onChange={(e) =>
                 setForm({ ...form, period_start: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -3522,7 +3522,7 @@ function ScopeEntryModal({
               onChange={(e) =>
                 setForm({ ...form, period_end: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -3538,7 +3538,7 @@ function ScopeEntryModal({
                 onChange={(e) =>
                   setForm({ ...form, fuel_type: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="diesel">{fuelTypeLabel('diesel', t)}</option>
                 <option value="petrol">{fuelTypeLabel('petrol', t)}</option>
@@ -3561,7 +3561,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, litres_or_m3: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
               <div>
@@ -3577,7 +3577,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, s1_factor: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
             </div>
@@ -3596,7 +3596,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, energy_type: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   <option value="grid_electricity">grid_electricity</option>
                   <option value="district_heating">district_heating</option>
@@ -3614,7 +3614,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, market_or_location: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   <option value="location">location</option>
                   <option value="market">market</option>
@@ -3629,7 +3629,7 @@ function ScopeEntryModal({
                   step="any"
                   value={form.kwh}
                   onChange={(e) => setForm({ ...form, kwh: e.target.value })}
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
               <div>
@@ -3645,7 +3645,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, s2_factor: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
             </div>
@@ -3660,7 +3660,7 @@ function ScopeEntryModal({
                 onChange={(e) =>
                   setForm({ ...form, supplier_name: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </div>
           </>
@@ -3677,7 +3677,7 @@ function ScopeEntryModal({
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="transport_upstream">transport_upstream</option>
                 <option value="transport_downstream">
@@ -3697,7 +3697,7 @@ function ScopeEntryModal({
                 onChange={(e) =>
                   setForm({ ...form, description: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -3714,7 +3714,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, activity_data: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
               <div>
@@ -3728,7 +3728,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, activity_unit: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
               <div>
@@ -3744,7 +3744,7 @@ function ScopeEntryModal({
                   onChange={(e) =>
                     setForm({ ...form, s3_factor: e.target.value })
                   }
-                  className={inputCls}
+                  className={`oe-input ${inputCls}`}
                 />
               </div>
             </div>
@@ -3908,7 +3908,7 @@ function EPDModal({
             <input
               value={form.epd_id}
               onChange={(e) => setForm({ ...form, epd_id: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder="oekobaudat:1.4.01"
               disabled={isEdit}
             />
@@ -3922,7 +3922,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, source: e.target.value as EPDSource })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="custom">custom</option>
               <option value="oekobaudat">oekobaudat</option>
@@ -3938,7 +3938,7 @@ function EPDModal({
           <input
             value={form.product_name}
             onChange={(e) => setForm({ ...form, product_name: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -3951,7 +3951,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, material_class: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               placeholder="concrete, steel…"
             />
           </div>
@@ -3964,7 +3964,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, manufacturer: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -3976,7 +3976,7 @@ function EPDModal({
             <input
               value={form.region}
               onChange={(e) => setForm({ ...form, region: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               maxLength={8}
               placeholder="DE, EU…"
             />
@@ -3990,7 +3990,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, declared_unit: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -4003,7 +4003,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, validity_until: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -4017,7 +4017,7 @@ function EPDModal({
               step="any"
               value={form.gwp_a1a3}
               onChange={(e) => setForm({ ...form, gwp_a1a3: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -4027,7 +4027,7 @@ function EPDModal({
               step="any"
               value={form.gwp_a4}
               onChange={(e) => setForm({ ...form, gwp_a4: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -4037,7 +4037,7 @@ function EPDModal({
               step="any"
               value={form.gwp_a5}
               onChange={(e) => setForm({ ...form, gwp_a5: e.target.value })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -4051,7 +4051,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, gwp_c_total: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -4063,7 +4063,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, gwp_d_credits: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
           <div>
@@ -4075,7 +4075,7 @@ function EPDModal({
               onChange={(e) =>
                 setForm({ ...form, document_url: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </div>
         </div>
@@ -4111,7 +4111,7 @@ function ModalShell({
   const { t } = useTranslation();
   useEscapeToClose(onClose);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
         role="dialog"
@@ -4121,7 +4121,7 @@ function ModalShell({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 id="carbon-modal-title" className="text-lg font-semibold">
+          <h2 id="carbon-modal-title" className="oe-section-title">
             {title}
           </h2>
           <button

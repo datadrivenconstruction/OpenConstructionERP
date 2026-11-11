@@ -141,10 +141,10 @@ function TimelineRow({ event }: { event: CoordinationTimelineEvent }) {
 function SkeletonRow() {
   return (
     <li className="flex animate-pulse items-start gap-3 border-b border-border py-3 last:border-b-0">
-      <div className="h-4 w-4 rounded bg-slate-200" />
+      <div className="h-4 w-4 rounded bg-surface-tertiary" />
       <div className="flex-1">
-        <div className="h-3 w-2/3 rounded bg-slate-200" />
-        <div className="mt-2 h-3 w-1/4 rounded bg-slate-100" />
+        <div className="h-3 w-2/3 rounded bg-surface-tertiary" />
+        <div className="mt-2 h-3 w-1/4 rounded bg-surface-secondary" />
       </div>
     </li>
   );
@@ -190,7 +190,7 @@ export function CoordinationTimeline({
       data-testid="coordination-timeline"
       className="rounded-xl border border-border bg-surface p-4 shadow-sm"
     >
-      <h3 className="mb-3 text-base font-semibold text-content-primary">
+      <h3 className="oe-section-title mb-3">
         {t('coordination.timeline_title', {
           defaultValue: 'Recent Activity',
         })}

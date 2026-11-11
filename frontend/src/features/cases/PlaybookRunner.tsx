@@ -134,7 +134,7 @@ function FlowSide({
         {items.map((item, i) => (
           <li
             key={i}
-            className="flex items-start gap-2.5 text-sm leading-snug text-content-secondary"
+            className="flex items-start gap-2 text-sm leading-snug text-content-secondary"
           >
             <FlowGlyph
               kind={item.glyph}
@@ -261,7 +261,7 @@ function StepBlock({
       id={id}
       aria-current={isCurrent ? "step" : undefined}
       className={clsx(
-        "relative scroll-mt-4 rounded-2xl border bg-surface-primary p-3.5 shadow-xs transition-colors sm:p-4",
+        "relative scroll-mt-4 rounded-2xl border bg-surface-primary p-3 shadow-xs transition-colors sm:p-4",
         isCurrent
           ? "border-oe-blue/50 ring-1 ring-inset ring-oe-blue/20"
           : done
@@ -288,7 +288,7 @@ function StepBlock({
       {/* Step counter + module tag: a left-aligned row, padded to clear the
           corner badge. */}
       <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 pe-9">
-        <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <span className="oe-overline">
           {t("cases.step_counter", {
             defaultValue: "Step {{n}} of {{total}}",
             n: index + 1,
@@ -306,7 +306,7 @@ function StepBlock({
           left-column line shares one left edge. */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
         <div className="min-w-0 space-y-3">
-          <h3 className="text-base font-semibold leading-snug text-content-primary sm:text-lg">
+          <h3 className="oe-section-title sm:text-lg">
             {title}
           </h3>
           <div>
@@ -318,7 +318,7 @@ function StepBlock({
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline">
               {t("cases.step.why", { defaultValue: "Why" })}
             </p>
             <p className="mt-1 text-sm leading-relaxed text-content-secondary">
@@ -344,7 +344,7 @@ function StepBlock({
             Stacks on narrow screens. */}
         <div className="min-w-0">
           {hasFlow ? (
-            <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-2.5">
+            <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-2">
               <FlowSide
                 label={t("cases.flow.in", { defaultValue: "Goes in" })}
                 items={inputs}
@@ -635,7 +635,7 @@ function MoreCaseTile({
         )}
         {playbook.region && (
           <span
-            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-2xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10"
+            className="absolute left-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded bg-white/90 px-1 text-2xs font-semibold text-content-primary shadow-sm ring-1 ring-inset ring-slate-900/10"
             title={regionDisplayName(playbook.region, language)}
             aria-label={regionDisplayName(playbook.region, language)}
           >
@@ -1144,7 +1144,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
               aria-live="polite"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <span className="oe-overline">
                   {t("cases.progress_label", { defaultValue: "Case progress" })}
                 </span>
                 <span className="shrink-0 text-2xs font-medium tabular-nums text-content-secondary">
@@ -1185,7 +1185,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
                 id={selectId}
                 value={selectedRaw}
                 onChange={(e) => setSelectedProject(playbook.id, e.target.value)}
-                className="mt-1.5 h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-xs text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                className="oe-select mt-1.5 w-full"
               >
                 <option value="">
                   {t("cases.run_on_none", {
@@ -1257,7 +1257,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
         <div className="flex min-w-0 flex-col gap-3 lg:flex-1">
         <section className="min-w-0" aria-label={t("cases.the_process", { defaultValue: "The process" })}>
           <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline">
               {t("cases.the_process", { defaultValue: "The process" })}
             </p>
             <p className="text-xs text-content-tertiary">
@@ -1424,7 +1424,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
           {nextCases.length > 0 && (
             <div>
               <div className="mb-2.5">
-                <h2 className="text-base font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t("cases.next.heading", { defaultValue: "Do this next" })}
                 </h2>
                 <p className="mt-0.5 text-xs text-content-tertiary">
@@ -1448,7 +1448,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
           {relatedCases.length > 0 && (
             <div>
               <div className="mb-2.5">
-                <h2 className="text-base font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t("cases.related.heading", { defaultValue: "Related cases" })}
                 </h2>
                 <p className="mt-0.5 text-xs text-content-tertiary">
@@ -1478,10 +1478,10 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
       {moreCases.length > 0 && (
         <section
           aria-label={t("cases.more.heading", { defaultValue: "Other cases" })}
-          className="space-y-2.5 border-t border-border-light pt-6"
+          className="space-y-2 border-t border-border-light pt-6"
         >
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t("cases.more.heading", { defaultValue: "Other cases" })}
             </h2>
             <p className="mt-0.5 text-xs text-content-tertiary">
@@ -1495,7 +1495,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
                   })}
             </p>
           </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-1.5">
+          <div className="flex gap-2 overflow-x-auto pb-1.5">
             {moreCases.map((c) => (
               <MoreCaseTile
                 key={c.id}

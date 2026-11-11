@@ -197,20 +197,20 @@ export function WebhookTargetsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[640px]">
-            <thead className="bg-surface-secondary/40 text-xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table-compact w-full min-w-[640px]">
+            <thead>
               <tr>
-                <th className="text-left px-4 py-2">{t('common.name', { defaultValue: 'Name' })}</th>
-                <th className="text-left px-4 py-2">{t('webhook_targets.url', { defaultValue: 'URL' })}</th>
-                <th className="text-left px-4 py-2">{t('webhook_targets.filter', { defaultValue: 'Event filter' })}</th>
-                <th className="text-left px-4 py-2">{t('webhook_targets.status', { defaultValue: 'Status' })}</th>
-                <th className="text-right px-4 py-2">{t('common.actions', { defaultValue: 'Actions' })}</th>
+                <th>{t('common.name', { defaultValue: 'Name' })}</th>
+                <th>{t('webhook_targets.url', { defaultValue: 'URL' })}</th>
+                <th>{t('webhook_targets.filter', { defaultValue: 'Event filter' })}</th>
+                <th>{t('webhook_targets.status', { defaultValue: 'Status' })}</th>
+                <th className="text-right">{t('common.actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
             <tbody>
               {targets.map((target) => (
-                <tr key={target.id} className="border-t border-border-light/60">
-                  <td className="px-4 py-3">
+                <tr key={target.id}>
+                  <td>
                     <div className="font-medium text-content-primary">{target.name}</div>
                     <div className="text-2xs text-content-quaternary">
                       {target.has_secret
@@ -218,14 +218,14 @@ export function WebhookTargetsPage() {
                         : t('webhook_targets.no_secret', { defaultValue: 'No secret' })}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-xs font-mono text-content-secondary truncate max-w-[260px]">
+                  <td className="font-mono text-content-secondary truncate max-w-[260px]">
                     {target.url}
                   </td>
-                  <td className="px-4 py-3 text-xs text-content-secondary">{target.event_filter}</td>
-                  <td className="px-4 py-3 text-xs">
+                  <td className="text-content-secondary">{target.event_filter}</td>
+                  <td>
                     <StatusBadge target={target} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <div className="inline-flex items-center gap-1">
                       <button
                         type="button"
@@ -344,7 +344,7 @@ function CreateForm({
       }}
       className="rounded-xl border border-border-light bg-surface-elevated p-5 space-y-3"
     >
-      <h2 className="text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title">
         {t('webhook_targets.new_title', { defaultValue: 'New webhook target' })}
       </h2>
       <div className="grid grid-cols-2 gap-3">
@@ -357,7 +357,7 @@ function CreateForm({
             required
             minLength={1}
             maxLength={120}
-            className="w-full rounded-md border border-border-light px-2 py-1.5 text-sm"
+            className="oe-input w-full"
           />
         </label>
         <label className="space-y-1 text-xs text-content-secondary">
@@ -367,7 +367,7 @@ function CreateForm({
             value={eventFilter}
             onChange={(e) => setEventFilter(e.target.value)}
             placeholder="*"
-            className="w-full rounded-md border border-border-light px-2 py-1.5 text-sm font-mono"
+            className="oe-input w-full font-mono"
           />
         </label>
       </div>
@@ -380,7 +380,7 @@ function CreateForm({
           required
           pattern="https?://.+"
           maxLength={2048}
-          className="w-full rounded-md border border-border-light px-2 py-1.5 text-sm font-mono"
+          className="oe-input w-full font-mono"
         />
       </label>
       <label className="block space-y-1 text-xs text-content-secondary">
@@ -391,7 +391,7 @@ function CreateForm({
           onChange={(e) => setSecret(e.target.value)}
           maxLength={255}
           autoComplete="off"
-          className="w-full rounded-md border border-border-light px-2 py-1.5 text-sm font-mono"
+          className="oe-input w-full font-mono"
         />
       </label>
       <div className="flex items-center justify-end gap-2 pt-2">

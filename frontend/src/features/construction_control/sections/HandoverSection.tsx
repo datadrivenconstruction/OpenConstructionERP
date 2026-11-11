@@ -289,22 +289,22 @@ export function HandoverSection({ projectId }: SectionProps) {
           <div className="lg:col-span-3">
             <Card>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table w-full">
                   <thead>
-                    <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                      <th className="px-4 py-2.5 font-medium">
+                    <tr className="text-left">
+                      <th>
                         {t('construction_control.col.number', { defaultValue: 'Number' })}
                       </th>
-                      <th className="px-4 py-2.5 font-medium">
+                      <th>
                         {t('construction_control.col.title', { defaultValue: 'Title' })}
                       </th>
-                      <th className="px-4 py-2.5 font-medium whitespace-nowrap">
+                      <th>
                         {t('construction_control.col.completeness', { defaultValue: 'Completeness' })}
                       </th>
-                      <th className="px-4 py-2.5 font-medium">
+                      <th>
                         {t('construction_control.col.gate', { defaultValue: 'Gate' })}
                       </th>
-                      <th className="px-4 py-2.5 font-medium">
+                      <th>
                         {t('construction_control.col.status', { defaultValue: 'Status' })}
                       </th>
                     </tr>
@@ -322,10 +322,10 @@ export function HandoverSection({ projectId }: SectionProps) {
                             isSel ? 'bg-oe-blue-subtle/60' : 'hover:bg-surface-secondary'
                           }`}
                         >
-                          <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                          <td className="font-mono text-content-secondary whitespace-nowrap">
                             {p.package_number}
                           </td>
-                          <td className="px-4 py-3">
+                          <td>
                             <div className="font-medium text-content-primary">{p.title}</div>
                             <div className="text-xs text-content-tertiary">
                               {t(`construction_control.regime.${p.completion_regime}`, {
@@ -333,10 +333,10 @@ export function HandoverSection({ projectId }: SectionProps) {
                               })}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-content-secondary whitespace-nowrap">
+                          <td className="text-content-secondary whitespace-nowrap">
                             {p.completeness_pct}%
                           </td>
-                          <td className="px-4 py-3">
+                          <td>
                             <div className="flex flex-col gap-1">
                               <StatusBadge status={p.gating_state} variants={GATING_STATE_VARIANTS} />
                               {(p.open_ncr_count > 0 || p.unreleased_hold_count > 0) && (
@@ -350,7 +350,7 @@ export function HandoverSection({ projectId }: SectionProps) {
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td>
                             <StatusBadge status={p.status} variants={HANDOVER_STATUS_VARIANTS} />
                           </td>
                         </tr>
@@ -458,7 +458,7 @@ function PackageDetail({
       <div className="space-y-4 p-5">
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-semibold text-content-primary">{pkg.title}</h3>
+            <h3 className="oe-section-title">{pkg.title}</h3>
             <StatusBadge status={pkg.status} variants={HANDOVER_STATUS_VARIANTS} />
           </div>
           <p className="mt-0.5 font-mono text-xs text-content-tertiary">{pkg.package_number}</p>
@@ -490,7 +490,7 @@ function PackageDetail({
         {/* ── Completion gate report ─────────────────────────────────────── */}
         <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('construction_control.handover.gate_report', { defaultValue: 'Completion gate' })}
             </span>
             <StatusBadge status={gatingState} variants={GATING_STATE_VARIANTS} />
@@ -863,7 +863,7 @@ function OverrideGateModal({
       onClose={onClose}
     >
       <div className="space-y-4 px-6 py-4">
-        <div className="flex items-start gap-2 rounded-lg border border-amber-400/50 bg-semantic-warning-bg/60 p-3 text-xs text-[#b45309]">
+        <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/50 bg-semantic-warning-bg/60 p-3 text-xs text-[#b45309]">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             {t('construction_control.handover.override_warning', {
@@ -1027,7 +1027,7 @@ function ModalShell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -1035,7 +1035,7 @@ function ModalShell({
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           <button
             type="button"
             onClick={onClose}

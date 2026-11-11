@@ -131,7 +131,7 @@ export function LinkList({ projectId, item, editVerdict, onChanged }: LinkListPr
   return (
     <section data-testid="links">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('commitment.drawer.links', { defaultValue: 'Linked documents' })}
         </h3>
         {!adding && (
@@ -165,7 +165,7 @@ export function LinkList({ projectId, item, editVerdict, onChanged }: LinkListPr
             <li
               key={link.link_id}
               data-testid="link-row"
-              className="flex flex-wrap items-start gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-2.5 text-sm"
+              className="flex flex-wrap items-start gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-content-primary" data-testid="link-name">
@@ -411,7 +411,7 @@ function CheckPanel({
   return (
     <div className="mt-2 space-y-3 rounded-lg bg-surface-secondary p-3" data-testid="check-panel">
       <div>
-        <h4 className="text-sm font-semibold text-content-primary">
+        <h4 className="oe-card-title">
           {t('commitment.check.title', { defaultValue: 'What would happen' })}
         </h4>
         <p className="text-xs text-content-secondary">

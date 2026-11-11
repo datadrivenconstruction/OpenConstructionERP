@@ -308,7 +308,7 @@ export function CaseEditorPage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Copy className="h-4 w-4 text-content-tertiary" />
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('cases.editor.start_from', { defaultValue: 'Start from one of ours' })}
               </h2>
             </div>
@@ -346,7 +346,7 @@ export function CaseEditorPage() {
                   key={entry.playbook.id}
                   type="button"
                   className={clsx(
-                    'flex gap-3 rounded-lg border border-border-light p-2.5 text-left transition',
+                    'flex gap-3 rounded-lg border border-border-light p-3 text-left transition',
                     'hover:border-oe-blue hover:bg-surface-secondary',
                   )}
                   onClick={() => {
@@ -384,7 +384,7 @@ export function CaseEditorPage() {
 
       {/* What the case is */}
       <Card className={SECTION}>
-        <h2 className="mb-4 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-4">
           {t('cases.editor.section_about', { defaultValue: 'What this case is' })}
         </h2>
         <div className="space-y-4">
@@ -421,7 +421,7 @@ export function CaseEditorPage() {
             <textarea
               id="case-long"
               rows={3}
-              className="w-full rounded-md border border-border-light bg-surface-primary p-2.5 text-sm text-content-primary"
+              className="oe-textarea w-full"
               value={draft.longDescription}
               onChange={(e) => patch({ longDescription: e.target.value })}
             />
@@ -433,7 +433,7 @@ export function CaseEditorPage() {
               </label>
               <select
                 id="case-category"
-                className="w-full rounded-md border border-border-light bg-surface-primary p-2.5 text-sm text-content-primary"
+                className="oe-select w-full"
                 value={draft.category}
                 onChange={(e) => patch({ category: e.target.value as CaseCategory })}
               >
@@ -496,7 +496,7 @@ export function CaseEditorPage() {
       {/* Steps */}
       <Card className={SECTION}>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('cases.editor.section_steps', { defaultValue: 'Steps' })}
             <span className="ml-2 font-normal text-content-tertiary">{draft.steps.length}</span>
           </h2>
@@ -577,7 +577,7 @@ export function CaseEditorPage() {
                         type="button"
                         onClick={() => setPickerFor(index)}
                         className={clsx(
-                          'flex w-full items-center gap-2.5 rounded-md border p-2 text-left transition',
+                          'flex w-full items-center gap-2 rounded-md border p-2 text-left transition',
                           targetBad
                             ? 'border-semantic-error'
                             : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
@@ -636,7 +636,7 @@ export function CaseEditorPage() {
                       </label>
                       <textarea
                         rows={2}
-                        className="w-full rounded-md border border-border-light bg-surface-primary p-2 text-sm text-content-primary"
+                        className="oe-textarea w-full"
                         value={step.what}
                         onChange={(e) => patchStep(index, { what: e.target.value })}
                       />
@@ -647,7 +647,7 @@ export function CaseEditorPage() {
                       </label>
                       <textarea
                         rows={2}
-                        className="w-full rounded-md border border-border-light bg-surface-primary p-2 text-sm text-content-primary"
+                        className="oe-textarea w-full"
                         value={step.why}
                         onChange={(e) => patchStep(index, { why: e.target.value })}
                         placeholder={t('cases.editor.step_why_ph', {
@@ -700,7 +700,7 @@ export function CaseEditorPage() {
           blocker is its own kind of lying to the author. */}
       {unchecked.length > 0 && (
         <Card className={clsx(SECTION, 'border-dashed')}>
-          <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title mb-1 flex items-center gap-2">
             <CircleSlash className="h-4 w-4 text-content-tertiary" />
             {t('cases.editor.section_unchecked', {
               defaultValue: 'Parts we could not check',
@@ -735,7 +735,7 @@ export function CaseEditorPage() {
       {/* What validation made of it */}
       {remarks.length > 0 && (
         <Card className={SECTION}>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title mb-3 flex items-center gap-2">
             <Info className="h-4 w-4 text-content-tertiary" />
             {t('cases.editor.section_review', { defaultValue: 'Worth a look' })}
           </h2>
@@ -774,7 +774,7 @@ export function CaseEditorPage() {
               />
             </div>
             <div className="p-4">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {draft.title.trim() ||
                   t('cases.editor.preview_untitled', { defaultValue: 'Your case, untitled' })}
               </h2>
@@ -806,7 +806,7 @@ export function CaseEditorPage() {
           </Card>
 
           <Card className={SECTION}>
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3 flex items-center gap-2">
               <LayoutGrid className="h-4 w-4 text-content-tertiary" />
               {t('cases.editor.route_title', { defaultValue: 'The route through the product' })}
             </h2>
@@ -821,7 +821,7 @@ export function CaseEditorPage() {
                 {draft.steps.map((step, index) => {
                   const Icon = step.to ? getRouteIcon(step.to.split('?')[0] ?? step.to) : null;
                   return (
-                    <li key={step.id} className="flex items-center gap-2.5 rounded-md p-1.5">
+                    <li key={step.id} className="flex items-center gap-2 rounded-md p-1.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-2xs font-medium text-content-secondary">
                         {index + 1}
                       </span>

@@ -9,9 +9,9 @@ import { logStatusLabel, logStatusVariant } from './labels';
 export const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 export const compactInputCls =
-  'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 export const warnInputCls =
-  'h-8 w-full rounded-md border border-semantic-warning/60 bg-semantic-warning-bg px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-semantic-warning/30';
+  'oe-input w-full';
 
 export function Money({ value, currency }: { value: string | null | undefined; currency: string }) {
   if (value === null || value === undefined || value === '') return <span>—</span>;
@@ -42,7 +42,7 @@ export function Toggle({
   disabled?: boolean;
 }) {
   return (
-    <label className="flex items-start gap-2.5 text-sm">
+    <label className="flex items-start gap-2 text-sm">
       <input
         type="checkbox"
         className="mt-0.5 h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue/30"

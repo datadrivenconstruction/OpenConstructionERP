@@ -292,7 +292,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
       : t('boq.create_boq', { defaultValue: 'Create BOQ' });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={busy ? undefined : onClose} />
 
@@ -305,7 +305,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
               <FileSpreadsheet size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('projects.new_boq', { defaultValue: 'New BOQ' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -319,7 +319,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-50"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -327,7 +327,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
           {/* Project selector */}
           <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
+            <label className="oe-label">
               {t('common.project')}
               <span aria-hidden="true" className="ml-1 text-semantic-error">*</span>
             </label>
@@ -359,7 +359,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
           {/* Start mode: empty vs import */}
           <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
+            <label className="oe-label">
               {t('boq.start_from', { defaultValue: 'Start from' })}
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -406,7 +406,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
                 }`}
                 data-testid="create-boq-file-picker"
               >
-                <FileUp size={18} className="shrink-0 text-content-tertiary" />
+                <FileUp size={20} className="shrink-0 text-content-tertiary" />
                 {file ? (
                   <span className="truncate text-content-primary">{file.name}</span>
                 ) : (
@@ -464,7 +464,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
           {/* Description */}
           <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
+            <label className="oe-label">
               {t('common.description')}
             </label>
             <textarea
@@ -472,7 +472,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('boq.scope_placeholder', { defaultValue: 'Scope of this BOQ...' })}
               rows={2}
-              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
+              className="oe-textarea-lg w-full resize-none"
             />
           </div>
 

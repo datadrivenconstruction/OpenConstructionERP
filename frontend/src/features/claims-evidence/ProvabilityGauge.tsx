@@ -90,7 +90,7 @@ export function ProvabilityGauge({ projectId, subjectKind, subjectId, className 
           <ShieldCheck className="h-4 w-4" />
         </span>
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('provability.title', { defaultValue: 'Provability' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -138,7 +138,7 @@ export function ProvabilityGauge({ projectId, subjectKind, subjectId, className 
 
           {/* Per-signal breakdown: present vs missing */}
           <div className="space-y-1.5">
-            <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <div className="oe-overline">
               {t('provability.signals', { defaultValue: 'Evidence signals' })}
             </div>
             <ul className="space-y-1">
@@ -165,7 +165,7 @@ export function ProvabilityGauge({ projectId, subjectKind, subjectId, className 
           {/* Cure list: what to fix, worst-cost first as the engine orders it */}
           {score.weaknesses.length > 0 && (
             <div className="space-y-1.5">
-              <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <div className="oe-overline">
                 {t('provability.cures', { defaultValue: 'What would strengthen it' })}
               </div>
               <ul className="space-y-1.5">

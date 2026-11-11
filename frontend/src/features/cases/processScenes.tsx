@@ -442,7 +442,7 @@ export function StepProcessScene({
     >
       <svg
         viewBox={VB}
-        className="h-full w-full p-3 text-slate-400"
+        className="h-full w-full p-3 text-content-quaternary"
         fill="none"
         stroke="currentColor"
         strokeWidth={2.4}

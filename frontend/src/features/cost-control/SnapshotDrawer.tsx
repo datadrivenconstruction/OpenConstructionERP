@@ -95,7 +95,7 @@ function NoteEditor({
       <label className="block text-sm">
         <span className="text-content-secondary">{t('cost_control.note_comment', { defaultValue: 'Why it moved' })}</span>
         <textarea
-          className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2"
+          className="oe-textarea mt-1 w-full"
           rows={2}
           maxLength={4000}
           value={comment}
@@ -112,7 +112,7 @@ function NoteEditor({
         {evidence.map((e, i) => (
           <div key={i} className="flex flex-wrap items-center gap-2">
             <select
-              className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-select"
               value={e.kind}
               aria-label={t('cost_control.note_evidence_kind', { defaultValue: 'Kind of evidence' })}
               onChange={(ev) => update(i, { kind: ev.target.value as EvidenceKind, document_id: null })}
@@ -125,7 +125,7 @@ function NoteEditor({
             </select>
             {e.kind === 'document' && docs.length > 0 && (
               <select
-                className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+                className="oe-select min-w-0 flex-1"
                 value={e.document_id ?? ''}
                 aria-label={t('cost_control.note_pick_document', { defaultValue: 'Document from the register' })}
                 onChange={(ev) => {
@@ -144,7 +144,7 @@ function NoteEditor({
               </select>
             )}
             <input
-              className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+              className="oe-input min-w-0 flex-1"
               value={e.ref}
               maxLength={500}
               onChange={(ev) => update(i, { ref: ev.target.value })}
@@ -368,7 +368,7 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
           <section className="rounded-xl border border-border-light p-4 text-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <div className="oe-overline">
                   {t('cost_control.col_forecast', { defaultValue: 'Forecast' })}
                 </div>
                 <div className="text-2xl font-semibold tabular-nums text-content-primary">
@@ -451,7 +451,7 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
 
           <section>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h3 className="me-auto text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title me-auto">
                 {t('cost_control.snapshot_lines', { defaultValue: 'Lines' })}
               </h3>
               {(isDraft ? (['attention', 'moved', 'all'] as const) : (['moved', 'all'] as const)).map((f) => (

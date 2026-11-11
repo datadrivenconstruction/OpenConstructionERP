@@ -37,10 +37,10 @@ interface ServiceLogPanelProps {
 }
 
 const MAINT_TONE: Record<MaintenanceStatus, string> = {
-  ok: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
-  due: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
-  overdue: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
-  unknown: 'bg-neutral-700/40 text-neutral-300 border-neutral-600/50',
+  ok: 'bg-semantic-success/15 text-semantic-success border-semantic-success/30',
+  due: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30',
+  overdue: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30',
+  unknown: 'bg-content-secondary text-content-quaternary border-border',
 };
 
 function todayIso(): string {
@@ -86,8 +86,8 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
   return (
     <section data-testid="service-log-panel">
       <header className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-          <Wrench size={13} className="text-amber-400" />
+        <div className="oe-overline flex items-center gap-1.5">
+          <Wrench size={14} className="text-semantic-warning" />
           <span>{t('assets.service.title', { defaultValue: 'Maintenance & service log' })}</span>
         </div>
         <span className={`rounded-md border px-2 py-0.5 text-2xs ${MAINT_TONE[maint]}`}>
@@ -116,7 +116,7 @@ export function ServiceLogPanel({ assetId, initialLog = [], initialHealth }: Ser
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value)}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+            className="oe-select-sm"
             data-testid="service-kind"
           >
             <option value="service">{t('assets.service.kind_service', { defaultValue: 'Service' })}</option>

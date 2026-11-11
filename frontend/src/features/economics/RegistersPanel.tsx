@@ -63,7 +63,7 @@ const word = (t: Translate, entry: KeyText) => t(entry[0], { defaultValue: entry
 function Section({ title, children, testId }: { title: string; children: ReactNode; testId: string }) {
   return (
     <section className="space-y-3" data-testid={testId}>
-      <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+      <h2 className="oe-section-title">{title}</h2>
       {children}
     </section>
   );
@@ -112,31 +112,31 @@ function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: 
   return (
     <Section title={t('economics.registers.securities_title', { defaultValue: 'Securities' })} testId="economics-securities">
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full">
+          <thead className="text-left">
             <tr>
-              <th className="px-3 py-2">{t('economics.registers.col_description', { defaultValue: 'Description' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.registers.col_amount', { defaultValue: 'Amount' })}</th>
-              <th className="px-3 py-2">{t('economics.registers.col_issuer', { defaultValue: 'Issuer' })}</th>
-              <th className="px-3 py-2">{t('economics.registers.col_valid_until', { defaultValue: 'Valid until' })}</th>
-              <th className="px-3 py-2">{t('economics.registers.col_status', { defaultValue: 'Status' })}</th>
-              <th className="px-3 py-2" />
+              <th>{t('economics.registers.col_description', { defaultValue: 'Description' })}</th>
+              <th className="text-right">{t('economics.registers.col_amount', { defaultValue: 'Amount' })}</th>
+              <th>{t('economics.registers.col_issuer', { defaultValue: 'Issuer' })}</th>
+              <th>{t('economics.registers.col_valid_until', { defaultValue: 'Valid until' })}</th>
+              <th>{t('economics.registers.col_status', { defaultValue: 'Status' })}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {data.securities.map((row) => (
-              <tr key={row.id} className="border-t border-border" data-testid="economics-security">
-                <td className="px-3 py-2">
+              <tr key={row.id} data-testid="economics-security">
+                <td>
                   <div>{row.description}</div>
                   <div className="text-xs text-content-secondary">
                     {word(t, SECURITY_KIND[row.kind])}
                     {row.reference && ` - ${row.reference}`}
                   </div>
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(row.amount)}</td>
-                <td className="px-3 py-2">{orDash(row.issuer)}</td>
-                <td className={row.lapsed ? 'px-3 py-2 text-semantic-error' : 'px-3 py-2'}>{orDash(day(row.valid_until))}</td>
-                <td className="px-3 py-2">
+                <td className="text-right tabular-nums">{money(row.amount)}</td>
+                <td>{orDash(row.issuer)}</td>
+                <td className={row.lapsed ? 'text-semantic-error' : ''}>{orDash(day(row.valid_until))}</td>
+                <td>
                   {canEdit ? (
                     <StatusSelect
                       value={row.status}
@@ -149,7 +149,7 @@ function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: 
                     <Badge variant={STATUS_VARIANT[row.status] ?? 'neutral'}>{word(t, SECURITY_STATUS[row.status])}</Badge>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {canEdit && (
                     <ConfirmDelete
                       label={t('economics.registers.delete_security', { defaultValue: 'Delete the security' })}
@@ -232,33 +232,33 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
   return (
     <Section title={t('economics.registers.insurance_title', { defaultValue: 'Insurance' })} testId="economics-insurance">
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full">
+          <thead className="text-left">
             <tr>
-              <th className="px-3 py-2">{t('economics.registers.col_policy', { defaultValue: 'Policy' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.registers.col_sum_insured', { defaultValue: 'Sum insured' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.registers.col_deductible', { defaultValue: 'Deductible' })}</th>
-              <th className="px-3 py-2">{t('economics.registers.col_period', { defaultValue: 'Period' })}</th>
-              <th className="px-3 py-2">{t('economics.registers.col_status', { defaultValue: 'Status' })}</th>
-              <th className="px-3 py-2" />
+              <th>{t('economics.registers.col_policy', { defaultValue: 'Policy' })}</th>
+              <th className="text-right">{t('economics.registers.col_sum_insured', { defaultValue: 'Sum insured' })}</th>
+              <th className="text-right">{t('economics.registers.col_deductible', { defaultValue: 'Deductible' })}</th>
+              <th>{t('economics.registers.col_period', { defaultValue: 'Period' })}</th>
+              <th>{t('economics.registers.col_status', { defaultValue: 'Status' })}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {data.insurances.map((row) => (
-              <tr key={row.id} className="border-t border-border" data-testid="economics-insurance-row">
-                <td className="px-3 py-2">
+              <tr key={row.id} data-testid="economics-insurance-row">
+                <td>
                   <div>{word(t, INSURANCE_KIND[row.kind])}</div>
                   <div className="text-xs text-content-secondary">
                     {row.insurer}
                     {row.policy_number && ` - ${row.policy_number}`}
                   </div>
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(row.sum_insured)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(row.deductible)}</td>
-                <td className={row.lapsed ? 'px-3 py-2 text-semantic-error' : 'px-3 py-2'}>
+                <td className="text-right tabular-nums">{money(row.sum_insured)}</td>
+                <td className="text-right tabular-nums">{money(row.deductible)}</td>
+                <td className={row.lapsed ? 'text-semantic-error' : ''}>
                   {orDash(day(row.period_from))} - {orDash(day(row.period_to))}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   {canEdit ? (
                     <StatusSelect
                       value={row.status}
@@ -271,7 +271,7 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
                     <Badge variant={STATUS_VARIANT[row.status] ?? 'neutral'}>{word(t, INSURANCE_STATUS[row.status])}</Badge>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {canEdit && (
                     <ConfirmDelete
                       label={t('economics.registers.delete_insurance', { defaultValue: 'Delete the insurance' })}

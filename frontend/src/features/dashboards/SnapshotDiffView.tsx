@@ -41,7 +41,7 @@ export function SnapshotDiffView({
   return (
     <Card data-testid="snapshot-diff-view">
       <div className="border-b border-border-light px-4 py-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('dashboards.diff_title', { defaultValue: 'Snapshot diff' })}
         </h3>
         <p className="text-xs text-content-tertiary">
@@ -62,7 +62,7 @@ export function SnapshotDiffView({
 
         {diffQuery.isError && (
           <div
-            className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300"
+            className="rounded border border-semantic-error/30 bg-semantic-error/10 p-3 text-xs text-semantic-error"
             data-testid="snapshot-diff-error"
           >
             {t('dashboards.diff_error', {
@@ -110,7 +110,7 @@ function DiffBody({ diff }: { diff: SnapshotDiff }) {
           title={t('dashboards.diff_columns_added', {
             defaultValue: 'Columns added',
           })}
-          icon={<PlusCircle className="h-3 w-3 text-emerald-400" />}
+          icon={<PlusCircle className="h-3 w-3 text-semantic-success" />}
           names={diff.columns_added}
           testId="snapshot-diff-added"
         />
@@ -119,7 +119,7 @@ function DiffBody({ diff }: { diff: SnapshotDiff }) {
           title={t('dashboards.diff_columns_removed', {
             defaultValue: 'Columns removed',
           })}
-          icon={<MinusCircle className="h-3 w-3 text-rose-400" />}
+          icon={<MinusCircle className="h-3 w-3 text-semantic-error" />}
           names={diff.columns_removed}
           testId="snapshot-diff-removed"
         />
@@ -205,9 +205,9 @@ interface ChipProps {
 
 function Chip({ tone, label, value, testId }: ChipProps) {
   const palette: Record<ChipProps['tone'], string> = {
-    emerald: 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30',
-    rose: 'bg-semantic-error/15 text-rose-300 border-rose-500/30',
-    amber: 'bg-semantic-warning/15 text-amber-300 border-amber-500/30',
+    emerald: 'bg-semantic-success/15 text-semantic-success border-semantic-success/30',
+    rose: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30',
+    amber: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30',
     neutral: 'bg-surface-secondary text-content-secondary border-border-light',
   };
   return (
@@ -235,8 +235,8 @@ function ColumnList({ variant, title, icon, names, testId }: ColumnListProps) {
   const { t } = useTranslation();
   const tone =
     variant === 'added'
-      ? 'border-emerald-500/30 bg-semantic-success/5'
-      : 'border-rose-500/30 bg-semantic-error/5';
+      ? 'border-semantic-success/30 bg-semantic-success/5'
+      : 'border-semantic-error/30 bg-semantic-error/5';
   return (
     <div className={`rounded border ${tone} p-2`} data-testid={testId}>
       <div className="mb-1 flex items-center gap-1 text-xs font-medium text-content-primary">
@@ -274,11 +274,11 @@ function ChangedList({
   const { t } = useTranslation();
   return (
     <div
-      className="rounded border border-amber-500/30 bg-semantic-warning/5 p-2"
+      className="rounded border border-semantic-warning/30 bg-semantic-warning/5 p-2"
       data-testid="snapshot-diff-changed"
     >
       <div className="mb-1 flex items-center gap-1 text-xs font-medium text-content-primary">
-        <Repeat className="h-3 w-3 text-amber-400" />
+        <Repeat className="h-3 w-3 text-semantic-warning" />
         <span>
           {t('dashboards.diff_columns_changed_title', {
             defaultValue: 'Type changed',
@@ -306,7 +306,7 @@ function ChangedList({
               </span>
               <span className="text-content-tertiary">{c.a_dtype}</span>
               <ArrowRight className="h-3 w-3 text-content-tertiary" />
-              <span className="text-amber-300">{c.b_dtype}</span>
+              <span className="text-semantic-warning">{c.b_dtype}</span>
             </li>
           ))}
         </ul>

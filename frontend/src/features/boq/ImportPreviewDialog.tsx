@@ -455,7 +455,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -466,7 +466,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
       >
         {/* ── Header ────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('boq.import_preview.title', { defaultValue: 'Import preview' })}
           </h2>
           <button
@@ -475,7 +475,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
@@ -541,7 +541,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
               />
 
               {error && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>
                 </div>
@@ -755,37 +755,37 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
               {/* Preview table */}
               <div className="rounded-lg border border-border-light overflow-hidden">
                 <div className="overflow-x-auto max-h-[40vh]">
-                  <table className="w-full text-xs">
-                    <thead className="sticky top-0 bg-surface-secondary border-b border-border-light">
+                  <table className="oe-table-compact w-full">
+                    <thead className="sticky top-0">
                       <tr>
-                        <th className="px-3 py-2 text-left font-medium text-content-tertiary whitespace-nowrap">
+                        <th>
                           {t('boq.import_preview.col_ordinal', { defaultValue: 'Pos. / Code' })}
                         </th>
-                        <th className="px-3 py-2 text-left font-medium text-content-tertiary">
+                        <th>
                           {t('boq.import_preview.col_description', { defaultValue: 'Description' })}
                         </th>
-                        <th className="px-3 py-2 text-left font-medium text-content-tertiary whitespace-nowrap">
+                        <th>
                           {t('boq.import_preview.col_unit', { defaultValue: 'Unit' })}
                         </th>
-                        <th className="px-3 py-2 text-right font-medium text-content-tertiary whitespace-nowrap">
+                        <th className="text-right">
                           {t('boq.import_preview.col_quantity', { defaultValue: 'Qty' })}
                         </th>
-                        <th className="px-3 py-2 text-right font-medium text-content-tertiary whitespace-nowrap">
+                        <th className="text-right">
                           {t('boq.import_preview.col_unit_rate', { defaultValue: 'Unit Rate' })}
                         </th>
-                        <th className="px-3 py-2 text-right font-medium text-content-tertiary whitespace-nowrap">
+                        <th className="text-right">
                           {t('boq.import_preview.col_total', { defaultValue: 'Total' })}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {visibleRows.map((pos, i) => (
                         <tr
                           key={i}
                           className={
                             pos.is_section
                               ? 'bg-surface-secondary/60'
-                              : 'hover:bg-surface-secondary/30'
+                              : ''
                           }
                         >
                           <td className={`px-3 py-1.5 whitespace-nowrap ${pos.is_section ? 'font-semibold text-content-primary' : 'text-content-secondary'}`}>
@@ -794,16 +794,16 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
                           <td className={`px-3 py-1.5 max-w-xs truncate ${pos.is_section ? 'font-semibold text-content-primary' : 'text-content-primary'}`}>
                             {pos.description}
                           </td>
-                          <td className="px-3 py-1.5 text-content-secondary whitespace-nowrap">
+                          <td className="text-content-secondary whitespace-nowrap">
                             {pos.is_section ? '' : pos.unit}
                           </td>
-                          <td className="px-3 py-1.5 text-right text-content-secondary tabular-nums whitespace-nowrap">
+                          <td className="text-right text-content-secondary tabular-nums whitespace-nowrap">
                             {pos.is_section ? '' : fmtNumber(pos.quantity)}
                           </td>
-                          <td className="px-3 py-1.5 text-right text-content-secondary tabular-nums whitespace-nowrap">
+                          <td className="text-right text-content-secondary tabular-nums whitespace-nowrap">
                             {pos.is_section ? '' : fmtNumber(pos.unit_rate)}
                           </td>
-                          <td className="px-3 py-1.5 text-right text-content-primary tabular-nums whitespace-nowrap font-medium">
+                          <td className="text-right tabular-nums whitespace-nowrap font-medium">
                             {pos.is_section ? '' : fmtNumber(pos.total)}
                           </td>
                         </tr>
@@ -838,7 +838,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
               </p>
 
               {preview.warnings.length > 0 && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 text-xs text-semantic-warning">
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-semantic-warning-bg border border-semantic-warning/30 text-xs text-semantic-warning">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>
                     {t('boq.import_preview.confirm_warnings', {
@@ -870,7 +870,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
               )}
 
               {error && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>
                 </div>
@@ -878,7 +878,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
 
               {alreadyDone && (
                 <div
-                  className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning/10 text-content-primary text-xs"
+                  className="flex items-start gap-2 p-2 rounded-lg bg-semantic-warning/10 text-content-primary text-xs"
                   role="alert"
                 >
                   <AlertTriangle size={14} className="shrink-0 mt-0.5 text-semantic-warning" />

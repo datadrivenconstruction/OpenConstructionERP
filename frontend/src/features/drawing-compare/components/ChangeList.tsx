@@ -249,7 +249,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
               size="sm"
               variant={change.status === 'relevant' ? 'primary' : 'secondary'}
               onClick={() => update.mutate({ status: 'relevant' })}
-              icon={<Check size={13} />}
+              icon={<Check size={14} />}
             >
               {t('drawing_compare.mark_relevant', { defaultValue: 'Relevant' })}
             </Button>
@@ -257,22 +257,22 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
               size="sm"
               variant={change.status === 'not_relevant' ? 'primary' : 'secondary'}
               onClick={() => update.mutate({ status: 'not_relevant' })}
-              icon={<X size={13} />}
+              icon={<X size={14} />}
             >
               {t('drawing_compare.mark_not_relevant', { defaultValue: 'Not relevant' })}
             </Button>
-            <Button size="sm" variant="ghost" disabled={!!change.rfi_id || rfi.isPending} onClick={() => rfi.mutate()} icon={rfi.isPending ? <Loader2 size={13} className="animate-spin" /> : <FileQuestion size={13} />}>
+            <Button size="sm" variant="ghost" disabled={!!change.rfi_id || rfi.isPending} onClick={() => rfi.mutate()} icon={rfi.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileQuestion size={14} />}>
               {t('drawing_compare.raise_rfi', { defaultValue: 'RFI' })}
             </Button>
-            <Button size="sm" variant="ghost" disabled={!!change.markup_id || markup.isPending} onClick={() => markup.mutate()} icon={<Cloud size={13} />}>
+            <Button size="sm" variant="ghost" disabled={!!change.markup_id || markup.isPending} onClick={() => markup.mutate()} icon={<Cloud size={14} />}>
               {t('drawing_compare.add_cloud', { defaultValue: 'Cloud' })}
             </Button>
             {change.flagged_at ? (
-              <Button size="sm" variant="ghost" onClick={() => clear.mutate()} icon={<Eraser size={13} />}>
+              <Button size="sm" variant="ghost" onClick={() => clear.mutate()} icon={<Eraser size={14} />}>
                 {t('drawing_compare.clear_flags', { defaultValue: 'Re-measured' })}
               </Button>
             ) : (
-              <Button size="sm" variant="ghost" onClick={onRemeasure} icon={<Ruler size={13} />}>
+              <Button size="sm" variant="ghost" onClick={onRemeasure} icon={<Ruler size={14} />}>
                 {t('drawing_compare.remeasure', { defaultValue: 'Re-measure' })}
               </Button>
             )}
@@ -286,7 +286,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
             rows={1}
             maxLength={5000}
             placeholder={t('drawing_compare.comment_placeholder', { defaultValue: 'Comment for the team' })}
-            className="w-full resize-y rounded-md border border-border bg-surface-primary px-2 py-1 text-xs"
+            className="oe-textarea-sm w-full resize-y"
           />
         </div>
       )}
@@ -330,14 +330,14 @@ export function RemeasureDialog({ change, comparisonId, onClose }: RemeasureDial
   const empty = preview && preview.items.length === 0;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="dc-remeasure-title"
       onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div className="w-full max-w-lg rounded-xl bg-surface-primary p-4 shadow-xl">
-        <h2 id="dc-remeasure-title" className="text-base font-semibold">
+        <h2 id="dc-remeasure-title" className="oe-section-title">
           {t('drawing_compare.remeasure_title', { defaultValue: 'Flag quantities in change {{seq}} for re-measure', seq: change.seq })}
         </h2>
         <p className="mt-1 text-sm text-content-secondary">
@@ -347,7 +347,7 @@ export function RemeasureDialog({ change, comparisonId, onClose }: RemeasureDial
           })}
         </p>
         <div className="mt-3 max-h-72 overflow-y-auto text-sm">
-          {!preview && !error && <Loader2 className="animate-spin" size={18} />}
+          {!preview && !error && <Loader2 className="animate-spin" size={20} />}
           {error && <p className="text-semantic-error">{error}</p>}
           {empty && <p className="text-content-secondary">{t('drawing_compare.remeasure_none', { defaultValue: 'Nothing measured inside this change.' })}</p>}
           {preview && preview.items.length > 0 && (
@@ -366,7 +366,7 @@ export function RemeasureDialog({ change, comparisonId, onClose }: RemeasureDial
           )}
           {preview && preview.positions.length > 0 && (
             <>
-              <h3 className="mt-3 text-xs font-semibold uppercase text-content-tertiary">
+              <h3 className="oe-card-title mt-3">
                 {t('drawing_compare.remeasure_positions', { defaultValue: 'BOQ positions' })}
               </h3>
               <ul className="mt-1 space-y-1">

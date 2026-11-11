@@ -149,7 +149,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
     return (
       <div
         data-testid="federation-type-tree-loading"
-        className="p-4 text-sm text-slate-500"
+        className="p-4 text-sm text-content-tertiary"
       >
         {t('bim.federation.type_tree.loading', {
           defaultValue: 'Loading element types…',
@@ -164,7 +164,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
       <div
         data-testid="federation-type-tree-error"
         role="alert"
-        className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+        className="rounded border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-semantic-error"
       >
         {t('bim.federation.type_tree.error', {
           defaultValue: 'Failed to load element types',
@@ -181,7 +181,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
     return (
       <div
         data-testid="federation-type-tree-empty"
-        className="rounded border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500"
+        className="rounded border border-dashed border-border bg-surface-secondary p-4 text-sm text-content-tertiary"
       >
         {t('bim.federation.type_tree.empty', {
           defaultValue:
@@ -194,10 +194,10 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
   /* ── Populated ────────────────────────────────────────────────── */
   return (
     <div data-testid="federation-type-tree" className="space-y-1">
-      <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+      <div className="mb-2 flex items-center justify-between text-xs text-content-tertiary">
         <span>{totalLabel}</span>
       </div>
-      <ul className="divide-y divide-slate-100 rounded border border-slate-200">
+      <ul className="divide-y divide-border-light rounded border border-border">
         {data.classes.map((cls) => {
           const Icon = iconFor(cls.ifc_class);
           const isExpanded = expanded.has(cls.ifc_class);
@@ -223,7 +223,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
                   }
                   aria-expanded={isExpanded}
                   data-testid={`federation-type-tree-toggle-${cls.ifc_class}`}
-                  className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded p-0.5 text-content-quaternary hover:bg-surface-secondary hover:text-content-secondary"
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4" />
@@ -236,11 +236,11 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
                   onClick={() => handleSelect(cls)}
                   title={tooltip || undefined}
                   data-testid={`federation-type-tree-select-${cls.ifc_class}`}
-                  className="flex flex-1 items-center gap-2 text-left text-sm text-slate-700 hover:text-slate-900"
+                  className="flex flex-1 items-center gap-2 text-left text-sm text-content-secondary hover:text-content-primary"
                 >
-                  <Icon className="h-4 w-4 text-slate-500" aria-hidden />
+                  <Icon className="h-4 w-4 text-content-tertiary" aria-hidden />
                   <span className="font-medium">{cls.display_name}</span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-content-quaternary">
                     {cls.ifc_class}
                   </span>
                 </button>
@@ -249,16 +249,16 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
               {isExpanded ? (
                 <ul
                   data-testid={`federation-type-tree-breakdown-${cls.ifc_class}`}
-                  className="space-y-1 border-t border-slate-100 bg-slate-50/50 px-3 py-2"
+                  className="space-y-1 border-t border-border-light bg-surface-secondary/50 px-3 py-2"
                 >
                   {cls.member_breakdown.map((m) => (
                     <li
                       key={`${cls.ifc_class}::${m.model_id}`}
-                      className="flex items-center justify-between text-xs text-slate-600"
+                      className="flex items-center justify-between text-xs text-content-secondary"
                       data-testid={`federation-type-tree-member-${cls.ifc_class}-${m.model_id}`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-slate-200 px-1.5 py-0.5 text-2xs uppercase tracking-wide text-slate-600">
+                        <span className="rounded bg-surface-tertiary px-1.5 py-0.5 text-2xs uppercase tracking-wide text-content-secondary">
                           {m.discipline}
                         </span>
                         <span className="truncate">{m.model_name}</span>
@@ -269,7 +269,7 @@ export function FederationTypeTree({ federationId, onSelectClass }: Props) {
                     </li>
                   ))}
                   {cls.sample_properties.length > 0 ? (
-                    <li className="pt-2 text-2xs text-slate-400">
+                    <li className="pt-2 text-2xs text-content-quaternary">
                       {/* The label is i18n'd but the property list is
                           interpolated manually — that keeps the test
                           mock (which returns ``defaultValue`` verbatim,

@@ -146,15 +146,15 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
     <div className="space-y-4" data-testid="ofi-panel">
       <div className="flex flex-wrap items-start gap-3">{addButton}</div>
       <div className="overflow-x-auto rounded-xl border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[820px] text-sm" data-testid="ofi-table">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full min-w-[820px]" data-testid="ofi-table">
+          <thead className="text-left">
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.ofi.col_item', { defaultValue: 'Item' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.ofi.col_installer', { defaultValue: 'Installed by' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.ofi.col_route', { defaultValue: 'How it is bought' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.ofi.col_dates', { defaultValue: 'Dates' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.ofi.col_status', { defaultValue: 'Status' })}</th>
-              <th scope="col" className="px-3 py-2" />
+              <th scope="col">{t('delivery_model.ui.ofi.col_item', { defaultValue: 'Item' })}</th>
+              <th scope="col">{t('delivery_model.ui.ofi.col_installer', { defaultValue: 'Installed by' })}</th>
+              <th scope="col">{t('delivery_model.ui.ofi.col_route', { defaultValue: 'How it is bought' })}</th>
+              <th scope="col">{t('delivery_model.ui.ofi.col_dates', { defaultValue: 'Dates' })}</th>
+              <th scope="col">{t('delivery_model.ui.ofi.col_status', { defaultValue: 'Status' })}</th>
+              <th scope="col" />
             </tr>
           </thead>
           <tbody>
@@ -163,8 +163,8 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
               const nextLabel = next ? NEXT_ACTION[next] : undefined;
               const hasRoute = !!item.procurement_route && item.procurement_route !== 'none_yet';
               return (
-                <tr key={item.id} className="border-t border-border-light align-top" data-testid="ofi-row">
-                  <th scope="row" className="px-3 py-2 text-left font-normal">
+                <tr key={item.id} className="align-top" data-testid="ofi-row">
+                  <th scope="row">
                     <span className="block font-medium text-content-primary">{item.description}</span>
                     <span className="block text-xs text-content-tertiary">
                       <span className="font-mono">{item.code}</span>
@@ -174,12 +174,12 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
                       <FindingList findings={item.findings} testId="ofi-findings" />
                     </span>
                   </th>
-                  <td className="px-3 py-2">
+                  <td>
                     {item.install_by === 'package' && item.package_id
                       ? packageTitle(item.package_id) || vocab(labels.t, INSTALL_BY, 'package')
                       : vocab(labels.t, INSTALL_BY, item.install_by)}
                   </td>
-                  <td className="px-3 py-2" data-testid="ofi-route">
+                  <td data-testid="ofi-route">
                     {hasRoute ? (
                       vocab(labels.t, OFI_ROUTE, item.procurement_route)
                     ) : (
@@ -196,7 +196,7 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {item.need_by_date && (
                       <span className="block">
                         {t('delivery_model.ui.ofi.needed_by', { defaultValue: 'Needed by {{date}}', date: fmtDate(item.need_by_date) })}
@@ -223,19 +223,19 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <ToneBadge tone={OFI_TONE[item.status]} testId="ofi-status">
                       {vocab(labels.t, OFI_STATUS, item.status)}
                     </ToneBadge>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {!editV && (
                       <span className="flex flex-wrap justify-end gap-1">
                         {next && nextLabel && (
                           <Button
                             size="sm"
                             variant="secondary"
-                            icon={<ArrowRight size={13} />}
+                            icon={<ArrowRight size={14} />}
                             loading={advance.isPending && advance.variables?.id === item.id}
                             onClick={() => advance.mutate({ id: item.id, status: next })}
                             data-testid="ofi-advance"
@@ -246,7 +246,7 @@ export function OfiPanel({ projectId, model, items, packages, labels, onChanged 
                         <Button
                           size="sm"
                           variant={hasRoute ? 'ghost' : 'secondary'}
-                          icon={<Route size={13} />}
+                          icon={<Route size={14} />}
                           onClick={() => setRouting(item)}
                           data-testid="ofi-route-action"
                         >

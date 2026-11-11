@@ -336,7 +336,7 @@ export function ChangeReviewPanel({
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <FileDiff size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.changes_title', { defaultValue: 'What changed since measuring' })}
             </h3>
           </div>
@@ -772,7 +772,7 @@ function ProposalRow({
           {row.appliable ? (
             <div className="mt-1 flex items-center gap-2 font-mono text-2xs">
               <span className="text-content-tertiary">{fmtQty(row.current_quantity)}</span>
-              <ArrowRight size={11} className="text-content-quaternary" />
+              <ArrowRight size={12} className="text-content-quaternary" />
               <span className="font-semibold text-content-primary">{fmtQty(row.new_model_quantity)}</span>
               <span className="text-content-tertiary">{row.unit}</span>
               {Number.isFinite(deltaNum) && deltaNum !== 0 && (

@@ -212,7 +212,7 @@ export function LevelSelect({ value, onChange }: { value: number; onChange: (lev
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
       aria-label={t('boq.structure_level', { defaultValue: 'Level' })}
-      className="rounded-md border border-border-light bg-surface-primary px-1.5 py-0.5 text-xs"
+      className="oe-select-sm"
     >
       <option value={0}>{t('boq.structure_level_position', { defaultValue: 'Position' })}</option>
       {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -277,7 +277,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={handleClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={handleClose}>
       <div
         ref={panelRef}
         role="dialog"
@@ -290,10 +290,10 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-oe-blue-subtle flex items-center justify-center">
-              <ClipboardPaste size={18} className="text-oe-blue" />
+              <ClipboardPaste size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 id={titleId} className="text-base font-semibold">{t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}</h2>
+              <h2 id={titleId} className="oe-section-title">{t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}</h2>
               <p className="text-xs text-content-secondary">{t('boq.paste_excel_hint', { defaultValue: 'Copy rows from Excel or Google Sheets and paste below' })}</p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="p-1.5 rounded-lg hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} className="text-content-tertiary" />
+            <X size={20} className="text-content-tertiary" />
           </button>
         </div>
 
@@ -313,7 +313,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
             placeholder={t('boq.paste_placeholder', { defaultValue: 'Paste tab-separated data here...\n\nExample:\nDescription\tUnit\tQty\tRate\nConcrete foundation\tm3\t120\t185.00\nRebar B500S\tkg\t2400\t1.45' })}
-            className="w-full h-40 rounded-xl border border-border-light bg-surface-secondary px-4 py-3 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-textarea-lg w-full font-mono resize-none"
             autoFocus
           />
 
@@ -373,30 +373,30 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
           {rows.length > 0 && (
             <div className="rounded-xl border border-border-light overflow-hidden">
               <div className="overflow-x-auto max-h-60">
-                <table className="w-full text-xs">
-                  <thead className="bg-surface-secondary sticky top-0">
+                <table className="oe-table-compact w-full">
+                  <thead className="sticky top-0">
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold text-content-secondary">#</th>
-                      <th className="px-3 py-2 text-left font-semibold text-content-secondary">{t('boq.structure_level', { defaultValue: 'Level' })}</th>
-                      <th className="px-3 py-2 text-left font-semibold text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
-                      <th className="px-3 py-2 text-center font-semibold text-content-secondary">{t('boq.unit', { defaultValue: 'Unit' })}</th>
-                      <th className="px-3 py-2 text-right font-semibold text-content-secondary">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
-                      <th className="px-3 py-2 text-right font-semibold text-content-secondary">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
-                      <th className="px-3 py-2 text-right font-semibold text-content-secondary">{t('boq.total', { defaultValue: 'Total' })}</th>
+                      <th>#</th>
+                      <th>{t('boq.structure_level', { defaultValue: 'Level' })}</th>
+                      <th>{t('boq.description', { defaultValue: 'Description' })}</th>
+                      <th className="text-center">{t('boq.unit', { defaultValue: 'Unit' })}</th>
+                      <th className="text-right">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
+                      <th className="text-right">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
+                      <th className="text-right">{t('boq.total', { defaultValue: 'Total' })}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {rows.slice(0, 50).map((r, i) => (
                       <tr key={`${r.ordinal}-${i}`} className="hover:bg-surface-secondary/50">
-                        <td className="px-3 py-1.5 font-mono text-content-tertiary">{r.ordinal}</td>
-                        <td className="px-3 py-1.5">
+                        <td className="font-mono text-content-tertiary">{r.ordinal}</td>
+                        <td>
                           <LevelSelect value={r.level} onChange={(v) => setLevels((m) => ({ ...m, [i]: v }))} />
                         </td>
                         <td className={`px-3 py-1.5 max-w-[300px] truncate ${r.level > 0 ? 'font-semibold' : ''}`}>{r.description}</td>
-                        <td className="px-3 py-1.5 text-center font-mono uppercase">{r.unit}</td>
+                        <td className="text-center font-mono">{r.unit}</td>
                         <td className={reviewClass(i, 'quantity')} title={reviewTitle(i, 'quantity')}>{r.quantity.toLocaleString(getNumberLocale())}</td>
                         <td className={reviewClass(i, 'unit_rate')} title={reviewTitle(i, 'unit_rate')}>{r.unit_rate.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums font-medium">{(r.quantity * r.unit_rate).toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
+                        <td className="text-right tabular-nums font-medium">{(r.quantity * r.unit_rate).toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -429,7 +429,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
             <Button
               variant="primary"
               size="sm"
-              icon={<Upload size={15} />}
+              icon={<Upload size={16} />}
               onClick={handleImport}
               disabled={rows.length === 0 || loading}
               loading={loading}

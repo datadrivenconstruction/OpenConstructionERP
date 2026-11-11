@@ -22,7 +22,7 @@ export function ConnectionStatus({ connectionInfo }: ConnectionStatusProps) {
     status === 'connected'
       ? 'bg-semantic-success'
       : status === 'connecting'
-        ? 'bg-amber-400'
+        ? 'bg-semantic-warning'
         : 'bg-semantic-error';
 
   const dotPulse = status === 'connecting' ? 'animate-pulse' : '';
@@ -62,7 +62,7 @@ export function ConnectionStatus({ connectionInfo }: ConnectionStatusProps) {
 
       {/* Tooltip on hover */}
       {showTooltip && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 min-w-[160px] rounded-lg border border-border bg-surface-elevated px-3 py-2 shadow-lg">
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-dropdown min-w-[160px] rounded-lg border border-border bg-surface-elevated px-3 py-2 shadow-lg">
           <div className="flex items-center gap-1.5 mb-1">
             <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
             <span className="text-xs font-medium text-content-primary">{statusLabel}</span>

@@ -114,11 +114,11 @@ const ROW_HEIGHT_PX = 44;
 const ROOM_LABEL_WIDTH_PX = 200;
 
 const STATE_BLOCK_CLASS: Record<BookingStatus, string> = {
-  reserved: 'bg-amber-200 text-semantic-warning border-semantic-warning/60',
-  checked_in: 'bg-emerald-300 text-semantic-success border-semantic-success/60',
+  reserved: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/60',
+  checked_in: 'bg-semantic-success text-semantic-success border-semantic-success/60',
   checked_out:
-    'bg-slate-200 text-slate-700 border-slate-300 line-through opacity-70',
-  cancelled: 'bg-rose-200 text-semantic-error border-semantic-error/60 line-through',
+    'bg-surface-tertiary text-content-secondary border-border line-through opacity-70',
+  cancelled: 'bg-semantic-error-bg text-semantic-error border-semantic-error/60 line-through',
 };
 
 /* ── Date helpers ─────────────────────────────────────────────────────── */
@@ -493,7 +493,7 @@ export function AccommodationCalendar({
   const handleToday = useCallback(() => setAnchor(new Date()), []);
 
   const inputCls =
-    'h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-select';
 
   // Month and weekday names are the only date-fns output on this page a reader
   // sees as words, so they are the only calls that take a locale. Every other
@@ -942,7 +942,7 @@ function CalendarGrid({
           style={{ height: 56 }}
         >
           <div
-            className="flex shrink-0 items-center px-3 text-xs font-semibold uppercase tracking-wide text-content-tertiary border-r border-border-light"
+            className="oe-overline flex shrink-0 items-center px-3 border-r border-border-light"
             style={{ width: ROOM_LABEL_WIDTH_PX }}
           >
             {t('accommodation.calendar.room_column', {
@@ -1122,7 +1122,7 @@ function RoomRow({
       >
         {showAccommodationLabel && (
           <span
-            className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary truncate"
+            className="oe-overline truncate"
             title={row.accommodation.name}
           >
             {row.accommodation.name}
@@ -1287,7 +1287,7 @@ function CreateBookingModal({
   });
 
   const inputCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input-lg w-full';
 
   const disabled = room.status === 'maintenance' || room.status === 'blocked';
 
@@ -1475,7 +1475,7 @@ function BookingDetailDrawer({
     <>
       {/* Backdrop — Material 220ms ease-standard fade-in */}
       <div
-        className="fixed inset-0 z-40 bg-black/40"
+        className="fixed inset-0 z-modal bg-black/40"
         style={{
           animation: 'accomCalFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         }}
@@ -1496,11 +1496,11 @@ function BookingDetailDrawer({
           animation:
             'accomCalSlideIn 220ms cubic-bezier(0.4, 0, 0.2, 1) both',
         }}
-        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-surface-elevated shadow-2xl"
+        className="fixed right-0 top-0 z-drawer flex h-full w-full max-w-md flex-col bg-surface-elevated shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-border-light p-4">
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('accommodation.calendar.booking_drawer_title', {
                 defaultValue: 'Booking details',
               })}

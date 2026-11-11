@@ -92,7 +92,7 @@ export function SplitGroupDrawer({
         </p>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('aiest.split.new_label', { defaultValue: 'New group label' })}
           </label>
           <input
@@ -100,7 +100,7 @@ export function SplitGroupDrawer({
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             placeholder={t('aiest.split.new_placeholder', { defaultValue: 'Optional' })}
-            className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+            className="oe-input w-full"
           />
         </div>
 
@@ -118,7 +118,7 @@ export function SplitGroupDrawer({
             <ul className="divide-y divide-border-light">
               {elementIds.map((eid) => (
                 <li key={eid}>
-                  <label className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface-secondary">
+                  <label className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-surface-secondary">
                     <input
                       type="checkbox"
                       checked={picked.has(eid)}

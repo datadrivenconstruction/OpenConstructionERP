@@ -244,7 +244,7 @@ function MarkupInput({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={(e) => commit(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && commit((e.target as HTMLInputElement).value)}
-        className="w-14 rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-right tabular-nums"
+        className="oe-input-sm w-14 text-right tabular-nums"
       />
       <span>%</span>
     </label>
@@ -277,12 +277,12 @@ function QuoteEditor({
   const plugs = rows.reduce((a, r) => a + (r.status === 'plugged' ? toCents(r.plug_amount) : 0), 0);
   return (
     <aside
-      className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-border-light bg-surface-elevated shadow-xl"
+      className="fixed inset-y-0 right-0 z-drawer flex w-full max-w-md flex-col border-l border-border-light bg-surface-elevated shadow-xl"
       role="dialog"
       aria-label={t('bid_day.quote_details', { defaultValue: 'Quote details' })}
     >
       <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
-        <h2 className="text-sm font-semibold text-content-primary">{t('bid_day.quote_details', { defaultValue: 'Quote details' })}</h2>
+        <h2 className="oe-card-title">{t('bid_day.quote_details', { defaultValue: 'Quote details' })}</h2>
         <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="text-content-tertiary hover:text-content-primary">
           <X size={16} />
         </button>
@@ -290,7 +290,7 @@ function QuoteEditor({
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-3 text-sm">
         <label className="block">
           <span className="text-xs text-content-secondary">{t('bid_day.vendor', { defaultValue: 'Vendor' })}</span>
-          <input value={vendor} disabled={disabled} onChange={(e) => setVendor(e.target.value)} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5" />
+          <input value={vendor} disabled={disabled} onChange={(e) => setVendor(e.target.value)} className="oe-input mt-1 w-full" />
         </label>
         <div className="grid grid-cols-2 gap-2 text-xs text-content-secondary">
           <div>
@@ -337,7 +337,7 @@ function QuoteEditor({
                     disabled={disabled}
                     placeholder={t('bid_day.exclusion_placeholder', { defaultValue: 'What the quote leaves out' })}
                     onChange={(e) => set(i, { text: e.target.value })}
-                    className="flex-1 rounded border border-border-light bg-surface-primary px-2 py-1"
+                    className="oe-input-sm flex-1"
                   />
                   <button type="button" disabled={disabled} onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))} aria-label={t('common.remove', { defaultValue: 'Remove' })} className="text-content-tertiary hover:text-semantic-error">
                     <Trash2 size={14} />
@@ -348,7 +348,7 @@ function QuoteEditor({
                     value={r.status}
                     disabled={disabled}
                     onChange={(e) => set(i, { status: e.target.value as ExclusionInput['status'] })}
-                    className="rounded border border-border-light bg-surface-primary px-1.5 py-1"
+                    className="oe-select-sm"
                   >
                     <option value="open">{t('bid_day.excl_open', { defaultValue: 'Open, not resolved' })}</option>
                     <option value="plugged">{t('bid_day.excl_plugged', { defaultValue: 'Plugged with an amount' })}</option>
@@ -361,7 +361,7 @@ function QuoteEditor({
                       disabled={disabled}
                       aria-label={t('bid_day.plug_amount', { defaultValue: 'Plug amount' })}
                       onChange={(e) => set(i, { plug_amount: e.target.value })}
-                      className="w-28 rounded border border-border-light bg-surface-primary px-1.5 py-1 text-right tabular-nums"
+                      className="oe-input-sm w-28 text-right tabular-nums"
                     />
                   )}
                 </div>
@@ -371,7 +371,7 @@ function QuoteEditor({
         </div>
         <label className="block">
           <span className="text-xs text-content-secondary">{t('bid_day.note', { defaultValue: 'Note' })}</span>
-          <textarea value={note} disabled={disabled} onChange={(e) => setNote(e.target.value)} rows={3} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5" />
+          <textarea value={note} disabled={disabled} onChange={(e) => setNote(e.target.value)} rows={3} className="oe-textarea mt-1 w-full" />
         </label>
       </div>
       <div className="flex items-center justify-between border-t border-border-light px-4 py-3">
@@ -441,7 +441,7 @@ function LateQuoteForm({
     });
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
       <form
         className="w-full max-w-md space-y-3 rounded-xl bg-surface-elevated p-5 shadow-xl"
         onSubmit={(e) => {
@@ -449,21 +449,21 @@ function LateQuoteForm({
           submit();
         }}
       >
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('bid_day.late_quote_title', { defaultValue: 'Late quote for {{row}}', row: rowName })}
         </h2>
         <div className="grid grid-cols-3 gap-2">
           <label className="col-span-3 text-xs text-content-secondary">
             {t('bid_day.vendor', { defaultValue: 'Vendor' })}
-            <input autoFocus value={vendor} onChange={(e) => setVendor(e.target.value)} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-sm" />
+            <input autoFocus value={vendor} onChange={(e) => setVendor(e.target.value)} className="oe-input mt-1 w-full" />
           </label>
           <label className="col-span-2 text-xs text-content-secondary">
             {t('bid_day.amount', { defaultValue: 'Amount' })}
-            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-right text-sm tabular-nums" />
+            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="oe-input mt-1 w-full text-right tabular-nums" />
           </label>
           <label className="text-xs text-content-secondary">
             {t('bid_day.currency', { defaultValue: 'Currency' })}
-            <input value={ccy} maxLength={3} onChange={(e) => setCcy(e.target.value)} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-sm uppercase" />
+            <input value={ccy} maxLength={3} onChange={(e) => setCcy(e.target.value)} className="oe-input mt-1 w-full uppercase" />
           </label>
         </div>
         <fieldset className="flex gap-3 text-xs text-content-secondary">
@@ -477,11 +477,11 @@ function LateQuoteForm({
         </fieldset>
         <label className="block text-xs text-content-secondary">
           {t('bid_day.late_exclusions', { defaultValue: 'Exclusions, one per line' })}
-          <textarea value={excl} onChange={(e) => setExcl(e.target.value)} rows={2} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-sm" />
+          <textarea value={excl} onChange={(e) => setExcl(e.target.value)} rows={2} className="oe-textarea mt-1 w-full" />
         </label>
         <label className="block text-xs text-content-secondary">
           {t('bid_day.note', { defaultValue: 'Note' })}
-          <input value={note} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-sm" />
+          <input value={note} onChange={(e) => setNote(e.target.value)} className="oe-input mt-1 w-full" />
         </label>
         <p className="text-2xs text-content-tertiary">{t('bid_day.late_time_hint', { defaultValue: 'The time received is recorded as now.' })}</p>
         <div className="flex justify-end gap-2">
@@ -691,7 +691,7 @@ export function BidDayPage() {
       )}
 
       {/* Totals stay in view while the estimator scrolls the packages. */}
-      <section className="sticky top-0 z-30 rounded-xl border border-border-light bg-surface-elevated/95 p-4 shadow-sm backdrop-blur">
+      <section className="sticky top-0 z-sticky rounded-xl border border-border-light bg-surface-elevated/95 p-4 shadow-sm backdrop-blur">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
           <Figure label={t('bid_day.direct_cost', { defaultValue: 'Direct cost' })} value={money(tot.direct, ccy)} />
           <Figure label={t('bid_day.markup', { defaultValue: 'Markup' })} value={money(tot.markup, ccy)} />
@@ -725,7 +725,7 @@ export function BidDayPage() {
 
       {(errors.length > 0 || warnings.length > 0) && (
         <section className="rounded-lg border border-border-light bg-surface-primary p-3">
-          <h2 className="mb-1 text-xs font-semibold text-content-secondary">
+          <h2 className="oe-card-title mb-1">
             {t('bid_day.checks', { defaultValue: 'Checks: {{errors}} to fix, {{warnings}} to review', errors: errors.length, warnings: warnings.length })}
           </h2>
           <ul className="max-h-32 space-y-0.5 overflow-y-auto text-xs">
@@ -741,30 +741,30 @@ export function BidDayPage() {
 
       <div className="grid gap-4 xl:grid-cols-[1fr_18rem]">
         <section className="overflow-x-auto rounded-xl border border-border-light bg-surface-primary">
-          <table className="w-full min-w-[48rem] text-sm">
-            <thead className="bg-surface-secondary text-left text-2xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table w-full min-w-[48rem]">
+            <thead className="text-left text-2xs">
               <tr>
-                <th className="px-3 py-2">{t('bid_day.col_package', { defaultValue: 'Package' })}</th>
-                <th className="w-36 px-3 py-2 text-right">{t('bid_day.col_estimate', { defaultValue: 'Estimate (plug)' })}</th>
+                <th>{t('bid_day.col_package', { defaultValue: 'Package' })}</th>
+                <th className="w-36 text-right">{t('bid_day.col_estimate', { defaultValue: 'Estimate (plug)' })}</th>
                 {Array.from({ length: maxQuotes }, (_, i) => (
-                  <th key={i} className="w-48 px-3 py-2">{t('bid_day.col_quote', { defaultValue: 'Quote {{n}}', n: i + 1 })}</th>
+                  <th key={i} className="w-48">{t('bid_day.col_quote', { defaultValue: 'Quote {{n}}', n: i + 1 })}</th>
                 ))}
-                <th className="w-40 px-3 py-2 text-right">{t('bid_day.col_in_bid', { defaultValue: 'In bid' })}</th>
+                <th className="w-40 text-right">{t('bid_day.col_in_bid', { defaultValue: 'In bid' })}</th>
               </tr>
             </thead>
             <tbody>
               {board.rows.map((row, ri) => (
-                <tr key={row.id} className="border-t border-border-light align-top">
-                  <td className="px-3 py-2">
+                <tr key={row.id} className="align-top">
+                  <td>
                     <div className="font-medium text-content-primary">{row.name}</div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1 text-2xs text-content-tertiary">
                       {t(`bid_day.kind_${row.kind}`, { defaultValue: row.kind === 'material' ? 'Material' : row.kind === 'other' ? 'Other' : 'Subcontract' })}
-                      {(findingsByRef.get(row.id) ?? 0) > 0 && <AlertTriangle size={11} className="text-semantic-warning" />}
+                      {(findingsByRef.get(row.id) ?? 0) > 0 && <AlertTriangle size={12} className="text-semantic-warning" />}
                     </div>
                     {row.suggestion && !row.suggestion.is_chosen && (
                       <div className="mt-1.5 rounded bg-surface-secondary px-2 py-1 text-2xs text-content-secondary">
                         <span className="inline-flex items-center gap-1 font-medium text-content-primary">
-                          <Sparkles size={11} />
+                          <Sparkles size={12} />
                           {t('bid_day.suggested', {
                             defaultValue: 'Suggested: {{vendor}} ({{pct}}% sure)',
                             vendor: row.suggestion.vendor,
@@ -782,7 +782,7 @@ export function BidDayPage() {
                       </div>
                     )}
                   </td>
-                  <td className="px-2 py-2">
+                  <td>
                     <AmountInput
                       value={row.plug_amount}
                       currency={ccy}
@@ -802,7 +802,7 @@ export function BidDayPage() {
                     const q = row.quotes[qi];
                     if (!q) {
                       return (
-                        <td key={qi} className="px-2 py-2">
+                        <td key={qi}>
                           {qi === row.quotes.length && !frozen && (
                             <button type="button" onClick={() => setLateFor(row)} className="flex w-full items-center justify-center gap-1 rounded border border-dashed border-border-light px-2 py-3 text-xs text-content-tertiary hover:border-oe-blue hover:text-oe-blue">
                               <Phone size={12} />
@@ -815,14 +815,14 @@ export function BidDayPage() {
                     const suggested = row.suggestion?.quote_id === q.id;
                     const differs = q.adjusted !== q.as_quoted;
                     return (
-                      <td key={q.id} className="px-2 py-2">
+                      <td key={q.id}>
                         <div className={clsx('rounded-lg border p-1.5', q.is_chosen ? 'border-oe-blue bg-oe-blue/5 ring-1 ring-oe-blue' : 'border-border-light')}>
                           <div className="flex items-center justify-between gap-1">
                             <button type="button" onClick={() => setEditing(q.id)} className="truncate text-left text-xs font-medium text-content-primary hover:underline" title={q.vendor}>
                               {q.vendor}
                             </button>
                             <div className="flex shrink-0 items-center gap-1">
-                              {suggested && <Sparkles size={11} className="text-oe-blue" aria-label={t('bid_day.suggested_short', { defaultValue: 'Suggested' })} />}
+                              {suggested && <Sparkles size={12} className="text-oe-blue" aria-label={t('bid_day.suggested_short', { defaultValue: 'Suggested' })} />}
                               {q.channel !== 'portal' && <Badge variant="neutral" size="sm">{t(`bid_day.channel_${q.channel}`, { defaultValue: q.channel })}</Badge>}
                             </div>
                           </div>
@@ -855,21 +855,21 @@ export function BidDayPage() {
                           )}
                           {q.is_chosen && (
                             <div className="mt-1 flex items-center justify-center gap-1 text-2xs font-semibold text-oe-blue">
-                              <CheckCircle2 size={11} />
+                              <CheckCircle2 size={12} />
                               {t('bid_day.chosen', { defaultValue: 'In the bid' })}
                             </div>
                           )}
                         </div>
                         {qi === row.quotes.length - 1 && qi === maxQuotes - 1 && !frozen && (
                           <button type="button" onClick={() => setLateFor(row)} className="mt-1 flex w-full items-center justify-center gap-1 text-2xs text-content-tertiary hover:text-oe-blue">
-                            <Plus size={11} />
+                            <Plus size={12} />
                             {t('bid_day.add_late_quote', { defaultValue: 'Late quote' })}
                           </button>
                         )}
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <div className="font-semibold tabular-nums text-content-primary">
                       {money(row.value, ccy)}
                     </div>
@@ -907,13 +907,13 @@ export function BidDayPage() {
                     setNewRow(null);
                   }}
                 >
-                  <input autoFocus value={newRow.name} placeholder={t('bid_day.scope_name', { defaultValue: 'Scope, e.g. Ready-mix concrete' })} onChange={(e) => setNewRow({ ...newRow, name: e.target.value })} className="flex-1 rounded border border-border-light bg-surface-primary px-2 py-1 text-sm" />
-                  <select value={newRow.kind} onChange={(e) => setNewRow({ ...newRow, kind: e.target.value as RowKind })} className="rounded border border-border-light bg-surface-primary px-1.5 py-1 text-sm">
+                  <input autoFocus value={newRow.name} placeholder={t('bid_day.scope_name', { defaultValue: 'Scope, e.g. Ready-mix concrete' })} onChange={(e) => setNewRow({ ...newRow, name: e.target.value })} className="oe-input-sm flex-1" />
+                  <select value={newRow.kind} onChange={(e) => setNewRow({ ...newRow, kind: e.target.value as RowKind })} className="oe-select-sm">
                     <option value="subcontract">{t('bid_day.kind_subcontract', { defaultValue: 'Subcontract' })}</option>
                     <option value="material">{t('bid_day.kind_material', { defaultValue: 'Material' })}</option>
                     <option value="other">{t('bid_day.kind_other', { defaultValue: 'Other' })}</option>
                   </select>
-                  <input inputMode="decimal" value={newRow.plug} placeholder={t('bid_day.col_estimate', { defaultValue: 'Estimate (plug)' })} onChange={(e) => setNewRow({ ...newRow, plug: e.target.value })} className="w-32 rounded border border-border-light bg-surface-primary px-2 py-1 text-right text-sm" />
+                  <input inputMode="decimal" value={newRow.plug} placeholder={t('bid_day.col_estimate', { defaultValue: 'Estimate (plug)' })} onChange={(e) => setNewRow({ ...newRow, plug: e.target.value })} className="oe-input-sm w-32 text-right" />
                   <Button variant="primary" size="sm" type="submit">{t('bid_day.add_scope', { defaultValue: 'Add scope' })}</Button>
                   <Button variant="ghost" size="sm" type="button" onClick={() => setNewRow(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
                 </form>
@@ -928,7 +928,7 @@ export function BidDayPage() {
 
         <aside className="space-y-4">
           <section className="rounded-xl border border-border-light bg-surface-primary p-3">
-            <h2 className="mb-2 text-xs font-semibold text-content-secondary">{t('bid_day.change_log', { defaultValue: 'Change log' })}</h2>
+            <h2 className="oe-card-title mb-2">{t('bid_day.change_log', { defaultValue: 'Change log' })}</h2>
             {board.events.length === 0 ? (
               <p className="text-xs text-content-tertiary">{t('bid_day.no_changes', { defaultValue: 'No changes yet.' })}</p>
             ) : (
@@ -951,7 +951,7 @@ export function BidDayPage() {
             )}
           </section>
           <section className="rounded-xl border border-border-light bg-surface-primary p-3">
-            <h2 className="mb-2 text-xs font-semibold text-content-secondary">{t('bid_day.submissions', { defaultValue: 'Submitted bids' })}</h2>
+            <h2 className="oe-card-title mb-2">{t('bid_day.submissions', { defaultValue: 'Submitted bids' })}</h2>
             {board.snapshots.length === 0 ? (
               <p className="text-xs text-content-tertiary">{t('bid_day.no_submissions', { defaultValue: 'Nothing submitted yet. "Freeze and submit" records exactly what goes in.' })}</p>
             ) : (
@@ -1022,9 +1022,9 @@ export function BidDayPage() {
       )}
 
       {freezeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-md space-y-3 rounded-xl bg-surface-elevated p-5 shadow-xl">
-            <h2 className="text-sm font-semibold text-content-primary">{t('bid_day.freeze_title', { defaultValue: 'Freeze and submit this bid?' })}</h2>
+            <h2 className="oe-card-title">{t('bid_day.freeze_title', { defaultValue: 'Freeze and submit this bid?' })}</h2>
             <p className="text-sm text-content-secondary">
               {t('bid_day.freeze_body', {
                 defaultValue: 'A permanent record of the chosen quotes, adjustments, markups and the total of {{total}} is stored with your name and the time. The board is locked until reopened.',
@@ -1034,7 +1034,7 @@ export function BidDayPage() {
             {errors.length > 0 && (
               <p className="text-xs text-semantic-error">{t('bid_day.freeze_blocked', { defaultValue: 'Fix the checks marked red first.' })}</p>
             )}
-            <textarea value={freezeNote} onChange={(e) => setFreezeNote(e.target.value)} rows={2} placeholder={t('bid_day.freeze_note', { defaultValue: 'Note, e.g. submitted through the client portal' })} className="w-full rounded border border-border-light bg-surface-primary px-2 py-1.5 text-sm" />
+            <textarea value={freezeNote} onChange={(e) => setFreezeNote(e.target.value)} rows={2} placeholder={t('bid_day.freeze_note', { defaultValue: 'Note, e.g. submitted through the client portal' })} className="oe-textarea w-full" />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={() => setFreezeOpen(false)}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
               <Button variant="primary" size="sm" icon={<Lock size={14} />} loading={busy} disabled={errors.length > 0} onClick={() => void doFreeze()}>
@@ -1046,9 +1046,9 @@ export function BidDayPage() {
       )}
 
       {push && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
           <div className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-xl bg-surface-elevated p-5 shadow-xl">
-            <h2 className="text-sm font-semibold text-content-primary">{t('bid_day.push_title', { defaultValue: 'Write chosen quotes into the estimate' })}</h2>
+            <h2 className="oe-card-title">{t('bid_day.push_title', { defaultValue: 'Write chosen quotes into the estimate' })}</h2>
             <p className="mt-1 text-xs text-content-secondary">
               {t('bid_day.push_body', { defaultValue: 'Each chosen quote, adjusted for plugged scope, is spread over its package positions in proportion to their current totals. Nothing is written until you confirm.' })}
             </p>
@@ -1056,10 +1056,10 @@ export function BidDayPage() {
               {push.plan.lines.length === 0 ? (
                 <p className="text-sm text-content-tertiary">{t('bid_day.push_nothing', { defaultValue: 'No chosen quote is linked to estimate positions.' })}</p>
               ) : (
-                <table className="w-full text-xs">
-                  <thead className="text-left text-content-tertiary">
+                <table className="oe-table-compact w-full">
+                  <thead className="text-left">
                     <tr>
-                      <th className="py-1">{t('bid_day.col_package', { defaultValue: 'Package' })}</th>
+                      <th>{t('bid_day.col_package', { defaultValue: 'Package' })}</th>
                       <th>{t('bid_day.position', { defaultValue: 'Position' })}</th>
                       <th className="text-right">{t('bid_day.old_total', { defaultValue: 'Now' })}</th>
                       <th className="text-right">{t('bid_day.new_total', { defaultValue: 'New' })}</th>
@@ -1067,8 +1067,8 @@ export function BidDayPage() {
                   </thead>
                   <tbody>
                     {push.plan.lines.map((l) => (
-                      <tr key={l.position_id} className="border-t border-border-light">
-                        <td className="py-1">{l.row}</td>
+                      <tr key={l.position_id}>
+                        <td>{l.row}</td>
                         <td>{l.ordinal} {l.description}</td>
                         <td className="text-right tabular-nums">{money(l.old_total, ccy)}</td>
                         <td className="text-right tabular-nums font-medium">{money(l.new_total, ccy)}</td>

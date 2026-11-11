@@ -267,7 +267,7 @@ export function PanelHeader({ title, hint, action }: { title: string; hint?: str
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+        <h2 className="oe-section-title">{title}</h2>
         {hint && <p className="text-sm text-content-secondary">{hint}</p>}
       </div>
       {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
@@ -278,8 +278,8 @@ export function PanelHeader({ title, hint, action }: { title: string; hint?: str
 export function Table({ head, children, testId }: { head: string[]; children: ReactNode; testId?: string }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-      <table className="w-full text-sm" data-testid={testId}>
-        <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+      <table className="oe-table w-full" data-testid={testId}>
+        <thead className="text-left">
           <tr>
             {head.map((h, i) => (
               <th key={`${h}-${i}`} scope="col" className="px-3 py-2 font-medium">
@@ -288,7 +288,7 @@ export function Table({ head, children, testId }: { head: string[]; children: Re
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">{children}</tbody>
+        <tbody>{children}</tbody>
       </table>
     </div>
   );

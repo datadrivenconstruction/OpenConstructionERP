@@ -199,7 +199,7 @@ function statusLabel(
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 /* ── Add Contact Modal ─────────────────────────────────────────────────── */
 
@@ -525,11 +525,9 @@ function AddContactModal({
             placeholder={t('contacts.company_placeholder', {
               defaultValue: 'e.g. Acme Construction Ltd.',
             })}
-            className={clsx(
+            className={clsx('oe-input-lg', 
               inputCls,
-              errors.company_name &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            )} aria-invalid={!!(errors.company_name)}
           />
         </WideModalField>
 
@@ -537,7 +535,7 @@ function AddContactModal({
           <input
             value={form.legal_name}
             onChange={(e) => set('legal_name', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder={t('contacts.legal_name_placeholder', { defaultValue: 'Registered legal entity name' })}
           />
         </WideModalField>
@@ -546,7 +544,7 @@ function AddContactModal({
           <select
             value={form.party_kind}
             onChange={(e) => set('party_kind', e.target.value as PartyKind | '')}
-            className={inputCls}
+            className={`oe-select-lg ${inputCls}`}
           >
             <option value="">{t('contacts.party_kind_unset', { defaultValue: 'Not stated' })}</option>
             <option value="natural_person">
@@ -562,7 +560,7 @@ function AddContactModal({
           <input
             value={form.vat_number}
             onChange={(e) => set('vat_number', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder={t('contacts.vat_placeholder', { defaultValue: 'e.g. DE123456789' })}
           />
         </WideModalField>
@@ -581,7 +579,7 @@ function AddContactModal({
             id="contact-tax-office"
             value={form.tax_office}
             onChange={(e) => set('tax_office', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             maxLength={100}
           />
         </WideModalField>
@@ -596,7 +594,7 @@ function AddContactModal({
           <input
             value={form.first_name}
             onChange={(e) => set('first_name', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder={t('contacts.first_name_placeholder', { defaultValue: 'John' })}
           />
         </WideModalField>
@@ -605,7 +603,7 @@ function AddContactModal({
           <input
             value={form.last_name}
             onChange={(e) => set('last_name', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder={t('contacts.last_name_placeholder', { defaultValue: 'Doe' })}
           />
         </WideModalField>
@@ -621,7 +619,7 @@ function AddContactModal({
             type="email"
             value={form.email}
             onChange={(e) => set('email', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder="name@company.com"
           />
         </WideModalField>
@@ -631,7 +629,7 @@ function AddContactModal({
             type="tel"
             value={form.phone}
             onChange={(e) => set('phone', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder="+49 170 1234567"
           />
         </WideModalField>
@@ -641,7 +639,7 @@ function AddContactModal({
             type="url"
             value={form.website}
             onChange={(e) => set('website', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
             placeholder="https://www.example.com"
           />
         </WideModalField>
@@ -662,10 +660,9 @@ function AddContactModal({
               set('country', e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))
             }
             maxLength={2}
-            className={clsx(
+            className={clsx('oe-input-lg', 
               inputCls,
-              errors.country && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            )} aria-invalid={!!(errors.country)}
             placeholder={t('contacts.country_placeholder', {
               defaultValue: 'e.g. DE, US, GB',
             })}
@@ -677,7 +674,7 @@ function AddContactModal({
             value={form.address}
             onChange={(e) => set('address', e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea w-full resize-none"
             placeholder={t('contacts.address_placeholder', {
               defaultValue: 'Street & number',
             })}
@@ -692,7 +689,7 @@ function AddContactModal({
             value={form.postcode}
             onChange={(e) => set('postcode', e.target.value)}
             maxLength={20}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
           />
         </WideModalField>
 
@@ -701,7 +698,7 @@ function AddContactModal({
             value={form.city}
             onChange={(e) => set('city', e.target.value)}
             maxLength={100}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>
@@ -722,23 +719,23 @@ function AddContactModal({
         {!form.billingSame && (
           <>
             <WideModalField label={t('contacts.field_address', { defaultValue: 'Address' })}>
-              <input value={form.billingStreet} onChange={(e) => set('billingStreet', e.target.value)} className={inputCls} />
+              <input value={form.billingStreet} onChange={(e) => set('billingStreet', e.target.value)} className={`oe-input-lg ${inputCls}`} />
             </WideModalField>
             <WideModalField label={t('contacts.field_postcode', { defaultValue: 'Postcode' })}>
-              <input value={form.billingPostcode} onChange={(e) => set('billingPostcode', e.target.value)} maxLength={20} className={inputCls} />
+              <input value={form.billingPostcode} onChange={(e) => set('billingPostcode', e.target.value)} maxLength={20} className={`oe-input-lg ${inputCls}`} />
             </WideModalField>
             <WideModalField label={t('contacts.field_city', { defaultValue: 'City' })}>
-              <input value={form.billingCity} onChange={(e) => set('billingCity', e.target.value)} maxLength={100} className={inputCls} />
+              <input value={form.billingCity} onChange={(e) => set('billingCity', e.target.value)} maxLength={100} className={`oe-input-lg ${inputCls}`} />
             </WideModalField>
             <WideModalField label={t('contacts.field_state', { defaultValue: 'State / region' })}>
-              <input value={form.billingState} onChange={(e) => set('billingState', e.target.value)} maxLength={100} className={inputCls} />
+              <input value={form.billingState} onChange={(e) => set('billingState', e.target.value)} maxLength={100} className={`oe-input-lg ${inputCls}`} />
             </WideModalField>
             <WideModalField label={t('contacts.field_country', { defaultValue: 'Country' })}>
               <input
                 value={form.billingCountry}
                 onChange={(e) => set('billingCountry', e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))}
                 maxLength={2}
-                className={inputCls}
+                className={`oe-input-lg ${inputCls}`}
               />
             </WideModalField>
           </>
@@ -812,7 +809,7 @@ function AddContactModal({
             onChange={(e) =>
               set('prequalification_status', e.target.value as PrequalificationStatus)
             }
-            className={inputCls}
+            className={`oe-select-lg ${inputCls}`}
           >
             {(Object.keys(PREQUAL_CONFIG) as PrequalificationStatus[]).map((ps) => (
               <option key={ps} value={ps}>
@@ -832,7 +829,7 @@ function AddContactModal({
             value={form.notes}
             onChange={(e) => set('notes', e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea w-full resize-none"
             placeholder={t('contacts.notes_placeholder', {
               defaultValue: 'Additional notes...',
             })}
@@ -890,11 +887,11 @@ function ImportContactsModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('contacts.import_contacts', { defaultValue: 'Import Contacts' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('contacts.import_contacts', { defaultValue: 'Import Contacts' })}
           </h2>
           <button
@@ -902,7 +899,7 @@ function ImportContactsModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -954,7 +951,7 @@ function ImportContactsModal({
             }}
             className="flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
-            <FileDown size={13} />
+            <FileDown size={14} />
             {t('contacts.download_template', { defaultValue: 'Download import template' })}
           </button>
 
@@ -1073,7 +1070,7 @@ const ContactCard = React.memo(function ContactCard({
       {/* Top: company + type badge + actions */}
       <div className="flex items-start justify-between gap-2">
         <div
-          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+          className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer"
           onClick={() => onEdit(contact)}
           role="button"
           tabIndex={0}
@@ -1083,7 +1080,7 @@ const ContactCard = React.memo(function ContactCard({
             {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-content-primary truncate">
+            <h3 className="oe-card-title truncate">
               {displayName}
             </h3>
             {personName && contact.company_name && (
@@ -1299,7 +1296,7 @@ function ContactDetailDrawer({
       <div className="px-5 py-4 space-y-6">
         {/* ── Convert actions ──────────────────────────────────── */}
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-2">
+          <h3 className="oe-overline mb-2">
             {t('contacts.convert_section', { defaultValue: 'Convert' })}
           </h3>
           {propDevEnabled ? (
@@ -1353,8 +1350,8 @@ function ContactDetailDrawer({
         {/* ── Linked records ───────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-1.5 mb-2">
-            <Link2 size={13} className="text-content-tertiary" />
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <Link2 size={14} className="text-content-tertiary" />
+            <h3 className="oe-overline">
               {t('contacts.linked_records', { defaultValue: 'Linked records' })}
             </h3>
           </div>
@@ -1396,7 +1393,7 @@ function ContactDetailDrawer({
             <div className="space-y-3">
               {leads.length > 0 && (
                 <div>
-                  <p className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                  <p className="oe-overline mb-1.5">
                     {t('contacts.linked_leads', { defaultValue: 'Leads' })} ({leads.length})
                   </p>
                   <div className="space-y-1.5">
@@ -1426,7 +1423,7 @@ function ContactDetailDrawer({
                             })}
                           </p>
                         </div>
-                        <ExternalLink size={13} className="shrink-0 text-content-tertiary" />
+                        <ExternalLink size={14} className="shrink-0 text-content-tertiary" />
                       </button>
                     ))}
                   </div>
@@ -1434,7 +1431,7 @@ function ContactDetailDrawer({
               )}
               {buyers.length > 0 && (
                 <div>
-                  <p className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                  <p className="oe-overline mb-1.5">
                     {t('contacts.linked_buyers', { defaultValue: 'Buyers' })} ({buyers.length})
                   </p>
                   <div className="space-y-1.5">
@@ -1460,7 +1457,7 @@ function ContactDetailDrawer({
                             {statusLabel(PROPDEV_BUYER_STATUS, buyer.status, t)}
                           </p>
                         </div>
-                        <ExternalLink size={13} className="shrink-0 text-content-tertiary" />
+                        <ExternalLink size={14} className="shrink-0 text-content-tertiary" />
                       </button>
                     ))}
                   </div>
@@ -1528,7 +1525,7 @@ function HowContactsWork() {
   return (
     <CollapsibleSection
       storageKey="contacts.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('contacts.how_title', { defaultValue: 'How the contact directory fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -2030,7 +2027,7 @@ export function ContactsPage() {
         <Card padding="none">
           <div className="flex flex-col gap-2 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <span className="oe-overline">
                 {t('contacts.filter_by_tag', { defaultValue: 'Quick filter' })}
               </span>
               {selectedTags.length > 0 && (
@@ -2048,7 +2045,7 @@ export function ContactsPage() {
             </div>
             {groupedFacets.map((group) => (
               <div key={group.label} className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 w-16 shrink-0 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <span className="oe-overline mr-1 w-16 shrink-0">
                   {group.label}
                 </span>
                 {group.items.map((item) => {
@@ -2099,7 +2096,7 @@ export function ContactsPage() {
               placeholder={t('contacts.search_placeholder', {
                 defaultValue: 'Search contacts...',
               })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              className="oe-input-lg w-full ps-10 pe-3"
             />
           </div>
 
@@ -2161,7 +2158,7 @@ export function ContactsPage() {
               aria-label={t('a11y.contacts.country_filter', {
                 defaultValue: 'Filter contacts by country',
               })}
-              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+              className="oe-select-lg ps-3 sm:w-36"
             >
               <option value="">
                 {t('contacts.filter_all_countries', { defaultValue: 'All Countries' })}
@@ -2194,7 +2191,7 @@ export function ContactsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="p-4">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <div className="h-9 w-9 animate-pulse rounded-lg bg-surface-tertiary" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 w-3/4 animate-pulse rounded bg-surface-tertiary" />

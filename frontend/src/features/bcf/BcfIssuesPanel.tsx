@@ -185,9 +185,9 @@ export function BcfSnapshot({
         )}
       >
         {placeholder === 'failed' ? (
-          <ImageOff size={18} className="shrink-0" />
+          <ImageOff size={20} className="shrink-0" />
         ) : placeholder === 'no_snapshot' ? (
-          <Crosshair size={18} className="shrink-0" />
+          <Crosshair size={20} className="shrink-0" />
         ) : null}
         {withCaption && <span className="text-2xs leading-tight">{label}</span>}
       </div>
@@ -249,7 +249,7 @@ function BcfCommentThread({
     <div>
       <div className="mb-2 flex items-center gap-2">
         <MessageSquare size={14} className="text-content-tertiary" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <span className="oe-overline">
           {t('bcf.comments', { defaultValue: 'Comments' })}
         </span>
         {topic.comments.length > 0 && (
@@ -271,7 +271,7 @@ function BcfCommentThread({
           }}
           rows={2}
           placeholder={t('bcf.comment_placeholder', { defaultValue: 'Add a comment...' })}
-          className="flex-1 resize-none rounded-lg border border-border-medium bg-surface-primary px-3 py-2 text-xs text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+          className="oe-textarea flex-1 resize-none"
         />
         <button
           type="button"
@@ -325,7 +325,7 @@ function BcfCommentThread({
 
 function FieldLabel({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="mb-1 flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+    <div className="oe-overline mb-1 flex items-center gap-1">
       <Icon size={12} className="shrink-0" />
       {children}
     </div>
@@ -333,7 +333,7 @@ function FieldLabel({ icon: Icon, children }: { icon: React.ElementType; childre
 }
 
 const fieldInputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue disabled:opacity-50';
+  'w-full';
 
 /* ── Detail drawer ─────────────────────────────────────────────────────── */
 
@@ -497,7 +497,7 @@ function BcfTopicDetail({
               value={topic.topic_status}
               disabled={busy}
               onChange={(e) => updateMut.mutate({ topic_status: e.target.value })}
-              className={fieldInputCls}
+              className={`oe-select ${fieldInputCls}`}
               data-testid="bcf-status-select"
             >
               {statusOptions.map((s) => (
@@ -516,7 +516,7 @@ function BcfTopicDetail({
               value={topic.priority ?? ''}
               disabled={busy}
               onChange={(e) => updateMut.mutate({ priority: e.target.value || null })}
-              className={fieldInputCls}
+              className={`oe-select ${fieldInputCls}`}
             >
               {priorityOptions.map((p) => (
                 <option key={p || 'none'} value={p}>
@@ -535,7 +535,7 @@ function BcfTopicDetail({
                 value={topic.assigned_to ?? ''}
                 disabled={busy}
                 onChange={(e) => updateMut.mutate({ assigned_to: e.target.value || null })}
-                className={fieldInputCls}
+                className={`oe-select ${fieldInputCls}`}
               >
                 <option value="">{t('bcf.unassigned', { defaultValue: 'Unassigned' })}</option>
                 {/* Keep an imported assignee that is not in the member list. */}
@@ -560,7 +560,7 @@ function BcfTopicDetail({
                   }
                 }}
                 placeholder={t('bcf.assignee_placeholder', { defaultValue: 'Name or email' })}
-                className={fieldInputCls}
+                className={`oe-input ${fieldInputCls}`}
               />
             )}
           </div>
@@ -574,11 +574,11 @@ function BcfTopicDetail({
               value={toDateInput(topic.due_date)}
               disabled={busy}
               onChange={(e) => updateMut.mutate({ due_date: e.target.value || null })}
-              className={clsx(fieldInputCls, overdue && 'border-semantic-error text-semantic-error')}
+              className={clsx('oe-input', fieldInputCls,)} aria-invalid={!!(overdue)}
             />
             {overdue && (
               <p className="mt-1 flex items-center gap-1 text-2xs font-medium text-semantic-error">
-                <AlertTriangle size={11} />
+                <AlertTriangle size={12} />
                 {t('bcf.overdue', { defaultValue: 'Overdue' })}
               </p>
             )}
@@ -684,7 +684,7 @@ function BcfTopicRow({
       />
       <div className="min-w-0 flex-1 py-2.5 pr-3">
         <div className="flex items-start justify-between gap-2">
-          <h4 className="truncate text-sm font-semibold text-content-primary">{topic.title}</h4>
+          <h4 className="oe-card-title truncate">{topic.title}</h4>
           <div className="flex shrink-0 items-center gap-1.5">
             {vp && onOpenViewpoint && (
               <button
@@ -697,7 +697,7 @@ function BcfTopicRow({
                 title={t('bcf.zoom_to_issue', { defaultValue: 'Zoom to issue' })}
                 aria-label={t('bcf.zoom_to_issue', { defaultValue: 'Zoom to issue' })}
               >
-                <Crosshair size={13} />
+                <Crosshair size={14} />
               </button>
             )}
             <Badge variant={statusVariant(topic.topic_status)} size="sm">
@@ -732,7 +732,7 @@ function BcfTopicRow({
 
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-2xs text-content-tertiary">
           <span className="inline-flex items-center gap-1">
-            <User size={11} className="shrink-0" />
+            <User size={12} className="shrink-0" />
             {topic.assigned_to ? (
               memberName(topic.assigned_to)
             ) : (
@@ -748,13 +748,13 @@ function BcfTopicRow({
                 overdue && 'font-medium text-semantic-error',
               )}
             >
-              {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
+              {overdue ? <AlertTriangle size={12} /> : <Calendar size={12} />}
               <DateDisplay value={topic.due_date} format="date" />
             </span>
           )}
           {topic.comments.length > 0 && (
             <span className="inline-flex items-center gap-1">
-              <MessageSquare size={11} className="shrink-0" />
+              <MessageSquare size={12} className="shrink-0" />
               {topic.comments.length}
             </span>
           )}
@@ -1007,8 +1007,8 @@ export function BcfIssuesPanel({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Boxes size={18} className="text-content-tertiary" />
-          <h3 className="text-base font-semibold text-content-primary">
+          <Boxes size={20} className="text-content-tertiary" />
+          <h3 className="oe-section-title">
             {t('bcf.title', { defaultValue: 'Issues (BCF)' })}
           </h3>
           <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-surface-secondary px-1.5 text-2xs font-medium text-content-secondary">
@@ -1040,7 +1040,7 @@ export function BcfIssuesPanel({
                     : 'border-border-light text-content-secondary hover:bg-surface-secondary',
                 )}
               >
-                <BarChart3 size={15} />
+                <BarChart3 size={16} />
               </button>
               {onOpenViewpoint && (
                 <button
@@ -1050,7 +1050,7 @@ export function BcfIssuesPanel({
                   aria-label={t('bcf.coordination_mode', { defaultValue: 'Coordination mode' })}
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:bg-surface-secondary"
                 >
-                  <Presentation size={15} />
+                  <Presentation size={16} />
                 </button>
               )}
               <button
@@ -1060,7 +1060,7 @@ export function BcfIssuesPanel({
                 aria-label={t('bcf.print_report', { defaultValue: 'Print report' })}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:bg-surface-secondary"
               >
-                <Printer size={15} />
+                <Printer size={16} />
               </button>
             </div>
           )}
@@ -1077,7 +1077,7 @@ export function BcfIssuesPanel({
             <select
               value={exportVersion}
               onChange={(e) => setExportVersion(e.target.value as BcfVersion)}
-              className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select-sm"
               aria-label={t('bcf.export_version', { defaultValue: 'BCF version' })}
               title={t('bcf.export_version', { defaultValue: 'BCF version' })}
             >
@@ -1119,7 +1119,7 @@ export function BcfIssuesPanel({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative max-w-sm flex-1">
             <Search
-              size={15}
+              size={16}
               className="absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary"
             />
             <input
@@ -1127,13 +1127,13 @@ export function BcfIssuesPanel({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('bcf.search', { defaultValue: 'Search title, labels, assignee...' })}
               aria-label={t('bcf.search', { defaultValue: 'Search title, labels, assignee...' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-9 pe-3 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input w-full ps-9 pe-3"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select"
             aria-label={t('bcf.filter_status', { defaultValue: 'Filter by status' })}
           >
             <option value="">{t('bcf.all_statuses', { defaultValue: 'All statuses' })}</option>

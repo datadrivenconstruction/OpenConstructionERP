@@ -91,7 +91,7 @@ function CurrencySummary({ row }: { row: CurrencyRollup }) {
     <Card padding="sm">
       <div className="mb-2 flex items-center gap-2">
         <Wallet size={14} className="text-content-tertiary" />
-        <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <span className="oe-overline">
           {row.currency || t('allowances.no_currency', { defaultValue: 'Unspecified currency' })}
         </span>
         {row.overdrawn && (
@@ -165,7 +165,7 @@ function AddAllowanceForm({
     <Card padding="md">
       <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-6">
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('allowances.col_label', { defaultValue: 'Description' })}
           </label>
           <input
@@ -176,7 +176,7 @@ function AddAllowanceForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('allowances.col_type', { defaultValue: 'Type' })}
           </label>
           <select
@@ -193,7 +193,7 @@ function AddAllowanceForm({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('allowances.col_held', { defaultValue: 'Held amount' })}
           </label>
           <input
@@ -205,7 +205,7 @@ function AddAllowanceForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('allowances.col_currency', { defaultValue: 'Currency' })}
           </label>
           <input
@@ -320,23 +320,23 @@ function RegisterTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm">
+      <table className="oe-table w-full min-w-[720px]">
         <thead>
-          <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-            <th className="py-2 pr-3 font-medium">{t('allowances.col_label', { defaultValue: 'Description' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('allowances.col_held', { defaultValue: 'Held' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('allowances.col_drawn', { defaultValue: 'Drawn' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('allowances.col_remaining', { defaultValue: 'Remaining' })}</th>
-            <th className="py-2 pl-1" />
+          <tr className="text-left text-2xs">
+            <th className="pr-3">{t('allowances.col_label', { defaultValue: 'Description' })}</th>
+            <th className="pr-3 text-right">{t('allowances.col_held', { defaultValue: 'Held' })}</th>
+            <th className="pr-3 text-right">{t('allowances.col_drawn', { defaultValue: 'Drawn' })}</th>
+            <th className="pr-3 text-right">{t('allowances.col_remaining', { defaultValue: 'Remaining' })}</th>
+            <th className="pl-1" />
           </tr>
         </thead>
         <tbody>
           {groups.map((group) => (
             <Fragment key={group.type}>
-              <tr className="bg-surface-secondary/40">
+              <tr>
                 <td
                   colSpan={5}
-                  className="py-1.5 pl-1 text-2xs font-semibold uppercase tracking-wide text-content-secondary"
+                  className="pl-1 font-semibold text-content-secondary"
                 >
                   {typeLabel(group.type)}
                 </td>
@@ -345,39 +345,39 @@ function RegisterTable({
                 const remainingNegative = toNum(a.remaining) < 0;
                 return (
                   <Fragment key={a.id}>
-                    <tr className="border-b border-border-light/60 hover:bg-surface-secondary/40">
-                      <td className="py-2 pr-3 text-content-primary">
+                    <tr>
+                      <td className="pr-3">
                         <span className="inline-flex items-center gap-1.5">
                           {a.label || '-'}
                           {a.overdrawn && (
                             <span title={t('allowances.overdrawn', { defaultValue: 'Over-drawn' })}>
-                              <AlertTriangle size={13} className="text-semantic-warning" />
+                              <AlertTriangle size={14} className="text-semantic-warning" />
                             </span>
                           )}
                         </span>
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                      <td className="pr-3 text-right tabular-nums text-content-secondary">
                         {formatCurrency(a.held_amount, a.currency)}
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums text-content-tertiary">
+                      <td className="pr-3 text-right tabular-nums text-content-tertiary">
                         {formatCurrency(a.drawn, a.currency)}
                       </td>
                       <td
                         className={
-                          'py-2 pr-3 text-right font-semibold tabular-nums ' +
-                          (remainingNegative ? 'text-semantic-error' : 'text-content-primary')
+                          'pr-3 text-right font-semibold tabular-nums ' +
+                          (remainingNegative ? 'text-semantic-error' : '')
                         }
                       >
                         {formatCurrency(a.remaining, a.currency)}
                       </td>
-                      <td className="py-2 pl-1">
+                      <td className="pl-1">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             onClick={() => onOpenDrawdown(a.id)}
                             className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-2xs font-medium text-oe-blue hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           >
-                            <TrendingDown size={13} />
+                            <TrendingDown size={14} />
                             {t('allowances.draw_down', { defaultValue: 'Draw down' })}
                           </button>
                           <button
@@ -393,7 +393,7 @@ function RegisterTable({
                     </tr>
                     {openDrawdownFor === a.id && (
                       <tr>
-                        <td colSpan={5} className="py-2">
+                        <td colSpan={5}>
                           <DrawdownForm allowance={a} onDone={onDrawdownDone} onCancel={onCloseDrawdown} />
                         </td>
                       </tr>
@@ -543,7 +543,7 @@ export function AllowancesPage() {
       )}
 
       <Card padding="md">
-        <h2 className="mb-3 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-3">
           {t('allowances.register', { defaultValue: 'Register' })}
         </h2>
         {isLoading ? (

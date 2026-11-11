@@ -436,7 +436,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
       >
         {selected ? (
           <>
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="oe-overline">
               {selected.group.slice(0, 3)}
             </span>
             <span className="font-medium">{selected.label}</span>
@@ -456,7 +456,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
       {open && (
         <div
           role="listbox"
-          className="absolute z-30 mt-1 w-[340px] max-h-[440px] overflow-auto rounded-md border border-border-light bg-surface-primary shadow-lg"
+          className="absolute z-dropdown mt-1 w-[340px] max-h-[440px] overflow-auto rounded-md border border-border-light bg-surface-primary shadow-lg"
           onMouseLeave={() => setOpen(false)}
         >
           <div className="sticky top-0 bg-surface-primary border-b border-border-light p-2">
@@ -473,7 +473,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
                 placeholder={t('bim.smartview.search_properties', {
                   defaultValue: 'Search properties…',
                 })}
-                className="w-full ps-7 pe-2 py-1 text-2xs rounded border border-border-light bg-surface-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input-sm w-full ps-7 pe-2"
               />
             </div>
             <div className="flex items-center justify-between mt-1 text-2xs text-content-tertiary uppercase tracking-wider">
@@ -497,7 +497,7 @@ function PropertyPicker({ catalog, value, onChange, disabled }: PropertyPickerPr
               if (!list || list.length === 0) return null;
               return (
                 <div key={g} className="py-1">
-                  <div className="sticky top-[60px] z-10 px-2 pt-1 pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary bg-surface-primary border-b border-border-light/60">
+                  <div className="oe-overline sticky top-[60px] z-10 px-2 pt-1 pb-0.5 bg-surface-primary border-b border-border-light/60">
                     {groupTitles[g]}{' '}
                     <span className="text-content-quaternary normal-case font-normal">
                       ({list.length})
@@ -580,7 +580,7 @@ function OperatorPicker({ dataType, value, onChange, disabled }: OperatorPickerP
         value={value}
         onChange={(e) => onChange(e.target.value as SmartViewOp)}
         aria-label={t('bim.smartview.operator', { defaultValue: 'Operator' })}
-        className="px-2 py-1 rounded border border-border-light bg-surface-secondary text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+        className="oe-select-sm"
       >
         {ops.map((op) => (
           <option key={op} value={op}>
@@ -594,7 +594,7 @@ function OperatorPicker({ dataType, value, onChange, disabled }: OperatorPickerP
           aria-label={hint}
           className="cursor-help text-content-quaternary hover:text-oe-blue"
         >
-          <Info size={11} />
+          <Info size={12} />
         </span>
       )}
     </div>
@@ -617,7 +617,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
   const baseInputCls =
     `px-1.5 py-1 rounded border bg-surface-secondary text-2xs focus:outline-none focus:ring-1 ${
       invalid
-        ? 'border-rose-400 focus:ring-rose-500'
+        ? 'border-semantic-error focus:ring-semantic-error'
         : 'border-border-light focus:ring-oe-blue'
     }`;
 
@@ -661,7 +661,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
     return (
       <div
         className={`inline-flex flex-wrap items-center gap-1 max-w-[280px] ${
-          invalid ? 'ring-1 ring-rose-400 rounded p-0.5' : ''
+          invalid ? 'ring-1 ring-semantic-error rounded p-0.5' : ''
         }`}
       >
         {arr.map((v, i) => (
@@ -673,7 +673,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
             <button
               type="button"
               onClick={() => onChange(arr.filter((_, j) => j !== i))}
-              className="hover:text-rose-600"
+              className="hover:text-semantic-error"
               aria-label={t('common.remove', { defaultValue: 'Remove' })}
             >
               <X size={9} />
@@ -686,7 +686,7 @@ function ValueInput({ property, op, value, onChange, invalid }: ValueInputProps)
             const next = e.target.value;
             if (next && !arr.includes(next)) onChange([...arr, next]);
           }}
-          className="px-1 py-0.5 rounded border border-border-light bg-surface-secondary text-2xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-select-sm"
         >
           <option value="">
             {t('bim.smartview.add_value', { defaultValue: '+ add' })}
@@ -822,7 +822,7 @@ function GroupRenderer({
       })}
       className={`rounded-md border p-2 space-y-1.5 ${
         groupError
-          ? 'border-rose-400 bg-rose-50/30 dark:bg-rose-950/10'
+          ? 'border-semantic-error bg-semantic-error-bg'
           : depth === 0
             ? 'border-border-light bg-surface-primary'
             : 'border-dashed border-border-light bg-surface-secondary/40'
@@ -838,7 +838,7 @@ function GroupRenderer({
           className={`px-2 py-0.5 rounded text-2xs font-semibold uppercase tracking-wider ${
             group.op === 'AND'
               ? 'bg-oe-blue text-white'
-              : 'bg-amber-500 text-white'
+              : 'bg-semantic-warning text-white'
           }`}
           title={t('bim.smartview.toggle_andor', {
             defaultValue: 'Click to switch AND ↔ OR',
@@ -878,7 +878,7 @@ function GroupRenderer({
         </div>
       </div>
       {groupError && (
-        <div className="flex items-center gap-1 text-2xs text-rose-700 dark:text-rose-300">
+        <div className="flex items-center gap-1 text-2xs text-semantic-error">
           <AlertCircle size={10} />
           <span>{groupError}</span>
         </div>
@@ -902,7 +902,7 @@ function GroupRenderer({
                   <button
                     type="button"
                     onClick={() => removeChild(idx)}
-                    className="mt-1 p-0.5 rounded text-content-quaternary hover:text-rose-600"
+                    className="mt-1 p-0.5 rounded text-content-quaternary hover:text-semantic-error"
                     title={t('common.remove', { defaultValue: 'Remove' })}
                     aria-label={t('common.remove', { defaultValue: 'Remove' })}
                   >
@@ -954,7 +954,7 @@ function GroupRenderer({
                   <button
                     type="button"
                     onClick={() => removeChild(idx)}
-                    className="ms-auto p-0.5 rounded text-content-quaternary hover:text-rose-600"
+                    className="ms-auto p-0.5 rounded text-content-quaternary hover:text-semantic-error"
                     title={t('common.remove', { defaultValue: 'Remove' })}
                     aria-label={t('common.remove', { defaultValue: 'Remove' })}
                   >
@@ -962,7 +962,7 @@ function GroupRenderer({
                   </button>
                 </div>
                 {childError && (
-                  <div className="flex items-center gap-1 ps-1 text-2xs text-rose-700 dark:text-rose-300">
+                  <div className="flex items-center gap-1 ps-1 text-2xs text-semantic-error">
                     <AlertCircle size={10} />
                     <span>{childError}</span>
                   </div>
@@ -999,7 +999,7 @@ function SamplePreview({ modelId, sampleIds }: SamplePreviewProps) {
   const rows: BIMElementData[] = samplesQuery.data?.items ?? [];
   return (
     <div className="space-y-1">
-      <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+      <div className="oe-overline">
         {t('bim.smartview.sample_title', {
           defaultValue: 'Sample matches ({{n}})',
           n: rows.length,
@@ -1175,8 +1175,8 @@ export default function SmartViewBuilder({
           {starredChips.length > 0 && (
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <Star size={11} className="text-amber-500 fill-amber-500" />
-                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <Star size={12} className="text-semantic-warning fill-amber-500" />
+                <span className="oe-overline">
                   {t('bim.smartview.starred', { defaultValue: 'Starred' })}
                 </span>
               </div>
@@ -1196,8 +1196,8 @@ export default function SmartViewBuilder({
           {recentChips.length > 0 && (
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <Clock size={11} className="text-content-tertiary" />
-                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <Clock size={12} className="text-content-tertiary" />
+                <span className="oe-overline">
                   {t('bim.smartview.recent', { defaultValue: 'Recent' })}
                 </span>
               </div>
@@ -1220,8 +1220,8 @@ export default function SmartViewBuilder({
       {/* Quick presets */}
       <div>
         <div className="flex items-center gap-1.5 mb-1.5">
-          <Zap size={12} className="text-amber-500" />
-          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <Zap size={12} className="text-semantic-warning" />
+          <span className="oe-overline">
             {t('bim.smartview.presets', { defaultValue: 'Quick presets' })}
           </span>
         </div>
@@ -1243,10 +1243,10 @@ export default function SmartViewBuilder({
       {report.treeErrors.length > 0 && (
         <div
           role="alert"
-          className="rounded border border-rose-300 bg-rose-50 dark:bg-rose-950/30 px-2 py-1.5 text-2xs text-rose-700 dark:text-rose-300"
+          className="rounded border border-semantic-error/30 bg-semantic-error-bg px-2 py-1.5 text-2xs text-semantic-error"
         >
           <div className="flex items-center gap-1 font-semibold">
-            <AlertCircle size={11} />
+            <AlertCircle size={12} />
             {t('bim.smartview.tree_invalid', {
               defaultValue: 'Rule tree is invalid',
             })}
@@ -1274,8 +1274,8 @@ export default function SmartViewBuilder({
       {/* Live count pill + actions */}
       <div className="flex items-center gap-2 flex-wrap">
         {report.errors.size > 0 ? (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
-            <AlertCircle size={11} />
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs bg-semantic-error-bg text-semantic-error">
+            <AlertCircle size={12} />
             {t('bim.smartview.fix_errors', {
               defaultValue: '{{n}} rule errors',
               n: report.errors.size,
@@ -1295,8 +1295,8 @@ export default function SmartViewBuilder({
           <span
             className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-2xs font-semibold ${
               matched === 0
-                ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
-                : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                ? 'bg-semantic-error-bg text-semantic-error'
+                : 'bg-semantic-success-bg text-semantic-success'
             }`}
             data-testid="smart-view-preview-count"
           >
@@ -1307,7 +1307,7 @@ export default function SmartViewBuilder({
           </span>
         )}
         {previewQuery.data?.truncated && (
-          <span className="text-2xs text-amber-600">
+          <span className="text-2xs text-semantic-warning">
             {t('bim.smartview.truncated', {
               defaultValue: 'Scan capped at 50K elements',
             })}
@@ -1329,7 +1329,7 @@ export default function SmartViewBuilder({
             className="ms-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-oe-blue text-white text-2xs font-semibold hover:bg-oe-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="smart-view-save-button"
           >
-            <Save size={11} />
+            <Save size={12} />
             {t('bim.smartview.save_btn', { defaultValue: 'Save Smart View' })}
           </button>
         )}
@@ -1400,8 +1400,8 @@ function SavedViewChip({
         aria-label={starred ? 'Unstar' : 'Star'}
         className={`p-0.5 rounded ${
           starred
-            ? 'text-amber-500 hover:text-amber-600'
-            : 'text-content-quaternary hover:text-amber-500'
+            ? 'text-semantic-warning hover:text-semantic-warning'
+            : 'text-content-quaternary hover:text-semantic-warning'
         }`}
       >
         <Star size={9} className={starred ? 'fill-amber-500' : ''} />

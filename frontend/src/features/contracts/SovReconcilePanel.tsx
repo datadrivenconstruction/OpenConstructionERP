@@ -192,31 +192,31 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
             })}
           </p>
           <div className="mt-2 overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-content-tertiary">
+            <table className="oe-table-compact w-full">
+              <thead>
                 <tr>
-                  {preview.can_apply && <th className="w-6 py-1" />}
-                  <th className="py-1 text-start">
+                  {preview.can_apply && <th className="w-6" />}
+                  <th>
                     {t('contracts.code', { defaultValue: 'Code' })}
                   </th>
-                  <th className="py-1 text-start">
+                  <th>
                     {t('contracts.description', { defaultValue: 'Description' })}
                   </th>
-                  <th className="py-1 text-start">
+                  <th>
                     {t('contracts.sov_reconcile_approved_on', { defaultValue: 'Approved' })}
                   </th>
-                  <th className="py-1 text-end">
+                  <th className="text-end">
                     {t('contracts.total', { defaultValue: 'Total' })}
                   </th>
-                  <th className="py-1" />
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
                   <Fragment key={item.source_key}>
-                  <tr className="border-t border-border-light align-top">
+                  <tr className="align-top">
                     {preview.can_apply && (
-                      <td className="py-1">
+                      <td>
                         <input
                           type="checkbox"
                           checked={!unticked.has(item.source_key)}
@@ -230,13 +230,13 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
                         />
                       </td>
                     )}
-                    <td className="py-1 font-mono">{item.source_code}</td>
-                    <td className="py-1">{item.title}</td>
-                    <td className="py-1">{item.approved_on ? fmtDate(item.approved_on) : '-'}</td>
-                    <td className="py-1 text-end">
+                    <td className="font-mono">{item.source_code}</td>
+                    <td>{item.title}</td>
+                    <td>{item.approved_on ? fmtDate(item.approved_on) : '-'}</td>
+                    <td className="text-end">
                       <MoneyDisplay amount={item.amount} currency={item.currency || currency} />
                     </td>
-                    <td className="py-1 ps-2 text-end">
+                    <td className="ps-2 text-end">
                       {asideKey === item.source_key ? (
                         <div className="flex flex-wrap items-center justify-end gap-1">
                           <input
@@ -250,7 +250,7 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
                             aria-label={t('contracts.sov_reconcile_reason', {
                               defaultValue: 'Which line covers it (optional)',
                             })}
-                            className="h-7 min-w-0 rounded border border-border bg-surface-primary px-2 text-xs"
+                            className="oe-input-sm min-w-0"
                           />
                           <Button
                             size="sm"
@@ -357,7 +357,7 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
               onClick={() => setConfirming(true)}
               disabled={ticked.length === 0}
             >
-              <ListPlus size={13} className="me-1" aria-hidden />
+              <ListPlus size={14} className="me-1" aria-hidden />
               {t('contracts.sov_reconcile_action', { defaultValue: 'Reconcile change orders' })}
             </Button>
           )}
@@ -383,7 +383,7 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
                   onClick={() => exclusionMut.mutate({ key: item.source_key, excluded: false })}
                   disabled={exclusionMut.isPending}
                 >
-                  <Undo2 size={13} className="me-1" aria-hidden />
+                  <Undo2 size={14} className="me-1" aria-hidden />
                   {t('contracts.sov_reconcile_take_back', { defaultValue: 'Offer again' })}
                 </Button>
               </li>

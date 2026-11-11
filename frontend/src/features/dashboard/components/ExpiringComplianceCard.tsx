@@ -32,7 +32,7 @@ export function ExpiringComplianceCard({
     <Card padding="md" data-testid="expiring-compliance-card">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('compliance.widget.title', {
               defaultValue: 'Expiring compliance',
             })}
@@ -43,7 +43,7 @@ export function ExpiringComplianceCard({
             })}
           </p>
         </div>
-        <ShieldCheck size={18} className="text-content-tertiary" />
+        <ShieldCheck size={20} className="text-content-tertiary" />
       </div>
 
       {isLoading ? (

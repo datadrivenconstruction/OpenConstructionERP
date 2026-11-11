@@ -403,7 +403,7 @@ function CreateDialog({
   const busy = mutation.isPending || linkMutation.isPending || checking;
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'w-full';
 
   if (checkRows) {
     return (
@@ -505,7 +505,7 @@ function CreateDialog({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('changeorders.title_placeholder', { defaultValue: 'e.g. Additional foundation work' })}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -518,7 +518,7 @@ function CreateDialog({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="oe-textarea w-full resize-none"
           />
         </WideModalField>
         <WideModalField
@@ -529,7 +529,7 @@ function CreateDialog({
             id="co-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className={fieldCls}
+            className={`oe-select-lg ${fieldCls}`}
           >
             {Object.entries(getReasonLabels(t)).map(([k, v]) => (
               <option key={k} value={k}>
@@ -548,7 +548,7 @@ function CreateDialog({
             min={0}
             value={scheduleDays}
             onChange={(e) => setScheduleDays(parseInt(e.target.value) || 0)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         {linkableContracts.length > 0 && (
@@ -564,7 +564,7 @@ function CreateDialog({
               id="co-contract"
               value={contractId}
               onChange={(e) => setContractId(e.target.value)}
-              className={fieldCls}
+              className={`oe-select-lg ${fieldCls}`}
             >
               <option value="">
                 {t('changeorders.apply_to_contract_none', { defaultValue: 'None - project budget only' })}
@@ -688,7 +688,7 @@ function AddItemDialog({
   const costDelta = (newQty * newRate) - (origQty * origRate);
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'w-full';
 
   return (
     <>
@@ -764,7 +764,7 @@ function AddItemDialog({
             id="item-description"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -775,7 +775,7 @@ function AddItemDialog({
             id="item-change-type"
             value={changeType}
             onChange={(e) => setChangeType(e.target.value)}
-            className={fieldCls}
+            className={`oe-select-lg ${fieldCls}`}
           >
             <option value="added">{t('changeorders.type_added', { defaultValue: 'Added' })}</option>
             <option value="removed">{t('changeorders.type_removed', { defaultValue: 'Removed' })}</option>
@@ -791,7 +791,7 @@ function AddItemDialog({
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
             placeholder={t('changeorders.unit_placeholder', { defaultValue: 'm2, m3, pcs...' })}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         {canCost && (
@@ -833,7 +833,7 @@ function AddItemDialog({
             step="any"
             value={origQty}
             onChange={(e) => setOrigQty(parseFloat(e.target.value) || 0)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -847,7 +847,7 @@ function AddItemDialog({
             step="any"
             value={newQty}
             onChange={(e) => setNewQty(parseFloat(e.target.value) || 0)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -861,7 +861,7 @@ function AddItemDialog({
             step="any"
             value={origRate}
             onChange={(e) => setOrigRate(parseFloat(e.target.value) || 0)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -875,7 +875,7 @@ function AddItemDialog({
             step="any"
             value={newRate}
             onChange={(e) => setNewRate(parseFloat(e.target.value) || 0)}
-            className={fieldCls}
+            className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
         <div className="sm:col-span-2 rounded-lg bg-surface-secondary p-3 text-sm">
@@ -986,7 +986,7 @@ function BoqPositionPickerDialog({
   }, [boqDetail, search]);
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'w-full';
 
   return (
     <WideModal
@@ -1011,7 +1011,7 @@ function BoqPositionPickerDialog({
             value={boqId}
             onChange={(e) => setBoqId(e.target.value)}
             disabled={boqsLoading}
-            className={fieldCls}
+            className={`oe-select-lg ${fieldCls}`}
           >
             <option value="">
               {boqsLoading
@@ -1041,7 +1041,7 @@ function BoqPositionPickerDialog({
               placeholder={t('changeorders.boq_picker_search_placeholder', {
                 defaultValue: 'Filter by description or ordinal…',
               })}
-              className={fieldCls}
+              className={`oe-input-lg ${fieldCls}`}
               autoComplete="off"
             />
           </WideModalField>
@@ -1058,19 +1058,19 @@ function BoqPositionPickerDialog({
             </p>
           ) : (
             <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+              <table className="oe-table w-full">
+                <thead className="sticky top-0">
                   <tr>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('changeorders.boq_picker_ordinal', { defaultValue: 'Ord.' })}
                     </th>
-                    <th className="px-3 py-2 text-left">
+                    <th>
                       {t('common.description', { defaultValue: 'Description' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('changeorders.boq_picker_qty', { defaultValue: 'Qty' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('changeorders.boq_picker_rate', { defaultValue: 'Rate' })}
                     </th>
                   </tr>
@@ -1090,16 +1090,16 @@ function BoqPositionPickerDialog({
                           unit_rate: Number(p.unit_rate) || 0,
                         })
                       }
-                      className="cursor-pointer border-t border-border-light hover:bg-surface-secondary"
+                      className="cursor-pointer"
                     >
-                      <td className="px-3 py-2 font-mono text-xs text-content-secondary whitespace-nowrap">
+                      <td className="font-mono text-content-secondary whitespace-nowrap">
                         {p.ordinal}
                       </td>
-                      <td className="px-3 py-2 text-content-primary">{p.description}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                      <td>{p.description}</td>
+                      <td className="text-right tabular-nums text-content-secondary">
                         {formatQuantity(p.quantity)} {p.unit}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                      <td className="text-right tabular-nums text-content-secondary">
                         {formatCurrency(Number(p.unit_rate) || 0, currency)}
                       </td>
                     </tr>
@@ -1216,7 +1216,7 @@ function ApprovalChainBuilderDialog({
     onConfirm(usePicker ? chosen.map((u) => u.id) : rawIds);
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input-lg w-full';
 
   return (
     <WideModal
@@ -1373,7 +1373,7 @@ function ApprovalChainBuilderDialog({
               rows={5}
               disabled={busy}
               placeholder={'b1f7e8e2-…\n5c0a9d1f-…\n8e4f1a32-…'}
-              className="w-full rounded-lg border border-border bg-surface-primary p-2 font-mono text-xs focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-textarea w-full font-mono"
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {t('changeorders.approver_directory_unavailable', {
@@ -1782,7 +1782,7 @@ function DetailView({
             order.currency,
           );
           return (
-            <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-oe-blue/25 bg-oe-blue/[0.06] dark:bg-oe-blue/[0.1] p-3 text-sm text-content-secondary">
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-oe-blue/25 bg-oe-blue/[0.06] dark:bg-oe-blue/[0.1] p-3 text-sm text-content-secondary">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-oe-blue" />
               <div className="min-w-0">
                 <p className="font-medium text-content-primary">
@@ -1832,7 +1832,7 @@ function DetailView({
               : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }));
           return (
             <div
-              className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
+              className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
               data-testid="co-auto-draft-banner"
             >
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
@@ -1869,7 +1869,7 @@ function DetailView({
           if (!src?.amountUnread || order.status !== 'draft') return null;
           return (
             <div
-              className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
+              className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
               data-testid="co-amount-unread"
             >
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
@@ -1935,7 +1935,7 @@ function DetailView({
                 aria-label={t('changeorders.approve_boq_label', {
                   defaultValue: 'Bill of quantities to receive the approved scope',
                 })}
-                className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-select"
               >
                 <option value="">{t('common.select_boq', { defaultValue: 'Select BOQ...' })}</option>
                 {targetBoqs.map((b) => (
@@ -2195,7 +2195,7 @@ function DetailView({
           'flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors';
         return (
           <div className="mb-6">
-            <h3 className="text-base font-semibold text-content-primary mb-3">
+            <h3 className="oe-section-title mb-3">
               {t('changeorders.related_records', { defaultValue: 'Related' })}
             </h3>
             <div className="flex flex-wrap items-center gap-2">
@@ -2314,7 +2314,7 @@ function DetailView({
         (order.status === 'submitted' && canApprove)) && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title">
               {t('changeorders.approvals_section', {
                 defaultValue: 'Approvals',
               })}
@@ -2380,7 +2380,7 @@ function DetailView({
 
       {/* Items */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-content-primary">
+        <h3 className="oe-section-title">
           {t('changeorders.items', { defaultValue: 'Line Items' })} ({order.items.length})
         </h3>
         {canEdit && (
@@ -2407,26 +2407,26 @@ function DetailView({
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" aria-label={t('changeorders.items_table_aria', { defaultValue: 'Change order line items' })}>
+            <table className="oe-table w-full" aria-label={t('changeorders.items_table_aria', { defaultValue: 'Change order line items' })}>
               <thead>
-                <tr className="border-b border-border bg-surface-secondary/50">
-                  <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                <tr>
+                  <th>
                     {t('common.description', { defaultValue: 'Description' })}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                  <th>
                     {t('changeorders.type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-content-secondary">
+                  <th className="text-right">
                     {t('changeorders.orig_qty', { defaultValue: 'Orig Qty' })}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-content-secondary">
+                  <th className="text-right">
                     {t('changeorders.new_qty', { defaultValue: 'New Qty' })}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-content-secondary">
+                  <th className="text-right">
                     {t('changeorders.cost_delta', { defaultValue: 'Cost Delta' })}
                   </th>
                   {canEdit && (
-                    <th className="px-4 py-3 w-12" />
+                    <th className="w-12" />
                   )}
                 </tr>
               </thead>
@@ -2434,8 +2434,8 @@ function DetailView({
                 {order.items.map((item) => {
                   const costDelta = Number(item.cost_delta);
                   return (
-                  <tr key={item.id} className="border-b border-border last:border-0 hover:bg-surface-secondary/30">
-                    <td className="px-4 py-3 text-content-primary">
+                  <tr key={item.id} className="last:border-0">
+                    <td>
                       {item.description}
                       <AccountChooser
                         compact
@@ -2449,22 +2449,22 @@ function DetailView({
                         onSaved={() => queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] })}
                       />
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <Badge variant={item.change_type === 'added' ? 'success' : item.change_type === 'removed' ? 'error' : 'neutral'}>
                         {t(`changeorders.type_${item.change_type}`, { defaultValue: item.change_type })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right text-content-secondary tabular-nums">
+                    <td className="text-right text-content-secondary tabular-nums">
                       {formatQuantity(item.original_quantity)} {item.unit}
                     </td>
-                    <td className="px-4 py-3 text-right text-content-secondary tabular-nums">
+                    <td className="text-right text-content-secondary tabular-nums">
                       {formatQuantity(item.new_quantity)} {item.unit}
                     </td>
                     <td className={`px-4 py-3 text-right font-medium tabular-nums whitespace-nowrap ${costDelta >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
                       {formatSignedCurrency(costDelta, order.currency)}
                     </td>
                     {canEdit && (
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <button
                           onClick={async () => {
                             const ok = await confirm({
@@ -2866,7 +2866,7 @@ export function ChangeOrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          className="oe-select"
           aria-label={t('changeorders.filter_status', { defaultValue: 'Filter by status' })}
         >
           <option value="">{t('changeorders.all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -2909,31 +2909,31 @@ export function ChangeOrdersPage() {
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm" aria-label={t('changeorders.table_aria', { defaultValue: 'Change orders list' })}>
+              <table className="oe-table w-full" aria-label={t('changeorders.table_aria', { defaultValue: 'Change orders list' })}>
                 <thead>
-                  <tr className="border-b border-border bg-surface-secondary/50">
-                    <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                  <tr>
+                    <th>
                       {t('changeorders.code', { defaultValue: 'Code' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                    <th>
                       {t('common.title')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                    <th>
                       {t('common.status')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                    <th>
                       {t('changeorders.reason', { defaultValue: 'Reason' })}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-content-secondary">
+                    <th className="text-right">
                       {t('changeorders.cost_impact', { defaultValue: 'Cost Impact' })}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-content-secondary">
+                    <th className="text-right">
                       {t('changeorders.schedule', { defaultValue: 'Schedule' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-secondary">
+                    <th>
                       {t('common.date', { defaultValue: 'Date' })}
                     </th>
-                    <th className="px-4 py-3 w-16" />
+                    <th className="w-16" />
                   </tr>
                 </thead>
                 <tbody>
@@ -2942,23 +2942,23 @@ export function ChangeOrdersPage() {
                     return (
                     <tr
                       key={order.id}
-                      className="border-b border-border last:border-0 hover:bg-surface-secondary/30 cursor-pointer"
+                      className="last:border-0 cursor-pointer"
                       onClick={() => setSelectedOrderId(order.id)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">{order.code}</td>
+                      <td className="font-mono text-content-secondary whitespace-nowrap">{order.code}</td>
                       {/* The title is the one free-text column here. It was
                           capped at a flat 200px, so it cut at the same ~40
                           characters whether the window was 1120px or 1720px
                           wide. w-full + max-w-0 hands it whatever the seven
                           fixed columns do not use, and truncates only past
                           that. */}
-                      <td className="px-4 py-3 text-content-primary font-medium w-full max-w-0 truncate" title={order.title}>
+                      <td className="font-medium w-full max-w-0 truncate" title={order.title}>
                         {order.title}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{translateStatus(order.status, t)}</Badge>
                       </td>
-                      <td className="px-4 py-3 text-content-secondary text-xs">
+                      <td className="text-content-secondary">
                         {t(`changeorders.reason_${order.reason_category}`, {
                           defaultValue: getReasonLabels(t)[order.reason_category] || order.reason_category,
                         })}
@@ -2966,15 +2966,15 @@ export function ChangeOrdersPage() {
                       <td className={`px-4 py-3 text-right font-medium tabular-nums whitespace-nowrap ${impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
                         {formatSignedCurrency(impact, order.currency)}
                       </td>
-                      <td className="px-4 py-3 text-right text-content-secondary tabular-nums">
+                      <td className="text-right text-content-secondary tabular-nums">
                         {order.schedule_impact_days > 0
                           ? `+${order.schedule_impact_days}d`
                           : order.schedule_impact_days === 0
                             ? '-'
                             : `${order.schedule_impact_days}d`}
                       </td>
-                      <td className="px-4 py-3 text-content-tertiary text-xs whitespace-nowrap">{formatDate(order.created_at)}</td>
-                      <td className="px-4 py-3">
+                      <td className="text-content-tertiary whitespace-nowrap">{formatDate(order.created_at)}</td>
+                      <td>
                         <div className="flex items-center gap-1">
                           {order.status === 'draft' && (
                             <button

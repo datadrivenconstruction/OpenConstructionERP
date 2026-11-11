@@ -346,7 +346,7 @@ function SubcontractorPickerModal({
             placeholder={t('bid_management.pick_sub_search', {
               defaultValue: 'Search subcontractors by name or trade…',
             })}
-            className={clsx(inputCls, 'pl-8')}
+            className={clsx('oe-input w-full', 'pl-8')}
             autoFocus
           />
         </div>
@@ -826,14 +826,14 @@ export function BidManagementPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('common.search', { defaultValue: 'Search…' })}
-            className={clsx(inputCls, 'pl-8')}
+            className={clsx('oe-input w-full', 'pl-8')}
           />
         </div>
         {tab === 'packages' && (
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={clsx(inputCls, 'max-w-[200px]')}
+            className={clsx('oe-select w-full', 'max-w-[200px]')}
           >
             <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
             {PACKAGE_STATUSES.map((s) => (
@@ -1138,7 +1138,7 @@ function SubmissionsLevelingView({
         <select
           value={pkg.id}
           onChange={(e) => setActivePkg(e.target.value)}
-          className={clsx(inputCls, 'max-w-[420px]')}
+          className={clsx('oe-select w-full', 'max-w-[420px]')}
         >
           {packages.map((p) => (
             <option key={p.id} value={p.id}>
@@ -1723,7 +1723,7 @@ function AwardConfirmModal({
             step="any"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={clsx(inputCls, 'text-right')}
+            className={clsx('oe-input w-full', 'text-right')}
           />
           <p className="mt-1 text-xs text-content-tertiary">
             {currency || ''} - {t('bid_management.awarded_amount_hint', {
@@ -1742,7 +1742,7 @@ function AwardConfirmModal({
             placeholder={t('bid_management.decision_summary_placeholder', {
               defaultValue: 'Why this bidder was selected (kept on the award record).',
             })}
-            className={clsx(inputCls, 'h-auto py-2 resize-y')}
+            className={clsx('oe-textarea w-full', 'h-auto resize-y')}
           />
         </div>
       </div>
@@ -1780,7 +1780,7 @@ function QAView({ packages }: { packages: BidPackage[] }) {
         <select
           value={pkg.id}
           onChange={(e) => setActivePkg(e.target.value)}
-          className={clsx(inputCls, 'max-w-[420px]')}
+          className={clsx('oe-select w-full', 'max-w-[420px]')}
         >
           {packages.map((p) => (
             <option key={p.id} value={p.id}>
@@ -1840,7 +1840,7 @@ function QAList({ packageId }: { packageId: string }) {
             value={askerEmail}
             onChange={(e) => setAskerEmail(e.target.value)}
             placeholder={t('bid_management.your_email', { defaultValue: 'Your email' })}
-            className={inputCls}
+            className="oe-input w-full"
           />
           <textarea
             value={question}
@@ -1849,7 +1849,7 @@ function QAList({ packageId }: { packageId: string }) {
               defaultValue: 'Type your question…',
             })}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea w-full', 'h-auto')}
           />
           <Button
             variant="primary"
@@ -1934,7 +1934,7 @@ function QAItem({ qa, packageId }: { qa: BidQA; packageId: string }) {
                 placeholder={t('bid_management.answer_placeholder', {
                   defaultValue: 'Write an answer…',
                 })}
-                className={inputCls}
+                className="oe-input w-full"
               />
               <Button
                 variant="secondary"
@@ -2537,7 +2537,7 @@ function AddScopeLineForm({
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="01.001"
-          className={inputCls}
+          className="oe-input w-full"
         />
       </div>
       <div>
@@ -2550,7 +2550,7 @@ function AddScopeLineForm({
           placeholder={t('bid_management.scope_line_desc_placeholder', {
             defaultValue: 'Reinforced concrete wall',
           })}
-          className={inputCls}
+          className="oe-input w-full"
         />
       </div>
       <div>
@@ -2561,7 +2561,7 @@ function AddScopeLineForm({
           step="any"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
-          className={clsx(inputCls, 'text-right')}
+          className={clsx('oe-input w-full', 'text-right')}
         />
       </div>
       <div>
@@ -2570,7 +2570,7 @@ function AddScopeLineForm({
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
           placeholder="m²"
-          className={inputCls}
+          className="oe-input w-full"
         />
       </div>
       <Button
@@ -2779,7 +2779,7 @@ function RecordBidModal({
                             setPrices((p) => ({ ...p, [li.id]: e.target.value }))
                           }
                           placeholder="0.00"
-                          className={clsx(inputCls, 'h-8 w-28 text-right')}
+                          className={clsx('oe-input w-full', 'w-28 text-right')}
                         />
                       </td>
                       <td className="px-3 py-1.5 text-right tabular-nums">
@@ -2812,7 +2812,7 @@ function RecordBidModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2 resize-y')}
+            className={clsx('oe-textarea w-full', 'h-auto resize-y')}
           />
         </div>
       </div>
@@ -2884,7 +2884,7 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
           value={company}
           onChange={(e) => setCompany(e.target.value)}
           placeholder={t('bid_management.company', { defaultValue: 'Company' })}
-          className={inputCls}
+          className="oe-input w-full"
         />
         {link && (
           <p className="text-2xs text-content-tertiary">
@@ -2899,7 +2899,7 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('bid_management.email', { defaultValue: 'Email' })}
-          className={inputCls}
+          className="oe-input w-full"
         />
         <Button
           variant="primary"
@@ -3041,7 +3041,7 @@ function CreatePackageModal({
           <input
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
-            className={inputCls}
+            className="oe-input w-full"
             placeholder="BP-001"
             autoFocus
           />
@@ -3052,7 +3052,7 @@ function CreatePackageModal({
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className={inputCls}
+            className="oe-input w-full"
             placeholder={t('bid_management.title_placeholder', {
               defaultValue: 'Façade cladding works',
             })}
@@ -3069,7 +3069,7 @@ function CreatePackageModal({
             value={form.scope_description}
             onChange={(e) => setForm({ ...form, scope_description: e.target.value })}
             rows={4}
-            className={clsx(inputCls, 'h-auto py-2 resize-y')}
+            className={clsx('oe-textarea w-full', 'h-auto resize-y')}
           />
         </WideModalField>
         <WideModalField
@@ -3079,7 +3079,7 @@ function CreatePackageModal({
             type="date"
             value={form.submission_deadline}
             onChange={(e) => setForm({ ...form, submission_deadline: e.target.value })}
-            className={inputCls}
+            className="oe-input w-full"
           />
         </WideModalField>
         <WideModalField
@@ -3089,7 +3089,7 @@ function CreatePackageModal({
           <input
             value={form.currency}
             onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-            className={inputCls}
+            className="oe-input w-full"
             maxLength={3}
           />
         </WideModalField>
@@ -3113,7 +3113,7 @@ function CreatePackageModal({
             step="0.01"
             value={form.total_budget_estimate}
             onChange={(e) => setForm({ ...form, total_budget_estimate: e.target.value })}
-            className={inputCls}
+            className="oe-input w-full"
           />
         </WideModalField>
       </WideModalSection>

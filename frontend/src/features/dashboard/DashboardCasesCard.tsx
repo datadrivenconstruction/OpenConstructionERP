@@ -338,9 +338,9 @@ export function DashboardCasesCard() {
             </span>
             <span aria-hidden="true">·</span>
             {anyInProgress ? (
-              <PlayCircle size={11} className="text-oe-blue" aria-hidden="true" />
+              <PlayCircle size={12} className="text-oe-blue" aria-hidden="true" />
             ) : (
-              <Sparkles size={11} className="text-oe-blue" aria-hidden="true" data-decorative-icon />
+              <Sparkles size={12} className="text-oe-blue" aria-hidden="true" data-decorative-icon />
             )}
             {framingLabel}
           </div>
@@ -460,7 +460,7 @@ export function DashboardCasesCard() {
             className="group relative isolate flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-oe-blue/40 bg-oe-blue/[0.05] px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/60 hover:bg-oe-blue/10 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue ring-1 ring-inset ring-oe-blue/20 transition-transform group-hover:scale-105">
-              <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+              <ArrowRight size={20} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="text-xs font-semibold leading-snug text-oe-blue-text">
               {t('cases.dashboard_card.more_tile', {

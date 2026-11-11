@@ -114,13 +114,13 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
   );
 
   const inputClass =
-    'mt-1 block w-32 rounded-md border border-border bg-surface-primary px-2 py-1 text-sm';
+    'mt-1 block w-32';
 
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('costmodel.cf_title', { defaultValue: 'Cash-flow forecast' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -151,7 +151,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
             value={delay}
             onChange={(e) => setDelay(e.target.value)}
             aria-label={t('costmodel.cf_delay', { defaultValue: 'Receipt delay (days)' })}
-            className={inputClass}
+            className={`oe-input-sm ${inputClass}`}
           />
         </label>
         <label className="text-xs text-content-secondary">
@@ -163,7 +163,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
             value={overrun}
             onChange={(e) => setOverrun(e.target.value)}
             aria-label={t('costmodel.cf_overrun', { defaultValue: 'Cost overrun (%)' })}
-            className={inputClass}
+            className={`oe-input-sm ${inputClass}`}
           />
         </label>
         {currencies.length > 1 && (
@@ -173,7 +173,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
               value={current?.currency ?? ''}
               onChange={(e) => setPicked(e.target.value)}
               aria-label={t('costmodel.cf_currency', { defaultValue: 'Currency' })}
-              className={inputClass}
+              className={`oe-select-sm ${inputClass}`}
             >
               {currencies.map((c) => (
                 <option key={c.currency} value={c.currency}>
@@ -192,7 +192,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
         </div>
       ) : error ? (
         <div className="mt-4 flex items-start gap-3 rounded-lg border border-semantic-error/30 bg-semantic-error-bg/30 p-3">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-error" />
+          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-error" />
           <div>
             <p className="text-sm font-medium text-content-primary">
               {t('costmodel.cf_load_failed', { defaultValue: 'Could not load the cash-flow forecast' })}
@@ -281,7 +281,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
           <MonthsTable months={current.months} currency={current.currency} />
 
           <div>
-            <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <h4 className="oe-overline mb-1">
               {t('costmodel.cf_sources', { defaultValue: 'Sources' })}
             </h4>
             <ul className="divide-y divide-border-light rounded-lg border border-border-light text-sm">
@@ -314,10 +314,10 @@ function MonthsTable({ months, currency }: { months: ForecastMonth[]; currency: 
   const th = 'px-2 py-1.5 text-right font-medium';
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead className="bg-surface-secondary text-content-secondary">
+      <table className="oe-table-compact w-full">
+        <thead>
           <tr>
-            <th className="px-2 py-1.5 text-left font-medium">{t('costmodel.cf_col_month', { defaultValue: 'Month' })}</th>
+            <th>{t('costmodel.cf_col_month', { defaultValue: 'Month' })}</th>
             <th className={th}>{t('costmodel.cf_col_planned_in', { defaultValue: 'Planned in' })}</th>
             <th className={th}>{t('costmodel.cf_col_actual_in', { defaultValue: 'Actual / expected in' })}</th>
             <th className={th}>{t('costmodel.cf_col_var_in', { defaultValue: 'Variance in' })}</th>
@@ -330,15 +330,15 @@ function MonthsTable({ months, currency }: { months: ForecastMonth[]; currency: 
         </thead>
         <tbody>
           {months.map((m) => (
-            <tr key={m.period} className="border-t border-border-light tabular-nums">
-              <td className="px-2 py-1.5 text-left">{m.period}</td>
-              <td className="px-2 py-1.5 text-right">{fmt(m.planned_in)}</td>
-              <td className="px-2 py-1.5 text-right">{fmt(m.is_past ? m.actual_in : m.expected_in)}</td>
-              <td className="px-2 py-1.5 text-right">{m.is_past ? fmt(m.variance_in) : ''}</td>
-              <td className="px-2 py-1.5 text-right">{fmt(m.planned_out)}</td>
-              <td className="px-2 py-1.5 text-right">{fmt(m.is_past ? m.actual_out : m.expected_out)}</td>
-              <td className="px-2 py-1.5 text-right">{m.is_past ? fmt(m.variance_out) : ''}</td>
-              <td className="px-2 py-1.5 text-right">{fmt(m.net)}</td>
+            <tr key={m.period} className="tabular-nums">
+              <td>{m.period}</td>
+              <td className="text-right">{fmt(m.planned_in)}</td>
+              <td className="text-right">{fmt(m.is_past ? m.actual_in : m.expected_in)}</td>
+              <td className="text-right">{m.is_past ? fmt(m.variance_in) : ''}</td>
+              <td className="text-right">{fmt(m.planned_out)}</td>
+              <td className="text-right">{fmt(m.is_past ? m.actual_out : m.expected_out)}</td>
+              <td className="text-right">{m.is_past ? fmt(m.variance_out) : ''}</td>
+              <td className="text-right">{fmt(m.net)}</td>
               <td className={`px-2 py-1.5 text-right ${isNegative(m.cumulative) ? 'text-semantic-error' : ''}`}>
                 {fmt(m.cumulative)}
               </td>
@@ -361,7 +361,7 @@ function FindingsList({ findings }: { findings: ForecastFinding[] }) {
   };
   return (
     <div>
-      <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h4 className="oe-overline mb-1">
         {t('costmodel.cf_findings', { defaultValue: 'Findings' })}
       </h4>
       <ul className="space-y-2">

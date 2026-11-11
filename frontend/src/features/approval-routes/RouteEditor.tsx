@@ -407,7 +407,7 @@ export function RouteEditor({
         title={t('approvalRoutes.section_basics', { defaultValue: 'Basics' })}
       >
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('approvalRoutes.name', { defaultValue: 'Name' })}
             <span className="text-semantic-error ml-0.5">*</span>
           </label>
@@ -417,13 +417,13 @@ export function RouteEditor({
             placeholder={t('approvalRoutes.name_placeholder', {
               defaultValue: 'e.g. Submittals - Standard 2-step review',
             })}
-            className="h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input w-full"
             autoFocus
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('approvalRoutes.target_kind', { defaultValue: 'Target kind' })}
             <span className="text-semantic-error ml-0.5">*</span>
           </label>
@@ -431,7 +431,7 @@ export function RouteEditor({
             value={targetKind}
             onChange={(e) => setTargetKind(e.target.value)}
             disabled={isEdit}
-            className="h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="oe-select w-full cursor-pointer"
           >
             {targetKinds.map((k) => (
               <option key={k} value={k}>
@@ -452,14 +452,14 @@ export function RouteEditor({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('approvalRoutes.project', { defaultValue: 'Project (optional)' })}
           </label>
           <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
             disabled={isEdit}
-            className="h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="oe-select w-full cursor-pointer"
           >
             <option value="">
               {t('approvalRoutes.global_route', {
@@ -568,7 +568,7 @@ function StepEditorRow({
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-semibold text-content-tertiary uppercase tracking-wide tabular-nums">
+        <span className="oe-overline tabular-nums">
           {t('approvalRoutes.step_n', {
             defaultValue: 'Step {{n}}',
             n: index + 1,
@@ -586,7 +586,7 @@ function StepEditorRow({
             )}
             aria-label={t('approvalRoutes.move_up', { defaultValue: 'Move up' })}
           >
-            <ArrowUp size={13} />
+            <ArrowUp size={14} />
           </button>
           <button
             onClick={onMoveDown}
@@ -601,7 +601,7 @@ function StepEditorRow({
               defaultValue: 'Move down',
             })}
           >
-            <ArrowDown size={13} />
+            <ArrowDown size={14} />
           </button>
           <button
             onClick={onRemove}
@@ -614,7 +614,7 @@ function StepEditorRow({
             )}
             aria-label={t('common.delete', { defaultValue: 'Delete' })}
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -639,7 +639,7 @@ function StepEditorRow({
                   : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
               )}
             >
-              <ShieldCheck size={11} />
+              <ShieldCheck size={12} />
               {t('approvalRoutes.by_role', { defaultValue: 'Role' })}
             </button>
             <button
@@ -657,7 +657,7 @@ function StepEditorRow({
                   : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
               )}
             >
-              <UserCog size={11} />
+              <UserCog size={12} />
               {t('approvalRoutes.by_user', { defaultValue: 'User' })}
             </button>
           </div>
@@ -665,7 +665,7 @@ function StepEditorRow({
             <select
               value={step.approver_user_id}
               onChange={(e) => onChange('approver_user_id', e.target.value)}
-              className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+              className="oe-select w-full cursor-pointer"
             >
               <option value="">
                 {t('approvalRoutes.pick_user', { defaultValue: 'Pick user…' })}
@@ -680,7 +680,7 @@ function StepEditorRow({
             <select
               value={step.approver_role}
               onChange={(e) => onChange('approver_role', e.target.value)}
-              className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+              className="oe-select w-full cursor-pointer"
             >
               <option value="">
                 {t('approvalRoutes.pick_role', { defaultValue: 'Pick role…' })}
@@ -706,7 +706,7 @@ function StepEditorRow({
             value={availableModes.includes(step.mode) ? step.mode : availableModes[0]}
             onChange={(e) => onChange('mode', e.target.value as RouteStepMode)}
             disabled={availableModes.length <= 1}
-            className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="oe-select w-full cursor-pointer"
           >
             {availableModes.map((m) => (
               <option key={m} value={m}>
@@ -723,7 +723,7 @@ function StepEditorRow({
           </select>
           {!userMode && (
             <p className="mt-1 flex items-start gap-1 rounded-md border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-1 text-2xs text-semantic-warning">
-              <AlertTriangle size={11} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={12} className="mt-0.5 shrink-0" />
               <span>
                 {t('approvalRoutes.mode_role_warning', {
                   defaultValue:
@@ -745,7 +745,7 @@ function StepEditorRow({
             value={step.sla_hours}
             onChange={(e) => onChange('sla_hours', e.target.value)}
             placeholder="—"
-            className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue tabular-nums"
+            className="oe-input w-full tabular-nums"
           />
         </div>
       </div>

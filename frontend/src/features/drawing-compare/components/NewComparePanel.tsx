@@ -36,7 +36,7 @@ interface NewComparePanelProps {
 }
 
 const SELECT =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none';
+  'oe-select w-full';
 
 export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: NewComparePanelProps) {
   const { t } = useTranslation();

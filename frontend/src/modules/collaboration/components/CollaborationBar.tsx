@@ -99,7 +99,7 @@ function UserAvatar({
     >
       {initials || '?'}
       {isLocal && (
-        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 border border-surface-primary" />
+        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-semantic-success border border-surface-primary" />
       )}
     </div>
   );

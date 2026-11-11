@@ -28,7 +28,7 @@ export function RunsList({ runs, loading, error, onRetry, locale, onNew, onOpen 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {t('aiest.runs.title', { defaultValue: 'Your AI estimates' })}
         </h2>
         <Button variant="primary" icon={<Plus className="h-4 w-4" />} onClick={onNew}>
@@ -37,7 +37,7 @@ export function RunsList({ runs, loading, error, onRetry, locale, onNew, onOpen 
       </div>
 
       {loading ? (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
@@ -82,7 +82,7 @@ export function RunsList({ runs, loading, error, onRetry, locale, onNew, onOpen 
           }}
         />
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {runs.map((r) => {
             const stage = STAGES.find((s) => s.id === r.current_stage);
             return (

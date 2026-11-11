@@ -121,7 +121,7 @@ export function UpcomingMilestonesCard() {
       <CardHeader
         title={
           <span className="inline-flex items-center gap-2">
-            <CalendarClock size={18} className="text-oe-blue" strokeWidth={1.75} />
+            <CalendarClock size={20} className="text-oe-blue" strokeWidth={1.75} />
             {t('dashboard.milestones_title', { defaultValue: 'Upcoming milestones' })}
           </span>
         }
@@ -135,16 +135,16 @@ export function UpcomingMilestonesCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('dashboard.milestones_open', { defaultValue: 'Open schedule' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />
       <CardContent>
-        <ul className="flex flex-col gap-2.5">
+        <ul className="flex flex-col gap-2">
           {milestones.map((m) => (
             <li key={m.id} className="flex items-center gap-3">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-semantic-warning-bg text-semantic-warning">
-                <Flag size={13} strokeWidth={1.75} />
+                <Flag size={14} strokeWidth={1.75} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-content-primary">{m.name}</p>

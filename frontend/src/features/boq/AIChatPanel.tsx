@@ -226,7 +226,7 @@ export function AIChatPanel({
   const offTranslate = isRTL ? '-translate-x-full' : 'translate-x-full';
   return (
     <div
-      className={`fixed right-0 top-12 z-40 h-[calc(100%-3rem)] w-[320px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-12 z-dropdown h-[calc(100%-3rem)] w-[320px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : offTranslate
       }`}
     >
@@ -234,7 +234,7 @@ export function AIChatPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-light shrink-0">
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-oe-blue" />
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('boq.ai_assistant', { defaultValue: 'AI Assistant' })}
           </h2>
         </div>
@@ -243,7 +243,7 @@ export function AIChatPanel({
           className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
-          <X size={18} />
+          <X size={20} />
         </button>
       </div>
 
@@ -295,7 +295,7 @@ export function AIChatPanel({
                       href="/settings"
                       className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-oe-blue hover:underline"
                     >
-                      <Settings size={11} />
+                      <Settings size={12} />
                       {t('boq.go_to_settings', { defaultValue: 'Go to Settings' })}
                     </a>
                   )}
@@ -332,17 +332,17 @@ export function AIChatPanel({
                 {/* Generated items table */}
                 {msg.items && msg.items.length > 0 && (
                   <div className="rounded-lg border border-border-light overflow-hidden bg-surface-primary">
-                    <table className="w-full text-2xs">
+                    <table className="oe-table-compact w-full text-2xs">
                       <thead>
-                        <tr className="border-b border-border-light bg-surface-secondary">
-                          <th className="w-7 px-1.5 py-1.5" />
-                          <th className="px-2 py-1.5 text-left font-medium text-content-tertiary">
+                        <tr>
+                          <th className="w-7" />
+                          <th>
                             {t('boq.description', { defaultValue: 'Description' })}
                           </th>
-                          <th className="w-10 px-1 py-1.5 text-center font-medium text-content-tertiary">
+                          <th className="w-10 text-center">
                             {t('boq.unit', { defaultValue: 'Unit' })}
                           </th>
-                          <th className="w-16 px-1.5 py-1.5 text-right font-medium text-content-tertiary">
+                          <th className="w-16 text-right">
                             {t('boq.total', { defaultValue: 'Total' })}
                           </th>
                         </tr>
@@ -359,7 +359,7 @@ export function AIChatPanel({
                                 isSelected ? 'bg-oe-blue-subtle/20' : 'hover:bg-surface-secondary'
                               }`}
                             >
-                              <td className="px-1.5 py-1.5 text-center">
+                              <td className="text-center">
                                 <div
                                   className={`h-3.5 w-3.5 rounded border flex items-center justify-center mx-auto ${
                                     isSelected
@@ -370,15 +370,15 @@ export function AIChatPanel({
                                   {isSelected && <Check size={9} className="text-white" strokeWidth={3} />}
                                 </div>
                               </td>
-                              <td className="px-2 py-1.5 text-content-primary truncate max-w-0">
+                              <td className="truncate max-w-0">
                                 <span className="block truncate" title={item.description}>
                                   {item.description}
                                 </span>
                               </td>
-                              <td className="px-1 py-1.5 text-center text-content-secondary font-mono uppercase">
+                              <td className="text-center text-content-secondary font-mono">
                                 {item.unit}
                               </td>
-                              <td className="px-1.5 py-1.5 text-right tabular-nums text-content-primary">
+                              <td className="text-right tabular-nums">
                                 {fmtNum(item.total)}
                               </td>
                             </tr>
@@ -429,7 +429,7 @@ export function AIChatPanel({
               defaultValue: 'Ask a question or describe positions to generate…',
             })}
             disabled={chatMutation.isPending}
-            className="flex-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary outline-none focus:ring-2 focus:ring-oe-blue/20 focus:border-oe-blue/40 disabled:opacity-50 transition-all"
+            className="oe-input flex-1"
           />
           <button
             onClick={handleSend}

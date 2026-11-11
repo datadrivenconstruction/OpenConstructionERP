@@ -352,7 +352,7 @@ function heat(count: number, max: number): string {
   const r = max > 0 ? count / max : 0;
   if (r > 0.66) return 'bg-semantic-error text-content-inverse';
   if (r > 0.33) return 'bg-semantic-warning text-content-inverse';
-  return 'bg-amber-200 text-semantic-warning';
+  return 'bg-semantic-warning-bg text-semantic-warning';
 }
 
 /** Stable per-discipline chip palette (deterministic — same discipline →
@@ -2117,7 +2117,7 @@ export function ClashDetectionPage() {
         >
           <Card padding="md">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title flex items-center gap-2">
                 <Radar className="h-4 w-4 text-oe-blue" />
                 {t('clash.new_run', { defaultValue: 'New clash run' })}
               </h2>
@@ -2136,14 +2136,14 @@ export function ClashDetectionPage() {
                 saved configuration template. Optional; an empty pick keeps
                 whatever the user has set. ─────────────────────────────── */}
             {profiles.length > 0 && (
-              <label className="mt-3 block text-xs font-medium text-content-secondary">
+              <label className="oe-label mt-3">
                 {t('clash.load_profile', {
                   defaultValue: 'Load a saved profile',
                 })}
                 <select
                   value={profileId}
                   onChange={(e) => onPickProfile(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-select mt-1 w-full"
                 >
                   <option value="">
                     {t('clash.no_profile', {
@@ -2182,7 +2182,7 @@ export function ClashDetectionPage() {
                 <select
                   value={mode}
                   onChange={(e) => setMode(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-select mt-1 w-full"
                 >
                   <option value="selection_sets">
                     {t('clash.mode_sets', {
@@ -2229,7 +2229,7 @@ export function ClashDetectionPage() {
                       onChange={(e) =>
                         setGroupBy(e.target.value as ClashGroupBy)
                       }
-                      className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-xs"
+                      className="oe-select-sm mt-1 w-full"
                     >
                       {ALL_GROUP_BY.filter((g) =>
                         availableGroupBy.includes(g),
@@ -2318,7 +2318,7 @@ export function ClashDetectionPage() {
                   onChange={(e) =>
                     setClashType(e.target.value as ClashType)
                   }
-                  className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-select mt-1 w-full"
                 >
                   <option value="both">
                     {t('clash.ct_both', {
@@ -2366,7 +2366,7 @@ export function ClashDetectionPage() {
                 )}
               >
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                  <span className="oe-overline">
                     {t('clash.tol_presets', {
                       defaultValue: 'Tolerance preset',
                     })}
@@ -2406,7 +2406,7 @@ export function ClashDetectionPage() {
                       onChange={(e) =>
                         setToleranceMm(Number(e.target.value))
                       }
-                      className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1 text-sm disabled:cursor-not-allowed"
+                      className="oe-input-sm mt-1 w-full"
                     />
                   </label>
                   <label
@@ -2428,11 +2428,8 @@ export function ClashDetectionPage() {
                         setClearanceMm(Number(e.target.value))
                       }
                       className={clsx(
-                        'mt-1 w-full rounded-md border bg-surface-primary px-2 py-1 text-sm disabled:cursor-not-allowed',
-                        clearanceMisconfigured
-                          ? 'border-semantic-error'
-                          : 'border-border',
-                      )}
+                        'oe-input-sm mt-1 w-full',
+                      )} aria-invalid={!!(clearanceMisconfigured)}
                     />
                   </label>
                 </div>
@@ -2501,7 +2498,7 @@ export function ClashDetectionPage() {
                     placeholder={t('clash.run_name_ph', {
                       defaultValue: 'e.g. Struct vs MEP - L3 coordination',
                     })}
-                    className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1 text-sm"
+                    className="oe-input-sm mt-1 w-full"
                   />
                 </label>
                 <label className="text-xs text-content-secondary">
@@ -2516,7 +2513,7 @@ export function ClashDetectionPage() {
                     placeholder={t('clash.run_desc_ph', {
                       defaultValue: 'Scope / intent / reviewer note',
                     })}
-                    className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1 text-sm"
+                    className="oe-input-sm mt-1 w-full"
                   />
                 </label>
               </div>
@@ -2572,7 +2569,7 @@ export function ClashDetectionPage() {
           {/* Save-as-profile dialog (item #23). */}
           {showSaveProfile && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+              className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
               role="dialog"
               aria-modal="true"
               onClick={() => setShowSaveProfile(false)}
@@ -2582,7 +2579,7 @@ export function ClashDetectionPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
-                  <h2 className="flex items-center gap-2 text-base font-semibold text-content-primary">
+                  <h2 className="oe-section-title flex items-center gap-2">
                     <Bookmark className="h-4 w-4 text-oe-blue" />
                     {t('clash.save_as_profile', {
                       defaultValue: 'Save configuration as a profile',
@@ -2598,7 +2595,7 @@ export function ClashDetectionPage() {
                   </button>
                 </div>
                 <div className="px-5 py-4">
-                  <label className="block text-xs font-medium text-content-secondary">
+                  <label className="oe-label">
                     {t('clash.profile_name', { defaultValue: 'Profile name' })}
                     <input
                       type="text"
@@ -2608,7 +2605,7 @@ export function ClashDetectionPage() {
                       placeholder={t('clash.profile_name_ph', {
                         defaultValue: 'e.g. MEP × Structural - tight',
                       })}
-                      className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                      className="oe-input mt-1 w-full"
                     />
                   </label>
                   <p className="mt-2 text-2xs text-content-tertiary">
@@ -2643,7 +2640,7 @@ export function ClashDetectionPage() {
           )}
 
           <Card padding="md">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('clash.history', { defaultValue: 'Run history' })}
             </h2>
 
@@ -2664,7 +2661,7 @@ export function ClashDetectionPage() {
                     onChange={(e) =>
                       setCompareBaseId(e.target.value || null)
                     }
-                    className="h-7 min-w-0 flex-1 rounded-md border border-border bg-surface-primary px-1.5 text-2xs text-content-primary"
+                    className="oe-select-sm min-w-0 flex-1"
                   >
                     <option value="">
                       {t('clash.compare_none', {
@@ -3010,7 +3007,7 @@ export function ClashDetectionPage() {
               {/* ── Clash matrix ───────────────────────────────────── */}
               <Card padding="md">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-content-primary">
+                  <h2 className="oe-card-title">
                     {t('clash.matrix_title', {
                       defaultValue:
                         'Clash matrix - discipline × discipline',
@@ -3038,14 +3035,13 @@ export function ClashDetectionPage() {
                   </p>
                 ) : (
                   <div className="mt-3 overflow-auto">
-                    <table className="border-collapse text-xs">
+                    <table className="oe-table-compact">
                       <thead>
                         <tr>
-                          <th className="p-2" />
+                          <th />
                           {disciplines.map((d) => (
                             <th
                               key={d}
-                              className="p-2 font-medium text-content-secondary"
                             >
                               {d}
                             </th>
@@ -3055,7 +3051,7 @@ export function ClashDetectionPage() {
                       <tbody>
                         {disciplines.map((row) => (
                           <tr key={row}>
-                            <th className="p-2 text-right font-medium text-content-secondary">
+                            <th className="text-right">
                               {row}
                             </th>
                             {disciplines.map((col) => {
@@ -3066,7 +3062,7 @@ export function ClashDetectionPage() {
                               const pairKey = `${a}|${b}`;
                               const isActive = fPair === pairKey;
                               return (
-                                <td key={col} className="p-1">
+                                <td key={col}>
                                   <button
                                     type="button"
                                     disabled={c === 0}
@@ -3116,7 +3112,7 @@ export function ClashDetectionPage() {
                 {/* Toolbar */}
                 <div className="border-b border-border-light p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+                    <h2 className="oe-card-title flex items-center gap-2">
                       {t('clash.results', {
                         defaultValue: 'Clash results',
                       })}
@@ -3137,7 +3133,7 @@ export function ClashDetectionPage() {
                         placeholder={t('clash.search_ph', {
                           defaultValue: 'Search element name…',
                         })}
-                        className="h-8 w-56 rounded-md border border-border bg-surface-primary ps-8 pe-2 text-xs"
+                        className="oe-input w-56 ps-8 pe-2"
                       />
                     </div>
 
@@ -3148,7 +3144,7 @@ export function ClashDetectionPage() {
                           e.target.value as 'all' | 'hard' | 'clearance',
                         )
                       }
-                      className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs"
+                      className="oe-select"
                     >
                       <option value="all">
                         {t('clash.all_types', {
@@ -3181,7 +3177,7 @@ export function ClashDetectionPage() {
                             e.target.value as ResultGroupBy,
                           )
                         }
-                        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary"
+                        className="oe-select"
                       >
                         <option value="none">
                           {t('clash.grp_none', {
@@ -3335,7 +3331,7 @@ export function ClashDetectionPage() {
                   {!showFacets && (
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="flex items-center gap-1 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                      <span className="oe-overline flex items-center gap-1">
                         <SlidersHorizontal className="h-3 w-3" />
                         {t('clash.filter_status', {
                           defaultValue: 'Status',
@@ -3362,7 +3358,7 @@ export function ClashDetectionPage() {
                     {/* Severity filter pills — coloured to match the table
                         badge so the filter and the column read as one. */}
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="flex items-center gap-1 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                      <span className="oe-overline flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
                         {t('clash.filter_severity', {
                           defaultValue: 'Severity',
@@ -3618,10 +3614,10 @@ export function ClashDetectionPage() {
                       </div>
                     )}
                     <div className="max-h-[640px] overflow-auto">
-                    <table className="w-full text-left text-xs">
+                    <table className="oe-table-compact w-full">
                       <thead className="sticky top-0 z-10 bg-surface-elevated">
-                        <tr className="border-b border-border-light text-content-tertiary">
-                          <th className="w-9 px-3 py-2.5">
+                        <tr>
+                          <th className="w-9">
                             <input
                               type="checkbox"
                               aria-label={t('clash.select_all', {
@@ -3714,12 +3710,12 @@ export function ClashDetectionPage() {
                               module: surfaces the estimated rework cost
                               per clash so a coordinator can prioritise
                               by money, not just by geometry. */}
-                          <th className="px-3 py-2.5 text-right">
+                          <th className="text-right">
                             {t('clash.col_cost_impact', {
                               defaultValue: 'Cost impact',
                             })}
                           </th>
-                          <th className="px-3 py-2.5 text-right">
+                          <th className="text-right">
                             {t('clash.col_actions', {
                               defaultValue: 'Actions',
                             })}
@@ -3740,7 +3736,7 @@ export function ClashDetectionPage() {
                                 key={`g-${it.key}`}
                                 className="border-b border-border-light bg-surface-secondary/60"
                               >
-                                <td colSpan={11} className="px-3 py-1.5">
+                                <td colSpan={11}>
                                   <button
                                     type="button"
                                     onClick={() => toggleGroup(it.key)}
@@ -3772,7 +3768,7 @@ export function ClashDetectionPage() {
                                 key={`p-${it.key}`}
                                 className="border-b border-border-light bg-oe-blue/[0.04]"
                               >
-                                <td colSpan={11} className="px-3 py-2">
+                                <td colSpan={11}>
                                   <div className="flex flex-wrap items-center gap-2">
                                     <button
                                       type="button"
@@ -3837,20 +3833,20 @@ export function ClashDetectionPage() {
                             <tr
                               key={r.id}
                               className={clsx(
-                                'border-b border-border-light/60 transition-colors',
+                                '',
                                 kbActive &&
                                   'ring-2 ring-inset ring-oe-blue/60',
                                 selected
                                   ? 'bg-oe-blue/5'
                                   : kbActive
                                     ? 'bg-oe-blue/5'
-                                    : 'hover:bg-surface-secondary',
+                                    : '',
                               )}
                               onClick={() => {
                                 if (kbIndex >= 0) setKbRow(kbIndex);
                               }}
                             >
-                              <td className="px-3 py-2">
+                              <td>
                                 <input
                                   type="checkbox"
                                   aria-label={t('clash.select_row', {
@@ -3867,10 +3863,10 @@ export function ClashDetectionPage() {
                                   }
                                 />
                               </td>
-                              <td className="px-3 py-2 tabular-nums text-content-tertiary">
+                              <td className="tabular-nums text-content-tertiary">
                                 {(r.__idx ?? 0) + 1}
                               </td>
-                              <td className="max-w-[220px] px-3 py-2">
+                              <td className="max-w-[220px]">
                                 <div className="truncate font-medium text-content-primary">
                                   {r.a_name || r.a_stable_id}
                                 </div>
@@ -3888,7 +3884,7 @@ export function ClashDetectionPage() {
                                   )}
                                 </div>
                               </td>
-                              <td className="max-w-[220px] px-3 py-2">
+                              <td className="max-w-[220px]">
                                 <div className="truncate font-medium text-content-primary">
                                   {r.b_name || r.b_stable_id}
                                 </div>
@@ -3906,7 +3902,7 @@ export function ClashDetectionPage() {
                                   )}
                                 </div>
                               </td>
-                              <td className="px-3 py-2">
+                              <td>
                                 <Badge
                                   size="sm"
                                   variant={
@@ -3924,7 +3920,7 @@ export function ClashDetectionPage() {
                                       })}
                                 </Badge>
                               </td>
-                              <td className="px-3 py-2">
+                              <td>
                                 <div className="flex flex-wrap items-center gap-1">
                                   <SeverityBadge severity={sev} t={t} />
                                   {(() => {
@@ -3958,17 +3954,17 @@ export function ClashDetectionPage() {
                                   })()}
                                 </div>
                               </td>
-                              <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                              <td className="text-right tabular-nums text-content-secondary">
                                 {r.clash_type === 'hard'
                                   ? `${fmtFixed(r.penetration_m, 3)} m`
                                   : '—'}
                               </td>
-                              <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                              <td className="text-right tabular-nums text-content-secondary">
                                 {r.clash_type === 'clearance'
                                   ? `${fmtFixed(r.distance_m, 3)} m`
                                   : '—'}
                               </td>
-                              <td className="px-3 py-2">
+                              <td>
                                 <StatusWorkflow
                                   status={r.status}
                                   onChange={(s) =>
@@ -4029,7 +4025,7 @@ export function ClashDetectionPage() {
                                   rework estimate from the
                                   ``clash_cost_impact`` backend module. */}
                               <ClashCostImpactColumn clashId={r.id} />
-                              <td className="px-3 py-2">
+                              <td>
                                 <div className="flex items-center justify-end gap-1.5">
                                   {r.bcf_topic_guid && (
                                     <Badge variant="blue" size="sm">
@@ -4343,14 +4339,13 @@ function GroupMatrix({
   }
   return (
     <div className="overflow-auto">
-      <table className="border-collapse text-xs">
+      <table className="oe-table-compact">
         <thead>
           <tr>
-            <th className="p-2" />
+            <th />
             {axes.map((d) => (
               <th
                 key={d}
-                className="p-2 font-medium text-content-secondary"
               >
                 {d}
               </th>
@@ -4360,7 +4355,7 @@ function GroupMatrix({
         <tbody>
           {axes.map((row) => (
             <tr key={row}>
-              <th className="p-2 text-right font-medium text-content-secondary">
+              <th className="text-right">
                 {row}
               </th>
               {axes.map((col) => {
@@ -4368,7 +4363,7 @@ function GroupMatrix({
                 const cell = lookup.get(`${a}|${b}`);
                 const c = cell?.count ?? 0;
                 return (
-                  <td key={col} className="p-1">
+                  <td key={col}>
                     <div
                       className={clsx(
                         'flex h-12 w-16 flex-col items-center justify-center rounded-md font-semibold',
@@ -4461,7 +4456,7 @@ function ClashGroupingPanel({
   return (
     <Card padding="md">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <Layers className="h-4 w-4 text-oe-blue" />
           {t('clash.grouping_title', {
             defaultValue: 'Group clashes by',
@@ -4472,7 +4467,7 @@ function ClashGroupingPanel({
           onChange={(e) =>
             setDimension(e.target.value as ClashGroupingDimension)
           }
-          className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-select"
         >
           {DIMENSIONS.map((d) => (
             <option key={d.value} value={d.value}>
@@ -4556,7 +4551,7 @@ function ClashGroupingPanel({
               ).sort();
               return (
                 <div key={grp.level}>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h3 className="oe-overline mb-2">
                     {t('clash.level_n', {
                       defaultValue: 'Level {{n}}',
                       n: grp.level,
@@ -4940,8 +4935,8 @@ function StatusWorkflow({
           if (e.target.value) onChange(e.target.value);
         }}
         className={clsx(
-          'h-6 rounded-md border border-border bg-surface-primary px-1 text-2xs font-medium',
-          terminal ? 'text-content-primary' : 'text-content-tertiary',
+          'oe-select-sm',
+          terminal ? '' : '',
         )}
         title={t('clash.status_terminal_picker', {
           defaultValue: 'Pick a terminal status',
@@ -5028,7 +5023,7 @@ function BulkActionsBar({
             if (v) onSetSeverity(v);
             e.target.value = '';
           }}
-          className="h-7 rounded-md border border-border bg-surface-primary px-2 text-2xs"
+          className="oe-select-sm"
         >
           <option value="">
             {t('clash.bulk_pick', { defaultValue: 'Pick…' })}
@@ -5052,7 +5047,7 @@ function BulkActionsBar({
             if (v) onSetStatus(v);
             e.target.value = '';
           }}
-          className="h-7 rounded-md border border-border bg-surface-primary px-2 text-2xs"
+          className="oe-select-sm"
         >
           <option value="">
             {t('clash.bulk_pick', { defaultValue: 'Pick…' })}
@@ -5074,7 +5069,7 @@ function BulkActionsBar({
           placeholder={t('clash.bulk_assignee_ph', {
             defaultValue: 'name or e-mail',
           })}
-          className="h-7 w-40 rounded-md border border-border bg-surface-primary px-2 text-2xs"
+          className="oe-input-sm w-40"
         />
         <Button
           size="sm"
@@ -5098,7 +5093,7 @@ function BulkActionsBar({
           placeholder={t('clash.bulk_suppress_reason_ph', {
             defaultValue: 'reason (required)',
           })}
-          className="h-7 w-44 rounded-md border border-border bg-surface-primary px-2 text-2xs"
+          className="oe-input-sm w-44"
         />
         <Button
           size="sm"
@@ -5273,7 +5268,7 @@ function FacetGroup({
   if (rows.length === 0) return null;
   return (
     <div>
-      <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <div className="oe-overline mb-1.5">
         {title}
       </div>
       <div className="max-h-40 space-y-0.5 overflow-y-auto pr-1">
@@ -5492,7 +5487,7 @@ function SelectionSetPicker({
           placeholder={t('clash.set_search', {
             defaultValue: 'Search…',
           })}
-          className="w-full rounded-md border border-border bg-surface-primary py-1 pl-7 pr-2 text-2xs"
+          className="oe-input-sm w-full pl-7 pr-2"
         />
       </div>
 
@@ -5511,7 +5506,7 @@ function SelectionSetPicker({
         )}
         {groups.length > 0 && (
           <div>
-            <p className="px-1 pb-0.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline px-1 pb-0.5">
               {groupByLabel(groupBy, t)}
             </p>
             {groups.map((g) => (
@@ -5609,7 +5604,7 @@ function ModelCardPicker({
   return (
     <Card padding="md" className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <Boxes className="h-4 w-4 text-oe-blue" />
           {t('clash.models_title', {
             defaultValue: 'CAD-BIM models - pick what to coordinate',
@@ -6017,7 +6012,7 @@ function ClashDetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end"
+      className="fixed inset-0 z-dropdown flex justify-end"
       role="dialog"
       aria-modal="true"
       aria-label={t('clash.detail_title', {
@@ -6033,7 +6028,7 @@ function ClashDetailPanel({
       <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-border bg-surface-elevated shadow-2xl animate-slide-in-right">
         <div className="flex items-start justify-between gap-3 border-b border-border-light p-4">
           <div className="min-w-0">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-oe-blue" />
               {t('clash.detail_title', {
                 defaultValue: 'Clash details',
@@ -6062,7 +6057,7 @@ function ClashDetailPanel({
               auto-rotate); degrades to a hint when the model/element ids
               are missing or the GLB fails to load. */}
           <div>
-            <h3 className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-content-secondary">
+            <h3 className="oe-card-title mb-1.5 flex items-center gap-1.5">
               <Box className="h-3.5 w-3.5" />
               {t('clash.quick_preview', {
                 defaultValue: 'Quick 3D preview',
@@ -6116,7 +6111,7 @@ function ClashDetailPanel({
                   defaultValue: 'e.g. MEP coordinator',
                 })}
                 onChange={(e) => setAssignee(e.target.value)}
-                className="h-8 min-w-0 flex-1 rounded-md border border-border bg-surface-primary px-2 text-sm"
+                className="oe-input min-w-0 flex-1"
               />
               <Button
                 variant="secondary"
@@ -6142,7 +6137,7 @@ function ClashDetailPanel({
                 type="date"
                 value={due}
                 onChange={(e) => setDue(e.target.value)}
-                className="h-8 min-w-0 flex-1 rounded-md border border-border bg-surface-primary px-2 text-sm"
+                className="oe-input min-w-0 flex-1"
               />
               <Button
                 variant="secondary"
@@ -6167,7 +6162,7 @@ function ClashDetailPanel({
               when the watcher isn't in the project members list — a
               graceful degradation for cross-team coordination. */}
           <div>
-            <h3 className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-content-secondary">
+            <h3 className="oe-card-title mb-1.5 flex items-center gap-1.5">
               <Eye className="h-3.5 w-3.5" />
               {t('clash.watchers', { defaultValue: 'Watchers' })}
               <span className="rounded-full bg-surface-secondary px-1.5 text-2xs font-medium text-content-tertiary">
@@ -6397,7 +6392,7 @@ function ClashDetailPanel({
                       setMentionOpen(false);
                     }
                   }}
-                  className="w-full resize-y rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-textarea w-full resize-y"
                 />
                 {mentionOpen && mentionCandidates.length > 0 && (
                   <div
@@ -6662,7 +6657,7 @@ function CompareSection({
   return (
     <Card padding="md" className="border-oe-blue/30">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <GitCompareArrows className="h-4 w-4 text-oe-blue" />
           {t('clash.compare_title', {
             defaultValue: 'Run-to-run comparison',

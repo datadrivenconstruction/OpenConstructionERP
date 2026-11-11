@@ -181,7 +181,7 @@ export function CapitalPlanPage() {
           {plans.length > 0 && (
             <select
               aria-label={t('capital_plan.plan', { defaultValue: 'Plan' })}
-              className={FIELD}
+              className="oe-select-sm"
               value={plan?.id ?? ''}
               onChange={(e) => {
                 setPlanId(e.target.value);
@@ -229,7 +229,7 @@ export function CapitalPlanPage() {
             <div className="flex flex-wrap items-end justify-center gap-3">
               <label className="text-sm">
                 <span className="mb-1 block text-content-secondary">{t('capital_plan.name', { defaultValue: 'Name' })}</span>
-                <input className={FIELD} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+                <input className="oe-input-sm" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
               </label>
               <label className="text-sm">
                 <span className="mb-1 block text-content-secondary">{t('capital_plan.currency', { defaultValue: 'Currency' })}</span>
@@ -308,7 +308,7 @@ export function CapitalPlanPage() {
           <span className="inline-flex items-center gap-2">
             <input
               autoFocus
-              className={FIELD}
+              className="oe-input-sm"
               placeholder={t('capital_plan.scenario_name', { defaultValue: 'Scenario name' })}
               aria-label={t('capital_plan.scenario_name', { defaultValue: 'Scenario name' })}
               value={cloneName}
@@ -335,7 +335,7 @@ export function CapitalPlanPage() {
           <GitCompare size={14} />
           <select
             aria-label={t('capital_plan.compare', { defaultValue: 'Compare' })}
-            className={FIELD}
+            className="oe-select-sm"
             value={compareWith}
             disabled={others.length === 0}
             onChange={(e) => setCompareWith(e.target.value)}
@@ -358,7 +358,7 @@ export function CapitalPlanPage() {
       {suggestion && (
         <Card data-testid="suggestion">
           <CardContent className="space-y-3 p-4">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('capital_plan.suggestion_title', { defaultValue: 'Suggested funding' })}
             </h2>
             {changes.length === 0 ? (
@@ -425,16 +425,16 @@ export function CapitalPlanPage() {
       {items.length > 0 && (
         <Card>
           <CardContent className="overflow-x-auto p-0">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="oe-table-compact w-full min-w-[720px]">
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-tertiary">
-                  <th className="px-3 py-2">{t('capital_plan.col.project', { defaultValue: 'Project' })}</th>
-                  <th className="px-2 py-2">{t('capital_plan.col.priority', { defaultValue: 'Priority' })}</th>
-                  <th className="px-2 py-2">{t('capital_plan.col.status', { defaultValue: 'Status' })}</th>
-                  <th className="px-2 py-2 text-right">{t('capital_plan.col.cost', { defaultValue: 'Cost' })}</th>
-                  <th className="px-2 py-2 text-center">{t('capital_plan.col.start', { defaultValue: 'Start' })}</th>
+                <tr className="text-left">
+                  <th>{t('capital_plan.col.project', { defaultValue: 'Project' })}</th>
+                  <th>{t('capital_plan.col.priority', { defaultValue: 'Priority' })}</th>
+                  <th>{t('capital_plan.col.status', { defaultValue: 'Status' })}</th>
+                  <th className="text-right">{t('capital_plan.col.cost', { defaultValue: 'Cost' })}</th>
+                  <th className="text-center">{t('capital_plan.col.start', { defaultValue: 'Start' })}</th>
                   {years.map((y) => (
-                    <th key={y} className="px-2 py-2 text-right">
+                    <th key={y} className="text-right">
                       {y}
                     </th>
                   ))}
@@ -443,11 +443,11 @@ export function CapitalPlanPage() {
               <tbody>
                 {items.map((item: CapitalItem) => (
                   <tr key={item.id} className="border-b border-border/60" data-testid={`row-${item.id}`}>
-                    <td className="px-3 py-1.5 font-medium text-content-primary">{item.title}</td>
-                    <td className="px-2 py-1.5">
+                    <td className="font-medium">{item.title}</td>
+                    <td>
                       <select
                         aria-label={t('capital_plan.col.priority', { defaultValue: 'Priority' })}
-                        className={FIELD}
+                        className="oe-select-sm"
                         value={item.priority}
                         onChange={(e) => patchItem.mutate({ id: item.id, body: { priority: Number(e.target.value) } })}
                       >
@@ -458,10 +458,10 @@ export function CapitalPlanPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-2 py-1.5">
+                    <td>
                       <select
                         aria-label={t('capital_plan.col.status', { defaultValue: 'Status' })}
-                        className={FIELD}
+                        className="oe-select-sm"
                         value={item.status}
                         onChange={(e) => patchItem.mutate({ id: item.id, body: { status: e.target.value as ItemStatus } })}
                       >
@@ -472,8 +472,8 @@ export function CapitalPlanPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{money(item.total_cost)}</td>
-                    <td className="px-2 py-1.5">
+                    <td className="text-right tabular-nums">{money(item.total_cost)}</td>
+                    <td>
                       <span className="inline-flex items-center gap-1">
                         <button
                           type="button"
@@ -514,8 +514,8 @@ export function CapitalPlanPage() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-border">
-                  <th colSpan={5} className="px-3 py-2 text-left font-semibold">
+                <tr>
+                  <th colSpan={5}>
                     {t('capital_plan.row.envelope', { defaultValue: 'Envelope' })}
                   </th>
                   {years.map((y) => {
@@ -548,7 +548,7 @@ export function CapitalPlanPage() {
                   })}
                 </tr>
                 <tr>
-                  <th colSpan={5} className="px-3 py-1.5 text-left font-semibold">
+                  <th colSpan={5}>
                     {t('capital_plan.row.demand', { defaultValue: 'Demand' })}
                   </th>
                   {years.map((y) => (
@@ -558,7 +558,7 @@ export function CapitalPlanPage() {
                   ))}
                 </tr>
                 <tr>
-                  <th colSpan={5} className="px-3 py-1.5 text-left font-semibold">
+                  <th colSpan={5}>
                     {t('capital_plan.row.gap', { defaultValue: 'Gap' })}
                   </th>
                   {years.map((y) => {
@@ -588,10 +588,10 @@ export function CapitalPlanPage() {
       {compareWith && compareQ.data && (
         <Card data-testid="compare">
           <CardContent className="space-y-3 p-4">
-            <h2 className="text-sm font-semibold">{t('capital_plan.compare_title', { defaultValue: 'Compared with the other scenario' })}</h2>
-            <table className="text-sm">
+            <h2 className="oe-card-title">{t('capital_plan.compare_title', { defaultValue: 'Compared with the other scenario' })}</h2>
+            <table className="oe-table">
               <thead>
-                <tr className="text-left text-xs uppercase text-content-tertiary">
+                <tr className="text-left">
                   <th className="pr-4">{t('capital_plan.col.year', { defaultValue: 'Year' })}</th>
                   <th className="pr-4 text-right">{t('capital_plan.delta_demand', { defaultValue: 'Demand change' })}</th>
                   <th className="text-right">{t('capital_plan.delta_gap', { defaultValue: 'Gap change' })}</th>
@@ -626,7 +626,7 @@ export function CapitalPlanPage() {
       {summary && summary.findings.length > 0 && (
         <Card data-testid="findings">
           <CardContent className="space-y-2 p-4">
-            <h2 className="text-sm font-semibold">{t('capital_plan.findings', { defaultValue: 'Checks' })}</h2>
+            <h2 className="oe-card-title">{t('capital_plan.findings', { defaultValue: 'Checks' })}</h2>
             <ul className="space-y-1 text-sm">
               {summary.findings.map((f, i) => (
                 <li key={`${f.rule_id}-${f.element_ref}-${i}`} className={f.severity === 'error' ? 'text-semantic-error' : 'text-content-secondary'}>

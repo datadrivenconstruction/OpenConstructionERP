@@ -156,7 +156,7 @@ export function AccountChooser({
               onClick={() => setEditing(true)}
               data-testid={`account-change-${targetId}`}
             >
-              <PenLine size={11} />
+              <PenLine size={12} />
               {t('costmodel.account.change', { defaultValue: 'Change' })}
             </button>
           )}

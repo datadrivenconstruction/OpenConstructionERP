@@ -83,12 +83,12 @@ export function BIMCRSPanel({
   // Confidence colour bands match the dashboard traffic-light: green ≥80%,
   // amber 50-79%, red <50%.
   const confidenceClass = !hasCRS
-    ? 'border-amber-300 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
+    ? 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning'
     : confidencePct == null || confidencePct >= 80
-      ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
+      ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success'
       : confidencePct >= 50
-        ? 'border-amber-300 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
-        : 'border-red-300 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300';
+        ? 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning'
+        : 'border-semantic-error/30 bg-semantic-error-bg text-semantic-error';
 
   const handlePick = (next: number) => {
     if (onSetCRS) onSetCRS(next);
@@ -118,7 +118,7 @@ export function BIMCRSPanel({
     >
       <div className="flex items-center gap-1.5 mb-1">
         <Globe2 size={12} className="shrink-0" />
-        <span className="text-2xs font-semibold uppercase tracking-wide">
+        <span className="oe-overline">
           {t('bim.crs.label', { defaultValue: 'Detected CRS' })}
         </span>
       </div>
@@ -169,7 +169,7 @@ export function BIMCRSPanel({
 
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 z-50 w-64
+          className="absolute top-full left-0 mt-1 z-dropdown w-64
                      rounded-lg border border-border-light bg-surface-primary
                      shadow-lg overflow-hidden text-content-primary"
         >
@@ -186,7 +186,7 @@ export function BIMCRSPanel({
                 className="w-full text-left px-3 py-1.5 hover:bg-surface-secondary
                            text-[11px] flex items-center gap-2"
               >
-                {opt.epsg === epsg && <Check size={10} className="text-emerald-500" />}
+                {opt.epsg === epsg && <Check size={10} className="text-semantic-success" />}
                 <span className="truncate flex-1">{opt.label}</span>
                 <span className="text-2xs text-content-tertiary tabular-nums">
                   EPSG:{opt.epsg}
@@ -210,8 +210,7 @@ export function BIMCRSPanel({
                   handleManual();
                 }
               }}
-              className="flex-1 text-[11px] px-2 py-1 rounded border border-border-light
-                         bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input-sm flex-1"
             />
             <button
               type="button"

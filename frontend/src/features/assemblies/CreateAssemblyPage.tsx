@@ -135,7 +135,7 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onClose}
@@ -149,7 +149,7 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
               <Layers size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('assemblies.new_assembly', { defaultValue: 'New Assembly' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -162,7 +162,7 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -193,11 +193,11 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
             {/* Unit & Category */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-content-primary">{t('assemblies.unit', { defaultValue: 'Unit' })}</label>
+                <label className="oe-label">{t('assemblies.unit', { defaultValue: 'Unit' })}</label>
                 {/* Friendly, localized label (e.g. "m² · Square meter") while the
                     option value stays the canonical getUnitsForLocale token, so
                     imperial/locale coverage and canonical storage are unchanged. */}
-                <select value={form.unit} onChange={(e) => set('unit', e.target.value)} className={selectClass}>
+                <select value={form.unit} onChange={(e) => set('unit', e.target.value)} className="oe-select-lg w-full cursor-pointer">
                   {unitOptions.map((u) => (
                     <option key={u} value={u}>{unitLabel(u, t)}</option>
                   ))}
@@ -209,8 +209,8 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-content-primary">{t('assemblies.category', { defaultValue: 'Category' })}</label>
-                <select value={form.category} onChange={(e) => set('category', e.target.value)} className={selectClass}>
+                <label className="oe-label">{t('assemblies.category', { defaultValue: 'Category' })}</label>
+                <select value={form.category} onChange={(e) => set('category', e.target.value)} className="oe-select-lg w-full cursor-pointer">
                   {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>{t(c.key, { defaultValue: c.defaultLabel })}</option>
                   ))}
@@ -221,10 +221,10 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
             {/* Classification */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-content-primary">
+                <label className="oe-label">
                   {t('assemblies.classification_standard', { defaultValue: 'Classification Standard' })}
                 </label>
-                <select value={form.classificationStandard} onChange={(e) => set('classificationStandard', e.target.value)} className={selectClass}>
+                <select value={form.classificationStandard} onChange={(e) => set('classificationStandard', e.target.value)} className="oe-select-lg w-full cursor-pointer">
                   <option value="">{t('assemblies.none', { defaultValue: '-- None --' })}</option>
                   {STANDARDS.map((s) => (
                     <option key={s.value} value={s.value}>{t(s.key, { defaultValue: s.defaultLabel })}</option>

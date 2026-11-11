@@ -146,7 +146,7 @@ export function AgentCard({
       {/* Example prompts */}
       {prompts.length > 0 && (
         <div className="mt-3 border-t border-border-light pt-3">
-          <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <div className="oe-overline mb-1.5">
             {t('agents.try_asking', { defaultValue: 'Try asking' })}
           </div>
           <div className="flex flex-wrap gap-1.5">

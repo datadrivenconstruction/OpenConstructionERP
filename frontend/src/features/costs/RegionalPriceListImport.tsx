@@ -300,7 +300,7 @@ export function RegionalPriceListImport() {
           <BookOpen size={20} className="text-oe-blue" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('costs_pricelist.title', { defaultValue: 'Import a regional price list' })}
           </h3>
           <p className="mt-1 text-sm text-content-secondary">
@@ -429,7 +429,7 @@ export function RegionalPriceListImport() {
                   <label className="text-xs text-content-secondary">
                     {t('costs_pricelist.region_label', { defaultValue: 'Region' })}
                     <select
-                      className="mt-1 block rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                      className="oe-select-sm mt-1 block"
                       value={overrides.regionCode ?? src.region_code ?? ''}
                       onChange={(e) => applyOverrides({ ...overrides, regionCode: e.target.value || undefined })}
                       disabled={busy}
@@ -446,7 +446,7 @@ export function RegionalPriceListImport() {
                     {t('costs_pricelist.edition_label', { defaultValue: 'Edition (year)' })}
                     <input
                       key={src.edition ?? 'none'}
-                      className="mt-1 block w-24 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                      className="oe-input-sm mt-1 block w-24"
                       inputMode="numeric"
                       defaultValue={overrides.edition ?? src.edition ?? ''}
                       onBlur={(e) => {
@@ -479,28 +479,28 @@ export function RegionalPriceListImport() {
 
               {preview.sample_rows.length > 0 && (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="text-content-secondary">
+                  <table className="oe-table-compact w-full">
+                    <thead>
                       <tr>
-                        <th className="py-1 pe-2 font-medium">{t('costs_pricelist.col_code', { defaultValue: 'Code' })}</th>
-                        <th className="py-1 pe-2 font-medium">
+                        <th className="pe-2">{t('costs_pricelist.col_code', { defaultValue: 'Code' })}</th>
+                        <th className="pe-2">
                           {t('costs_pricelist.col_description', { defaultValue: 'Description' })}
                         </th>
-                        <th className="py-1 pe-2 font-medium">{t('costs_pricelist.col_unit', { defaultValue: 'Unit' })}</th>
-                        <th className="py-1 text-end font-medium">
+                        <th className="pe-2">{t('costs_pricelist.col_unit', { defaultValue: 'Unit' })}</th>
+                        <th className="text-end">
                           {t('costs_pricelist.col_rate', { defaultValue: 'Price' })}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="text-content-primary">
+                    <tbody>
                       {preview.sample_rows.map((row) => (
-                        <tr key={row.code} className="border-t border-border-light">
-                          <td className="py-1 pe-2 font-mono whitespace-nowrap">{row.code}</td>
-                          <td className="max-w-md truncate py-1 pe-2" title={row.description}>
+                        <tr key={row.code}>
+                          <td className="pe-2 font-mono whitespace-nowrap">{row.code}</td>
+                          <td className="max-w-md truncate pe-2" title={row.description}>
                             {row.description}
                           </td>
-                          <td className="py-1 pe-2 whitespace-nowrap">{row.source_unit || row.unit}</td>
-                          <td className="py-1 text-end tabular-nums whitespace-nowrap">{money(row.rate)}</td>
+                          <td className="pe-2 whitespace-nowrap">{row.source_unit || row.unit}</td>
+                          <td className="text-end tabular-nums whitespace-nowrap">{money(row.rate)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -526,7 +526,7 @@ export function RegionalPriceListImport() {
                 <label className="min-w-[16rem] flex-1 text-xs text-content-secondary">
                   {t('costs_pricelist.catalog_name', { defaultValue: 'New catalogue name' })}
                   <input
-                    className="mt-1 block w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                    className="oe-input-sm mt-1 block w-full"
                     value={catalogName}
                     maxLength={50}
                     onChange={(e) => setCatalogName(e.target.value)}

@@ -60,19 +60,19 @@ const TYPE_META: Record<
 > = {
   added: {
     icon: Plus,
-    cls: 'text-emerald-600 dark:text-emerald-400',
+    cls: 'text-semantic-success',
     key: 'bim.diff_added',
     fallback: 'Added',
   },
   deleted: {
     icon: Minus,
-    cls: 'text-rose-600 dark:text-rose-400',
+    cls: 'text-semantic-error',
     key: 'bim.diff_deleted',
     fallback: 'Deleted',
   },
   modified: {
     icon: PencilRuler,
-    cls: 'text-amber-600 dark:text-amber-400',
+    cls: 'text-semantic-warning',
     key: 'bim.diff_modified',
     fallback: 'Modified',
   },
@@ -143,8 +143,8 @@ export default function BIMDiffPanel({
   return (
     <div className="flex flex-col h-full" data-testid="bim-diff-panel">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-light bg-surface-secondary">
-        <h3 className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-primary">
-          <GitCompare size={13} className="text-oe-blue" />
+        <h3 className="oe-overline inline-flex items-center gap-1.5">
+          <GitCompare size={14} className="text-oe-blue" />
           {t('bim.diff_title', { defaultValue: 'Compare versions' })}
         </h3>
         <button
@@ -172,7 +172,7 @@ export default function BIMDiffPanel({
           onChange={(e) => setOldModelId(e.target.value)}
           disabled={candidates.length === 0}
           data-testid="bim-diff-old-model"
-          className="w-full px-2 py-1 text-xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-select-sm w-full"
         >
           <option value="">
             {candidates.length === 0
@@ -201,12 +201,12 @@ export default function BIMDiffPanel({
           </p>
         ) : diffQuery.isLoading ? (
           <div className="flex items-center gap-2 px-3 py-4 text-2xs text-content-tertiary">
-            <Loader2 size={13} className="animate-spin text-oe-blue" />
+            <Loader2 size={14} className="animate-spin text-oe-blue" />
             {t('bim.diff_loading', { defaultValue: 'Computing diff…' })}
           </div>
         ) : diffQuery.error ? (
           <p
-            className="px-3 py-4 text-2xs text-rose-600"
+            className="px-3 py-4 text-2xs text-semantic-error"
             data-testid="bim-diff-error"
           >
             {t('bim.diff_error', {
@@ -217,16 +217,16 @@ export default function BIMDiffPanel({
           <>
             {/* Summary strip */}
             <div className="flex items-center gap-3 px-3 py-2 border-b border-border-light text-2xs">
-              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                <Plus size={11} />
+              <span className="inline-flex items-center gap-1 text-semantic-success">
+                <Plus size={12} />
                 {grouped.totals.added}
               </span>
-              <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                <PencilRuler size={11} />
+              <span className="inline-flex items-center gap-1 text-semantic-warning">
+                <PencilRuler size={12} />
                 {grouped.totals.modified}
               </span>
-              <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400">
-                <Minus size={11} />
+              <span className="inline-flex items-center gap-1 text-semantic-error">
+                <Minus size={12} />
                 {grouped.totals.deleted}
               </span>
             </div>
@@ -252,26 +252,26 @@ export default function BIMDiffPanel({
                         className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-surface-secondary transition-colors"
                       >
                         {isOpen ? (
-                          <ChevronDown size={13} className="shrink-0 text-content-tertiary" />
+                          <ChevronDown size={14} className="shrink-0 text-content-tertiary" />
                         ) : (
-                          <ChevronRight size={13} className="shrink-0 text-content-tertiary" />
+                          <ChevronRight size={14} className="shrink-0 text-content-tertiary" />
                         )}
                         <span className="flex-1 min-w-0 truncate text-2xs font-medium text-content-primary">
                           {g.category}
                         </span>
                         <span className="flex items-center gap-1.5 text-2xs tabular-nums shrink-0">
                           {g.added > 0 && (
-                            <span className="text-emerald-600 dark:text-emerald-400">
+                            <span className="text-semantic-success">
                               +{g.added}
                             </span>
                           )}
                           {g.modified > 0 && (
-                            <span className="text-amber-600 dark:text-amber-400">
+                            <span className="text-semantic-warning">
                               ~{g.modified}
                             </span>
                           )}
                           {g.deleted > 0 && (
-                            <span className="text-rose-600 dark:text-rose-400">
+                            <span className="text-semantic-error">
                               −{g.deleted}
                             </span>
                           )}
@@ -326,14 +326,14 @@ export default function BIMDiffPanel({
                                         </dt>
                                         <dd className="text-2xs text-content-secondary min-w-0">
                                           <span
-                                            className="line-through text-rose-500/80 break-words"
+                                            className="line-through text-semantic-error break-words"
                                             title={d.oldText}
                                           >
                                             {d.oldText}
                                           </span>
                                           {' → '}
                                           <span
-                                            className="text-emerald-600 dark:text-emerald-400 break-words"
+                                            className="text-semantic-success break-words"
                                             title={d.newText}
                                           >
                                             {d.newText}

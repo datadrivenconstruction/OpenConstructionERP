@@ -121,7 +121,7 @@ function LinkGroup({
                 >
                   <span className="truncate">{shortRef(noun, id)}</span>
                   <ArrowUpRight
-                    size={11}
+                    size={12}
                     className="shrink-0 text-content-quaternary transition-colors group-hover:text-oe-blue"
                   />
                 </button>
@@ -234,7 +234,7 @@ export function CostLineRollupDrawer({
       }
       subtitle={
         <span className="inline-flex items-center gap-1">
-          <Layers size={11} />
+          <Layers size={12} />
           {t('costmodel.spine.line_detail', { defaultValue: 'Cost line' })}
         </span>
       }
@@ -254,7 +254,7 @@ export function CostLineRollupDrawer({
           <>
             {/* Figures */}
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-2">
                 {t('costmodel.spine.figures', { defaultValue: 'Figures' })}
               </h3>
               <div className="divide-y divide-border-light rounded-lg border border-border-light px-3">
@@ -295,7 +295,7 @@ export function CostLineRollupDrawer({
 
             {/* Links */}
             <section>
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-3">
                 {t('costmodel.spine.linked_records', { defaultValue: 'Linked records' })}
               </h3>
               {totalLinks === 0 ? (

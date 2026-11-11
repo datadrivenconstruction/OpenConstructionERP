@@ -739,7 +739,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 className="w-3 h-3 rounded-full"
                 style={{ background: getCategoryColor(mod.module_category) }}
               />
-              <h3 className="text-lg font-semibold" style={{ color: NODE_TEXT }}>
+              <h3 className="oe-section-title" style={{ color: NODE_TEXT }}>
                 {mod.module_label || mod.module_id}
               </h3>
             </div>
@@ -759,7 +759,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
 
           {mod.manifest?.depends && mod.manifest.depends.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.dependencies', { defaultValue: 'Dependencies' })}
               </h4>
               <div className="flex flex-wrap gap-1">
@@ -778,7 +778,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
 
           {mod.models.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.models', { defaultValue: 'Models' })} ({mod.models.length})
               </h4>
               <div className="space-y-1">
@@ -800,7 +800,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
 
           {mod.routes.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.routes', { defaultValue: 'Routes' })} ({mod.routes.length})
               </h4>
               <div className="space-y-1 max-h-[300px] overflow-y-auto">
@@ -843,7 +843,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Table2 size={16} style={{ color: '#eab308' }} />
-              <h3 className="text-lg font-semibold" style={{ color: NODE_TEXT }}>
+              <h3 className="oe-section-title" style={{ color: NODE_TEXT }}>
                 {model.class_name}
               </h3>
             </div>
@@ -858,7 +858,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+            <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
               {t('architecture.columns', { defaultValue: 'Columns' })} ({model.columns.length})
             </h4>
             <div className="space-y-0.5 max-h-[400px] overflow-y-auto">
@@ -899,7 +899,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
 
           {model.relationships.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.relationships', { defaultValue: 'Relationships' })}
               </h4>
               {model.relationships.map((rel) => (
@@ -954,7 +954,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           </div>
           {route.response_model && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.response_model', { defaultValue: 'Response Model' })}
               </h4>
               <span className="text-xs font-mono" style={{ color: '#16a34a' }}>
@@ -964,7 +964,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
           )}
           {route.request_schema && (
             <div>
-              <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
+              <h4 className="oe-card-title mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.request_schema', { defaultValue: 'Request Schema' })}
               </h4>
               <span className="text-xs font-mono" style={{ color: '#3b82f6' }}>
@@ -995,7 +995,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
       }}
     >
       <div className="sticky top-0 flex items-center justify-between px-4 py-3 z-10" style={{ background: '#ffffff', borderBottom: '1px solid #334155' }}>
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: NODE_TEXT_DIM }}>
+        <span className="oe-overline" style={{ color: NODE_TEXT_DIM }}>
           {t('architecture.details', { defaultValue: 'Details' })}
         </span>
         <button
@@ -1086,7 +1086,7 @@ function ArchitectureEmptyState() {
         >
           <Network size={32} style={{ color: '#6b7280' }} />
         </div>
-        <h2 className="text-xl font-semibold">
+        <h2 className="oe-section-title">
           {t('architecture.empty_title', { defaultValue: 'Architecture Map' })}
         </h2>
         <p className="text-sm" style={{ color: NODE_TEXT_DIM }}>
@@ -1300,8 +1300,8 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         </Panel>
         {highlightActive && (
           <Panel position="top-center">
-            <div className="flex items-center gap-2 rounded-full border border-blue-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm">
-              <Waypoints size={13} className="text-blue-500" />
+            <div className="flex items-center gap-2 rounded-full border border-blue-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-content-secondary shadow-sm backdrop-blur-sm">
+              <Waypoints size={14} className="text-blue-500" />
               <span>
                 {t('architecture.connected_count', {
                   defaultValue: '{{count}} directly connected',
@@ -1312,12 +1312,12 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
                 <button
                   type="button"
                   onClick={onPaneClick}
-                  className="ml-1 rounded-full px-2 py-0.5 text-2xs text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  className="ml-1 rounded-full px-2 py-0.5 text-2xs text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-secondary"
                 >
                   {t('architecture.clear_highlight', { defaultValue: 'Clear' })}
                 </button>
               ) : (
-                <span className="ml-1 text-2xs font-normal text-slate-400">
+                <span className="ml-1 text-2xs font-normal text-content-quaternary">
                   {t('architecture.click_to_lock', { defaultValue: 'click to lock' })}
                 </span>
               )}
@@ -1478,7 +1478,7 @@ export function ArchitectureMapPage() {
             placeholder={t('architecture.search', { defaultValue: 'Search nodes...' })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="ps-8 pe-8 py-1.5 rounded-md text-xs outline-none"
+            className="oe-input-sm ps-8 pe-8"
             style={{
               background: '#f8fafc',
               border: '1px solid #334155',

@@ -462,8 +462,8 @@ export function ContractSecuritiesPanel({
     <div className="rounded-lg border border-border-light">
       <header className="flex items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <Landmark size={15} className="text-content-tertiary" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <Landmark size={16} className="text-content-tertiary" />
+          <span className="oe-overline">
             {t('contracts.securities.title', {
               defaultValue: 'Bonds and guarantees',
             })}
@@ -499,50 +499,50 @@ export function ContractSecuritiesPanel({
 
         {rows.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table-compact w-full">
+              <thead>
                 <tr>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_type', {
                       defaultValue: 'Type',
                     })}
                   </th>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_issuer', {
                       defaultValue: 'Issuer',
                     })}
                   </th>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_reference', {
                       defaultValue: 'Reference',
                     })}
                   </th>
-                  <th className="text-right py-1">
+                  <th className="text-right">
                     {t('contracts.securities.col_value', {
                       defaultValue: 'Value',
                     })}
                   </th>
-                  <th className="text-right py-1">
+                  <th className="text-right">
                     {t('contracts.securities.col_percent', {
                       defaultValue: '% of contract',
                     })}
                   </th>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_valid_from', {
                       defaultValue: 'Valid from',
                     })}
                   </th>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_expiry', {
                       defaultValue: 'Expiry',
                     })}
                   </th>
-                  <th className="text-left py-1">
+                  <th>
                     {t('contracts.securities.col_status', {
                       defaultValue: 'Status',
                     })}
                   </th>
-                  <th className="text-right py-1">
+                  <th className="text-right">
                     <span className="sr-only">
                       {t('common.actions', { defaultValue: 'Actions' })}
                     </span>
@@ -551,18 +551,18 @@ export function ContractSecuritiesPanel({
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-t border-border-light">
-                    <td className="py-1.5 pe-2">{typeLabel(t, row.security_type)}</td>
-                    <td className="py-1.5 pe-2 text-content-secondary">
+                  <tr key={row.id}>
+                    <td className="pe-2">{typeLabel(t, row.security_type)}</td>
+                    <td className="pe-2 text-content-secondary">
                       {row.provider_name || '—'}
                     </td>
-                    <td className="py-1.5 pe-2 font-mono text-xs text-content-secondary">
+                    <td className="pe-2 font-mono text-content-secondary">
                       {row.reference || '—'}
                     </td>
                     {/* The row's own currency, never the contract's: the two
                         differ often enough that assuming would misstate the
                         cover by the exchange rate. */}
-                    <td className="py-1.5 pe-2 text-right font-medium tabular-nums">
+                    <td className="pe-2 text-right font-medium tabular-nums">
                       {hasUsableCurrency(row.currency) ? (
                         <MoneyDisplay
                           amount={row.amount}
@@ -593,19 +593,19 @@ export function ContractSecuritiesPanel({
                         </span>
                       )}
                     </td>
-                    <td className="py-1.5 pe-2 text-right tabular-nums text-content-secondary">
+                    <td className="pe-2 text-right tabular-nums text-content-secondary">
                       {row.percent_of_contract == null
                         ? '—'
                         : fmtPercent(row.percent_of_contract)}
                     </td>
-                    <td className="py-1.5 pe-2 text-content-secondary">
+                    <td className="pe-2 text-content-secondary">
                       {row.valid_from ? (
                         <DateDisplay value={row.valid_from} />
                       ) : (
                         '—'
                       )}
                     </td>
-                    <td className="py-1.5 pe-2">
+                    <td className="pe-2">
                       {row.valid_to ? (
                         <span className="flex flex-wrap items-center gap-1.5">
                           <DateDisplay value={row.valid_to} />
@@ -622,12 +622,12 @@ export function ContractSecuritiesPanel({
                         </span>
                       )}
                     </td>
-                    <td className="py-1.5 pe-2">
+                    <td className="pe-2">
                       <Badge variant={statusTone(row.status)} size="sm" dot>
                         {statusLabel(t, row.status)}
                       </Badge>
                     </td>
-                    <td className="py-1.5 text-right whitespace-nowrap">
+                    <td className="text-right whitespace-nowrap">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -657,7 +657,7 @@ export function ContractSecuritiesPanel({
 
         {editing !== null && (
           <div className="mt-3 rounded-lg bg-surface-secondary p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {editing === 'new'
                 ? t('contracts.securities.form_add_title', {
                     defaultValue: 'New security',
@@ -675,7 +675,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <select
-                  className={inputCls}
+                  className="oe-select"
                   value={draft.security_type}
                   onChange={(e) => field('security_type', e.target.value)}
                 >
@@ -694,7 +694,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <select
-                  className={inputCls}
+                  className="oe-select"
                   value={draft.status}
                   onChange={(e) => field('status', e.target.value)}
                 >
@@ -713,7 +713,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   value={draft.provider_name}
                   onChange={(e) => field('provider_name', e.target.value)}
                   autoComplete="organization"
@@ -727,7 +727,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   value={draft.reference}
                   onChange={(e) => field('reference', e.target.value)}
                   maxLength={120}
@@ -744,7 +744,7 @@ export function ContractSecuritiesPanel({
                     browser-normalised value, and the point of holding this as
                     text is that the Decimal goes back exactly as typed. */}
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   value={draft.amount}
                   onChange={(e) => field('amount', e.target.value)}
                   inputMode="decimal"
@@ -774,7 +774,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   value={draft.percent_of_contract}
                   onChange={(e) =>
                     field('percent_of_contract', e.target.value)
@@ -791,7 +791,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   type="date"
                   value={draft.valid_from}
                   onChange={(e) => field('valid_from', e.target.value)}
@@ -805,7 +805,7 @@ export function ContractSecuritiesPanel({
                   })}
                 </span>
                 <input
-                  className={inputCls}
+                  className="oe-input"
                   type="date"
                   value={draft.valid_to}
                   onChange={(e) => field('valid_to', e.target.value)}
@@ -820,7 +820,7 @@ export function ContractSecuritiesPanel({
                 })}
               </span>
               <textarea
-                className={inputCls}
+                className="oe-textarea"
                 rows={2}
                 value={draft.notes}
                 onChange={(e) => field('notes', e.target.value)}

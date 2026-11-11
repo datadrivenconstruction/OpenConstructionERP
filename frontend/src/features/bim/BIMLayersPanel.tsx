@@ -37,7 +37,7 @@ export default function BIMLayersPanel({ elements }: BIMLayersPanelProps) {
   return (
     <div className="flex flex-col gap-2 p-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.layers_title', { defaultValue: 'Layers' })}
         </h3>
         <button

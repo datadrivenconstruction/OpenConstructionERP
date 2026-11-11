@@ -136,7 +136,7 @@ export default function BIMCoverageCard() {
             <Cuboid size={20} strokeWidth={1.75} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboard.bim_coverage_title', {
                 defaultValue: 'BIM Integration Coverage',
               })}
@@ -224,7 +224,7 @@ export default function BIMCoverageCard() {
           className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
         >
           {t('dashboard.bim_open_viewer', { defaultValue: 'Open BIM viewer' })}
-          <ArrowRight size={11} />
+          <ArrowRight size={12} />
         </button>
       </div>
     </div>

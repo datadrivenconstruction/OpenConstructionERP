@@ -93,9 +93,9 @@ export function BudgetLineThresholdEditor({
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-content-secondary">
           {armed ? (
-            <BellRing size={13} className="text-semantic-warning" />
+            <BellRing size={14} className="text-semantic-warning" />
           ) : (
-            <BellOff size={13} className="text-content-tertiary" />
+            <BellOff size={14} className="text-content-tertiary" />
           )}
           {t('costmodel.overrun_threshold_label', { defaultValue: 'Cost-overrun alert' })}
         </span>
@@ -131,7 +131,7 @@ export function BudgetLineThresholdEditor({
         </p>
         <Button size="sm" variant="secondary" onClick={save} disabled={!dirty || mutation.isPending}>
           {mutation.isPending ? (
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
           ) : (
             t('common.save', { defaultValue: 'Save' })
           )}

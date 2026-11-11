@@ -468,7 +468,7 @@ export default function AddToBOQModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -481,7 +481,7 @@ export default function AddToBOQModal({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
             <Link2 size={16} className="text-oe-blue" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('bim.add_to_boq_title', { defaultValue: 'Add to BOQ' })}
             </h2>
             <span className="text-2xs text-content-tertiary">
@@ -518,7 +518,7 @@ export default function AddToBOQModal({
             value={selectedBOQId ?? ''}
             onChange={(e) => setUserSelectedBOQId(e.target.value || null)}
             disabled={boqs.length === 0}
-            className="w-full px-2 py-1.5 text-sm rounded border border-oe-blue/50 bg-surface-primary ring-2 ring-oe-blue/20 focus:outline-none focus:ring-2 focus:ring-oe-blue"
+            className="oe-select w-full"
           >
             {boqs.length === 0 ? (
               <option value="">
@@ -546,7 +546,7 @@ export default function AddToBOQModal({
                 disabled={createBoqMut.isPending}
                 className="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-50"
               >
-                {createBoqMut.isPending ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />}
+                {createBoqMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                 {t('bim.create_boq_here', { defaultValue: 'Create bid schedule' })}
               </button>
             </div>
@@ -596,7 +596,7 @@ export default function AddToBOQModal({
               {/* Search */}
               <div className="relative mb-3">
                 <Search
-                  size={13}
+                  size={14}
                   className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
                 />
                 <input
@@ -606,7 +606,7 @@ export default function AddToBOQModal({
                   placeholder={t('bim.search_positions', {
                     defaultValue: 'Search positions by ordinal or description…',
                   })}
-                  className="w-full ps-8 pe-3 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input w-full ps-8 pe-3"
                 />
               </div>
 
@@ -663,7 +663,7 @@ export default function AddToBOQModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue resize-none"
+                  className="oe-textarea w-full resize-none"
                 />
               </div>
 
@@ -675,7 +675,7 @@ export default function AddToBOQModal({
                     value={ordinal}
                     onChange={(e) => setOrdinal(e.target.value)}
                     placeholder={buildAutoOrdinal(positions)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-input w-full"
                   />
                 </div>
                 <div>
@@ -687,7 +687,7 @@ export default function AddToBOQModal({
                       setQuantity(e.target.value);
                       setUserEditedQty(true);
                     }}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue tabular-nums"
+                    className="oe-input w-full tabular-nums"
                   />
                 </div>
                 <div>
@@ -699,7 +699,7 @@ export default function AddToBOQModal({
                       setUnit(e.target.value);
                       setUserPickedUnit(true);
                     }}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="oe-input w-full"
                   />
                 </div>
               </div>
@@ -767,7 +767,7 @@ export default function AddToBOQModal({
                   type="text"
                   value={unitRate}
                   onChange={(e) => setUnitRate(e.target.value)}
-                  className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue tabular-nums"
+                  className="oe-input w-full tabular-nums"
                 />
 
                 {/* Cost suggestion chips - top-N CWICR matches for this
@@ -776,8 +776,8 @@ export default function AddToBOQModal({
                 {suggestions.length > 0 && (
                   <div className="mt-2">
                     <div className="flex items-center gap-1 mb-1">
-                      <Sparkles size={10} className="text-amber-500" />
-                      <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                      <Sparkles size={10} className="text-semantic-warning" />
+                      <span className="oe-overline">
                         {t('bim.cost_suggestions', {
                           defaultValue: 'Suggested rates',
                         })}
@@ -798,10 +798,10 @@ export default function AddToBOQModal({
                         const confidencePct = Math.round(s.score * 100);
                         const confColor =
                           s.score >= 0.6
-                            ? 'bg-emerald-500'
+                            ? 'bg-semantic-success'
                             : s.score >= 0.35
-                              ? 'bg-amber-500'
-                              : 'bg-slate-400';
+                              ? 'bg-semantic-warning'
+                              : 'bg-content-quaternary';
                         return (
                           <li key={s.cost_item_id}>
                             <button
@@ -850,7 +850,7 @@ export default function AddToBOQModal({
 
               <div className="rounded-md border border-oe-blue/20 bg-oe-blue/5 p-2 text-2xs text-content-secondary">
                 <div className="flex items-start gap-1.5">
-                  <CheckCircle2 size={11} className="text-oe-blue shrink-0 mt-0.5" />
+                  <CheckCircle2 size={12} className="text-oe-blue shrink-0 mt-0.5" />
                   <span>
                     {t('bim.form_note', {
                       defaultValue:
@@ -982,15 +982,15 @@ function BIMQuantitySuggestionBadge({
   const isLow = suggestion.confidence === 'low';
   const isMedium = suggestion.confidence === 'medium';
   const tone = isLow
-    ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300/60 dark:border-amber-700/40 text-amber-800 dark:text-amber-300'
+    ? 'bg-semantic-warning-bg border-semantic-warning/60 text-semantic-warning'
     : isMedium
       ? 'bg-oe-blue/5 border-oe-blue/30 text-oe-blue'
-      : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300/60 dark:border-emerald-700/40 text-emerald-800 dark:text-emerald-300';
+      : 'bg-semantic-success-bg border-semantic-success/60 text-semantic-success';
 
   const icon = isLow ? (
-    <AlertTriangle size={11} className="shrink-0" />
+    <AlertTriangle size={12} className="shrink-0" />
   ) : (
-    <Sigma size={11} className="shrink-0" />
+    <Sigma size={12} className="shrink-0" />
   );
 
   const label = formatSuggestionBadge(suggestion, system);

@@ -227,20 +227,20 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
                   issues: checked.issues.length,
                 })}
               </p>
-              <table className="w-full text-xs">
+              <table className="oe-table-compact w-full">
                 <thead>
-                  <tr className="text-start text-2xs uppercase text-content-tertiary">
-                    <th className="px-2 py-1">{t('costmodel.import.col_row', { defaultValue: 'Row' })}</th>
-                    <th className="px-2 py-1">{t('costmodel.import.col_code', { defaultValue: 'Code' })}</th>
-                    <th className="px-2 py-1">{t('costmodel.import.col_problem', { defaultValue: 'Problem' })}</th>
+                  <tr className="text-start text-2xs">
+                    <th>{t('costmodel.import.col_row', { defaultValue: 'Row' })}</th>
+                    <th>{t('costmodel.import.col_code', { defaultValue: 'Code' })}</th>
+                    <th>{t('costmodel.import.col_problem', { defaultValue: 'Problem' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {checked.issues.map((issue, i) => (
                     <tr key={`${issue.row ?? 'file'}-${issue.problem}-${i}`} className="border-t border-border-light">
-                      <td className="px-2 py-1 tabular-nums">{issue.row ?? '-'}</td>
-                      <td className="px-2 py-1 font-mono">{issue.code || '-'}</td>
-                      <td className="px-2 py-1">{problemMessage(t, issue.problem, issue.params)}</td>
+                      <td className="tabular-nums">{issue.row ?? '-'}</td>
+                      <td className="font-mono">{issue.code || '-'}</td>
+                      <td>{problemMessage(t, issue.problem, issue.params)}</td>
                     </tr>
                   ))}
                 </tbody>

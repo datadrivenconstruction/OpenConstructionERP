@@ -80,8 +80,8 @@ export function FederatedResultsTable({
       className="overflow-x-auto rounded border border-border-light"
       data-testid="federation-results-table"
     >
-      <table className="min-w-full text-xs">
-        <thead className="bg-surface-secondary text-content-secondary">
+      <table className="oe-table-compact min-w-full">
+        <thead>
           <tr>
             {orderedColumns.map((col) => (
               <th
@@ -102,7 +102,7 @@ export function FederatedResultsTable({
               data-testid={`federation-results-row-${idx}`}
             >
               {orderedColumns.map((col) => (
-                <td key={col} className="px-3 py-2">
+                <td key={col}>
                   {renderCell(col, row, { snapshotLabels, projectLabels })}
                 </td>
               ))}
@@ -139,7 +139,7 @@ function renderCell(
   if (col === PROJECT_COL && typeof value === 'string') {
     return (
       <span
-        className="inline-flex items-center rounded bg-semantic-success/10 px-2 py-0.5 font-mono text-2xs text-emerald-300"
+        className="inline-flex items-center rounded bg-semantic-success/10 px-2 py-0.5 font-mono text-2xs text-semantic-success"
         data-testid={`federation-chip-project-${value}`}
         title={value}
       >
@@ -150,7 +150,7 @@ function renderCell(
   if (col === SNAPSHOT_COL && typeof value === 'string') {
     return (
       <span
-        className="inline-flex items-center rounded bg-semantic-info/10 px-2 py-0.5 font-mono text-2xs text-sky-300"
+        className="inline-flex items-center rounded bg-semantic-info/10 px-2 py-0.5 font-mono text-2xs text-semantic-info"
         data-testid={`federation-chip-snapshot-${value}`}
         title={value}
       >

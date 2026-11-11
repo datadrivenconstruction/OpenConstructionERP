@@ -148,14 +148,14 @@ export function ContractPanel({ projectId, model, items, packages, catalogue, la
         return (
           <section key={group} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="contract-group" data-group={group}>
             <div className="mb-2 flex flex-wrap items-center gap-3">
-              <h3 className="text-sm font-semibold text-content-primary">{vocab(labels.t, CONTRACT_GROUP, group)}</h3>
+              <h3 className="oe-card-title">{vocab(labels.t, CONTRACT_GROUP, group)}</h3>
               {total !== null && rows.length > 0 && (
                 <span className="text-xs text-content-secondary" data-testid="partner-total">
                   {t('delivery_model.ui.contract.partners_total', { defaultValue: 'Shares add up to {{total}} percent.', total })}
                 </span>
               )}
               <span className="ml-auto">
-                <ReasonedButton size="sm" variant="secondary" verdict={editV} icon={<Plus size={13} />} onClick={() => setEditing({ mode: 'new', group })} data-testid="add-contract-item">
+                <ReasonedButton size="sm" variant="secondary" verdict={editV} icon={<Plus size={14} />} onClick={() => setEditing({ mode: 'new', group })} data-testid="add-contract-item">
                   {t('delivery_model.ui.contract.add', { defaultValue: 'Add an item' })}
                 </ReasonedButton>
               </span>

@@ -112,21 +112,21 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
       )}
 
       <Card padding="md">
-        <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('accountingSync.mapping.accounts', { defaultValue: 'Accounts' })}</h3>
+        <h3 className="oe-card-title mb-3">{t('accountingSync.mapping.accounts', { defaultValue: 'Accounts' })}</h3>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[32rem] text-sm">
+          <table className="oe-table-compact w-full min-w-[32rem]">
             <thead>
-              <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="pb-2 pr-3 font-medium">{t('accountingSync.mapping.category', { defaultValue: 'Posting' })}</th>
-                <th className="pb-2 pr-3 font-medium">{t('accountingSync.mapping.account_code', { defaultValue: 'Account code' })}</th>
-                <th className="pb-2 font-medium">{t('accountingSync.mapping.account_name', { defaultValue: 'Account name' })}</th>
+              <tr className="text-left text-2xs">
+                <th className="pb-2 pr-3">{t('accountingSync.mapping.category', { defaultValue: 'Posting' })}</th>
+                <th className="pb-2 pr-3">{t('accountingSync.mapping.account_code', { defaultValue: 'Account code' })}</th>
+                <th className="pb-2">{t('accountingSync.mapping.account_name', { defaultValue: 'Account name' })}</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map((a, i) => (
                 <tr key={a.category} className="border-t border-border-light" data-testid={`account-row-${a.category}`}>
-                  <td className="py-1.5 pr-3 text-content-primary">{categoryLabel(t, a.category)}</td>
-                  <td className="py-1.5 pr-3">
+                  <td className="pr-3">{categoryLabel(t, a.category)}</td>
+                  <td className="pr-3">
                     <input
                       className={a.account_code.trim() === '' ? warnInputCls : compactInputCls}
                       value={a.account_code}
@@ -136,7 +136,7 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
                       onChange={(e) => setAccounts((rows) => rows.map((r, j) => (j === i ? { ...r, account_code: e.target.value } : r)))}
                     />
                   </td>
-                  <td className="py-1.5">
+                  <td>
                     <input
                       className={compactInputCls}
                       value={a.account_name}
@@ -152,24 +152,24 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
       </Card>
 
       <Card padding="md">
-        <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('accountingSync.mapping.taxes', { defaultValue: 'Tax codes' })}</h3>
+        <h3 className="oe-card-title mb-3">{t('accountingSync.mapping.taxes', { defaultValue: 'Tax codes' })}</h3>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[32rem] text-sm">
+          <table className="oe-table-compact w-full min-w-[32rem]">
             <thead>
-              <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="pb-2 pr-3 font-medium">{t('accountingSync.mapping.tax_code', { defaultValue: 'Tax code' })}</th>
-                <th className="pb-2 pr-3 font-medium">{t('accountingSync.mapping.direction', { defaultValue: 'Direction' })}</th>
-                <th className="pb-2 pr-3 text-right font-medium">{t('accountingSync.mapping.rate', { defaultValue: 'Rate' })}</th>
-                <th className="pb-2 font-medium">{t('accountingSync.mapping.external_code', { defaultValue: 'Code in your books' })}</th>
+              <tr className="text-left text-2xs">
+                <th className="pb-2 pr-3">{t('accountingSync.mapping.tax_code', { defaultValue: 'Tax code' })}</th>
+                <th className="pb-2 pr-3">{t('accountingSync.mapping.direction', { defaultValue: 'Direction' })}</th>
+                <th className="pb-2 pr-3 text-right">{t('accountingSync.mapping.rate', { defaultValue: 'Rate' })}</th>
+                <th className="pb-2">{t('accountingSync.mapping.external_code', { defaultValue: 'Code in your books' })}</th>
               </tr>
             </thead>
             <tbody>
               {taxes.map((x, i) => (
                 <tr key={`${x.tax_code}-${x.direction}`} className="border-t border-border-light" data-testid={`tax-row-${x.tax_code}-${x.direction}`}>
-                  <td className="py-1.5 pr-3 font-medium text-content-primary">{x.tax_code}</td>
-                  <td className="py-1.5 pr-3 text-content-secondary">{directionLabel(t, x.direction)}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">{x.rate_pct === null ? '—' : `${x.rate_pct}%`}</td>
-                  <td className="py-1.5">
+                  <td className="pr-3 font-medium">{x.tax_code}</td>
+                  <td className="pr-3 text-content-secondary">{directionLabel(t, x.direction)}</td>
+                  <td className="pr-3 text-right tabular-nums text-content-secondary">{x.rate_pct === null ? '—' : `${x.rate_pct}%`}</td>
+                  <td>
                     <input
                       className={x.external_code.trim() === '' ? warnInputCls : compactInputCls}
                       value={x.external_code}

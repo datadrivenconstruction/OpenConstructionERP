@@ -43,7 +43,7 @@ export function CDETransmittalsBadge({
           count: links.length,
         })}
       >
-        <Send size={11} />
+        <Send size={12} />
         {t('cde.transmittals_badge', {
           defaultValue: '{{count}} transmittals',
           count: links.length,
@@ -70,7 +70,7 @@ function TransmittalsDrawer({
   const { t } = useTranslation();
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/40 animate-fade-in"
+      className="fixed inset-0 z-modal flex justify-end bg-black/40 animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-label={t('cde.transmittals_drawer_title', {
@@ -83,8 +83,8 @@ function TransmittalsDrawer({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <Send size={18} className="text-oe-blue" />
-            <h3 className="text-base font-semibold">
+            <Send size={20} className="text-oe-blue" />
+            <h3 className="oe-section-title">
               {t('cde.transmittals_drawer_title', {
                 defaultValue: 'Transmittals carrying this container',
               })}
@@ -118,7 +118,7 @@ function TransmittalsDrawer({
               <div className="flex items-center gap-2 mt-1 text-xs text-content-tertiary">
                 {link.revision_code && (
                   <span className="inline-flex items-center gap-1 font-mono">
-                    <FileText size={11} /> {link.revision_code}
+                    <FileText size={12} /> {link.revision_code}
                   </span>
                 )}
                 {link.issued_date && (

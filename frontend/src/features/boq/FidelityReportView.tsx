@@ -120,7 +120,7 @@ export function FidelityReportView({ report, boqId, initialRows = 200 }: Fidelit
           value={filter.kind}
           onChange={(e) => setFilter((f) => ({ ...f, kind: e.target.value }))}
           aria-label={t('boq.fidelity.filter_kind', { defaultValue: 'Kind of loss' })}
-          className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="oe-select-sm"
         >
           <option value="">{t('boq.fidelity.all_kinds', { defaultValue: 'All kinds' })}</option>
           {kinds.map((kind) => (
@@ -134,7 +134,7 @@ export function FidelityReportView({ report, boqId, initialRows = 200 }: Fidelit
           value={filter.query}
           onChange={(e) => setFilter((f) => ({ ...f, query: e.target.value }))}
           placeholder={t('boq.fidelity.search_placeholder', { defaultValue: 'Search position, field or value' })}
-          className="min-w-[12rem] flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="oe-input-sm min-w-[12rem] flex-1"
         />
       </div>
 
@@ -149,39 +149,39 @@ export function FidelityReportView({ report, boqId, initialRows = 200 }: Fidelit
       )}
 
       <div className="max-h-[50vh] overflow-auto rounded-lg border border-border-light">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-surface-secondary text-left text-content-secondary">
+        <table className="oe-table-compact w-full">
+          <thead className="sticky top-0 text-left">
             <tr>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_severity', { defaultValue: 'Severity' })}</th>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_kind', { defaultValue: 'Kind of loss' })}</th>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_position', { defaultValue: 'Position' })}</th>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_field', { defaultValue: 'Field' })}</th>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_original', { defaultValue: 'Original value' })}</th>
-              <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_written', { defaultValue: 'Value written' })}</th>
+              <th>{t('boq.fidelity.col_severity', { defaultValue: 'Severity' })}</th>
+              <th>{t('boq.fidelity.col_kind', { defaultValue: 'Kind of loss' })}</th>
+              <th>{t('boq.fidelity.col_position', { defaultValue: 'Position' })}</th>
+              <th>{t('boq.fidelity.col_field', { defaultValue: 'Field' })}</th>
+              <th>{t('boq.fidelity.col_original', { defaultValue: 'Original value' })}</th>
+              <th>{t('boq.fidelity.col_written', { defaultValue: 'Value written' })}</th>
             </tr>
           </thead>
           <tbody>
             {visible.map((item, index) => (
               <tr key={`${item.kind}-${item.position_ref}-${item.field}-${index}`} className="border-t border-border-light align-top">
-                <td className="px-2 py-1.5">
+                <td>
                   <Badge variant={SEVERITY_VARIANT[item.severity] ?? 'neutral'} size="sm">
                     {severityLabel(t, item.severity)}
                   </Badge>
                 </td>
-                <td className="px-2 py-1.5">
+                <td>
                   {kindLabel(t, item.kind)}
                   {item.count > 1 && <span className="ml-1 text-content-tertiary">×{fmtNumber(item.count, 0)}</span>}
                   {item.detail && <div className="mt-0.5 text-2xs text-content-tertiary">{item.detail}</div>}
                 </td>
-                <td className="px-2 py-1.5 font-mono">{item.position_ref || '–'}</td>
-                <td className="px-2 py-1.5">{fieldLabel(t, item.field)}</td>
-                <td className="px-2 py-1.5 break-all">{item.original ?? '–'}</td>
-                <td className="px-2 py-1.5 break-all">{item.written ?? '–'}</td>
+                <td className="font-mono">{item.position_ref || '–'}</td>
+                <td>{fieldLabel(t, item.field)}</td>
+                <td className="break-all">{item.original ?? '–'}</td>
+                <td className="break-all">{item.written ?? '–'}</td>
               </tr>
             ))}
             {visible.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-2 py-4 text-center text-content-tertiary">
+                <td colSpan={6} className="text-center text-content-tertiary">
                   {t('boq.fidelity.no_match', { defaultValue: 'No item matches the filter.' })}
                 </td>
               </tr>

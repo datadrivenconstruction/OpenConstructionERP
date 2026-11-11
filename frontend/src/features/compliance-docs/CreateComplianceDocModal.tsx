@@ -109,7 +109,7 @@ export function CreateComplianceDocModal({
 
   const canSubmit = name.trim().length > 0 && effectiveDate <= expiresAt;
   const selectCls =
-    'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+    'oe-select';
 
   return (
     <WideModal
@@ -295,7 +295,7 @@ export function CreateComplianceDocModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+            className="oe-textarea"
             data-testid="compliance-field-notes"
           />
         </WideModalField>

@@ -266,30 +266,30 @@ export function BOQVariablesDialog({ open, onClose, boqId, seed }: BOQVariablesD
 
             {drafts.length > 0 && (
               <div className="overflow-hidden rounded-xl border border-border-light">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary/40 text-2xs uppercase tracking-wider text-content-tertiary">
+                <table className="oe-table w-full">
+                  <thead className="text-2xs">
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold w-[22%]">
+                      <th className="w-[22%]">
                         {t('boq.variables_name', { defaultValue: 'Name' })}
                       </th>
-                      <th className="px-3 py-2 text-left font-semibold w-[14%]">
+                      <th className="w-[14%]">
                         {t('boq.variables_type', { defaultValue: 'Type' })}
                       </th>
-                      <th className="px-3 py-2 text-left font-semibold w-[20%]">
+                      <th className="w-[20%]">
                         {t('boq.variables_value', { defaultValue: 'Value' })}
                       </th>
-                      <th className="px-3 py-2 text-left font-semibold">
+                      <th>
                         {t('boq.variables_description', { defaultValue: 'Description' })}
                       </th>
-                      <th className="w-10 px-2 py-2"></th>
+                      <th className="w-10"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {drafts.map((d, i) => {
                       const err = rowErrors[i];
                       return (
                         <tr key={d.uid} className={err ? 'bg-semantic-error-bg/30' : ''}>
-                          <td className="px-3 py-2">
+                          <td>
                             <div className="flex items-center gap-1">
                               <span className="text-content-tertiary text-xs select-none">$</span>
                               <input
@@ -299,35 +299,35 @@ export function BOQVariablesDialog({ open, onClose, boqId, seed }: BOQVariablesD
                                   patchRow(d.uid, { name: e.target.value })
                                 }
                                 placeholder="GFA"
-                                className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 font-mono text-sm uppercase focus:border-oe-blue focus:outline-none"
+                                className="oe-input-sm w-full font-mono uppercase"
                                 aria-invalid={err ? true : undefined}
                               />
                             </div>
                           </td>
-                          <td className="px-3 py-2">
+                          <td>
                             <select
                               value={d.type}
                               onChange={(e) =>
                                 patchRow(d.uid, { type: e.target.value as BOQVariable['type'] })
                               }
-                              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm focus:border-oe-blue focus:outline-none"
+                              className="oe-select-sm w-full"
                             >
                               <option value="number">number</option>
                               <option value="text">text</option>
                               <option value="date">date</option>
                             </select>
                           </td>
-                          <td className="px-3 py-2">
+                          <td>
                             <input
                               type={d.type === 'date' ? 'date' : d.type === 'number' ? 'number' : 'text'}
                               step={d.type === 'number' ? 'any' : undefined}
                               value={d.value}
                               onChange={(e) => patchRow(d.uid, { value: e.target.value })}
                               placeholder={d.type === 'number' ? '1500' : ''}
-                              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm focus:border-oe-blue focus:outline-none"
+                              className="oe-input-sm w-full"
                             />
                           </td>
-                          <td className="px-3 py-2">
+                          <td>
                             <input
                               type="text"
                               value={d.description}
@@ -335,10 +335,10 @@ export function BOQVariablesDialog({ open, onClose, boqId, seed }: BOQVariablesD
                               placeholder={t('boq.variables_description_placeholder', {
                                 defaultValue: 'Optional note',
                               })}
-                              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm focus:border-oe-blue focus:outline-none"
+                              className="oe-input-sm w-full"
                             />
                           </td>
-                          <td className="px-2 py-2">
+                          <td>
                             <button
                               type="button"
                               onClick={() => deleteRow(d.uid)}

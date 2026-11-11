@@ -31,7 +31,7 @@ export function CostMatchPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="cost_match.how"
-        icon={<Layers size={15} className="text-oe-blue" />}
+        icon={<Layers size={16} className="text-oe-blue" />}
         title={t('cost_match.flow_title', {
           defaultValue: 'How matching works, and what it will not do',
         })}

@@ -203,7 +203,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col bg-black/95"
+      className="fixed inset-0 z-modal flex flex-col bg-black/95"
       role="dialog"
       aria-modal="true"
       aria-label={
@@ -234,7 +234,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
             title={t('daily_diary.panorama_reset', { defaultValue: 'Reset view' })}
             data-testid="daily-diary-panorama-reset"
           >
-            <RotateCcw size={15} />
+            <RotateCcw size={16} />
             <span className="hidden sm:inline">
               {t('daily_diary.panorama_reset', { defaultValue: 'Reset view' })}
             </span>
@@ -263,7 +263,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
       >
         {webglFailed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-white">
-            <AlertCircle size={22} className="text-red-400" />
+            <AlertCircle size={22} className="text-semantic-error" />
             <p className="text-sm font-medium">
               {t('daily_diary.panorama_webgl_title', { defaultValue: '3D rendering unavailable' })}
             </p>
@@ -287,7 +287,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
 
         {!webglFailed && phase === 'error' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-white">
-            <AlertCircle size={22} className="text-red-400" />
+            <AlertCircle size={22} className="text-semantic-error" />
             <p className="text-sm font-medium">
               {t('daily_diary.panorama_error_title', { defaultValue: 'Could not load this photo' })}
             </p>

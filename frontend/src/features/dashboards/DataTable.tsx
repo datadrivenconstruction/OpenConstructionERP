@@ -128,8 +128,8 @@ export function DataTable({
       </div>
 
       <div className="max-h-[60vh] overflow-auto">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-surface-secondary">
+        <table className="oe-table-compact w-full">
+          <thead className="sticky top-0">
             <tr>
               {cols.map((col) => (
                 <th
@@ -153,7 +153,7 @@ export function DataTable({
           <tbody>
             {rowsQuery.isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={cols.length || 1} className="p-3">
+                <td colSpan={cols.length || 1}>
                   <Skeleton className="h-4 w-full" />
                 </td>
               </tr>
@@ -162,7 +162,7 @@ export function DataTable({
               <tr>
                 <td
                   colSpan={cols.length || 1}
-                  className="p-6 text-center text-content-tertiary"
+                  className="text-center text-content-tertiary"
                   data-testid="data-table-empty"
                 >
                   {t('dashboards.data_table_empty', {
@@ -180,7 +180,7 @@ export function DataTable({
                 {cols.map((col) => (
                   <td
                     key={col}
-                    className="px-2 py-1 align-top text-content-primary"
+                    className="align-top"
                   >
                     {formatCell(row[col])}
                   </td>

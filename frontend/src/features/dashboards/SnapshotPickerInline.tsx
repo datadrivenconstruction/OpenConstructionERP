@@ -92,7 +92,7 @@ export function SnapshotPickerInline({
             defaultValue: 'Choose snapshot',
           })}
           data-testid="snapshot-picker-inline-listbox"
-          className="absolute z-30 mt-1 max-h-72 w-72 overflow-y-auto rounded border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute z-dropdown mt-1 max-h-72 w-72 overflow-y-auto rounded border border-border-light bg-surface-primary py-1 shadow-lg"
         >
           {timelineQuery.isLoading && (
             <div
@@ -126,11 +126,11 @@ export function SnapshotPickerInline({
                 onClick={() => handlePick(item.id)}
                 data-testid={`snapshot-picker-inline-option-${item.id}`}
                 className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-surface-secondary ${
-                  isActive ? 'bg-semantic-success/5 text-emerald-200' : 'text-content-primary'
+                  isActive ? 'bg-semantic-success/5 text-semantic-success' : 'text-content-primary'
                 }`}
               >
                 <span className="flex h-3 w-3 flex-shrink-0 items-center justify-center">
-                  {isActive && <Check className="h-3 w-3 text-emerald-400" />}
+                  {isActive && <Check className="h-3 w-3 text-semantic-success" />}
                 </span>
                 <span className="flex-1 truncate" title={item.label}>
                   {item.label}

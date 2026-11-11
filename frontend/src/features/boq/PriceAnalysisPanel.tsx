@@ -73,7 +73,7 @@ const KIND_DOT_CLASSES: Record<string, string> = {
   machinery: 'bg-teal-500',
   equipment: 'bg-violet-500',
   subcontractor: 'bg-pink-500',
-  other: 'bg-gray-500',
+  other: 'bg-content-tertiary',
 };
 
 /* ── Props ──────────────────────────────────────────────────────────── */
@@ -187,7 +187,7 @@ export function PriceAnalysisPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
 
@@ -206,7 +206,7 @@ export function PriceAnalysisPanel({
             <Calculator size={17} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('boq.price_analysis', { defaultValue: 'Price analysis' })}
             </h2>
             <p className="text-xs text-content-tertiary truncate mt-0.5">
@@ -253,7 +253,7 @@ export function PriceAnalysisPanel({
             disabled={downloading || !data}
             className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-50"
           >
-            {downloading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+            {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
             {t('boq.price_analysis_download', { defaultValue: 'Download sheet (Markdown)' })}
           </button>
         </div>
@@ -318,7 +318,7 @@ export function PriceAnalysisPanel({
                   <ComponentTable data={data} />
                   {activeCategories.length > 1 && (
                     <div className="space-y-2">
-                      <h3 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                      <h3 className="oe-overline">
                         {t('boq.price_analysis_by_category', { defaultValue: 'By category' })}
                       </h3>
                       <div className="space-y-1">
@@ -326,7 +326,7 @@ export function PriceAnalysisPanel({
                           <div key={c.kind} className="flex items-center justify-between text-xs">
                             <span className="flex items-center gap-2 text-content-secondary">
                               <span
-                                className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[c.kind] ?? 'bg-gray-500'}`}
+                                className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[c.kind] ?? 'bg-content-tertiary'}`}
                               />
                               {kindLabel(data.preset, c.kind, t)}
                             </span>
@@ -357,22 +357,22 @@ function ComponentTable({ data }: { data: PriceAnalysisResponse }) {
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-xs">
+      <table className="oe-table-compact w-full">
         <thead>
-          <tr className="text-content-tertiary uppercase tracking-wide">
-            <th className="text-left font-semibold py-1.5 pr-3">
+          <tr>
+            <th className="pr-3">
               {t('boq.price_analysis_col_resource', { defaultValue: 'Resource' })}
             </th>
-            <th className="text-left font-semibold py-1.5 pr-3">
+            <th className="pr-3">
               {t('boq.description', { defaultValue: 'Description' })}
             </th>
-            <th className="text-right font-semibold py-1.5 pr-3">
+            <th className="text-right pr-3">
               {t('boq.quantity', { defaultValue: 'Quantity' })}
             </th>
-            <th className="text-right font-semibold py-1.5 pr-3">
+            <th className="text-right pr-3">
               {t('boq.price_analysis_col_unit_cost', { defaultValue: 'Unit cost' })}
             </th>
-            <th className="text-right font-semibold py-1.5">
+            <th className="text-right">
               {t('boq.price_analysis_col_amount', { defaultValue: 'Amount' })}
             </th>
           </tr>
@@ -380,23 +380,23 @@ function ComponentTable({ data }: { data: PriceAnalysisResponse }) {
         <tbody>
           {data.components.map((c, idx) => (
             <tr key={`${c.kind}-${c.description}-${idx}`} className="border-t border-border-light">
-              <td className="py-1.5 pr-3 whitespace-nowrap">
+              <td className="pr-3 whitespace-nowrap">
                 <span className="flex items-center gap-2 text-content-secondary">
                   <span
-                    className={`w-2 h-2 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[c.kind] ?? 'bg-gray-500'}`}
+                    className={`w-2 h-2 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[c.kind] ?? 'bg-content-tertiary'}`}
                   />
                   {kindLabel(data.preset, c.kind, t)}
                 </span>
               </td>
-              <td className="py-1.5 pr-3 text-content-primary">{c.description}</td>
-              <td className="py-1.5 pr-3 text-right text-content-secondary tabular-nums whitespace-nowrap">
+              <td className="pr-3">{c.description}</td>
+              <td className="pr-3 text-right text-content-secondary tabular-nums whitespace-nowrap">
                 {formatValue(toNum(c.quantity), 'number', { maximumFractionDigits: 4 })}
                 {c.unit && <span className="text-content-tertiary ml-1">{c.unit}</span>}
               </td>
-              <td className="py-1.5 pr-3 text-right text-content-secondary tabular-nums whitespace-nowrap">
+              <td className="pr-3 text-right text-content-secondary tabular-nums whitespace-nowrap">
                 {formatCurrency(c.unit_cost, data.currency)}
               </td>
-              <td className="py-1.5 text-right text-content-primary font-medium tabular-nums whitespace-nowrap">
+              <td className="text-right font-medium tabular-nums whitespace-nowrap">
                 {formatCurrency(c.amount, data.currency)}
               </td>
             </tr>
@@ -421,22 +421,22 @@ function EfbSheet({ data }: { data: PriceAnalysisResponse }) {
   if (!efb) return null;
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+      <h3 className="oe-overline">
         {t(data.preset.label_i18n_key, { defaultValue: data.preset.label })}
       </h3>
-      <table className="w-full text-xs">
+      <table className="oe-table-compact w-full">
         <tbody>
           {efb.rows.map((row) => (
-            <tr key={row.kind} className="border-t border-border-light">
-              <td className="py-1.5 pr-3 text-content-secondary">
+            <tr key={row.kind}>
+              <td className="pr-3 text-content-secondary">
                 <span className="flex items-center gap-2">
                   <span
-                    className={`w-2 h-2 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[row.kind] ?? 'bg-gray-500'}`}
+                    className={`w-2 h-2 rounded-sm flex-shrink-0 ${KIND_DOT_CLASSES[row.kind] ?? 'bg-content-tertiary'}`}
                   />
                   {row.label}
                 </span>
               </td>
-              <td className="py-1.5 text-right text-content-primary font-medium tabular-nums whitespace-nowrap">
+              <td className="text-right font-medium tabular-nums whitespace-nowrap">
                 {formatCurrency(row.amount, efb.currency)}
               </td>
             </tr>

@@ -49,7 +49,7 @@ export function ApprovalTargetBadge({
   if (active) {
     return (
       <Badge variant="blue" size="sm" className={className}>
-        <Clock size={11} className="mr-1" />
+        <Clock size={12} className="mr-1" />
         {t('approvalRoutes.pending_step_n', {
           defaultValue: 'Approval · step {{n}}',
           n: active.current_step_ordinal,

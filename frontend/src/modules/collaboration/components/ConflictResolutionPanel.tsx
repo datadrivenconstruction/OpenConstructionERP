@@ -139,7 +139,7 @@ export function ConflictResolutionPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -163,7 +163,7 @@ export function ConflictResolutionPanel({
               <GitMerge className="h-4 w-4 text-semantic-warning" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('conflict.panel_title', { defaultValue: 'Merge Conflict Detected' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -280,7 +280,7 @@ export function ConflictResolutionPanel({
               </button>
             ) : (
               <div className="space-y-2">
-                <label className="block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('conflict.manual_label', { defaultValue: 'Enter merged value' })}
                 </label>
                 <textarea
@@ -293,10 +293,10 @@ export function ConflictResolutionPanel({
                     defaultValue: 'Type the merged value...',
                   })}
                   className={clsx(
-                    'w-full rounded-lg border border-border bg-surface-secondary',
-                    'px-3 py-2 text-xs text-content-primary resize-none',
-                    'placeholder:text-content-quaternary',
-                    'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-oe-blue',
+                    'oe-textarea w-full',
+                    'resize-none',
+                    '',
+                    '',
                   )}
                 />
                 <div className="flex items-center gap-2">
@@ -308,7 +308,7 @@ export function ConflictResolutionPanel({
                       'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
                       'bg-semantic-success text-white hover:bg-semantic-success',
                       'disabled:opacity-40 disabled:pointer-events-none',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-semantic-success focus-visible:ring-offset-2',
                     )}
                   >
                     <CheckCircle2 size={12} />

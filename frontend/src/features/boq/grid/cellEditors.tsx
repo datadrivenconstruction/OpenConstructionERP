@@ -691,7 +691,7 @@ export const FormulaCellEditor = forwardRef(
 
     const isFormulaMode = isFormula(value);
     const borderClass = preview.kind === 'err'
-      ? 'border-rose-400/70 ring-rose-400/20'
+      ? 'border-semantic-error/70 ring-semantic-error/20'
       : isFormulaMode
         ? 'border-violet-500/70 ring-violet-500/25'
         : 'border-oe-blue/40 ring-oe-blue/20';
@@ -752,7 +752,7 @@ export const FormulaCellEditor = forwardRef(
             )}
             {preview.kind === 'err' && (
               <span className="inline-flex items-center gap-1 text-semantic-error">
-                <AlertTriangle size={11} strokeWidth={2} />{' '}
+                <AlertTriangle size={12} strokeWidth={2} />{' '}
                 {preview.m === 'not_number'
                   ? t('boq.formula_err_not_number', { defaultValue: 'Not a number' })
                   : t('boq.formula_err_syntax', { defaultValue: 'Syntax error or unresolved reference' })}

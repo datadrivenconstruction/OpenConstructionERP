@@ -117,7 +117,7 @@ export function BuyerAccessLinkPanel({
       className="rounded-xl border border-border-light bg-surface-secondary/40 p-3 space-y-3"
     >
       <header className="flex items-center justify-between gap-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary flex items-center gap-1.5">
+        <h3 className="oe-overline flex items-center gap-1.5">
           <LinkIcon size={12} aria-hidden />
           {t('buyer_portal_panel.title', {
             defaultValue: 'Buyer access link',
@@ -131,9 +131,9 @@ export function BuyerAccessLinkPanel({
           data-testid="issue-portal-link"
         >
           {issuing ? (
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
           ) : (
-            <Plus size={11} />
+            <Plus size={12} />
           )}
           {t('buyer_portal_panel.issue', { defaultValue: 'Issue new link' })}
         </button>
@@ -156,7 +156,7 @@ export function BuyerAccessLinkPanel({
               readOnly
               value={freshIssued.portal_url}
               onFocus={(e) => e.currentTarget.select()}
-              className="flex-1 h-7 px-2 rounded border border-border-light bg-surface-primary text-2xs font-mono text-content-primary"
+              className="oe-input-sm flex-1 font-mono"
               aria-label={t('buyer_portal_panel.url', {
                 defaultValue: 'Portal URL',
               })}

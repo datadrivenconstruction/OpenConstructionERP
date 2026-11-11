@@ -458,7 +458,7 @@ export default function BIMRightPanelTabs({
         )}
         {activeTab === 'trait-lens' && (
           <div className="p-2">
-            <h3 className="px-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary mb-1">
+            <h3 className="oe-overline px-1 mb-1">
               {t('bim.trait_lens.heading', { defaultValue: 'Trait Lens' })}
             </h3>
             <p className="px-1 text-2xs text-content-tertiary mb-2">
@@ -472,7 +472,7 @@ export default function BIMRightPanelTabs({
         )}
         {activeTab === 'bundles' && (
           <div className="p-2">
-            <h3 className="px-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary mb-1">
+            <h3 className="oe-overline px-1 mb-1">
               {t('bim.element_bundles.heading', { defaultValue: 'Element Bundles' })}
             </h3>
             <p className="px-1 text-2xs text-content-tertiary mb-2">
@@ -659,7 +659,7 @@ function PropertiesTabContent({
     <div className="flex flex-col">
       {selected ? (
         <section className="px-3 py-2 border-b border-border-light">
-          <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary mb-2">
+          <h3 className="oe-overline mb-2">
             {t('bim.properties_tab_element', { defaultValue: 'Element properties' })}
           </h3>
           <div className="text-xs text-content-primary mb-1.5 truncate" title={selected.name ?? selected.id}>

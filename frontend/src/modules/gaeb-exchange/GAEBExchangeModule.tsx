@@ -108,30 +108,30 @@ function ImportPreview({
         )}
       </div>
       <div className="overflow-x-auto max-h-80">
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
-            <tr className="bg-surface-secondary/50 sticky top-0">
-              <th className="px-3 py-1.5 text-left font-medium text-content-secondary w-24">{t('boq.ordinal', { defaultValue: 'Ordinal' })}</th>
-              <th className="px-3 py-1.5 text-left font-medium text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
-              <th className="px-3 py-1.5 text-center font-medium text-content-secondary w-16">{t('boq.unit', { defaultValue: 'Unit' })}</th>
-              <th className="px-3 py-1.5 text-right font-medium text-content-secondary w-20">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
-              <th className="px-3 py-1.5 text-right font-medium text-content-secondary w-20">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
-              <th className="px-3 py-1.5 text-left font-medium text-content-secondary w-32">{t('boq.section', { defaultValue: 'Section' })}</th>
+            <tr className="sticky top-0">
+              <th className="w-24">{t('boq.ordinal', { defaultValue: 'Ordinal' })}</th>
+              <th>{t('boq.description', { defaultValue: 'Description' })}</th>
+              <th className="text-center w-16">{t('boq.unit', { defaultValue: 'Unit' })}</th>
+              <th className="text-right w-20">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
+              <th className="text-right w-20">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
+              <th className="w-32">{t('boq.section', { defaultValue: 'Section' })}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {/* GAEB is an interchange format: quantities/units stay metric-
                 canonical here (no measurement-system conversion). (#270) */}
             {displayed.map((pos, idx) => (
               <tr key={pos.ordinal || `pos-${idx}`} className={`hover:bg-surface-secondary/30 ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}>
-                <td className="px-3 py-1.5 font-mono text-content-tertiary">{pos.ordinal}</td>
-                <td className="px-3 py-1.5 text-content-primary max-w-[300px] truncate" title={pos.description}>
+                <td className="font-mono text-content-tertiary">{pos.ordinal}</td>
+                <td className="max-w-[300px] truncate" title={pos.description}>
                   {pos.description || '-'}
                 </td>
-                <td className="px-3 py-1.5 text-center text-content-secondary">{pos.unit || '-'}</td>
-                <td className="px-3 py-1.5 text-right tabular-nums">{pos.quantity > 0 ? fmtNumber(pos.quantity, 3) : '-'}</td>
-                <td className="px-3 py-1.5 text-right tabular-nums">{pos.unitRate > 0 ? fmtNumber(pos.unitRate, 2) : '-'}</td>
-                <td className="px-3 py-1.5 text-content-tertiary text-2xs truncate" title={pos.section}>{pos.section || '-'}</td>
+                <td className="text-center text-content-secondary">{pos.unit || '-'}</td>
+                <td className="text-right tabular-nums">{pos.quantity > 0 ? fmtNumber(pos.quantity, 3) : '-'}</td>
+                <td className="text-right tabular-nums">{pos.unitRate > 0 ? fmtNumber(pos.unitRate, 2) : '-'}</td>
+                <td className="text-content-tertiary truncate" title={pos.section}>{pos.section || '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -563,7 +563,7 @@ export default function GAEBExchangeModule() {
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Upload size={15} />
+          <Upload size={16} />
           {t('gaeb.tab_import', { defaultValue: 'Import' })}
         </button>
         <button
@@ -575,7 +575,7 @@ export default function GAEBExchangeModule() {
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Download size={15} />
+          <Download size={16} />
           {t('gaeb.tab_export', { defaultValue: 'Export' })}
         </button>
       </div>
@@ -599,7 +599,7 @@ export default function GAEBExchangeModule() {
             {importFile ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-2 text-sm text-content-primary">
-                  <FileUp size={18} className="text-oe-blue" />
+                  <FileUp size={20} className="text-oe-blue" />
                   <span className="font-medium">{importFile.name}</span>
                   <span className="text-content-tertiary">
                     ({fmtFixed(importFile.size / 1024, 1)} KB)
@@ -684,12 +684,12 @@ export default function GAEBExchangeModule() {
               a double import. Clearing the file starts a fresh round. */}
           {parsedPositions && parsedPositions.length > 0 && !importResult && (
             <div className="rounded-xl border border-border bg-surface-primary p-5">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
+              <h3 className="oe-card-title mb-3">
                 {t('gaeb.target_boq', { defaultValue: 'Import Target' })}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1">
+                  <label className="oe-label">
                     {t('common.project', { defaultValue: 'Project' })}
                   </label>
                   <select
@@ -699,7 +699,7 @@ export default function GAEBExchangeModule() {
                       setImportProjectId(e.target.value);
                       setImportTargetBoqId('');
                     }}
-                    className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                    className="oe-select w-full"
                   >
                     <option value="">— {t('risk.select_project', { defaultValue: 'Select project' })} —</option>
                     {projects.map((p) => (
@@ -708,14 +708,14 @@ export default function GAEBExchangeModule() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1">
+                  <label className="oe-label">
                     {t('boq.title', { defaultValue: 'BOQ' })}
                   </label>
                   <select
                     value={importTargetBoqId}
                     onChange={(e) => setImportTargetBoqId(e.target.value)}
                     disabled={!importProjectId}
-                    className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm disabled:opacity-50"
+                    className="oe-select w-full"
                   >
                     <option value="">— {t('gaeb.select_boq', { defaultValue: 'Select BOQ' })} —</option>
                     <option value={NEW_BOQ_OPTION}>
@@ -731,7 +731,7 @@ export default function GAEBExchangeModule() {
                   <Button
                     variant="primary"
                     className="w-full"
-                    icon={isImporting ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                    icon={isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                     onClick={handleImport}
                     disabled={!importTargetBoqId || isImporting}
                   >
@@ -799,12 +799,12 @@ export default function GAEBExchangeModule() {
         <div className="space-y-5">
           {/* BOQ selection */}
           <div className="rounded-xl border border-border bg-surface-primary p-5">
-            <h3 className="text-sm font-semibold text-content-primary mb-3">
+            <h3 className="oe-card-title mb-3">
               {t('gaeb.source_boq', { defaultValue: '1. Select BOQ to Export' })}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1">
+                <label className="oe-label">
                   {t('common.project', { defaultValue: 'Project' })}
                 </label>
                 <select
@@ -814,7 +814,7 @@ export default function GAEBExchangeModule() {
                     setExportProjectId(e.target.value);
                     setExportBoqId('');
                   }}
-                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                  className="oe-select w-full"
                 >
                   <option value="">— {t('risk.select_project', { defaultValue: 'Select project' })} —</option>
                   {projects.map((p) => (
@@ -823,7 +823,7 @@ export default function GAEBExchangeModule() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1">
+                <label className="oe-label">
                   {t('boq.title', { defaultValue: 'BOQ' })}
                 </label>
                 <select
@@ -831,7 +831,7 @@ export default function GAEBExchangeModule() {
                   value={exportBoqId}
                   onChange={(e) => setExportBoqId(e.target.value)}
                   disabled={!exportProjectId}
-                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm disabled:opacity-50"
+                  className="oe-select w-full"
                 >
                   <option value="">— {t('gaeb.select_boq', { defaultValue: 'Select BOQ' })} —</option>
                   {exportBoqs.map((b) => (
@@ -840,13 +840,13 @@ export default function GAEBExchangeModule() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1">
+                <label className="oe-label">
                   {t('gaeb.export_format', { defaultValue: 'Format' })}
                 </label>
                 <select
                   value={exportFormat}
                   onChange={(e) => setExportFormat(e.target.value as ExportFormatChoice)}
-                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                  className="oe-select w-full"
                 >
                   <option value="X83">X83 - {t('gaeb.x83_desc', { defaultValue: 'Invitation to Tender (Ausschreibung)' })}</option>
                   <option value="X81">X81 - {t('gaeb.x81_desc', { defaultValue: 'Tender Specification (no prices)' })}</option>
@@ -860,14 +860,14 @@ export default function GAEBExchangeModule() {
           {exportBoqId && exportablePositions.length > 0 && (
             <div className="rounded-xl border border-border bg-surface-primary p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('gaeb.export_summary', { defaultValue: '2. Export Summary' })}
                 </h3>
                 <button
                   onClick={() => setShowExportPreview((v) => !v)}
                   className="flex items-center gap-1 text-xs text-oe-blue hover:underline"
                 >
-                  <Eye size={13} />
+                  <Eye size={14} />
                   {showExportPreview ? t('gaeb.hide_preview', { defaultValue: 'Hide preview' }) : t('gaeb.show_preview', { defaultValue: 'Show preview' })}
                 </button>
               </div>
@@ -915,29 +915,29 @@ export default function GAEBExchangeModule() {
 
               {showExportPreview && (
                 <div className="border border-border-light rounded-lg overflow-x-auto max-h-60">
-                  <table className="w-full text-xs">
+                  <table className="oe-table-compact w-full">
                     <thead>
                       <tr className="bg-surface-tertiary/50 sticky top-0">
-                        <th className="px-3 py-1.5 text-left font-medium text-content-secondary">{t('boq.ordinal', { defaultValue: 'Ordinal' })}</th>
-                        <th className="px-3 py-1.5 text-left font-medium text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
-                        <th className="px-3 py-1.5 text-center font-medium text-content-secondary">{t('boq.unit', { defaultValue: 'Unit' })}</th>
-                        <th className="px-3 py-1.5 text-right font-medium text-content-secondary">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
+                        <th>{t('boq.ordinal', { defaultValue: 'Ordinal' })}</th>
+                        <th>{t('boq.description', { defaultValue: 'Description' })}</th>
+                        <th className="text-center">{t('boq.unit', { defaultValue: 'Unit' })}</th>
+                        <th className="text-right">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
                         {exportFormat !== 'X81' && (
-                          <th className="px-3 py-1.5 text-right font-medium text-content-secondary">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
+                          <th className="text-right">{t('boq.unit_rate', { defaultValue: 'Rate' })}</th>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {/* GAEB export preview stays metric-canonical (interchange
                           round-trip): no measurement-system conversion. (#270) */}
                       {exportablePositions.filter((p) => !p.isSection).slice(0, 30).map((pos) => (
-                        <tr key={pos.id} className="hover:bg-surface-secondary/30">
-                          <td className="px-3 py-1.5 font-mono text-content-tertiary">{pos.ordinal}</td>
-                          <td className="px-3 py-1.5 text-content-primary max-w-[280px] truncate">{pos.description}</td>
-                          <td className="px-3 py-1.5 text-center text-content-secondary">{pos.unit}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums">{fmtNumber(pos.quantity, 3)}</td>
+                        <tr key={pos.id}>
+                          <td className="font-mono text-content-tertiary">{pos.ordinal}</td>
+                          <td className="max-w-[280px] truncate">{pos.description}</td>
+                          <td className="text-center text-content-secondary">{pos.unit}</td>
+                          <td className="text-right tabular-nums">{fmtNumber(pos.quantity, 3)}</td>
                           {exportFormat !== 'X81' && (
-                            <td className="px-3 py-1.5 text-right tabular-nums">{fmtNumber(pos.unitRate, 2)}</td>
+                            <td className="text-right tabular-nums">{fmtNumber(pos.unitRate, 2)}</td>
                           )}
                         </tr>
                       ))}
@@ -948,7 +948,7 @@ export default function GAEBExchangeModule() {
 
               <Button
                 variant="primary"
-                icon={isExporting ? <Loader2 size={15} className="animate-spin" /> : <FileDown size={15} />}
+                icon={isExporting ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
                 onClick={handleExport}
                 disabled={isExporting}
               >

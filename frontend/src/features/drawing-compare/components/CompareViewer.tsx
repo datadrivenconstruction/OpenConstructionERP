@@ -327,7 +327,7 @@ export function CompareViewer({
         <div className="flex flex-wrap items-center gap-3 text-xs text-content-secondary">
           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-semantic-error" />{t('drawing_compare.legend_old', { defaultValue: 'Only in the older revision' })}</span>
           <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-blue-600" />{t('drawing_compare.legend_new', { defaultValue: 'Only in the newer revision' })}</span>
-          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-gray-400" />{t('drawing_compare.legend_same', { defaultValue: 'Unchanged' })}</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-content-quaternary" />{t('drawing_compare.legend_same', { defaultValue: 'Unchanged' })}</span>
         </div>
       )}
     </div>

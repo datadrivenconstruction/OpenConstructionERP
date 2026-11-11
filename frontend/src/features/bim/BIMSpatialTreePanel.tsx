@@ -170,7 +170,7 @@ export default function BIMSpatialTreePanel({
           placeholder={t('bim.structure.search_placeholder', {
             defaultValue: 'Find element, type or storey...',
           })}
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-input-sm min-w-0 flex-1"
           data-testid="bim-structure-search"
         />
       </div>
@@ -225,7 +225,7 @@ export default function BIMSpatialTreePanel({
                               aria-label={typeOpen ? t('common.collapse', { defaultValue: 'Collapse' }) : t('common.expand', { defaultValue: 'Expand' })}
                               className="inline-flex h-5 w-5 items-center justify-center text-content-tertiary shrink-0"
                             >
-                              {typeOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                              {typeOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                             </button>
                             <button
                               type="button"
@@ -233,7 +233,7 @@ export default function BIMSpatialTreePanel({
                               className="flex flex-1 min-w-0 items-center gap-1.5 py-1 text-left text-2xs text-content-secondary"
                               title={t('bim.structure.highlight_type', { defaultValue: 'Highlight all of this type' })}
                             >
-                              <Box size={11} className="text-content-tertiary shrink-0" />
+                              <Box size={12} className="text-content-tertiary shrink-0" />
                               <span className="truncate">{type.label}</span>
                               <span className="ms-auto shrink-0 rounded bg-surface-tertiary px-1 text-2xs tabular-nums text-content-tertiary">
                                 {type.ids.length}

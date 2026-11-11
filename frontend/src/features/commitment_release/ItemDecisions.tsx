@@ -444,7 +444,7 @@ export function EndItem({ projectId, item, matrix, labels, personName, onChanged
 
   return (
     <section data-testid="end-item">
-      <h3 className="mb-1 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-1">
         {t('commitment.end.title', { defaultValue: 'Stop or hand over' })}
       </h3>
       <p className="mb-2 text-sm text-content-secondary">

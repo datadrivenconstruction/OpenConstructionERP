@@ -237,7 +237,7 @@ export function AbortTermsDialog({ open, onClose, projectId, item, terms, bases,
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('commitment.abort_form.schedule', { defaultValue: 'Cancellation steps' })}
             </h3>
             <Button

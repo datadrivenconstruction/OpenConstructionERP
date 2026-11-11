@@ -34,7 +34,7 @@ export function BOQRenameDialog({ boqId, name, onClose }: BOQRenameDialogProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
       aria-label={t('boq.rename', { defaultValue: 'Rename estimate' })}
@@ -51,7 +51,7 @@ export function BOQRenameDialog({ boqId, name, onClose }: BOQRenameDialogProps) 
           if (e.key === 'Escape') onClose();
         }}
       >
-        <h2 className="mb-3 text-base font-semibold text-content-primary">
+        <h2 className="oe-section-title mb-3">
           {t('boq.rename', { defaultValue: 'Rename estimate' })}
         </h2>
         <input
@@ -61,7 +61,7 @@ export function BOQRenameDialog({ boqId, name, onClose }: BOQRenameDialogProps) 
           data-testid="boq-rename-dialog-input"
           onChange={(e) => setDraft(e.target.value)}
           onFocus={(e) => e.currentTarget.select()}
-          className="mb-4 w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-input mb-4 w-full"
         />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>

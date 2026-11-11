@@ -76,19 +76,19 @@ export function ReviewDashboard({
       {/* Headline tiles */}
       <div className="flex gap-2">
         <StatTile
-          icon={<CircleDot size={15} />}
+          icon={<CircleDot size={16} />}
           label={t('bcf.dashboard_open', { defaultValue: 'Open' })}
           value={stats.open}
           tone="default"
         />
         <StatTile
-          icon={<AlertTriangle size={15} />}
+          icon={<AlertTriangle size={16} />}
           label={t('bcf.dashboard_overdue', { defaultValue: 'Overdue' })}
           value={stats.overdue}
           tone={stats.overdue > 0 ? 'error' : 'default'}
         />
         <StatTile
-          icon={<UserX size={15} />}
+          icon={<UserX size={16} />}
           label={t('bcf.dashboard_unassigned', { defaultValue: 'Unassigned' })}
           value={stats.unassignedOpen}
           tone={stats.unassignedOpen > 0 ? 'warning' : 'default'}
@@ -97,7 +97,7 @@ export function ReviewDashboard({
 
       {/* Status split */}
       <div>
-        <p className="mb-1 text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+        <p className="oe-overline mb-1">
           {t('bcf.dashboard_by_status', { defaultValue: 'By status' })}
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -112,7 +112,7 @@ export function ReviewDashboard({
       {/* Priority split */}
       {priorityEntries.length > 0 && (
         <div>
-          <p className="mb-1 text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+          <p className="oe-overline mb-1">
             {t('bcf.dashboard_by_priority', { defaultValue: 'By priority' })}
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -128,7 +128,7 @@ export function ReviewDashboard({
       {/* Busiest assignees */}
       {topAssignees.length > 0 && (
         <div>
-          <p className="mb-1 text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+          <p className="oe-overline mb-1">
             {t('bcf.dashboard_workload', { defaultValue: 'Open by assignee' })}
           </p>
           <ul className="space-y-1">

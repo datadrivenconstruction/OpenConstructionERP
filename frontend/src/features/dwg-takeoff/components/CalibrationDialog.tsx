@@ -145,14 +145,14 @@ export function CalibrationDialog({
         className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 rounded-full border border-oe-blue/40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-2 shadow-xl ring-1 ring-oe-blue/20"
       >
         <MousePointer2 size={14} className="text-oe-blue" />
-        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">
+        <span className="text-xs font-medium text-content-primary">
           {label}
         </span>
         <button
           type="button"
           onClick={onCancel}
           aria-label={t('dwg_takeoff.cancel_calibration', { defaultValue: 'Cancel calibration' })}
-          className="ml-1 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+          className="ml-1 rounded-full p-1 text-content-quaternary hover:bg-surface-secondary hover:text-content-secondary"
         >
           <X size={14} />
         </button>
@@ -166,7 +166,7 @@ export function CalibrationDialog({
   return (
     <div
       data-testid="dwg-calibration-dialog"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={(e) => {
         // Backdrop click cancels.
         if (e.target === e.currentTarget) onCancel();
@@ -180,7 +180,7 @@ export function CalibrationDialog({
         className="w-full max-w-sm rounded-xl border border-border bg-surface shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold text-foreground">
+          <h2 className="oe-card-title text-foreground">
             {t('dwg_takeoff.cal_title', {
               defaultValue: 'Calibrate drawing scale',
             })}
@@ -227,13 +227,13 @@ export function CalibrationDialog({
                   if (error) setError(null);
                 }}
                 placeholder="e.g. 5"
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-input flex-1 bg-background text-foreground"
               />
               <select
                 data-testid="dwg-calibration-unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value as CalibrationUnit)}
-                className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select bg-background text-foreground"
               >
                 {CALIBRATION_UNITS.map((u) => (
                   <option key={u} value={u}>
@@ -247,7 +247,7 @@ export function CalibrationDialog({
           {error && (
             <p
               data-testid="dwg-calibration-error"
-              className="text-xs text-red-500"
+              className="text-xs text-semantic-error"
               role="alert"
             >
               {error}

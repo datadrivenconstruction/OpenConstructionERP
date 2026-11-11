@@ -240,7 +240,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
     <Card className={className} data-testid="hakedis-panel" data-source-kind={source.kind}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="break-words text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title break-words">
             {t('hakedis.title', { defaultValue: 'Payment certificate' })}{' '}
             <span className="whitespace-nowrap tabular-nums">
               {t('hakedis.header.number', { defaultValue: 'No. {{number}}', number: header.certificate_number })}
@@ -263,7 +263,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
             {doc.frozen ? (
               <span data-testid="hakedis-frozen-badge">
                 <Badge variant="success" size="sm">
-                  <Lock size={11} className="mr-1 inline" aria-hidden="true" />
+                  <Lock size={12} className="mr-1 inline" aria-hidden="true" />
                   {t('hakedis.frozen.badge', { defaultValue: 'Frozen' })}
                 </Badge>
               </span>
@@ -311,7 +311,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
           className="mt-3 flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary"
           data-testid="hakedis-frozen-note"
         >
-          <Lock size={15} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden="true" />
+          <Lock size={16} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden="true" />
           <span className="min-w-0 break-words">
             {t('hakedis.frozen.note', {
               defaultValue:
@@ -340,7 +340,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
           {attention.length > 0 ? (
             <>
               <p className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-                <AlertTriangle size={15} className="shrink-0 text-semantic-warning" aria-hidden="true" />
+                <AlertTriangle size={16} className="shrink-0 text-semantic-warning" aria-hidden="true" />
                 {t('hakedis.attention.title', { defaultValue: 'Needs your attention' })}
                 <span className="font-normal text-content-tertiary">({attention.length})</span>
               </p>
@@ -353,7 +353,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
                       className="flex w-full items-start gap-1.5 rounded text-left text-sm text-content-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                       data-testid={`hakedis-attention-${item.id}`}
                     >
-                      <ArrowDownRight size={13} className="mt-1 shrink-0 text-content-tertiary" aria-hidden="true" />
+                      <ArrowDownRight size={14} className="mt-1 shrink-0 text-content-tertiary" aria-hidden="true" />
                       <span className="min-w-0 break-words">{item.text}</span>
                     </button>
                   </li>
@@ -362,7 +362,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
             </>
           ) : doc.can_certify ? (
             <p className="flex items-center gap-2 text-sm text-content-primary" data-testid="hakedis-ready">
-              <CheckCircle2 size={15} className="shrink-0 text-semantic-success" aria-hidden="true" />
+              <CheckCircle2 size={16} className="shrink-0 text-semantic-success" aria-hidden="true" />
               {t('hakedis.attention.ready', { defaultValue: 'Nothing is missing. The certificate is ready to certify.' })}
             </p>
           ) : (

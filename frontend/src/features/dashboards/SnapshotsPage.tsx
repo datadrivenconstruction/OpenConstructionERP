@@ -157,7 +157,7 @@ export function SnapshotsPage() {
     return (
       <div className="space-y-5 animate-fade-in">
         <EmptyState
-          icon={<FolderOpen className="h-10 w-10 text-neutral-500" />}
+          icon={<FolderOpen className="h-10 w-10 text-content-tertiary" />}
           title={t('dashboards.no_project_title', { defaultValue: 'Select a project first' })}
           description={t('dashboards.no_project_desc', {
             defaultValue:
@@ -299,14 +299,14 @@ export function SnapshotsPage() {
           <Card>
             <div className="grid gap-3 p-4 sm:grid-cols-2">
               <label className="space-y-1">
-                <span className="text-xs font-medium text-neutral-400">
+                <span className="text-xs font-medium text-content-quaternary">
                   {t('dashboards.diff_pick_a', { defaultValue: 'Older snapshot (A)' })}
                 </span>
                 <select
                   value={diffA}
                   onChange={(e) => setDiffA(e.target.value)}
                   data-testid="dashboards-diff-a"
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                  className="oe-select w-full"
                 >
                   <option value="">
                     {t('dashboards.diff_pick_placeholder', { defaultValue: 'Select a snapshot…' })}
@@ -319,14 +319,14 @@ export function SnapshotsPage() {
                 </select>
               </label>
               <label className="space-y-1">
-                <span className="text-xs font-medium text-neutral-400">
+                <span className="text-xs font-medium text-content-quaternary">
                   {t('dashboards.diff_pick_b', { defaultValue: 'Newer snapshot (B)' })}
                 </span>
                 <select
                   value={diffB}
                   onChange={(e) => setDiffB(e.target.value)}
                   data-testid="dashboards-diff-b"
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                  className="oe-select w-full"
                 >
                   <option value="">
                     {t('dashboards.diff_pick_placeholder', { defaultValue: 'Select a snapshot…' })}
@@ -342,7 +342,7 @@ export function SnapshotsPage() {
           </Card>
           {diffA && diffB && diffA === diffB ? (
             <EmptyState
-              icon={<GitCompare className="h-10 w-10 text-neutral-500" />}
+              icon={<GitCompare className="h-10 w-10 text-content-tertiary" />}
               title={t('dashboards.diff_same_title', {
                 defaultValue: 'Same snapshot selected',
               })}
@@ -355,7 +355,7 @@ export function SnapshotsPage() {
             <SnapshotDiffView snapshotAId={diffA} snapshotBId={diffB} />
           ) : (
             <EmptyState
-              icon={<GitCompare className="h-10 w-10 text-neutral-500" />}
+              icon={<GitCompare className="h-10 w-10 text-content-tertiary" />}
               title={t('dashboards.diff_pick_two_title', {
                 defaultValue: 'Pick two snapshots to compare',
               })}
@@ -381,14 +381,14 @@ export function SnapshotsPage() {
 
       {snapshotsQuery.isError && (
         <Card>
-          <div className="p-4 text-sm text-rose-300">
+          <div className="p-4 text-sm text-semantic-error">
             <p>
               {t('dashboards.snapshots_load_failed', {
                 defaultValue: 'Could not load snapshots.',
               })}
             </p>
             {snapshotsQuery.error instanceof Error && snapshotsQuery.error.message && (
-              <p className="mt-2 font-mono text-xs text-rose-400/80">
+              <p className="mt-2 font-mono text-xs text-semantic-error">
                 {snapshotsQuery.error.message}
               </p>
             )}
@@ -407,7 +407,7 @@ export function SnapshotsPage() {
 
       {!snapshotsQuery.isLoading && !snapshotsQuery.isError && snapshots.length === 0 && (
         <EmptyState
-          icon={<Boxes className="h-10 w-10 text-neutral-500" />}
+          icon={<Boxes className="h-10 w-10 text-content-tertiary" />}
           title={t('dashboards.no_snapshots_title', {
             defaultValue: 'No snapshots yet',
           })}
@@ -444,7 +444,7 @@ export function SnapshotsPage() {
             ))}
           </div>
           <div
-            className="flex flex-col items-center gap-2 pt-1 text-xs text-neutral-500"
+            className="flex flex-col items-center gap-2 pt-1 text-xs text-content-tertiary"
             data-testid="dashboards-snapshots-footer"
           >
             <span>
@@ -508,7 +508,7 @@ function ViewTab({ active, onClick, icon, label, testId }: ViewTabProps) {
       className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
         active
           ? 'bg-oe-blue text-white'
-          : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200'
+          : 'text-content-quaternary hover:bg-neutral-800/60 hover:text-content-quaternary'
       }`}
     >
       {icon}
@@ -540,10 +540,10 @@ function SnapshotCard({
       <div className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="truncate text-sm font-semibold text-neutral-100">
+            <h3 className="oe-card-title truncate text-content-quaternary">
               {snapshot.label}
             </h3>
-            <p className="mt-0.5 text-xs text-neutral-500">
+            <p className="mt-0.5 text-xs text-content-tertiary">
               {formatDate(snapshot.created_at)}
             </p>
           </div>
@@ -551,7 +551,7 @@ function SnapshotCard({
             type="button"
             onClick={onDelete}
             disabled={deleting}
-            className="rounded p-1 text-neutral-500 hover:bg-semantic-error/10 hover:text-rose-300 disabled:opacity-40"
+            className="rounded p-1 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error disabled:opacity-40"
             aria-label="delete"
             data-testid={`snapshot-delete-${snapshot.id}`}
           >
@@ -560,18 +560,18 @@ function SnapshotCard({
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="rounded bg-neutral-800/60 px-2 py-1">
-            <div className="text-neutral-500">
+            <div className="text-content-tertiary">
               {t('dashboards.entities', { defaultValue: 'Entities' })}
             </div>
-            <div className="tabular-nums font-medium text-neutral-100">
+            <div className="tabular-nums font-medium text-content-quaternary">
               {formatNumber(snapshot.total_entities)}
             </div>
           </div>
           <div className="rounded bg-neutral-800/60 px-2 py-1">
-            <div className="text-neutral-500">
+            <div className="text-content-tertiary">
               {t('dashboards.categories', { defaultValue: 'Categories' })}
             </div>
-            <div className="tabular-nums font-medium text-neutral-100">
+            <div className="tabular-nums font-medium text-content-quaternary">
               {formatNumber(snapshot.total_categories)}
             </div>
           </div>
@@ -592,12 +592,12 @@ function SnapshotCard({
             the model a user prices in matching or measures off in
             takeoff; surface both quantity flows straight from the card so
             the snapshot is not a dead end. */}
-        <div className="flex flex-wrap gap-2 border-t border-neutral-800/60 pt-3">
+        <div className="flex flex-wrap gap-2 border-t border-border pt-3">
           <button
             type="button"
             onClick={onMatchToCost}
             data-testid={`snapshot-match-${snapshot.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-quaternary transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
           >
             <Calculator className="h-3.5 w-3.5" />
             {t('dashboards.snapshot_match_to_cost', {
@@ -608,7 +608,7 @@ function SnapshotCard({
             type="button"
             onClick={onTakeoff}
             data-testid={`snapshot-takeoff-${snapshot.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-quaternary transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
           >
             <Ruler className="h-3.5 w-3.5" />
             {t('dashboards.snapshot_takeoff', { defaultValue: 'Takeoff' })}

@@ -37,7 +37,7 @@ export function LinkToPositionBanner({
     <div
       role="status"
       data-testid="bim-link-position-banner"
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-oe-blue/40 bg-surface-primary/95 px-3 py-2 text-xs shadow-lg backdrop-blur-sm"
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-dropdown flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-oe-blue/40 bg-surface-primary/95 px-3 py-2 text-xs shadow-lg backdrop-blur-sm"
     >
       <Link2 size={14} className="shrink-0 text-oe-blue" />
       <span className="min-w-0 text-content-secondary">
@@ -80,7 +80,7 @@ export function LinkToPositionBanner({
         title={t('common.cancel', { defaultValue: 'Cancel' })}
         className="rounded p-1 text-content-tertiary hover:bg-surface-secondary"
       >
-        <X size={13} />
+        <X size={14} />
       </button>
     </div>
   );

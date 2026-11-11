@@ -308,7 +308,7 @@ export function CaseModuleHive({ playbook, onSelect }: CaseModuleHiveProps): Rea
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
         <div className="min-w-0 sm:w-36 sm:shrink-0">
-          <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <p className="oe-overline">
             {heading}
           </p>
           <p className="text-xs text-content-tertiary">

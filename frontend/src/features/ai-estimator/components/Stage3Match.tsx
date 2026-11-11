@@ -497,7 +497,7 @@ export function Stage3Match(props: Stage3MatchProps) {
   // in, with the progress bar on top.
   if (loading && groups.length === 0) {
     return (
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
@@ -657,7 +657,7 @@ export function Stage3Match(props: Stage3MatchProps) {
         );
 
         if (!groupByTrade || !canGroup) {
-          return <div className="space-y-2.5">{ordered.map(renderCard)}</div>;
+          return <div className="space-y-2">{ordered.map(renderCard)}</div>;
         }
 
         return (
@@ -712,7 +712,7 @@ export function Stage3Match(props: Stage3MatchProps) {
                     )}
                   </button>
                   {!collapsed && (
-                    <div className="space-y-2.5 p-2.5">
+                    <div className="space-y-2 p-2">
                       {section.groups.map(renderCard)}
                     </div>
                   )}

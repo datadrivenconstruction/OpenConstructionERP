@@ -479,7 +479,7 @@ function ChecklistsPanel({ systemId, onAfterChange }: { systemId: string; onAfte
 
   return (
     <div className="space-y-2">
-      <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <p className="oe-overline">
         {t('commissioning.checklists', { defaultValue: 'Checklists' })}
       </p>
       {isLoading ? (
@@ -584,7 +584,7 @@ function IssuesPanel({ systemId, onAfterChange }: { systemId: string; onAfterCha
 
   return (
     <div className="space-y-2">
-      <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <p className="oe-overline">
         {t('commissioning.issues', { defaultValue: 'Issues' })}
       </p>
       {isLoading ? (
@@ -618,7 +618,7 @@ function IssuesPanel({ systemId, onAfterChange }: { systemId: string; onAfterCha
                   onClick={() => closeMut.mutate(issue.id)}
                   disabled={closeMut.isPending}
                 >
-                  <Check size={13} className="mr-1" />
+                  <Check size={14} className="mr-1" />
                   {t('commissioning.close', { defaultValue: 'Close' })}
                 </Button>
               ) : (
@@ -792,7 +792,7 @@ const SystemCard = React.memo(function SystemCard({
             className="hidden md:inline-flex"
           >
             <Badge variant="error" size="sm">
-              <AlertTriangle size={11} className="mr-0.5" />
+              <AlertTriangle size={12} className="mr-0.5" />
               {readiness.open_critical_issues}
             </Badge>
           </span>
@@ -821,7 +821,7 @@ const SystemCard = React.memo(function SystemCard({
                   className="inline-flex items-center gap-1.5 text-2xs text-content-tertiary"
                   title={readiness?.blocking_reasons.join(' ') ?? ''}
                 >
-                  <Circle size={11} className="text-semantic-warning" />
+                  <Circle size={12} className="text-semantic-warning" />
                   {t('commissioning.not_ready', { defaultValue: 'Not ready to commission' })}
                 </span>
               )
@@ -852,14 +852,14 @@ const SystemCard = React.memo(function SystemCard({
               {t('commissioning.export_csv', { defaultValue: 'Export CSV' })}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => onDelete(system)}>
-              <Trash2 size={13} className="mr-1" />
+              <Trash2 size={14} className="mr-1" />
               {t('commissioning.delete', { defaultValue: 'Delete' })}
             </Button>
           </div>
 
           {readiness && readiness.blocking_reasons.length > 0 && system.status !== 'commissioned' && (
             <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg/40 px-3 py-2">
-              <p className="text-2xs font-semibold uppercase tracking-wide text-[#b45309] mb-1">
+              <p className="oe-overline text-[#b45309] mb-1">
                 {t('commissioning.blockers', { defaultValue: 'Before commissioning' })}
               </p>
               <ul className="list-disc pl-4 space-y-0.5">
@@ -875,7 +875,7 @@ const SystemCard = React.memo(function SystemCard({
           {readiness && readiness.defined && (
             <div className="rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2.5">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <p className="oe-overline">
                   {t('commissioning.readiness', { defaultValue: 'Readiness' })}
                 </p>
                 <span className="text-2xs tabular-nums text-content-secondary">
@@ -948,14 +948,14 @@ function CreateSystemModal({
   const [location, setLocation] = useState('');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
         role="dialog"
         aria-label={t('commissioning.new_system', { defaultValue: 'New system' })}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('commissioning.new_system', { defaultValue: 'New system' })}
           </h2>
           <button
@@ -963,13 +963,13 @@ function CreateSystemModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('commissioning.field_name', { defaultValue: 'System name' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -985,7 +985,7 @@ function CreateSystemModal({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('commissioning.field_type', { defaultValue: 'System type' })}
               </label>
               <select
@@ -1001,7 +1001,7 @@ function CreateSystemModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('commissioning.field_tag', { defaultValue: 'Tag' })}
               </label>
               <input
@@ -1013,7 +1013,7 @@ function CreateSystemModal({
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('commissioning.field_location', { defaultValue: 'Location' })}
             </label>
             <input
@@ -1110,7 +1110,7 @@ function HowCommissioningWorks() {
   return (
     <CollapsibleSection
       storageKey="commissioning.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('commissioning.flow_title', { defaultValue: 'How Commissioning fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1168,7 +1168,7 @@ function HowCommissioningWorks() {
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs">
-      <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">{label}</span>
+      <span className="oe-overline">{label}</span>
       <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">{value}</span>
     </div>
   );

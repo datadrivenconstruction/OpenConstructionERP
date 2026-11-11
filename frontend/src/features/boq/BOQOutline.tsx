@@ -123,13 +123,13 @@ export function BOQOutline({ positions, onJump }: BOQOutlineProps) {
         <div
           role="menu"
           aria-label={t('boq.outline_title', { defaultValue: 'Sections' })}
-          className="absolute right-0 z-30 mt-1 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-fade-in"
+          className="absolute right-0 z-dropdown mt-1 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-fade-in"
         >
           {/* Filter */}
           <div className="border-b border-border-light p-2">
             <div className="relative">
               <Search
-                size={13}
+                size={14}
                 className="pointer-events-none absolute start-2 top-1/2 -translate-y-1/2 text-content-tertiary"
               />
               <input
@@ -139,7 +139,7 @@ export function BOQOutline({ positions, onJump }: BOQOutlineProps) {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('boq.outline_filter_ph', { defaultValue: 'Filter sections...' })}
                 aria-label={t('boq.outline_filter_ph', { defaultValue: 'Filter sections...' })}
-                className="h-7 w-full rounded-md border border-border-light bg-surface-primary ps-7 pe-6 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input-sm w-full ps-7 pe-6"
               />
               {query && (
                 <button
@@ -148,7 +148,7 @@ export function BOQOutline({ positions, onJump }: BOQOutlineProps) {
                   aria-label={t('common.clear', { defaultValue: 'Clear' })}
                   className="absolute end-1.5 top-1/2 -translate-y-1/2 text-content-tertiary hover:text-content-primary"
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               )}
             </div>

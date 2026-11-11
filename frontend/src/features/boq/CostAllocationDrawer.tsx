@@ -300,23 +300,23 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
             </label>
           </fieldset>
 
-          <table className="w-full text-sm" data-testid="cost-allocation-rows">
+          <table className="oe-table-compact w-full" data-testid="cost-allocation-rows">
             <thead>
-              <tr className="text-start text-2xs uppercase text-content-tertiary">
-                <th className="py-1 pe-2">{t('boq.cost_allocation.col_target', { defaultValue: 'Cost line or account' })}</th>
-                <th className="w-28 py-1 pe-2 text-end">
+              <tr className="text-start text-2xs">
+                <th className="pe-2">{t('boq.cost_allocation.col_target', { defaultValue: 'Cost line or account' })}</th>
+                <th className="w-28 pe-2 text-end">
                   {mode === 'percent'
                     ? t('boq.cost_allocation.col_share_pct', { defaultValue: 'Share %' })
                     : t('boq.cost_allocation.col_share_qty', { defaultValue: 'Quantity' })}
                 </th>
-                <th className="w-28 py-1 pe-2 text-end">{t('boq.cost_allocation.col_amount', { defaultValue: 'Amount' })}</th>
+                <th className="w-28 pe-2 text-end">{t('boq.cost_allocation.col_amount', { defaultValue: 'Amount' })}</th>
                 <th className="w-8" />
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-3 text-center text-xs text-content-tertiary">
+                  <td colSpan={4} className="text-center text-content-tertiary">
                     {t('boq.cost_allocation.no_rows', {
                       defaultValue: 'Not allocated. Pick a cost line or an account below.',
                     })}
@@ -324,8 +324,8 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
                 </tr>
               )}
               {rows.map((r, i) => (
-                <tr key={r.key} className="border-t border-border-light">
-                  <td className="py-1.5 pe-2">
+                <tr key={r.key}>
+                  <td className="pe-2">
                     <span className="me-1.5 rounded bg-surface-secondary px-1 py-0.5 text-2xs text-content-tertiary">
                       {r.target.type === 'account'
                         ? t('boq.cost_allocation.kind_account', { defaultValue: 'Account' })
@@ -334,25 +334,25 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
                     <span className="font-mono text-xs">{r.target.code}</span>
                     <span className="ms-1.5 text-content-secondary">{r.target.label}</span>
                   </td>
-                  <td className="py-1.5 pe-2">
+                  <td className="pe-2">
                     <input
                       type="text"
                       inputMode="decimal"
                       value={r.share}
                       onChange={(e) => setShare(r.key, e.target.value)}
                       aria-label={t('boq.cost_allocation.share_for', { defaultValue: 'Share for {{code}}', code: r.target.code })}
-                      className="h-7 w-full rounded-md border border-border bg-surface-primary px-2 text-end tabular-nums"
+                      className="oe-input-sm w-full text-end tabular-nums"
                     />
                   </td>
-                  <td className="py-1.5 pe-2 text-end tabular-nums text-content-secondary">{money(preview[i] ?? '0')}</td>
-                  <td className="py-1.5">
+                  <td className="pe-2 text-end tabular-nums text-content-secondary">{money(preview[i] ?? '0')}</td>
+                  <td>
                     <button
                       type="button"
                       onClick={() => removeRow(r.key)}
                       aria-label={t('boq.cost_allocation.remove_row', { defaultValue: 'Remove share' })}
                       className="text-content-tertiary hover:text-semantic-error"
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   </td>
                 </tr>
@@ -360,11 +360,11 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
             </tbody>
             {rows.length > 0 && (
               <tfoot>
-                <tr className="border-t-2 border-border">
-                  <th className="py-1.5 pe-2 text-start text-xs font-semibold">
+                <tr>
+                  <th className="pe-2">
                     {t('boq.cost_allocation.sum', { defaultValue: 'Sum' })}
                   </th>
-                  <td className="py-1.5 pe-2 text-end text-xs font-semibold tabular-nums" data-testid="cost-allocation-sum">
+                  <td className="pe-2 text-end font-semibold tabular-nums" data-testid="cost-allocation-sum">
                     {check.total} / {check.expected} {unitLabel}
                   </td>
                   <td colSpan={2} />
@@ -395,7 +395,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
 
           <div className="rounded-md border border-border-light">
             <div className="flex items-center gap-1.5 border-b border-border-light px-2 py-1.5">
-              <Search size={13} className="text-content-tertiary" />
+              <Search size={14} className="text-content-tertiary" />
               <input
                 type="text"
                 value={search}
@@ -414,7 +414,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
               )}
               {!candidatesLoading && candidatesFailed && (
                 <li className="flex items-center gap-2 px-2 py-2 text-xs text-semantic-error" role="alert">
-                  <AlertTriangle size={13} className="shrink-0" />
+                  <AlertTriangle size={14} className="shrink-0" />
                   {t('boq.cost_allocation.candidates_failed', {
                     defaultValue: 'Cost lines and accounts could not be loaded.',
                   })}

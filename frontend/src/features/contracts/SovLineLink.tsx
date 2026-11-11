@@ -44,7 +44,7 @@ interface BoqPositionForLink {
 }
 
 const INPUT_CLS =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  '';
 
 /** The BOQ position a line is linked to, or '' when it has none. */
 export function linkedPositionId(line: ContractLine): string {
@@ -169,7 +169,7 @@ export function SovLineLinkEditor({
       className="space-y-2 rounded-lg border border-dashed border-border-light bg-surface-secondary/40 p-3"
     >
       <p className="flex items-center gap-2 text-xs text-content-secondary">
-        <Link2 size={13} className="text-oe-blue" />
+        <Link2 size={14} className="text-oe-blue" />
         {t('contracts.sov_link_hint', {
           defaultValue:
             'Populate from progress bills this line at the latest progress reading of the position it is linked to.',
@@ -190,7 +190,7 @@ export function SovLineLinkEditor({
               {t('contracts.sov_link_boq', { defaultValue: 'BOQ' })}
               <select
                 data-testid="sov-link-boq"
-                className={INPUT_CLS}
+                className={`oe-select ${INPUT_CLS}`}
                 value={boqId}
                 onChange={(e) => {
                   setPickedBoqId(e.target.value);
@@ -229,7 +229,7 @@ export function SovLineLinkEditor({
               <input
                 type="text"
                 data-testid="sov-link-code"
-                className={INPUT_CLS}
+                className={`oe-input ${INPUT_CLS}`}
                 value={shownCode}
                 onChange={(e) => setCode(e.target.value)}
               />
@@ -301,7 +301,7 @@ export function SovLineLinkSummary({
       onClick={onOpen}
       className="flex items-center gap-1 text-xs text-oe-blue hover:underline"
     >
-      <Link2 size={11} />
+      <Link2 size={12} />
       {text || t('contracts.sov_link_open', { defaultValue: 'Link to BOQ' })}
     </button>
   );

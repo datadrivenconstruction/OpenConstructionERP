@@ -124,7 +124,7 @@ function GlassPanel({
             </div>
           ) : null}
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {title}
             </h2>
             {subtitle ? (
@@ -170,7 +170,7 @@ function InlineProjectSwitcher({ excludeId }: { excludeId?: string | null }) {
         const next = options.find((p) => p.id === e.target.value);
         if (next) setActiveProject(next.id, next.name);
       }}
-      className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm font-medium text-content-primary transition-colors hover:border-oe-blue/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+      className="oe-select-lg inline-flex items-center justify-center bg-surface"
     >
       <option value="" disabled>
         {t('coordination.switch_project', {

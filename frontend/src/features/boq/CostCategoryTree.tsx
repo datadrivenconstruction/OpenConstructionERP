@@ -265,7 +265,7 @@ export function CostCategoryTree({
             aria-label={t('boq.cost_tree_search_placeholder', {
               defaultValue: 'Filter categories...',
             })}
-            className="h-7 w-full rounded-md border border-border-light bg-surface-primary pl-7 pr-2 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input-sm w-full pl-7 pr-2"
           />
         </div>
       </div>

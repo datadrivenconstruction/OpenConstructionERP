@@ -328,7 +328,7 @@ export function CustomColumnsDialog({
               <p className="text-sm font-semibold text-content-primary">{preset.name}</p>
               {allApplied && (
                 <span className="inline-flex items-center gap-0.5 text-2xs font-medium text-semantic-success">
-                  <Check size={11} />
+                  <Check size={12} />
                   {t('boq.applied', { defaultValue: 'Applied' })}
                 </span>
               )}
@@ -446,7 +446,7 @@ export function CustomColumnsDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
@@ -462,7 +462,7 @@ export function CustomColumnsDialog({
               <Columns3 size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('boq.custom_columns', { defaultValue: 'Custom Columns' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -477,7 +477,7 @@ export function CustomColumnsDialog({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -486,7 +486,7 @@ export function CustomColumnsDialog({
           {/* ── Existing columns ─────────────────────────────────────── */}
           <section>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <h3 className="oe-overline">
                 {t('boq.existing_columns', { defaultValue: 'Existing custom columns' })}
               </h3>
               {columns.length > 0 && (
@@ -593,7 +593,7 @@ export function CustomColumnsDialog({
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors shrink-0"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   );
@@ -604,7 +604,7 @@ export function CustomColumnsDialog({
 
           {/* ── Presets ─────────────────────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('boq.preset_universal', { defaultValue: 'Quick start with a preset' })}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -634,7 +634,7 @@ export function CustomColumnsDialog({
           {/* ── Manual add ──────────────────────────────────────────── */}
           <section>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <h3 className="oe-overline">
                 {t('boq.add_custom_column', { defaultValue: 'Or add a custom one' })}
               </h3>
               {!showCustomForm && (
@@ -654,7 +654,7 @@ export function CustomColumnsDialog({
                     <div>
                       <label
                         htmlFor="column-name"
-                        className="block text-xs font-medium text-content-secondary mb-1.5"
+                        className="oe-label"
                       >
                         {t('boq.column_name', { defaultValue: 'Column name' })}
                       </label>
@@ -666,7 +666,7 @@ export function CustomColumnsDialog({
                         placeholder={t('boq.column_name_placeholder', {
                           defaultValue: 'e.g. Supplier, Notes, PO Number',
                         })}
-                        className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                        className="oe-input w-full"
                         autoFocus
                       />
                       {newName && (
@@ -742,7 +742,7 @@ export function CustomColumnsDialog({
                     <div>
                       <label
                         htmlFor="column-options"
-                        className="block text-xs font-medium text-content-secondary mb-1.5"
+                        className="oe-label"
                       >
                         {t('boq.column_options', { defaultValue: 'Options (comma or newline separated)' })}
                       </label>
@@ -752,7 +752,7 @@ export function CustomColumnsDialog({
                         onChange={(e) => setNewOptions(e.target.value)}
                         placeholder={t('boq.column_options_placeholder', { defaultValue: 'Approved, Pending, Rejected' })}
                         rows={2}
-                        className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all resize-none"
+                        className="oe-textarea w-full resize-none"
                       />
                     </div>
                   )}
@@ -762,7 +762,7 @@ export function CustomColumnsDialog({
                       <div>
                         <label
                           htmlFor="column-formula"
-                          className="block text-xs font-medium text-content-secondary mb-1.5"
+                          className="oe-label"
                         >
                           {t('boq.column_formula', { defaultValue: 'Formula' })}
                         </label>
@@ -806,7 +806,7 @@ export function CustomColumnsDialog({
                         <div>
                           <label
                             htmlFor="column-decimals"
-                            className="block text-xs font-medium text-content-secondary mb-1.5"
+                            className="oe-label"
                           >
                             {t('boq.column_decimals', { defaultValue: 'Decimals' })}
                           </label>
@@ -820,7 +820,7 @@ export function CustomColumnsDialog({
                               const n = parseInt(e.target.value, 10);
                               setNewDecimals(isNaN(n) ? 2 : Math.max(0, Math.min(6, n)));
                             }}
-                            className="h-9 w-20 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                            className="oe-input w-20"
                           />
                         </div>
                         <Button

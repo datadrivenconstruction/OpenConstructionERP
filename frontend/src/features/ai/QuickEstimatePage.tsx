@@ -87,7 +87,7 @@ const TABS: TabDef[] = [
   { id: 'photo', label: 'Photo / Scan', labelKey: 'ai.tab_photo', icon: <Camera size={22} />, descKey: 'ai.tab_photo_desc', descFallback: 'Building photo or scanned document', color: 'from-violet-500/10 to-purple-500/10 text-violet-600' },
   { id: 'pdf', label: 'PDF', labelKey: 'ai.tab_pdf', icon: <FileText size={22} />, descKey: 'ai.tab_pdf_desc', descFallback: 'BOQ sheets, specs, tender docs', color: 'from-red-500/10 to-orange-500/10 text-semantic-error' },
   { id: 'excel', label: 'Excel / CSV', labelKey: 'ai.tab_excel', icon: <FileSpreadsheet size={22} />, descKey: 'ai.tab_excel_desc', descFallback: 'Spreadsheet with BOQ data', color: 'from-green-500/10 to-emerald-500/10 text-semantic-success' },
-  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={22} />, descKey: 'ai.tab_paste_desc', descFallback: 'Copy-paste from any app', color: 'from-slate-500/10 to-gray-500/10 text-slate-600' },
+  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={22} />, descKey: 'ai.tab_paste_desc', descFallback: 'Copy-paste from any app', color: 'from-slate-500/10 to-gray-500/10 text-content-secondary' },
 ];
 
 // ── Option data ──────────────────────────────────────────────────────────────
@@ -192,22 +192,22 @@ function ShimmerRow() {
   return (
     <tr className="animate-pulse">
       <td className="px-4 py-3">
-        <div className="h-4 w-12 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="h-4 w-12 rounded bg-surface-tertiary/70" />
       </td>
       <td className="px-4 py-3">
-        <div className="h-4 w-48 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="h-4 w-48 rounded bg-surface-tertiary/70" />
       </td>
       <td className="px-4 py-3">
-        <div className="h-4 w-8 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="h-4 w-8 rounded bg-surface-tertiary/70" />
       </td>
       <td className="px-4 py-3 text-right">
-        <div className="ml-auto h-4 w-14 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="ml-auto h-4 w-14 rounded bg-surface-tertiary/70" />
       </td>
       <td className="px-4 py-3 text-right">
-        <div className="ml-auto h-4 w-16 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="ml-auto h-4 w-16 rounded bg-surface-tertiary/70" />
       </td>
       <td className="px-4 py-3 text-right">
-        <div className="ml-auto h-4 w-20 rounded bg-slate-200/70 dark:bg-slate-700/40" />
+        <div className="ml-auto h-4 w-20 rounded bg-surface-tertiary/70" />
       </td>
     </tr>
   );
@@ -258,7 +258,7 @@ function LoadingState({ isCad, fileName, fileSizeMB }: { isCad?: boolean; fileNa
         <div className="relative px-6 pt-6 pb-2">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25">
-              <Sparkles size={18} className="animate-pulse" aria-hidden="true" />
+              <Sparkles size={20} className="animate-pulse" aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-content-primary">{title}</p>
@@ -272,7 +272,7 @@ function LoadingState({ isCad, fileName, fileSizeMB }: { isCad?: boolean; fileNa
               {fileName && <span className="ml-2 text-content-tertiary truncate max-w-[120px] inline-block align-bottom">{fileName}</span>}
             </div>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200/60 dark:bg-slate-700/40">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-tertiary/60">
             {isCad && estimatedTotal > 0 ? (
               <div
                 className="h-full rounded-full bg-gradient-to-r from-sky-500 to-blue-600 transition-all duration-500 ease-linear"
@@ -284,25 +284,25 @@ function LoadingState({ isCad, fileName, fileSizeMB }: { isCad?: boolean; fileNa
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table w-full">
             <thead>
-              <tr className="border-b border-border-light text-left">
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+              <tr className="text-left">
+                <th>
                   {t('boq.pos', { defaultValue: 'Pos' })}
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                <th>
                   {t('boq.description', { defaultValue: 'Description' })}
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                <th>
                   {t('boq.unit', { defaultValue: 'Unit' })}
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
+                <th className="text-right">
                   {t('common.quantity')}
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
+                <th className="text-right">
                   {t('common.rate')}
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
+                <th className="text-right">
                   {t('boq.total', { defaultValue: 'Total' })}
                 </th>
               </tr>
@@ -377,7 +377,7 @@ function RecentEstimatesPanel({
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText size={15} className="text-content-tertiary" aria-hidden="true" />
+          <FileText size={16} className="text-content-tertiary" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-content-primary">
             {t('ai.recent_estimates', { defaultValue: 'Recent estimates' })}
           </h3>
@@ -397,7 +397,7 @@ function RecentEstimatesPanel({
                 defaultValue: 'Could not load your estimate history.',
               })}
             </p>
-            <Button variant="ghost" size="sm" onClick={() => refetch()} icon={<RotateCcw size={13} />}>
+            <Button variant="ghost" size="sm" onClick={() => refetch()} icon={<RotateCcw size={14} />}>
               {t('common.retry', { defaultValue: 'Retry' })}
             </Button>
           </CardContent>
@@ -407,7 +407,7 @@ function RecentEstimatesPanel({
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-12 animate-pulse rounded-xl bg-slate-200/60 dark:bg-slate-700/30"
+              className="h-12 animate-pulse rounded-xl bg-surface-tertiary/60"
             />
           ))}
         </div>
@@ -597,7 +597,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg"
         aria-hidden="true"
@@ -610,7 +610,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
         aria-labelledby={titleId}
         className="relative w-full max-w-md animate-card-in rounded-2xl border border-border-light bg-surface-elevated p-6 shadow-xl"
       >
-        <h3 id={titleId} className="text-lg font-semibold text-content-primary mb-4">
+        <h3 id={titleId} className="oe-section-title mb-4">
           {t('ai.save_to_boq', { defaultValue: 'Save as BOQ' })}
         </h3>
 
@@ -618,7 +618,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor={projectSelectId}
-              className="text-sm font-medium text-content-primary"
+              className="oe-label"
             >
               {t('ai.select_project', { defaultValue: 'Select Project' })}
             </label>
@@ -626,7 +626,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
               id={projectSelectId}
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary cursor-pointer appearance-none"
+              className="oe-select-lg w-full cursor-pointer"
             >
               <option value="" disabled>
                 {t('ai.choose_project', { defaultValue: '-- Choose a project --' })}
@@ -642,7 +642,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor={boqNameId}
-              className="text-sm font-medium text-content-primary"
+              className="oe-label"
             >
               {t('ai.boq_name', { defaultValue: 'BOQ Name' })}
             </label>
@@ -651,7 +651,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
               type="text"
               value={boqName}
               onChange={(e) => setBOQName(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary"
+              className="oe-input-lg w-full"
               placeholder={t('ai.boq_name_placeholder', { defaultValue: 'Name for this BOQ...' })}
             />
           </div>
@@ -663,14 +663,14 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
           {enrichedMatches > 0 && (
             <label
               htmlFor={applyEnrichedId}
-              className="flex items-start gap-2.5 rounded-lg border border-emerald-500/20 bg-semantic-success/5 p-3 cursor-pointer"
+              className="flex items-start gap-2 rounded-lg border border-semantic-success/20 bg-semantic-success/5 p-3 cursor-pointer"
             >
               <input
                 id={applyEnrichedId}
                 type="checkbox"
                 checked={applyEnriched}
                 onChange={(e) => setApplyEnriched(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-semantic-success focus:ring-emerald-500/40"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-semantic-success focus:ring-semantic-success/40"
               />
               <span className="text-sm text-content-secondary">
                 <span className="font-medium text-content-primary">
@@ -700,7 +700,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
             onClick={() => onSave(selectedProject, boqName, applyEnriched)}
             disabled={!selectedProject || !boqName.trim() || saving}
             loading={saving}
-            icon={<Save size={15} />}
+            icon={<Save size={16} />}
           >
             {t('ai.save', { defaultValue: 'Save' })}
           </Button>
@@ -752,25 +752,25 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table w-full">
         <thead>
-          <tr className="border-b border-border-light text-left">
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide w-20">
+          <tr className="text-left">
+            <th className="w-20">
               {t('ai.col_pos', { defaultValue: 'Pos' })}
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+            <th>
               {t('ai.col_description', { defaultValue: 'Description' })}
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide w-16">
+            <th className="w-16">
               {t('ai.col_unit', { defaultValue: 'Unit' })}
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-24">
+            <th className="text-right w-24">
               {t('common.quantity')}
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-28">
+            <th className="text-right w-28">
               {t('ai.col_rate', { defaultValue: 'Unit Rate' })}
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-32">
+            <th className="text-right w-32">
               {t('ai.col_total', { defaultValue: 'Total' })}
             </th>
           </tr>
@@ -785,10 +785,10 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
             return (
               <React.Fragment key={`${item.ordinal}-${idx}`}>
                 {showCategory && (
-                  <tr className="bg-surface-secondary/50">
+                  <tr>
                     <td
                       colSpan={6}
-                      className="px-4 py-2 text-xs font-semibold text-content-secondary uppercase tracking-wider"
+                      className="font-semibold text-content-secondary"
                     >
                       {item.category}
                     </td>
@@ -798,10 +798,10 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
                   className="border-b border-border-light/50 transition-colors duration-fast hover:bg-surface-secondary/30"
                   style={{ animationDelay: `${idx * 30}ms` }}
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-content-tertiary">
+                  <td className="font-mono text-content-tertiary">
                     {item.ordinal}
                   </td>
-                  <td className="px-4 py-3 text-content-primary">
+                  <td>
                     {item.description}
                     {Object.keys(item.classification).length > 0 && (
                       <div className="mt-0.5 flex gap-1">
@@ -813,13 +813,13 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-content-secondary">
+                  <td className="text-content-secondary">
                     {item.unit ? displayQty.unitFor(item.unit) : item.unit}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-content-primary">
+                  <td className="text-right font-mono">
                     {formatNumber(displayQty.convert(item.quantity, item.unit || '').value)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-content-secondary">
+                  <td className="text-right font-mono text-content-secondary">
                     {bestMatch ? (
                       <div className="flex flex-col items-end gap-0.5">
                         <span className="line-through text-content-quaternary text-xs">
@@ -839,7 +839,7 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
                             ? formatNumber(displayQty.convertRate(bestMatch.rate, item.unit || ''), currencyArg)
                             : formatNumber(bestMatch.rate, (bestMatch.currency || currency) || undefined)}
                         </span>
-                        <span className="text-2xs text-emerald-600/70 font-normal">
+                        <span className="text-2xs text-semantic-success font-normal">
                           {bestMatch.code}
                         </span>
                         {!matchAppliesToTotal(bestMatch) && (
@@ -862,7 +862,7 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
                       formatNumber(displayQty.convertRate(item.unit_rate, item.unit || ''), currencyArg)
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono font-medium text-content-primary">
+                  <td className="text-right font-mono font-medium">
                     {bestMatch && matchAppliesToTotal(bestMatch) ? (
                       <div className="flex flex-col items-end gap-0.5">
                         <span className="line-through text-content-quaternary text-xs">
@@ -882,14 +882,14 @@ function ResultsTable({ result, selectedCurrency, enrichResult }: { result: Esti
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border">
+          <tr>
             <td
               colSpan={5}
-              className="px-4 py-4 text-right text-base font-semibold text-content-primary"
+              className="text-right font-semibold"
             >
               {t('ai.grand_total', { defaultValue: 'Grand Total' })}
             </td>
-            <td className="px-4 py-4 text-right font-mono text-lg font-semibold text-oe-blue">
+            <td className="text-right font-mono text-lg font-semibold text-oe-blue">
               {enrichMap.size > 0 ? (
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="line-through text-content-quaternary text-sm font-normal">
@@ -1009,25 +1009,25 @@ function QuantityTablesResult({ data }: { data: CadExtractResponse }) {
             {/* Items table */}
             {isExpanded && (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table w-full">
                   <thead>
-                    <tr className="border-b border-border-light/50 text-left">
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                    <tr className="text-left">
+                      <th>
                         {t('common.type')}
                       </th>
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                      <th>
                         {t('ai.cad_col_material', { defaultValue: 'Material' })}
                       </th>
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-20">
+                      <th className="text-right w-20">
                         {t('ai.cad_col_count', { defaultValue: 'Count' })}
                       </th>
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-28">
+                      <th className="text-right w-28">
                         {swapUnit(t('ai.cad_col_volume', { defaultValue: 'Volume (m\u00b3)' }), 'm\u00b3')}
                       </th>
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-28">
+                      <th className="text-right w-28">
                         {swapUnit(t('ai.cad_col_area', { defaultValue: 'Area (m\u00b2)' }), 'm\u00b2')}
                       </th>
-                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-24">
+                      <th className="text-right w-24">
                         {swapUnit(t('ai.cad_col_length', { defaultValue: 'Length (m)' }), 'm')}
                       </th>
                     </tr>
@@ -1038,24 +1038,24 @@ function QuantityTablesResult({ data }: { data: CadExtractResponse }) {
                         key={`${item.type}-${item.material || ''}-${idx}`}
                         className="border-b border-border-light/30 hover:bg-surface-secondary/20 transition-colors"
                       >
-                        <td className="px-4 py-2 text-content-primary">{item.type}</td>
-                        <td className="px-4 py-2 text-content-secondary text-xs">{item.material || '-'}</td>
-                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(item.count)}</td>
-                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(dVol(item.volume_m3))}</td>
-                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(dArea(item.area_m2))}</td>
-                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(dLen(item.length_m))}</td>
+                        <td>{item.type}</td>
+                        <td className="text-content-secondary">{item.material || '-'}</td>
+                        <td className="text-right font-mono">{fmtNum(item.count)}</td>
+                        <td className="text-right font-mono">{fmtNum(dVol(item.volume_m3))}</td>
+                        <td className="text-right font-mono">{fmtNum(dArea(item.area_m2))}</td>
+                        <td className="text-right font-mono">{fmtNum(dLen(item.length_m))}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-border bg-surface-secondary/30">
-                      <td colSpan={2} className="px-4 py-2 text-xs font-semibold text-content-secondary uppercase">
+                    <tr>
+                      <td colSpan={2} className="font-semibold text-content-secondary">
                         {t('ai.cad_subtotal', { defaultValue: 'Subtotal' })}
                       </td>
-                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(group.totals.count)}</td>
-                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(dVol(group.totals.volume_m3))}</td>
-                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(dArea(group.totals.area_m2))}</td>
-                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(dLen(group.totals.length_m))}</td>
+                      <td className="text-right font-mono font-semibold">{fmtNum(group.totals.count)}</td>
+                      <td className="text-right font-mono font-semibold">{fmtNum(dVol(group.totals.volume_m3))}</td>
+                      <td className="text-right font-mono font-semibold">{fmtNum(dArea(group.totals.area_m2))}</td>
+                      <td className="text-right font-mono font-semibold">{fmtNum(dLen(group.totals.length_m))}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1258,9 +1258,9 @@ function CompactOptions({
   const currencyId = useId();
   const standardId = useId();
   const selectClass =
-    'h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary cursor-pointer appearance-none';
+    'oe-select w-full cursor-pointer';
   const inputClass =
-    'h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-fast ease-oe hover:border-content-tertiary';
+    'oe-input w-full';
 
   return (
     <div className="mt-4 grid grid-cols-3 gap-3">
@@ -1375,8 +1375,8 @@ function CadConverterSection({
       {/* Section header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <HardHat size={18} className="text-oe-blue" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <HardHat size={20} className="text-oe-blue" />
+          <h3 className="oe-card-title">
             {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
           </h3>
           <Badge variant={installedCount > 0 ? 'success' : 'warning'} size="sm">
@@ -1417,13 +1417,13 @@ function CadConverterSection({
                 </div>
               ) : (
                 <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle">
-                  <HardDrive size={18} className="text-oe-blue" />
+                  <HardDrive size={20} className="text-oe-blue" />
                   <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-oe-blue animate-ping" />
                   <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-oe-blue" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-content-primary">
+                <h4 className="oe-card-title">
                   {installError ? t('quantities.install_failed', { defaultValue: 'Installation failed' })
                     : installResult ? t('quantities.install_success', { defaultValue: 'Converter installed successfully' })
                     : t('quantities.installing_converter', { defaultValue: `Installing ${installingName}...`, name: installingName })}
@@ -1504,10 +1504,10 @@ function CadConverterSection({
               {/* Icon + Name */}
               <div className="flex items-center gap-3">
                 <div className={clsx('flex h-9 w-9 items-center justify-center rounded-lg text-white', c.installed ? 'bg-gradient-to-br from-emerald-500 to-teal-500' : colors.icon)}>
-                  <FileInput size={18} strokeWidth={1.75} />
+                  <FileInput size={20} strokeWidth={1.75} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-content-primary">{converterName(t, c)}</h4>
+                  <h4 className="oe-card-title">{converterName(t, c)}</h4>
                   <p className="text-2xs text-content-quaternary">{c.engine}</p>
                 </div>
               </div>
@@ -2643,7 +2643,7 @@ export function QuickEstimatePage() {
                   className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated px-3 py-1 text-xs font-medium text-content-secondary"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-semantic-success animate-pulse" />
-                  <Zap size={11} className="text-violet-500" />
+                  <Zap size={12} className="text-violet-500" />
                   {t('ai.model_pill', {
                     defaultValue: 'model: {{model}}',
                     model: aiSettings.preferred_model,
@@ -2722,7 +2722,7 @@ export function QuickEstimatePage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue/10">
               <Sparkles size={28} className="text-oe-blue" />
             </div>
-            <h3 className="text-lg font-semibold text-content-primary">
+            <h3 className="oe-section-title">
               {t('ai.setup_required_title', { defaultValue: 'Connect your AI to get started' })}
             </h3>
             <p className="mt-2 text-sm text-content-secondary max-w-md mx-auto">
@@ -2803,7 +2803,7 @@ export function QuickEstimatePage() {
         >
           <div className="flex items-start gap-3">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10">
-              <Info size={15} className="text-oe-blue" />
+              <Info size={16} className="text-oe-blue" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-content-primary mb-1">
@@ -2921,10 +2921,10 @@ export function QuickEstimatePage() {
         {/* Coloured section accent bar */}
         <div className="relative flex items-center gap-3 border-b border-white/40 px-5 py-3 dark:border-white/5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-sky-500/25">
-            <Wand2 size={15} />
+            <Wand2 size={16} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {isCadRoute
                 ? t('ai.input_cad_title', { defaultValue: 'Upload a CAD or BIM file' })
                 : activeTab === 'text'
@@ -2981,7 +2981,7 @@ export function QuickEstimatePage() {
                     board through a short dialogue (max 3 rounds). */}
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-200/60 bg-gradient-to-r from-violet-500/5 to-cyan-500/5 px-4 py-3 dark:border-violet-500/20">
                   <div className="flex items-center gap-2">
-                    <Wand2 size={18} className="text-violet-500" />
+                    <Wand2 size={20} className="text-violet-500" />
                     <div>
                       <p className="text-sm font-semibold text-content-primary">
                         {t('aiest.intake.cta_title', { defaultValue: 'Guided estimate (new)' })}
@@ -3019,7 +3019,7 @@ export function QuickEstimatePage() {
                         'Describe your project...\n\nExample: "3-story residential building, 1200 m\u00b2 total area, reinforced concrete frame with brick facade, flat roof, standard MEP installations. Location: Berlin, Germany."',
                     })}
                     rows={6}
-                    className="w-full rounded-xl border border-white/50 bg-white/70 px-5 py-4 text-base text-content-primary placeholder:text-content-tertiary shadow-inner shadow-slate-900/[0.03] backdrop-blur-sm transition-all duration-normal ease-oe hover:border-violet-300/60 focus:border-violet-400 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:shadow-[0_0_0_6px_rgba(139,92,246,0.08)] resize-none leading-relaxed"
+                    className="oe-textarea w-full bg-white/70 shadow-slate-900/[0.03] backdrop-blur-sm resize-none"
                     disabled={isPending}
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-content-tertiary tabular-nums">
@@ -3033,7 +3033,7 @@ export function QuickEstimatePage() {
                     data-testid="ai-quick-estimate-examples"
                     className="flex flex-wrap items-center gap-2"
                   >
-                    <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                    <span className="oe-overline">
                       {t('ai.examples_label', { defaultValue: 'Try' })}
                     </span>
                     {[
@@ -3085,7 +3085,7 @@ export function QuickEstimatePage() {
                         disabled={isPending}
                         className="group inline-flex items-center gap-1.5 rounded-full border border-white/50 bg-white/60 px-3 py-1 text-xs font-medium text-content-secondary backdrop-blur transition hover:-translate-y-0.5 hover:border-violet-300/60 hover:bg-white/90 hover:text-violet-700 hover:shadow-sm dark:hover:text-violet-300"
                       >
-                        <Sparkles size={11} className="text-violet-500 opacity-70 group-hover:opacity-100" />
+                        <Sparkles size={12} className="text-violet-500 opacity-70 group-hover:opacity-100" />
                         {ex.label}
                       </button>
                     ))}
@@ -3168,7 +3168,7 @@ export function QuickEstimatePage() {
                       id={buildingTypeId}
                       value={buildingType}
                       onChange={(e) => setBuildingType(e.target.value)}
-                      className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary cursor-pointer appearance-none"
+                      className="oe-select w-full cursor-pointer"
                       disabled={isPending}
                     >
                       {BUILDING_TYPES.map((bt) => (
@@ -3194,7 +3194,7 @@ export function QuickEstimatePage() {
                       value={areaM2}
                       onChange={(e) => setAreaM2(e.target.value)}
                       placeholder="1200"
-                      className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-fast ease-oe hover:border-content-tertiary"
+                      className="oe-input w-full"
                       disabled={isPending}
                     />
                   </div>
@@ -3309,7 +3309,7 @@ export function QuickEstimatePage() {
                     'mb-4 rounded-xl border p-4 flex items-center justify-between',
                     (convertersData.installed_count ?? 0) > 0
                       ? 'border-semantic-success/30 bg-semantic-success/5'
-                      : 'border-amber-500/30 bg-semantic-warning-bg dark:bg-amber-900/10'
+                      : 'border-semantic-warning/30 bg-semantic-warning-bg'
                   )}>
                     <div className="flex items-center gap-3">
                       <div className={clsx(
@@ -3369,8 +3369,8 @@ export function QuickEstimatePage() {
                   /* Compact status panel on /ai-estimate?tab=cad */
                   <div className="mt-3 rounded-xl border border-border bg-surface-secondary/50 p-3">
                     <div className="flex items-center justify-between mb-2.5">
-                      <h4 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-                        <HardHat size={13} />
+                      <h4 className="oe-card-title flex items-center gap-1.5">
+                        <HardHat size={14} />
                         {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
                       </h4>
                       {convertersData && (
@@ -3391,9 +3391,9 @@ export function QuickEstimatePage() {
                           }`}
                         >
                           {c.installed ? (
-                            <CheckCircle2 size={13} className="shrink-0 text-semantic-success" />
+                            <CheckCircle2 size={14} className="shrink-0 text-semantic-success" />
                           ) : (
-                            <XCircle size={13} className="shrink-0 text-content-quaternary" />
+                            <XCircle size={14} className="shrink-0 text-content-quaternary" />
                           )}
                           <span className="font-medium truncate">{converterName(t, c)}</span>
                           <span className="ml-auto text-2xs opacity-60">{fmtList(c.extensions)}</span>
@@ -3401,7 +3401,7 @@ export function QuickEstimatePage() {
                       ))}
                     </div>
                     <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-oe-blue/10 dark:bg-oe-blue/[0.14] px-2.5 py-2">
-                      <Info size={13} className="shrink-0 mt-0.5 text-oe-blue-text" />
+                      <Info size={14} className="shrink-0 mt-0.5 text-oe-blue-text" />
                       <div className="text-2xs text-oe-blue-text leading-relaxed">
                         <p>
                           {t('ai.cad_module_info_extract', {
@@ -3414,7 +3414,7 @@ export function QuickEstimatePage() {
                           className="mt-1 inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
                         >
                           {t('ai.cad_manage_converters', { defaultValue: 'Manage Converters' })}
-                          <ExternalLink size={11} />
+                          <ExternalLink size={12} />
                         </Link>
                       </div>
                     </div>
@@ -3439,7 +3439,7 @@ export function QuickEstimatePage() {
                         'Paste your BOQ data here (from Excel, Word, or any table)...\n\nExample:\nPos\tDescription\tUnit\tQty\tRate\n01.01\tExcavation\tm3\t250\t18.50\n01.02\tConcrete C30/37\tm3\t120\t145.00\n01.03\tReinforcement BSt 500\tkg\t12000\t1.85',
                     })}
                     rows={8}
-                    className="w-full rounded-xl border border-border bg-surface-primary px-4 py-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue focus:shadow-[0_0_0_4px_rgba(0,113,227,0.08)] transition-all duration-normal ease-oe hover:border-content-tertiary resize-none leading-relaxed font-mono"
+                    className="oe-textarea-lg w-full resize-none font-mono"
                     disabled={isPending}
                   />
                   <div className="absolute bottom-3 right-3 text-xs text-content-tertiary">
@@ -3502,7 +3502,7 @@ export function QuickEstimatePage() {
                             size="lg"
                             loading={isPending}
                             disabled={!canSubmit}
-                            icon={<Layers size={18} aria-hidden="true" />}
+                            icon={<Layers size={20} aria-hidden="true" />}
                             className="px-6"
                             aria-describedby={!canSubmit ? submitHelpId : undefined}
                           >
@@ -3513,7 +3513,7 @@ export function QuickEstimatePage() {
                             variant="secondary"
                             size="lg"
                             disabled={!canSubmit}
-                            icon={<Database size={18} aria-hidden="true" />}
+                            icon={<Database size={20} aria-hidden="true" />}
                             className="px-6"
                             onClick={() => {
                               if (selectedFile) {
@@ -3532,7 +3532,7 @@ export function QuickEstimatePage() {
                           size="lg"
                           loading={isPending}
                           disabled={!canSubmit}
-                          icon={<Sparkles size={18} aria-hidden="true" />}
+                          icon={<Sparkles size={20} aria-hidden="true" />}
                           aria-describedby={!canSubmit ? submitHelpId : undefined}
                         >
                           {submitLabel}
@@ -3579,7 +3579,7 @@ export function QuickEstimatePage() {
             <CardContent className="!mt-0">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-semantic-error-bg">
-                  <AlertCircle size={18} className="text-semantic-error" aria-hidden="true" />
+                  <AlertCircle size={20} className="text-semantic-error" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-semantic-error">
@@ -3617,7 +3617,7 @@ export function QuickEstimatePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Layers size={16} className="text-oe-blue" />
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {cadColumnsData.filename}
               </h3>
               <Badge variant="blue" size="sm">{cadColumnsData.total_elements.toLocaleString(getNumberLocale())} elements</Badge>
@@ -3633,7 +3633,7 @@ export function QuickEstimatePage() {
                 onClick={() => navigate(`/data-explorer?session=${cadColumnsData.session_id}`)}
                 className="shrink-0 whitespace-nowrap"
               >
-                <Database size={13} className="mr-1" />
+                <Database size={14} className="mr-1" />
                 <span>{t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' })}</span>
               </Button>
             </div>
@@ -3641,7 +3641,7 @@ export function QuickEstimatePage() {
 
           {/* Preset Buttons */}
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-2 block">
+            <label className="oe-label mb-2">
               QTO Grouping
             </label>
             <div className="flex flex-wrap gap-2">
@@ -3701,7 +3701,7 @@ export function QuickEstimatePage() {
           {showCustom && (
             <div className="space-y-3 border-t border-border-light pt-3">
               <div>
-                <label className="text-xs font-medium text-content-secondary mb-2 block">Group by columns</label>
+                <label className="oe-label mb-2">Group by columns</label>
                 <div className="flex flex-wrap gap-1.5">
                   {(cadColumnsData.columns?.grouping || []).map(col => {
                     const isSelected = (selectedGroupBy || []).includes(col);
@@ -3723,7 +3723,7 @@ export function QuickEstimatePage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-content-secondary mb-2 block">{t('ai.sum_quantities', { defaultValue: 'Sum quantities' })}</label>
+                <label className="oe-label mb-2">{t('ai.sum_quantities', { defaultValue: 'Sum quantities' })}</label>
                 <div className="flex flex-wrap gap-1.5">
                   {(cadColumnsData.columns?.quantity || []).map(col => {
                     const isSelected = (selectedSumCols || []).includes(col);
@@ -3751,13 +3751,13 @@ export function QuickEstimatePage() {
           {/* Preview table - show only selected columns */}
           {(cadColumnsData.preview || []).length > 0 && (
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-2 block">
+              <label className="oe-label mb-2">
                 {t('ai.cad_preview', { defaultValue: 'Preview (first 10 elements)' })}
               </label>
               <div className="overflow-x-auto rounded-lg border border-border-light">
-                <table className="w-full text-xs">
+                <table className="oe-table-compact w-full">
                   <thead>
-                    <tr className="border-b border-border-light bg-surface-secondary/50">
+                    <tr>
                       {(() => {
                         const previewKeys = new Set(Object.keys(cadColumnsData.preview[0] ?? {}));
                         const visibleCols = (selectedGroupBy.length || selectedSumCols.length)
@@ -3772,7 +3772,7 @@ export function QuickEstimatePage() {
                           return (
                             <th
                               key={key}
-                              className="px-3 py-1.5 text-left font-semibold text-content-tertiary uppercase tracking-wide whitespace-nowrap text-oe-blue"
+                              className="text-oe-blue"
                             >
                               {key}{displayUnit ? ` (${displayUnit})` : ''}
                             </th>
@@ -3802,8 +3802,8 @@ export function QuickEstimatePage() {
                               <td
                                 key={key}
                                 className={clsx(
-                                  'px-3 py-1 whitespace-nowrap',
-                                  typeof val === 'number' ? 'text-right font-mono text-content-primary' : 'text-content-secondary',
+                                  'whitespace-nowrap',
+                                  typeof val === 'number' ? 'text-right font-mono' : 'text-content-secondary',
                                 )}
                               >
                                 {val === null || val === undefined || val === 'None' || val === ''
@@ -3857,7 +3857,7 @@ export function QuickEstimatePage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('ai.cad_grouped_results', { defaultValue: 'Grouped Results' })}
               </h2>
               <Badge variant="success" size="sm">
@@ -3925,12 +3925,12 @@ export function QuickEstimatePage() {
           {/* Grouped results table */}
           <Card padding="none">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table-compact w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/50 text-left">
-                    <th className="px-2 py-2.5 w-8" />
+                  <tr className="text-left">
+                    <th className="w-8" />
                     {(cadGroupResult.group_by || []).map((col) => (
-                      <th key={col} className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                      <th key={col}>
                         {col}
                       </th>
                     ))}
@@ -3939,12 +3939,12 @@ export function QuickEstimatePage() {
                       // Display boundary (#270): relabel to the user's system.
                       const displayUnit = unit ? displayQty.unitFor(unit) : unit;
                       return (
-                        <th key={col} className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
+                        <th key={col} className="text-right">
                           {col}{displayUnit ? ` (${displayUnit})` : ''}
                         </th>
                       );
                     })}
-                    <th className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-20">
+                    <th className="text-right w-20">
                       {t('ai.cad_col_count', { defaultValue: 'Count' })}
                     </th>
                   </tr>
@@ -3975,31 +3975,31 @@ export function QuickEstimatePage() {
                           <React.Fragment key={`tree-${node.parentKey}`}>
                             {/* Parent row */}
                             <tr
-                              className="border-b border-border-light/30 bg-surface-secondary/40 hover:bg-surface-secondary/60 cursor-pointer transition-colors"
+                              className="cursor-pointer"
                               onClick={() => toggleTreeNode(node.parentKey)}
                             >
-                              <td className="px-2 py-2">
+                              <td>
                                 {isExpanded
                                   ? <ChevronDown size={14} className="text-content-tertiary" />
                                   : <ChevronRight size={14} className="text-content-tertiary" />
                                 }
                               </td>
-                              <td className="px-4 py-2 text-sm text-content-primary font-semibold">
+                              <td className="font-semibold">
                                 {node.parentLabel}
                               </td>
                               {groupByCols.slice(1).map((col) => (
-                                <td key={col} className="px-4 py-2 text-xs text-content-quaternary italic">
+                                <td key={col} className="text-content-quaternary italic">
                                   {node.children.length} {t('ai.cad_sub_groups', { defaultValue: 'sub-groups' })}
                                 </td>
                               ))}
                               {sumCols.map((col) => (
-                                <td key={col} className="px-4 py-2 text-right font-mono text-sm font-semibold text-content-primary">
+                                <td key={col} className="text-right font-mono font-semibold">
                                   {(node.sums[col] || 0) > 0
                                     ? sumDisplay(col, node.sums[col] || 0).toLocaleString(getNumberLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
                                     : '-'}
                                 </td>
                               ))}
-                              <td className="px-4 py-2 text-right font-mono text-sm font-semibold text-content-primary">
+                              <td className="text-right font-mono font-semibold">
                                 {node.count}
                               </td>
                             </tr>
@@ -4010,12 +4010,12 @@ export function QuickEstimatePage() {
                                 <tr
                                   key={g.key}
                                   className={clsx(
-                                    'border-b border-border-light/20 hover:bg-surface-secondary/20 cursor-pointer transition-colors',
+                                    'cursor-pointer',
                                     !hasQty && 'opacity-40',
                                   )}
                                   onClick={() => setElementDetailGroup(g)}
                                 >
-                                  <td className="px-2 py-1.5">
+                                  <td>
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setDeletedGroupKeys(prev => new Set(prev).add(g.key)); }}
                                       className="text-content-quaternary hover:text-semantic-error transition-colors"
@@ -4024,26 +4024,26 @@ export function QuickEstimatePage() {
                                       <X size={12} />
                                     </button>
                                   </td>
-                                  <td className="px-4 py-1.5 text-sm text-content-secondary ps-10">
+                                  <td className="text-content-secondary ps-10">
                                     <span className="text-border mr-1.5">|--</span>
                                     {cleanValue(groupByCols[0]!, g.key_parts[groupByCols[0]!] || '')}
                                   </td>
                                   {groupByCols.slice(1).map((col) => (
-                                    <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
+                                    <td key={col} className="font-medium">
                                       {cleanValue(col, g.key_parts[col] || '')}
                                     </td>
                                   ))}
                                   {sumCols.map((col) => (
                                     <td key={col} className={clsx(
-                                      'px-4 py-1.5 text-right font-mono text-sm',
-                                      (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
+                                      'text-right font-mono',
+                                      (g.sums[col] ?? 0) > 0 ? 'font-medium' : 'text-content-quaternary',
                                     )}>
                                       {g.sums[col] != null && g.sums[col] > 0
                                         ? sumDisplay(col, g.sums[col]).toLocaleString(getNumberLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
                                         : '-'}
                                     </td>
                                   ))}
-                                  <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
+                                  <td className="text-right font-mono font-medium">{g.count}</td>
                                 </tr>
                               );
                             })}
@@ -4061,12 +4061,12 @@ export function QuickEstimatePage() {
                           <tr
                             key={g.key}
                             className={clsx(
-                              'border-b border-border-light/30 hover:bg-surface-secondary/20 cursor-pointer transition-colors',
+                              'cursor-pointer',
                               !hasQty && 'opacity-40',
                             )}
                             onClick={() => setElementDetailGroup(g)}
                           >
-                            <td className="px-2 py-1.5">
+                            <td>
                               <button
                                 onClick={(e) => { e.stopPropagation(); setDeletedGroupKeys(prev => new Set(prev).add(g.key)); }}
                                 className="text-content-quaternary hover:text-semantic-error transition-colors"
@@ -4076,37 +4076,37 @@ export function QuickEstimatePage() {
                               </button>
                             </td>
                             {groupByCols.map((col) => (
-                              <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
+                              <td key={col} className="font-medium">
                                 {cleanValue(col, g.key_parts[col] || '')}
                               </td>
                             ))}
                             {sumCols.map((col) => (
                               <td key={col} className={clsx(
-                                'px-4 py-1.5 text-right font-mono text-sm',
-                                (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
+                                'text-right font-mono',
+                                (g.sums[col] ?? 0) > 0 ? 'font-medium' : 'text-content-quaternary',
                               )}>
                                 {g.sums[col] != null && g.sums[col] > 0
                                   ? sumDisplay(col, g.sums[col]).toLocaleString(getNumberLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
                                   : '-'}
                               </td>
                             ))}
-                            <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
+                            <td className="text-right font-mono font-medium">{g.count}</td>
                           </tr>
                         );
                       });
                   })()}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-oe-blue/20 bg-oe-blue-subtle/30">
+                  <tr className="bg-oe-blue-subtle/30">
                     <td />
                     <td
                       colSpan={(cadGroupResult.group_by || []).length}
-                      className="px-4 py-2.5 text-xs font-semibold text-content-primary uppercase"
+                      className="font-semibold"
                     >
                       {t('ai.cad_grand_total', { defaultValue: 'Grand Total' })}
                     </td>
                     {(cadGroupResult.sum_columns || []).map((col) => (
-                      <td key={col} className="px-4 py-2.5 text-right font-mono font-semibold text-oe-blue">
+                      <td key={col} className="text-right font-mono font-semibold text-oe-blue">
                         {computedTotals.sums[col] != null
                           ? displayQty
                               .convert(computedTotals.sums[col] ?? 0, cadColumnsData?.unit_labels?.[col] ?? '')
@@ -4115,7 +4115,7 @@ export function QuickEstimatePage() {
                           : '-'}
                       </td>
                     ))}
-                    <td className="px-4 py-2.5 text-right font-mono font-semibold text-oe-blue">
+                    <td className="text-right font-mono font-semibold text-oe-blue">
                       {computedTotals.count}
                     </td>
                   </tr>
@@ -4131,7 +4131,7 @@ export function QuickEstimatePage() {
               <select
                 value={cadBOQProjectId}
                 onChange={(e) => setCadBOQProjectId(e.target.value)}
-                className="h-8 rounded-md border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:ring-1 focus:ring-oe-blue"
+                className="oe-select"
               >
                 <option value="">{t('ai.select_project', { defaultValue: '-- Select project --' })}</option>
                 {(cadProjectsList || []).map((p) => (
@@ -4143,7 +4143,7 @@ export function QuickEstimatePage() {
                 value={cadBOQName}
                 onChange={(e) => setCadBOQName(e.target.value)}
                 placeholder={t('ai.boq_name_placeholder', { defaultValue: 'BOQ name' })}
-                className="h-8 w-48 rounded-md border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:ring-1 focus:ring-oe-blue"
+                className="oe-input w-48"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -4172,7 +4172,7 @@ export function QuickEstimatePage() {
 
       {/* Element Detail Panel (slide-over) */}
       {elementDetailGroup && (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setElementDetailGroup(null)}>
+        <div className="fixed inset-0 z-dropdown flex justify-end" onClick={() => setElementDetailGroup(null)}>
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div
             className="relative w-full max-w-3xl bg-surface-primary shadow-2xl border-l border-border-light overflow-hidden flex flex-col animate-slide-in-right"
@@ -4181,7 +4181,7 @@ export function QuickEstimatePage() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border-light bg-surface-secondary/30">
               <div>
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('ai.cad_element_detail', { defaultValue: 'Element Detail' })}
                 </h3>
                 <p className="text-xs text-content-tertiary mt-0.5">
@@ -4204,7 +4204,7 @@ export function QuickEstimatePage() {
                 onClick={() => setElementDetailGroup(null)}
                 className="p-1.5 rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
             {/* Content */}
@@ -4218,10 +4218,10 @@ export function QuickEstimatePage() {
                 </div>
               )}
               {elementDetailData && !elementDetailLoading && (
-                <table className="w-full text-xs">
+                <table className="oe-table-compact w-full">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b border-border-light bg-surface-secondary/80 backdrop-blur">
-                      <th className="px-3 py-2 text-left font-semibold text-content-tertiary uppercase tracking-wide w-10">#</th>
+                    <tr className="backdrop-blur">
+                      <th className="w-10">#</th>
                       {elementDetailData.columns.map((col) => {
                         // Display boundary (#270): append the user's unit so the
                         // converted numbers below are self-describing. Only
@@ -4232,8 +4232,8 @@ export function QuickEstimatePage() {
                           <th
                             key={col}
                             className={clsx(
-                              'px-3 py-2 font-semibold text-content-tertiary uppercase tracking-wide whitespace-nowrap',
-                              col in (elementDetailData.totals || {}) ? 'text-right' : 'text-left',
+                              '',
+                              col in (elementDetailData.totals || {}) ? 'text-right' : '',
                             )}
                           >
                             {col}{displayUnit ? ` (${displayUnit})` : ''}
@@ -4245,7 +4245,7 @@ export function QuickEstimatePage() {
                   <tbody>
                     {elementDetailData.elements.map((el, idx) => (
                       <tr key={`el-${idx}-${Object.values(el).slice(0, 2).join('-')}`} className="border-b border-border-light/20 hover:bg-surface-secondary/20 transition-colors">
-                        <td className="px-3 py-1.5 text-content-quaternary font-mono">{idx + 1}</td>
+                        <td className="text-content-quaternary font-mono">{idx + 1}</td>
                         {elementDetailData.columns.map((col) => {
                           const val = el[col];
                           const isNumeric = col in (elementDetailData.totals || {});
@@ -4259,8 +4259,8 @@ export function QuickEstimatePage() {
                             <td
                               key={col}
                               className={clsx(
-                                'px-3 py-1.5 whitespace-nowrap max-w-[200px] truncate',
-                                isNumeric ? 'text-right font-mono text-content-primary' : 'text-content-secondary',
+                                'whitespace-nowrap max-w-[200px] truncate',
+                                isNumeric ? 'text-right font-mono' : 'text-content-secondary',
                               )}
                               title={val != null ? String(val) : ''}
                             >
@@ -4276,8 +4276,8 @@ export function QuickEstimatePage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-oe-blue/20 bg-oe-blue-subtle/30 sticky bottom-0">
-                      <td className="px-3 py-2 font-semibold text-xs text-content-primary uppercase">
+                    <tr className="bg-oe-blue-subtle/30 sticky bottom-0">
+                      <td className="font-semibold">
                         {t('ai.cad_total', { defaultValue: 'Total' })}
                       </td>
                       {elementDetailData.columns.map((col) => {
@@ -4291,7 +4291,7 @@ export function QuickEstimatePage() {
                           <td
                             key={col}
                             className={clsx(
-                              'px-3 py-2',
+                              '',
                               total != null ? 'text-right font-mono font-semibold text-oe-blue' : '',
                             )}
                           >
@@ -4323,7 +4323,7 @@ export function QuickEstimatePage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('ai.cad_quantity_tables', { defaultValue: 'Quantity Tables' })}
               </h2>
               <Badge variant="success" size="sm">
@@ -4423,7 +4423,7 @@ export function QuickEstimatePage() {
           {/* Results header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('ai.results', { defaultValue: 'Estimate Results' })}
               </h2>
               <Badge variant="success" size="sm">
@@ -4482,7 +4482,7 @@ export function QuickEstimatePage() {
                 <select
                   value={enrichRegion}
                   onChange={(e) => setEnrichRegion(e.target.value)}
-                  className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary cursor-pointer appearance-none"
+                  className="oe-select cursor-pointer"
                   disabled={enriching}
                   aria-label={t('ai.enrich_region_label', { defaultValue: 'Cost database region' })}
                 >
@@ -4514,7 +4514,7 @@ export function QuickEstimatePage() {
             )}
             {enrichResult && enrichResult.total_matched > 0 && (
               <div className="flex items-center gap-2 text-xs text-semantic-success">
-                <CheckCircle2 size={13} />
+                <CheckCircle2 size={14} />
                 <span>
                   {t('ai.enrich_summary', {
                     defaultValue: '{{matched}} of {{total}} items matched with regional cost data ({{region}})',
@@ -4531,7 +4531,7 @@ export function QuickEstimatePage() {
               Without this, "Save as BOQ" feels like the end of the road. */}
           <div className="rounded-xl border border-oe-blue/15 bg-oe-blue-subtle/20 p-4">
             <p className="flex items-center gap-1.5 text-xs font-semibold text-content-primary mb-1.5">
-              <Info size={13} className="text-oe-blue" />
+              <Info size={14} className="text-oe-blue" />
               {t('ai.estimate_after_title', { defaultValue: 'Recommended next steps' })}
             </p>
             <ul className="space-y-1 text-xs text-content-secondary leading-relaxed list-none">
@@ -4562,21 +4562,21 @@ export function QuickEstimatePage() {
                 to="/match-elements"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue transition-colors"
               >
-                <Database size={13} />
+                <Database size={14} />
                 {t('ai.estimate_link_match', { defaultValue: 'CAD-BIM Match → Cost' })}
               </Link>
               <Link
                 to="/validation"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue transition-colors"
               >
-                <CheckCircle2 size={13} />
+                <CheckCircle2 size={14} />
                 {t('ai.estimate_link_validation', { defaultValue: 'Validation' })}
               </Link>
               <Link
                 to="/costs"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue transition-colors"
               >
-                <Search size={13} />
+                <Search size={14} />
                 {t('ai.estimate_link_costs', { defaultValue: 'Cost Database' })}
               </Link>
             </div>

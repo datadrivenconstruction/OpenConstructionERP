@@ -113,7 +113,7 @@ function Section({
 }) {
   return (
     <section>
-      <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <h3 className="oe-overline mb-2 flex items-center gap-2">
         <span className="text-content-quaternary">{icon}</span>
         {title}
       </h3>
@@ -175,7 +175,7 @@ export function PositionActualsDrawer({
       title={header || t('costmodel.actuals.title')}
       subtitle={
         <span className="inline-flex items-center gap-1">
-          <HardHat size={11} />
+          <HardHat size={12} />
           {t('costmodel.actuals.subtitle')}
         </span>
       }

@@ -288,9 +288,9 @@ export function AssigneePicker({
                 }`}
               >
                 {o.kind === 'user' ? (
-                  <User size={13} className="shrink-0 text-content-tertiary" />
+                  <User size={14} className="shrink-0 text-content-tertiary" />
                 ) : (
-                  <BookUser size={13} className="shrink-0 text-content-tertiary" />
+                  <BookUser size={14} className="shrink-0 text-content-tertiary" />
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-content-primary">{o.label}</span>

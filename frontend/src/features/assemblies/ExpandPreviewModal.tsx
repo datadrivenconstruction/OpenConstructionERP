@@ -82,7 +82,7 @@ export function ExpandPreviewModal({
       </Button>
       <Button
         variant="primary"
-        icon={<Play size={15} />}
+        icon={<Play size={16} />}
         onClick={runPreview}
         loading={preview.isFetching}
       >
@@ -105,7 +105,7 @@ export function ExpandPreviewModal({
     >
       {/* Inputs */}
       <section className="mb-5">
-        <h3 className="text-sm font-semibold text-content-primary mb-2">
+        <h3 className="oe-card-title mb-2">
           {t('assembly.preview.inputs_title', { defaultValue: 'Input parameters' })}
         </h3>
         {inputParams.length === 0 ? (
@@ -135,7 +135,7 @@ export function ExpandPreviewModal({
                     if (e.key === 'Enter') runPreview();
                   }}
                   placeholder={p.value ?? '0'}
-                  className="w-full h-9 px-2.5 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary text-right tabular-nums focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
+                  className="oe-input w-full text-right tabular-nums"
                 />
                 {p.description && (
                   <div className="text-2xs text-content-tertiary mt-1 leading-snug">
@@ -160,7 +160,7 @@ export function ExpandPreviewModal({
                   key={`${err.scope}-${err.name}-${err.code}-${i}`}
                   className="flex items-start gap-1.5 text-xs text-semantic-error"
                 >
-                  <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                   <span>
                     {err.name && <span className="font-mono font-semibold">{err.name}</span>}
                     {err.name ? ' - ' : ''}
@@ -176,7 +176,7 @@ export function ExpandPreviewModal({
       {/* Resolved parameters */}
       {resolvedEntries.length > 0 && (
         <section className="mb-4">
-          <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1.5">
+          <div className="oe-overline mb-1.5">
             {t('assembly.preview.resolved_title', { defaultValue: 'Resolved parameters' })}
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -195,12 +195,12 @@ export function ExpandPreviewModal({
 
       {/* Lines */}
       <section>
-        <h3 className="text-sm font-semibold text-content-primary mb-2">
+        <h3 className="oe-card-title mb-2">
           {t('assembly.preview.lines_title', { defaultValue: 'Expanded lines' })}
         </h3>
         {preview.isLoading ? (
           <div className="flex items-center gap-2 py-8 justify-center text-xs text-content-tertiary">
-            <Loader2 size={15} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
             {t('assembly.preview.loading', { defaultValue: 'Computing preview…' })}
           </div>
         ) : preview.isError ? (
@@ -213,43 +213,43 @@ export function ExpandPreviewModal({
           </p>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border-light">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light bg-surface-tertiary text-left">
-                  <th className="px-3 py-2 font-medium text-content-secondary min-w-[200px]">
+                <tr className="bg-surface-tertiary text-left">
+                  <th className="min-w-[200px]">
                     {t('boq.description', { defaultValue: 'Description' })}
                   </th>
-                  <th className="px-3 py-2 font-medium text-content-secondary w-16 text-center">
+                  <th className="w-16 text-center">
                     {t('boq.unit', { defaultValue: 'Unit' })}
                   </th>
-                  <th className="px-3 py-2 font-medium text-content-secondary w-40 text-right">
+                  <th className="w-40 text-right">
                     {t('assembly.preview.col_qty', { defaultValue: 'Qty (static -> computed)' })}
                   </th>
-                  <th className="px-3 py-2 font-medium text-content-secondary w-28 text-right">
+                  <th className="w-28 text-right">
                     {t('assemblies.unit_cost', { defaultValue: 'Unit Cost' })}
                   </th>
-                  <th className="px-3 py-2 font-medium text-content-secondary w-28 text-right">
+                  <th className="w-28 text-right">
                     {t('boq.total', { defaultValue: 'Total' })}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {data.lines.map((line, i) => {
                   const changed = line.static_quantity !== line.computed_quantity;
                   return (
                     <tr key={line.component_id ?? `line-${i}`} className="hover:bg-surface-secondary/40">
-                      <td className="px-3 py-2 text-content-primary">{line.description}</td>
-                      <td className="px-3 py-2 text-center text-content-secondary uppercase text-xs">
+                      <td>{line.description}</td>
+                      <td className="text-center text-content-secondary">
                         {line.unit}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums">
+                      <td className="text-right tabular-nums">
                         <span className="inline-flex items-center justify-end gap-1">
                           <span className={changed ? 'text-content-tertiary line-through' : 'text-content-secondary'}>
                             {line.static_quantity}
                           </span>
                           {changed && (
                             <>
-                              <ArrowRight size={11} className="text-content-quaternary" />
+                              <ArrowRight size={12} className="text-content-quaternary" />
                               <span className="font-semibold text-oe-blue">
                                 {line.computed_quantity}
                               </span>
@@ -257,10 +257,10 @@ export function ExpandPreviewModal({
                           )}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                      <td className="text-right tabular-nums text-content-secondary">
                         {line.unit_cost}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums font-semibold text-content-primary">
+                      <td className="text-right tabular-nums font-semibold">
                         {line.total}
                       </td>
                     </tr>
@@ -268,11 +268,11 @@ export function ExpandPreviewModal({
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
-                  <td colSpan={4} className="px-3 py-2.5 text-right text-content-primary">
+                <tr className="bg-surface-tertiary">
+                  <td colSpan={4} className="text-right">
                     {t('assembly.preview.total_rate', { defaultValue: 'Total rate' })}
                   </td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     {data.total_rate}
                     <span className="ml-1 text-xs font-normal text-content-tertiary">
                       {currency} / {unit}

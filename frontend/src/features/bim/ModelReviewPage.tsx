@@ -577,12 +577,12 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
       {/* Header: what this page is, which model, and the two actions that
           only exist because a model is on screen. */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border-light px-4 py-2.5">
-        <Cuboid size={18} className="shrink-0 text-oe-blue" />
+        <Cuboid size={20} className="shrink-0 text-oe-blue" />
         <h1 className="text-sm font-semibold text-content-primary">
           {t('nav.model_review', { defaultValue: 'Model Review' })}
         </h1>
         <select
-          className="ms-1 max-w-[240px] rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-secondary"
+          className="oe-select ms-1 max-w-[240px]"
           value={activeModelId ?? ''}
           onChange={(e) => setActiveModelId(e.target.value || null)}
           disabled={isLoadingModels || models.length === 0}
@@ -616,7 +616,7 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
             </span>
             {counts.overdue > 0 && (
               <span className="inline-flex items-center gap-1 text-semantic-error">
-                <AlertTriangle size={11} />
+                <AlertTriangle size={12} />
                 <span className="font-semibold tabular-nums">{counts.overdue}</span>
                 {t('bcf.dashboard_overdue', { defaultValue: 'Overdue' })}
               </span>
@@ -665,7 +665,7 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
           className="flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary"
           aria-pressed={checksOpen}
         >
-          {checksOpen ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}
+          {checksOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
           {t('bim.checks_title', { defaultValue: 'Checks' })}
         </button>
         <button
@@ -674,7 +674,7 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
           className="flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary"
           aria-pressed={issuesOpen}
         >
-          {issuesOpen ? <PanelRightClose size={15} /> : <PanelRightOpen size={15} />}
+          {issuesOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
           {t('bim.issues', { defaultValue: 'Issues' })}
         </button>
       </div>

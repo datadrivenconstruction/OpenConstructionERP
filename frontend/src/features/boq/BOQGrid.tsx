@@ -3337,10 +3337,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       {contextMenu && createPortal(
         <>
           {/* Backdrop */}
-          <div className="fixed inset-0 z-[9998]" onClick={closeContextMenu} onContextMenu={(e) => { e.preventDefault(); closeContextMenu(); }} />
+          <div className="fixed inset-0 z-dropdown" onClick={closeContextMenu} onContextMenu={(e) => { e.preventDefault(); closeContextMenu(); }} />
           {/* Menu — flip to the left if it would overflow the viewport (Bug 11). */}
           <div
-            className="fixed z-[9999] min-w-[200px] rounded-lg border border-border-light bg-surface-elevated shadow-lg py-1 overflow-y-auto"
+            className="fixed z-popover min-w-[200px] rounded-lg border border-border-light bg-surface-elevated shadow-lg py-1 overflow-y-auto"
             // Measured before paint: the real menu has 25+ items, so a fixed
             // height guess let it run off the bottom of the viewport.
             ref={(el) => {
@@ -3732,7 +3732,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
       {/* ── Manual Resource Dialog ─────────────────────────────────── */}
       {manualResourceDialog && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setManualResourceDialog(null)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={() => setManualResourceDialog(null)}>
           <div
             role="dialog"
             aria-modal="true"
@@ -3740,7 +3740,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-[380px] p-5 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 id="boq-manual-resource-title" className="text-sm font-semibold text-content-primary mb-4 flex items-center gap-2">
+            <h3 id="boq-manual-resource-title" className="oe-card-title mb-4 flex items-center gap-2">
               <Wrench size={16} className="text-oe-blue" />
               {t('boq.add_resource_manual', { defaultValue: 'Add Resource' })}
             </h3>
@@ -4017,7 +4017,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
        *   currencies are never blended in the grand total. */}
       {positionCurrencyDialog && !readOnly && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
           onClick={() => setPositionCurrencyDialog(null)}
         >
           <div
@@ -4029,7 +4029,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           >
             <h3
               id="boq-position-currency-title"
-              className="text-sm font-semibold text-content-primary mb-1 flex items-center gap-2"
+              className="oe-card-title mb-1 flex items-center gap-2"
             >
               <Banknote size={16} className="text-semantic-warning" />
               {t('boq.position_currency_title', { defaultValue: 'Position currency' })}
@@ -4115,7 +4115,7 @@ function CtxItem({ icon, label, onClick, danger, disabled, title }: {
       disabled={disabled}
       title={title}
       aria-disabled={disabled || undefined}
-      className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-xs text-left transition-colors ${
+      className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs text-left transition-colors ${
         disabled
           ? 'text-content-tertiary opacity-50 cursor-not-allowed'
           : danger
@@ -4137,7 +4137,7 @@ function CtxGroupLabel({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-1 select-none">
       <Sparkles size={10} className="text-violet-500" />
-      <span className="text-2xs font-semibold text-violet-500 uppercase tracking-wider">{label}</span>
+      <span className="oe-overline text-violet-500">{label}</span>
     </div>
   );
 }

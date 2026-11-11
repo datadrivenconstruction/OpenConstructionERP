@@ -172,7 +172,7 @@ const TYPE_BADGE_COLORS: Record<CorrespondenceType, string> = {
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 /* ── Contact party deep links (CONN-21) ───────────────────────────────── */
 
@@ -680,8 +680,7 @@ function CreateCorrespondenceModal({
             })}
             className={clsx(
               inputCls,
-              subjectError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            )} aria-invalid={!!(subjectError)}
           />
         </WideModalField>
       </WideModalSection>
@@ -967,7 +966,7 @@ function CreateCorrespondenceModal({
                       onChange={() => toggleDocument(doc.id)}
                       className="shrink-0 accent-oe-blue"
                     />
-                    <FileText size={13} className="shrink-0 text-content-tertiary" />
+                    <FileText size={14} className="shrink-0 text-content-tertiary" />
                     <span className="truncate">{doc.name}</span>
                   </label>
                 );
@@ -1070,9 +1069,9 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
           className="shrink-0"
         >
           {item.direction === 'incoming' ? (
-            <ArrowDownLeft size={11} className="mr-1" />
+            <ArrowDownLeft size={12} className="mr-1" />
           ) : (
-            <ArrowUpRight size={11} className="mr-1" />
+            <ArrowUpRight size={12} className="mr-1" />
           )}
           {t(`correspondence.dir_${item.direction}`, {
             defaultValue: item.direction === 'incoming' ? 'Incoming' : 'Outgoing',
@@ -1097,14 +1096,14 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
           (item.status === 'open' || item.status === 'awaiting_response') &&
           (item.is_overdue ? (
             <Badge variant="error" size="sm" className="shrink-0">
-              <AlertTriangle size={11} className="mr-1" />
+              <AlertTriangle size={12} className="mr-1" />
               {t('correspondence.overdue', { defaultValue: 'Overdue' })}
             </Badge>
           ) : (
             typeof item.days_until_due === 'number' &&
             item.days_until_due <= 7 && (
               <Badge variant="warning" size="sm" className="shrink-0 hidden md:inline-flex">
-                <Clock size={11} className="mr-1" />
+                <Clock size={12} className="mr-1" />
                 {item.days_until_due <= 0
                   ? t('correspondence.due_today', { defaultValue: 'Due today' })
                   : t('correspondence.due_in_days', {
@@ -1214,7 +1213,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
 
           {item.notes && (
             <div className="rounded-lg bg-surface-secondary p-3">
-              <p className="text-xs text-content-tertiary mb-1 font-medium uppercase tracking-wide">
+              <p className="oe-overline mb-1">
                 {t('correspondence.label_notes', { defaultValue: 'Notes' })}
               </p>
               <p className="text-sm text-content-primary whitespace-pre-wrap">{item.notes}</p>
@@ -1227,12 +1226,12 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
             item.linked_rfi_id) && (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="inline-flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-                <Link2 size={11} />
+                <Link2 size={12} />
                 {t('correspondence.label_linked', { defaultValue: 'Linked' })}
               </span>
               {(item.linked_document_ids ?? []).length > 0 && (
                 <Badge variant="neutral" size="sm">
-                  <FileText size={11} className="mr-1" />
+                  <FileText size={12} className="mr-1" />
                   {t('correspondence.linked_docs', {
                     defaultValue: '{{count}} document(s)',
                     count: (item.linked_document_ids ?? []).length,
@@ -1245,7 +1244,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
                 >
-                  <Send size={11} />
+                  <Send size={12} />
                   {t('correspondence.linked_transmittal', {
                     defaultValue: 'View transmittal',
                   })}
@@ -1257,7 +1256,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
                 >
-                  <HelpCircle size={11} />
+                  <HelpCircle size={12} />
                   {t('correspondence.linked_rfi', { defaultValue: 'View RFI' })}
                 </Link>
               )}
@@ -1268,7 +1267,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
               row links to the authenticated download endpoint. */}
           <div className="space-y-1.5">
             <span className="inline-flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-              <Paperclip size={11} />
+              <Paperclip size={12} />
               {t('correspondence.label_attachments', { defaultValue: 'Attachments' })}
             </span>
             {attachments.length > 0 ? (
@@ -1310,9 +1309,9 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
               disabled={uploading}
               icon={
                 uploading ? (
-                  <Loader2 size={13} className="animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Upload size={13} />
+                  <Upload size={14} />
                 )
               }
               onClick={(e) => {
@@ -1338,7 +1337,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<ListTodo size={13} />}
+              icon={<ListTodo size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onCreateTask(item);
@@ -1353,7 +1352,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
@@ -1366,7 +1365,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
               variant="secondary"
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);
@@ -1495,7 +1494,7 @@ function HowCorrespondenceWorks() {
   return (
     <CollapsibleSection
       storageKey="correspondence.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('correspondence.how_title', { defaultValue: 'How correspondence fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1951,7 +1950,7 @@ export function CorrespondencePage() {
               setDirectionFilter(e.target.value as CorrespondenceDirection | '')
             }
             aria-label={t('correspondence.filter_all_dir', { defaultValue: 'All Directions' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+            className="oe-select-lg ps-3 sm:w-36"
           >
             <option value="">
               {t('correspondence.filter_all_dir', { defaultValue: 'All Directions' })}
@@ -1974,7 +1973,7 @@ export function CorrespondencePage() {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as CorrespondenceType | '')}
             aria-label={t('correspondence.filter_all_type', { defaultValue: 'All Types' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+            className="oe-select-lg ps-3 sm:w-36"
           >
             <option value="">
               {t('correspondence.filter_all_type', { defaultValue: 'All Types' })}
@@ -1996,7 +1995,7 @@ export function CorrespondencePage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as CorrespondenceStatus | '')}
             aria-label={t('correspondence.filter_all_status', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select-lg ps-3 sm:w-40"
           >
             <option value="">
               {t('correspondence.filter_all_status', { defaultValue: 'All Statuses' })}
@@ -2059,7 +2058,7 @@ export function CorrespondencePage() {
             {page && <TruncationNotice page={page} className="-mt-2 mb-3" />}
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
+              <div className="oe-overline flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

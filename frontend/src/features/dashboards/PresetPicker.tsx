@@ -89,7 +89,7 @@ export function PresetPicker({ projectId, snapshot, onSelect }: PresetPickerProp
 
       {open && (
         <div
-          className="absolute right-0 z-30 mt-1 w-72 rounded border border-border-light bg-surface-primary shadow-lg"
+          className="absolute right-0 z-dropdown mt-1 w-72 rounded border border-border-light bg-surface-primary shadow-lg"
           data-testid="preset-picker-dropdown"
           role="menu"
         >
@@ -176,7 +176,7 @@ function PresetGroup({
 }: PresetGroupProps) {
   return (
     <div className="border-b border-border-light p-1.5 last:border-b-0">
-      <div className="flex items-center gap-1 px-2 py-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+      <div className="oe-overline flex items-center gap-1 px-2 py-1">
         {icon}
         {title}
       </div>
@@ -294,7 +294,7 @@ export function PresetSaveModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/50"
       role="dialog"
       aria-modal="true"
       data-testid="preset-save-modal"
@@ -302,7 +302,7 @@ export function PresetSaveModal({
       <Card className="w-[420px] max-w-[95vw] p-0">
         <form onSubmit={handleSubmit}>
           <div className="border-b border-border-light px-4 py-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboards.save_preset_title', {
                 defaultValue: 'Save current dashboard',
               })}
@@ -312,7 +312,7 @@ export function PresetSaveModal({
             <div>
               <label
                 htmlFor="preset-name"
-                className="block text-xs font-medium text-content-secondary"
+                className="oe-label"
               >
                 {t('dashboards.preset_name', { defaultValue: 'Name' })}
               </label>
@@ -328,7 +328,7 @@ export function PresetSaveModal({
             <div>
               <label
                 htmlFor="preset-description"
-                className="block text-xs font-medium text-content-secondary"
+                className="oe-label"
               >
                 {t('dashboards.preset_description', {
                   defaultValue: 'Description',
@@ -418,7 +418,7 @@ export function PresetPickerEmptyState() {
   const { t } = useTranslation();
   return (
     <EmptyState
-      icon={<Bookmark className="h-8 w-8 text-neutral-500" />}
+      icon={<Bookmark className="h-8 w-8 text-content-tertiary" />}
       title={t('dashboards.no_presets_title', {
         defaultValue: 'No saved presets',
       })}

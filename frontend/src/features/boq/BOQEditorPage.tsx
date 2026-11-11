@@ -6168,7 +6168,7 @@ export function BOQEditorPage() {
 
       {/* ── Update Rates Confirmation Dialog ────────────────────────── */}
       {showRecalcConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setShowRecalcConfirm(false)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setShowRecalcConfirm(false)}>
           <div role="dialog" aria-modal="true" aria-labelledby="boq-recalc-confirm-title" className="w-full max-w-md mx-4 rounded-2xl bg-surface-primary shadow-2xl border border-border-light overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5">
               <div className="flex items-center gap-3 mb-3">
@@ -6176,7 +6176,7 @@ export function BOQEditorPage() {
                   <Database size={20} className="text-oe-blue" />
                 </div>
                 <div>
-                  <h3 id="boq-recalc-confirm-title" className="text-base font-semibold">{t('boq.recalc_confirm_title', { defaultValue: 'Update Unit Rates' })}</h3>
+                  <h3 id="boq-recalc-confirm-title" className="oe-section-title">{t('boq.recalc_confirm_title', { defaultValue: 'Update Unit Rates' })}</h3>
                   <p className="text-xs text-content-secondary">{t('boq.recalc_confirm_subtitle', { defaultValue: 'Match positions to cost database' })}</p>
                 </div>
               </div>
@@ -6206,7 +6206,7 @@ export function BOQEditorPage() {
       {/* ── GAEB Export Preview Dialog ─────────────────────────────── */}
       {gaebPreviewOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
           onClick={() => setGaebPreviewOpen(false)}
         >
           <div
@@ -6217,7 +6217,7 @@ export function BOQEditorPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 id="boq-gaeb-export-title" className="text-sm font-semibold text-content-primary">
+              <h3 id="boq-gaeb-export-title" className="oe-card-title">
                 {gaebExportFormat === 'gaeb_x84'
                   ? t('boq.gaeb_export_title_x84', { defaultValue: 'Export GAEB XML (X84) - with prices' })
                   : t('boq.gaeb_export_title', { defaultValue: 'Export GAEB XML (X83)' })}
@@ -6452,7 +6452,7 @@ export function BOQEditorPage() {
 
       {/* ── Section Name Modal ────────────────────────────────────── */}
       {showSectionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowSectionModal(false)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={() => setShowSectionModal(false)}>
           <div
             role="dialog"
             aria-modal="true"
@@ -6460,7 +6460,7 @@ export function BOQEditorPage() {
             className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-96 p-5 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 id="boq-add-section-title" className="text-sm font-semibold text-content-primary mb-3">
+            <h3 id="boq-add-section-title" className="oe-card-title mb-3">
               {t('boq.add_section', { defaultValue: 'Add Section' })}
             </h3>
             {/* Issue #407 — this dialog is not inside a <form>, so an input with
@@ -6479,7 +6479,7 @@ export function BOQEditorPage() {
               value={sectionNameInput}
               onChange={(e) => setSectionNameInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') void handleConfirmAddSection(); }}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full"
               placeholder={t('boq.section_name_placeholder', { defaultValue: 'e.g. Structural Works, MEP, Finishes...' })}
               autoFocus
             />
@@ -6495,7 +6495,7 @@ export function BOQEditorPage() {
             <select
               value={sectionParentInput}
               onChange={(e) => setSectionParentInput(e.target.value)}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-select w-full"
             >
               <option value="">
                 {t('boq.section_parent_top', { defaultValue: '- Top level (no parent) -' })}
@@ -6714,13 +6714,13 @@ export function BOQEditorPage() {
 
       {/* ── Keyboard Shortcuts Overlay ──────────────────────────────── */}
       {showShortcuts && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" data-testid="boq-shortcuts-overlay" aria-label={t('boq.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center" role="dialog" aria-modal="true" data-testid="boq-shortcuts-overlay" aria-label={t('boq.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowShortcuts(false)} />
           <div className="relative z-10 rounded-xl bg-surface-primary shadow-2xl border border-border-light p-6 max-w-md w-full animate-scale-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Keyboard size={18} className="text-content-tertiary" />
-                <h3 className="text-base font-semibold text-content-primary">
+                <Keyboard size={20} className="text-content-tertiary" />
+                <h3 className="oe-section-title">
                   {t('boq.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}
                 </h3>
               </div>
@@ -6732,7 +6732,7 @@ export function BOQEditorPage() {
                 <X size={16} />
               </button>
             </div>
-            <div className="grid grid-cols-[auto_1fr] gap-y-2.5 gap-x-4 text-sm">
+            <div className="grid grid-cols-[auto_1fr] gap-y-2 gap-x-4 text-sm">
               <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_enter', { defaultValue: 'Ctrl+Enter' })}</kbd>
               <span className="text-content-secondary">{t('boq.shortcut_new_position', { defaultValue: 'New Position' })}</span>
 
@@ -6772,7 +6772,7 @@ export function BOQEditorPage() {
 
       {/* ── Vector DB Setup Dialog ───────────────────────────────────── */}
       {showVectorSetup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowVectorSetup(false)} />
           <div className="relative w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated shadow-2xl animate-form-scale-in">
             <button
@@ -6789,7 +6789,7 @@ export function BOQEditorPage() {
                   <Sparkles size={20} className="text-violet-500" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-content-primary">
+                  <h3 className="oe-section-title">
                     {t('boq.vector_setup_title', { defaultValue: 'AI Features Setup' })}
                   </h3>
                   <p className="text-xs text-content-tertiary">
@@ -6806,7 +6806,7 @@ export function BOQEditorPage() {
                 })}
               </p>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {/* Option 1: Index existing database */}
                 <button
                   onClick={handleIndexNow}
@@ -6854,7 +6854,7 @@ export function BOQEditorPage() {
 
               {/* Status info */}
               <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-secondary/80 px-3 py-2">
-                <WarnTriangle size={13} className="text-semantic-warning shrink-0 mt-0.5" />
+                <WarnTriangle size={14} className="text-semantic-warning shrink-0 mt-0.5" />
                 <p className="text-xs text-content-tertiary leading-relaxed">
                   {vectorStatus?.cost_collection
                     ? t('boq.vector_status_partial', {

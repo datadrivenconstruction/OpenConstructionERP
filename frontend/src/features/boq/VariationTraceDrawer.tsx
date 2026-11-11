@@ -53,7 +53,7 @@ const selectCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-textarea w-full';
 
 type Translate = ReturnType<typeof useTranslation>['t'];
 
@@ -232,7 +232,7 @@ export function VariationTraceDrawer({
 
         {readOnly && (
           <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-            <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
             {t('boq.variation_trace_locked', {
               defaultValue: 'This bill is locked, so its traces cannot be changed.',
             })}
@@ -268,7 +268,7 @@ export function VariationTraceDrawer({
         </fieldset>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <p className="oe-overline">
             {t('boq.variation_trace_source', { defaultValue: 'Source' })}
           </p>
           <VariationSourceSelect
@@ -335,7 +335,7 @@ export function VariationTraceDrawer({
           <div className="space-y-1" data-testid="variation-trace-contradictions">
             {needsContractLine && (
               <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 {t('boq.variation_trace_needs_contract_line', {
                   defaultValue:
                     'A removed or modified line needs the contract line it changes. Without one the bill will flag it.',
@@ -344,7 +344,7 @@ export function VariationTraceDrawer({
             )}
             {removedButPositive && (
               <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 {t('boq.variation_trace_removed_positive', {
                   defaultValue:
                     'This line is marked as removed but its quantity is positive. An omission comes off the contract as a negative quantity.',
@@ -353,7 +353,7 @@ export function VariationTraceDrawer({
             )}
             {addedButNegative && (
               <p className="flex items-start gap-1.5 text-xs text-content-secondary">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 {t('boq.variation_trace_added_negative', {
                   defaultValue:
                     'This line is marked as added but its quantity is negative. Scope that comes off the contract is removed, not added.',

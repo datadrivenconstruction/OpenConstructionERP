@@ -161,23 +161,23 @@ export function BidNoBidPage() {
       </section>
 
       <section className="overflow-x-auto rounded-xl border border-border-light bg-surface-primary">
-        <table className="w-full text-sm">
+        <table className="oe-table w-full">
           <thead>
-            <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="px-3 py-2">{t('bid_no_bid.criterion', { defaultValue: 'Criterion' })}</th>
-              <th className="px-3 py-2">{t('bid_no_bid.weight', { defaultValue: 'Weight %' })}</th>
-              <th className="px-3 py-2">{t('bid_no_bid.rating', { defaultValue: 'Rating 1-5' })}</th>
-              <th className="px-3 py-2">{t('bid_no_bid.note', { defaultValue: 'Note' })}</th>
+            <tr className="text-left text-2xs">
+              <th>{t('bid_no_bid.criterion', { defaultValue: 'Criterion' })}</th>
+              <th>{t('bid_no_bid.weight', { defaultValue: 'Weight %' })}</th>
+              <th>{t('bid_no_bid.rating', { defaultValue: 'Rating 1-5' })}</th>
+              <th>{t('bid_no_bid.note', { defaultValue: 'Note' })}</th>
             </tr>
           </thead>
           <tbody>
             {CRITERIA.map((k) => (
-              <tr key={k} className="border-t border-border-light align-top">
-                <td className="px-3 py-2">
+              <tr key={k} className="align-top">
+                <td>
                   <div className="font-medium text-content-primary">{t(`bid_no_bid.criterion_${k}`, { defaultValue: LABELS[k][0] })}</div>
                   <div className="text-xs text-content-tertiary">{t(`bid_no_bid.hint_${k}`, { defaultValue: LABELS[k][1] })}</div>
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <input
                     type="number"
                     min={0}
@@ -192,7 +192,7 @@ export function BidNoBidPage() {
                     aria-label={t('bid_no_bid.weight', { defaultValue: 'Weight %' })}
                   />
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <div className="flex gap-1" role="group">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <button
@@ -213,7 +213,7 @@ export function BidNoBidPage() {
                     ))}
                   </div>
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <input
                     type="text"
                     maxLength={500}
@@ -244,7 +244,7 @@ export function BidNoBidPage() {
       )}
 
       <section className="rounded-xl border border-border-light bg-surface-primary p-4">
-        <h2 className="text-sm font-semibold text-content-primary">{t('bid_no_bid.decision', { defaultValue: 'Decision' })}</h2>
+        <h2 className="oe-card-title">{t('bid_no_bid.decision', { defaultValue: 'Decision' })}</h2>
         {card.decision && (
           <p className="mt-1 text-sm text-content-secondary" data-testid="bid-no-bid-decided">
             {t('bid_no_bid.decided_line', {
@@ -261,7 +261,7 @@ export function BidNoBidPage() {
           maxLength={2000}
           rows={2}
           placeholder={t('bid_no_bid.reason_ph', { defaultValue: 'Reason (required when you go against the score)' })}
-          className="mt-3 w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-sm"
+          className="oe-textarea-sm mt-3 w-full"
           data-testid="bid-no-bid-reason"
         />
         <div className="mt-2 flex flex-wrap gap-2">
@@ -292,7 +292,7 @@ export function BidNoBidPage() {
                 value={outcomeNote}
                 onChange={(e) => setOutcomeNote(e.target.value)}
                 placeholder={t('bid_no_bid.outcome_note', { defaultValue: 'Why (price, scope, relationship...)' })}
-                className="min-w-56 flex-1 rounded border border-border-light bg-surface-primary px-2 py-1 text-sm"
+                className="oe-input-sm min-w-56 flex-1"
               />
             </div>
           </div>
@@ -300,7 +300,7 @@ export function BidNoBidPage() {
       </section>
 
       <section className="rounded-xl border border-border-light bg-surface-primary p-4">
-        <h2 className="text-sm font-semibold text-content-primary">{t('bid_no_bid.ledger', { defaultValue: 'Win-loss ledger of this project' })}</h2>
+        <h2 className="oe-card-title">{t('bid_no_bid.ledger', { defaultValue: 'Win-loss ledger of this project' })}</h2>
         {ledger && (
           <>
             <p className="mt-1 text-xs text-content-secondary" data-testid="bid-no-bid-ledger-summary">
@@ -330,7 +330,7 @@ export function BidNoBidPage() {
       </section>
 
       <section className="rounded-xl border border-border-light bg-surface-primary p-4">
-        <h2 className="text-sm font-semibold text-content-primary">{t('bid_no_bid.trail', { defaultValue: 'Audit trail' })}</h2>
+        <h2 className="oe-card-title">{t('bid_no_bid.trail', { defaultValue: 'Audit trail' })}</h2>
         <ul className="mt-2 space-y-1 text-xs text-content-secondary" data-testid="bid-no-bid-trail">
           {card.events.map((e) => (
             <li key={e.id}>

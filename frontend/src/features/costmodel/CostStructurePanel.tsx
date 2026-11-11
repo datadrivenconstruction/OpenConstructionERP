@@ -154,7 +154,7 @@ function AccountEditor({
         maxLength={255}
         onChange={(e) => onChange({ ...edit, title: e.target.value })}
         aria-label={t('costmodel.structure.edit_title', { defaultValue: 'Title' })}
-        className="h-7 min-w-[10rem] flex-1 rounded-md border border-border bg-surface-primary px-2 text-xs"
+        className="oe-input-sm min-w-[10rem] flex-1"
       />
       <input
         type="text"
@@ -162,7 +162,7 @@ function AccountEditor({
         value={edit.ownAmount}
         onChange={(e) => onChange({ ...edit, ownAmount: e.target.value })}
         aria-label={t('costmodel.structure.edit_own_amount', { defaultValue: 'Own amount' })}
-        className="h-7 w-28 rounded-md border border-border bg-surface-primary px-2 text-end text-xs tabular-nums"
+        className="oe-input-sm w-28 text-end tabular-nums"
       />
       <label className="flex items-center gap-1 text-xs text-content-secondary">
         <input
@@ -378,8 +378,8 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
     <div className="flex flex-col gap-3 border-b border-border-light px-4 py-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-            <FolderTree size={15} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-2">
+            <FolderTree size={16} className="text-oe-blue" />
             {t('costmodel.structure.title', { defaultValue: 'Cost structure' })}
           </h3>
           <p className="mt-0.5 text-xs text-content-tertiary">
@@ -402,7 +402,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
               // A level of one list means nothing in another.
               setMaxLevel('');
             }}
-            className="h-8 min-w-[10rem] rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary"
+            className="oe-select min-w-[10rem]"
             data-testid="structure-code-list"
           >
             {lists.length === 0 && !listsQuery.isLoading && !listsQuery.isError && (
@@ -429,7 +429,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
           <select
             value={maxLevel}
             onChange={(e) => setMaxLevel(e.target.value)}
-            className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary"
+            className="oe-select"
           >
             <option value="">{t('costmodel.structure.all_levels', { defaultValue: 'All levels' })}</option>
             {Array.from({ length: Math.min(Math.max(chosenList?.depth ?? 0, 0), MAX_APPLY_LEVEL) }, (_, i) => i + 1).map((lvl) => (
@@ -509,9 +509,9 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
             {t('costmodel.structure.collapse_all', { defaultValue: 'Collapse all' })}
           </button>
         </div>
-        <table className="w-full min-w-[720px] text-xs" data-testid="cost-structure-table">
+        <table className="oe-table-compact w-full min-w-[720px]" data-testid="cost-structure-table">
           <thead>
-            <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
+            <tr className="text-2xs">
               {columns.map((c, i) => (
                 <th key={c} className={`px-3 py-2 font-medium ${i >= 2 ? 'text-end' : 'text-start'}`}>
                   {c}
@@ -551,7 +551,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
                       )}
                       {node.code}
                     </td>
-                    <td className="px-3 py-1.5 text-content-primary">
+                    <td>
                       {editing && edit ? (
                         <AccountEditor
                           edit={edit}
@@ -575,11 +575,11 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
                         </span>
                       )}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-1.5 text-end tabular-nums">{money(node.own_amount)}</td>
-                    <td className="whitespace-nowrap px-3 py-1.5 text-end tabular-nums">{money(node.posted)}</td>
-                    <td className="whitespace-nowrap px-3 py-1.5 text-end font-semibold tabular-nums">{money(node.total)}</td>
-                    <td className="px-3 py-1.5 text-end tabular-nums text-content-secondary">{node.line_count}</td>
-                    <td className="px-2 py-1.5">
+                    <td className="whitespace-nowrap text-end tabular-nums">{money(node.own_amount)}</td>
+                    <td className="whitespace-nowrap text-end tabular-nums">{money(node.posted)}</td>
+                    <td className="whitespace-nowrap text-end font-semibold tabular-nums">{money(node.total)}</td>
+                    <td className="text-end tabular-nums text-content-secondary">{node.line_count}</td>
+                    <td>
                       {!editing && (
                         <button
                           type="button"
@@ -601,24 +601,24 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
                 className="border-b border-border-light/60 bg-semantic-warning/10"
                 data-testid={`structure-suspense-${bucket.kind}`}
               >
-                <td className="px-3 py-1.5 font-mono text-content-tertiary">-</td>
-                <td className="px-3 py-1.5 font-medium text-semantic-warning">
+                <td className="font-mono text-content-tertiary">-</td>
+                <td className="font-medium text-semantic-warning">
                   {suspenseLabel(t, bucket)}
                 </td>
-                <td className="px-3 py-1.5" />
-                <td className="whitespace-nowrap px-3 py-1.5 text-end tabular-nums">{money(bucket.amount)}</td>
-                <td className="whitespace-nowrap px-3 py-1.5 text-end font-semibold tabular-nums">{money(bucket.amount)}</td>
-                <td className="px-3 py-1.5 text-end tabular-nums text-content-secondary">{bucket.line_count}</td>
+                <td />
+                <td className="whitespace-nowrap text-end tabular-nums">{money(bucket.amount)}</td>
+                <td className="whitespace-nowrap text-end font-semibold tabular-nums">{money(bucket.amount)}</td>
+                <td className="text-end tabular-nums text-content-secondary">{bucket.line_count}</td>
                 <td />
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t-2 border-border">
-              <th colSpan={4} className="px-3 py-2 text-start text-xs font-semibold text-content-primary">
+            <tr>
+              <th colSpan={4}>
                 {t('costmodel.structure.grand_total', { defaultValue: 'Total incl. suspense' })}
               </th>
-              <td className="whitespace-nowrap px-3 py-2 text-end text-xs font-semibold tabular-nums" data-testid="structure-total">
+              <td className="whitespace-nowrap text-end font-semibold tabular-nums" data-testid="structure-total">
                 {money(structure.total)}
               </td>
               <td colSpan={2} />

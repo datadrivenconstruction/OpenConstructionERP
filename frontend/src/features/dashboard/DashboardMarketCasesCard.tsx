@@ -193,7 +193,7 @@ export function DashboardMarketCasesCard() {
         data-state="empty"
         className="h-full rounded-xl border border-border-light bg-surface-primary p-5"
       >
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('dashboard.market_cases.title_generic', { defaultValue: 'Cases by market' })}
         </h3>
         <p className="mt-1 text-xs leading-relaxed text-content-tertiary">
@@ -210,7 +210,7 @@ export function DashboardMarketCasesCard() {
             defaultValue: 'Browse all {{count}} cases',
             count: PLAYBOOKS.length,
           })}
-          <ArrowRight size={13} aria-hidden="true" />
+          <ArrowRight size={14} aria-hidden="true" />
         </button>
       </div>
     );
@@ -278,10 +278,10 @@ export function DashboardMarketCasesCard() {
               name to a few letters and the sentence to a word per line. With a
               real basis the button drops under the text instead. */}
           <div className="min-w-0 grow basis-48">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline">
               {title}
             </p>
-            <h3 className="truncate text-base font-semibold tracking-tight text-content-primary">
+            <h3 className="oe-section-title truncate">
               {marketName}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -303,7 +303,7 @@ export function DashboardMarketCasesCard() {
               count: selectedCount,
             })}
             <ArrowRight
-              size={13}
+              size={14}
               className="transition-transform group-hover:translate-x-0.5"
               aria-hidden="true" />
           </button>
@@ -333,7 +333,7 @@ export function DashboardMarketCasesCard() {
                     : 'bg-oe-blue/10 text-oe-blue-text ring-oe-blue/20',
                 )}
               >
-                {offer.applied ? <Check size={11} aria-hidden="true" /> : <Package size={11} aria-hidden="true" data-decorative-icon />}
+                {offer.applied ? <Check size={12} aria-hidden="true" /> : <Package size={12} aria-hidden="true" data-decorative-icon />}
                 {offer.applied
                   ? t('cases.regional_pack_in_use', { defaultValue: 'Regional pack in use: {{name}}', name: offer.name })
                   : t('cases.regional_pack_needed', { defaultValue: 'Needs {{name}}', name: offer.name })}

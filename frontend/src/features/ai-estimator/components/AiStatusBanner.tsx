@@ -49,7 +49,7 @@ export function AiStatusBanner({ readiness }: { readiness: AiReadiness }) {
   const { llmReady, vectorReady, preferredModel } = readiness;
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2.5">
+    <div className="mb-4 flex flex-wrap items-center gap-2">
       <Chip
         ready={llmReady}
         icon={<BrainCircuit className="h-4 w-4" />}

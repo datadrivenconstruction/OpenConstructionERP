@@ -76,7 +76,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <FileText size={16} className="text-oe-blue" />
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('contracts.aia.title', {
               defaultValue: 'AIA G702 / G703 Application for Payment',
             })}
@@ -103,7 +103,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
         <div className="space-y-5">
           {/* ── G702 summary (nine standard lines) ───────────────────── */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {t('contracts.aia.g702', { defaultValue: 'G702 - Certificate summary' })}
             </p>
             <dl className="divide-y divide-border-light rounded-lg border border-border-light">
@@ -195,7 +195,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
 
           {/* ── G703 continuation sheet ──────────────────────────────── */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {t('contracts.aia.g703', { defaultValue: 'G703 - Continuation sheet' })}
               <span className="ml-2 normal-case text-content-tertiary">
                 ({appQ.data.lines.length})
@@ -204,58 +204,58 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
 
             {/* Desktop / tablet: full table */}
             <div className="hidden overflow-x-auto rounded-lg border border-border-light sm:block">
-              <table className="w-full text-right text-xs">
-                <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+              <table className="oe-table-compact w-full text-right">
+                <thead className="text-2xs">
                   <tr>
-                    <th className="px-2 py-2 text-left">
+                    <th>
                       {t('contracts.aia.col_item', { defaultValue: 'Item' })}
                     </th>
-                    <th className="px-2 py-2 text-left">
+                    <th>
                       {t('contracts.aia.col_description', { defaultValue: 'Description' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_scheduled', { defaultValue: 'Scheduled' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_previous', { defaultValue: 'Previous' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_this_period', { defaultValue: 'This period' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_stored', { defaultValue: 'Stored' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_total', { defaultValue: 'Total' })}
                     </th>
-                    <th className="px-2 py-2">%</th>
-                    <th className="px-2 py-2">
+                    <th>%</th>
+                    <th>
                       {t('contracts.aia.col_balance', { defaultValue: 'Balance' })}
                     </th>
-                    <th className="px-2 py-2">
+                    <th>
                       {t('contracts.aia.col_retainage', { defaultValue: 'Retainage' })}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {appQ.data.lines.map((ln) => (
                     <tr key={`${ln.line_number}-${ln.item_number}`}>
-                      <td className="px-2 py-1.5 text-left font-medium text-content-primary">
+                      <td className="font-medium">
                         {ln.item_number}
                       </td>
-                      <td className="max-w-[16rem] truncate px-2 py-1.5 text-left text-content-secondary">
+                      <td className="max-w-[16rem] truncate text-content-secondary">
                         {ln.description}
                       </td>
-                      <td className="px-2 py-1.5">{moneyOrBlank(ln.scheduled_value)}</td>
-                      <td className="px-2 py-1.5">{money(ln.previous_value)}</td>
-                      <td className="px-2 py-1.5">{money(ln.this_period_value)}</td>
-                      <td className="px-2 py-1.5">{money(ln.materials_stored)}</td>
-                      <td className="px-2 py-1.5">{money(ln.total_completed_stored)}</td>
-                      <td className="px-2 py-1.5 text-content-tertiary">
+                      <td>{moneyOrBlank(ln.scheduled_value)}</td>
+                      <td>{money(ln.previous_value)}</td>
+                      <td>{money(ln.this_period_value)}</td>
+                      <td>{money(ln.materials_stored)}</td>
+                      <td>{money(ln.total_completed_stored)}</td>
+                      <td className="text-content-tertiary">
                         {percentOrBlank(ln.percent_complete)}
                       </td>
-                      <td className="px-2 py-1.5">{moneyOrBlank(ln.balance_to_finish)}</td>
-                      <td className="px-2 py-1.5">{money(ln.retainage)}</td>
+                      <td>{moneyOrBlank(ln.balance_to_finish)}</td>
+                      <td>{money(ln.retainage)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -314,7 +314,7 @@ export function AIAApplicationPanel({ claimId, currency }: AIAApplicationPanelPr
 
           {/* ── Certification status ─────────────────────────────────── */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {t('contracts.aia.certification', { defaultValue: 'Certification' })}
             </p>
             <dl className="divide-y divide-border-light rounded-lg border border-border-light">

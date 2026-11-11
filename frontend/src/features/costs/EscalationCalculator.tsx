@@ -123,7 +123,7 @@ export function EscalationCalculator({
           <TrendingUp size={16} className="text-semantic-warning" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('costs.escalation_calculator', { defaultValue: 'Cost Escalation Calculator' })}
           </h3>
           <p className="text-2xs text-content-tertiary">
@@ -144,7 +144,7 @@ export function EscalationCalculator({
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
-            className="w-full h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select w-full"
           >
             {Object.entries(ESCALATION_INDICES).map(([key, val]) => (
               <option key={key} value={key}>
@@ -162,7 +162,7 @@ export function EscalationCalculator({
           <select
             value={baseYear}
             onChange={(e) => setBaseYear(Number(e.target.value))}
-            className="w-full h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select w-full"
           >
             {YEARS.map((y) => (
               <option key={y} value={y}>
@@ -180,7 +180,7 @@ export function EscalationCalculator({
           <select
             value={targetYear}
             onChange={(e) => setTargetYear(Number(e.target.value))}
-            className="w-full h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select w-full"
           >
             {YEARS.map((y) => (
               <option key={y} value={y}>
@@ -199,7 +199,7 @@ export function EscalationCalculator({
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-input w-full tabular-nums"
           />
         </div>
       </div>
@@ -222,7 +222,7 @@ export function EscalationCalculator({
             value={manualRate}
             onChange={(e) => setManualRate(e.target.value)}
             placeholder="5.0"
-            className="w-20 h-7 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-input-sm w-20 tabular-nums"
           />
         )}
       </div>
@@ -231,7 +231,7 @@ export function EscalationCalculator({
       {escalation.yearlyRates.length > 0 && (
         <div className="mb-4">
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-2xs font-medium text-content-secondary uppercase tracking-wide">
+            <span className="oe-overline">
               {t('costs.yearly_breakdown', { defaultValue: 'Year-by-year breakdown' })}
             </span>
           </div>
@@ -283,7 +283,7 @@ export function EscalationCalculator({
       {/* Info + Apply */}
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center gap-1 text-2xs text-content-tertiary">
-          <Info size={11} />
+          <Info size={12} />
           <span>
             {t('costs.escalation_disclaimer', {
               defaultValue: 'Based on published indices. Verify with project-specific data.',
@@ -296,7 +296,7 @@ export function EscalationCalculator({
             disabled={baseYear >= targetYear}
             className="flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
           >
-            <Calculator size={13} />
+            <Calculator size={14} />
             {t('costs.apply_escalation', { defaultValue: 'Apply' })}
           </button>
         )}

@@ -204,7 +204,7 @@ export function ImpactSimulator({
         aria-expanded={open}
       >
         <span className="flex items-center gap-2">
-          <Calculator size={18} className="text-oe-blue" />
+          <Calculator size={20} className="text-oe-blue" />
           <span className="text-base font-semibold text-content-primary">
             {t('changeorders.impact_title', { defaultValue: 'What-If Impact' })}
           </span>
@@ -213,9 +213,9 @@ export function ImpactSimulator({
           </Badge>
         </span>
         {open ? (
-          <ChevronUp size={18} className="text-content-tertiary" />
+          <ChevronUp size={20} className="text-content-tertiary" />
         ) : (
-          <ChevronDown size={18} className="text-content-tertiary" />
+          <ChevronDown size={20} className="text-content-tertiary" />
         )}
       </button>
 
@@ -247,7 +247,7 @@ export function ImpactSimulator({
             <div className="space-y-5">
               {/* Cost */}
               <section>
-                <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h4 className="oe-overline mb-1 flex items-center gap-1.5">
                   <TrendingUp size={14} /> {t('changeorders.impact_cost', { defaultValue: 'Project budget' })}
                 </h4>
                 <DeltaRow
@@ -279,7 +279,7 @@ export function ImpactSimulator({
 
               {/* Schedule */}
               <section>
-                <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h4 className="oe-overline mb-1 flex items-center gap-1.5">
                   <CalendarClock size={14} /> {t('changeorders.impact_schedule', { defaultValue: 'Schedule' })}
                 </h4>
                 {data.schedule.current_end_date ? (
@@ -317,7 +317,7 @@ export function ImpactSimulator({
 
               {/* EVM */}
               <section>
-                <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h4 className="oe-overline mb-1 flex items-center gap-1.5">
                   <TrendingUp size={14} /> {t('changeorders.impact_evm', { defaultValue: 'Earned value (EVM)' })}
                 </h4>
                 <DeltaRow
@@ -347,7 +347,7 @@ export function ImpactSimulator({
 
               {/* BOQ */}
               <section>
-                <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h4 className="oe-overline mb-1 flex items-center gap-1.5">
                   <Layers size={14} /> {t('changeorders.impact_boq', { defaultValue: 'Bill of quantities' })}
                 </h4>
                 {/* Three different facts used to share one sentence, and two
@@ -402,7 +402,7 @@ export function ImpactSimulator({
                 <ul className="space-y-1 rounded-md bg-surface-secondary px-3 py-2">
                   {data.notes.map((n, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-xs text-content-tertiary">
-                      <Info size={13} className="mt-0.5 shrink-0" />
+                      <Info size={14} className="mt-0.5 shrink-0" />
                       <span>{n}</span>
                     </li>
                   ))}
@@ -413,7 +413,7 @@ export function ImpactSimulator({
                   have published. Newest first. */}
               {savedScenarios.length > 0 && (
                 <section>
-                  <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h4 className="oe-overline mb-1 flex items-center gap-1.5">
                     <History size={14} />{' '}
                     {t('changeorders.impact_saved_scenarios', { defaultValue: 'Saved scenarios' })}
                     <Badge variant="neutral" size="sm">{savedScenarios.length}</Badge>
@@ -476,7 +476,7 @@ export function ImpactSimulator({
                         value={costInput}
                         placeholder={defaultCost}
                         onChange={(e) => setCostInput(e.target.value)}
-                        className="w-40 rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                        className="oe-input w-40"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-xs text-content-tertiary">
@@ -486,7 +486,7 @@ export function ImpactSimulator({
                         value={daysInput}
                         placeholder={String(defaultDays)}
                         onChange={(e) => setDaysInput(e.target.value)}
-                        className="w-28 rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                        className="oe-input w-28"
                       />
                     </label>
                     <Button variant="secondary" size="sm" onClick={runOverrides} disabled={isFetching}>

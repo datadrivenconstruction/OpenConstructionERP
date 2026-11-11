@@ -306,7 +306,7 @@ export function ApprovalInstanceDetailDrawer({
                   variant="secondary"
                   onClick={() => setReassignOpen(true)}
                   disabled={busy}
-                  icon={<UserCog size={13} />}
+                  icon={<UserCog size={14} />}
                   data-testid="instance-reassign-button"
                 >
                   {t('approvalRoutes.reassign', {
@@ -319,7 +319,7 @@ export function ApprovalInstanceDetailDrawer({
                   onClick={() => cancelMut.mutate()}
                   loading={cancelMut.isPending}
                   disabled={busy}
-                  icon={<Ban size={13} />}
+                  icon={<Ban size={14} />}
                 >
                   {t('approvalRoutes.cancel', {
                     defaultValue: 'Cancel workflow',

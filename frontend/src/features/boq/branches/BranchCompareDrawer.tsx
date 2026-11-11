@@ -127,7 +127,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+        className="oe-select w-full"
       >
         <option value="">{t('boq.branch.pick', { defaultValue: '- Select -' })}</option>
         {nodes.map((n) => (
@@ -151,7 +151,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <GitCompare size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.branch.compare_title', { defaultValue: 'Compare branches' })}
             </h3>
           </div>
@@ -211,7 +211,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
                 onClick={() => download('xlsx')}
                 className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
               >
-                <FileSpreadsheet size={13} /> XLSX
+                <FileSpreadsheet size={14} /> XLSX
               </button>
               <button
                 type="button"
@@ -219,7 +219,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
                 onClick={() => download('pdf')}
                 className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
               >
-                <FileText size={13} /> PDF
+                <FileText size={14} /> PDF
               </button>
             </div>
           </div>
@@ -243,7 +243,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
             </div>
             <div className="flex items-center gap-2 text-xs font-mono">
               <span className="text-content-tertiary">{fmtNumber(data.summary.total_a)}</span>
-              <ArrowRight size={11} className="text-content-quaternary" />
+              <ArrowRight size={12} className="text-content-quaternary" />
               <span className="font-semibold text-content-primary">{fmtNumber(data.summary.total_b)}</span>
               <span className="text-content-tertiary">{data.currency}</span>
               <Delta value={data.summary.delta} />
@@ -270,21 +270,21 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
                 {t('boq.branch.no_diff', { defaultValue: 'No differences.' })}
               </p>
             ) : (
-              <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-surface-elevated border-b border-border-light">
-                  <tr className="text-2xs text-content-tertiary text-left">
-                    <th className="px-3 py-2 font-medium">{t('boq.branch.col_position', { defaultValue: 'Position' })}</th>
-                    <th className="px-2 py-2 font-medium text-right">{t('boq.branch.col_qty', { defaultValue: 'Qty' })}</th>
-                    <th className="px-2 py-2 font-medium text-right">{t('boq.branch.col_rate', { defaultValue: 'Rate' })}</th>
-                    <th className="px-2 py-2 font-medium text-right">{t('boq.branch.col_delta', { defaultValue: 'Difference' })}</th>
+              <table className="oe-table-compact w-full">
+                <thead className="sticky top-0 bg-surface-elevated">
+                  <tr className="text-2xs text-left">
+                    <th>{t('boq.branch.col_position', { defaultValue: 'Position' })}</th>
+                    <th className="text-right">{t('boq.branch.col_qty', { defaultValue: 'Qty' })}</th>
+                    <th className="text-right">{t('boq.branch.col_rate', { defaultValue: 'Rate' })}</th>
+                    <th className="text-right">{t('boq.branch.col_delta', { defaultValue: 'Difference' })}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {rows.map((r) => {
                     const textChanged = r.changed_fields.includes('description');
                     return (
-                      <tr key={r.key} className="hover:bg-surface-secondary/40" data-testid="branch-compare-row">
-                        <td className="px-3 py-2 align-top">
+                      <tr key={r.key} data-testid="branch-compare-row">
+                        <td className="align-top">
                           <div className="flex items-center gap-1.5">
                             <Badge variant={CHANGE_VARIANT[r.change_type]} size="sm">
                               {changeLabel(r.change_type)}
@@ -306,7 +306,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
                           const b = field === 'quantity' ? r.b_quantity : r.b_unit_rate;
                           const pair = r.change_type === 'changed' && r.changed_fields.includes(field);
                           return (
-                            <td key={field} className="px-2 py-2 align-top text-right font-mono text-2xs">
+                            <td key={field} className="align-top text-right font-mono">
                               {pair ? (
                                 <>
                                   <span className="text-content-tertiary">{fmtNumber(a)}</span>
@@ -319,7 +319,7 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
                             </td>
                           );
                         })}
-                        <td className="px-2 py-2 align-top text-right text-2xs">
+                        <td className="align-top text-right">
                           <Delta value={r.delta} />
                         </td>
                       </tr>
@@ -329,28 +329,28 @@ export function BranchCompareDrawer({ nodes, currentBoqId, isOpen, onClose }: Br
               </table>
             )
           ) : (
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-surface-elevated border-b border-border-light">
-                <tr className="text-2xs text-content-tertiary text-left">
-                  <th className="px-3 py-2 font-medium">
+            <table className="oe-table-compact w-full">
+              <thead className="sticky top-0 bg-surface-elevated">
+                <tr className="text-2xs text-left">
+                  <th>
                     {view === 'sections'
                       ? t('boq.branch.col_section', { defaultValue: 'Section' })
                       : t('boq.branch.col_cost_group', { defaultValue: 'Cost group' })}
                   </th>
-                  <th className="px-2 py-2 font-medium text-right">A</th>
-                  <th className="px-2 py-2 font-medium text-right">B</th>
-                  <th className="px-2 py-2 font-medium text-right">{t('boq.branch.col_delta', { defaultValue: 'Difference' })}</th>
+                  <th className="text-right">A</th>
+                  <th className="text-right">B</th>
+                  <th className="text-right">{t('boq.branch.col_delta', { defaultValue: 'Difference' })}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {groups.map((g) => (
                   <tr key={g.key || '-'} data-testid="branch-compare-group">
-                    <td className="px-3 py-2 text-content-primary">
+                    <td>
                       {g.label || t('boq.branch.ungrouped', { defaultValue: 'Not grouped' })}
                     </td>
-                    <td className="px-2 py-2 text-right font-mono text-2xs text-content-secondary">{fmtNumber(g.total_a)}</td>
-                    <td className="px-2 py-2 text-right font-mono text-2xs text-content-primary">{fmtNumber(g.total_b)}</td>
-                    <td className="px-2 py-2 text-right text-2xs">
+                    <td className="text-right font-mono text-content-secondary">{fmtNumber(g.total_a)}</td>
+                    <td className="text-right font-mono">{fmtNumber(g.total_b)}</td>
+                    <td className="text-right">
                       <Delta value={g.delta} />
                     </td>
                   </tr>

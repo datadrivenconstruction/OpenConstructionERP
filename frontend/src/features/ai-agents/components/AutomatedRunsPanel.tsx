@@ -80,7 +80,7 @@ export function AutomatedRunsPanel({
                   type="button"
                   onClick={() => onSelect(run.id)}
                   className={clsx(
-                    'flex w-full items-start gap-2.5 rounded-lg border p-2.5 text-left transition-colors',
+                    'flex w-full items-start gap-2 rounded-lg border p-3 text-left transition-colors',
                     isActive
                       ? 'border-oe-blue/40 bg-oe-blue-subtle/40'
                       : 'border-border-light bg-surface-elevated hover:border-oe-blue/30 hover:bg-surface-secondary/40',

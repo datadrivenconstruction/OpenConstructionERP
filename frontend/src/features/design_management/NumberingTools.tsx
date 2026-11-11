@@ -103,7 +103,7 @@ export function NumberingTools({ ctx }: { ctx: DesignContext }) {
         <input
           type="text"
           autoComplete="off"
-          className="w-72 rounded-md border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-sm"
+          className="oe-input w-72 font-mono"
           placeholder={ui(t, 'design.ui.numbering.check_placeholder')}
           aria-label={ui(t, 'design.ui.numbering.check_placeholder')}
           value={number}

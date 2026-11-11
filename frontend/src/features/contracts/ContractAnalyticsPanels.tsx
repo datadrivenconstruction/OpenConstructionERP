@@ -119,7 +119,7 @@ function PanelHeader({
 }) {
   return (
     <div className="mb-2 flex items-center justify-between gap-2">
-      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+      <p className="oe-overline flex items-center gap-1.5">
         {icon}
         {title}
       </p>
@@ -255,25 +255,25 @@ function SovStatusPanel({
       const totals = q.data.totals;
       body = (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-2xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table-compact w-full">
+            <thead className="text-2xs">
               <tr>
-                <th className="py-1 text-left">
+                <th>
                   {t('contracts.sov_line', { defaultValue: 'Line' })}
                 </th>
-                <th className="py-1 text-right">
+                <th className="text-right">
                   {t('contracts.sov_scheduled', { defaultValue: 'Scheduled' })}
                 </th>
-                <th className="py-1 text-right">
+                <th className="text-right">
                   {t('contracts.sov_billed', { defaultValue: 'Billed' })}
                 </th>
-                <th className="py-1 text-right">
+                <th className="text-right">
                   {t('contracts.sov_earned', { defaultValue: 'Earned' })}
                 </th>
-                <th className="py-1 text-right">
+                <th className="text-right">
                   {t('contracts.sov_paid', { defaultValue: 'Paid' })}
                 </th>
-                <th className="py-1 text-right">
+                <th className="text-right">
                   {t('contracts.sov_percent', { defaultValue: '% Complete' })}
                 </th>
               </tr>
@@ -291,30 +291,30 @@ function SovStatusPanel({
                       ? 'text-content-primary'
                       : MUTED;
                 return (
-                  <tr key={lineId} className="border-t border-border-light">
-                    <td className="py-1 pr-2 font-mono text-xs text-content-secondary">
+                  <tr key={lineId}>
+                    <td className="pr-2 font-mono text-content-secondary">
                       {labelFor(lineId)}
                     </td>
-                    <td className="py-1 text-right tabular-nums text-content-secondary">
+                    <td className="text-right tabular-nums text-content-secondary">
                       {money(row.scheduled)}
                     </td>
-                    <td className="py-1 text-right tabular-nums text-content-secondary">
+                    <td className="text-right tabular-nums text-content-secondary">
                       {money(row.billed)}
                     </td>
                     <td
                       className={clsx(
-                        'py-1 text-right tabular-nums',
+                        'text-right tabular-nums',
                         over ? DANGER : 'text-content-secondary',
                       )}
                     >
                       {money(row.earned)}
                     </td>
-                    <td className="py-1 text-right tabular-nums text-content-secondary">
+                    <td className="text-right tabular-nums text-content-secondary">
                       {money(row.paid)}
                     </td>
                     <td
                       className={clsx(
-                        'py-1 text-right tabular-nums font-medium',
+                        'text-right tabular-nums font-medium',
                         pctColor,
                       )}
                     >
@@ -325,23 +325,23 @@ function SovStatusPanel({
               })}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-border-light font-medium">
-                <td className="py-1 pr-2 text-xs uppercase tracking-wide text-content-tertiary">
+              <tr>
+                <td className="pr-2 text-content-tertiary">
                   {t('contracts.sov_total', { defaultValue: 'Total' })}
                 </td>
-                <td className="py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {money(totals.scheduled)}
                 </td>
-                <td className="py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {money(totals.billed)}
                 </td>
-                <td className="py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {money(totals.earned)}
                 </td>
-                <td className="py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {money(totals.paid)}
                 </td>
-                <td className="py-1 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {fmtPct(totals.percent_complete)}
                 </td>
               </tr>
@@ -454,7 +454,7 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       if (report.status === 'errors') {
         return {
           cls: 'border-semantic-error/30 bg-semantic-error-bg',
-          icon: <ShieldX size={18} className={clsx('mt-0.5 shrink-0', DANGER)} />,
+          icon: <ShieldX size={20} className={clsx('mt-0.5 shrink-0', DANGER)} />,
           titleCls: 'text-semantic-error',
           title: t('contracts.completeness_errors_title', {
             defaultValue: 'Completeness check found blocking issues',
@@ -464,7 +464,7 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       if (report.status === 'warnings') {
         return {
           cls: 'border-semantic-warning/30 bg-semantic-warning-bg',
-          icon: <ShieldAlert size={18} className={clsx('mt-0.5 shrink-0', WARNING)} />,
+          icon: <ShieldAlert size={20} className={clsx('mt-0.5 shrink-0', WARNING)} />,
           titleCls: 'text-semantic-warning',
           title: t('contracts.completeness_warnings_title', {
             defaultValue: 'Complete, with warnings to review',
@@ -474,7 +474,7 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       if (report.status === 'passed') {
         return {
           cls: 'border-semantic-success/30 bg-semantic-success-bg',
-          icon: <ShieldCheck size={18} className={clsx('mt-0.5 shrink-0', SUCCESS)} />,
+          icon: <ShieldCheck size={20} className={clsx('mt-0.5 shrink-0', SUCCESS)} />,
           titleCls: 'text-semantic-success',
           title: t('contracts.completeness_passed_title', {
             defaultValue: 'All completeness checks passed',
@@ -485,7 +485,7 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
       // mislabelled as a green pass.
       return {
         cls: 'border-border-light bg-surface-secondary',
-        icon: <Info size={18} className="mt-0.5 shrink-0 text-content-tertiary" />,
+        icon: <Info size={20} className="mt-0.5 shrink-0 text-content-tertiary" />,
         titleCls: 'text-content-secondary',
         title: t('contracts.completeness_skipped_title', {
           defaultValue: 'No applicable completeness rules',
@@ -703,11 +703,11 @@ function ChecklistRow({
 }) {
   const icon =
     item.status === 'pass' ? (
-      <CheckCircle2 size={15} className={clsx('mt-0.5 shrink-0', SUCCESS)} />
+      <CheckCircle2 size={16} className={clsx('mt-0.5 shrink-0', SUCCESS)} />
     ) : item.status === 'fail' ? (
-      <XCircle size={15} className={clsx('mt-0.5 shrink-0', DANGER)} />
+      <XCircle size={16} className={clsx('mt-0.5 shrink-0', DANGER)} />
     ) : (
-      <MinusCircle size={15} className={clsx('mt-0.5 shrink-0', MUTED)} />
+      <MinusCircle size={16} className={clsx('mt-0.5 shrink-0', MUTED)} />
     );
   return (
     <li className="flex items-start gap-2 border-b border-border-light py-1.5 last:border-0">
@@ -1125,7 +1125,7 @@ function SecurityCoveragePanel({
           </div>
 
           <div>
-            <p className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline mb-1">
               {t('contracts.security_coverage_by_status', {
                 defaultValue: 'By status',
               })}
@@ -1141,7 +1141,7 @@ function SecurityCoveragePanel({
 
           {d.active_types.length > 0 && (
             <div>
-              <p className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <p className="oe-overline mb-1">
                 {t('contracts.security_coverage_active_types', {
                   defaultValue: 'Active types',
                 })}
@@ -1194,9 +1194,9 @@ export function ContractAnalyticsPanels({
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2 border-t border-border-light pt-4">
-        <BarChart3 size={15} className="text-oe-blue" />
+        <BarChart3 size={16} className="text-oe-blue" />
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('contracts.analytics_section_title', {
               defaultValue: 'Analytics & close-out',
             })}

@@ -193,7 +193,7 @@ export function ApprovalAnalyticsPanel({
 
       {/* Bottlenecks */}
       <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-1.5">
+        <h3 className="oe-overline mb-1.5">
           {t('approvalRoutes.analytics_bottlenecks', { defaultValue: 'Bottlenecks' })}
         </h3>
         {data.bottlenecks.length === 0 ? (
@@ -205,9 +205,9 @@ export function ApprovalAnalyticsPanel({
         ) : (
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/40">
+                  <tr>
                     <Th>{t('approvalRoutes.analytics_col_step', { defaultValue: 'Step' })}</Th>
                     <Th right>{t('approvalRoutes.analytics_col_median', { defaultValue: 'Median' })}</Th>
                     <Th right>{t('approvalRoutes.analytics_col_avg', { defaultValue: 'Avg' })}</Th>
@@ -215,7 +215,7 @@ export function ApprovalAnalyticsPanel({
                     <Th right>{t('approvalRoutes.analytics_col_count', { defaultValue: 'Decided' })}</Th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {data.bottlenecks.map((b) => {
                     const drillable = b.kind === 'step' && typeof onDrill === 'function';
                     return (
@@ -250,14 +250,14 @@ export function ApprovalAnalyticsPanel({
       {/* Time by role */}
       {data.by_role.length > 0 && (
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-1.5">
+          <h3 className="oe-overline mb-1.5">
             {t('approvalRoutes.analytics_by_role', { defaultValue: 'Time by role' })}
           </h3>
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/40">
+                  <tr>
                     <Th>{t('approvalRoutes.analytics_col_role', { defaultValue: 'Role' })}</Th>
                     <Th right>{t('approvalRoutes.analytics_col_count', { defaultValue: 'Decided' })}</Th>
                     <Th right>{t('approvalRoutes.analytics_col_avg', { defaultValue: 'Avg' })}</Th>
@@ -265,7 +265,7 @@ export function ApprovalAnalyticsPanel({
                     <Th right>{t('approvalRoutes.analytics_col_breach_rate', { defaultValue: 'Breach %' })}</Th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {data.by_role.map((r) => (
                     <tr key={r.role ?? '__none__'}>
                       <Td>{roleLabel(r.role)}</Td>
@@ -285,14 +285,14 @@ export function ApprovalAnalyticsPanel({
       {/* Time by step */}
       {data.by_step.length > 0 && (
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary mb-1.5">
+          <h3 className="oe-overline mb-1.5">
             {t('approvalRoutes.analytics_by_step', { defaultValue: 'Time by step' })}
           </h3>
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/40">
+                  <tr>
                     <Th>{t('approvalRoutes.col_name', { defaultValue: 'Name' })}</Th>
                     <Th right>{t('approvalRoutes.analytics_col_step', { defaultValue: 'Step' })}</Th>
                     <Th>{t('approvalRoutes.analytics_col_role', { defaultValue: 'Role' })}</Th>
@@ -303,7 +303,7 @@ export function ApprovalAnalyticsPanel({
                     <Th right>{t('approvalRoutes.analytics_col_sla', { defaultValue: 'SLA' })}</Th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {data.by_step.map((s) => (
                     <tr key={`${s.route_id}:${s.ordinal}`}>
                       <Td>{s.route_name}</Td>
@@ -346,7 +346,7 @@ function RangeSelector({
       <select
         value={days}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+        className="oe-select cursor-pointer"
         aria-label={t('approvalRoutes.analytics_range_label', { defaultValue: 'Window' })}
       >
         {RANGE_OPTIONS.map((d) => (
