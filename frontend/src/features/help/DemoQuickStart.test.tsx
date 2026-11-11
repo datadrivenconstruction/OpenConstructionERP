@@ -46,7 +46,7 @@ describe('DemoQuickStart', () => {
 
 describe('demoFaceFor', () => {
   it('gives every known demo a company photo and unknown slugs a drawing', () => {
-    expect(demoFaceFor('contractor-jeddah').src).toMatch(/cmt-general-contractor\.webp$/);
+    expect(demoFaceFor('residential-berlin').src).toMatch(/cmt-general-contractor\.webp$/);
     expect(demoFaceFor('nope')).toEqual({ src: null, kind: 'warehouse' });
   });
 });

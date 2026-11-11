@@ -2441,6 +2441,73 @@ html[data-menu-active='pill'] aside.oe-sidebar [data-active] .oe-nav-icon {
 }
 html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-row[data-active] .oe-nav-trail { color: inherit; opacity: 0.85; }
 
+/* ── Demo menu styles ─────────────────────────────────────────────────────
+   html[data-oe-menu] from applyDemoMenuStyle (shared/lib/demoProfiles.ts), set
+   only while a demo is active. Colours come from the accent and surface tokens,
+   so every accent works in light and dark; logical properties keep RTL right. */
+html[data-oe-menu='tinted'] aside.oe-sidebar {
+  background: color-mix(in srgb, var(--oe-blue) 7%, var(--oe-bg));
+}
+html[data-oe-menu='tinted'] aside.oe-sidebar .oe-nav-row[data-active] {
+  background: color-mix(in srgb, var(--oe-blue) 16%, var(--oe-bg));
+  color: var(--oe-blue-text);
+}
+
+/* Dark sidebar: the surface and text tokens are re-pointed inside the aside,
+   so every class that reads them (text-content-*, bg-surface-*) flips with it. */
+html[data-oe-menu='dark'] aside.oe-sidebar {
+  --oe-bg: #151922;
+  --oe-bg-ch: 21 25 34;
+  --oe-bg-secondary: #1f2531;
+  --oe-bg-secondary-ch: 31 37 49;
+  --oe-bg-tertiary: #1a1f2a;
+  --oe-bg-tertiary-ch: 26 31 42;
+  --oe-bg-elevated: #232a38;
+  --oe-bg-elevated-ch: 35 42 56;
+  --oe-border-light: #2c3444;
+  --oe-border: #3a4357;
+  --oe-text-primary: #f2f4f8;
+  --oe-text-secondary: #c3c9d6;
+  --oe-text-tertiary: #aab1c0;
+  --oe-text-quaternary: #9aa1b1;
+  --oe-blue-text: #ffffff;
+  background: var(--oe-bg);
+  color: var(--oe-text-primary);
+}
+html[data-oe-menu='dark'] aside.oe-sidebar .oe-nav-row[data-active],
+html[data-oe-menu='dark'] aside.oe-sidebar .oe-nav-rail-row[data-active] {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* Pill: the active row is a filled accent capsule. */
+html[data-oe-menu='pill'] aside.oe-sidebar .oe-nav-row[data-active],
+html[data-oe-menu='pill'] aside.oe-sidebar .oe-nav-rail-row[data-active] {
+  border-color: transparent;
+  background: var(--oe-blue);
+  color: var(--oe-on-accent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+html[data-oe-menu='pill'] aside.oe-sidebar .oe-nav-row[data-active] { border-radius: 9999px; }
+html[data-oe-menu='pill'] aside.oe-sidebar [data-active] .oe-nav-icon {
+  --oe-nav-icon-color: currentColor;
+  background: transparent;
+}
+html[data-oe-menu='pill'] aside.oe-sidebar .oe-nav-row[data-active] .oe-nav-trail { color: inherit; opacity: 0.85; }
+
+/* Outline: a hairline frame in the accent instead of a fill, a ruled sidebar edge. */
+html[data-oe-menu='outline'] aside.oe-sidebar {
+  border-inline-end: 1px solid var(--oe-border);
+}
+html[data-oe-menu='outline'] aside.oe-sidebar .oe-nav-row[data-active],
+html[data-oe-menu='outline'] aside.oe-sidebar .oe-nav-rail-row[data-active] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--oe-blue-text);
+  box-shadow: inset 0 0 0 1.5px var(--oe-blue);
+}
+
 /* ── Spreadsheet tables and keyboard mode ─────────────────────────────────
    html[data-excel-tables] / html[data-keyboard-mode] from shared/lib/tablePrefs.ts;
    the behaviour lives in shared/lib/tableEnhancer.ts. */

@@ -22,6 +22,7 @@ import { ACCENT_SWATCH } from '@/shared/lib/appearance';
 import {
   DEMO_PROFILES,
   demoProfile,
+  applyDemoMenuStyle,
   hiddenGroupsFor,
   readChosenDemo,
   writeChosenDemo,
@@ -100,6 +101,7 @@ export function useDemoProjects() {
           navGroups.map((g) => g.id),
         ),
       );
+      applyDemoMenuStyle(profile.menuStyle);
       writeChosenDemo(slug);
       setActiveProject(p.id, p.name);
       navigate(`/projects/${p.id}`);
@@ -116,6 +118,13 @@ export function DemoSwitcherBar() {
   const { pathname } = useLocation();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const { demoMode, loaded, bySlug, open } = useDemoProjects();
+
+  // The menu style follows the chosen demo across reloads and goes away with the demo bar.
+  useEffect(() => {
+    if (!demoMode) return undefined;
+    applyDemoMenuStyle(demoProfile(readChosenDemo())?.menuStyle ?? null);
+    return () => applyDemoMenuStyle(null);
+  }, [demoMode]);
 
   useEffect(() => {
     if (!demoMode || !loaded) return;
