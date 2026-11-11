@@ -19,6 +19,29 @@ _COLOR_PATTERN = r"^#[0-9a-fA-F]{6}$"
 _COLOR_DESCRIPTION = "Project colour as #rrggbb, shown to the whole team. Null clears it."
 
 
+#: Longest external folder link stored; matches the column width.
+EXTERNAL_FOLDER_URL_MAX = 500
+_FOLDER_SCHEME_RE = re.compile(r"^(https?|file|smb)://\S+$", re.IGNORECASE)
+_FOLDER_UNC_RE = re.compile(r"^\\\\[^\\/\s]+\\[^\s]+$")
+_CONTROL_CHARS_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def validate_external_folder_url(v: str | None) -> str | None:
+    """Accept http(s)/file/smb URLs and UNC paths; blank clears the link."""
+    if v is None:
+        return None
+    v = v.strip()
+    if not v:
+        return None
+    if len(v) > EXTERNAL_FOLDER_URL_MAX:
+        raise ValueError(f"external_folder_url must be at most {EXTERNAL_FOLDER_URL_MAX} characters")
+    if _CONTROL_CHARS_RE.search(v):
+        raise ValueError("external_folder_url must not contain control characters")
+    if not (_FOLDER_SCHEME_RE.match(v) or _FOLDER_UNC_RE.match(v)):
+        raise ValueError("external_folder_url must be an http(s), file or smb link, or a UNC path")
+    return v
+
+
 def _normalise_color(v: str | None) -> str | None:
     """Lower-case a valid hex colour so equal colours compare equal."""
     return v.lower() if v else None
@@ -388,6 +411,16 @@ class ProjectCreate(BaseModel):
     )
     color: str | None = Field(default=None, pattern=_COLOR_PATTERN, description=_COLOR_DESCRIPTION)
 
+    external_folder_url: str | None = Field(
+        default=None,
+        description="Link to the project folder outside the platform: http(s), file, smb or UNC path. Blank clears it.",
+    )
+
+    @field_validator("external_folder_url", mode="after")
+    @classmethod
+    def _check_external_folder_url(cls, v: str | None) -> str | None:
+        return validate_external_folder_url(v)
+
     @field_validator("color", mode="after")
     @classmethod
     def _lower_color(cls, v: str | None) -> str | None:
@@ -560,6 +593,16 @@ class ProjectUpdate(BaseModel):
     # 'public' or 'private'; an explicit null clears it back to not recorded.
     works: str | None = Field(default=None, pattern=_WORKS_PATTERN)
     color: str | None = Field(default=None, pattern=_COLOR_PATTERN, description=_COLOR_DESCRIPTION)
+
+    external_folder_url: str | None = Field(
+        default=None,
+        description="Link to the project folder outside the platform: http(s), file, smb or UNC path. Blank clears it.",
+    )
+
+    @field_validator("external_folder_url", mode="after")
+    @classmethod
+    def _check_external_folder_url(cls, v: str | None) -> str | None:
+        return validate_external_folder_url(v)
 
     @field_validator("color", mode="after")
     @classmethod
@@ -737,6 +780,7 @@ class ProjectResponse(BaseModel):
     legal_entity_id: UUID | None = None
     works: str | None = None
     color: str | None = None
+    external_folder_url: str | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None

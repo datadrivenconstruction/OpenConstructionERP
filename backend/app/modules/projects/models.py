@@ -157,6 +157,9 @@ class Project(Base):
     # Team-wide project colour, "#rrggbb". NULL means none chosen: the UI then
     # derives a stable colour from the id, so the default is never stored.
     color: Mapped[str | None] = mapped_column(String(7), nullable=True, default=None)
+    # Link to the project's folder outside the platform (shared drive, cloud
+    # folder): http(s), file, smb or a UNC path. Validated on write in the schemas.
+    external_folder_url: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
 
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)

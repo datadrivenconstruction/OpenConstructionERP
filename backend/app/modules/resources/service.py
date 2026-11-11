@@ -1518,10 +1518,28 @@ class ResourcesService:
         by_resource: dict[uuid.UUID, list[Assignment]] = {}
         for a in assignments:
             by_resource.setdefault(a.resource_id, []).append(a)
+        phones = await self._contact_phones({r.contact_id for r in resources if r.contact_id is not None})
         entries: list[dict[str, Any]] = []
         for r in resources:
-            entries.append({"resource": r, "assignments": by_resource.get(r.id, [])})
+            entries.append(
+                {
+                    "resource": r,
+                    "assignments": by_resource.get(r.id, []),
+                    "phone": phones.get(r.contact_id) if r.contact_id else None,
+                }
+            )
         return entries
+
+    async def _contact_phones(self, contact_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+        """Primary phones for the given contacts in one query (no per-row lookups)."""
+        if not contact_ids:
+            return {}
+        from app.modules.contacts.models import Contact
+
+        rows = (
+            await self.session.execute(select(Contact.id, Contact.primary_phone).where(Contact.id.in_(contact_ids)))
+        ).all()
+        return {cid: phone.strip() for (cid, phone) in rows if phone and phone.strip()}
 
     async def _annotate_assignment_labels(self, assignments: list[Assignment]) -> None:
         """Resolve project/task names for assignments and attach them transiently.

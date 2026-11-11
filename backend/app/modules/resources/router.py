@@ -825,6 +825,7 @@ async def board(
             BoardEntry(
                 resource=ResourceResponse.model_validate(e["resource"]),
                 assignments=[AssignmentResponse.model_validate(a) for a in e["assignments"]],
+                phone=e.get("phone"),
             )
             for e in entries
         ],

@@ -54,6 +54,8 @@ export interface Project {
   works?: ProjectWorks | null;
   /** Team-wide project colour "#rrggbb"; null derives one from the id. */
   color?: string | null;
+  /** Link to the project folder outside the platform; null when not set. */
+  external_folder_url?: string | null;
   /**
    * True when this project may use AIA G702/G703 payment applications
    * (US/CA/AU only). Computed server-side from the project country; the
@@ -106,6 +108,8 @@ export interface CreateProjectData {
   subdivision_code?: string | null;
   /** Public buyer or private client; omitted or null when not recorded. */
   works?: ProjectWorks | null;
+  /** http(s), file, smb or UNC link to the project folder; null clears it. */
+  external_folder_url?: string | null;
   /** Phase-12 expansion fields — all optional on the backend schema. */
   project_code?: string | null;
   project_type?: string | null;

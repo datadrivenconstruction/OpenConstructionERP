@@ -59,6 +59,7 @@ import {
 import { DismissibleInfo } from '@/shared/ui/DismissibleInfo';
 import { ProjectLayoutManager } from './ProjectLayoutManager';
 import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } from './ProjectStatusBadge';
+import { folderLinkHref } from './folderLink';
 import { StatusHistoryTimeline } from './StatusHistoryTimeline';
 import { useProjectDetailLayoutStore } from '@/stores/useProjectDetailLayoutStore';
 import {
@@ -2266,6 +2267,20 @@ export function ProjectDetailPage() {
                   <p className="mt-2 text-sm text-content-secondary max-w-2xl leading-relaxed">
                     {project.description}
                   </p>
+                )}
+                {project.external_folder_url && (
+                  <a
+                    href={folderLinkHref(project.external_folder_url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex max-w-full items-center gap-1.5 text-sm text-oe-blue hover:underline"
+                    data-testid="project-folder-link"
+                  >
+                    <FolderOpen size={13} className="shrink-0" />
+                    <span className="truncate">
+                      {t('project.folder_link', { defaultValue: 'Project folder' })}
+                    </span>
+                  </a>
                 )}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <Badge variant="blue" size="sm">

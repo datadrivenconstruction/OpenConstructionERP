@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -571,6 +572,10 @@ class AttachmentResponse(BaseModel):
     label: str = ""
     added_by: str = ""
     added_at: str = ""
+    # True for direct uploads, which the download route can serve; linked
+    # documents are fetched through the documents module.
+    downloadable: bool = False
+    size_bytes: int | None = None
 
 
 @router.get(
@@ -602,11 +607,48 @@ async def list_submittal_attachments(
                     label=str(a.get("label", "")),
                     added_by=str(a.get("added_by", "")),
                     added_at=str(a.get("added_at", "")),
+                    downloadable=bool(a.get("path")),
+                    size_bytes=a.get("size_bytes") if isinstance(a.get("size_bytes"), int) else None,
                 )
             )
         except (ValueError, TypeError):
             continue
     return out
+
+
+@router.get(
+    "/{submittal_id}/attachments/{document_id}/download/",
+    dependencies=[Depends(RequirePermission("submittals.read"))],
+)
+async def download_submittal_attachment(
+    submittal_id: uuid.UUID,
+    document_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SubmittalService = Depends(_get_service),
+) -> FileResponse:
+    """Serve a directly uploaded attachment; the stored name is server-derived."""
+    submittal = await service.get_submittal(submittal_id)
+    await verify_project_access(submittal.project_id, str(user_id), session)
+    meta = dict(getattr(submittal, "metadata_", {}) or {})
+    entry = next(
+        (
+            a
+            for a in (meta.get("attachments") or [])
+            if isinstance(a, dict) and str(a.get("document_id")) == str(document_id) and a.get("path")
+        ),
+        None,
+    )
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    # Only the final path component is trusted, so a poisoned entry cannot leave the uploads dir.
+    filepath = ATTACHMENTS_DIR / Path(str(entry["path"])).name
+    if not filepath.is_file():
+        raise HTTPException(status_code=404, detail="Attachment file is missing")
+    label = str(entry.get("label") or "").strip()
+    ext = filepath.suffix
+    download_name = filepath.name if not label else (label if label.lower().endswith(ext.lower()) else label + ext)
+    return FileResponse(filepath, filename=download_name)
 
 
 @router.post(

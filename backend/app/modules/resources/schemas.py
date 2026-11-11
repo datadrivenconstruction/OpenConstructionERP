@@ -710,6 +710,8 @@ class BoardEntry(BaseModel):
 
     resource: ResourceResponse
     assignments: list[AssignmentResponse] = Field(default_factory=list)
+    # Primary phone of the linked contact; None when unlinked or the contact has no phone.
+    phone: str | None = None
 
 
 class BoardResponse(BaseModel):
