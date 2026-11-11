@@ -38,6 +38,7 @@ import {
   Download,
   Filter,
 } from 'lucide-react';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { BOARD_PRINT_CSS, BOARD_PRINT_ID, BoardPhoneCell, BoardPrintButton } from './boardContact';
 import {
   Button,
@@ -3348,7 +3349,7 @@ function AssignmentsTab({
                                 project:
                                   a.project_name ||
                                   t('resources.untitled_project', { defaultValue: 'Project' }),
-                                date: new Date(a.start_at).toLocaleDateString(),
+                                date: new Date(a.start_at).toLocaleDateString(getIntlLocale()),
                               })}
                             />
                           </td>

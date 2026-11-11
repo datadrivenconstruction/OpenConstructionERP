@@ -13,6 +13,7 @@ import { Download, Loader2, Paperclip, Trash2, Upload } from 'lucide-react';
 
 import { ConfirmDialog, DateDisplay } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { fmtFixed } from '@/shared/lib/formatters';
 import {
   deleteSubmittalAttachment,
   downloadSubmittalAttachment,
@@ -24,8 +25,8 @@ import {
 function formatSize(bytes: number | null): string {
   if (bytes == null) return '';
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) return `${fmtFixed(bytes / 1024, 0)} KB`;
+  return `${fmtFixed(bytes / (1024 * 1024), 1)} MB`;
 }
 
 export function SubmittalAttachments({

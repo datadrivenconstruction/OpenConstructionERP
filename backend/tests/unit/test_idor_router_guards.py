@@ -586,6 +586,7 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         # Route census (test_object_scoped_routes_are_all_pinned)
         "add_submittal_attachment",
         "approve_submittal",
+        "download_submittal_attachment",
         "get_submittal_approval",
         "list_submittal_attachments",
         "remove_submittal_attachment",
