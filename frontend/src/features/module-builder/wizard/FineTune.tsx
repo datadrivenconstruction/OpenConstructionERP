@@ -57,7 +57,7 @@ import { isLockedFeature, isLockedField, isLockedRule, type Baseline } from '../
 import { Disclosure, ProblemList, SectionHeading } from './shared';
 
 const selectClass =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
+  'oe-select w-full';
 
 /** A ready sentence for a new check, so it works the moment it is added. */
 const RULE_MESSAGES: Record<ModuleRuleKind, Phrase> = {
@@ -90,7 +90,7 @@ export function LockedMark({ testId }: { testId?: string }) {
       })}
       data-testid={testId}
     >
-      <Lock size={11} aria-hidden />
+      <Lock size={12} aria-hidden />
       {t('module_builder.locked', { defaultValue: 'Already in use' })}
     </span>
   );
@@ -149,7 +149,7 @@ export function FineTune({
           className="flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-secondary"
           data-testid="module-builder-upgrade-empty"
         >
-          <LockOpen size={13} className="mt-px shrink-0 text-content-tertiary" />
+          <LockOpen size={14} className="mt-px shrink-0 text-content-tertiary" />
           {t('module_builder.upgrade_empty_intro', {
             defaultValue: 'Nothing is recorded yet, so you can change anything.',
           })}
@@ -157,7 +157,7 @@ export function FineTune({
       )}
       {upgrading && !baseline?.empty && (
         <p className="flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
-          <Lock size={13} className="mt-px shrink-0 text-content-tertiary" />
+          <Lock size={14} className="mt-px shrink-0 text-content-tertiary" />
           {t('module_builder.upgrade_locked_intro', {
             defaultValue:
               'What entries already hold stays as it is: the kind of each field, its choices, the checks and the stages. You can rename things and add new fields, choices, stages, checks and functions.',
@@ -166,7 +166,7 @@ export function FineTune({
       )}
       <div className="space-y-3">
         <div>
-          <label htmlFor="module-builder-purpose" className="mb-1 block text-sm font-medium text-content-secondary">
+          <label htmlFor="module-builder-purpose" className="oe-label">
             {t('module_builder.purpose_label', { defaultValue: 'What it is for, in one sentence' })}
           </label>
           <textarea
@@ -190,7 +190,7 @@ export function FineTune({
             onChange={(e) => setSpec({ ...spec, entity: { ...spec.entity, plural_name: e.target.value } })}
           />
         </div>
-        <label className="flex items-start gap-2.5 text-sm">
+        <label className="flex items-start gap-2 text-sm">
           <input
             type="checkbox"
             checked={spec.entity.project_scoped}
@@ -225,7 +225,7 @@ export function FineTune({
         hint={t('module_builder.advanced_hint', {
           defaultValue: 'Names the platform uses inside. Filled in for you; change them only if you need to.',
         })}
-        icon={<Settings2 size={15} />}
+        icon={<Settings2 size={16} />}
         testId="module-builder-advanced"
       >
         <AdvancedSettings
@@ -282,7 +282,7 @@ export function TablePreview({ spec }: { spec: ModuleSpec }) {
       data-testid="module-builder-preview"
     >
       <div className="flex items-center gap-2 border-b border-border-light bg-surface-primary/60 px-3 py-2">
-        <Table2 size={13} className="shrink-0 text-content-tertiary" />
+        <Table2 size={14} className="shrink-0 text-content-tertiary" />
         <p className="min-w-0 truncate text-xs font-medium text-content-secondary">
           {t('module_builder.preview_table', { defaultValue: 'The table this builds' })}
           {caption && <span className="ml-1.5 font-normal text-content-tertiary">{caption}</span>}
@@ -296,11 +296,11 @@ export function TablePreview({ spec }: { spec: ModuleSpec }) {
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light">
+              <tr>
                 {columns.map((field, i) => (
-                  <th key={i} className="whitespace-nowrap px-3 py-1.5 text-xs font-medium text-content-secondary">
+                  <th key={i}>
                     {field.label}
                     {field.unit.trim() !== '' && (
                       <span className="ml-1 font-normal text-content-quaternary">{field.unit}</span>
@@ -311,9 +311,9 @@ export function TablePreview({ spec }: { spec: ModuleSpec }) {
             </thead>
             <tbody>
               {[0, 1].map((row) => (
-                <tr key={row} className="border-b border-border-light/50 last:border-0">
+                <tr key={row} className="last:border-0">
                   {columns.map((field, i) => (
-                    <td key={i} className="px-3 py-2">
+                    <td key={i}>
                       <span
                         aria-hidden
                         className={clsx('block h-2 rounded-full bg-surface-tertiary', PREVIEW_WIDTH[field.type] ?? 'w-20')}
@@ -386,7 +386,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                 />
               </div>
               <div className="sm:col-span-4">
-                <label className="mb-1 block text-sm font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('module_builder.field_kind', { defaultValue: 'Kind of value' })}
                 </label>
                 <select
@@ -415,7 +415,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
 
             {field.type === 'link' && (
               <div className="mt-2">
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('module_builder.link_points_at', { defaultValue: 'Points at' })}
                 </label>
                 <select
@@ -449,7 +449,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                       disabled={optionIndex < keptOptions}
                       onChange={(e) => setSpec(setOption(spec, index, optionIndex, e.target.value))}
                       aria-label={t('module_builder.field_options', { defaultValue: 'The choices' })}
-                      className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+                      className="min-w-0 flex-1 oe-input"
                     />
                     {optionIndex >= keptOptions && (
                       <button
@@ -458,7 +458,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                         aria-label={t('common.remove', { defaultValue: 'Remove' })}
                         className="rounded-md p-1 text-content-tertiary hover:text-semantic-error"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     )}
                   </div>
@@ -505,7 +505,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                   disabled={index === 0 || locked || previousLocked}
                   className="rounded-md p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
                 >
-                  <ArrowUp size={13} />
+                  <ArrowUp size={14} />
                 </button>
                 <button
                   type="button"
@@ -514,7 +514,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                   disabled={index === spec.entity.fields.length - 1 || locked}
                   className="rounded-md p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
                 >
-                  <ArrowDown size={13} />
+                  <ArrowDown size={14} />
                 </button>
                 {!locked && (
                   <button
@@ -525,7 +525,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                     className="rounded-md p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
                     data-testid={`module-builder-remove-field-${index}`}
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
@@ -543,7 +543,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
         <Button
           variant="secondary"
           size="sm"
-          icon={<Plus size={13} />}
+          icon={<Plus size={14} />}
           disabled={atLimit}
           onClick={() => setSpec(addField(spec))}
           data-testid="module-builder-add-field"
@@ -590,7 +590,7 @@ function RulesEditor({ spec, setSpec, vocabulary, problems, baseline = null }: E
 
       <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dashed border-border-light p-3">
         <div className="min-w-[10rem] flex-1">
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('module_builder.rule_on_field', { defaultValue: 'About which field' })}
           </label>
           <select
@@ -673,7 +673,7 @@ function RulesEditor({ spec, setSpec, vocabulary, problems, baseline = null }: E
 
             {rule.kind === 'order' && (
               <div className="mt-2">
-                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('module_builder.rule_other_field', { defaultValue: 'Must not come after' })}
                 </label>
                 <select
@@ -716,7 +716,7 @@ function RulesEditor({ spec, setSpec, vocabulary, problems, baseline = null }: E
                     aria-label={t('module_builder.remove_rule', { defaultValue: 'Remove this rule' })}
                     className="rounded-md p-1 hover:text-semantic-error"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
@@ -759,7 +759,7 @@ function FeatureSettings({ spec, setSpec, problems, baseline = null }: Omit<Edit
                   )
                 }
                 aria-label={t('module_builder.stage_name', { defaultValue: 'Stage name' })}
-                className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary"
+                className="min-w-0 flex-1 oe-input"
               />
               <label className="flex items-center gap-1.5 text-xs text-content-secondary">
                 <input
@@ -787,7 +787,7 @@ function FeatureSettings({ spec, setSpec, problems, baseline = null }: Omit<Edit
                 aria-label={t('common.remove', { defaultValue: 'Remove' })}
                 className="rounded-md p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
               >
-                <Trash2 size={13} />
+                <Trash2 size={14} />
               </button>
             </div>
           ))}
@@ -822,7 +822,7 @@ function FeatureSettings({ spec, setSpec, problems, baseline = null }: Omit<Edit
             </div>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium text-content-secondary">
+            <label className="oe-label">
               {t('module_builder.due_field', { defaultValue: 'Remind about this date' })}
             </label>
             <select
@@ -910,7 +910,7 @@ function AdvancedSettings({
                 value={field.name}
                 disabled={isLockedField(baseline, field)}
                 onChange={(e) => setSpec(updateField(spec, index, { name: e.target.value }))}
-                className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1 font-mono text-xs text-content-primary"
+                className="min-w-0 flex-1 oe-input oe-input-sm font-mono"
                 data-testid={`module-builder-field-name-${index}`}
               />
             </label>
@@ -931,7 +931,7 @@ function AdvancedSettings({
                 disabled={isLockedRule(baseline, rule)}
                 onChange={(e) => setSpec(updateRule(spec, index, { code: e.target.value.toUpperCase() }))}
                 aria-label={t('module_builder.rule_code', { defaultValue: 'Code' })}
-                className="min-w-0 rounded-lg border border-border-light bg-surface-primary px-2 py-1 font-mono text-xs text-content-primary"
+                className="min-w-0 oe-input oe-input-sm font-mono"
               />
             ))}
           </div>

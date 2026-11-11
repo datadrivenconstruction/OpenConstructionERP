@@ -101,40 +101,40 @@ export function SeriesActionRegisterDialog({ seriesId, onClose }: SeriesActionRe
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border-light">
-              <table className="w-full text-sm min-w-[560px]">
+              <table className="oe-table min-w-[560px]">
                 <thead>
-                  <tr className="bg-surface-secondary/40 text-2xs uppercase tracking-wide text-content-tertiary">
-                    <th className="text-left font-medium px-3 py-2">
+                  <tr>
+                    <th>
                       {t('meetings.action_description', { defaultValue: 'Action item' })}
                     </th>
-                    <th className="text-left font-medium px-3 py-2 w-24">
+                    <th className="w-24">
                       {t('meetings.col_raised', { defaultValue: 'Raised' })}
                     </th>
-                    <th className="text-left font-medium px-3 py-2 w-28">
+                    <th className="w-28">
                       {t('meetings.action_owner', { defaultValue: 'Owner' })}
                     </th>
-                    <th className="text-left font-medium px-3 py-2 w-28">
+                    <th className="w-28">
                       {t('meetings.action_due', { defaultValue: 'Due' })}
                     </th>
-                    <th className="text-left font-medium px-3 py-2 w-28">
+                    <th className="w-28">
                       {t('meetings.action_status', { defaultValue: 'Status' })}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {actions.map((a) => (
-                    <tr key={a.id} className="hover:bg-surface-secondary/30">
-                      <td className="px-3 py-2 text-content-primary">{a.description}</td>
-                      <td className="px-3 py-2 text-content-tertiary font-mono text-xs">
+                    <tr key={a.id}>
+                      <td>{a.description}</td>
+                      <td className="text-content-tertiary font-mono text-xs">
                         {a.origin_meeting_number || '—'}
                       </td>
-                      <td className="px-3 py-2 text-content-secondary">
+                      <td className="text-content-secondary">
                         {a.owner_name || a.owner_id || '—'}
                       </td>
-                      <td className="px-3 py-2 text-content-secondary">
+                      <td className="text-content-secondary">
                         {a.due_date ? <DateDisplay value={a.due_date} /> : '—'}
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <div className="flex items-center gap-1.5">
                           <Badge variant={STATUS_VARIANT[a.status]} size="sm">
                             {statusLabel(a.status)}

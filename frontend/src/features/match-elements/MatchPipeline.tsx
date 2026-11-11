@@ -63,7 +63,7 @@ export function PipelinePreview() {
           <Workflow className="w-4 h-4" />
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-content-primary truncate">
+          <h3 className="oe-card-title truncate">
             {t('match_elements.pipeline.title', 'Match pipeline')}
           </h3>
           <p className="text-2xs text-content-tertiary">
@@ -232,7 +232,7 @@ export function MatchPipeline({ sessionId }: Props) {
             <Workflow className="w-4 h-4" />
           </span>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-content-primary truncate">
+            <h3 className="oe-card-title truncate">
               {t('match_elements.pipeline.title', 'Match pipeline')}
             </h3>
             <p className="text-2xs text-content-tertiary">

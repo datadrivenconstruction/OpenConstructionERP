@@ -27,7 +27,7 @@ import {
 const KINDS: GlossaryKind[] = ['person', 'company', 'abbreviation', 'term', 'boq', 'place'];
 
 const fieldCls =
-  'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
 interface MeetingGlossaryDialogProps {
   projectId: string;
@@ -148,7 +148,7 @@ export function MeetingGlossaryDialog({ projectId, onClose }: MeetingGlossaryDia
           </label>
           <label className="text-xs text-content-secondary space-y-0.5">
             <span>{t('meetings.audio.glossary_kind', { defaultValue: 'Kind' })}</span>
-            <select className={fieldCls} value={kind} onChange={(e) => setKind(e.target.value as GlossaryKind)}>
+            <select className={`${fieldCls} oe-select`} value={kind} onChange={(e) => setKind(e.target.value as GlossaryKind)}>
               {KINDS.map((k) => (
                 <option key={k} value={k}>
                   {kindLabel(k)}

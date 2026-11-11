@@ -2235,7 +2235,7 @@ export function CesiumViewer({
             />
             <div className="relative">
               <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-warning/15 text-amber-300 ring-1 ring-amber-400/30">
-                <Download size={18} strokeWidth={2} />
+                <Download size={20} strokeWidth={2} />
               </div>
               <h3 className="text-base font-semibold text-white">
                 {t('geo_hub.cesium_not_installed_title', {
@@ -2267,7 +2267,7 @@ export function CesiumViewer({
             />
             <div className="relative">
               <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-error/15 text-red-300 ring-1 ring-red-400/30">
-                <AlertTriangle size={18} strokeWidth={2} />
+                <AlertTriangle size={20} strokeWidth={2} />
               </div>
               <h3 className="text-base font-semibold text-white">
                 {t('geo_hub.cesium_init_failed_title', {
@@ -2291,7 +2291,7 @@ export function CesiumViewer({
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
               >
-                <RefreshCw size={13} strokeWidth={2.25} />
+                <RefreshCw size={14} strokeWidth={2.25} />
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>
               <p className="mt-3 text-2xs text-slate-400">
@@ -2331,7 +2331,7 @@ export function CesiumViewer({
             defaultValue: 'Fit camera to data',
           })}
         >
-          <Locate size={13} strokeWidth={2.25} />
+          <Locate size={14} strokeWidth={2.25} />
           <span>
             {t('geo_hub.fit_to_data', {
               defaultValue: 'Fit to data',

@@ -112,7 +112,7 @@ export function GeoSceneModePicker({
             ].join(' ')}
             data-testid={`geo-scene-tab-${it.key}`}
           >
-            <Icon size={13} strokeWidth={2} />
+            <Icon size={14} strokeWidth={2} />
             {it.label}
           </button>
         );

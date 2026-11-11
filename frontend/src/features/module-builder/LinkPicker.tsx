@@ -227,7 +227,7 @@ export function LinkPicker({ id, target, projectId, value, onChange, label, inva
             className="shrink-0 rounded p-0.5 text-content-tertiary hover:text-content-primary"
             data-testid="link-picker-clear"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         ) : (
           <ChevronDown size={14} aria-hidden className="shrink-0 text-content-quaternary" />
@@ -239,7 +239,7 @@ export function LinkPicker({ id, target, projectId, value, onChange, label, inva
           id={listId}
           role="listbox"
           aria-label={label}
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute z-dropdown mt-1 max-h-64 w-full overflow-auto rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
         >
           {results.isLoading ? (
             <li className="flex items-center gap-2 px-3 py-2 text-xs text-content-tertiary">

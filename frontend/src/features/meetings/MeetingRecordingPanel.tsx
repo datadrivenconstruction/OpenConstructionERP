@@ -93,9 +93,9 @@ const RULE_DEFAULTS: Record<MeetingRuleId, string> = {
 };
 
 const fieldCls =
-  'h-8 rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input';
 const areaCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical';
+  'oe-textarea w-full resize-vertical';
 
 export function MeetingRecordingPanel({ meetingId, projectId, attendees }: MeetingRecordingPanelProps) {
   const { t, i18n } = useTranslation();
@@ -287,7 +287,7 @@ export function MeetingRecordingPanel({ meetingId, projectId, attendees }: Meeti
           <div className="flex items-center gap-3 flex-wrap text-xs text-content-secondary">
             <label className="flex items-center gap-1.5">
               {t('meetings.audio.language', { defaultValue: 'Spoken language' })}
-              <select className={fieldCls} value={language} onChange={(e) => setLanguage(e.target.value)} data-testid="recording-language">
+              <select className={`${fieldCls} oe-select`} value={language} onChange={(e) => setLanguage(e.target.value)} data-testid="recording-language">
                 <option value="">{t('meetings.audio.language_auto', { defaultValue: 'Meeting language' })}</option>
                 {SPOKEN_LANGUAGES.map((code) => (
                   <option key={code} value={code}>
@@ -301,7 +301,7 @@ export function MeetingRecordingPanel({ meetingId, projectId, attendees }: Meeti
                 <label className="flex items-center gap-1.5">
                   {t('meetings.audio.retention', { defaultValue: 'Keep audio for (days)' })}
                   <select
-                    className={fieldCls}
+                    className={`${fieldCls} oe-select`}
                     value={retention ?? ''}
                     onChange={(e) => setRetention(e.target.value ? Number(e.target.value) : null)}
                     disabled={deleteAfter}

@@ -99,10 +99,10 @@ function PanelBody() {
     >
       <header className="flex items-center gap-2">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-oe-blue/10 text-oe-blue">
-          <Database size={15} strokeWidth={2} />
+          <Database size={16} strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('geo_hub.cache_admin.title', {
               defaultValue: 'Nominatim geocode cache',
             })}
@@ -127,16 +127,16 @@ function PanelBody() {
           aria-label={t('common.refresh', { defaultValue: 'Refresh' })}
         >
           {statsQuery.isFetching ? (
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
           ) : (
-            <RefreshCw size={13} strokeWidth={2} />
+            <RefreshCw size={14} strokeWidth={2} />
           )}
         </button>
       </header>
 
       {statsQuery.isLoading && (
         <div className="mt-3 flex items-center gap-2 text-xs text-content-tertiary">
-          <Loader2 size={13} className="animate-spin" />
+          <Loader2 size={14} className="animate-spin" />
           <span>
             {t('geo_hub.cache_admin.loading', {
               defaultValue: 'Loading cache stats…',

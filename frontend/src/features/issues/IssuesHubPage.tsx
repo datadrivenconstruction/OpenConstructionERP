@@ -68,7 +68,7 @@ interface Project {
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
 const controlCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary ' +
+  'oe-select oe-input-lg' +
   'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -381,7 +381,7 @@ export function IssuesHubPage() {
                       : undefined
                   }
                 >
-                  <Icon size={13} className="shrink-0" />
+                  <Icon size={14} className="shrink-0" />
                   {t(meta.labelKey, { defaultValue: meta.labelDefault })}
                   {isErr ? (
                     <AlertTriangle size={12} className="text-semantic-error shrink-0" />
@@ -616,7 +616,7 @@ function IssueRow({ issue, onOpen }: { issue: UnifiedIssue; onOpen: () => void }
       {/* Source */}
       <span className="w-24 shrink-0">
         <Badge variant={meta.variant} size="sm">
-          <SourceIcon size={11} className="mr-1 shrink-0" />
+          <SourceIcon size={12} className="mr-1 shrink-0" />
           {t(meta.labelKey, { defaultValue: meta.labelDefault })}
         </Badge>
       </span>
@@ -668,7 +668,7 @@ function IssueRow({ issue, onOpen }: { issue: UnifiedIssue; onOpen: () => void }
       >
         {issue.dueDate ? (
           <span className="inline-flex items-center justify-end gap-1">
-            {overdue && <AlertTriangle size={11} className="shrink-0" />}
+            {overdue && <AlertTriangle size={12} className="shrink-0" />}
             <DateDisplay value={issue.dueDate} />
           </span>
         ) : (
@@ -678,7 +678,7 @@ function IssueRow({ issue, onOpen }: { issue: UnifiedIssue; onOpen: () => void }
 
       {/* Open affordance */}
       <span className="w-6 shrink-0 text-content-quaternary">
-        <ArrowUpRight size={15} />
+        <ArrowUpRight size={16} />
       </span>
     </div>
   );

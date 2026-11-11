@@ -357,7 +357,7 @@ export function MatchSuggestionsPanel({
           role="status"
           data-testid="match-fallback-hint"
         >
-          <Info size={11} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <Info size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span className="flex-1">
             {t('match.fallback_hint', {
               defaultValue:
@@ -594,9 +594,9 @@ function EmptyState({
       data-testid="match-empty-state"
     >
       <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-tertiary">
-        <Sparkles size={18} aria-hidden="true" />
+        <Sparkles size={20} aria-hidden="true" />
       </div>
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('match.no_results_title', {
           defaultValue: 'No matches found yet',
         })}
@@ -764,7 +764,7 @@ function CatalogBindingBar({
 
       {picking && (
         <div
-          className="absolute top-full right-3 mt-1 z-30 w-64 max-w-xs rounded border border-border-light bg-surface shadow-lg p-1"
+          className="absolute top-full right-3 mt-1 z-dropdown w-64 max-w-xs rounded border border-border-light bg-surface shadow-lg p-1"
           data-testid="match-catalog-picker"
           role="listbox"
           aria-label={t('match.catalog_picker_aria', {
@@ -841,9 +841,9 @@ function CatalogBlockedState({
         data-testid="match-state-no-catalogs-loaded"
       >
         <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
-          <Database size={18} aria-hidden="true" />
+          <Database size={20} aria-hidden="true" />
         </div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('match.state_no_catalogs_title', {
             defaultValue: 'No CWICR catalogue loaded',
           })}
@@ -874,9 +874,9 @@ function CatalogBlockedState({
         data-testid="match-state-no-catalog-selected"
       >
         <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
-          <AlertTriangle size={18} aria-hidden="true" />
+          <AlertTriangle size={20} aria-hidden="true" />
         </div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('match.state_no_pick_title', {
             defaultValue: 'Select a catalogue',
           })}
@@ -898,9 +898,9 @@ function CatalogBlockedState({
         data-testid="match-state-not-vectorized"
       >
         <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-warning-bg text-semantic-warning">
-          <Loader2 size={18} aria-hidden="true" />
+          <Loader2 size={20} aria-hidden="true" />
         </div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('match.state_not_vectorized_title', {
             defaultValue: 'Catalogue not vectorised yet',
           })}
@@ -991,7 +991,7 @@ const CandidateCard = memo(function CandidateCard({
           className="p-1 rounded hover:bg-semantic-success-bg text-semantic-success"
           data-testid={`match-accept-${candidate.code}`}
         >
-          <Check size={11} aria-hidden="true" />
+          <Check size={12} aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -1003,7 +1003,7 @@ const CandidateCard = memo(function CandidateCard({
           className="p-1 rounded hover:bg-surface-tertiary text-content-tertiary"
           data-testid={`match-reject-${candidate.code}`}
         >
-          <XIcon size={11} aria-hidden="true" />
+          <XIcon size={12} aria-hidden="true" />
         </button>
       </li>
     );
@@ -1090,7 +1090,7 @@ const CandidateCard = memo(function CandidateCard({
           className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium bg-oe-blue text-content-inverse hover:bg-oe-blue-hover"
           data-testid={`match-accept-${candidate.code}`}
         >
-          <Check size={11} aria-hidden="true" />
+          <Check size={12} aria-hidden="true" />
           {t('match.accept', { defaultValue: 'Accept' })}
         </button>
         <button
@@ -1102,7 +1102,7 @@ const CandidateCard = memo(function CandidateCard({
           className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border text-content-secondary hover:bg-surface-tertiary"
           data-testid={`match-reject-${candidate.code}`}
         >
-          <XIcon size={11} aria-hidden="true" />
+          <XIcon size={12} aria-hidden="true" />
           {t('match.reject', { defaultValue: 'Reject' })}
         </button>
       </div>
@@ -1153,7 +1153,7 @@ function ScoreBadge({
           id={tooltipId}
           role="tooltip"
           data-testid={`match-boosts-tooltip-${candidate.code}`}
-          className="absolute right-0 top-full mt-1 z-10 min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-2xs"
+          className="absolute right-0 top-full mt-1 z-dropdown min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-2xs"
         >
           <div className="flex items-center justify-between mb-1 font-semibold text-content-primary">
             <span>
@@ -1220,7 +1220,7 @@ function MatchModelsOffHint({ ids }: { ids: ReadonlyArray<string> }) {
       role="status"
       data-testid="match-models-off-hint"
     >
-      <Info size={11} className="mt-0.5 shrink-0" aria-hidden="true" />
+      <Info size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
       <span className="flex-1 min-w-0">
         {t('processes.match_models_off', {
           defaultValue: 'Suggestions use a simpler ranking because {{names}} is off.',

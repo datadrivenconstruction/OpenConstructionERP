@@ -429,7 +429,7 @@ export function MethodologyEditorPage() {
 
       {/* ── Read-only banner ────────────────────────────────────────────── */}
       {readOnly && (
-        <div className="flex items-start gap-2.5 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-4 py-3">
+        <div className="flex items-start gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-4 py-3">
           <Lock size={16} className="mt-0.5 shrink-0 text-oe-blue" />
           <div className="min-w-0 text-sm">
             <p className="font-medium text-content-primary">
@@ -528,7 +528,7 @@ export function MethodologyEditorPage() {
               />
               <div className="xl:sticky xl:top-4 self-start">
                 <Card padding="lg">
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <h3 className="oe-card-title">
                     {t('methodology.preview.title', { defaultValue: 'Live preview' })}
                   </h3>
                   <p className="mt-0.5 text-xs text-content-secondary">

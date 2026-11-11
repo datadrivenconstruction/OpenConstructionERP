@@ -206,9 +206,9 @@ const TRANSITION_CONFIG: Record<
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -313,7 +313,7 @@ function MoCExposureBand({
     <Card padding="none" className="overflow-hidden animate-card-in">
       <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border-light bg-surface-secondary/30">
         <div className="flex items-center gap-2 min-w-0">
-          <Wallet size={15} className="text-content-tertiary shrink-0" />
+          <Wallet size={16} className="text-content-tertiary shrink-0" />
           <span className="text-sm font-semibold text-content-primary">
             {t('moc.exposure_title', { defaultValue: 'Cost and schedule exposure' })}
           </span>
@@ -343,7 +343,7 @@ function MoCExposureBand({
                 {row.currency || t('moc.currency_unspecified', { defaultValue: 'Unspecified' })}
               </Badge>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {EXPOSURE_BUCKETS.map((b) => {
                 const cost = row.cost[b.key];
                 const days = row.days[b.key];
@@ -368,7 +368,7 @@ function MoCExposureBand({
                     <p className="mt-0.5 flex items-center gap-1.5 text-2xs text-content-tertiary tabular-nums">
                       {days !== 0 && (
                         <span className="inline-flex items-center gap-0.5">
-                          <CalendarClock size={11} />
+                          <CalendarClock size={12} />
                           {signed(days)} {t('moc.days', { defaultValue: 'days' })}
                         </span>
                       )}
@@ -491,7 +491,7 @@ function MoCFormModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
         role="dialog"
@@ -501,7 +501,7 @@ function MoCFormModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {mode === 'create'
                 ? t('moc.new_change', { defaultValue: 'New change request' })
                 : t('moc.edit_change', { defaultValue: 'Edit change request' })}
@@ -517,7 +517,7 @@ function MoCFormModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -525,7 +525,7 @@ function MoCFormModal({
         <div className="px-6 py-4 space-y-5">
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('moc.field_category', { defaultValue: 'Change category' })}
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -545,7 +545,7 @@ function MoCFormModal({
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
-                    <Icon size={18} />
+                    <Icon size={20} />
                     <span className="text-2xs font-medium leading-tight">
                       {t(`moc.category_${cat}`, { defaultValue: MOC_CATEGORY_LABELS[cat] ?? cap(cat) })}
                     </span>
@@ -557,7 +557,7 @@ function MoCFormModal({
 
           {/* Risk level */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('moc.field_risk', { defaultValue: 'Risk level' })}
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -587,7 +587,7 @@ function MoCFormModal({
 
           {/* Title */}
           <div>
-            <label htmlFor="moc-title" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="moc-title" className="oe-label">
               {t('moc.field_title', { defaultValue: 'Title' })} <span className="text-semantic-error">*</span>
             </label>
             <input
@@ -600,7 +600,8 @@ function MoCFormModal({
               placeholder={t('moc.title_placeholder', {
                 defaultValue: 'e.g. Switch facade cladding from brick to rainscreen panels',
               })}
-              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+              className={inputCls}
+              aria-invalid={titleError ? true : undefined}
               autoFocus
             />
             {titleError && (
@@ -612,7 +613,7 @@ function MoCFormModal({
 
           {/* Description */}
           <div>
-            <label htmlFor="moc-description" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="moc-description" className="oe-label">
               {t('moc.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -637,7 +638,7 @@ function MoCFormModal({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label htmlFor="moc-cost" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="moc-cost" className="oe-label">
                 {t('moc.field_cost_impact', { defaultValue: 'Cost impact' })}
               </label>
               <input
@@ -650,7 +651,7 @@ function MoCFormModal({
               />
             </div>
             <div>
-              <label htmlFor="moc-currency" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="moc-currency" className="oe-label">
                 {t('moc.field_currency', { defaultValue: 'Currency' })}
               </label>
               <input
@@ -662,7 +663,7 @@ function MoCFormModal({
               />
             </div>
             <div>
-              <label htmlFor="moc-days" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="moc-days" className="oe-label">
                 {t('moc.field_schedule_delta', { defaultValue: 'Schedule delta (days)' })}
               </label>
               <input
@@ -750,7 +751,7 @@ function TransitionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-md bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
         role="dialog"
@@ -766,17 +767,17 @@ function TransitionModal({
                 : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
             )}
           >
-            <Icon size={18} />
+            <Icon size={20} />
           </span>
           <div>
-            <h2 className="text-base font-semibold text-content-primary">{titleMap[action]}</h2>
+            <h2 className="oe-card-title">{titleMap[action]}</h2>
             <p className="text-xs text-content-tertiary font-mono">{entry.code}</p>
           </div>
         </div>
         <div className="px-6 py-4 space-y-3">
           <p className="text-sm text-content-secondary">{bodyMap[action]}</p>
           <div>
-            <label htmlFor="moc-trans-notes" className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label htmlFor="moc-trans-notes" className="oe-label">
               {t(`moc.notes_${action}`, { defaultValue: cfg.notesLabel })}
               <span className="text-content-quaternary font-normal">
                 {' '}
@@ -802,7 +803,7 @@ function TransitionModal({
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
-              <Icon size={15} className="mr-1.5 shrink-0" />
+              <Icon size={16} className="mr-1.5 shrink-0" />
             )}
             <span>{t(`moc.action_${action}`, { defaultValue: MOC_ACTION_LABELS[action] ?? cap(action) })}</span>
           </Button>
@@ -845,7 +846,7 @@ function AddImpactModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
         role="dialog"
@@ -854,7 +855,7 @@ function AddImpactModal({
       >
         <div className="px-6 py-4 border-b border-border-light flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('moc.add_impact', { defaultValue: 'Add impact assessment' })}
             </h2>
             <p className="text-xs text-content-tertiary font-mono">{entry.code}</p>
@@ -864,13 +865,13 @@ function AddImpactModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="imp-area" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="imp-area" className="oe-label">
                 {t('moc.impact_area', { defaultValue: 'Impact area' })}
               </label>
               <select
@@ -887,7 +888,7 @@ function AddImpactModal({
               </select>
             </div>
             <div>
-              <label htmlFor="imp-sev" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="imp-sev" className="oe-label">
                 {t('moc.impact_severity', { defaultValue: 'Severity' })}
               </label>
               <select
@@ -905,7 +906,7 @@ function AddImpactModal({
             </div>
           </div>
           <div>
-            <label htmlFor="imp-desc" className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label htmlFor="imp-desc" className="oe-label">
               {t('moc.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -919,7 +920,7 @@ function AddImpactModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="imp-cost" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="imp-cost" className="oe-label">
                 {t('moc.field_cost_impact', { defaultValue: 'Cost impact' })}
               </label>
               <input
@@ -932,7 +933,7 @@ function AddImpactModal({
               />
             </div>
             <div>
-              <label htmlFor="imp-days" className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label htmlFor="imp-days" className="oe-label">
                 {t('moc.field_schedule_delta', { defaultValue: 'Schedule delta (days)' })}
               </label>
               <input
@@ -946,7 +947,7 @@ function AddImpactModal({
             </div>
           </div>
           <div>
-            <label htmlFor="imp-mit" className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label htmlFor="imp-mit" className="oe-label">
               {t('moc.impact_mitigation', { defaultValue: 'Mitigation' })}
             </label>
             <textarea
@@ -980,7 +981,7 @@ function AddImpactModal({
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
-              <ListPlus size={15} className="mr-1.5 shrink-0" />
+              <ListPlus size={16} className="mr-1.5 shrink-0" />
             )}
             <span>{t('moc.add_impact', { defaultValue: 'Add impact' })}</span>
           </Button>
@@ -1041,7 +1042,7 @@ const MoCRow = React.memo(function MoCRow({
         <span className="text-sm font-mono font-semibold text-content-secondary w-20 shrink-0">{entry.code}</span>
 
         <span className="flex items-center gap-1.5 shrink-0" title={t(`moc.category_${catKey}`, { defaultValue: MOC_CATEGORY_LABELS[catKey] ?? cap(catKey) })}>
-          <CatIcon size={15} className="text-content-tertiary" />
+          <CatIcon size={16} className="text-content-tertiary" />
         </span>
 
         <span className="text-sm text-content-primary truncate flex-1 min-w-0">{entry.title}</span>
@@ -1088,18 +1089,18 @@ const MoCRow = React.memo(function MoCRow({
               <span
                 className={clsx('inline-flex items-center rounded-md border px-1.5 py-0.5 font-medium', catCfg.color)}
               >
-                <CatIcon size={11} className="mr-1" />
+                <CatIcon size={12} className="mr-1" />
                 {t(`moc.category_${catKey}`, { defaultValue: MOC_CATEGORY_LABELS[catKey] ?? cap(catKey) })}
               </span>
             </span>
             {money && (
               <span className="flex items-center gap-1 text-semantic-warning font-medium">
-                <DollarSign size={13} /> {money}
+                <DollarSign size={14} /> {money}
               </span>
             )}
             {entry.schedule_delta_days !== 0 && (
               <span className="flex items-center gap-1">
-                <CalendarClock size={13} />
+                <CalendarClock size={14} />
                 {entry.schedule_delta_days > 0 ? '+' : ''}
                 {entry.schedule_delta_days} {t('moc.days', { defaultValue: 'days' })}
               </span>
@@ -1124,7 +1125,7 @@ const MoCRow = React.memo(function MoCRow({
                     onAddImpact(entry);
                   }}
                 >
-                  <Plus size={11} />
+                  <Plus size={12} />
                   {t('moc.add_impact', { defaultValue: 'Add impact' })}
                 </button>
               )}
@@ -1173,7 +1174,7 @@ const MoCRow = React.memo(function MoCRow({
                             onDeleteImpact(entry, imp.id);
                           }}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -1893,7 +1894,7 @@ export function MoCPage() {
 
           {/* Toolbar: search, status / category / risk filters, sort, reset,
               and a CSV export of the visible register. */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[180px] flex-1 sm:max-w-xs">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
               <input

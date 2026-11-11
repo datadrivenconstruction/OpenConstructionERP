@@ -161,7 +161,7 @@ export function ModuleBuilderPage() {
           className="flex items-center gap-1.5 text-xs text-content-tertiary"
           data-testid="module-builder-ai-ready"
         >
-          <Sparkles size={13} strokeWidth={1.9} className="shrink-0 text-oe-blue-text" />
+          <Sparkles size={14} strokeWidth={1.9} className="shrink-0 text-oe-blue-text" />
           {t('module_builder.ai_connected', {
             defaultValue:
               'An AI provider is connected, so a module can be drafted from a sentence.',
@@ -174,7 +174,7 @@ export function ModuleBuilderPage() {
           className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning"
           data-testid="module-builder-ai-missing"
         >
-          <AlertTriangle size={13} strokeWidth={1.9} className="shrink-0" />
+          <AlertTriangle size={14} strokeWidth={1.9} className="shrink-0" />
           <span>
             {t('module_builder.ai_missing_v2', {
               defaultValue:
@@ -195,7 +195,7 @@ export function ModuleBuilderPage() {
       <CollapsibleSection
         storageKey="module_builder.how"
         title={t('module_builder.how_title', { defaultValue: 'How the module builder works' })}
-        icon={<Boxes size={15} strokeWidth={1.9} />}
+        icon={<Boxes size={16} strokeWidth={1.9} />}
         subtitle={t('module_builder.how_subtitle', {
           defaultValue: 'What a module is, and the five steps from an idea to a working register.',
         })}
@@ -394,7 +394,7 @@ export function ModuleBuilderPage() {
                 'The module stops serving straight away. Its records stay, and reinstalling it brings them back.',
             })}
           </p>
-          <label className="flex items-start gap-2.5" data-testid="module-builder-drop-data">
+          <label className="flex items-start gap-2" data-testid="module-builder-drop-data">
             <input
               type="checkbox"
               checked={dropData}
@@ -435,7 +435,7 @@ function BuilderConcepts() {
   const concepts = [
     {
       id: 'module',
-      icon: <Boxes size={15} strokeWidth={1.9} />,
+      icon: <Boxes size={16} strokeWidth={1.9} />,
       title: t('module_builder.concept_module_title', { defaultValue: 'Module' }),
       text: t('module_builder.concept_module_text', {
         defaultValue:
@@ -444,7 +444,7 @@ function BuilderConcepts() {
     },
     {
       id: 'field',
-      icon: <Columns3 size={15} strokeWidth={1.9} />,
+      icon: <Columns3 size={16} strokeWidth={1.9} />,
       title: t('module_builder.concept_field_title', { defaultValue: 'Field' }),
       text: t('module_builder.concept_field_text', {
         defaultValue:
@@ -453,7 +453,7 @@ function BuilderConcepts() {
     },
     {
       id: 'check',
-      icon: <ShieldCheck size={15} strokeWidth={1.9} />,
+      icon: <ShieldCheck size={16} strokeWidth={1.9} />,
       title: t('module_builder.concept_check_title', { defaultValue: 'Check' }),
       text: t('module_builder.concept_check_text', {
         defaultValue:
@@ -462,7 +462,7 @@ function BuilderConcepts() {
     },
     {
       id: 'function',
-      icon: <Puzzle size={15} strokeWidth={1.9} />,
+      icon: <Puzzle size={16} strokeWidth={1.9} />,
       title: t('module_builder.concept_function_title', { defaultValue: 'Function' }),
       text: t('module_builder.concept_function_text', {
         defaultValue:
@@ -471,7 +471,7 @@ function BuilderConcepts() {
     },
   ];
   return (
-    <ul className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4" data-testid="module-builder-concepts">
+    <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" data-testid="module-builder-concepts">
       {concepts.map((concept) => (
         <li
           key={concept.id}
@@ -530,9 +530,9 @@ function BuilderSteps() {
     },
   ];
   return (
-    <ol className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5" data-testid="module-builder-steps">
+    <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5" data-testid="module-builder-steps">
       {steps.map((step, i) => (
-        <li key={i} className="flex items-start gap-2.5">
+        <li key={i} className="flex items-start gap-2">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-white">
             {i + 1}
           </span>

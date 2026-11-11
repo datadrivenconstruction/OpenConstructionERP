@@ -31,7 +31,7 @@ import {
 } from './api';
 
 const inputCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input w-full';
 
 const STATUS_VARIANT: Record<CheckStatus, BadgeVariant> = {
   unchecked: 'warning',
@@ -80,7 +80,7 @@ function ValidationPanel({ projectId }: { projectId: string }) {
   if (failed.length === 0) return null;
   return (
     <Card padding="sm" data-testid="measurement-book-findings">
-      <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-2 flex items-center gap-1.5">
         <AlertTriangle size={14} className="text-semantic-warning" />
         {t('measurement_book.findings', { defaultValue: 'Findings' })}
       </h3>
@@ -103,16 +103,16 @@ function PositionsTable({ rows, onOpen }: { rows: PositionSummary[]; onOpen: (p:
   return (
     <Card padding="none">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light text-2xs uppercase text-content-tertiary">
-              <th className="px-3 py-2 text-start">{t('measurement_book.col_ordinal', { defaultValue: 'No.' })}</th>
-              <th className="px-3 py-2 text-start">{t('measurement_book.col_description', { defaultValue: 'Description' })}</th>
-              <th className="px-3 py-2 text-start">{t('measurement_book.col_unit', { defaultValue: 'Unit' })}</th>
-              <th className="px-3 py-2 text-end">{t('measurement_book.col_boq_qty', { defaultValue: 'BOQ qty' })}</th>
-              <th className="px-3 py-2 text-end">{t('measurement_book.col_measured', { defaultValue: 'Measured' })}</th>
-              <th className="px-3 py-2 text-end">{t('measurement_book.col_checked', { defaultValue: 'Checked' })}</th>
-              <th className="px-3 py-2 text-start">{t('measurement_book.col_percent', { defaultValue: '% measured' })}</th>
+            <tr>
+              <th>{t('measurement_book.col_ordinal', { defaultValue: 'No.' })}</th>
+              <th>{t('measurement_book.col_description', { defaultValue: 'Description' })}</th>
+              <th>{t('measurement_book.col_unit', { defaultValue: 'Unit' })}</th>
+              <th className="text-end">{t('measurement_book.col_boq_qty', { defaultValue: 'BOQ qty' })}</th>
+              <th className="text-end">{t('measurement_book.col_measured', { defaultValue: 'Measured' })}</th>
+              <th className="text-end">{t('measurement_book.col_checked', { defaultValue: 'Checked' })}</th>
+              <th>{t('measurement_book.col_percent', { defaultValue: '% measured' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -122,18 +122,18 @@ function PositionsTable({ rows, onOpen }: { rows: PositionSummary[]; onOpen: (p:
                 <tr
                   key={p.boq_position_id}
                   onClick={() => onOpen(p)}
-                  className="cursor-pointer border-b border-border-light hover:bg-surface-secondary/50"
+                  className="cursor-pointer"
                   data-testid="measurement-book-position"
                 >
-                  <td className="px-3 py-2 tabular-nums" dir="ltr">{p.ordinal}</td>
-                  <td className="px-3 py-2 text-content-primary">{p.description}</td>
-                  <td className="px-3 py-2">{p.unit}</td>
-                  <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{p.boq_quantity}</td>
+                  <td className="tabular-nums" dir="ltr">{p.ordinal}</td>
+                  <td>{p.description}</td>
+                  <td>{p.unit}</td>
+                  <td className="text-end tabular-nums" dir="ltr">{p.boq_quantity}</td>
                   <td className={`px-3 py-2 text-end tabular-nums ${over ? 'font-semibold text-semantic-error' : ''}`} dir="ltr">
                     {p.measured_quantity}
                   </td>
-                  <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{p.checked_quantity}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-end tabular-nums" dir="ltr">{p.checked_quantity}</td>
+                  <td>
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-tertiary">
                         <div
@@ -278,7 +278,7 @@ function PositionDetail({ projectId, position, onBack }: { projectId: string; po
         <Button variant="ghost" size="sm" icon={<ArrowLeft size={14} className="rtl:rotate-180" />} onClick={onBack}>
           {t('measurement_book.back', { defaultValue: 'All positions' })}
         </Button>
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           <span dir="ltr">{position.ordinal}</span> {position.description}
         </h2>
         <span className="text-xs text-content-tertiary" dir="ltr">
@@ -297,46 +297,46 @@ function PositionDetail({ projectId, position, onBack }: { projectId: string; po
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border-light text-2xs uppercase text-content-tertiary">
-                  <th className="px-3 py-2 text-start">{t('measurement_book.f_date', { defaultValue: 'Date' })}</th>
-                  <th className="px-3 py-2 text-start">{t('measurement_book.f_location', { defaultValue: 'Location' })}</th>
-                  <th className="px-3 py-2 text-end">{t('measurement_book.f_number', { defaultValue: 'No.' })}</th>
-                  <th className="px-3 py-2 text-end">{t('measurement_book.f_length', { defaultValue: 'Length' })}</th>
-                  <th className="px-3 py-2 text-end">{t('measurement_book.f_breadth', { defaultValue: 'Breadth' })}</th>
-                  <th className="px-3 py-2 text-end">{t('measurement_book.f_height', { defaultValue: 'Height' })}</th>
-                  <th className="px-3 py-2 text-end">{t('measurement_book.col_quantity', { defaultValue: 'Quantity' })}</th>
-                  <th className="px-3 py-2 text-start">{t('measurement_book.f_measured_by', { defaultValue: 'Measured by' })}</th>
-                  <th className="px-3 py-2 text-start">{t('measurement_book.col_status', { defaultValue: 'Status' })}</th>
-                  <th className="px-3 py-2" />
+                <tr>
+                  <th>{t('measurement_book.f_date', { defaultValue: 'Date' })}</th>
+                  <th>{t('measurement_book.f_location', { defaultValue: 'Location' })}</th>
+                  <th className="text-end">{t('measurement_book.f_number', { defaultValue: 'No.' })}</th>
+                  <th className="text-end">{t('measurement_book.f_length', { defaultValue: 'Length' })}</th>
+                  <th className="text-end">{t('measurement_book.f_breadth', { defaultValue: 'Breadth' })}</th>
+                  <th className="text-end">{t('measurement_book.f_height', { defaultValue: 'Height' })}</th>
+                  <th className="text-end">{t('measurement_book.col_quantity', { defaultValue: 'Quantity' })}</th>
+                  <th>{t('measurement_book.f_measured_by', { defaultValue: 'Measured by' })}</th>
+                  <th>{t('measurement_book.col_status', { defaultValue: 'Status' })}</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((e) => (
-                  <tr key={e.id} className="border-b border-border-light" data-testid="measurement-book-entry">
-                    <td className="px-3 py-2 tabular-nums" dir="ltr">{e.entry_date}</td>
-                    <td className="px-3 py-2">{e.location ?? ''}</td>
-                    <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{e.number ?? ''}</td>
-                    <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{e.length ?? ''}</td>
-                    <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{e.breadth ?? ''}</td>
-                    <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{e.height ?? ''}</td>
-                    <td className="px-3 py-2 text-end font-medium tabular-nums" dir="ltr">
+                  <tr key={e.id} data-testid="measurement-book-entry">
+                    <td className="tabular-nums" dir="ltr">{e.entry_date}</td>
+                    <td>{e.location ?? ''}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{e.number ?? ''}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{e.length ?? ''}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{e.breadth ?? ''}</td>
+                    <td className="text-end tabular-nums" dir="ltr">{e.height ?? ''}</td>
+                    <td className="text-end font-medium tabular-nums" dir="ltr">
                       {e.quantity}
                       {e.check_quantity != null && e.check_quantity !== e.quantity && (
                         <span className="ms-1 text-2xs text-content-tertiary">({e.check_quantity})</span>
                       )}
                     </td>
-                    <td className="px-3 py-2">{e.measured_by ?? ''}</td>
-                    <td className="px-3 py-2">
+                    <td>{e.measured_by ?? ''}</td>
+                    <td>
                       <StatusBadge status={e.check_status} />
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" icon={<Check size={13} />} onClick={() => doCheck(e.id, 'checked', e.quantity)}>
+                        <Button variant="ghost" size="sm" icon={<Check size={14} />} onClick={() => doCheck(e.id, 'checked', e.quantity)}>
                           {t('measurement_book.check', { defaultValue: 'Check' })}
                         </Button>
-                        <Button variant="ghost" size="sm" icon={<X size={13} />} onClick={() => doCheck(e.id, 'disputed', e.quantity)}>
+                        <Button variant="ghost" size="sm" icon={<X size={14} />} onClick={() => doCheck(e.id, 'disputed', e.quantity)}>
                           {t('measurement_book.dispute', { defaultValue: 'Dispute' })}
                         </Button>
                         <button
@@ -402,29 +402,29 @@ function RunningBillTab({ projectId }: { projectId: string }) {
     <div className="space-y-4">
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light text-2xs uppercase text-content-tertiary">
-                <th className="px-3 py-2 text-start">{t('measurement_book.col_ordinal', { defaultValue: 'No.' })}</th>
-                <th className="px-3 py-2 text-start">{t('measurement_book.col_description', { defaultValue: 'Description' })}</th>
-                <th className="px-3 py-2 text-end">{t('measurement_book.col_checked', { defaultValue: 'Checked' })}</th>
-                <th className="px-3 py-2 text-end">{t('measurement_book.col_rate', { defaultValue: 'Unit rate' })}</th>
-                <th className="px-3 py-2 text-end">{t('measurement_book.col_value', { defaultValue: 'Value to date' })}</th>
+              <tr>
+                <th>{t('measurement_book.col_ordinal', { defaultValue: 'No.' })}</th>
+                <th>{t('measurement_book.col_description', { defaultValue: 'Description' })}</th>
+                <th className="text-end">{t('measurement_book.col_checked', { defaultValue: 'Checked' })}</th>
+                <th className="text-end">{t('measurement_book.col_rate', { defaultValue: 'Unit rate' })}</th>
+                <th className="text-end">{t('measurement_book.col_value', { defaultValue: 'Value to date' })}</th>
               </tr>
             </thead>
             <tbody>
               {bill.lines.map((l) => (
-                <tr key={l.boq_position_id} className="border-b border-border-light">
-                  <td className="px-3 py-2 tabular-nums" dir="ltr">{l.ordinal}</td>
-                  <td className="px-3 py-2">{l.description}</td>
-                  <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{l.checked_quantity} {l.unit}</td>
-                  <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{l.unit_rate}</td>
-                  <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{l.value_to_date}</td>
+                <tr key={l.boq_position_id}>
+                  <td className="tabular-nums" dir="ltr">{l.ordinal}</td>
+                  <td>{l.description}</td>
+                  <td className="text-end tabular-nums" dir="ltr">{l.checked_quantity} {l.unit}</td>
+                  <td className="text-end tabular-nums" dir="ltr">{l.unit_rate}</td>
+                  <td className="text-end tabular-nums" dir="ltr">{l.value_to_date}</td>
                 </tr>
               ))}
               <tr className="font-semibold">
-                <td className="px-3 py-2" colSpan={4}>{t('measurement_book.total', { defaultValue: 'Total' })}</td>
-                <td className="px-3 py-2 text-end tabular-nums" dir="ltr">{bill.total_value} {bill.currency}</td>
+                <td colSpan={4}>{t('measurement_book.total', { defaultValue: 'Total' })}</td>
+                <td className="text-end tabular-nums" dir="ltr">{bill.total_value} {bill.currency}</td>
               </tr>
             </tbody>
           </table>

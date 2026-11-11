@@ -35,7 +35,7 @@ interface ProposalReviewListProps {
 }
 
 const fieldCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
 export function ProposalReviewList({ proposals, people, busy, onReview }: ProposalReviewListProps) {
   const { t } = useTranslation();
@@ -105,7 +105,7 @@ export function ProposalReviewList({ proposals, people, busy, onReview }: Propos
             return (
               <div
                 key={p.id}
-                className="rounded-lg border border-border-light bg-surface-primary p-2.5 space-y-2"
+                className="rounded-lg border border-border-light bg-surface-primary p-3 space-y-2"
                 data-testid={`proposal-${p.id}`}
               >
                 <div className="flex items-start gap-2">
@@ -128,7 +128,7 @@ export function ProposalReviewList({ proposals, people, busy, onReview }: Propos
                       </div>
                     ) : (
                       <textarea
-                        className={`${fieldCls} resize-vertical`}
+                        className={`${fieldCls} oe-textarea resize-vertical`}
                         rows={p.kind === 'summary' ? 4 : 2}
                         value={d.text}
                         onChange={(e) => patch(p, { text: e.target.value })}

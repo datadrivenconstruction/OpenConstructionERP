@@ -189,7 +189,7 @@ export function DevelopmentGeoPage() {
           'px-5 py-3',
         ].join(' ')}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <span
             className={[
               'inline-flex h-8 w-8 items-center justify-center rounded-md',

@@ -220,7 +220,7 @@ function InboxRow({ item }: { item: InboxItem }) {
           <div className="mt-0.5 truncate text-2xs text-content-tertiary">{item.project_name}</div>
         )}
       </div>
-      <SevIcon size={13} className={clsx('shrink-0 mt-0.5', sevStyle.color)} aria-hidden />
+      <SevIcon size={14} className={clsx('shrink-0 mt-0.5', sevStyle.color)} aria-hidden />
       {clickable && (
         <ArrowRight
           size={14}
@@ -266,7 +266,7 @@ function InboxRow({ item }: { item: InboxItem }) {
           title={acknowledgeLabel}
           className={ROW_ACTION_CLASS}
         >
-          {acknowledged ? <Undo2 size={13} /> : <Check size={13} />}
+          {acknowledged ? <Undo2 size={14} /> : <Check size={14} />}
         </button>
         <button
           type="button"
@@ -276,7 +276,7 @@ function InboxRow({ item }: { item: InboxItem }) {
           title={dismissLabel}
           className={ROW_ACTION_CLASS}
         >
-          <X size={13} />
+          <X size={14} />
         </button>
       </div>
     </div>
@@ -313,7 +313,7 @@ export function InboxPanel({
       {isLoading ? (
         <div className="px-4 py-6 space-y-3" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="flex items-start gap-2.5">
+            <div key={i} className="flex items-start gap-2">
               <div className="h-7 w-7 rounded-md bg-surface-secondary animate-pulse shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-2.5 w-3/4 rounded bg-surface-secondary animate-pulse" />
@@ -395,10 +395,10 @@ export function InboxPanel({
       <button
         type="button"
         onClick={() => navigate('/inbox')}
-        className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
+        className="group flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
       >
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-semantic-warning-bg">
-          <ClipboardCheck size={15} className="text-semantic-warning" />
+          <ClipboardCheck size={16} className="text-semantic-warning" />
         </span>
         <span className="min-w-0">
           <span className="block text-lg font-semibold leading-none tabular-nums text-content-primary">
@@ -412,10 +412,10 @@ export function InboxPanel({
       <button
         type="button"
         onClick={() => navigate('/inbox')}
-        className="group flex flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
+        className="group flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
       >
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-oe-blue-subtle">
-          <Bell size={15} className="text-oe-blue" />
+          <Bell size={16} className="text-oe-blue" />
         </span>
         <span className="min-w-0">
           <span className="block text-lg font-semibold leading-none tabular-nums text-content-primary">
@@ -456,7 +456,7 @@ export function InboxPanel({
               className="inline-flex items-center gap-1 text-xs font-medium text-content-secondary hover:text-oe-blue transition-colors"
             >
               {t('inbox.view_all', { defaultValue: 'View all' })}
-              <ArrowRight size={13} />
+              <ArrowRight size={14} />
             </button>
           }
         />

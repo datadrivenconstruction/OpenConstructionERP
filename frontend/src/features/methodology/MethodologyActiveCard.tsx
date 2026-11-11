@@ -100,7 +100,7 @@ export function MethodologyActiveCard({ projectId }: Props) {
               <select
                 value={draftSlug}
                 onChange={(e) => setDraftSlug(e.target.value)}
-                className="h-9 min-w-[18rem] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select min-w-[18rem]"
               >
                 {!hasInternationalRow && (
                   <option value={INTERNATIONAL_SLUG}>
@@ -129,7 +129,7 @@ export function MethodologyActiveCard({ projectId }: Props) {
         )}
 
         <div className="mt-3 flex items-center gap-2 text-xs text-content-tertiary">
-          <Layers3 size={13} />
+          <Layers3 size={14} />
           <span>
             {t('methodology.active.current', { defaultValue: 'Currently active:' })}{' '}
             <Badge variant="blue" size="sm">

@@ -139,7 +139,7 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-2.5 py-2">
+    <div className="flex items-start gap-2 py-2">
       <span className="mt-0.5 shrink-0 text-content-tertiary">{icon}</span>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
@@ -990,12 +990,12 @@ export function PartnerPackApplyDialog({
   const failurePanel = failure && (
     <div
       role="alert"
-      className="flex items-start gap-2.5 rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-3.5 py-3 text-sm text-semantic-error"
+      className="flex items-start gap-2 rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-3.5 py-3 text-sm text-semantic-error"
     >
       {failure.kind === 'forbidden' ? (
-        <ShieldAlert size={18} className="mt-0.5 shrink-0" aria-hidden />
+        <ShieldAlert size={20} className="mt-0.5 shrink-0" aria-hidden />
       ) : (
-        <XCircle size={18} className="mt-0.5 shrink-0" aria-hidden />
+        <XCircle size={20} className="mt-0.5 shrink-0" aria-hidden />
       )}
       <div className="min-w-0 flex-1">
         <p className="font-semibold">{failureTitle(failure.kind)}</p>
@@ -1074,9 +1074,9 @@ export function PartnerPackApplyDialog({
                 className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-oe-blue/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {installing ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <Power size={15} />
+                  <Power size={16} />
                 )}
                 {t('modules.pack_activate', { defaultValue: 'Activate pack' })}
               </button>
@@ -1228,7 +1228,7 @@ export function PartnerPackApplyDialog({
 
           {isLoading && (
             <div className="flex items-center justify-center gap-2 py-10 text-sm text-content-tertiary">
-              <Loader2 size={18} className="animate-spin" />
+              <Loader2 size={20} className="animate-spin" />
               {t('modules.pack_preview_loading', {
                 defaultValue: 'Checking what will change...',
               })}
@@ -1248,14 +1248,14 @@ export function PartnerPackApplyDialog({
           {plan && (
             <div className="divide-y divide-border-light">
               <Row
-                icon={<Sparkles size={15} />}
+                icon={<Sparkles size={16} />}
                 label={t('modules.pack_branding', { defaultValue: 'Branding' })}
               >
                 {plan.branding.powered_by}
               </Row>
 
               <Row
-                icon={<Coins size={15} />}
+                icon={<Coins size={16} />}
                 label={t('modules.pack_currency_locale', {
                   defaultValue: 'Currency & language',
                 })}
@@ -1277,7 +1277,7 @@ export function PartnerPackApplyDialog({
 
               {plan.default_methodology && (
                 <Row
-                  icon={<Calculator size={15} />}
+                  icon={<Calculator size={16} />}
                   label={t('modules.pack_methodology', {
                     defaultValue: 'Estimating methodology',
                   })}
@@ -1290,7 +1290,7 @@ export function PartnerPackApplyDialog({
 
               {plan.built_in_for_country && (
                 <Row
-                  icon={<Landmark size={15} />}
+                  icon={<Landmark size={16} />}
                   label={t('modules.pack_built_in', { defaultValue: 'Built in for this country' })}
                 >
                   <BuiltInForCountry facts={plan.built_in_for_country} />
@@ -1298,7 +1298,7 @@ export function PartnerPackApplyDialog({
               )}
 
               <Row
-                icon={<Boxes size={15} />}
+                icon={<Boxes size={16} />}
                 label={t('modules.pack_search_index', { defaultValue: 'AI search index' })}
               >
                 <SearchIndexNote inline />
@@ -1306,7 +1306,7 @@ export function PartnerPackApplyDialog({
 
               {/* The country's cost databases, offered before anything loads. */}
               <Row
-                icon={<Database size={15} />}
+                icon={<Database size={16} />}
                 label={t('modules.pack_data', { defaultValue: 'Cost data installed' })}
               >
                 {costBases ? (
@@ -1434,7 +1434,7 @@ export function PartnerPackApplyDialog({
 
               {plan.rule_packs_active.length > 0 && (
                 <Row
-                  icon={<ShieldCheck size={15} />}
+                  icon={<ShieldCheck size={16} />}
                   label={t('modules.pack_standards', {
                     defaultValue: 'Validation standards',
                   })}
@@ -1451,7 +1451,7 @@ export function PartnerPackApplyDialog({
 
               {plan.modules_to_enable.length > 0 && (
                 <Row
-                  icon={<Boxes size={15} />}
+                  icon={<Boxes size={16} />}
                   label={t('modules.pack_modules_enable', {
                     defaultValue: 'Modules switched on',
                   })}
@@ -1464,7 +1464,7 @@ export function PartnerPackApplyDialog({
 
               {willDisable && (
                 <Row
-                  icon={<AlertTriangle size={15} className="text-semantic-warning" />}
+                  icon={<AlertTriangle size={16} className="text-semantic-warning" />}
                   label={t('modules.pack_modules_disable', {
                     defaultValue: 'Modules switched off',
                   })}
@@ -1491,7 +1491,7 @@ export function PartnerPackApplyDialog({
 
               {plan.demo_project && (
                 <Row
-                  icon={<Globe size={15} />}
+                  icon={<Globe size={16} />}
                   label={t('modules.pack_demo', { defaultValue: 'Demo project' })}
                 >
                   <label className="flex cursor-pointer items-center gap-2 text-sm">

@@ -219,7 +219,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
       {/* Add-external modal — small inline portal-free dialog */}
       {showExternalModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => {
             e.stopPropagation();
             setShowExternalModal(false);
@@ -235,7 +235,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
             <div className="flex items-center justify-between mb-3">
               <h3
                 id="external-attendee-title"
-                className="text-sm font-semibold text-content-primary"
+                className="oe-card-title"
               >
                 {t('meetings.add_external_title', {
                   defaultValue: 'Add external attendee',
@@ -250,7 +250,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
                 <X size={16} />
               </button>
             </div>
-            <label className="block text-xs font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('meetings.external_name_label', { defaultValue: 'Full name' })}
             </label>
             <input
@@ -261,7 +261,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
               placeholder={t('meetings.external_name_placeholder', {
                 defaultValue: 'Jane Walker',
               })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input oe-input-lg w-full"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && externalName.trim()) {
                   externalMut.mutate(externalName.trim());

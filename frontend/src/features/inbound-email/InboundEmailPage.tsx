@@ -21,7 +21,7 @@ export function InboundEmailPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="inbound_email.how"
-        icon={<Inbox size={15} className="text-oe-blue" />}
+        icon={<Inbox size={16} className="text-oe-blue" />}
         title={t('inbound_email.flow_title', {
           defaultValue: 'Reading a message for what it says about delay',
         })}

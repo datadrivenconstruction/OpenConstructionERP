@@ -150,16 +150,16 @@ export function GuaranteesPage() {
             />
           ) : (
             <Card padding="none" className="overflow-x-auto">
-              <table className="w-full min-w-[860px] text-sm">
+              <table className="oe-table min-w-[860px]">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.col_reference', { defaultValue: 'Reference' })}</th>
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.field_type', { defaultValue: 'Type' })}</th>
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.field_issuer_bank', { defaultValue: 'Issuing bank' })}</th>
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.field_beneficiary', { defaultValue: 'Beneficiary' })}</th>
-                    <th className="px-4 py-2.5 text-right font-medium">{t('guarantees.field_amount', { defaultValue: 'Amount' })}</th>
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.field_expiry_date', { defaultValue: 'Expiry date' })}</th>
-                    <th className="px-4 py-2.5 font-medium">{t('guarantees.col_status', { defaultValue: 'Status' })}</th>
+                  <tr>
+                    <th>{t('guarantees.col_reference', { defaultValue: 'Reference' })}</th>
+                    <th>{t('guarantees.field_type', { defaultValue: 'Type' })}</th>
+                    <th>{t('guarantees.field_issuer_bank', { defaultValue: 'Issuing bank' })}</th>
+                    <th>{t('guarantees.field_beneficiary', { defaultValue: 'Beneficiary' })}</th>
+                    <th className="text-right">{t('guarantees.field_amount', { defaultValue: 'Amount' })}</th>
+                    <th>{t('guarantees.field_expiry_date', { defaultValue: 'Expiry date' })}</th>
+                    <th>{t('guarantees.col_status', { defaultValue: 'Status' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -167,25 +167,25 @@ export function GuaranteesPage() {
                     <tr
                       key={g.id}
                       onClick={() => navigate(`/projects/${projectId}/guarantees/${g.id}`)}
-                      className="cursor-pointer border-b border-border-light last:border-0 hover:bg-surface-secondary"
+                      className="cursor-pointer last:border-0"
                     >
-                      <td className="px-4 py-3 font-medium text-content-primary">
+                      <td className="font-medium">
                         <Link to={`/projects/${projectId}/guarantees/${g.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
                           {g.reference}
                         </Link>
                         <div className="text-2xs font-normal text-content-tertiary">{directionLabel(t, g.direction)}</div>
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">{typeLabel(t, g.guarantee_type)}</td>
-                      <td className="px-4 py-3 text-content-secondary">{g.issuer_bank || '—'}</td>
-                      <td className="px-4 py-3 text-content-secondary">{g.beneficiary || '—'}</td>
-                      <td className="px-4 py-3 text-right text-content-primary"><Money value={g.amount} currency={g.currency} /></td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">{typeLabel(t, g.guarantee_type)}</td>
+                      <td className="text-content-secondary">{g.issuer_bank || '—'}</td>
+                      <td className="text-content-secondary">{g.beneficiary || '—'}</td>
+                      <td className="text-right"><Money value={g.amount} currency={g.currency} /></td>
+                      <td className="text-content-secondary">
                         <div className="flex flex-wrap items-center gap-2">
                           <DateDisplay value={g.expiry_date} />
                           <AlertBadge band={g.alert_band} days={g.days_to_expiry} />
                         </div>
                       </td>
-                      <td className="px-4 py-3"><Badge variant={statusVariant(g.status)}>{statusLabel(t, g.status)}</Badge></td>
+                      <td><Badge variant={statusVariant(g.status)}>{statusLabel(t, g.status)}</Badge></td>
                     </tr>
                   ))}
                 </tbody>

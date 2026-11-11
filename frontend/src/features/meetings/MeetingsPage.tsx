@@ -151,7 +151,7 @@ const ATTENDEE_STATUS_ICON: Record<AttendeeStatus, React.ReactNode> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 const MEETING_TYPE_CARD_CONFIG: Record<
   MeetingType,
@@ -353,7 +353,7 @@ function MeetingPeopleFields({
             value={form.attendees}
             onChange={(e) => set('attendees', e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            className="w-full oe-textarea resize-none"
             placeholder={t('meetings.attendees_placeholder', {
               defaultValue: 'One name per line',
             })}
@@ -437,7 +437,7 @@ function AttachmentDropzone({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-content-primary mb-1.5">
+      <label className="oe-label">
         {t('meetings.field_attachments', { defaultValue: 'Attachments' })}
       </label>
 
@@ -619,7 +619,7 @@ function CreateMeetingModal({
                       : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                   )}
                 >
-                  <TypeIcon size={18} />
+                  <TypeIcon size={20} />
                   <span className="text-2xs font-medium leading-tight">
                     {t(`meetings.type_${mt}`, {
                       defaultValue: mt.charAt(0).toUpperCase() + mt.slice(1),
@@ -661,11 +661,8 @@ function CreateMeetingModal({
             placeholder={t('meetings.title_placeholder', {
               defaultValue: 'e.g. Weekly Progress Meeting #12',
             })}
-            className={clsx(
-              inputCls,
-              titleError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls}
+            aria-invalid={titleError ? true : undefined}
           />
         </WideModalField>
 
@@ -685,11 +682,8 @@ function CreateMeetingModal({
               set('date', e.target.value);
               setTouched(true);
             }}
-            className={clsx(
-              inputCls,
-              dateError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls}
+            aria-invalid={dateError ? true : undefined}
           />
         </WideModalField>
 
@@ -715,7 +709,7 @@ function CreateMeetingModal({
             onChange={(e) => set('minutes', e.target.value)}
             rows={8}
             maxLength={50000}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical"
+            className="w-full oe-textarea resize-vertical"
             placeholder={t('meetings.minutes_placeholder', {
               defaultValue: 'Meeting description, minutes, or notes...',
             })}
@@ -944,7 +938,7 @@ function EditMeetingModal({
                       : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                   )}
                 >
-                  <TypeIcon size={18} />
+                  <TypeIcon size={20} />
                   <span className="text-2xs font-medium leading-tight">
                     {t(`meetings.type_${mt}`, {
                       defaultValue: mt.charAt(0).toUpperCase() + mt.slice(1),
@@ -975,11 +969,8 @@ function EditMeetingModal({
               set('title', e.target.value);
               setTouched(true);
             }}
-            className={clsx(
-              inputCls,
-              titleError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls}
+            aria-invalid={titleError ? true : undefined}
             data-testid="edit-meeting-title"
           />
         </WideModalField>
@@ -1000,11 +991,8 @@ function EditMeetingModal({
               set('date', e.target.value);
               setTouched(true);
             }}
-            className={clsx(
-              inputCls,
-              dateError &&
-                'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            className={inputCls}
+            aria-invalid={dateError ? true : undefined}
           />
         </WideModalField>
 
@@ -1027,7 +1015,7 @@ function EditMeetingModal({
             onChange={(e) => set('minutes', e.target.value)}
             rows={8}
             maxLength={50000}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical"
+            className="w-full oe-textarea resize-vertical"
             data-testid="edit-meeting-minutes"
           />
         </WideModalField>
@@ -1209,7 +1197,7 @@ function ImportSummaryModal({
   const sourceCfg = detectedSource ? SOURCE_LABELS[detectedSource] || SOURCE_LABELS.other : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('meetings.import_summary', { defaultValue: 'Import Meeting Summary' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
@@ -1220,10 +1208,10 @@ function ImportSummaryModal({
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
                 aria-label={t('common.back', { defaultValue: 'Back' })}
               >
-                <ArrowLeft size={18} />
+                <ArrowLeft size={20} />
               </button>
             )}
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {step === 'preview'
                 ? t('meetings.review_import', { defaultValue: 'Review Extracted Data' })
                 : t('meetings.import_summary', { defaultValue: 'Import Meeting Summary' })}
@@ -1234,7 +1222,7 @@ function ImportSummaryModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -1426,7 +1414,7 @@ function ImportSummaryModal({
 
               {/* Title (editable) */}
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('meetings.field_title', { defaultValue: 'Title' })}
                 </label>
                 <div className="flex items-center gap-2">
@@ -1441,7 +1429,7 @@ function ImportSummaryModal({
 
               {/* Meeting Type (editable) */}
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('meetings.field_type', { defaultValue: 'Meeting Type' })}
                 </label>
                 <div className="relative">
@@ -1467,7 +1455,7 @@ function ImportSummaryModal({
               {/* Key Topics */}
               {previewData.key_topics.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1.5 uppercase tracking-wide">
+                  <label className="oe-overline block mb-1.5">
                     {t('meetings.label_topics', { defaultValue: 'Key Topics' })}
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -1483,7 +1471,7 @@ function ImportSummaryModal({
               {/* Attendees (checkboxes) */}
               {editAttendees.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1.5 uppercase tracking-wide">
+                  <label className="oe-overline block mb-1.5">
                     {t('meetings.label_attendees', { defaultValue: 'Attendees' })}
                     <span className="ml-1 text-content-tertiary font-normal">
                       ({editAttendees.filter((a) => a.included).length}/{editAttendees.length})
@@ -1519,7 +1507,7 @@ function ImportSummaryModal({
               {/* Action Items (editable, removable) */}
               {editActionItems.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1.5 uppercase tracking-wide">
+                  <label className="oe-overline block mb-1.5">
                     {t('meetings.label_actions', { defaultValue: 'Action Items' })}
                     <span className="ml-1 text-content-tertiary font-normal">
                       ({editActionItems.filter((a) => a.included).length}/{editActionItems.length})
@@ -1571,7 +1559,7 @@ function ImportSummaryModal({
               {/* Decisions (read-only) */}
               {previewData.decisions.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1.5 uppercase tracking-wide">
+                  <label className="oe-overline block mb-1.5">
                     {t('meetings.label_decisions', { defaultValue: 'Decisions' })}
                   </label>
                   <div className="rounded-lg bg-semantic-success-bg border border-semantic-success/30 p-3 space-y-1.5">
@@ -1595,7 +1583,7 @@ function ImportSummaryModal({
               {/* Summary preview */}
               {previewData.summary && (
                 <div>
-                  <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                  <label className="oe-overline block mb-1">
                     {t('meetings.label_summary', { defaultValue: 'Summary' })}
                   </label>
                   <p className="text-sm text-content-secondary bg-surface-secondary rounded-lg p-3">
@@ -2542,7 +2530,7 @@ export function MeetingsPage() {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as MeetingType | '')}
             aria-label={t('meetings.filter_type', { defaultValue: 'Filter by type' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+            className="oe-select oe-input-lg ps-3 pe-9 sm:w-44"
           >
             <option value="">
               {t('meetings.filter_all_types', { defaultValue: 'All Types' })}
@@ -2566,7 +2554,7 @@ export function MeetingsPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as MeetingStatus | '')}
             aria-label={t('meetings.filter_status', { defaultValue: 'Filter by status' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg ps-3 pe-9 sm:w-40"
           >
             <option value="">
               {t('meetings.filter_all_statuses', { defaultValue: 'All Statuses' })}

@@ -99,7 +99,7 @@ export function EngineModePicker({ current, onChange }: EngineModePickerProps) {
             ].join(' ')}
             data-testid={`geo-engine-tab-${it.key}`}
           >
-            <Icon size={13} strokeWidth={2} />
+            <Icon size={14} strokeWidth={2} />
             {it.label}
           </button>
         );

@@ -120,7 +120,7 @@ export function Disclosure({
         onClick={onToggle}
         aria-expanded={open}
         data-testid={testId}
-        className="flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-start transition-colors hover:bg-surface-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+        className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-start transition-colors hover:bg-surface-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
       >
         {icon && <span className="shrink-0 text-content-tertiary">{icon}</span>}
         <span className="min-w-0 flex-1">

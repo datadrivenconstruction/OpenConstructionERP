@@ -162,11 +162,11 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         aria-label={t('geo_hub.legend.expand', { defaultValue: 'Show map layers' })}
         title={t('geo_hub.legend.expand', { defaultValue: 'Show map layers' })}
       >
-        <Layers size={13} strokeWidth={2} className="text-emerald-300" />
+        <Layers size={14} strokeWidth={2} className="text-emerald-300" />
         <span className="tabular-nums">
           {query.isLoading ? '…' : query.isError ? '!' : total}
         </span>
-        <ChevronUp size={13} strokeWidth={2.25} className="text-white/70" />
+        <ChevronUp size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -184,7 +184,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <h2 className="oe-overline">
             {t('geo_hub.legend.title', { defaultValue: 'Map layers' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -236,7 +236,7 @@ export function MapLayerLegend({ projectId }: MapLayerLegendProps) {
         )}
         {!query.isLoading && query.isError && (
           <div className="m-1 flex items-start gap-2 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-2.5 text-2xs text-semantic-error">
-            <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
             <span>
               {t('geo_hub.legend.error_hint', {
                 defaultValue:

@@ -253,7 +253,7 @@ function ActivePackSpotlight({
             </span>
             {t('packs.active_eyebrow', { defaultValue: 'Active pack' })}
           </p>
-          <h2 id="packs-active-title" className="mt-1 text-lg font-semibold leading-snug text-content-primary">
+          <h2 id="packs-active-title" className="oe-section-title mt-1">
             {entry.name}
           </h2>
           {summary && <p className="mt-0.5 text-sm text-content-secondary">{summary}</p>}
@@ -555,7 +555,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             : 'border-border bg-surface-primary text-content-secondary hover:border-content-tertiary/60 hover:text-content-primary',
         )}
       >
-        <Icon size={13} aria-hidden />
+        <Icon size={14} aria-hidden />
         {label}
         <span
           className={clsx(
@@ -584,7 +584,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue hover:underline"
             data-testid="packs-open-page"
           >
-            <PackageOpen size={15} aria-hidden />
+            <PackageOpen size={16} aria-hidden />
             {t('packs.open_page', { defaultValue: 'Open the packs page' })}
           </Link>
         )}
@@ -597,7 +597,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             className="inline-flex items-center gap-1.5 text-sm font-medium text-content-secondary hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded"
             data-testid="packs-install-toggle"
           >
-            <UploadCloud size={15} aria-hidden />
+            <UploadCloud size={16} aria-hidden />
             {t('packs.install_custom', { defaultValue: 'Install a custom pack' })}
             <ChevronDown size={14} aria-hidden className={clsx('transition-transform', installOpen && 'rotate-180')} />
           </button>
@@ -648,7 +648,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
                 defaultValue: 'Search by name, country, language or standard',
               })}
               data-testid="packs-search"
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary pe-9 ps-9 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/60 focus:outline-none focus:ring-2 focus:ring-oe-blue/25 [&::-webkit-search-cancel-button]:hidden"
+              className="oe-input oe-input-lg w-full pe-9 ps-9 [&::-webkit-search-cancel-button]:hidden"
             />
             {qInput && (
               <button
@@ -762,7 +762,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
               value={spied ?? ''}
               onChange={(e) => jumpToSection(e.target.value)}
               data-testid="packs-jump"
-              className="h-9 max-w-[16rem] cursor-pointer rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
+              className="oe-select max-w-[16rem] cursor-pointer"
             >
               {sections.map((s) => (
                 <option key={s.id} value={s.id}>

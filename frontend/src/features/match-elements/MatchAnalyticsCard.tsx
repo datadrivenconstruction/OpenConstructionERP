@@ -134,7 +134,7 @@ function BreakdownTable({
               </div>
               <div className="flex-1 relative h-4 rounded bg-surface-tertiary overflow-hidden">
                 <div
-                  className="absolute inset-y-0 left-0 bg-sky-400/70 dark:bg-sky-500/60"
+                  className="absolute inset-y-0 left-0 bg-semantic-info/70"
                   style={{ width: `${pct}%` }}
                 />
                 <div className="absolute inset-0 flex items-center justify-end pr-1.5 text-2xs font-medium text-content-primary">
@@ -239,7 +239,7 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex-1 flex items-center gap-2.5 text-left min-w-0"
+          className="flex-1 flex items-center gap-2 text-left min-w-0"
           aria-expanded={open}
         >
           <span className="shrink-0 w-6 h-6 rounded-md bg-semantic-info text-white inline-flex items-center justify-center">
@@ -249,7 +249,7 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
             <div className="text-sm font-semibold text-content-primary leading-tight">
               {t('match_elements.analytics_title', 'Match analytics')}
               {data.alerts.length > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-amber-200 text-semantic-warning dark:bg-amber-800 dark:text-amber-100">
+                <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-semibold bg-semantic-warning/20 text-semantic-warning">
                   <AlertTriangle className="w-2.5 h-2.5" />
                   {t('match_elements.analytics_alerts_count', '{{n}} alert', {
                     n: data.alerts.length,
@@ -282,7 +282,7 @@ export function MatchAnalyticsCard({ projectId }: MatchAnalyticsCardProps) {
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="shrink-0 text-xs rounded border border-border bg-surface-primary px-2 py-1 text-content-primary"
+          className="shrink-0 oe-select oe-input-sm"
           aria-label={t('match_elements.analytics_window_label', 'Window')}
         >
           {WINDOW_OPTIONS.map((d) => (

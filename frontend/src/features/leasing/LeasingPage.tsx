@@ -82,7 +82,7 @@ function HowItWorks() {
   return (
     <CollapsibleSection
       storageKey="leasing.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('leasing.flow_title', { defaultValue: 'How leasing fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -137,7 +137,7 @@ function HowItWorks() {
 }
 
 const inputCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input w-full';
 
 function NewLeaseForm({ projectId, onDone }: { projectId: string; onDone: () => void }) {
   const { t } = useTranslation();
@@ -186,7 +186,7 @@ function NewLeaseForm({ projectId, onDone }: { projectId: string; onDone: () => 
         {field(t('leasing.col_code', { defaultValue: 'Lease' }), <input className={inputCls} value={form.code} onChange={(e) => set('code', e.target.value)} />)}
         {field(
           t('leasing.f_unit_kind', { defaultValue: 'Unit type' }),
-          <select className={inputCls} value={form.unit_kind} onChange={(e) => set('unit_kind', e.target.value as UnitKind)}>
+          <select className={`${inputCls} oe-select`} value={form.unit_kind} onChange={(e) => set('unit_kind', e.target.value as UnitKind)}>
             <option value="plot">{t('leasing.unit_plot', { defaultValue: 'Plot or unit of a development' })}</option>
             <option value="asset">{t('leasing.unit_asset', { defaultValue: 'Asset register entry' })}</option>
             <option value="unit">{t('leasing.unit_other', { defaultValue: 'Other unit' })}</option>
@@ -213,7 +213,7 @@ function NewLeaseForm({ projectId, onDone }: { projectId: string; onDone: () => 
         {field(t('leasing.f_currency', { defaultValue: 'Currency' }), <input maxLength={3} dir="ltr" className={inputCls} value={form.currency} onChange={(e) => set('currency', e.target.value)} />)}
         {field(
           t('leasing.col_frequency', { defaultValue: 'Billed' }),
-          <select className={inputCls} value={form.frequency} onChange={(e) => set('frequency', e.target.value as Frequency)}>
+          <select className={`${inputCls} oe-select`} value={form.frequency} onChange={(e) => set('frequency', e.target.value as Frequency)}>
             {(['monthly', 'quarterly', 'semiannual', 'annual'] as Frequency[]).map((f) => (
               <option key={f} value={f}>{frequencyLabel(f, t)}</option>
             ))}
@@ -222,7 +222,7 @@ function NewLeaseForm({ projectId, onDone }: { projectId: string; onDone: () => 
         {field(t('leasing.col_deposit', { defaultValue: 'Deposit' }), <input inputMode="decimal" dir="ltr" className={inputCls} value={form.deposit} onChange={(e) => set('deposit', e.target.value)} />)}
         {field(
           t('leasing.f_escalation', { defaultValue: 'Escalation' }),
-          <select className={inputCls} value={form.escalation_kind} onChange={(e) => set('escalation_kind', e.target.value as EscalationKind)}>
+          <select className={`${inputCls} oe-select`} value={form.escalation_kind} onChange={(e) => set('escalation_kind', e.target.value as EscalationKind)}>
             <option value="none">{t('leasing.esc_none', { defaultValue: 'No escalation' })}</option>
             <option value="fixed">{t('leasing.esc_fixed', { defaultValue: 'Fixed percent' })}</option>
             <option value="index">{t('leasing.esc_index', { defaultValue: 'Linked to an index' })}</option>
@@ -369,32 +369,32 @@ export function LeasingPage() {
                     description={t('leasing.empty_desc', { defaultValue: 'Draft the first lease of a unit in this project.' })}
                   />
                 ) : (
-                  <table className="w-full text-sm">
-                    <thead className="text-xs text-content-tertiary">
-                      <tr className="border-b border-border-light">
-                        <th className="px-3 py-2 text-start">{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
-                        <th className="px-3 py-2 text-start">{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
-                        <th className="px-3 py-2 text-start">{t('leasing.col_term', { defaultValue: 'Term' })}</th>
-                        <th className="px-3 py-2 text-end">{t('leasing.col_rent', { defaultValue: 'Rent per period' })}</th>
-                        <th className="px-3 py-2 text-start">{t('leasing.col_frequency', { defaultValue: 'Billed' })}</th>
-                        <th className="px-3 py-2 text-start">{t('leasing.col_status', { defaultValue: 'Status' })}</th>
+                  <table className="oe-table">
+                    <thead>
+                      <tr>
+                        <th>{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
+                        <th>{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
+                        <th>{t('leasing.col_term', { defaultValue: 'Term' })}</th>
+                        <th className="text-end">{t('leasing.col_rent', { defaultValue: 'Rent per period' })}</th>
+                        <th>{t('leasing.col_frequency', { defaultValue: 'Billed' })}</th>
+                        <th>{t('leasing.col_status', { defaultValue: 'Status' })}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {leases.map((l) => (
-                        <tr key={l.id} className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50">
-                          <td className="px-3 py-2">
+                        <tr key={l.id} className="last:border-0">
+                          <td>
                             <Link className="font-medium text-oe-blue hover:underline" to={`/leasing/${l.id}`}>
                               {l.code}
                             </Link>
                           </td>
-                          <td className="px-3 py-2">{l.unit_label || l.unit_ref}</td>
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td>{l.unit_label || l.unit_ref}</td>
+                          <td className="whitespace-nowrap">
                             {fmtDate(l.start_date)} – {fmtDate(l.end_date)}
                           </td>
-                          <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(l.rent_amount, l.currency)}</td>
-                          <td className="px-3 py-2">{frequencyLabel(l.frequency, t)}</td>
-                          <td className="px-3 py-2">
+                          <td className="text-end tabular-nums">{fmtCurrency(l.rent_amount, l.currency)}</td>
+                          <td>{frequencyLabel(l.frequency, t)}</td>
+                          <td>
                             <Badge variant={STATUS_VARIANT[l.status]} size="sm">
                               {statusLabel(l.status, t)}
                             </Badge>
@@ -419,24 +419,24 @@ export function LeasingPage() {
                   description={t('leasing.roll_empty_desc', { defaultValue: 'Active leases and leases under notice appear here.' })}
                 />
               ) : (
-                <table className="w-full text-sm">
-                  <thead className="text-xs text-content-tertiary">
-                    <tr className="border-b border-border-light">
-                      <th className="px-3 py-2 text-start">{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_tenant', { defaultValue: 'Tenant' })}</th>
-                      <th className="px-3 py-2 text-end">{t('leasing.col_current_rent', { defaultValue: 'Current rent' })}</th>
-                      <th className="px-3 py-2 text-end">{t('leasing.col_annual_rent', { defaultValue: 'Annual rent' })}</th>
-                      <th className="px-3 py-2 text-end">{t('leasing.col_deposit', { defaultValue: 'Deposit' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_next_due', { defaultValue: 'Next due' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_end', { defaultValue: 'End' })}</th>
+                <table className="oe-table">
+                  <thead>
+                    <tr>
+                      <th>{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
+                      <th>{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
+                      <th>{t('leasing.col_tenant', { defaultValue: 'Tenant' })}</th>
+                      <th className="text-end">{t('leasing.col_current_rent', { defaultValue: 'Current rent' })}</th>
+                      <th className="text-end">{t('leasing.col_annual_rent', { defaultValue: 'Annual rent' })}</th>
+                      <th className="text-end">{t('leasing.col_deposit', { defaultValue: 'Deposit' })}</th>
+                      <th>{t('leasing.col_next_due', { defaultValue: 'Next due' })}</th>
+                      <th>{t('leasing.col_end', { defaultValue: 'End' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(rollQ.data?.items ?? []).map((r) => (
-                      <tr key={r.lease_id} className="border-b border-border-light last:border-0">
-                        <td className="px-3 py-2">{r.unit_label || r.unit_ref}</td>
-                        <td className="px-3 py-2">
+                      <tr key={r.lease_id} className="last:border-0">
+                        <td>{r.unit_label || r.unit_ref}</td>
+                        <td>
                           <Link className="text-oe-blue hover:underline" to={`/leasing/${r.lease_id}`}>
                             {r.code}
                           </Link>{' '}
@@ -444,22 +444,22 @@ export function LeasingPage() {
                             {statusLabel(r.status, t)}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2">{r.tenant_name}</td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(r.current_rent, r.currency)}</td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(r.annual_rent, r.currency)}</td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(r.deposit, r.currency)}</td>
-                        <td className="px-3 py-2">{r.next_due_date ? fmtDate(r.next_due_date) : '–'}</td>
-                        <td className="px-3 py-2">{fmtDate(r.end_date)}</td>
+                        <td>{r.tenant_name}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(r.current_rent, r.currency)}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(r.annual_rent, r.currency)}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(r.deposit, r.currency)}</td>
+                        <td>{r.next_due_date ? fmtDate(r.next_due_date) : '–'}</td>
+                        <td>{fmtDate(r.end_date)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
                     {Object.entries(rollQ.data?.totals ?? {}).map(([cur, v]) => (
                       <tr key={cur} className="font-semibold">
-                        <td className="px-3 py-2" colSpan={4}>
+                        <td colSpan={4}>
                           {t('leasing.total', { defaultValue: 'Total' })}
                         </td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(v, cur)}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(v, cur)}</td>
                         <td colSpan={3} />
                       </tr>
                     ))}
@@ -482,48 +482,48 @@ export function LeasingPage() {
                   })}
                 />
               ) : (
-                <table className="w-full text-sm">
-                  <thead className="text-xs text-content-tertiary">
-                    <tr className="border-b border-border-light">
-                      <th className="px-3 py-2 text-start">{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_tenant', { defaultValue: 'Tenant' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_invoice', { defaultValue: 'Invoice' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_due_date', { defaultValue: 'Due' })}</th>
-                      <th className="px-3 py-2 text-start">{t('leasing.col_age', { defaultValue: 'Overdue' })}</th>
-                      <th className="px-3 py-2 text-end">{t('leasing.col_paid', { defaultValue: 'Paid' })}</th>
-                      <th className="px-3 py-2 text-end">{t('leasing.col_outstanding', { defaultValue: 'Outstanding' })}</th>
+                <table className="oe-table">
+                  <thead>
+                    <tr>
+                      <th>{t('leasing.col_code', { defaultValue: 'Lease' })}</th>
+                      <th>{t('leasing.col_unit', { defaultValue: 'Unit' })}</th>
+                      <th>{t('leasing.col_tenant', { defaultValue: 'Tenant' })}</th>
+                      <th>{t('leasing.col_invoice', { defaultValue: 'Invoice' })}</th>
+                      <th>{t('leasing.col_due_date', { defaultValue: 'Due' })}</th>
+                      <th>{t('leasing.col_age', { defaultValue: 'Overdue' })}</th>
+                      <th className="text-end">{t('leasing.col_paid', { defaultValue: 'Paid' })}</th>
+                      <th className="text-end">{t('leasing.col_outstanding', { defaultValue: 'Outstanding' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(arrearsQ.data?.items ?? []).map((r) => (
-                      <tr key={r.invoice_id} className="border-b border-border-light last:border-0">
-                        <td className="px-3 py-2">
+                      <tr key={r.invoice_id} className="last:border-0">
+                        <td>
                           <Link className="text-oe-blue hover:underline" to={`/leasing/${r.lease_id}`}>
                             {r.code}
                           </Link>
                         </td>
-                        <td className="px-3 py-2">{r.unit_label}</td>
-                        <td className="px-3 py-2">{r.tenant_name}</td>
-                        <td className="px-3 py-2">{r.invoice_number}</td>
-                        <td className="px-3 py-2">{r.due_date ? fmtDate(r.due_date) : '–'}</td>
-                        <td className="px-3 py-2">
+                        <td>{r.unit_label}</td>
+                        <td>{r.tenant_name}</td>
+                        <td>{r.invoice_number}</td>
+                        <td>{r.due_date ? fmtDate(r.due_date) : '–'}</td>
+                        <td>
                           <Badge variant={r.bucket === 'over_90' || r.bucket === '61_90' ? 'error' : 'warning'} size="sm">
                             {bucketLabel(r.bucket, t)}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(r.paid, r.currency)}</td>
-                        <td className="px-3 py-2 text-end font-semibold tabular-nums">{fmtCurrency(r.due, r.currency)}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(r.paid, r.currency)}</td>
+                        <td className="text-end font-semibold tabular-nums">{fmtCurrency(r.due, r.currency)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
                     {Object.entries(arrearsQ.data?.totals ?? {}).map(([cur, b]) => (
                       <tr key={cur} className="font-semibold">
-                        <td className="px-3 py-2" colSpan={7}>
+                        <td colSpan={7}>
                           {t('leasing.total', { defaultValue: 'Total' })}
                         </td>
-                        <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(b.total ?? '0', cur)}</td>
+                        <td className="text-end tabular-nums">{fmtCurrency(b.total ?? '0', cur)}</td>
                       </tr>
                     ))}
                   </tfoot>

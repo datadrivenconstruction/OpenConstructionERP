@@ -101,7 +101,7 @@ function PackCardImpl({
       <div className="flex items-start gap-3">
         <PackEmblem pack={pack} size={44} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug text-content-primary">
+          <h3 className="oe-card-title">
             {/* The whole card is the link to the pack's page; the action
                 button sits above the stretched area. */}
             <Link
@@ -118,7 +118,7 @@ function PackCardImpl({
         </div>
         {isActive && (
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-semibold text-semantic-success">
-            <Check size={11} aria-hidden />
+            <Check size={12} aria-hidden />
             {t('modules.active', { defaultValue: 'Active' })}
           </span>
         )}
@@ -132,7 +132,7 @@ function PackCardImpl({
         <span
           className="inline-flex h-5 items-center gap-1 rounded-md bg-surface-secondary px-1.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary"
         >
-          <TypeIcon size={11} aria-hidden style={{ color: pack.branding.accent_color ?? pack.branding.primary_color }} />
+          <TypeIcon size={12} aria-hidden style={{ color: pack.branding.accent_color ?? pack.branding.primary_color }} />
           {t(meta.labelKey, { defaultValue: meta.defaultLabel })}
         </span>
         <span

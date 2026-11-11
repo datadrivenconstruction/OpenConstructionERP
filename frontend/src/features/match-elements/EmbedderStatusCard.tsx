@@ -115,7 +115,7 @@ function LoadedState({ status }: { status: EmbedderStatus }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-left"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left"
         aria-expanded={open}
       >
         <span className="shrink-0 w-6 h-6 rounded-md bg-semantic-success text-white inline-flex items-center justify-center">
@@ -125,7 +125,7 @@ function LoadedState({ status }: { status: EmbedderStatus }) {
           <div className="text-sm font-semibold text-semantic-success leading-tight">
             {t('match_elements.embedder_loaded_title', 'Language model ready')}
           </div>
-          <div className="text-2xs text-emerald-800/80 dark:text-emerald-200/80 truncate">
+          <div className="text-2xs text-semantic-success/80 truncate">
             {t(
               'match_elements.embedder_loaded_caption',
               '{{model}} · {{precision}} · ~{{size}} MB · {{license}} · {{n}}+ languages',
@@ -240,7 +240,7 @@ function MissingState({ status }: { status: EmbedderStatus }) {
           <div className="mt-0.5">
             <TrustBadges status={status} />
           </div>
-          <p className="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
+          <p className="mt-2 text-sm text-semantic-warning/90 leading-relaxed">
             {installSentence(status, t)}
           </p>
         </div>
@@ -250,12 +250,12 @@ function MissingState({ status }: { status: EmbedderStatus }) {
         <>
           <CopyableCommand command={status.pip_command} />
 
-          <div className="text-2xs text-amber-900/80 dark:text-amber-100/80">
+          <div className="text-2xs text-semantic-warning/80">
             {t(
               'match_elements.embedder_install_hint_after',
               'After install, restart the backend.',
             )}{' '}
-            <span className="text-amber-800/70 dark:text-amber-200/70">
+            <span className="text-semantic-warning/70">
               {t(
                 'match_elements.embedder_size_caption',
                 '~{{int8}} MB download (INT8) or ~{{fp32}} MB (FP32).',
@@ -266,7 +266,7 @@ function MissingState({ status }: { status: EmbedderStatus }) {
         </>
       )}
 
-      <div className="text-2xs text-amber-900/80 dark:text-amber-100/80 pt-1 border-t border-semantic-warning/30 dark:border-amber-800/60">
+      <div className="text-2xs text-semantic-warning/80 pt-1 border-t border-semantic-warning/30">
         <a
           href={status.homepage}
           target="_blank"

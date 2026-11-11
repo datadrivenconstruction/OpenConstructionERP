@@ -58,7 +58,7 @@ interface MinutesDialogProps {
 const inputCls =
   'h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical';
+  'oe-textarea w-full resize-vertical';
 
 async function downloadMinutesPdf(meetingId: string, locale: string): Promise<void> {
   const token = useAuthStore.getState().accessToken;
@@ -268,7 +268,7 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
         )}
         {minutes && (pdfLanguagesQ.data?.length ?? 0) > 0 && (
           <select
-            className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs"
+            className="oe-select oe-input-sm"
             value={pdfLocale}
             onChange={(e) => setPdfLocale(e.target.value)}
             aria-label={t('meetings.audio.pdf_language', { defaultValue: 'PDF language' })}
@@ -538,13 +538,13 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
                     <span className="flex-1 min-w-[160px] text-content-primary">{ai.description}</span>
                     {ai.brought_forward && (
                       <Badge variant="warning" size="sm">
-                        <ArrowUpRight size={11} className="mr-0.5" />
+                        <ArrowUpRight size={12} className="mr-0.5" />
                         {t('meetings.brought_forward', { defaultValue: 'Brought forward' })}
                       </Badge>
                     )}
                     {ai.overdue && (
                       <Badge variant="error" size="sm">
-                        <AlertTriangle size={11} className="mr-0.5" />
+                        <AlertTriangle size={12} className="mr-0.5" />
                         {t('meetings.overdue', { defaultValue: 'Overdue' })}
                       </Badge>
                     )}

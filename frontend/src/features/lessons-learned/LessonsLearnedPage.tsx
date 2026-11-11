@@ -13,7 +13,7 @@ import { lessonsApi, type Impact, type Lesson, type LessonInput } from './api';
 
 const IMPACTS: Impact[] = ['low', 'medium', 'high'];
 const FIELD =
-  'h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
+  'oe-input w-full';
 
 function blank(projectId: string): LessonInput {
   return {
@@ -107,7 +107,7 @@ export function LessonsLearnedPage() {
           </label>
           <label className="text-xs text-content-secondary">
             {t('lessons_learned.field.impact', { defaultValue: 'Impact' })}
-            <select className={FIELD} value={form.impact} onChange={(e) => set({ impact: e.target.value as Impact })}>
+            <select className={`${FIELD} oe-select`} value={form.impact} onChange={(e) => set({ impact: e.target.value as Impact })}>
               {IMPACTS.map((i) => (
                 <option key={i} value={i}>
                   {t(`lessons_learned.impact.${i}`, { defaultValue: i })}
@@ -117,11 +117,11 @@ export function LessonsLearnedPage() {
           </label>
           <label className="md:col-span-2 text-xs text-content-secondary">
             {t('lessons_learned.field.description', { defaultValue: 'What happened' })}
-            <textarea className={`${FIELD} h-20 py-1.5`} value={form.description} onChange={(e) => set({ description: e.target.value })} />
+            <textarea className={`${FIELD} oe-textarea h-20 py-1.5`} value={form.description} onChange={(e) => set({ description: e.target.value })} />
           </label>
           <label className="md:col-span-2 text-xs text-content-secondary">
             {t('lessons_learned.field.recommendation', { defaultValue: 'What to do next time' })}
-            <textarea className={`${FIELD} h-20 py-1.5`} value={form.recommendation} onChange={(e) => set({ recommendation: e.target.value })} />
+            <textarea className={`${FIELD} oe-textarea h-20 py-1.5`} value={form.recommendation} onChange={(e) => set({ recommendation: e.target.value })} />
           </label>
           <div className="md:col-span-2 flex gap-2">
             <Button type="submit" variant="primary" disabled={create.isPending}>

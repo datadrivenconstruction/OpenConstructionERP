@@ -107,12 +107,12 @@ export function InsightsPanel({
     >
       {/* Header strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-light bg-surface-primary/60 px-4 py-3">
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
             <BarChart3 size={16} />
           </span>
           <div className="min-w-0">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title flex items-center gap-2">
               {title ?? t('insights.toggle', { defaultValue: 'Insights' })}
             </h2>
             <p className="truncate text-xs text-content-tertiary">

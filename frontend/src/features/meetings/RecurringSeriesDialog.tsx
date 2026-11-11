@@ -49,7 +49,7 @@ interface RecurringSeriesDialogProps {
 const FREQS: RecurrenceFreq[] = ['DAILY', 'WEEKLY', 'MONTHLY'];
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 export function RecurringSeriesDialog({
   open,
@@ -151,7 +151,7 @@ export function RecurringSeriesDialog({
           <select
             value={meetingType}
             onChange={(e) => setMeetingType(e.target.value as MeetingType)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             {MEETING_TYPES.map((mt) => (
               <option key={mt} value={mt}>
@@ -193,7 +193,7 @@ export function RecurringSeriesDialog({
           <select
             value={freq}
             onChange={(e) => setFreq(e.target.value as RecurrenceFreq)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             {FREQS.map((f) => (
               <option key={f} value={f}>

@@ -412,7 +412,7 @@ export function MapLibreViewer({
                     className="flex h-5 w-5 items-center justify-center rounded-full text-white shadow-md ring-2 ring-white"
                     style={{ backgroundColor: color }}
                   >
-                    <MapPin size={11} fill="currentColor" strokeWidth={0} />
+                    <MapPin size={12} fill="currentColor" strokeWidth={0} />
                   </span>
                 </button>
               </Marker>

@@ -273,7 +273,7 @@ export interface KpiTileProps {
 export function KpiTile({ label, value, format = 'number', currency, color = 0, caption }: KpiTileProps) {
   const accent = paletteColor(color);
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-primary p-3.5">
+    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-primary p-3">
       <span className="absolute inset-y-0 left-0 w-1" style={{ background: accent }} aria-hidden />
       <div className="pl-1.5">
         <div className="truncate text-2xs font-medium uppercase tracking-wider text-content-tertiary" title={label}>

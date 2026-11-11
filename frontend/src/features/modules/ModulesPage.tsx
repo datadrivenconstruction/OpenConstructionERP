@@ -622,7 +622,7 @@ export function ModuleTogglesSection({
           return (
             <div key={cat}>
               <div className="flex items-center gap-2 mb-2.5">
-                <h3 className="text-xs font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t(catMeta.labelKey, { defaultValue: catMeta.defaultLabel })}
                 </h3>
                 <div className="flex-1 h-px bg-border-light" />
@@ -1045,7 +1045,7 @@ function DataPackagesTab() {
       {modules && modules.filter((m) => m.installed).length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+            <h3 className="oe-overline">
               {t('marketplace.my_modules', { defaultValue: 'Installed Packages' })}
             </h3>
             {demoStatus && Object.values(demoStatus).some(Boolean) && (
@@ -1063,8 +1063,8 @@ function DataPackagesTab() {
                   key={mod.id}
                   className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 transition-all hover:border-border"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success dark:text-emerald-400">
-                    <Icon size={15} />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success">
+                    <Icon size={16} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="text-xs font-medium text-content-primary truncate block">{mod.name}</span>
@@ -1230,7 +1230,7 @@ function DataPackagesTab() {
             <div className="relative p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Plug size={20} className="text-purple-500" />
-                <h2 className="text-lg font-semibold text-content-primary">
+                <h2 className="oe-section-title">
                   {t('modules.community_title', { defaultValue: 'Build Your Own Module' })}
                 </h2>
               </div>
@@ -1441,7 +1441,7 @@ function SystemModulesTab({ query, onClearQuery }: SystemModulesTabProps) {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 9 }).map((_, i) => (
             <Card key={i} className="animate-pulse" padding="sm">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div className="h-8 w-8 shrink-0 rounded-lg bg-surface-secondary" />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div className="h-3 w-2/3 rounded bg-surface-secondary" />
@@ -1564,16 +1564,16 @@ function SystemModulesTab({ query, onClearQuery }: SystemModulesTabProps) {
             style={{ animationDelay: `${80 + i * 30}ms` }}
             padding="sm"
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <div
                 className={clsx(
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
                   mod.enabled
-                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
+                    ? 'bg-semantic-success-bg text-semantic-success'
                     : 'bg-surface-tertiary text-content-quaternary',
                 )}
               >
-                {mod.is_core ? <ShieldCheck size={15} /> : <Package size={15} />}
+                {mod.is_core ? <ShieldCheck size={16} /> : <Package size={16} />}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -1707,7 +1707,7 @@ function ModuleToggleCard({
           enabled ? 'bg-oe-blue-subtle text-oe-blue-text' : 'bg-surface-tertiary text-content-quaternary',
         )}
       >
-        <Icon size={15} />
+        <Icon size={16} />
       </div>
       <div className="min-w-0 flex-1">
         <span
@@ -1809,7 +1809,7 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
                 : mod.category === 'vector_index'
                   ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
                   : mod.category === 'language'
-                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
+                    ? 'bg-semantic-success-bg text-semantic-success'
                     : mod.category === 'converter'
                       ? 'bg-semantic-warning-bg text-semantic-warning'
                       : mod.category === 'analytics'

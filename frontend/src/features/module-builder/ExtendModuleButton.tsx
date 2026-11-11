@@ -58,7 +58,7 @@ export function ExtendModuleButton({ moduleKey, basePath, className }: ExtendMod
         )}
         data-testid={`module-builder-extend-${moduleKey}`}
       >
-        <PackagePlus size={13} />
+        <PackagePlus size={14} />
         {t('module_builder.extend', { defaultValue: 'Add fields and functions' })}
       </button>
 

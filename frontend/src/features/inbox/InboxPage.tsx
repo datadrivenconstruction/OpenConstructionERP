@@ -43,7 +43,7 @@ import {
 const LIMIT = 100;
 
 const SELECT_CLS =
-  'rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs ' +
+  'oe-select oe-input-sm' +
   'text-content-secondary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
 
 /** A compact inline link to a sibling module (keeps the intro copy readable). */
@@ -65,8 +65,8 @@ function InboxIntro() {
   const { t } = useTranslation();
   return (
     <Card padding="md">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <Network size={15} className="text-oe-blue" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <Network size={16} className="text-oe-blue" />
         {t('inbox.intro_title', { defaultValue: 'What the inbox is' })}
       </h2>
       <p className="mt-1 text-xs leading-relaxed text-content-tertiary">
@@ -145,19 +145,19 @@ export function InboxPage() {
       value: 'all',
       label: t('inbox.filter_all', { defaultValue: 'All' }),
       count: kindScoped.length,
-      icon: <InboxIcon size={13} aria-hidden />,
+      icon: <InboxIcon size={14} aria-hidden />,
     },
     {
       value: 'approval',
       label: t('inbox.filter_approvals', { defaultValue: 'Approvals' }),
       count: approvals,
-      icon: <ClipboardCheck size={13} aria-hidden />,
+      icon: <ClipboardCheck size={14} aria-hidden />,
     },
     {
       value: 'alert',
       label: t('inbox.filter_alerts', { defaultValue: 'Alerts' }),
       count: alerts,
-      icon: <Bell size={13} aria-hidden />,
+      icon: <Bell size={14} aria-hidden />,
     },
   ];
 

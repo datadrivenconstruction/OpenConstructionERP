@@ -1011,7 +1011,7 @@ export function InlinePdfAnnotator({
               onClick={() => setAnnotations([])}
               className="text-semantic-error"
             >
-              <Trash2 size={13} className="mr-1" />
+              <Trash2 size={14} className="mr-1" />
               {t('markups.clear_all', { defaultValue: 'Clear' })}
             </Button>
             <Button
@@ -1020,7 +1020,7 @@ export function InlinePdfAnnotator({
               onClick={handleSaveAll}
               loading={saving}
             >
-              <Save size={13} className="mr-1" />
+              <Save size={14} className="mr-1" />
               {t('markups.save_annotations', { defaultValue: 'Save All' })}
             </Button>
           </>
@@ -1089,7 +1089,7 @@ export function InlinePdfAnnotator({
                 top: textPosition.y / (pageDimensionsRef.current.height / (overlayRef.current?.getBoundingClientRect().height || 1)),
               }}
             >
-              <div className="flex items-center gap-1 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-border-light p-1">
+              <div className="flex items-center gap-1 bg-surface-elevated rounded-lg shadow-lg border border-border-light p-1">
                 <input
                   autoFocus
                   value={textInput}

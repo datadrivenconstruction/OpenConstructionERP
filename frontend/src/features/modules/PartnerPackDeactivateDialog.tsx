@@ -230,7 +230,7 @@ export function PartnerPackDeactivateDialog({
                 disabled={running}
                 className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-oe-blue/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {running ? <Loader2 size={15} className="animate-spin" /> : <Power size={15} />}
+                {running ? <Loader2 size={16} className="animate-spin" /> : <Power size={16} />}
                 {t('modules.pack_deactivate', { defaultValue: 'Deactivate' })}
               </button>
             </>
@@ -303,7 +303,7 @@ export function PartnerPackDeactivateDialog({
       ) : (
         /* ── Intro view: what deactivation does ─────────────────────────── */
         <ul className="space-y-3 text-sm text-content-secondary">
-          <li className="flex items-start gap-2.5">
+          <li className="flex items-start gap-2">
             <Boxes size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
             <span>
               {t('modules.pp_deact_info_modules', {
@@ -311,7 +311,7 @@ export function PartnerPackDeactivateDialog({
               })}
             </span>
           </li>
-          <li className="flex items-start gap-2.5">
+          <li className="flex items-start gap-2">
             <FolderOpen size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
             <span>
               {t('modules.pp_deact_info_projects', {
@@ -320,7 +320,7 @@ export function PartnerPackDeactivateDialog({
               })}
             </span>
           </li>
-          <li className="flex items-start gap-2.5">
+          <li className="flex items-start gap-2">
             <Languages size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
             <span>
               {t('modules.pp_deact_info_language', {

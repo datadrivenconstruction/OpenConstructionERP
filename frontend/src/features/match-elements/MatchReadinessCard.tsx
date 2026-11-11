@@ -335,7 +335,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
         </div>
         {/* Why at all: without this a blocked card names what is missing but
             not what it is for, and a first-time user reads it as a fault. */}
-        <p className="mt-1 pl-6 text-xs text-rose-900/90 dark:text-rose-100/90">
+        <p className="mt-1 pl-6 text-xs text-semantic-error/90">
           {t('match_readiness.blocked_why', {
             defaultValue:
               'Matching compares every model element with a rate catalogue by meaning, so it needs two things on this server: the meaning search service and a rate catalogue for your country.',

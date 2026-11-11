@@ -194,14 +194,14 @@ export function UpdateScreen({ spec, additions, preview, previewing, empty = fal
         hint={t('module_builder.what_changes_hint', {
           defaultValue: 'The files rewritten on this instance and the address the module answers on.',
         })}
-        icon={<FolderTree size={15} />}
+        icon={<FolderTree size={16} />}
         testId="module-builder-what-changes"
       >
         {preview && !previewing ? (
           <PreviewFiles preview={preview} />
         ) : (
           <p className="flex items-center gap-2 text-xs text-content-tertiary">
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
             {t('module_builder.preparing', { defaultValue: 'Preparing the files…' })}
           </p>
         )}

@@ -67,9 +67,9 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} aria-hidden />
+      <div className="fixed inset-0 bg-black/30 z-drawer" onClick={onClose} aria-hidden />
       <aside
-        className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-surface-primary z-50 shadow-2xl flex flex-col border-l border-border-light"
+        className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-surface-primary z-drawer shadow-2xl flex flex-col border-l border-border-light"
         role="dialog"
         aria-modal="true"
         aria-labelledby="templates-panel-heading"
@@ -80,7 +80,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
             <h2 id="templates-panel-heading" className="text-base font-semibold">
               {t('match_elements.templates.title', 'Template library')}
             </h2>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-content-tertiary">
               {listQ.data ? t('match_elements.templates.count', '{{count}} signatures', { count: listQ.data.length }) : ''}
             </span>
             {hitCount > 0 && (
@@ -105,13 +105,13 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
 
         <div className="flex-1 overflow-auto p-4">
           {listQ.isLoading && (
-            <div className="text-center text-slate-500 py-8">
+            <div className="text-center text-content-tertiary py-8">
               <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
               {t('match_elements.templates.loading', 'Loading library…')}
             </div>
           )}
           {listQ.data && listQ.data.length === 0 && (
-            <div className="text-center text-slate-500 py-12 text-sm">
+            <div className="text-center text-content-tertiary py-12 text-sm">
               <p>{t('match_elements.templates.empty', 'No saved templates yet.')}</p>
               <p className="text-xs mt-2 opacity-70">
                 {t('match_elements.templates.empty_hint', 'Confirmed matches with "Save to library" enabled appear here and propagate to future projects.')}
@@ -133,7 +133,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <div className="text-sm font-medium truncate">
-                      {tpl.label ?? <span className="text-slate-400 italic">{t('match_elements.templates.unnamed', '(unnamed)')}</span>}
+                      {tpl.label ?? <span className="text-content-tertiary italic">{t('match_elements.templates.unnamed', '(unnamed)')}</span>}
                     </div>
                     {isHit && (
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-indigo-100 px-1.5 py-0.5 text-2xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
@@ -144,7 +144,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                       </span>
                     )}
                   </div>
-                  <div className="font-mono text-xs text-slate-500 truncate mt-0.5">
+                  <div className="font-mono text-xs text-content-tertiary truncate mt-0.5">
                     {t('match_elements.templates.sig', 'sig: {{prefix}}…', { prefix: tpl.signature.slice(0, 16) })}
                   </div>
                   <div className="text-xs text-content-secondary mt-1">
@@ -169,7 +169,7 @@ export function TemplatesPanel({ onClose, activeSignatures }: Props) {
                     if (confirm(t('match_elements.templates.remove_confirm', 'Remove this template from the library?'))) deleteMut.mutate(tpl.id);
                   }}
                   disabled={deleteMut.isPending}
-                  className="p-1.5 rounded text-slate-400 hover:text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50"
+                  className="p-1.5 rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50"
                   title={t('match_elements.templates.remove_title', 'Remove from library')}
                 >
                   <Trash2 className="w-4 h-4" />

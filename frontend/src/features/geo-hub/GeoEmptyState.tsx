@@ -274,11 +274,11 @@ export function GeoEmptyState({
           aria-expanded={false}
           data-testid="geo-empty-pill"
         >
-          <MapPin size={13} strokeWidth={2} className="text-blue-300" />
+          <MapPin size={14} strokeWidth={2} className="text-blue-300" />
           {t('geo_hub.empty.no_anchor_pill', {
             defaultValue: 'Anchor this project',
           })}
-          <ChevronUp size={13} strokeWidth={2.25} className="text-white/70" />
+          <ChevronUp size={14} strokeWidth={2.25} className="text-white/70" />
         </button>
       </div>
     );
@@ -325,7 +325,7 @@ export function GeoEmptyState({
             })}
             data-testid="geo-empty-dismiss"
           >
-            <X size={15} strokeWidth={2.25} />
+            <X size={16} strokeWidth={2.25} />
           </button>
         )}
         <div className="relative">
@@ -335,7 +335,7 @@ export function GeoEmptyState({
               TONE_ICON_BG[v.tone],
             ].join(' ')}
           >
-            <Icon size={18} strokeWidth={2} />
+            <Icon size={20} strokeWidth={2} />
           </div>
           <h3 className="text-base font-semibold text-white">{v.title}</h3>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
@@ -357,9 +357,9 @@ export function GeoEmptyState({
                 ].join(' ')}
               >
                 {isAnchoring ? (
-                  <Loader2 size={13} strokeWidth={2.25} className="animate-spin" />
+                  <Loader2 size={14} strokeWidth={2.25} className="animate-spin" />
                 ) : (
-                  <Sparkles size={13} strokeWidth={2.25} />
+                  <Sparkles size={14} strokeWidth={2.25} />
                 )}
                 {t('geo_hub.empty.auto_anchor_cta', {
                   defaultValue: 'Auto-anchor from project address',
@@ -378,7 +378,7 @@ export function GeoEmptyState({
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70',
                 ].join(' ')}
               >
-                <Plus size={13} strokeWidth={2.25} />
+                <Plus size={14} strokeWidth={2.25} />
                 {t('geo_hub.empty.place_existing_cta', {
                   defaultValue: 'Place a project file on the map',
                 })}
@@ -398,7 +398,7 @@ export function GeoEmptyState({
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
               >
-                <MapPin size={13} strokeWidth={2.25} />
+                <MapPin size={14} strokeWidth={2.25} />
                 {t('geo_hub.empty.place_manually_cta', {
                   defaultValue: 'Place a pin on the map',
                 })}
@@ -417,7 +417,7 @@ export function GeoEmptyState({
                 ].join(' ')}
               >
                 {v.ctaLabel}
-                <ArrowUpRight size={13} strokeWidth={2.25} />
+                <ArrowUpRight size={14} strokeWidth={2.25} />
               </Link>
             )}
           </div>

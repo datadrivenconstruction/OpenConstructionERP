@@ -91,7 +91,7 @@ export function InterfaceHistoryPanel({
                   {moved ? (
                     <span className="inline-flex items-center gap-1 text-xs text-content-secondary">
                       {statusText(h.from_status)}
-                      <ArrowRight size={11} className="shrink-0 rtl:rotate-180" aria-hidden="true" />
+                      <ArrowRight size={12} className="shrink-0 rtl:rotate-180" aria-hidden="true" />
                       {statusText(h.to_status)}
                     </span>
                   ) : h.to_status ? (

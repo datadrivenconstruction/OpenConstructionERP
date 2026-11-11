@@ -68,7 +68,7 @@ function SlotShell({
       )}
     >
       <p className="mb-3 inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-        <Icon size={13} aria-hidden />
+        <Icon size={14} aria-hidden />
         {label}
       </p>
       {children}
@@ -153,14 +153,14 @@ function CountrySlot({
       <div className="mt-auto flex flex-wrap gap-2 pt-3">
         <Link to={`/packs/${encodeURIComponent(entry.slug)}`} className={slotLinkClass()}>
           {t('packs.see_changes', { defaultValue: 'See what it changed' })}
-          <ArrowUpRight size={13} aria-hidden className="rtl:-scale-x-100" />
+          <ArrowUpRight size={14} aria-hidden className="rtl:-scale-x-100" />
         </Link>
         <button type="button" className={slotLinkClass()} onClick={onChange}>
           {t('packs.change', { defaultValue: 'Change' })}
         </button>
         {canInstall && !envPinned && (
           <button type="button" className={slotLinkClass()} onClick={onDeactivate} data-testid="packs-slot-deactivate">
-            <Power size={13} aria-hidden />
+            <Power size={14} aria-hidden />
             {t('modules.pack_deactivate', { defaultValue: 'Deactivate' })}
           </button>
         )}
@@ -236,7 +236,7 @@ function CompanySlot({ profiles, onChange }: { profiles: CompanyProfilesState; o
             onClick={() => profiles.requestSwitch(full)}
             data-testid="packs-slot-company-reset"
           >
-            <Power size={13} aria-hidden />
+            <Power size={14} aria-hidden />
             {t('packs.use_all_modules', { defaultValue: 'Back to all modules' })}
           </button>
         )}
@@ -274,7 +274,7 @@ function HowPacksWork() {
   ];
   return (
     <section aria-labelledby="packs-how-title" className="rounded-2xl border border-border-light bg-surface-elevated p-4 sm:p-5">
-      <h2 id="packs-how-title" className="text-sm font-semibold text-content-primary">
+      <h2 id="packs-how-title" className="oe-card-title">
         {t('packs.how_title', { defaultValue: 'How packs work' })}
       </h2>
       <ol className="mt-3 grid gap-3 md:grid-cols-3">
@@ -392,7 +392,7 @@ export function PacksPage() {
 
       {/* Your setup: one country pack + one company type. */}
       <section aria-labelledby="packs-setup-title" className="space-y-3">
-        <h2 id="packs-setup-title" className="text-sm font-semibold text-content-primary">
+        <h2 id="packs-setup-title" className="oe-card-title">
           {t('packs.setup_title', { defaultValue: 'Your setup' })}
         </h2>
         <div className="flex flex-col items-stretch gap-3 md:flex-row">

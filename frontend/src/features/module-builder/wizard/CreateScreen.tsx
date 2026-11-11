@@ -112,14 +112,14 @@ export function CreateScreen({ spec, preview, previewing }: CreateScreenProps) {
         hint={t('module_builder.what_created_files_hint', {
           defaultValue: 'Generated from your specification, not written by an AI. Open any file to read it line by line.',
         })}
-        icon={<FolderTree size={15} />}
+        icon={<FolderTree size={16} />}
         testId="module-builder-what-created"
       >
         {preview && !previewing ? (
           <PreviewFiles preview={preview} />
         ) : (
           <p className="flex items-center gap-2 text-xs text-content-tertiary">
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
             {t('module_builder.preparing', { defaultValue: 'Preparing the files…' })}
           </p>
         )}
@@ -184,14 +184,14 @@ export function InstallEffects({ spec }: { spec: ModuleSpec }) {
 
   return (
     <section className="rounded-2xl border border-border-light p-4 sm:p-5" data-testid="module-builder-install-effects">
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('module_builder.install_effects_title', { defaultValue: 'What happens when you press Create module' })}
       </h3>
       <ul className="mt-3 space-y-2">
         {items.map((item) => (
           <li
             key={item.testId}
-            className="flex items-start gap-2.5 text-sm text-content-secondary"
+            className="flex items-start gap-2 text-sm text-content-secondary"
             data-testid={`module-builder-install-effect-${item.testId}`}
           >
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary">
@@ -247,7 +247,7 @@ export function PreviewFiles({ preview }: { preview: PreviewResponse }) {
                     aria-hidden
                     className={clsx('shrink-0 text-content-quaternary transition-transform', isOpen && 'rotate-90')}
                   />
-                  <FileCode size={13} className="shrink-0 text-content-quaternary" />
+                  <FileCode size={14} className="shrink-0 text-content-quaternary" />
                   <span className="truncate font-mono">{file.path}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-content-tertiary">

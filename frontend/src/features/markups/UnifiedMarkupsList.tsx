@@ -120,7 +120,7 @@ function UnifiedRow({ item, onOpen }: { item: UnifiedMarkup; onOpen: () => void 
       </td>
       <td className="px-3 py-2.5">
         <div className="flex items-center gap-1.5">
-          <TypeIcon size={13} className="text-content-tertiary shrink-0" />
+          <TypeIcon size={14} className="text-content-tertiary shrink-0" />
           <span className="text-xs text-content-secondary capitalize">
             {item.type.replace(/_/g, ' ')}
           </span>
@@ -290,7 +290,7 @@ export function UnifiedMarkupsList({ projectId }: UnifiedMarkupsListProps) {
                     : 'border-border-light bg-surface-primary text-content-tertiary hover:bg-surface-secondary',
                 )}
               >
-                <Icon size={11} />
+                <Icon size={12} />
                 {tp.replace(/_/g, ' ')}
                 <span className="tabular-nums">{summary.byType[tp]}</span>
               </button>
@@ -342,34 +342,34 @@ export function UnifiedMarkupsList({ projectId }: UnifiedMarkupsListProps) {
       ) : (
         <Card padding="none" className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" data-testid="unified-markups-table">
+            <table className="oe-table" data-testid="unified-markups-table">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary/50">
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <tr>
+                  <th>
                     {t('markups.col_file', { defaultValue: 'File' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[140px]">
+                  <th className="w-[140px]">
                     {t('markups.col_source', { defaultValue: 'Source' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[130px]">
+                  <th className="w-[130px]">
                     {t('markups.col_type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="px-3 py-2 text-center text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[60px]">
+                  <th className="text-center w-[60px]">
                     {t('markups.col_page', { defaultValue: 'Pg' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                  <th>
                     {t('markups.col_label', { defaultValue: 'Label / Text' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[110px]">
+                  <th className="w-[110px]">
                     {t('markups.col_created', { defaultValue: 'Created' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[120px]">
+                  <th className="w-[120px]">
                     {t('markups.col_author', { defaultValue: 'Author' })}
                   </th>
-                  <th className="px-3 py-2 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[40px]" />
+                  <th className="text-right w-[40px]" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {filtered.map((item) => (
                   <UnifiedRow
                     key={item.id}

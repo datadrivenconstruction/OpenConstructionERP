@@ -49,7 +49,7 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
       <div
@@ -59,7 +59,7 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-oe-blue" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t(
                 'match_elements.new_text.title',
                 'New session - paste descriptions',
@@ -87,7 +87,7 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
           <div>
             <label
               htmlFor="me-text-name"
-              className="block text-xs font-medium text-content-secondary mb-1"
+              className="oe-label"
             >
               {t('match_elements.new_text.name_label', 'Session name (optional)')}
             </label>
@@ -100,14 +100,14 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
                 'match_elements.new_text.name_placeholder',
                 'e.g. Quick estimate Q3',
               )}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-1.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="w-full oe-input"
             />
           </div>
 
           <div>
             <label
               htmlFor="me-text-input"
-              className="block text-xs font-medium text-content-secondary mb-1"
+              className="oe-label"
             >
               {t(
                 'match_elements.new_text.lines_label',
@@ -127,7 +127,7 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
                 'match_elements.new_text.lines_placeholder',
                 'Stahlbetonwand C30/37, d=240mm\nленточный фундамент 800x600\nconcrete slab 200mm',
               )}
-              className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm font-mono text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 resize-y"
+              className="w-full oe-textarea font-mono resize-y"
             />
           </div>
 

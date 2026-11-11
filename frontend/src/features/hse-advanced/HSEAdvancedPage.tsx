@@ -200,9 +200,9 @@ const CAPA_STATUS_COLORS: Record<CAPAStatus, BadgeVariant> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 /* ── Shared safety-incident picker ──────────────────────────────────────
  * Replaces the raw-UUID field on the investigation / CAPA-source flows with a
@@ -274,7 +274,7 @@ function SafetyIncidentPicker({
 
   return (
     <select
-      className={inputCls}
+      className={`${inputCls} oe-select`}
       value={value}
       disabled={isLoading}
       onChange={(e) => onChange(e.target.value)}
@@ -411,7 +411,7 @@ function CapaSourceRefPicker({
   }
 
   return (
-    <select className={inputCls} value={value} disabled={isLoading} onChange={(e) => onChange(e.target.value)}>
+    <select className={`${inputCls} oe-select`} value={value} disabled={isLoading} onChange={(e) => onChange(e.target.value)}>
       <option value="">
         {t('hse_advanced.capa_select_source', { defaultValue: 'No linked record' })}
       </option>
@@ -487,7 +487,7 @@ function HowHSEWork() {
   return (
     <CollapsibleSection
       storageKey="hse_advanced.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('hse_advanced.flow_title', { defaultValue: 'How HSE Advanced fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -592,38 +592,38 @@ export function HSEAdvancedPage() {
     {
       key: 'incidents',
       label: t('hse_advanced.tab_incidents', { defaultValue: 'Incidents' }),
-      icon: <ShieldAlert size={15} />,
+      icon: <ShieldAlert size={16} />,
     },
     {
       key: 'jsa',
       label: t('hse_advanced.tab_jsa', { defaultValue: 'JSAs' }),
-      icon: <ClipboardList size={15} />,
+      icon: <ClipboardList size={16} />,
     },
     {
       key: 'permits',
       label: t('hse_advanced.tab_permits', { defaultValue: 'Permits' }),
-      icon: <FileCheck size={15} />,
+      icon: <FileCheck size={16} />,
     },
     {
       key: 'toolbox',
       label: t('hse_advanced.tab_toolbox', { defaultValue: 'Toolbox' }),
-      icon: <Users size={15} />,
+      icon: <Users size={16} />,
     },
     {
       key: 'ppe',
       label: t('hse_advanced.tab_ppe', { defaultValue: 'PPE' }),
-      icon: <HardHat size={15} />,
+      icon: <HardHat size={16} />,
       hint: t('hse_advanced.ppe_company_register', { defaultValue: 'Company-wide register' }),
     },
     {
       key: 'audits',
       label: t('hse_advanced.tab_audits', { defaultValue: 'Audits' }),
-      icon: <ShieldCheck size={15} />,
+      icon: <ShieldCheck size={16} />,
     },
     {
       key: 'capa',
       label: t('hse_advanced.tab_capa', { defaultValue: 'CAPA' }),
-      icon: <Wrench size={15} />,
+      icon: <Wrench size={16} />,
     },
   ];
 
@@ -770,7 +770,7 @@ function SearchBar({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+          className="oe-input oe-input-lg w-full ps-10 pe-3"
         />
       </div>
       <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={onCreate}>
@@ -842,7 +842,7 @@ function Osha300Download({ projectId }: { projectId: string }) {
     <div className="flex items-center gap-2 shrink-0">
       <label
         htmlFor="osha-300-year"
-        className="text-xs font-medium text-content-tertiary"
+        className="oe-label"
       >
         {t('hse.advanced.osha_year_label', { defaultValue: 'Year' })}
       </label>
@@ -850,7 +850,7 @@ function Osha300Download({ projectId }: { projectId: string }) {
         id="osha-300-year"
         value={year}
         onChange={(e) => setYear(Number.parseInt(e.target.value, 10))}
-        className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+        className="oe-select"
         aria-label={t('hse.advanced.osha_year_label', { defaultValue: 'Year' })}
       >
         {years.map((y) => (
@@ -1066,7 +1066,7 @@ function KpiCard({
   // overpower the table data they sit above.
   const toneCls: Record<KpiTone, string> = {
     success: 'border-semantic-success/30 bg-semantic-success/5 text-semantic-success',
-    warning: 'border-amber-500/30 bg-semantic-warning-bg text-semantic-warning',
+    warning: 'border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning',
     error: 'border-semantic-error/30 bg-semantic-error/5 text-semantic-error',
     blue: 'border-oe-blue/30 bg-oe-blue-subtle text-oe-blue-text',
     neutral: 'border-border bg-surface-secondary text-content-tertiary',
@@ -1113,7 +1113,7 @@ function ModalShell({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -1124,13 +1124,13 @@ function ModalShell({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-section-title">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="px-6 py-4 space-y-4">{children}</div>
@@ -1277,22 +1277,22 @@ function IncidentsTab({
           })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.incident_ref', { defaultValue: 'Incident ref' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.method', { defaultValue: 'Method' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.started_at', { defaultValue: 'Started' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.lead', { defaultValue: 'Lead' })}
                 </th>
               </tr>
@@ -1300,7 +1300,7 @@ function IncidentsTab({
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={5} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -1308,21 +1308,21 @@ function IncidentsTab({
                 filtered.map((it) => (
                   <tr
                     key={it.id}
-                    className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer transition-colors"
+                    className="cursor-pointer"
                     onClick={() => setDetail(it)}
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                    <td className="font-mono text-xs">
                       {it.incident_ref}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary">
+                    <td className="text-content-secondary">
                       {t(`hse_advanced.method_${it.method}`, {
                         defaultValue: it.method.replace(/_/g, ' '),
                       })}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary">
+                    <td className="text-content-secondary">
                       <DateDisplay value={it.started_at} />
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="text-center">
                       <Badge
                         variant={it.status === 'completed' ? 'success' : 'blue'}
                         size="sm"
@@ -1332,7 +1332,7 @@ function IncidentsTab({
                         })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-content-secondary text-xs font-mono">
+                    <td className="text-content-secondary text-xs font-mono">
                       {it.investigation_lead ?? '—'}
                     </td>
                   </tr>
@@ -1363,7 +1363,7 @@ function IncidentsTab({
           }
         >
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.incident_ref', { defaultValue: 'Linked safety incident' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -1375,7 +1375,7 @@ function IncidentsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.started_at', { defaultValue: 'Started' })}
             </label>
             <input
@@ -1386,11 +1386,11 @@ function IncidentsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.method', { defaultValue: 'Method' })}
             </label>
             <select
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               value={form.method}
               onChange={(e) =>
                 setForm((f) => ({
@@ -1414,7 +1414,7 @@ function IncidentsTab({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.findings', { defaultValue: 'Findings' })}
             </label>
             <textarea
@@ -1638,22 +1638,22 @@ function JSATab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_jsa', { defaultValue: 'New JSA' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.task_description', { defaultValue: 'Task' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.location', { defaultValue: 'Location' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.work_date', { defaultValue: 'Work date' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.risk_score', { defaultValue: 'Risk' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
               </tr>
@@ -1661,7 +1661,7 @@ function JSATab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={5} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -1669,18 +1669,18 @@ function JSATab({ projectId }: { projectId: string }) {
                 filtered.map((it) => (
                   <tr
                     key={it.id}
-                    className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer transition-colors"
+                    className="cursor-pointer"
                     onClick={() => setDetail(it)}
                   >
-                    <td className="px-4 py-3 text-content-primary max-w-[24rem] truncate">
+                    <td className="max-w-[24rem] truncate">
                       {it.task_description}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary">{it.location ?? '—'}</td>
-                    <td className="px-4 py-3 text-content-secondary">
+                    <td className="text-content-secondary">{it.location ?? '—'}</td>
+                    <td className="text-content-secondary">
                       <DateDisplay value={it.work_date} />
                     </td>
-                    <td className="px-4 py-3 text-center tabular-nums">{it.risk_score}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="text-center tabular-nums">{it.risk_score}</td>
+                    <td className="text-center">
                       <Badge
                         variant={it.status === 'approved' || it.status === 'active' ? 'success' : 'blue'}
                         size="sm"
@@ -1718,7 +1718,7 @@ function JSATab({ projectId }: { projectId: string }) {
           }
         >
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.task_description', { defaultValue: 'Task description' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -1731,7 +1731,7 @@ function JSATab({ projectId }: { projectId: string }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.work_date', { defaultValue: 'Work date' })}
               </label>
               <input
@@ -1742,7 +1742,7 @@ function JSATab({ projectId }: { projectId: string }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -2141,25 +2141,25 @@ function PermitsTab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_permit', { defaultValue: 'Issue Permit' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('common.number', { defaultValue: '#' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('common.description', { defaultValue: 'Description' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.permit_type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.work_end', { defaultValue: 'Work end' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.countdown', { defaultValue: 'Countdown' })}
                 </th>
               </tr>
@@ -2167,7 +2167,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={6} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -2179,27 +2179,27 @@ function PermitsTab({ projectId }: { projectId: string }) {
                   return (
                     <tr
                       key={p.id}
-                      className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer"
+                      className="cursor-pointer"
                       onClick={() => setDetail(p)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs">{p.permit_number}</td>
-                      <td className="px-4 py-3 text-content-primary max-w-[20rem] truncate">
+                      <td className="font-mono text-xs">{p.permit_number}</td>
+                      <td className="max-w-[20rem] truncate">
                         {p.description || '—'}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary text-xs">
+                      <td className="text-content-secondary text-xs">
                         {p.permit_type.replace(/_/g, ' ')}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <Badge variant={PERMIT_STATUS_COLORS[p.status] ?? 'neutral'} size="sm">
                           {t(`hse_advanced.permit_status_${p.status}`, {
                             defaultValue: PERMIT_STATUS_LABELS[p.status] ?? p.status,
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         {p.work_end ? <DateDisplay value={p.work_end} /> : '—'}
                       </td>
-                      <td className="px-4 py-3 text-center tabular-nums">
+                      <td className="text-center tabular-nums">
                         {days === null ? (
                           <span className="text-content-tertiary">—</span>
                         ) : days < 0 ? (
@@ -2254,7 +2254,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
           }
         >
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.permit_number', { defaultValue: 'Permit number' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -2265,11 +2265,11 @@ function PermitsTab({ projectId }: { projectId: string }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.permit_type', { defaultValue: 'Type' })}
             </label>
             <select
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               value={form.permit_type}
               onChange={(e) => setForm((f) => ({ ...f, permit_type: e.target.value }))}
             >
@@ -2298,7 +2298,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('common.description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -2310,7 +2310,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.work_start', { defaultValue: 'Work start' })}
               </label>
               <input
@@ -2321,7 +2321,7 @@ function PermitsTab({ projectId }: { projectId: string }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.work_end', { defaultValue: 'Work end' })}
               </label>
               <input
@@ -2612,7 +2612,7 @@ function PermitDetailDrawer({
             })}
           </p>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.closure_notes', { defaultValue: 'Closure notes' })}
             </label>
             <textarea
@@ -2891,19 +2891,19 @@ function ToolboxTab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_toolbox', { defaultValue: 'Log Talk' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.topic_code', { defaultValue: 'Code' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.topic', { defaultValue: 'Topic' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.conducted_at', { defaultValue: 'Conducted' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.attendance', { defaultValue: 'Attendance' })}
                 </th>
               </tr>
@@ -2911,19 +2911,19 @@ function ToolboxTab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={4} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
               ) : (
                 filtered.map((it) => (
-                  <tr key={it.id} className="border-b border-border-light hover:bg-surface-secondary/30">
-                    <td className="px-4 py-3 font-mono text-xs">{it.topic_code}</td>
-                    <td className="px-4 py-3 text-content-primary">{it.topic_title}</td>
-                    <td className="px-4 py-3 text-content-secondary">
+                  <tr key={it.id}>
+                    <td className="font-mono text-xs">{it.topic_code}</td>
+                    <td>{it.topic_title}</td>
+                    <td className="text-content-secondary">
                       <DateDisplay value={it.conducted_at} />
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="text-center">
                       <Badge variant="blue" size="sm">
                         {it.attendance_count}
                       </Badge>
@@ -2959,7 +2959,7 @@ function ToolboxTab({ projectId }: { projectId: string }) {
         >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.topic_code', { defaultValue: 'Topic code' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -2970,7 +2970,7 @@ function ToolboxTab({ projectId }: { projectId: string }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.conducted_at', { defaultValue: 'Conducted at' })}
               </label>
               <input
@@ -2982,7 +2982,7 @@ function ToolboxTab({ projectId }: { projectId: string }) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.topic_title', { defaultValue: 'Topic title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -2993,7 +2993,7 @@ function ToolboxTab({ projectId }: { projectId: string }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('common.notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -3162,22 +3162,22 @@ function PPETab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_ppe', { defaultValue: 'Issue PPE' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.item', { defaultValue: 'Item' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.issued_to', { defaultValue: 'Issued to' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.issued_at', { defaultValue: 'Issued at' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.valid_until', { defaultValue: 'Valid until' })}
                 </th>
               </tr>
@@ -3185,7 +3185,7 @@ function PPETab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={5} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -3196,26 +3196,26 @@ function PPETab({ projectId }: { projectId: string }) {
                   return (
                     <tr
                       key={p.id}
-                      className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer"
+                      className="cursor-pointer"
                       onClick={() => setDetail(p)}
                     >
-                      <td className="px-4 py-3 text-content-primary">
+                      <td>
                         {p.ppe_type.replace(/_/g, ' ')}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         {p.recipient_name ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         <DateDisplay value={p.issued_at} />
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <Badge variant={p.returned_at ? 'neutral' : 'success'} size="sm">
                           {t(`hse_advanced.ppe_status_${p.status}`, {
                             defaultValue: PPE_STATUS_LABELS[p.status] ?? p.status.replace(/_/g, ' '),
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         {p.valid_until ? (
                           <span
                             className={
@@ -3266,11 +3266,11 @@ function PPETab({ projectId }: { projectId: string }) {
         >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.ppe_type', { defaultValue: 'PPE type' })}
               </label>
               <select
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 value={form.ppe_type}
                 onChange={(e) => setForm((f) => ({ ...f, ppe_type: e.target.value }))}
               >
@@ -3301,7 +3301,7 @@ function PPETab({ projectId }: { projectId: string }) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.issued_at', { defaultValue: 'Issued at' })}
               </label>
               <input
@@ -3313,7 +3313,7 @@ function PPETab({ projectId }: { projectId: string }) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.issued_to', { defaultValue: 'Issued to' })}
             </label>
             <input
@@ -3323,7 +3323,7 @@ function PPETab({ projectId }: { projectId: string }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.valid_until', { defaultValue: 'Valid until' })}
             </label>
             <input
@@ -3542,22 +3542,22 @@ function AuditsTab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_audit', { defaultValue: 'Schedule Audit' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.audit_type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.conducted_at', { defaultValue: 'Conducted' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.summary', { defaultValue: 'Summary' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.score', { defaultValue: 'Score' })}
                 </th>
               </tr>
@@ -3565,7 +3565,7 @@ function AuditsTab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={5} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -3582,21 +3582,21 @@ function AuditsTab({ projectId }: { projectId: string }) {
                   return (
                     <tr
                       key={it.id}
-                      className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer transition-colors"
+                      className="cursor-pointer"
                       onClick={() => setDetail(it)}
                     >
-                      <td className="px-4 py-3 text-content-primary">
+                      <td>
                         {t(`hse_advanced.audit_type_${it.audit_type}`, {
                           defaultValue: it.audit_type.replace(/_/g, ' '),
                         })}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         <DateDisplay value={it.conducted_at} />
                       </td>
-                      <td className="px-4 py-3 text-content-secondary max-w-[20rem] truncate">
+                      <td className="text-content-secondary max-w-[20rem] truncate">
                         {it.summary || '—'}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <Badge
                           variant={it.status === 'completed' ? 'success' : 'blue'}
                           size="sm"
@@ -3606,7 +3606,7 @@ function AuditsTab({ projectId }: { projectId: string }) {
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-center tabular-nums">
+                      <td className="text-center tabular-nums">
                         {pct === null ? '—' : `${pct}%`}
                       </td>
                     </tr>
@@ -3639,11 +3639,11 @@ function AuditsTab({ projectId }: { projectId: string }) {
         >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.audit_type', { defaultValue: 'Type' })}
               </label>
               <select
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 value={form.audit_type}
                 onChange={(e) => setForm((f) => ({ ...f, audit_type: e.target.value }))}
               >
@@ -3662,7 +3662,7 @@ function AuditsTab({ projectId }: { projectId: string }) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.conducted_at', { defaultValue: 'Conducted at' })}
               </label>
               <input
@@ -3674,7 +3674,7 @@ function AuditsTab({ projectId }: { projectId: string }) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.summary', { defaultValue: 'Summary' })}
             </label>
             <textarea
@@ -3935,9 +3935,9 @@ function AuditDetailDrawer({
                 className="flex items-start gap-2 rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2"
               >
                 {f.is_passed ? (
-                  <CheckCircle2 size={15} className="text-semantic-success mt-0.5 shrink-0" />
+                  <CheckCircle2 size={16} className="text-semantic-success mt-0.5 shrink-0" />
                 ) : (
-                  <XCircle size={15} className="text-semantic-error mt-0.5 shrink-0" />
+                  <XCircle size={16} className="text-semantic-error mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-content-primary">{f.item_description}</div>
@@ -4023,7 +4023,7 @@ function AuditDetailDrawer({
           }
         >
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.finding_description', { defaultValue: 'Finding' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -4038,11 +4038,11 @@ function AuditDetailDrawer({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.finding_category', { defaultValue: 'Category' })}
               </label>
               <select
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 value={findingForm.category}
                 onChange={(e) =>
                   setFindingForm((f) => ({
@@ -4059,11 +4059,11 @@ function AuditDetailDrawer({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('hse_advanced.finding_severity', { defaultValue: 'Severity' })}
               </label>
               <select
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 value={findingForm.severity}
                 onChange={(e) =>
                   setFindingForm((f) => ({
@@ -4241,25 +4241,25 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
           createLabel={t('hse_advanced.new_capa', { defaultValue: 'New CAPA' })}
         />
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border-light bg-surface-secondary/50">
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <tr>
+                <th>
                   {t('hse_advanced.source_type', { defaultValue: 'Source' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('common.title', { defaultValue: 'Title' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.owner', { defaultValue: 'Owner' })}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                <th>
                   {t('hse_advanced.target_date', { defaultValue: 'Target' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('common.status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                <th className="text-center">
                   {t('hse_advanced.countdown', { defaultValue: 'Countdown' })}
                 </th>
               </tr>
@@ -4267,7 +4267,7 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  <td colSpan={6} className="py-8 text-center text-content-tertiary">
                     {t('hse_advanced.no_matches', { defaultValue: 'No matches' })}
                   </td>
                 </tr>
@@ -4279,29 +4279,29 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
                   return (
                     <tr
                       key={it.id}
-                      className="border-b border-border-light hover:bg-surface-secondary/30 cursor-pointer transition-colors"
+                      className="cursor-pointer"
                       onClick={() => setDetail(it)}
                     >
-                      <td className="px-4 py-3 text-content-secondary text-xs">
+                      <td className="text-content-secondary text-xs">
                         {t(`hse_advanced.source_type_${it.source_type}`, {
                           defaultValue: it.source_type.replace(/_/g, ' '),
                         })}
                       </td>
-                      <td className="px-4 py-3 text-content-primary">{it.title}</td>
-                      <td className="px-4 py-3 text-content-secondary text-xs font-mono">
+                      <td>{it.title}</td>
+                      <td className="text-content-secondary text-xs font-mono">
                         {it.owner_user_id ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         {it.target_date ? <DateDisplay value={it.target_date} /> : '—'}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <Badge variant={CAPA_STATUS_COLORS[it.status] ?? 'neutral'} size="sm">
                           {t(`hse_advanced.capa_status_${it.status}`, {
                             defaultValue: CAPA_STATUS_LABELS[it.status] ?? it.status.replace(/_/g, ' '),
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-center tabular-nums text-xs">
+                      <td className="text-center tabular-nums text-xs">
                         {isClosed || days === null ? (
                           <span className="text-content-tertiary">—</span>
                         ) : days < 0 ? (
@@ -4434,7 +4434,7 @@ function CreateCAPADialog({
       }
     >
       <div>
-        <label className="block text-sm font-medium text-content-primary mb-1.5">
+        <label className="oe-label">
           {t('common.title', { defaultValue: 'Title' })}{' '}
           <span className="text-semantic-error">*</span>
         </label>
@@ -4445,7 +4445,7 @@ function CreateCAPADialog({
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-content-primary mb-1.5">
+        <label className="oe-label">
           {t('common.description', { defaultValue: 'Description' })}{' '}
           <span className="text-semantic-error">*</span>
         </label>
@@ -4458,11 +4458,11 @@ function CreateCAPADialog({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-content-primary mb-1.5">
+          <label className="oe-label">
             {t('hse_advanced.source_type', { defaultValue: 'Source' })}
           </label>
           <select
-            className={inputCls}
+            className={`${inputCls} oe-select`}
             value={form.source_type}
             disabled={lockSource}
             onChange={(e) =>
@@ -4482,7 +4482,7 @@ function CreateCAPADialog({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-primary mb-1.5">
+          <label className="oe-label">
             {t('hse_advanced.target_date', { defaultValue: 'Target date' })}
           </label>
           <input
@@ -4494,7 +4494,7 @@ function CreateCAPADialog({
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-content-primary mb-1.5">
+        <label className="oe-label">
           {t('hse_advanced.source_record', { defaultValue: 'Linked source record' })}
         </label>
         {lockSource ? (
@@ -4834,7 +4834,7 @@ function CAPADetailDrawer({
 
       {item.effectiveness_verified_at && (
         <div className="rounded-lg bg-semantic-success/5 border border-semantic-success/30 p-3 text-sm text-semantic-success flex items-center gap-2">
-          <ListChecks size={15} />
+          <ListChecks size={16} />
           {t('hse_advanced.effectiveness_done', {
             defaultValue: 'Effectiveness verified',
           })}{' '}
@@ -4871,7 +4871,7 @@ function CAPADetailDrawer({
             })}
           </p>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.verification_notes', { defaultValue: 'Verification notes' })}
             </label>
             <textarea
@@ -4942,7 +4942,7 @@ function CAPADetailDrawer({
                   onClick={() => setWhys((arr) => arr.filter((_, j) => j !== i))}
                   className="h-10 px-2 text-content-tertiary hover:text-semantic-error"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}
@@ -4956,11 +4956,11 @@ function CAPADetailDrawer({
             {t('hse_advanced.add_why', { defaultValue: 'Add why' })}
           </Button>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('hse_advanced.root_cause_category', { defaultValue: 'Root-cause category' })}
             </label>
             <select
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               value={rootCause}
               onChange={(e) => setRootCause(e.target.value as RootCauseCategory | '')}
             >
@@ -5021,7 +5021,7 @@ function CAPADetailDrawer({
             </span>
           </label>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('common.notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -5151,22 +5151,22 @@ function CorrectiveActionsFSMTab({ projectId }: { projectId: string }) {
     <>
     <Card padding="none">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+            <tr>
+              <th>
                 {t('hse.advanced.ca_col_description', { defaultValue: 'Description' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('hse.advanced.ca_col_due', { defaultValue: 'Due' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('hse.advanced.ca_col_verified_at', { defaultValue: 'Verified at' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('hse.advanced.ca_col_advance', { defaultValue: 'Advance' })}
               </th>
             </tr>
@@ -5177,23 +5177,22 @@ function CorrectiveActionsFSMTab({ projectId }: { projectId: string }) {
               return (
                 <tr
                   key={row.id}
-                  className="border-b border-border-light hover:bg-surface-secondary/30"
                 >
-                  <td className="px-4 py-3 text-content-primary max-w-[28rem] truncate">
+                  <td className="max-w-[28rem] truncate">
                     {row.description}
                   </td>
-                  <td className="px-4 py-3 text-content-secondary">
+                  <td className="text-content-secondary">
                     {row.due_date ? <DateDisplay value={row.due_date} /> : '—'}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="text-center">
                     <Badge variant={FSM_BADGE[row.status]} size="sm">
                       {fsmLabel(t, row.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-content-secondary">
+                  <td className="text-content-secondary">
                     {row.verified_at ? <DateDisplay value={row.verified_at} /> : '—'}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="text-center">
                     {next ? (
                       <select
                         aria-label={t('hse.advanced.ca_col_advance', {
@@ -5206,7 +5205,7 @@ function CorrectiveActionsFSMTab({ projectId }: { projectId: string }) {
                           if (!to) return;
                           advance(row, to);
                         }}
-                        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                        className="oe-select oe-input-sm"
                       >
                         <option value="">
                           {t('hse.advanced.ca_choose_next', {
@@ -5263,7 +5262,7 @@ function CorrectiveActionsFSMTab({ projectId }: { projectId: string }) {
           })}
         </p>
         <div>
-          <label className="block text-sm font-medium text-content-primary mb-1.5">
+          <label className="oe-label">
             {t('hse_advanced.verification_notes', { defaultValue: 'Verification notes' })}
           </label>
           <textarea

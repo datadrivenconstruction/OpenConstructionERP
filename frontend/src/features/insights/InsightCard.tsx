@@ -32,7 +32,7 @@ export function CardControls({ onEdit, onRemove }: { onEdit?: () => void; onRemo
           title={t('insights.edit_chart', { defaultValue: 'Edit chart' })}
           className="rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-oe-blue"
         >
-          <Pencil size={13} />
+          <Pencil size={14} />
         </button>
       )}
       {onRemove && (
