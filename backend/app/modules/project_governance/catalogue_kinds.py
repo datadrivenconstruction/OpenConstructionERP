@@ -26,6 +26,7 @@ i18n keys, tenant items may carry ``labels: {locale: text}``.
 
 from __future__ import annotations
 
+import copy
 import json
 import re
 from collections.abc import Callable
@@ -95,6 +96,10 @@ def phase_capabilities() -> frozenset[str]:
     return frozenset(_PHASE_CAPABILITIES)
 
 
+# Shipped catalogues are read-only files: parse and validate each folder once per file state.
+_SHIPPED_CACHE: dict[tuple[int, str], tuple[Any, tuple[Any, ...]]] = {}
+
+
 @dataclass(frozen=True)
 class CatalogueKind:
     """How one kind of catalogue is typed, validated and found on disk.
@@ -138,14 +143,27 @@ class CatalogueKind:
             return self.list_shipped()
         if self.shipped_dir is None or not self.shipped_dir.is_dir():
             return ()
+        paths = sorted(self.shipped_dir.glob("*.json"))
+        try:
+            stamp = tuple((str(p), p.stat().st_mtime_ns) for p in paths)
+        except OSError:
+            stamp = None
+        key = (id(self.model), str(self.shipped_dir))
+        hit = _SHIPPED_CACHE.get(key)
+        if stamp is not None and hit is not None and hit[0] == stamp:
+            return copy.deepcopy(hit[1])
         out = []
-        for path in sorted(self.shipped_dir.glob("*.json")):
+        for path in paths:
             try:
                 raw = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError) as exc:
                 raise InvalidCatalogueError(path, [f"unreadable: {exc}"]) from exc
             out.append(self.parse_body(raw, source="shipped", origin=str(path)))
-        return tuple(out)
+        result = tuple(out)
+        if stamp is not None:
+            _SHIPPED_CACHE[key] = (stamp, result)
+            return copy.deepcopy(result)
+        return result
 
     def get_shipped(self, catalogue_id: str, version: int | None = None) -> Any:
         """One shipped catalogue of this kind; ``UnknownCatalogueError`` when absent."""

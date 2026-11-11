@@ -11,7 +11,7 @@ import re
 import uuid
 from datetime import date
 
-from sqlalchemy import func, select, update
+from sqlalchemy import Numeric, cast, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
@@ -98,6 +98,14 @@ class FieldTimeRepository:
         deleted draft never causes a duplicate (the ``(project_id, reference)``
         unique constraint would otherwise reject it).
         """
+        if self.session.bind is not None and self.session.bind.dialect.name == "postgresql":
+            suffix = func.substring(FieldTimesheet.reference, r"(\d+)\s*$")
+            top = (
+                await self.session.execute(
+                    select(func.max(cast(suffix, Numeric))).where(FieldTimesheet.project_id == project_id)
+                )
+            ).scalar_one()
+            return f"{_REFERENCE_PREFIX}{int(top or 0) + 1:06d}"
         stmt = select(FieldTimesheet.reference).where(FieldTimesheet.project_id == project_id)
         rows = (await self.session.execute(stmt)).scalars().all()
         highest = 0
@@ -135,6 +143,12 @@ class FieldTimeRepository:
         self.session.add(line)
         await self.session.flush()
         return line
+
+    async def add_lines(self, lines: list[FieldTimesheetLine]) -> None:
+        """Insert several lines with one flush."""
+        if lines:
+            self.session.add_all(lines)
+            await self.session.flush()
 
     async def update_line_fields(self, line_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a line."""

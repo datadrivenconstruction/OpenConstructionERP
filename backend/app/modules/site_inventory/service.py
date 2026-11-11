@@ -124,11 +124,8 @@ class SiteInventoryService:
 
     async def get_location(self, project_id: uuid.UUID, location_id: uuid.UUID) -> StockLocation | None:
         """Load one location, scoped to the project (``None`` if foreign/absent)."""
-        stmt = select(StockLocation).where(
-            StockLocation.id == location_id,
-            StockLocation.project_id == project_id,
-        )
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        location = await self.session.get(StockLocation, location_id)
+        return location if location is not None and location.project_id == project_id else None
 
     async def delete_location(self, project_id: uuid.UUID, location_id: uuid.UUID) -> None:
         """Delete a storage location nothing has been stored at or booked to.
@@ -229,8 +226,8 @@ class SiteInventoryService:
 
     async def get_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> StockItem | None:
         """Load one item, scoped to the project (``None`` if foreign/absent)."""
-        stmt = select(StockItem).where(StockItem.id == item_id, StockItem.project_id == project_id)
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        item = await self.session.get(StockItem, item_id)
+        return item if item is not None and item.project_id == project_id else None
 
     async def update_item(
         self,
@@ -664,12 +661,18 @@ class SiteInventoryService:
         """True when a BoQ position's owning BoQ is in the project."""
         from app.modules.boq.models import BOQ, Position
 
+        known = self.session.info.setdefault("site_inventory_positions", set())
+        if (project_id, position_id) in known:
+            return True
         stmt = (
             select(Position.id)
             .join(BOQ, Position.boq_id == BOQ.id)
             .where(Position.id == position_id, BOQ.project_id == project_id)
         )
-        return (await self.session.execute(stmt)).first() is not None
+        found = (await self.session.execute(stmt)).first() is not None
+        if found:
+            known.add((project_id, position_id))
+        return found
 
     async def _position_budgets(
         self,

@@ -630,6 +630,11 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
 
         with recording_demo_history():
             for _name, _marker, _build in _module_seeders:
+                import os as _os  # TEMPTIMING
+                if _os.environ.get('W49_ONLY') and _name not in _os.environ['W49_ONLY'].split(','):  # TEMPTIMING
+                    continue  # TEMPTIMING
+                import time as _tm  # TEMPTIMING
+                _t0 = _tm.perf_counter()  # TEMPTIMING
                 try:
                     if _marker is not None:
                         async with async_session_factory() as _chk:
@@ -643,6 +648,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
                             logger.info("%s demo seed: %s", _name, _counts)
                 except Exception:
                     logger.warning("%s demo seed skipped (non-fatal)", _name, exc_info=True)
+                with open("C:/tmp/w49-timing.log", "a") as _tf:  # TEMPTIMING
+                    _tf.write(f"{_name} {_tm.perf_counter() - _t0:.1f}"+chr(10))  # TEMPTIMING
 
         # Governance decided its gates before the modules had rows, so an area
         # whose module answered "not met" passed at risk with an open condition.
