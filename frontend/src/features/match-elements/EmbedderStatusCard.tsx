@@ -255,7 +255,7 @@ function MissingState({ status }: { status: EmbedderStatus }) {
               'match_elements.embedder_install_hint_after',
               'After install, restart the backend.',
             )}{' '}
-            <span className="text-semantic-warning/70">
+            <span className="text-semantic-warning/75">
               {t(
                 'match_elements.embedder_size_caption',
                 '~{{int8}} MB download (INT8) or ~{{fp32}} MB (FP32).',

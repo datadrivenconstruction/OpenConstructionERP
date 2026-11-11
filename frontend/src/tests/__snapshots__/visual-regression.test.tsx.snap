@@ -1099,13 +1099,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             <svg
               class="lucide lucide-file-spreadsheet"
               fill="none"
-              height="15"
+              height="16"
               stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
               viewBox="0 0 24 24"
-              width="15"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
@@ -1190,13 +1190,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             <svg
               class="lucide lucide-layout-grid"
               fill="none"
-              height="15"
+              height="16"
               stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
               viewBox="0 0 24 24"
-              width="15"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <rect
@@ -1359,7 +1359,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           class="relative flex h-2 w-2 shrink-0"
         >
           <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75"
           />
           <span
             class="relative inline-flex rounded-full h-2 w-2 bg-semantic-success"
@@ -1371,13 +1371,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         <svg
           class="lucide lucide-external-link text-content-quaternary group-hover/oss:text-oe-blue transition-colors"
           fill="none"
-          height="11"
+          height="12"
           stroke="currentColor"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
           viewBox="0 0 24 24"
-          width="11"
+          width="12"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -2039,13 +2039,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                   <svg
                     class="lucide lucide-arrow-right"
                     fill="none"
-                    height="11"
+                    height="12"
                     stroke="currentColor"
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
                     viewBox="0 0 24 24"
-                    width="11"
+                    width="12"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -2067,13 +2067,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     <svg
                       class="lucide lucide-file-text"
                       fill="none"
-                      height="11"
+                      height="12"
                       stroke="currentColor"
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
                       viewBox="0 0 24 24"
-                      width="11"
+                      width="12"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -2112,13 +2112,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     <svg
                       class="lucide lucide-upload"
                       fill="none"
-                      height="13"
+                      height="14"
                       stroke="currentColor"
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
                       viewBox="0 0 24 24"
-                      width="13"
+                      width="14"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -2197,7 +2197,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                   class="min-w-0 flex-1"
                 >
                   <h3
-                    class="text-sm font-semibold text-content-primary"
+                    class="oe-card-title"
                   >
                     Start your cost database
                   </h3>
@@ -2217,13 +2217,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     <svg
                       class="lucide lucide-download"
                       fill="none"
-                      height="15"
+                      height="16"
                       stroke="currentColor"
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
                       viewBox="0 0 24 24"
-                      width="15"
+                      width="16"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -2277,7 +2277,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </svg>
               </div>
               <h2
-                class="text-lg font-semibold text-content-primary"
+                class="oe-section-title"
               >
                 Getting Started
               </h2>
@@ -2382,13 +2382,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                         <svg
                           class="lucide lucide-arrow-right"
                           fill="none"
-                          height="13"
+                          height="14"
                           stroke="currentColor"
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
                           viewBox="0 0 24 24"
-                          width="13"
+                          width="14"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -2488,13 +2488,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                         <svg
                           class="lucide lucide-arrow-right"
                           fill="none"
-                          height="13"
+                          height="14"
                           stroke="currentColor"
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
                           viewBox="0 0 24 24"
-                          width="13"
+                          width="14"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -2616,13 +2616,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                         <svg
                           class="lucide lucide-arrow-right"
                           fill="none"
-                          height="13"
+                          height="14"
                           stroke="currentColor"
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
                           viewBox="0 0 24 24"
-                          width="13"
+                          width="14"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -2718,13 +2718,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                           <svg
                             class="lucide lucide-arrow-right"
                             fill="none"
-                            height="13"
+                            height="14"
                             stroke="currentColor"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
                             viewBox="0 0 24 24"
-                            width="13"
+                            width="14"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -2747,13 +2747,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                           <svg
                             class="lucide lucide-download"
                             fill="none"
-                            height="13"
+                            height="14"
                             stroke="currentColor"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
                             viewBox="0 0 24 24"
-                            width="13"
+                            width="14"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -2868,13 +2868,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                         <svg
                           class="lucide lucide-arrow-right"
                           fill="none"
-                          height="13"
+                          height="14"
                           stroke="currentColor"
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
                           viewBox="0 0 24 24"
-                          width="13"
+                          width="14"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -2971,13 +2971,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                         <svg
                           class="lucide lucide-arrow-right"
                           fill="none"
-                          height="13"
+                          height="14"
                           stroke="currentColor"
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
                           viewBox="0 0 24 24"
-                          width="13"
+                          width="14"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
@@ -3051,13 +3051,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <svg
                   class="lucide lucide-users"
                   fill="none"
-                  height="18"
+                  height="20"
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.75"
                   viewBox="0 0 24 24"
-                  width="18"
+                  width="20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -3123,13 +3123,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <svg
                   class="lucide lucide-sparkles"
                   fill="none"
-                  height="18"
+                  height="20"
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.75"
                   viewBox="0 0 24 24"
-                  width="18"
+                  width="20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -3196,13 +3196,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <svg
                   class="lucide lucide-layers"
                   fill="none"
-                  height="18"
+                  height="20"
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.75"
                   viewBox="0 0 24 24"
-                  width="18"
+                  width="20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -3298,13 +3298,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                       <svg
                         class="lucide lucide-zap"
                         fill="none"
-                        height="13"
+                        height="14"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
                         viewBox="0 0 24 24"
-                        width="13"
+                        width="14"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
@@ -3335,13 +3335,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                       <svg
                         class="lucide lucide-layers"
                         fill="none"
-                        height="13"
+                        height="14"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
                         viewBox="0 0 24 24"
-                        width="13"
+                        width="14"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
@@ -3378,13 +3378,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                       <svg
                         class="lucide lucide-globe"
                         fill="none"
-                        height="13"
+                        height="14"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
                         viewBox="0 0 24 24"
-                        width="13"
+                        width="14"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <circle
@@ -3423,13 +3423,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                       <svg
                         class="lucide lucide-shield-check"
                         fill="none"
-                        height="13"
+                        height="14"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
                         viewBox="0 0 24 24"
-                        width="13"
+                        width="14"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
