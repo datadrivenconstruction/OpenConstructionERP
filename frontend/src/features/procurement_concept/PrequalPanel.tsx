@@ -34,7 +34,7 @@ import {
 import { CandidateDialog, ReferenceDialog, ScoresDialog } from './CandidateDialogs';
 import { refusalText, useCandidates, useRefusalToast } from './hooks';
 import { CANDIDATE_LIST, CANDIDATE_SOURCE, catalogueName, vocab, type LabelContext } from './labels';
-import { FIELD_CLASS, FindingList, Money, ReasonedButton, RefusalBox, ToneBadge } from './ProcurementBits';
+import { FindingList, Money, ReasonedButton, RefusalBox, ToneBadge } from './ProcurementBits';
 import { ProfileDialog } from './ProfileDialog';
 import { capVerdict, notApplicable, offer, steerVerdict } from './rules';
 import type { BadgeVariant } from '@/shared/ui/Badge';

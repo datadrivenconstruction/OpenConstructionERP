@@ -15,7 +15,7 @@ import { Button } from '@/shared/ui/Button';
 import { fmtList } from '@/shared/lib/formatters';
 
 import { putRoleHolders, type HolderInput, type RoleHolder } from './api';
-import { FIELD_CLASS, RefusalBox, useWrite, type Refusal } from './StakeholderBits';
+import { RefusalBox, useWrite, type Refusal } from './StakeholderBits';
 import { useRoles } from './hooks';
 import { LETTER, nameOf, vocab } from './labels';
 import type { Screen } from './screen';

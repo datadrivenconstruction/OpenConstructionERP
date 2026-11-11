@@ -61,7 +61,6 @@ import { allowedStatusMoves, fteDecimals, groupByPhase, phasesOf, planIsSubmitta
 import {
   ClearedBadge,
   ExportButtons,
-  FIELD_CLASS,
   FILL_TONE,
   PLAN_TONE,
   POSITION_TONE,

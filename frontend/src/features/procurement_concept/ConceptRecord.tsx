@@ -17,7 +17,7 @@ import { fmtDate } from '@/shared/lib/formatters';
 import { REOPEN_REASON_MAX, conceptAction, downloadExport, type Concept, type ConceptAction, type ExportFormat, type ExportPart, type Finding } from './api';
 import { useRefusalToast } from './hooks';
 import { CLIENT_TYPE, CONCEPT_STATE, JURISDICTION, catalogueName, vocab, type KeyText, type LabelContext } from './labels';
-import { CONCEPT_TONE, FIELD_CLASS, Field, FindingList, ReasonedButton, RefusalBox, ToneBadge } from './ProcurementBits';
+import { CONCEPT_TONE, Field, FindingList, ReasonedButton, RefusalBox, ToneBadge } from './ProcurementBits';
 import { conceptSteps, editVerdict, splitFindings } from './rules';
 
 export const CONCEPT_ACTION: Record<ConceptAction, KeyText> = {
