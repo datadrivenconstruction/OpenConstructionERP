@@ -175,7 +175,7 @@ export function StageAdjustSheet({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/30 z-40"
+        className="fixed inset-0 bg-black/30 z-drawer"
         onClick={onClose}
         aria-hidden
       />
@@ -185,7 +185,7 @@ export function StageAdjustSheet({
         aria-modal="true"
         aria-labelledby="stage-adjust-title"
         tabIndex={-1}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-surface-primary border-l border-border shadow-2xl flex flex-col outline-none"
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-drawer bg-surface-primary border-l border-border shadow-2xl flex flex-col outline-none"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border">
@@ -195,7 +195,7 @@ export function StageAdjustSheet({
             </div>
             <h2
               id="stage-adjust-title"
-              className="text-base font-semibold text-content-primary truncate"
+              className="oe-card-title truncate"
             >
               {stage.title}
             </h2>
@@ -220,14 +220,14 @@ export function StageAdjustSheet({
           {/* Group-by knob */}
           {stage.stage_name === 'group' && (
             <div>
-              <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+              <label className="oe-overline">
                 {t('match_elements.pipeline.group_by', 'Group by keys')}
               </label>
               <input
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value)}
                 placeholder="ifc_class, predefined_type"
-                className="mt-1 w-full text-xs px-2.5 py-2 rounded-lg border border-border bg-surface-primary text-content-primary font-mono"
+                className="mt-1 w-full oe-input oe-input-sm font-mono"
               />
               <p className="mt-1 text-2xs text-content-tertiary">
                 {t(
@@ -242,7 +242,7 @@ export function StageAdjustSheet({
           {stage.stage_name === 'match' && (
             <div className="space-y-3">
               <div>
-                <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+                <label className="oe-overline">
                   {t('match_elements.pipeline.method', 'Method')}
                 </label>
                 <div className="mt-1 flex gap-1.5 flex-wrap">
@@ -266,7 +266,7 @@ export function StageAdjustSheet({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+                  <label className="oe-overline">
                     {t('match_elements.pipeline.max_groups', 'Max groups')}
                   </label>
                   <input
@@ -275,11 +275,11 @@ export function StageAdjustSheet({
                     max={200}
                     value={maxGroups}
                     onChange={(e) => setMaxGroups(Number(e.target.value))}
-                    className="mt-1 w-full text-xs px-2.5 py-2 rounded-lg border border-border bg-surface-primary text-content-primary"
+                    className="mt-1 w-full oe-input oe-input-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+                  <label className="oe-overline">
                     Top-K
                   </label>
                   <input
@@ -288,7 +288,7 @@ export function StageAdjustSheet({
                     max={50}
                     value={topK}
                     onChange={(e) => setTopK(Number(e.target.value))}
-                    className="mt-1 w-full text-xs px-2.5 py-2 rounded-lg border border-border bg-surface-primary text-content-primary"
+                    className="mt-1 w-full oe-input oe-input-sm"
                   />
                 </div>
               </div>
@@ -313,7 +313,7 @@ export function StageAdjustSheet({
                 onSelect={setPromptId}
               />
               <div>
-                <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+                <label className="oe-overline">
                   {t('match_elements.pipeline.llm_provider', 'LLM provider')}
                 </label>
                 <div className="mt-1 grid grid-cols-1 gap-1">

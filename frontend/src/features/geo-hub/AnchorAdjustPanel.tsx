@@ -205,8 +205,8 @@ export function AnchorAdjustPanel({
         })}
         data-testid="geo-anchor-adjust-pill"
       >
-        <MapPinned size={13} strokeWidth={2} className="text-emerald-300" />
-        <ChevronUp size={13} strokeWidth={2.25} className="text-white/70" />
+        <MapPinned size={14} strokeWidth={2} className="text-emerald-300" />
+        <ChevronUp size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -235,7 +235,7 @@ export function AnchorAdjustPanel({
             'bg-semantic-success/15 text-emerald-300 ring-1 ring-emerald-400/30',
           ].join(' ')}
         >
-          <MapPinned size={13} strokeWidth={2} />
+          <MapPinned size={14} strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-2xs font-semibold uppercase tracking-wider text-slate-400">
@@ -300,9 +300,9 @@ export function AnchorAdjustPanel({
           data-testid="geo-anchor-regeocode"
         >
           {isRegeocoding ? (
-            <Loader2 size={11} strokeWidth={2.25} className="animate-spin" />
+            <Loader2 size={12} strokeWidth={2.25} className="animate-spin" />
           ) : (
-            <Sparkles size={11} strokeWidth={2.25} />
+            <Sparkles size={12} strokeWidth={2.25} />
           )}
           {t('geo_hub.adjust.regeocode', { defaultValue: 'Re-geocode' })}
         </button>
@@ -321,9 +321,9 @@ export function AnchorAdjustPanel({
           data-testid="geo-anchor-drag-toggle"
         >
           {dragMode ? (
-            <RefreshCw size={11} strokeWidth={2.25} />
+            <RefreshCw size={12} strokeWidth={2.25} />
           ) : (
-            <Crosshair size={11} strokeWidth={2.25} />
+            <Crosshair size={12} strokeWidth={2.25} />
           )}
           {dragMode
             ? t('geo_hub.adjust.drag_on', { defaultValue: 'Click map to set' })

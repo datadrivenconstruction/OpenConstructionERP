@@ -114,7 +114,7 @@ function JobsExplainer() {
   return (
     <CollapsibleSection
       storageKey="jobs.how"
-      icon={<ListChecks size={15} className="text-oe-blue" />}
+      icon={<ListChecks size={16} className="text-oe-blue" />}
       title={t('jobs.flow_title', { defaultValue: 'How background jobs work' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -258,15 +258,13 @@ export function JobsPage() {
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-content-tertiary" />
           <input
             type="text"
             placeholder={t('jobs.search', { defaultValue: 'Search jobs...' })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pe-4 ps-10 text-sm
-              focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue
-              dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            className="w-full oe-input pe-4 ps-10"
           />
           {search && (
             <button
@@ -274,7 +272,7 @@ export function JobsPage() {
               className="absolute right-3 top-1/2 -translate-y-1/2"
               aria-label={t('common.clear_search', { defaultValue: 'Clear search' })}
             >
-              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden />
+              <X className="h-4 w-4 text-content-tertiary hover:text-content-secondary" aria-hidden />
             </button>
           )}
         </div>
@@ -282,8 +280,7 @@ export function JobsPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value as JobStatus | ''); setOffset(0); }}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm
-            dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          className="oe-select"
         >
           <option value="">{t('jobs.all_statuses', { defaultValue: 'All statuses' })}</option>
           {STATUS_OPTIONS.map((s) => (
@@ -296,8 +293,7 @@ export function JobsPage() {
         <select
           value={kindFilter}
           onChange={(e) => { setKindFilter(e.target.value); setOffset(0); }}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm
-            dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          className="oe-select"
         >
           <option value="">{t('jobs.all_kinds', { defaultValue: 'All kinds' })}</option>
           {kinds.map((k) => (
@@ -308,7 +304,7 @@ export function JobsPage() {
 
       {/* Loading */}
       {isLoading && (
-        <div className="py-16 text-center text-gray-500">
+        <div className="py-16 text-center text-content-tertiary">
           <Clock className="mx-auto mb-2 h-6 w-6 animate-spin" />
           {t('common.loading', { defaultValue: 'Loading...' })}
         </div>
@@ -335,18 +331,18 @@ export function JobsPage() {
       {/* Table */}
       {!isLoading && filtered.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border-light bg-surface-secondary text-xs font-medium uppercase text-content-tertiary">
+          <table className="oe-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">{t('jobs.col_kind', { defaultValue: 'Kind' })}</th>
-                <th className="px-4 py-3">{t('jobs.col_status', { defaultValue: 'Status' })}</th>
-                <th className="px-4 py-3">{t('jobs.col_progress', { defaultValue: 'Progress' })}</th>
-                <th className="px-4 py-3">{t('jobs.col_created', { defaultValue: 'Created' })}</th>
-                <th className="px-4 py-3">{t('jobs.col_duration', { defaultValue: 'Duration' })}</th>
-                <th className="px-4 py-3">{t('jobs.col_actions', { defaultValue: 'Actions' })}</th>
+                <th>{t('jobs.col_kind', { defaultValue: 'Kind' })}</th>
+                <th>{t('jobs.col_status', { defaultValue: 'Status' })}</th>
+                <th>{t('jobs.col_progress', { defaultValue: 'Progress' })}</th>
+                <th>{t('jobs.col_created', { defaultValue: 'Created' })}</th>
+                <th>{t('jobs.col_duration', { defaultValue: 'Duration' })}</th>
+                <th>{t('jobs.col_actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {filtered.map((job) => (
                 <tr
                   key={job.id}
@@ -356,34 +352,34 @@ export function JobsPage() {
                       ? 'bg-blue-50 dark:bg-blue-950/30'
                       : 'bg-surface-primary hover:bg-surface-secondary'}`}
                 >
-                  <td className="px-4 py-3 font-medium text-content-primary">
+                  <td className="font-medium">
                     {job.kind}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <Badge variant={STATUS_BADGE_VARIANT[job.status]} dot size="sm">
                       {t(`jobs.status_${job.status}`, {
                         defaultValue: job.status.charAt(0).toUpperCase() + job.status.slice(1),
                       })}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <ProgressCell job={job} />
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-content-tertiary">
+                  <td className="whitespace-nowrap text-content-tertiary">
                     {fullDateTime(job.created_at)}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-content-tertiary">
+                  <td className="whitespace-nowrap text-content-tertiary">
                     {durationLabel(job.started_at, job.finished_at)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <div className="flex items-center gap-2">
                       {canCancel(job.status) && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleCancel(job.id); }}
                           disabled={cancelMutation.isPending}
                           className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium
-                            text-red-600 hover:bg-red-50 disabled:opacity-50
-                            dark:text-red-400 dark:hover:bg-red-950/30"
+                            text-semantic-error hover:bg-semantic-error-bg disabled:opacity-50
+                            "
                           title={t('jobs.cancel', { defaultValue: 'Cancel job' })}
                         >
                           {cancelMutation.isPending ? (
@@ -398,8 +394,8 @@ export function JobsPage() {
                         <button
                           onClick={(e) => { e.stopPropagation(); handleExportResult(job); }}
                           className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium
-                            text-gray-600 hover:bg-gray-100
-                            dark:text-gray-400 dark:hover:bg-gray-800"
+                            text-content-secondary hover:bg-surface-secondary
+                            "
                           title={t('jobs.export_result', { defaultValue: 'Download result JSON' })}
                         >
                           <Download className="h-3.5 w-3.5" aria-hidden />
@@ -428,7 +424,7 @@ export function JobsPage() {
 
       {/* Pagination */}
       {total > LIMIT && (
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+        <div className="mt-4 flex items-center justify-between text-sm text-content-tertiary">
           <span>
             {t('jobs.showing', {
               defaultValue: '{{from}}-{{to}} of {{total}}',
@@ -470,7 +466,7 @@ function ProgressCell({ job }: { job: JobRun }) {
   const { t } = useTranslation();
 
   if (job.status !== 'started' && job.status !== 'pending') {
-    return <span className="text-xs text-gray-400">-</span>;
+    return <span className="text-xs text-content-tertiary">-</span>;
   }
 
   const pct = job.progress_pct ?? 0;
@@ -507,25 +503,25 @@ function JobDetailPanel({
   return (
     <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('jobs.detail_title', { defaultValue: 'Job Details' })}
         </h3>
         <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
-          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden />
+          <X className="h-4 w-4 text-content-tertiary hover:text-content-secondary" aria-hidden />
         </button>
       </div>
 
       <div className="grid gap-2 text-sm sm:grid-cols-2">
         <div>
-          <span className="text-gray-500">{t('jobs.detail_id', { defaultValue: 'ID' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_id', { defaultValue: 'ID' })}:</span>{' '}
           <span className="font-mono text-xs">{job.id}</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_kind', { defaultValue: 'Kind' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_kind', { defaultValue: 'Kind' })}:</span>{' '}
           <span className="font-medium">{job.kind}</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_status', { defaultValue: 'Status' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_status', { defaultValue: 'Status' })}:</span>{' '}
           <Badge variant={STATUS_BADGE_VARIANT[job.status]} dot size="sm">
             {t(`jobs.status_${job.status}`, {
               defaultValue: job.status.charAt(0).toUpperCase() + job.status.slice(1),
@@ -533,24 +529,24 @@ function JobDetailPanel({
           </Badge>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_created', { defaultValue: 'Created' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_created', { defaultValue: 'Created' })}:</span>{' '}
           <span className="font-medium">{fullDateTime(job.created_at)}</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_started', { defaultValue: 'Started' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_started', { defaultValue: 'Started' })}:</span>{' '}
           <span className="font-medium">{fullDateTime(job.started_at)}</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_finished', { defaultValue: 'Finished' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_finished', { defaultValue: 'Finished' })}:</span>{' '}
           <span className="font-medium">{fullDateTime(job.finished_at)}</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('jobs.detail_duration', { defaultValue: 'Duration' })}:</span>{' '}
+          <span className="text-content-tertiary">{t('jobs.detail_duration', { defaultValue: 'Duration' })}:</span>{' '}
           <span className="font-medium">{durationLabel(job.started_at, job.finished_at)}</span>
         </div>
         {job.celery_task_id && (
           <div>
-            <span className="text-gray-500">{t('jobs.detail_celery_id', { defaultValue: 'Celery Task' })}:</span>{' '}
+            <span className="text-content-tertiary">{t('jobs.detail_celery_id', { defaultValue: 'Celery Task' })}:</span>{' '}
             <span className="font-mono text-xs">{job.celery_task_id}</span>
           </div>
         )}
@@ -558,10 +554,10 @@ function JobDetailPanel({
         {/* Progress for active jobs */}
         {canCancel(job.status) && (
           <div className="sm:col-span-2">
-            <span className="text-gray-500">{t('jobs.detail_progress', { defaultValue: 'Progress' })}:</span>{' '}
+            <span className="text-content-tertiary">{t('jobs.detail_progress', { defaultValue: 'Progress' })}:</span>{' '}
             <ProgressCell job={job} />
             {job.progress_message && (
-              <p className="mt-1 text-xs text-gray-500">{job.progress_message}</p>
+              <p className="mt-1 text-xs text-content-tertiary">{job.progress_message}</p>
             )}
           </div>
         )}
@@ -569,7 +565,7 @@ function JobDetailPanel({
         {/* Result data */}
         {job.result_jsonb && Object.keys(job.result_jsonb).length > 0 && (
           <div className="sm:col-span-2">
-            <p className="mb-1 text-gray-500">{t('jobs.detail_result', { defaultValue: 'Result' })}:</p>
+            <p className="mb-1 text-content-tertiary">{t('jobs.detail_result', { defaultValue: 'Result' })}:</p>
             <pre className="max-h-48 overflow-auto rounded bg-surface-secondary p-2 text-xs text-content-secondary">
               {JSON.stringify(job.result_jsonb, null, 2)}
             </pre>

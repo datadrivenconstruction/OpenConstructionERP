@@ -182,7 +182,7 @@ function SectionHeader({
   return (
     <div className="mt-1 flex items-center gap-1.5 px-2 pt-2 pb-1">
       <Icon size={12} className="text-content-tertiary" strokeWidth={2} />
-      <h3 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+      <h3 className="oe-overline">
         {label}
       </h3>
       <span className="ml-auto text-2xs font-medium tabular-nums text-content-tertiary">
@@ -248,7 +248,7 @@ function Row({
           'rounded-sm bg-surface-secondary text-content-secondary',
         ].join(' ')}
       >
-        <Icon size={13} strokeWidth={2} />
+        <Icon size={14} strokeWidth={2} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -356,9 +356,9 @@ export function OverlaySidebar({
           defaultValue: 'Show overlays + tilesets',
         })}
       >
-        <Layers size={13} strokeWidth={2} className="text-emerald-300" />
+        <Layers size={14} strokeWidth={2} className="text-emerald-300" />
         <span className="tabular-nums">{isLoading ? '…' : totalCount}</span>
-        <ChevronRight size={13} strokeWidth={2.25} className="text-white/70" />
+        <ChevronRight size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -386,7 +386,7 @@ export function OverlaySidebar({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <h2 className="oe-overline">
             {t('geo_hub.overlay_sidebar.title', {
               defaultValue: 'Layers on this project',
             })}
@@ -442,7 +442,7 @@ export function OverlaySidebar({
             className="m-3 rounded-md border border-dashed border-border px-3 py-4 text-center text-2xs text-content-tertiary"
           >
             <Layers
-              size={18}
+              size={20}
               className="mx-auto mb-1.5 text-content-quaternary"
               aria-hidden
             />

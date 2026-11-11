@@ -102,7 +102,7 @@ function TilesetCard({
   return (
     <div
       className={[
-        'group relative w-full rounded-md border bg-surface-primary p-2.5',
+        'group relative w-full rounded-md border bg-surface-primary p-2',
         'transition-colors duration-fast ease-oe',
         focused
           ? 'border-oe-blue/60 ring-1 ring-oe-blue/30'
@@ -191,7 +191,7 @@ function TilesetCard({
             : t('geo_hub.sidebar.hide', { defaultValue: 'Hide from map' })
         }
       >
-        {hidden ? <EyeOff size={13} /> : <Eye size={13} />}
+        {hidden ? <EyeOff size={14} /> : <Eye size={14} />}
       </button>
       {onChangeOpacity && (
         <div
@@ -225,7 +225,7 @@ function TilesetCard({
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
             ].join(' ')}
           >
-            {hidden ? <EyeOff size={13} aria-hidden /> : <Eye size={13} aria-hidden />}
+            {hidden ? <EyeOff size={14} aria-hidden /> : <Eye size={14} aria-hidden />}
           </button>
           <label className="flex flex-1 items-center gap-2 text-2xs text-content-tertiary">
             <span className="sr-only">
@@ -267,7 +267,7 @@ function TilesetCard({
 
 function SkeletonCard() {
   return (
-    <div className="rounded-md border border-border bg-surface-primary p-2.5">
+    <div className="rounded-md border border-border bg-surface-primary p-2">
       <div className="flex items-start gap-2">
         <div className="h-7 w-7 shrink-0 rounded-sm bg-surface-secondary animate-pulse" />
         <div className="min-w-0 flex-1 space-y-1.5">
@@ -319,9 +319,9 @@ export function TilesetSidebar({
         aria-label={t('geo_hub.sidebar.expand', { defaultValue: 'Show tilesets' })}
         title={t('geo_hub.sidebar.expand', { defaultValue: 'Show tilesets' })}
       >
-        <Layers size={13} strokeWidth={2} className="text-emerald-300" />
+        <Layers size={14} strokeWidth={2} className="text-emerald-300" />
         <span className="tabular-nums">{isLoading ? '…' : totalCount}</span>
-        <ChevronRight size={13} strokeWidth={2.25} className="text-white/70" />
+        <ChevronRight size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -357,8 +357,8 @@ export function TilesetSidebar({
         }
       >
         <div className="flex items-center gap-1.5">
-          <Layers size={13} className="text-content-tertiary" />
-          <h2 className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+          <Layers size={14} className="text-content-tertiary" />
+          <h2 className="oe-overline">
             {t('geo_hub.sidebar.title', { defaultValue: 'Tilesets' })}
           </h2>
           {tilesets && (
@@ -383,7 +383,7 @@ export function TilesetSidebar({
                 defaultValue: 'Hide tilesets',
               })}
             >
-              <ChevronLeft size={13} strokeWidth={2} />
+              <ChevronLeft size={14} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -426,7 +426,7 @@ export function TilesetSidebar({
         )}
         {!isLoading && (!tilesets || tilesets.length === 0) && (
           <div className="flex flex-col items-center gap-1.5 px-3 py-6 text-center">
-            <MapIcon size={18} className="text-content-quaternary" />
+            <MapIcon size={20} className="text-content-quaternary" />
             <p className="text-xs text-content-tertiary">
               {t('geo_hub.sidebar.empty', {
                 defaultValue: 'No tilesets in this project yet.',

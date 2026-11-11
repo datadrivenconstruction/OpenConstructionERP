@@ -83,7 +83,7 @@ function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 
   );
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="facts-form">
-      <h2 className="text-sm font-semibold text-content-primary">{t('hseFrame.facts.title', { defaultValue: 'Project facts' })}</h2>
+      <h2 className="oe-card-title">{t('hseFrame.facts.title', { defaultValue: 'Project facts' })}</h2>
       <p className="mb-3 text-sm text-content-secondary">
         {t('hseFrame.facts.hint', {
           defaultValue: 'The catalogue decides from these figures which duties apply. A missing figure leaves the duty undecided, never waived.',
@@ -117,7 +117,7 @@ function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 
         <label className="flex flex-col gap-1.5 text-sm text-content-primary">
           {t('hseFrame.facts.plan_status', { defaultValue: 'Health and safety plan' })}
           <select
-            className="h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm"
+            className="oe-select oe-input-lg"
             disabled={!canEdit}
             value={(value('plan_status') as string) ?? 'not_started'}
             onChange={(e) => set({ plan_status: e.target.value as Frame['plan_status'] })}
@@ -133,7 +133,7 @@ function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 
         <label className="flex flex-col gap-1.5 text-sm text-content-primary">
           {t('hseFrame.facts.later_works', { defaultValue: 'File for later works' })}
           <select
-            className="h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm"
+            className="oe-select oe-input-lg"
             disabled={!canEdit}
             value={(value('later_works_status') as string) ?? 'not_started'}
             onChange={(e) => set({ later_works_status: e.target.value as Frame['later_works_status'] })}
@@ -208,7 +208,7 @@ function DutyList({ duties }: { duties: Duties | null }) {
   ];
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="duty-list">
-      <h2 className="text-sm font-semibold text-content-primary">{t('hseFrame.duty.title', { defaultValue: 'Duties from the facts' })}</h2>
+      <h2 className="oe-card-title">{t('hseFrame.duty.title', { defaultValue: 'Duties from the facts' })}</h2>
       <ul className="mt-2 space-y-1">
         {rows.map(([key, label]) => {
           const word = dutyWord(duties ? duties[key] : null);
@@ -230,7 +230,7 @@ function ReadinessList({ readiness, catalogue }: { readiness: Readiness | undefi
   const { t, i18n } = useTranslation();
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="readiness-list">
-      <h2 className="text-sm font-semibold text-content-primary">{t('hseFrame.readiness.title', { defaultValue: 'Gate readiness' })}</h2>
+      <h2 className="oe-card-title">{t('hseFrame.readiness.title', { defaultValue: 'Gate readiness' })}</h2>
       <ul className="mt-2 space-y-1">
         {(readiness?.items ?? []).map((item) => {
           const Icon = STATE_ICON[item.state];
@@ -265,7 +265,7 @@ function SummaryList({ summary }: { summary: Summary | undefined }) {
   ];
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="summary-list">
-      <h2 className="text-sm font-semibold text-content-primary">{t('hseFrame.summary.title', { defaultValue: 'From the neighbouring modules' })}</h2>
+      <h2 className="oe-card-title">{t('hseFrame.summary.title', { defaultValue: 'From the neighbouring modules' })}</h2>
       <p className="mb-2 text-sm text-content-secondary">
         {t('hseFrame.summary.hint', { defaultValue: 'Read now from safety, HSE advanced, inspections and permits. The records stay where they are kept.' })}
       </p>

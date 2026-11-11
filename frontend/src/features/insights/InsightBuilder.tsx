@@ -88,7 +88,7 @@ export function InsightBuilder({ datasets, initial, nextColor = 1, onSave, onClo
     (draft.title?.length ?? 0) > 0;
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input oe-input-lg w-full';
   const labelCls = 'mb-1 block text-2xs font-medium uppercase tracking-wider text-content-tertiary';
 
   const save = () => {
@@ -156,7 +156,7 @@ export function InsightBuilder({ datasets, initial, nextColor = 1, onSave, onClo
           {datasets.length > 1 && (
             <div>
               <label className={labelCls}>{t('insights.dataset', { defaultValue: 'Data' })}</label>
-              <select className={fieldCls} value={datasetId} onChange={(e) => setDatasetId(e.target.value)}>
+              <select className={`${fieldCls} oe-select`} value={datasetId} onChange={(e) => setDatasetId(e.target.value)}>
                 {datasets.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.label}
@@ -170,7 +170,7 @@ export function InsightBuilder({ datasets, initial, nextColor = 1, onSave, onClo
             <div>
               <label className={labelCls}>{t('insights.measure', { defaultValue: 'Measure' })}</label>
               <select
-                className={fieldCls}
+                className={`${fieldCls} oe-select`}
                 value={measure}
                 onChange={(e) => setMeasure(e.target.value)}
                 disabled={measures.length === 0}
@@ -185,7 +185,7 @@ export function InsightBuilder({ datasets, initial, nextColor = 1, onSave, onClo
             </div>
             <div>
               <label className={labelCls}>{t('insights.aggregation', { defaultValue: 'Aggregate' })}</label>
-              <select className={fieldCls} value={agg} onChange={(e) => setAgg(e.target.value as Aggregation)}>
+              <select className={`${fieldCls} oe-select`} value={agg} onChange={(e) => setAgg(e.target.value as Aggregation)}>
                 {AGG_ORDER.map((a) => (
                   <option key={a} value={a}>
                     {aggLabel(a)}
@@ -198,7 +198,7 @@ export function InsightBuilder({ datasets, initial, nextColor = 1, onSave, onClo
           <div className={chart === 'kpi' ? 'opacity-40' : ''}>
             <label className={labelCls}>{t('insights.group_by', { defaultValue: 'Group by' })}</label>
             <select
-              className={fieldCls}
+              className={`${fieldCls} oe-select`}
               value={dimension}
               onChange={(e) => setDimension(e.target.value)}
               disabled={chart === 'kpi' || dims.length === 0}

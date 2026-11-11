@@ -56,7 +56,7 @@ export function DimensionsSection({ projectId, methodologySlug, readOnly }: Prop
     <Card padding="lg">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('methodology.dimensions.title', { defaultValue: 'Analytical dimensions' })}
           </h3>
           <p className="mt-0.5 text-xs text-content-secondary">
@@ -98,9 +98,9 @@ export function DimensionsSection({ projectId, methodologySlug, readOnly }: Prop
               >
                 <div className="flex items-center gap-2">
                   {dim.kind === 'tree' ? (
-                    <ListTree size={15} className="text-content-tertiary" />
+                    <ListTree size={16} className="text-content-tertiary" />
                   ) : (
-                    <Tags size={15} className="text-content-tertiary" />
+                    <Tags size={16} className="text-content-tertiary" />
                   )}
                   <span className="text-sm font-medium text-content-primary">{dim.label}</span>
                   <span className="font-mono text-2xs text-content-tertiary">{dim.key}</span>
@@ -121,7 +121,7 @@ export function DimensionsSection({ projectId, methodologySlug, readOnly }: Prop
                       className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -287,7 +287,7 @@ function AddDimensionModal({
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as DimensionKind)}
-              className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary"
+              className="oe-select"
             >
               <option value="flat">{t('methodology.dimensions.flat', { defaultValue: 'Flat' })}</option>
               <option value="tree">{t('methodology.dimensions.tree', { defaultValue: 'Tree' })}</option>
@@ -305,7 +305,7 @@ function AddDimensionModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('methodology.dimensions.values_field', { defaultValue: 'Values (one per line)' })}
           </label>
           <textarea
@@ -315,7 +315,7 @@ function AddDimensionModal({
             placeholder={t('methodology.dimensions.values_placeholder', {
               defaultValue: '1 Site preparation\n2 Main buildings and structures\n3 Auxiliary buildings',
             })}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 font-mono text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="w-full oe-textarea font-mono"
           />
           <p className="text-xs text-content-tertiary">
             {t('methodology.dimensions.values_hint', {

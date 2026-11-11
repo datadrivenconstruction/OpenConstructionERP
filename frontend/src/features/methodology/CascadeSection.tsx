@@ -244,7 +244,7 @@ export function CascadeSection({
       <Card padding="lg">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('methodology.cascade.base_sets.title', { defaultValue: 'Base sets' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -279,7 +279,7 @@ export function CascadeSection({
                     value={token}
                     disabled={readOnly}
                     onChange={(e) => renameBaseToken(token, e.target.value)}
-                    className="h-8 w-44 rounded-md border border-border bg-surface-primary px-2 font-mono text-xs text-content-primary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    className="oe-input oe-input-sm w-44 font-mono"
                     aria-label={t('methodology.cascade.base_sets.name_label', {
                       defaultValue: 'Base set name',
                     })}
@@ -291,7 +291,7 @@ export function CascadeSection({
                       className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -327,7 +327,7 @@ export function CascadeSection({
       <Card padding="lg">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('methodology.cascade.composites.title', { defaultValue: 'Composite base sets' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -362,7 +362,7 @@ export function CascadeSection({
                     value={name}
                     disabled={readOnly}
                     onChange={(e) => renameComposite(name, e.target.value)}
-                    className="h-8 w-44 rounded-md border border-border bg-surface-primary px-2 font-mono text-xs text-content-primary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    className="oe-input oe-input-sm w-44 font-mono"
                     aria-label={t('methodology.cascade.composites.name_label', {
                       defaultValue: 'Composite name',
                     })}
@@ -374,7 +374,7 @@ export function CascadeSection({
                       className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -418,7 +418,7 @@ export function CascadeSection({
       <Card padding="lg">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('methodology.cascade.steps.title', { defaultValue: 'Markup steps' })}
             </h3>
             <p className="mt-0.5 text-xs text-content-secondary">
@@ -460,7 +460,7 @@ export function CascadeSection({
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-content-tertiary" aria-hidden>
-                      <GripVertical size={15} />
+                      <GripVertical size={16} />
                     </span>
                     <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-surface-secondary px-1.5 text-2xs font-semibold tabular-nums text-content-secondary">
                       {index + 1}
@@ -479,7 +479,7 @@ export function CascadeSection({
                         // break that reference, so we keep the existing key.
                         updateStep(index, { label });
                       }}
-                      className="h-8 min-w-[10rem] flex-1 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      className="oe-input min-w-[10rem] flex-1"
                     />
                     {step.category === 'tax' && (
                       <Badge variant="blue" size="sm">
@@ -495,7 +495,7 @@ export function CascadeSection({
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
                           aria-label={t('methodology.cascade.steps.move_up', { defaultValue: 'Move up' })}
                         >
-                          <ArrowUp size={13} />
+                          <ArrowUp size={14} />
                         </button>
                         <button
                           type="button"
@@ -504,7 +504,7 @@ export function CascadeSection({
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
                           aria-label={t('methodology.cascade.steps.move_down', { defaultValue: 'Move down' })}
                         >
-                          <ArrowDown size={13} />
+                          <ArrowDown size={14} />
                         </button>
                         <button
                           type="button"
@@ -512,7 +512,7 @@ export function CascadeSection({
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                           aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
@@ -527,7 +527,7 @@ export function CascadeSection({
                         value={step.kind}
                         disabled={readOnly}
                         onChange={(e) => updateStep(index, { kind: e.target.value as StepKind })}
-                        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary disabled:opacity-60"
+                        className="oe-select oe-input-sm"
                       >
                         <option value="percentage">
                           {t('methodology.cascade.steps.kind_pct', { defaultValue: 'Percentage' })}
@@ -549,7 +549,7 @@ export function CascadeSection({
                           value={step.rate}
                           disabled={readOnly}
                           onChange={(e) => updateStep(index, { rate: e.target.value })}
-                          className="h-8 w-24 rounded-md border border-border bg-surface-primary px-2 text-xs tabular-nums text-content-primary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="oe-input oe-input-sm w-24 tabular-nums"
                         />
                       </label>
                     ) : (
@@ -563,7 +563,7 @@ export function CascadeSection({
                           value={step.amount}
                           disabled={readOnly}
                           onChange={(e) => updateStep(index, { amount: e.target.value })}
-                          className="h-8 w-28 rounded-md border border-border bg-surface-primary px-2 text-xs tabular-nums text-content-primary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="oe-input oe-input-sm w-28 tabular-nums"
                         />
                       </label>
                     )}
@@ -576,7 +576,7 @@ export function CascadeSection({
                         value={step.category}
                         disabled={readOnly}
                         onChange={(e) => updateStep(index, { category: e.target.value })}
-                        className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary disabled:opacity-60"
+                        className="oe-select oe-input-sm"
                       >
                         {STEP_CATEGORIES.map((cat) => (
                           <option key={cat} value={cat}>

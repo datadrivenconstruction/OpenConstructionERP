@@ -453,11 +453,7 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
                 onChange={(e) => updateSlot(idx, e.target.value)}
                 disabled={disabled}
                 data-testid={`grouping-slot-${idx + 1}`}
-                className={clsx(
-                  'rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm',
-                  'focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue',
-                  disabled && 'opacity-50',
-                )}
+                className="oe-select"
               >
                 <option value="">
                   {idx === 0
@@ -634,37 +630,37 @@ export function GroupingPanel({ sessionId, groupsQ, updateSessionM }: GroupingPa
             </div>
 
             <div className="max-h-80 overflow-auto rounded-lg border border-border-light">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-surface-secondary text-content-secondary">
+              <table className="oe-table">
+                <thead className="sticky top-0">
                   <tr>
-                    <th className="px-3 py-2 text-left font-medium">
+                    <th>
                       {t('match.wizard.group', { defaultValue: 'Group' })}
                     </th>
-                    <th className="px-3 py-2 text-right font-medium">
+                    <th className="text-right">
                       {t('match.wizard.count', { defaultValue: 'Count' })}
                     </th>
-                    <th className="px-3 py-2 text-left font-medium">
+                    <th>
                       {t('match.wizard.grouping.unit', { defaultValue: 'Unit' })}
                     </th>
-                    <th className="px-3 py-2 text-left font-medium">
+                    <th>
                       {t('match.wizard.grouping.samples', { defaultValue: 'Samples' })}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {groups.map((g) => (
-                    <tr key={g.id} className="border-t border-border-light/60">
-                      <td className="px-3 py-2 text-content-primary">
+                    <tr key={g.id}>
+                      <td>
                         <div className="font-medium">{g.display_label}</div>
                         <div className="text-xs text-content-tertiary">{g.trade}</div>
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-primary">
+                      <td className="text-right tabular-nums">
                         {g.element_count}
                       </td>
-                      <td className="px-3 py-2 text-content-secondary">
+                      <td className="text-content-secondary">
                         {g.chosen_unit ?? '—'}
                       </td>
-                      <td className="px-3 py-2 text-content-secondary">
+                      <td className="text-content-secondary">
                         {g.sample_names.length > 0 ? (
                           <span
                             className="block max-w-[280px] truncate"

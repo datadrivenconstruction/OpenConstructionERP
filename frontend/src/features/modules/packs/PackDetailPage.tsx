@@ -64,7 +64,7 @@ function Section({
 }) {
   return (
     <section className="rounded-xl border border-border-light bg-surface-elevated p-4 sm:p-5" data-testid={testId}>
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-3 flex items-center gap-2">
         <Icon size={16} aria-hidden className="text-content-tertiary" />
         {title}
       </h3>
@@ -226,19 +226,19 @@ export function PackDetailPage() {
   if (canInstall && envPinned) {
     primaryAction = (
       <p className="inline-flex items-center gap-1.5 text-xs text-content-tertiary">
-        <Info size={13} aria-hidden />
+        <Info size={14} aria-hidden />
         {t('modules.pack_active_via_env', { defaultValue: 'Active via environment (OE_PACK)' })}
       </p>
     );
   } else if (canInstall) {
     primaryAction = isActive ? (
-      <Button variant="secondary" icon={<Power size={15} />} onClick={() => setDeactivateOpen(true)} data-testid="pack-detail-deactivate">
+      <Button variant="secondary" icon={<Power size={16} />} onClick={() => setDeactivateOpen(true)} data-testid="pack-detail-deactivate">
         {t('modules.pack_deactivate', { defaultValue: 'Deactivate' })}
       </Button>
     ) : (
       <Button
         variant="primary"
-        icon={<Power size={15} />}
+        icon={<Power size={16} />}
         onClick={() => {
           if (envPinned) {
             addToast({
@@ -269,7 +269,7 @@ export function PackDetailPage() {
         className="inline-flex items-center gap-1.5 text-sm font-medium text-content-secondary hover:text-content-primary"
         data-testid="pack-detail-back"
       >
-        <ArrowLeft size={15} aria-hidden className="rtl:rotate-180" />
+        <ArrowLeft size={16} aria-hidden className="rtl:rotate-180" />
         {t('packs.all_packs', { defaultValue: 'All packs' })}
       </Link>
 
@@ -313,7 +313,7 @@ export function PackDetailPage() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         {/* What changes */}
         <div className="min-w-0 space-y-4">
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {isActive
               ? t('packs.what_it_changed', { defaultValue: 'What this pack changed' })
               : t('packs.what_changes', { defaultValue: 'What activating changes' })}

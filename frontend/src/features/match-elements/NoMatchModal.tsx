@@ -84,7 +84,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/40 z-popover flex items-center justify-center p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -132,7 +132,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                     <o.icon className="w-4 h-4" />
                     {o.title}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">{o.sub}</div>
+                  <div className="text-xs text-content-tertiary mt-0.5">{o.sub}</div>
                 </div>
               </div>
             </label>
@@ -145,7 +145,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
                 placeholder={t('match_elements.no_match.placeholder.description', 'Position description')}
-                className="w-full px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
+                className="w-full oe-input"
               />
               <div className="flex gap-2">
                 <input
@@ -153,7 +153,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   placeholder={t('match_elements.no_match.placeholder.unit', 'Unit')}
-                  className="w-24 px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
+                  className="w-24 oe-input"
                 />
                 <input
                   type="number"
@@ -161,7 +161,7 @@ export function NoMatchModal({ sessionId, groupKey, onClose, onDone }: Props) {
                   onChange={(e) => setRate(e.target.value)}
                   placeholder={t('match_elements.no_match.placeholder.rate', 'Unit rate')}
                   step="0.01"
-                  className="flex-1 px-2 py-1.5 text-sm rounded border border-border bg-surface-primary"
+                  className="flex-1 oe-input"
                 />
               </div>
               <label className="flex items-start gap-2 text-xs text-content-secondary cursor-pointer pt-1">

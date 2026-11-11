@@ -167,16 +167,16 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
     null;
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {/* Template selector */}
       <div className="flex items-center gap-2 flex-wrap">
-        <label className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+        <label className="oe-overline">
           {t('match_elements.pipeline.prompt', 'Prompt')}
         </label>
         <select
           value={active?.id ?? ''}
           onChange={(e) => onSelect(e.target.value)}
-          className="flex-1 min-w-[160px] text-xs px-2 py-1.5 rounded-lg border border-border bg-surface-primary text-content-primary"
+          className="flex-1 min-w-[160px] oe-select oe-input-sm"
         >
           {templates.map((tpl) => (
             <option key={tpl.id} value={tpl.id}>
@@ -215,7 +215,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
           }}
           rows={3}
           className={
-            'w-full text-xs font-mono px-2.5 py-2 rounded-lg border border-border text-content-primary resize-y ' +
+            'w-full oe-textarea font-mono resize-y' +
             (isSystem
               ? 'bg-surface-secondary/60 opacity-70 cursor-not-allowed'
               : 'bg-surface-secondary')
@@ -238,7 +238,7 @@ export function PromptEditor({ promptKey, selectedId, onSelect }: Props) {
           }}
           rows={8}
           className={
-            'w-full text-xs font-mono px-2.5 py-2 rounded-lg border border-border text-content-primary resize-y ' +
+            'w-full oe-textarea font-mono resize-y' +
             (isSystem
               ? 'bg-surface-secondary/60 opacity-70 cursor-not-allowed'
               : 'bg-surface-secondary')

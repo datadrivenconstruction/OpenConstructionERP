@@ -48,7 +48,7 @@ function useDebounced<T>(value: T, delay: number): T {
 }
 
 const inputClass =
-  'w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary ' +
+  'oe-input w-full' +
   'placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue';
 
 const cardClass =
@@ -478,7 +478,7 @@ export function LaborRatesPage() {
               {t('laborRates.load_template', { defaultValue: 'Load a saved template' })}
             </span>
             <select
-              className={inputClass}
+              className={`${inputClass} oe-select`}
               style={{ minWidth: '16rem' }}
               value={editingId ?? ''}
               onChange={(e) => {
@@ -577,7 +577,7 @@ export function LaborRatesPage() {
           {/* On-cost list */}
           <div className={cardClass}>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('laborRates.oncosts', { defaultValue: 'On-costs' })}
               </h2>
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addOnCost}>
@@ -635,7 +635,7 @@ export function LaborRatesPage() {
                     aria-label={t('laborRates.oncost_col_what', { defaultValue: 'What it covers' })}
                   />
                   <select
-                    className={`${inputClass} w-32`}
+                    className={`${inputClass} oe-select w-32`}
                     value={row.kind}
                     onChange={(e) =>
                       updateOnCost(row.key, { kind: e.target.value as OnCostKind })
@@ -658,7 +658,7 @@ export function LaborRatesPage() {
                       placeholder="0"
                       aria-label={t('laborRates.oncost_value', { defaultValue: 'Value' })}
                     />
-                    <span className="pointer-events-none absolute right-2 top-1.5 text-xs text-gray-400">
+                    <span className="pointer-events-none absolute right-2 top-1.5 text-xs text-content-tertiary">
                       {row.kind === 'percentage' ? '%' : currency || '/h'}
                     </span>
                   </div>
@@ -678,8 +678,8 @@ export function LaborRatesPage() {
           {/* Crew composer */}
           <div className={cardClass}>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-                <Users size={16} className="text-gray-500" />
+              <h2 className="oe-card-title flex items-center gap-2">
+                <Users size={16} className="text-content-tertiary" />
                 {t('laborRates.crew', { defaultValue: 'Crew composer' })}
               </h2>
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addCrew}>
@@ -761,7 +761,7 @@ export function LaborRatesPage() {
         {/* Breakdown column */}
         <div className="lg:col-span-2">
           <div className={`${cardClass} lg:sticky lg:top-4`}>
-            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3">
               {t('laborRates.breakdown', { defaultValue: 'Rate build-up' })}
             </h2>
 

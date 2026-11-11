@@ -171,10 +171,10 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
     <Card padding="md" data-testid="mcp-settings">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 rounded-lg bg-oe-blue/10 p-2 text-oe-blue">
-          <Bot size={18} aria-hidden="true" />
+          <Bot size={20} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('mcp.title', { defaultValue: 'AI clients (MCP)' })}
           </h3>
           <p className="mt-0.5 text-sm text-content-secondary">
@@ -237,7 +237,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
 
       {/* 2. Create a token */}
       <section className="mt-6" aria-labelledby="mcp-new-token-heading">
-        <h4 id="mcp-new-token-heading" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h4 id="mcp-new-token-heading" className="oe-card-title flex items-center gap-2">
           <KeyRound size={14} aria-hidden="true" />
           {t('mcp.new_token', { defaultValue: 'New token' })}
         </h4>
@@ -255,7 +255,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
           <label className="flex flex-col text-xs text-content-secondary">
             {t('mcp.expires_in', { defaultValue: 'Expires after' })}
             <select
-              className="mt-1 rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+              className="mt-1 oe-select"
               value={expiryDays}
               onChange={(e) => setExpiryDays(Number(e.target.value))}
             >
@@ -334,7 +334,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
 
       {/* 3. Existing tokens */}
       <section className="mt-6" aria-labelledby="mcp-tokens-heading">
-        <h4 id="mcp-tokens-heading" className="text-sm font-semibold text-content-primary">
+        <h4 id="mcp-tokens-heading" className="oe-card-title">
           {t('mcp.tokens', { defaultValue: 'Tokens' })}
         </h4>
         {(tokensQ.data ?? []).length === 0 ? (
@@ -389,7 +389,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
 
       {/* 4. Proposals waiting for review */}
       <section className="mt-6 flex flex-wrap items-center gap-3" aria-labelledby="mcp-review-heading">
-        <h4 id="mcp-review-heading" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h4 id="mcp-review-heading" className="oe-card-title flex items-center gap-2">
           <ListChecks size={14} aria-hidden="true" />
           {t('mcp.proposals', { defaultValue: 'Proposed changes' })}
         </h4>
@@ -403,7 +403,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
 
       {/* 5. Validation */}
       <section className="mt-6" aria-labelledby="mcp-validation-heading">
-        <h4 id="mcp-validation-heading" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h4 id="mcp-validation-heading" className="oe-card-title flex items-center gap-2">
           <ShieldCheck size={14} aria-hidden="true" />
           {t('mcp.checks', { defaultValue: 'Checks' })}
         </h4>
@@ -427,7 +427,7 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
 
       {/* 6. Recent tool calls */}
       <section className="mt-6" aria-labelledby="mcp-calls-heading">
-        <h4 id="mcp-calls-heading" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h4 id="mcp-calls-heading" className="oe-card-title flex items-center gap-2">
           <ScrollText size={14} aria-hidden="true" />
           {t('mcp.recent_calls', { defaultValue: 'Recent tool calls' })}
         </h4>
@@ -437,30 +437,30 @@ export function McpSettingsPanel({ origin }: McpSettingsPanelProps) {
           </p>
         ) : (
           <div className="mt-2 overflow-x-auto">
-            <table className="w-full text-sm" data-testid="mcp-calls">
+            <table className="oe-table oe-table-compact" data-testid="mcp-calls">
               <thead>
-                <tr className="text-start text-xs text-content-tertiary">
-                  <th className="py-1 pe-3 text-start font-medium">{t('mcp.col_time', { defaultValue: 'Time' })}</th>
-                  <th className="py-1 pe-3 text-start font-medium">{t('mcp.col_tool', { defaultValue: 'Tool' })}</th>
-                  <th className="py-1 pe-3 text-start font-medium">
+                <tr>
+                  <th>{t('mcp.col_time', { defaultValue: 'Time' })}</th>
+                  <th>{t('mcp.col_tool', { defaultValue: 'Tool' })}</th>
+                  <th>
                     {t('mcp.col_outcome', { defaultValue: 'Outcome' })}
                   </th>
-                  <th className="py-1 text-end font-medium">{t('mcp.col_duration', { defaultValue: 'Duration' })}</th>
+                  <th className="text-end">{t('mcp.col_duration', { defaultValue: 'Duration' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {(callsQ.data ?? []).map((c) => (
-                  <tr key={c.id} className="border-t border-border">
-                    <td className="py-1 pe-3 text-content-secondary">{fmtDateTime(c.created_at)}</td>
-                    <td className="py-1 pe-3" dir="ltr">
+                  <tr key={c.id}>
+                    <td className="text-content-secondary">{fmtDateTime(c.created_at)}</td>
+                    <td dir="ltr">
                       <code className="text-xs">{c.tool}</code>
                     </td>
-                    <td className="py-1 pe-3">
+                    <td>
                       <Badge size="sm" variant={OUTCOME_VARIANT[c.outcome] ?? 'neutral'}>
                         {t(`mcp.outcome.${c.outcome}`, { defaultValue: c.outcome })}
                       </Badge>
                     </td>
-                    <td className="py-1 text-end text-content-secondary">
+                    <td className="text-end text-content-secondary">
                       {c.duration_ms != null
                         ? t('mcp.duration_ms', { defaultValue: '{{ms}} ms', ms: c.duration_ms })
                         : ''}

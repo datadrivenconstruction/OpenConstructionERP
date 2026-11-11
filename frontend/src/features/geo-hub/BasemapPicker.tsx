@@ -84,7 +84,7 @@ export function BasemapPicker({ current, onChange }: BasemapPickerProps) {
             ].join(' ')}
             data-testid={`geo-basemap-tab-${b.id}`}
           >
-            <Icon size={13} strokeWidth={2} />
+            <Icon size={14} strokeWidth={2} />
             {t(b.labelKey, { defaultValue: b.labelDefault })}
           </button>
         );

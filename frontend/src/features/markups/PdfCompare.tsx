@@ -922,7 +922,7 @@ export function PdfComparePage() {
           {loadingA && <Loader2 size={12} className="animate-spin text-content-tertiary shrink-0" />}
           {errorA && (
             <span title={errorA}>
-              <AlertCircle size={13} className="text-semantic-error" />
+              <AlertCircle size={14} className="text-semantic-error" />
             </span>
           )}
         </div>
@@ -972,7 +972,7 @@ export function PdfComparePage() {
           {loadingB && <Loader2 size={12} className="animate-spin text-content-tertiary shrink-0" />}
           {errorB && (
             <span title={errorB}>
-              <AlertCircle size={13} className="text-semantic-error" />
+              <AlertCircle size={14} className="text-semantic-error" />
             </span>
           )}
         </div>
@@ -1003,7 +1003,7 @@ export function PdfComparePage() {
               }`}
               title={label}
             >
-              <Icon size={13} />
+              <Icon size={14} />
               <span className="hidden md:inline">{label}</span>
             </button>
           ))}
@@ -1257,7 +1257,7 @@ export function PdfComparePage() {
         )}
         {(loadingA || loadingB) && (
           <span className="flex items-center gap-1">
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
             {t('pdf_compare.loading', { defaultValue: 'Loading…' })}
           </span>
         )}

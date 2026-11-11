@@ -102,7 +102,7 @@ export function CascadePreview({
     <div className="space-y-4">
       {/* ── Sample resource totals ──────────────────────────────────────── */}
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline">
           {t('methodology.preview.sample_title', { defaultValue: 'Sample direct costs' })}
         </h4>
         <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -119,7 +119,7 @@ export function CascadePreview({
                 inputMode="decimal"
                 value={sample[type] ?? ''}
                 onChange={(e) => setSample((p) => ({ ...p, [type]: e.target.value }))}
-                className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs tabular-nums text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input oe-input-sm w-full tabular-nums"
               />
             </label>
           ))}
@@ -131,7 +131,7 @@ export function CascadePreview({
           role="alert"
           className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2.5"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
           <div className="min-w-0">
             <p className="text-xs font-medium text-content-primary">
               {t('methodology.preview.invalid', { defaultValue: 'This cascade cannot be computed yet' })}
@@ -147,13 +147,13 @@ export function CascadePreview({
       <div className="rounded-lg border border-border-light bg-surface-secondary/20 px-3 py-2.5">
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5 text-2xs font-medium text-content-secondary">
-            <ServerCog size={13} />
+            <ServerCog size={14} />
             {t('methodology.preview.server_title', { defaultValue: 'Authoritative server total' })}
           </span>
           <Button
             variant="secondary"
             size="sm"
-            icon={<Calculator size={13} />}
+            icon={<Calculator size={14} />}
             loading={verifyMut.isPending}
             onClick={() => verifyMut.mutate()}
             disabled={!!error}
@@ -218,37 +218,37 @@ function PreviewBreakdown({ preview, currency }: { preview: PreviewResult; curre
 
       {/* Per-step breakdown */}
       <div className="overflow-hidden rounded-lg border border-border-light">
-        <table className="min-w-full text-xs">
-          <thead className="bg-surface-secondary/40 text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table oe-table-compact min-w-full text-xs">
+          <thead>
             <tr>
-              <th className="px-2.5 py-1.5 text-left font-medium">
+              <th>
                 {t('methodology.preview.col_step', { defaultValue: 'Step' })}
               </th>
-              <th className="px-2.5 py-1.5 text-right font-medium">
+              <th className="text-right">
                 {t('methodology.preview.col_rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="px-2.5 py-1.5 text-right font-medium">
+              <th className="text-right">
                 {t('methodology.preview.col_amount', { defaultValue: 'Amount' })}
               </th>
-              <th className="px-2.5 py-1.5 text-right font-medium">
+              <th className="text-right">
                 {t('methodology.preview.col_running', { defaultValue: 'Running total' })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             <tr className="bg-surface-secondary/20">
-              <td className="px-2.5 py-1.5 font-medium text-content-secondary">
+              <td className="font-medium text-content-secondary">
                 {t('methodology.preview.direct', { defaultValue: 'Direct cost' })}
               </td>
-              <td className="px-2.5 py-1.5" />
-              <td className="px-2.5 py-1.5" />
-              <td className="px-2.5 py-1.5 text-right font-medium tabular-nums text-content-primary">
+              <td />
+              <td />
+              <td className="text-right font-medium tabular-nums">
                 <MoneyDisplay amount={preview.directTotal} currency={cur} />
               </td>
             </tr>
             {preview.steps.map((s) => (
               <tr key={s.key}>
-                <td className="px-2.5 py-1.5 text-content-primary">
+                <td>
                   {s.label || s.key}
                   {s.category === 'tax' && (
                     <span className="ml-1.5 align-middle">
@@ -258,13 +258,13 @@ function PreviewBreakdown({ preview, currency }: { preview: PreviewResult; curre
                     </span>
                   )}
                 </td>
-                <td className="px-2.5 py-1.5 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   {s.kind === 'percentage' ? `${s.rate}%` : '-'}
                 </td>
-                <td className="px-2.5 py-1.5 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   <MoneyDisplay amount={s.amount} currency={cur} />
                 </td>
-                <td className="px-2.5 py-1.5 text-right tabular-nums text-content-primary">
+                <td className="text-right tabular-nums">
                   <MoneyDisplay amount={s.runningTotal} currency={cur} />
                 </td>
               </tr>
@@ -272,10 +272,10 @@ function PreviewBreakdown({ preview, currency }: { preview: PreviewResult; curre
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-border bg-surface-secondary/30">
-              <td className="px-2.5 py-2 text-sm font-semibold text-content-primary" colSpan={2}>
+              <td className="font-semibold" colSpan={2}>
                 {t('methodology.preview.grand', { defaultValue: 'Grand total' })}
               </td>
-              <td className="px-2.5 py-2 text-right text-2xs text-content-tertiary tabular-nums">
+              <td className="text-right text-2xs text-content-tertiary tabular-nums">
                 {/* The sign comes from the formatter and the cell may not be
                     broken, so the plus cannot end up on the line above its own
                     figure. Not compacted either: the column this sits under
@@ -287,7 +287,7 @@ function PreviewBreakdown({ preview, currency }: { preview: PreviewResult; curre
                   <MoneyDisplay amount={preview.markupTotal} currency={cur} signDisplay="always" />
                 </span>
               </td>
-              <td className="px-2.5 py-2 text-right text-sm font-semibold tabular-nums text-content-primary">
+              <td className="text-right font-semibold tabular-nums">
                 <MoneyDisplay amount={preview.grandTotal} currency={cur} />
               </td>
             </tr>

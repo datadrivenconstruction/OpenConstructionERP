@@ -242,7 +242,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
             title={title}
             className="mb-3 h-28 w-full"
           />
-          <div className="rounded-xl bg-surface-secondary/50 p-3.5">
+          <div className="rounded-xl bg-surface-secondary/50 p-3">
             <p className="text-sm leading-relaxed text-content-secondary">{what}</p>
 
             {/* How it works — ordered steps. */}
@@ -251,7 +251,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
             </p>
             <ol className="mt-1.5 space-y-1.5">
               {module.how.map((step, i) => (
-                <li key={step.key} className="flex gap-2.5 text-sm text-content-secondary">
+                <li key={step.key} className="flex gap-2 text-sm text-content-secondary">
                   <span
                     aria-hidden="true"
                     className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-semibold tabular-nums text-oe-blue"
@@ -273,7 +273,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
                     key={tip.key}
                     className="flex gap-2 rounded-lg bg-semantic-warning/5 px-2.5 py-1.5 text-xs leading-relaxed text-content-secondary ring-1 ring-inset ring-amber-500/10"
                   >
-                    <Lightbulb size={13} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
+                    <Lightbulb size={14} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
                     <span>{t(tip.key, { defaultValue: tip.default })}</span>
                   </li>
                 ))}
@@ -299,7 +299,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
               data-testid={`howto-locate-${module.id}`}
               className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
             >
-              <Compass size={13} />
+              <Compass size={14} />
               {t('howto.show_me', { defaultValue: 'Show me where' })}
             </button>
             <button
@@ -309,7 +309,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
               className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
             >
               {t('howto.open_module', { defaultValue: 'Open module' })}
-              <ArrowRight size={13} />
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
@@ -430,7 +430,7 @@ export function HowItWorksPage() {
       />
 
       {/* Search + section order control. */}
-      <div className="sticky top-0 z-10 -mx-4 bg-surface/80 px-4 py-2 backdrop-blur sm:-mx-7 sm:px-7">
+      <div className="sticky top-0 z-sticky -mx-4 bg-surface/80 px-4 py-2 backdrop-blur sm:-mx-7 sm:px-7">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search
@@ -447,7 +447,7 @@ export function HowItWorksPage() {
                 defaultValue: 'Search modules - e.g. "cost", "schedule", "clash"...',
               })}
               aria-label={t('howto.search_placeholder', { defaultValue: 'Search modules' })}
-              className="w-full rounded-xl border border-border-light bg-surface-elevated py-2.5 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/40 focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+              className="w-full oe-input ps-9 pe-3"
             />
           </div>
 
@@ -519,7 +519,7 @@ export function HowItWorksPage() {
               <section key={category.id} data-testid={`howto-section-${category.id}`}>
                 <div className="mb-3 flex items-start justify-between gap-3 border-b border-border-light pb-2">
                   <div className="min-w-0">
-                    <h2 className="text-base font-semibold text-content-primary">
+                    <h2 className="oe-card-title">
                       {t(category.labelKey, { defaultValue: category.labelDefault })}
                       <span className="ml-2 text-xs font-normal text-content-tertiary">
                         {modules.length}
@@ -542,7 +542,7 @@ export function HowItWorksPage() {
                         })}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:border-oe-blue/30 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-light disabled:hover:text-content-secondary"
                       >
-                        <ChevronUp size={15} aria-hidden="true" />
+                        <ChevronUp size={16} aria-hidden="true" />
                       </button>
                       <button
                         type="button"
@@ -554,7 +554,7 @@ export function HowItWorksPage() {
                         })}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:border-oe-blue/30 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-light disabled:hover:text-content-secondary"
                       >
-                        <ChevronDown size={15} aria-hidden="true" />
+                        <ChevronDown size={16} aria-hidden="true" />
                       </button>
                     </div>
                   )}

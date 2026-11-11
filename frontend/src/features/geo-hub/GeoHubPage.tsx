@@ -221,7 +221,7 @@ function GlobalNoProjectsEmpty({
               'bg-semantic-success/15 text-emerald-300 ring-1 ring-emerald-400/30',
             ].join(' ')}
           >
-            <MapPin size={18} strokeWidth={2} />
+            <MapPin size={20} strokeWidth={2} />
           </div>
           <h3 className="text-base font-semibold text-white">
             {t('geo_hub.empty.global_no_projects_title', {
@@ -249,9 +249,9 @@ function GlobalNoProjectsEmpty({
               ].join(' ')}
             >
               {isBulking ? (
-                <Loader2 size={13} strokeWidth={2.25} className="animate-spin" />
+                <Loader2 size={14} strokeWidth={2.25} className="animate-spin" />
               ) : (
-                <MapPin size={13} strokeWidth={2.25} />
+                <MapPin size={14} strokeWidth={2.25} />
               )}
               {t('geo_hub.empty.bulk_cta', {
                 defaultValue: 'Auto-anchor all my projects',
@@ -269,7 +269,7 @@ function GlobalNoProjectsEmpty({
               {t('geo_hub.empty.global_no_projects_manual_cta', {
                 defaultValue: 'Anchor a project manually',
               })}
-              <ArrowUpRight size={13} strokeWidth={2.25} />
+              <ArrowUpRight size={14} strokeWidth={2.25} />
             </Link>
             {/* Secondary path for users who live in PropDev — anchoring
                 a development surfaces it here too via the same map config. */}
@@ -285,7 +285,7 @@ function GlobalNoProjectsEmpty({
               {t('geo_hub.empty.global_no_projects_propdev_cta', {
                 defaultValue: 'Anchor from Property Developments',
               })}
-              <ArrowUpRight size={13} strokeWidth={2.25} />
+              <ArrowUpRight size={14} strokeWidth={2.25} />
             </Link>
           </div>
           <p className="mt-3 text-2xs text-slate-400">
@@ -370,11 +370,11 @@ function AnchoredProjectsOverlay({
           defaultValue: 'Show anchored projects',
         })}
       >
-        <Layers size={13} strokeWidth={2} className="text-emerald-300" />
+        <Layers size={14} strokeWidth={2} className="text-emerald-300" />
         <span className="tabular-nums">
           {isLoading ? '…' : isError ? '!' : projects.length}
         </span>
-        <ChevronRight size={13} strokeWidth={2.25} className="text-white/70" />
+        <ChevronRight size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -397,7 +397,7 @@ function AnchoredProjectsOverlay({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <h2 className="oe-overline">
             {t('geo_hub.rail.title', { defaultValue: 'Anchored projects' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -466,7 +466,7 @@ function AnchoredProjectsOverlay({
         {!isLoading && isError && (
           <div className="m-3 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-3 text-2xs text-semantic-error">
             <div className="flex items-start gap-2">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <div className="space-y-1">
                 <div className="font-semibold">
                   {t('geo_hub.rail.error_title', {
@@ -545,7 +545,7 @@ function AnchoredProjectsOverlay({
                         })}
                       >
                         {t('common.open', { defaultValue: 'Open' })}
-                        <ArrowUpRight size={11} strokeWidth={2.25} />
+                        <ArrowUpRight size={12} strokeWidth={2.25} />
                       </Link>
                     </div>
                     <div className="ml-4 mt-1 flex items-center gap-2 font-mono text-2xs text-content-tertiary">
@@ -955,7 +955,7 @@ export function GeoHubPage() {
           'px-5 py-3',
         ].join(' ')}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <span
             className={[
               'inline-flex h-8 w-8 items-center justify-center rounded-md',
@@ -1019,7 +1019,7 @@ export function GeoHubPage() {
       {projectsQuery.isError && isStaleBackend && (
         <div className="border-b border-semantic-warning/30 bg-semantic-warning-bg px-5 py-2 text-xs text-semantic-warning">
           <div className="flex items-center gap-2">
-            <ServerCrash size={13} className="shrink-0" />
+            <ServerCrash size={14} className="shrink-0" />
             <span className="flex-1">
               {t('geo_hub.global_stale_backend', {
                 defaultValue:
@@ -1035,7 +1035,7 @@ export function GeoHubPage() {
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
               ].join(' ')}
             >
-              <RefreshCw size={11} strokeWidth={2} />
+              <RefreshCw size={12} strokeWidth={2} />
               {t('common.retry', { defaultValue: 'Retry' })}
             </button>
           </div>
@@ -1047,7 +1047,7 @@ export function GeoHubPage() {
       {projectsQuery.isError && !isStaleBackend && (
         <div className="border-b border-semantic-error/30 bg-semantic-error-bg px-5 py-2 text-xs text-semantic-error">
           <div className="flex items-center gap-2">
-            <AlertTriangle size={13} className="shrink-0" />
+            <AlertTriangle size={14} className="shrink-0" />
             <span className="flex-1">
               {t('geo_hub.global_fetch_failed', {
                 defaultValue:
@@ -1063,7 +1063,7 @@ export function GeoHubPage() {
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400',
               ].join(' ')}
             >
-              <RefreshCw size={11} strokeWidth={2} />
+              <RefreshCw size={12} strokeWidth={2} />
               {t('common.retry', { defaultValue: 'Retry' })}
             </button>
           </div>
@@ -1078,7 +1078,7 @@ export function GeoHubPage() {
       {projectsQuery.isLoading && !projectsQuery.isError && (
         <div className="border-b border-semantic-success/30 bg-semantic-success/10 px-5 py-2 text-xs text-semantic-success">
           <div className="flex items-center gap-2">
-            <Info size={13} className="shrink-0" />
+            <Info size={14} className="shrink-0" />
             <span className="flex-1">
               {t('geo_hub.global_first_load_hint', {
                 defaultValue:

@@ -123,7 +123,7 @@ const STATUS_CONFIG: Record<
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 const INSPECTION_TYPES: InspectionType[] = [
   'structural',
@@ -302,7 +302,7 @@ function CreateInspectionModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
         role="dialog"
@@ -316,7 +316,7 @@ function CreateInspectionModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {isEdit
                 ? t('inspections.edit_inspection', { defaultValue: 'Edit Inspection' })
                 : t('inspections.new_inspection', { defaultValue: 'New Inspection' })}
@@ -335,7 +335,7 @@ function CreateInspectionModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -343,7 +343,7 @@ function CreateInspectionModal({
         <div className="px-6 py-4 space-y-5">
           {/* ── Inspection Type ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('inspections.field_type', { defaultValue: 'Inspection Type' })}
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -363,7 +363,7 @@ function CreateInspectionModal({
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
-                    <TypeIcon size={18} />
+                    <TypeIcon size={20} />
                     <span className="text-2xs font-medium leading-tight">
                       {t(`inspections.type_${it}`, {
                         defaultValue: it.replace(/_/g, ' '),
@@ -386,7 +386,7 @@ function CreateInspectionModal({
 
           {/* Title */}
           <div>
-            <label htmlFor="inspection-title" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="inspection-title" className="oe-label">
               {t('inspections.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -400,11 +400,8 @@ function CreateInspectionModal({
               placeholder={t('inspections.title_placeholder', {
                 defaultValue: 'e.g. Foundation Concrete Pour - Grid A1-A5',
               })}
-              className={clsx(
-                inputCls,
-                titleError &&
-                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              className={inputCls}
+              aria-invalid={titleError ? true : undefined}
               autoFocus
             />
             {titleError && (
@@ -426,7 +423,7 @@ function CreateInspectionModal({
           {/* Two-column: Date + Inspector */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="inspection-date" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="inspection-date" className="oe-label">
                 {t('inspections.field_date', { defaultValue: 'Planned Date' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -438,11 +435,8 @@ function CreateInspectionModal({
                   set('date', e.target.value);
                   setTouched(true);
                 }}
-                className={clsx(
-                  inputCls,
-                  dateError &&
-                    'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-                )}
+                className={inputCls}
+                aria-invalid={dateError ? true : undefined}
               />
               {dateError && (
                 <p className="mt-1 text-xs text-semantic-error">
@@ -451,7 +445,7 @@ function CreateInspectionModal({
               )}
             </div>
             <div>
-              <label htmlFor="inspection-inspector" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="inspection-inspector" className="oe-label">
                 {t('inspections.field_inspector', { defaultValue: 'Inspector' })}
               </label>
               <input
@@ -476,7 +470,7 @@ function CreateInspectionModal({
           </div>
 
           <div>
-            <label htmlFor="inspection-location" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="inspection-location" className="oe-label">
               {t('inspections.field_location', { defaultValue: 'Location' })}
             </label>
             <input
@@ -690,7 +684,7 @@ function CompleteInspectionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="w-full max-w-md bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
         role="dialog"
@@ -699,7 +693,7 @@ function CompleteInspectionDialog({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('inspections.record_result_title', { defaultValue: 'Record inspection result' })}
             </h2>
             <p className="text-xs text-content-tertiary mt-0.5 truncate">
@@ -711,7 +705,7 @@ function CompleteInspectionDialog({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors shrink-0"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -737,7 +731,7 @@ function CompleteInspectionDialog({
                 )}
                 aria-pressed={selected}
               >
-                <OptIcon size={18} className={clsx('mt-0.5 shrink-0', opt.iconCls)} />
+                <OptIcon size={20} className={clsx('mt-0.5 shrink-0', opt.iconCls)} />
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-content-primary">
                     {resultLabels[opt.value]}
@@ -1183,7 +1177,7 @@ function HowInspectionsWork() {
   return (
     <CollapsibleSection
       storageKey="inspections.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('inspections.how_title', { defaultValue: 'How inspections fit together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1860,7 +1854,7 @@ export function InspectionsPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as InspectionStatus | '')}
             aria-label={t('inspections.filter_all_statuses', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg ps-3 pe-9 sm:w-40"
           >
             <option value="">
               {t('inspections.filter_all_statuses', { defaultValue: 'All Statuses' })}
@@ -1884,7 +1878,7 @@ export function InspectionsPage() {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as InspectionType | '')}
             aria-label={t('inspections.filter_all_types', { defaultValue: 'All Types' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg ps-3 pe-9 sm:w-40"
           >
             <option value="">
               {t('inspections.filter_all_types', { defaultValue: 'All Types' })}

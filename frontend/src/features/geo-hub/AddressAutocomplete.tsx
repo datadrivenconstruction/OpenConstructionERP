@@ -306,7 +306,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
           <span>
             {t('geo_hub.autocomplete.disabled', {
               defaultValue:
@@ -323,7 +323,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-error" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-error" />
           <span>
             {t('geo_hub.autocomplete.network_error', {
               defaultValue:
@@ -340,7 +340,7 @@ export function AddressAutocomplete({
             'flex items-start gap-2 px-3 py-2 text-xs text-content-secondary',
           ].join(' ')}
         >
-          <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-semantic-warning" />
           <span>
             {t('geo_hub.autocomplete.rate_limited', {
               defaultValue:
@@ -392,9 +392,8 @@ export function AddressAutocomplete({
             window.setTimeout(() => setIsOpen(false), 120);
           }}
           className={[
-            'h-10 w-full rounded-lg border border-border bg-surface-primary',
-            'px-3 pl-9 pr-9 text-sm text-content-primary',
-            'placeholder:text-content-tertiary',
+            'oe-input oe-input-lg w-full',
+            'pl-9 pr-9 text-sm',
             'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
             disabled ? 'opacity-60 cursor-not-allowed' : '',
             className ?? '',
@@ -427,7 +426,7 @@ export function AddressAutocomplete({
           })}
           aria-busy={isLoading || undefined}
           className={[
-            'absolute z-30 mt-1 w-full max-h-72 overflow-y-auto rounded-lg',
+            'absolute z-dropdown mt-1 w-full max-h-72 overflow-y-auto rounded-lg',
             'border border-border bg-surface-primary shadow-lg ring-1 ring-black/5',
           ].join(' ')}
           data-testid="geo-address-autocomplete-list"
@@ -441,7 +440,7 @@ export function AddressAutocomplete({
                 className="flex items-center gap-2 px-3 py-2 text-xs text-content-tertiary"
                 data-testid="geo-address-autocomplete-loading"
               >
-                <Loader2 size={13} className="animate-spin" aria-hidden />
+                <Loader2 size={14} className="animate-spin" aria-hidden />
                 <span>
                   {t('geo_hub.autocomplete.searching', {
                     defaultValue: 'Searching…',
@@ -485,7 +484,7 @@ export function AddressAutocomplete({
                 data-testid="geo-address-autocomplete-option"
               >
                 <span className="mt-0.5 text-base leading-none" aria-hidden>
-                  {flag ?? <MapPin size={13} strokeWidth={2} />}
+                  {flag ?? <MapPin size={14} strokeWidth={2} />}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-xs font-medium text-content-primary">

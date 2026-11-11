@@ -186,7 +186,7 @@ export function StageCard({
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="text-sm font-semibold text-content-primary">
+                <h4 className="oe-card-title">
                   {stage.title}
                 </h4>
                 {stage.uses_llm && (

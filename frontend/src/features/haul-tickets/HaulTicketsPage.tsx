@@ -43,7 +43,7 @@ type Tab = 'tickets' | 'summary' | 'invoices' | 'import';
 const HAUL_TYPES: HaulType[] = ['earthworks', 'aggregates', 'concrete', 'asphalt', 'waste', 'other'];
 const STATUSES: TicketStatus[] = ['issued', 'loaded', 'delivered', 'verified', 'invoiced', 'rejected'];
 const GROUPS: GroupBy[] = ['day', 'haulier', 'material', 'haul_type'];
-const INPUT = 'rounded border border-border bg-surface-primary px-2 py-1 text-sm';
+const INPUT = 'oe-input';
 
 function useLabels() {
   const { t } = useTranslation();
@@ -172,7 +172,7 @@ function TicketsTab({ projectId }: { projectId: string }) {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className={INPUT}
+          className={`${INPUT} oe-select`}
           aria-label={t('haul.filter_status', { defaultValue: 'Status' })}
         >
           <option value="">{t('haul.all_statuses', { defaultValue: 'All statuses' })}</option>
@@ -215,16 +215,16 @@ function TicketsTab({ projectId }: { projectId: string }) {
         />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border text-left text-content-tertiary">
-                <th className="py-1 pr-3">{t('haul.col_number', { defaultValue: 'Ticket' })}</th>
-                <th className="pr-3">{t('haul.col_date', { defaultValue: 'Date' })}</th>
-                <th className="pr-3">{t('haul.col_material', { defaultValue: 'Material' })}</th>
-                <th className="pr-3">{t('haul.col_haulier', { defaultValue: 'Haulier' })}</th>
-                <th className="pr-3 text-right">{t('haul.col_net', { defaultValue: 'Net t' })}</th>
-                <th className="pr-3 text-right">{t('haul.col_amount', { defaultValue: 'Amount' })}</th>
-                <th className="pr-3">{t('haul.col_status', { defaultValue: 'Status' })}</th>
+              <tr>
+                <th>{t('haul.col_number', { defaultValue: 'Ticket' })}</th>
+                <th>{t('haul.col_date', { defaultValue: 'Date' })}</th>
+                <th>{t('haul.col_material', { defaultValue: 'Material' })}</th>
+                <th>{t('haul.col_haulier', { defaultValue: 'Haulier' })}</th>
+                <th className="text-right">{t('haul.col_net', { defaultValue: 'Net t' })}</th>
+                <th className="text-right">{t('haul.col_amount', { defaultValue: 'Amount' })}</th>
+                <th>{t('haul.col_status', { defaultValue: 'Status' })}</th>
                 <th />
               </tr>
             </thead>
@@ -354,7 +354,7 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
         {field('ticket_number', t('haul.col_number', { defaultValue: 'Ticket' }))}
         <label className="flex flex-col gap-1 text-xs text-content-secondary">
           {t('haul.f_type', { defaultValue: 'Haul type' })}
-          <select value={f.haul_type} onChange={set('haul_type')} className={INPUT}>
+          <select value={f.haul_type} onChange={set('haul_type')} className={`${INPUT} oe-select`}>
             {HAUL_TYPES.map((h) => (
               <option key={h} value={h}>
                 {labels.haulType[h]}
@@ -373,7 +373,7 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
         {field('rate', t('haul.f_rate', { defaultValue: 'Rate' }), { type: 'number' })}
         <label className="flex flex-col gap-1 text-xs text-content-secondary">
           {t('haul.f_rate_basis', { defaultValue: 'Rate per' })}
-          <select value={f.rate_basis} onChange={set('rate_basis')} className={INPUT}>
+          <select value={f.rate_basis} onChange={set('rate_basis')} className={`${INPUT} oe-select`}>
             <option value="t">{t('haul.basis_t', { defaultValue: 'tonne' })}</option>
             <option value="m3">{t('haul.basis_m3', { defaultValue: 'cubic metre' })}</option>
             <option value="load">{t('haul.basis_load', { defaultValue: 'load' })}</option>
@@ -382,7 +382,7 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
         </label>
         <label className="flex flex-col gap-1 text-xs text-content-secondary">
           {t('haul.f_unit', { defaultValue: 'Counted in' })}
-          <select value={f.unit} onChange={set('unit')} className={INPUT}>
+          <select value={f.unit} onChange={set('unit')} className={`${INPUT} oe-select`}>
             <option value="t">{t('haul.basis_t', { defaultValue: 'tonne' })}</option>
             <option value="m3">{t('haul.basis_m3', { defaultValue: 'cubic metre' })}</option>
             <option value="load">{t('haul.basis_load', { defaultValue: 'load' })}</option>
@@ -420,7 +420,7 @@ function SummaryTab({ projectId }: { projectId: string }) {
         <select
           value={groupBy}
           onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-          className={INPUT}
+          className={`${INPUT} oe-select`}
           aria-label={t('haul.group_by', { defaultValue: 'Group by' })}
         >
           {GROUPS.map((g) => (
@@ -437,10 +437,10 @@ function SummaryTab({ projectId }: { projectId: string }) {
       {rows.length === 0 && !q.isLoading ? (
         <EmptyState icon={<Truck size={28} />} title={t('haul.empty_title', { defaultValue: 'No tickets yet' })} />
       ) : (
-        <table className="w-full text-sm">
+        <table className="oe-table oe-table-compact">
           <thead>
-            <tr className="border-b border-border text-left text-content-tertiary">
-              <th className="py-1">{labels.group[groupBy]}</th>
+            <tr>
+              <th>{labels.group[groupBy]}</th>
               <th className="text-right">{t('haul.sum_tickets', { defaultValue: 'Tickets' })}</th>
               <th className="text-right">{t('haul.f_loads', { defaultValue: 'Loads' })}</th>
               <th className="text-right">{t('haul.sum_tonnes', { defaultValue: 'Tonnes' })}</th>
@@ -451,7 +451,7 @@ function SummaryTab({ projectId }: { projectId: string }) {
           <tbody>
             {[...rows, ...(q.data ? [q.data.totals] : [])].map((r, i, all) => (
               <tr key={`${r.key}-${i}`} className={clsx('border-b border-border-light', i === all.length - 1 && 'font-medium')}>
-                <td className="py-1">{i === all.length - 1 ? t('haul.sum_total', { defaultValue: 'Total' }) : r.label}</td>
+                <td>{i === all.length - 1 ? t('haul.sum_total', { defaultValue: 'Total' }) : r.label}</td>
                 <td className="text-right tabular-nums">{r.tickets}</td>
                 <td className="text-right tabular-nums">{r.loads}</td>
                 <td className="text-right tabular-nums">{r.tonnes}</td>

@@ -360,7 +360,7 @@ export function PlaceOnMapPicker({
       }
     >
       {!hasAnchor && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-sm text-semantic-warning">
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-sm text-semantic-warning">
           <MapPin size={16} className="mt-0.5 shrink-0" />
           <span>
             {t('geo_hub.place.anchor_first', {
@@ -376,7 +376,7 @@ export function PlaceOnMapPicker({
           className="flex items-center justify-center gap-2 py-12 text-sm text-content-tertiary"
           role="status"
         >
-          <Loader2 size={18} className="animate-spin" />
+          <Loader2 size={20} className="animate-spin" />
           {t('geo_hub.place.loading', { defaultValue: 'Loading project files...' })}
         </div>
       )}
@@ -397,14 +397,14 @@ export function PlaceOnMapPicker({
               to={`/projects/${projectId}/bim`}
               className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-oe-blue/90"
             >
-              <Plus size={13} />
+              <Plus size={14} />
               {t('geo_hub.place.add_model', { defaultValue: 'Add a BIM model' })}
             </Link>
             <Link
               to={`/projects/${projectId}/files`}
               className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-primary px-3 py-1.5 text-xs font-semibold text-content-secondary transition hover:bg-surface-secondary"
             >
-              <Plus size={13} />
+              <Plus size={14} />
               {t('geo_hub.place.add_pdf', { defaultValue: 'Upload a drawing' })}
             </Link>
           </div>
@@ -416,8 +416,8 @@ export function PlaceOnMapPicker({
           {/* 3D models -------------------------------------------------- */}
           {models.length > 0 && (
             <section>
-              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-                <Boxes size={13} />
+              <h4 className="oe-overline mb-2 flex items-center gap-1.5">
+                <Boxes size={14} />
                 {t('geo_hub.place.models_heading', {
                   defaultValue: '3D models',
                 })}
@@ -460,7 +460,7 @@ export function PlaceOnMapPicker({
                       </div>
                       {placed ? (
                         <span className="inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-2.5 py-1 text-xs font-semibold text-semantic-success">
-                          <Check size={13} />
+                          <Check size={14} />
                           {t('geo_hub.place.on_map', {
                             defaultValue: 'On the map',
                           })}
@@ -473,9 +473,9 @@ export function PlaceOnMapPicker({
                           className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-oe-blue/90 disabled:cursor-wait disabled:opacity-60"
                         >
                           {busy ? (
-                            <Loader2 size={13} className="animate-spin" />
+                            <Loader2 size={14} className="animate-spin" />
                           ) : (
-                            <MapPin size={13} />
+                            <MapPin size={14} />
                           )}
                           {t('geo_hub.place.place_cta', {
                             defaultValue: 'Place on map',
@@ -483,7 +483,7 @@ export function PlaceOnMapPicker({
                         </button>
                       ) : ready && !hasGeom ? (
                         <span className="inline-flex items-center gap-1 text-xs text-content-tertiary">
-                          <AlertTriangle size={13} />
+                          <AlertTriangle size={14} />
                           {t('geo_hub.place.no_geometry_chip', {
                             defaultValue: 'No 3D geometry',
                           })}
@@ -496,7 +496,7 @@ export function PlaceOnMapPicker({
                           {t('geo_hub.place.open_in_bim', {
                             defaultValue: 'Convert first',
                           })}
-                          <ArrowUpRight size={13} />
+                          <ArrowUpRight size={14} />
                         </Link>
                       )}
                     </li>
@@ -518,8 +518,8 @@ export function PlaceOnMapPicker({
           {/* PDF drawings --------------------------------------------- */}
           {pdfs.length > 0 && (
             <section>
-              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-                <FileText size={13} />
+              <h4 className="oe-overline mb-2 flex items-center gap-1.5">
+                <FileText size={14} />
                 {t('geo_hub.place.pdfs_heading', {
                   defaultValue: 'PDF drawings',
                 })}
@@ -546,7 +546,7 @@ export function PlaceOnMapPicker({
                       </div>
                       {placed ? (
                         <span className="inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-2.5 py-1 text-xs font-semibold text-semantic-success">
-                          <Check size={13} />
+                          <Check size={14} />
                           {t('geo_hub.place.on_map', {
                             defaultValue: 'On the map',
                           })}
@@ -559,9 +559,9 @@ export function PlaceOnMapPicker({
                           className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-oe-blue/90 disabled:cursor-wait disabled:opacity-60"
                         >
                           {busy ? (
-                            <Loader2 size={13} className="animate-spin" />
+                            <Loader2 size={14} className="animate-spin" />
                           ) : (
-                            <MapPin size={13} />
+                            <MapPin size={14} />
                           )}
                           {t('geo_hub.place.place_cta', {
                             defaultValue: 'Place on map',

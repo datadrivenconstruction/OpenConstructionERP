@@ -186,7 +186,7 @@ export function GeoModePicker({
               ].join(' ')}
               data-testid={`geo-mode-tab-${it.key}`}
             >
-              <Icon size={13} strokeWidth={2} />
+              <Icon size={14} strokeWidth={2} />
               {it.label}
               {it.softDisabled && (
                 <span
@@ -311,7 +311,7 @@ function ContextPickerDialog({ kind, onClose, onPick }: ContextPickerDialogProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -324,7 +324,7 @@ function ContextPickerDialog({ kind, onClose, onPick }: ContextPickerDialogProps
         data-testid="geo-context-picker-dialog"
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-card-title">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -345,8 +345,8 @@ function ContextPickerDialog({ kind, onClose, onPick }: ContextPickerDialogProps
             })}
             autoFocus
             className={[
-              'h-9 w-full rounded-md border border-border bg-surface-primary',
-              'px-3 text-sm text-content-primary placeholder:text-content-tertiary',
+              'oe-input w-full',
+              'text-sm',
               'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
             ].join(' ')}
             data-testid="geo-context-picker-search"

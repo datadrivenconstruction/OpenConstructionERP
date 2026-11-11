@@ -39,7 +39,7 @@ export function GuaranteesSummaryCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('guarantees.card_open', { defaultValue: 'Open guarantees' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

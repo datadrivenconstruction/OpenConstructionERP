@@ -73,16 +73,16 @@ function TemplateCard({
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
           {template.industry ? (
-            <TrainFront size={18} />
+            <TrainFront size={20} />
           ) : template.country_code ? (
             <CountryFlag code={template.country_code} size={20} />
           ) : (
-            <Globe2 size={18} />
+            <Globe2 size={20} />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="truncate text-sm font-semibold text-content-primary">
+            <h4 className="oe-card-title truncate">
               {template.name}
             </h4>
             {installed && (
@@ -150,7 +150,7 @@ function GallerySection({
     <div>
       <div className="mb-2.5 flex items-center gap-2">
         <span className="text-content-tertiary">{icon}</span>
-        <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+        <h3 className="oe-card-title">{title}</h3>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {templates.map((tpl) => (
@@ -334,7 +334,7 @@ export function MethodologiesPage() {
       {/* ── Installed methodologies (per project) ───────────────────────── */}
       {activeProjectId ? (
       <section>
-        <h2 className="mb-3 text-base font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-3">
           {t('methodology.installed.title', { defaultValue: 'Installed in this project' })}
         </h2>
 
@@ -395,7 +395,7 @@ export function MethodologiesPage() {
 
       {/* ── Templates gallery ───────────────────────────────────────────── */}
       <section className="space-y-5">
-        <h2 className="text-base font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('methodology.gallery.title', { defaultValue: 'Built-in templates' })}
         </h2>
 
@@ -416,7 +416,7 @@ export function MethodologiesPage() {
           <>
             <GallerySection
               title={t('methodology.gallery.group_default', { defaultValue: 'Neutral default' })}
-              icon={<Globe2 size={15} />}
+              icon={<Globe2 size={16} />}
               templates={grouped.international}
               installedByTemplate={installedByTemplate}
               onInstall={handleInstall}
@@ -424,7 +424,7 @@ export function MethodologiesPage() {
             />
             <GallerySection
               title={t('methodology.gallery.group_countries', { defaultValue: 'Countries' })}
-              icon={<Banknote size={15} />}
+              icon={<Banknote size={16} />}
               templates={grouped.countries}
               installedByTemplate={installedByTemplate}
               onInstall={handleInstall}
@@ -434,7 +434,7 @@ export function MethodologiesPage() {
               title={t('methodology.gallery.group_uzbekistan', {
                 defaultValue: 'Cascading (Uzbekistan)',
               })}
-              icon={<FlaskConical size={15} />}
+              icon={<FlaskConical size={16} />}
               templates={grouped.uzbekistan}
               installedByTemplate={installedByTemplate}
               onInstall={handleInstall}
@@ -442,7 +442,7 @@ export function MethodologiesPage() {
             />
             <GallerySection
               title={t('methodology.gallery.group_industry', { defaultValue: 'Industry packs' })}
-              icon={<TrainFront size={15} />}
+              icon={<TrainFront size={16} />}
               templates={grouped.industry}
               installedByTemplate={installedByTemplate}
               onInstall={handleInstall}
@@ -483,22 +483,22 @@ function InstalledMethodologyCard({
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-secondary">
           {methodology.industry ? (
-            <TrainFront size={18} />
+            <TrainFront size={20} />
           ) : methodology.country_code ? (
             <CountryFlag code={methodology.country_code} size={20} />
           ) : (
-            <Layers3 size={18} />
+            <Layers3 size={20} />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="truncate text-sm font-semibold text-content-primary">
+            <h4 className="oe-card-title truncate">
               {methodology.name}
             </h4>
             {isActive && (
               <Badge variant="blue" size="sm">
                 <span className="inline-flex items-center gap-1">
-                  <Star size={11} />
+                  <Star size={12} />
                   {t('methodology.installed.active', { defaultValue: 'Active' })}
                 </span>
               </Badge>

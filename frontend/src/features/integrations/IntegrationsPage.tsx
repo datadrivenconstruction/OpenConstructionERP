@@ -609,10 +609,10 @@ function InfoPopover({
         className="rounded p-1 text-content-tertiary hover:text-oe-blue hover:bg-surface-secondary transition-colors"
         title={t('integrations.show_info', 'Show setup info')}
       >
-        <Info size={15} />
+        <Info size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-lg border border-border-light bg-surface-primary p-3 shadow-lg animate-fade-in">
+        <div className="absolute right-0 top-full z-dropdown mt-1 w-72 rounded-lg border border-border-light bg-surface-primary p-3 shadow-lg animate-fade-in">
           <p className="text-xs text-content-secondary leading-relaxed">{text}</p>
           {externalUrl && (
             <a
@@ -622,7 +622,7 @@ function InfoPopover({
               className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-oe-blue hover:underline"
             >
               {t('integrations.learn_more', 'Learn more')}
-              <ExternalLink size={11} />
+              <ExternalLink size={12} />
             </a>
           )}
         </div>
@@ -669,7 +669,7 @@ function CalendarFeedSection() {
           {feedUrl}
         </code>
         <Button variant="secondary" size="sm" onClick={handleCopy} className="shrink-0">
-          {copied ? <Check size={13} className="mr-1" /> : <Copy size={13} className="mr-1" />}
+          {copied ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
           {copied ? t('common.copied', 'Copied') : t('common.copy', 'Copy')}
         </Button>
       </div>
@@ -824,7 +824,7 @@ function ConnectModal({
   }, [connector, name, fieldValues, selectedEvents, addToast, t, onSaved]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-surface-primary p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
@@ -930,7 +930,7 @@ function ConnectModal({
                 })}
               </p>
             )}
-            <div className="grid grid-cols-2 gap-1.5 rounded-lg bg-surface-secondary p-2.5">
+            <div className="grid grid-cols-2 gap-1.5 rounded-lg bg-surface-secondary p-3">
               {connector.eventOptions.map((event) => {
                 const meta = connector.eventOptionLabels?.[event];
                 return (
@@ -1122,7 +1122,7 @@ export function IntegrationsPage() {
 
         return (
           <div key={category}>
-            <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-3">
+            <h2 className="oe-overline mb-3">
               {t(catLabel.key, catLabel.defaultLabel)}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1141,14 +1141,14 @@ export function IntegrationsPage() {
                     className="rounded-xl border border-border-light bg-surface-primary p-4 transition-all hover:border-border hover:shadow-sm"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         <div
                           className={`flex h-9 w-9 items-center justify-center rounded-lg ${CATEGORY_ICON_STYLES[connector.category]}`}
                         >
-                          <Icon size={18} />
+                          <Icon size={20} />
                         </div>
                         <div>
-                          <h3 className="text-sm font-semibold text-content-primary">
+                          <h3 className="oe-card-title">
                             {t(connector.nameKey, connector.defaultName)}
                           </h3>
                           <p className="text-2xs text-content-tertiary">
@@ -1196,7 +1196,7 @@ export function IntegrationsPage() {
                           {cfg.is_active ? (
                             <CheckCircle2 size={14} className="shrink-0 text-semantic-success" />
                           ) : (
-                            <XCircle size={14} className="shrink-0 text-red-400" />
+                            <XCircle size={14} className="shrink-0 text-semantic-error" />
                           )}
                           <span className="truncate text-content-primary">{cfg.name}</span>
                         </div>
@@ -1263,7 +1263,7 @@ export function IntegrationsPage() {
                         className="inline-flex items-center gap-1 text-xs text-oe-blue hover:underline"
                       >
                         {t('integrations.learn_more', 'Learn more')}
-                        <ExternalLink size={11} />
+                        <ExternalLink size={12} />
                       </a>
                     )}
                   </div>

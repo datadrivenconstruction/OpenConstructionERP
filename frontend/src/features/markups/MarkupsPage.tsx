@@ -151,26 +151,26 @@ const TYPE_LABELS: Record<MarkupType, string> = {
 const TYPE_COLORS: Record<MarkupType, string> = {
   cloud: 'text-blue-500',
   arrow: 'text-orange-500',
-  text: 'text-gray-500',
+  text: 'text-content-tertiary',
   rectangle: 'text-indigo-500',
-  highlight: 'text-yellow-500',
+  highlight: 'text-semantic-warning',
   distance: 'text-purple-500',
   area: 'text-teal-500',
-  count: 'text-rose-500',
-  stamp: 'text-green-500',
+  count: 'text-semantic-error',
+  stamp: 'text-semantic-success',
   polygon: 'text-cyan-500',
 };
 
 const TYPE_BG_COLORS: Record<MarkupType, string> = {
   cloud: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800',
   arrow: 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800',
-  text: 'bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-700',
+  text: 'bg-surface-secondary border-border-light',
   rectangle: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800',
-  highlight: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
+  highlight: 'bg-semantic-warning-bg border-semantic-warning/30',
   distance: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800',
   area: 'bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800',
-  count: 'bg-rose-50 border-rose-200 dark:bg-rose-900/20 dark:border-rose-800',
-  stamp: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800',
+  count: 'bg-semantic-error-bg border-semantic-error/30',
+  stamp: 'bg-semantic-success-bg border-semantic-success/30',
   polygon: 'bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-800',
 };
 
@@ -201,13 +201,13 @@ const DEFAULT_STAMPS = [
 
 const STAMP_BADGE_COLORS: Record<string, string> = {
   green:
-    'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
-  red: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700',
+    'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
+  red: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
   blue: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
   purple:
     'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700',
   amber:
-    'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700',
+    'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
 };
 
 const inputCls =
@@ -435,7 +435,7 @@ function AddMarkupModal({
   const isMeasurementType = MEASUREMENT_TYPES.includes(selectedType);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
       <div
         ref={dialogRef}
@@ -446,7 +446,7 @@ function AddMarkupModal({
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light">
-          <h2 className="text-base font-semibold text-content-primary flex items-center gap-2">
+          <h2 className="oe-card-title flex items-center gap-2">
             <Plus size={16} className="text-oe-blue" />
             {t('markups.add_markup', { defaultValue: 'Add Markup' })}
           </h2>
@@ -462,7 +462,7 @@ function AddMarkupModal({
         <div className="px-5 py-4 space-y-4">
           {/* Type Selector: 2 rows of 5 */}
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label className="oe-label">
               {t('markups.markup_type', { defaultValue: 'Type' })}
             </label>
             <div className="grid grid-cols-5 gap-1.5">
@@ -480,7 +480,7 @@ function AddMarkupModal({
                         : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
                     )}
                   >
-                    <Icon size={13} className={isSelected ? TYPE_COLORS[tp] : ''} />
+                    <Icon size={14} className={isSelected ? TYPE_COLORS[tp] : ''} />
                     <span className="truncate">
                       {t(`markups.type_${tp}`, { defaultValue: TYPE_LABELS[tp] })}
                     </span>
@@ -493,7 +493,7 @@ function AddMarkupModal({
           {/* Document + Page row */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label">
                 {t('markups.document', { defaultValue: 'Document' })}
               </label>
               <select
@@ -512,7 +512,7 @@ function AddMarkupModal({
               </select>
             </div>
             <div className="w-20">
-              <label className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label">
                 {t('markups.page', { defaultValue: 'Page' })}
               </label>
               <input
@@ -528,7 +528,7 @@ function AddMarkupModal({
           {/* Label + Text */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label">
                 {t('markups.label_field', { defaultValue: 'Label' })}
               </label>
               <input
@@ -541,7 +541,7 @@ function AddMarkupModal({
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label">
                 {t('markups.text_field', { defaultValue: 'Text' })}
               </label>
               <input
@@ -557,7 +557,7 @@ function AddMarkupModal({
 
           {/* Color Picker */}
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label className="oe-label">
               {t('markups.color', { defaultValue: 'Color' })}
             </label>
             <div className="flex items-center gap-2">
@@ -580,7 +580,7 @@ function AddMarkupModal({
 
           {/* Assignee dropdown */}
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label className="oe-label">
               {t('markups.assignee', { defaultValue: 'Assignee' })}
             </label>
             <select
@@ -601,7 +601,7 @@ function AddMarkupModal({
           {/* Priority + Due date - optional issue-tracking fields. */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="flex items-center gap-1 text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label flex items-center gap-1">
                 <Flag size={12} />
                 {t('markups.priority', { defaultValue: 'Priority' })}
               </label>
@@ -620,7 +620,7 @@ function AddMarkupModal({
               </select>
             </div>
             <div className="flex-1">
-              <label className="flex items-center gap-1 text-xs font-medium text-content-secondary mb-1.5">
+              <label className="oe-label flex items-center gap-1">
                 <CalendarClock size={12} />
                 {t('markups.due_date', { defaultValue: 'Due date' })}
               </label>
@@ -638,7 +638,7 @@ function AddMarkupModal({
           {isMeasurementType && (
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-xs font-medium text-content-secondary mb-1.5">
+                <label className="oe-label">
                   {t('markups.measurement_value', { defaultValue: 'Value' })}
                 </label>
                 <input
@@ -651,7 +651,7 @@ function AddMarkupModal({
                 />
               </div>
               <div className="w-24">
-                <label className="block text-xs font-medium text-content-secondary mb-1.5">
+                <label className="oe-label">
                   {t('markups.measurement_unit', { defaultValue: 'Unit' })}
                 </label>
                 <select
@@ -850,9 +850,9 @@ function MarkupDetail({
               data-testid="markup-open-in-document"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors shadow-sm"
             >
-              <FileText size={13} />
+              <FileText size={14} />
               {t('markups.openInDocument', { defaultValue: 'Open in document' })}
-              <ExternalLink size={11} className="opacity-80" />
+              <ExternalLink size={12} className="opacity-80" />
             </button>
           )}
           {/* Convert to issue, or open the linked issue once promoted. This is
@@ -866,11 +866,11 @@ function MarkupDetail({
                     defaultValue: 'Open the tracked issue raised from this markup',
                   })}
                   data-testid="markup-open-issue"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-green-700 bg-green-50 border border-green-300 hover:bg-green-100 transition-colors dark:text-green-300 dark:bg-green-900/20 dark:border-green-700"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-semantic-success bg-semantic-success-bg border border-semantic-success/30 hover:bg-semantic-success-bg transition-colors"
                 >
-                  <ClipboardCheck size={13} />
+                  <ClipboardCheck size={14} />
                   {t('markups.openIssue', { defaultValue: 'Open issue' })}
-                  <ExternalLink size={11} className="opacity-80" />
+                  <ExternalLink size={12} className="opacity-80" />
                 </button>
               )
             : onConvertToIssue && (
@@ -885,7 +885,7 @@ function MarkupDetail({
                   data-testid="markup-convert-to-issue"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <ClipboardCheck size={13} />
+                  <ClipboardCheck size={14} />
                   {isConverting
                     ? t('markups.converting', { defaultValue: 'Converting...' })
                     : t('markups.convertToIssue', { defaultValue: 'Convert to issue' })}
@@ -902,9 +902,9 @@ function MarkupDetail({
               data-testid="markup-use-as-quantity"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
             >
-              <Ruler size={13} />
+              <Ruler size={14} />
               {t('markups.useAsQuantity', { defaultValue: 'Use as takeoff quantity' })}
-              <ExternalLink size={11} className="opacity-80" />
+              <ExternalLink size={12} className="opacity-80" />
             </button>
           )}
         </div>
@@ -963,7 +963,7 @@ function MarkupDetail({
             variant="ghost"
             size="sm"
             onClick={onEdit}
-            icon={<Edit3 size={13} />}
+            icon={<Edit3 size={14} />}
           >
             {t('markups.edit', { defaultValue: 'Edit' })}
           </Button>
@@ -1014,7 +1014,7 @@ function MarkupDetail({
               })}
               className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
             >
-              <ExternalLink size={11} />
+              <ExternalLink size={12} />
               {t('markups.open_linked_boq', { defaultValue: 'Open BOQ position' })}
             </button>
           ) : (
@@ -1164,9 +1164,9 @@ function MarkupGridCard({
                   onClick={() => onOpenIssue(punchId)}
                   title={t('markups.openIssue', { defaultValue: 'Open issue' })}
                   data-testid="markup-grid-open-issue"
-                  className="p-1 rounded hover:bg-surface-secondary text-green-600 transition-colors"
+                  className="p-1 rounded hover:bg-surface-secondary text-semantic-success transition-colors"
                 >
-                  <ClipboardCheck size={13} />
+                  <ClipboardCheck size={14} />
                 </button>
               )
             : onConvertToIssue && (
@@ -1177,7 +1177,7 @@ function MarkupGridCard({
                   data-testid="markup-grid-convert-to-issue"
                   className="p-1 rounded hover:bg-surface-secondary text-content-tertiary hover:text-oe-blue transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <ClipboardCheck size={13} />
+                  <ClipboardCheck size={14} />
                 </button>
               )}
           <button
@@ -1185,15 +1185,15 @@ function MarkupGridCard({
             title={t('markups.edit', { defaultValue: 'Edit' })}
             className="p-1 rounded hover:bg-surface-secondary text-content-tertiary hover:text-oe-blue transition-colors"
           >
-            <Edit3 size={13} />
+            <Edit3 size={14} />
           </button>
           {markup.status === 'active' && (
             <button
               onClick={() => onChangeStatus('resolved')}
               title={t('markups.action_resolve', { defaultValue: 'Resolve' })}
-              className="p-1 rounded hover:bg-surface-secondary text-green-600 transition-colors"
+              className="p-1 rounded hover:bg-surface-secondary text-semantic-success transition-colors"
             >
-              <Check size={13} />
+              <Check size={14} />
             </button>
           )}
           {markup.status === 'resolved' && (
@@ -1202,7 +1202,7 @@ function MarkupGridCard({
               title={t('markups.action_archive', { defaultValue: 'Archive' })}
               className="p-1 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
             >
-              <Check size={13} />
+              <Check size={14} />
             </button>
           )}
           <button
@@ -1210,7 +1210,7 @@ function MarkupGridCard({
             title={t('common.delete', { defaultValue: 'Delete' })}
             className="p-1 rounded hover:bg-surface-secondary text-semantic-error/70 hover:text-semantic-error transition-colors"
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -1374,7 +1374,7 @@ function MarkupTableRow({
               <button
                 onClick={() => onChangeStatus('resolved')}
                 title={t('markups.action_resolve', { defaultValue: 'Resolve' })}
-                className="p-1 rounded hover:bg-surface-secondary text-green-600 transition-colors"
+                className="p-1 rounded hover:bg-surface-secondary text-semantic-success transition-colors"
               >
                 <Check size={14} />
               </button>
@@ -2359,7 +2359,7 @@ export function MarkupsPage() {
                   defaultValue: 'Show only markups past their due date',
                 })}
               >
-                <AlertTriangle size={13} />
+                <AlertTriangle size={14} />
                 {t('markups.overdue_only', { defaultValue: 'Overdue' })}
               </button>
 
@@ -2433,42 +2433,42 @@ export function MarkupsPage() {
               /* ── List View (Table) ─────────────────────────────────────── */
               <Card padding="none" className="overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="oe-table">
                     <thead>
-                      <tr className="border-b border-border-light bg-surface-secondary/50">
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[120px]">
+                      <tr>
+                        <th className="w-[120px]">
                           {t('markups.col_type', { defaultValue: 'Type' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                        <th>
                           {t('markups.col_label', { defaultValue: 'Label / Text' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[130px]">
+                        <th className="w-[130px]">
                           {t('markups.col_document', { defaultValue: 'Document' })}
                         </th>
-                        <th className="px-3 py-2 text-center text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[50px]">
+                        <th className="text-center w-[50px]">
                           {t('markups.col_page', { defaultValue: 'Pg' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[90px]">
+                        <th className="w-[90px]">
                           {t('markups.col_status', { defaultValue: 'Status' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[120px]">
+                        <th className="w-[120px]">
                           {t('markups.col_priority', { defaultValue: 'Priority' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[140px]">
+                        <th className="w-[140px]">
                           {t('markups.col_assignee', { defaultValue: 'Assignee' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[100px]">
+                        <th className="w-[100px]">
                           {t('markups.col_measurement', { defaultValue: 'Measure' })}
                         </th>
-                        <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[100px]">
+                        <th className="w-[100px]">
                           {t('markups.col_date', { defaultValue: 'Date' })}
                         </th>
-                        <th className="px-3 py-2 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[80px]">
+                        <th className="text-right w-[80px]">
                           {t('common.actions', { defaultValue: 'Actions' })}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {filteredMarkups.map((markup) => (
                         <MarkupTableRow
                           key={markup.id}
@@ -2510,7 +2510,7 @@ export function MarkupsPage() {
               </Card>
             ) : (
               /* ── Grid View ─────────────────────────────────────────────── */
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {filteredMarkups.map((markup) => (
                   <MarkupGridCard
                     key={markup.id}
@@ -2561,7 +2561,7 @@ export function MarkupsPage() {
               {displayStamps.map((stamp) => {
                 const colorCls =
                   STAMP_BADGE_COLORS[stamp.color] ??
-                  'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-600';
+                  'bg-surface-secondary text-content-secondary border-border';
                 return (
                   <button
                     key={stamp.name}
@@ -2582,7 +2582,7 @@ export function MarkupsPage() {
                     )}
                     title={t('markups.click_to_place_stamp', { defaultValue: 'Click to place this stamp on a document' })}
                   >
-                    <Stamp size={11} />
+                    <Stamp size={12} />
                     {t(`markups.stamp_${stamp.name}`, { defaultValue: stamp.label })}
                   </button>
                 );
@@ -2620,26 +2620,26 @@ export function MarkupsPage() {
 
       {/* ── Custom Stamp Form ──────────────────────────────────────────── */}
       {showCustomStampForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowCustomStampForm(false)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={() => setShowCustomStampForm(false)}>
           <div className="w-full max-w-sm mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-content-primary mb-4">
+            <h3 className="oe-card-title mb-4">
               {t('markups.create_custom_stamp', { defaultValue: 'Create Custom Stamp' })}
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-content-secondary mb-1">
+                <label className="oe-label">
                   {t('markups.stamp_text', { defaultValue: 'Stamp Text' })}
                 </label>
                 <input
                   value={customStampName}
                   onChange={(e) => setCustomStampName(e.target.value)}
                   placeholder={t('markups.stamp_text_placeholder', { defaultValue: 'e.g. CHECKED, HOLD, RFI...' })}
-                  className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  className="oe-input w-full"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-secondary mb-1">
+                <label className="oe-label">
                   {t('markups.stamp_color', { defaultValue: 'Color' })}
                 </label>
                 <div className="flex gap-2">

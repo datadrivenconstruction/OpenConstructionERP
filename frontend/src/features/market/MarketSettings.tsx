@@ -28,7 +28,7 @@ const UNITS_OPTIONS = [
 ] as const;
 
 const selectClass =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-select w-full';
 
 function emptyProfile(): MarketProfile {
   return {
@@ -131,7 +131,7 @@ export function MarketSettings() {
         <CardHeader title={t('market.primary', { defaultValue: 'Primary market' })} />
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('market.primary', { defaultValue: 'Primary market' })}
               <select
                 aria-label={t('market.primary', { defaultValue: 'Primary market' })}
@@ -263,7 +263,7 @@ export function MarketSettings() {
         <CardHeader title={t('market.standards', { defaultValue: 'Standards' })} />
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('market.classification', { defaultValue: 'Classification' })}
               <select
                 aria-label={t('market.classification', { defaultValue: 'Classification' })}
@@ -280,7 +280,7 @@ export function MarketSettings() {
                 ))}
               </select>
             </label>
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('market.contract_family', { defaultValue: 'Contract forms' })}
               <select
                 aria-label={t('market.contract_family', { defaultValue: 'Contract forms' })}
@@ -297,7 +297,7 @@ export function MarketSettings() {
                 ))}
               </select>
             </label>
-            <label className="block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('market.units', { defaultValue: 'Units system' })}
               <select
                 aria-label={t('market.units', { defaultValue: 'Units system' })}

@@ -146,7 +146,7 @@ function Stepper({
               onClick={reachable ? () => onJump(n) : undefined}
               disabled={!reachable}
               className={clsx(
-                'group flex items-center gap-2.5 transition-all duration-300',
+                'group flex items-center gap-2 transition-all duration-300',
                 reachable && 'cursor-pointer',
                 !reachable && 'cursor-not-allowed',
               )}
@@ -188,7 +188,7 @@ function Stepper({
                 className={clsx(
                   'mx-3 sm:mx-4 h-0.5 w-10 sm:w-16 rounded-full transition-colors duration-300',
                   n < current
-                    ? 'bg-emerald-400 dark:bg-emerald-600'
+                    ? 'bg-semantic-success'
                     : 'bg-border',
                 )}
               />
@@ -714,7 +714,7 @@ export function CatalogueStep({
                   'Install a catalogue first',
                 )}
               </h3>
-              <p className="text-xs text-amber-800/90 dark:text-amber-200/80 mt-1 leading-relaxed">
+              <p className="text-xs text-semantic-warning/90 mt-1 leading-relaxed">
                 {t(
                   'match_wizard.no_installed_body',
                   'A cost catalogue is the vector index your project elements are matched against. You can\'t move past this step until at least one is installed. Pick the closest regional book below - installs run in the background, the wizard keeps your picks.',
@@ -739,7 +739,7 @@ export function CatalogueStep({
                 )}
               </button>
               {available.length === 0 && (
-                <p className="mt-2 text-2xs text-amber-700/80 dark:text-amber-300/70">
+                <p className="mt-2 text-2xs text-semantic-warning/80">
                   {t(
                     'match_wizard.no_installed_no_available',
                     'No catalogues are available from the server. Check the Qdrant / costs registry status.',
@@ -756,7 +756,7 @@ export function CatalogueStep({
           <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-3">
             {t('match_wizard.installed_label', 'Installed')}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 mb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 mb-5">
             {installed.map((c) => (
               <SelectableTile
                 key={c.region}
@@ -1003,7 +1003,7 @@ function SourceStep({
               )}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
             {(bimQ.data ?? []).map((m: BIMModelOption) => {
               const isSel = selected?.kind === 'bim' && selected.modelId === m.id;
               const isReady = m.status === 'ready';
@@ -1148,7 +1148,7 @@ function SourceStep({
                 'match_wizard.text_placeholder',
                 'Concrete C30/37 wall, 240mm\nDoor - single leaf, hardwood\n…',
               )}
-              className="block w-full rounded-2xl border border-border-light bg-surface-primary text-sm font-mono p-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-colors"
+              className="block w-full oe-textarea font-mono"
             />
           </label>
           {selected?.kind === 'text' && (
@@ -1403,7 +1403,7 @@ export function MatchWizard({
             <Target className="w-4 h-4" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-content-primary leading-tight">
+            <h2 className="oe-card-title">
               {t(
                 'match_wizard.goal_title',
                 'From your model to a priced Bill of Quantities',
@@ -1494,7 +1494,7 @@ export function MatchWizard({
             onClick={() => createMut.mutate()}
             disabled={!source || createMut.isPending}
             className={clsx(
-              'inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-base font-semibold transition-all duration-200',
+              'inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-base font-semibold transition-all duration-200',
               'bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white',
               'shadow-xl shadow-indigo-500/35 hover:shadow-2xl hover:shadow-indigo-500/45 hover:-translate-y-px',
               'ring-2 ring-indigo-400/40',

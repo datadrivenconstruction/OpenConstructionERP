@@ -495,7 +495,7 @@ export function ModuleBuilderWizard({ open, onClose, onInstalled, upgrade = null
         )}
         {loadingInstalled && (
           <p className="flex items-center gap-2 py-8 text-sm text-content-tertiary" data-testid="module-builder-loading-installed">
-            <Loader2 size={15} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
             {t('common.loading', { defaultValue: 'Loading...' })}
           </p>
         )}
@@ -505,7 +505,7 @@ export function ModuleBuilderWizard({ open, onClose, onInstalled, upgrade = null
             role="alert"
             className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error"
           >
-            <AlertTriangle size={15} className="mt-px shrink-0" />
+            <AlertTriangle size={16} className="mt-px shrink-0" />
             {refusal}
           </p>
         )}

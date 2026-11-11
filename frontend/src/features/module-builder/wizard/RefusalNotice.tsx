@@ -85,7 +85,7 @@ export function RefusalNotice({ refusal, spec }: { refusal: UpgradeRefusal; spec
       data-code={refusal.code}
     >
       <p className="flex items-start gap-2 font-semibold text-semantic-error">
-        <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+        <AlertTriangle size={16} className="mt-0.5 shrink-0" />
         {layout
           ? t('module_builder.layout_conflict_title', {
               defaultValue: 'Entries are already kept under this name',

@@ -113,7 +113,7 @@ export function AnchorDriftIndicator({
       {projectAddressText && (
         <div className="flex items-start gap-1.5">
           <MapPin
-            size={11}
+            size={12}
             strokeWidth={2}
             className="mt-0.5 shrink-0 text-content-tertiary"
           />
@@ -128,7 +128,7 @@ export function AnchorDriftIndicator({
       {anchoredAddress && (
         <div className="flex items-start gap-1.5">
           <History
-            size={11}
+            size={12}
             strokeWidth={2}
             className="mt-0.5 shrink-0 text-content-tertiary"
           />
@@ -146,7 +146,7 @@ export function AnchorDriftIndicator({
       {drift && onReanchor && (
         <div className="mt-1 flex items-center gap-2 pt-1">
           <AlertCircle
-            size={11}
+            size={12}
             strokeWidth={2.25}
             className="text-semantic-warning"
             aria-hidden

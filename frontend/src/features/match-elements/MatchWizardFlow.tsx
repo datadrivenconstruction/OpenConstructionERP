@@ -431,7 +431,7 @@ function LaneSection({
         <span className={clsx('h-2.5 w-2.5 shrink-0 rounded-full', accent.dot)} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+            <h3 className="oe-card-title">{title}</h3>
             <span
               className={clsx(
                 'rounded-full px-2 py-0.5 text-2xs font-semibold tabular-nums',
@@ -1242,7 +1242,7 @@ export function MatchWizardFlow() {
           retries, occasional stale-cache shape mismatches, ranker
           tuning). The banner sets the right expectation and gives a
           1-click path to file an issue against the public repo. */}
-      <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-semantic-warning/30 bg-gradient-to-r from-amber-50/80 via-white to-white px-3 py-2 shadow-sm dark:from-amber-950/20 dark:via-surface-primary dark:to-surface-primary">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-semantic-warning/30 bg-gradient-to-r from-amber-50/80 via-white to-white px-3 py-2 shadow-sm dark:from-amber-950/20 dark:via-surface-primary dark:to-surface-primary">
         <span className="inline-flex shrink-0 items-center gap-1 rounded border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-semantic-warning">
           <Sparkles className="h-2.5 w-2.5" />
           {t('match_elements.beta_badge', { defaultValue: 'Beta' })}
@@ -1454,14 +1454,14 @@ export function MatchWizardFlow() {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-content-primary">
+                      <label className="oe-label">
                         {t('match.wizard.catalogueLabel', { defaultValue: 'Cost catalogue' })}
                       </label>
                       <select
                         value={catalogueId ?? ''}
                         disabled={cataloguesQ.isLoading}
                         onChange={(e) => chooseCatalogue(e.target.value || null)}
-                        className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm disabled:opacity-60"
+                        className="w-full oe-select"
                       >
                         <option value="" disabled={!!autoBlocked}>
                           {t('match.wizard.catalogueAuto', {
@@ -1530,7 +1530,7 @@ export function MatchWizardFlow() {
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-content-primary">
+                      <label className="oe-label">
                         {t('match.wizard.displayCurrencyLabel', {
                           defaultValue: 'Display currency',
                         })}
@@ -1538,7 +1538,7 @@ export function MatchWizardFlow() {
                       <select
                         value={displayCurrency ?? ''}
                         onChange={(e) => setDisplayCurrency(e.target.value || null)}
-                        className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+                        className="w-full oe-select"
                       >
                         {(() => {
                           // Build a de-duplicated currency menu: the
@@ -1634,7 +1634,7 @@ export function MatchWizardFlow() {
                   </p>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-content-primary">
+                    <label className="oe-label">
                       {t('match.wizard.stageHint', {
                         defaultValue: 'Construction stage (optional)',
                       })}
@@ -1642,7 +1642,7 @@ export function MatchWizardFlow() {
                     <select
                       value={stageHint}
                       onChange={(e) => setStageHint(e.target.value as ConstructionStage | '')}
-                      className="w-full max-w-sm rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm"
+                      className="w-full max-w-sm oe-select"
                     >
                       <option value="">
                         {t('match.wizard.allStages', { defaultValue: 'All stages (no filter)' })}
@@ -1698,7 +1698,7 @@ export function MatchWizardFlow() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-content-primary">
+                    <label className="oe-label">
                       {t('match.wizard.autoConfirm', {
                         defaultValue: 'Auto-confirm above score',
                       })}{' '}
@@ -2051,24 +2051,24 @@ export function MatchWizardFlow() {
                             )}
                           </div>
                           <div className="max-h-80 overflow-auto">
-                            <table className="w-full text-sm">
-                              <thead className="sticky top-0 bg-surface-primary">
-                                <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-                                  <th className="px-3 py-2 font-medium">
+                            <table className="oe-table">
+                              <thead className="sticky top-0">
+                                <tr>
+                                  <th>
                                     {t('match.wizard.colDescription', {
                                       defaultValue: 'Description',
                                     })}
                                   </th>
-                                  <th className="px-3 py-2 font-medium">
+                                  <th>
                                     {t('match.wizard.colUnit', { defaultValue: 'Unit' })}
                                   </th>
-                                  <th className="px-3 py-2 text-right font-medium">
+                                  <th className="text-right">
                                     {t('match.wizard.colQty', { defaultValue: 'Qty' })}
                                   </th>
-                                  <th className="px-3 py-2 text-right font-medium">
+                                  <th className="text-right">
                                     {t('match.wizard.colRate', { defaultValue: 'Rate' })}
                                   </th>
-                                  <th className="px-3 py-2 text-right font-medium">
+                                  <th className="text-right">
                                     {t('match.wizard.colTotal', { defaultValue: 'Total' })}
                                   </th>
                                 </tr>
@@ -2079,9 +2079,9 @@ export function MatchWizardFlow() {
                                   return (
                                     <tr
                                       key={`${p.group_key}-${i}`}
-                                      className="border-b border-border-light/60 last:border-0 align-top"
+                                      className="last:border-0 align-top"
                                     >
-                                      <td className="px-3 py-2">
+                                      <td>
                                         <div className="text-content-primary">
                                           {p.description}
                                         </div>
@@ -2099,10 +2099,10 @@ export function MatchWizardFlow() {
                                           </div>
                                         )}
                                       </td>
-                                      <td className="px-3 py-2 text-content-secondary">
+                                      <td className="text-content-secondary">
                                         {p.unit}
                                       </td>
-                                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                                      <td className="text-right tabular-nums text-content-secondary">
                                         {Number(p.quantity).toLocaleString(getNumberLocale(), {
                                           maximumFractionDigits: 3,
                                         })}
@@ -2121,7 +2121,7 @@ export function MatchWizardFlow() {
                                             })
                                           : fmtDisplayMoney(Number(p.unit_rate), p.currency)}
                                       </td>
-                                      <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                                      <td className="text-right tabular-nums font-medium">
                                         {fmtDisplayMoney(Number(p.line_total), p.currency)}
                                       </td>
                                     </tr>

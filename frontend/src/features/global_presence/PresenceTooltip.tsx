@@ -174,7 +174,7 @@ export function PresenceTooltip({ user, onClose }: PresenceTooltipProps) {
       ref={ref}
       role="tooltip"
       className={clsx(
-        'absolute top-full right-0 mt-2 z-50',
+        'absolute top-full right-0 mt-2 z-tooltip',
         'w-56 rounded-xl border border-border-light',
         'bg-surface-primary shadow-lg',
         'p-3 text-sm',

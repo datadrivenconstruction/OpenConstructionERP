@@ -58,7 +58,7 @@ function LinkPicker({ projectId, item, catalogue, write }: { projectId: string; 
     <div className="mt-2 flex flex-wrap items-end gap-2" data-testid={`link-picker-${item.id}`}>
       <label className="flex flex-col gap-1 text-xs text-content-secondary">
         {t('hseFrame.link.kind', { defaultValue: 'Record kind' })}
-        <select className="h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm" value={kind} onChange={(e) => { setKind(e.target.value); setPick(''); }}>
+        <select className="oe-select" value={kind} onChange={(e) => { setKind(e.target.value); setPick(''); }}>
           {catalogue.link_kinds.map((k) => (
             <option key={k} value={k}>
               {t(`hseFrame.link_kind.${k}`, { defaultValue: k.replace(/_/g, ' ') })}
@@ -69,7 +69,7 @@ function LinkPicker({ projectId, item, catalogue, write }: { projectId: string; 
       <Input label={t('hseFrame.link.search', { defaultValue: 'Search' })} value={q} onChange={(e) => setQ(e.target.value)} />
       <label className="flex flex-col gap-1 text-xs text-content-secondary">
         {t('hseFrame.link.record', { defaultValue: 'Record' })}
-        <select className="h-9 min-w-48 rounded-lg border border-border bg-surface-primary px-2 text-sm" value={pick} onChange={(e) => setPick(e.target.value)} data-testid="link-candidate">
+        <select className="oe-select min-w-48" value={pick} onChange={(e) => setPick(e.target.value)} data-testid="link-candidate">
           <option value="">{t('hseFrame.link.choose', { defaultValue: 'Choose a record' })}</option>
           {(candidates.data ?? []).map((c) => (
             <option key={c.id} value={c.id}>
@@ -208,7 +208,7 @@ function AddItem({ projectId, catalogue, write }: { projectId: string; catalogue
     <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-border-light p-3" data-testid="add-item">
       <label className="flex flex-col gap-1 text-xs text-content-secondary">
         {t('hseFrame.add.topic', { defaultValue: 'Topic' })}
-        <select className="h-10 rounded-lg border border-border bg-surface-primary px-2 text-sm" value={topic} onChange={(e) => setTopic(e.target.value)} data-testid="add-topic">
+        <select className="oe-select oe-input-lg" value={topic} onChange={(e) => setTopic(e.target.value)} data-testid="add-topic">
           {topics.map((x) => (
             <option key={x.code} value={x.code}>
               {labelOf(x, i18n.language)}
@@ -254,7 +254,7 @@ export function RegisterPanel(props: Props) {
         return (
           <section key={code} data-testid={`topic-${code}`}>
             <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="text-sm font-semibold text-content-primary">{labelOf(topic, i18n.language, code)}</h2>
+              <h2 className="oe-card-title">{labelOf(topic, i18n.language, code)}</h2>
               {p.total > 0 && (
                 <span className="text-xs text-content-secondary">
                   {t('hseFrame.register.progress', { defaultValue: '{{done}} of {{total}} mandatory done', done: p.done, total: p.total })}

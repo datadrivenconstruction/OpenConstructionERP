@@ -36,7 +36,7 @@ function BarList({ rows }: { rows: (MoneyTotal & { label: string })[] }) {
     return m;
   }, [rows]);
   return (
-    <ul className="space-y-2.5">
+    <ul className="space-y-2">
       {rows.map((r) => (
         <li key={`${r.label}-${r.currency}`}>
           <div className="flex items-baseline justify-between gap-3 text-xs">
@@ -203,17 +203,17 @@ export function GuaranteesExposurePage() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card padding="md">
-              <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('guarantees.by_bank', { defaultValue: 'By bank' })}</h3>
+              <h3 className="oe-card-title mb-3">{t('guarantees.by_bank', { defaultValue: 'By bank' })}</h3>
               <BarList rows={bankRows} />
             </Card>
             <Card padding="md">
-              <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('guarantees.by_type', { defaultValue: 'By type' })}</h3>
+              <h3 className="oe-card-title mb-3">{t('guarantees.by_type', { defaultValue: 'By type' })}</h3>
               <BarList rows={typeRows} />
             </Card>
           </div>
 
           <Card padding="md">
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('guarantees.expiring_title', { defaultValue: 'Expiring soon' })}</h3>
+            <h3 className="oe-card-title mb-3">{t('guarantees.expiring_title', { defaultValue: 'Expiring soon' })}</h3>
             {ex.expiring.length === 0 ? (
               <p className="text-sm text-content-tertiary">{t('guarantees.expiring_empty', { defaultValue: 'Nothing expires in the next 60 days' })}</p>
             ) : (
@@ -237,7 +237,7 @@ export function GuaranteesExposurePage() {
 
       <Card padding="md">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-content-primary">{t('guarantees.credit_lines', { defaultValue: 'Bank credit lines' })}</h3>
+          <h3 className="oe-card-title">{t('guarantees.credit_lines', { defaultValue: 'Bank credit lines' })}</h3>
           <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setFacilityModal({ editing: null })}>
             {t('guarantees.facility_new', { defaultValue: 'New credit line' })}
           </Button>

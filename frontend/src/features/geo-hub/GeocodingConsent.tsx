@@ -75,7 +75,7 @@ function ChoiceForm({ current, onDone }: { current?: GeocodingConsent; onDone?: 
             value={mirrorUrl}
             onChange={(e) => setMirrorUrl(e.target.value)}
             placeholder="https://nominatim.example.com"
-            className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="min-w-0 flex-1 oe-input"
           />
           <Button
             size="sm"
@@ -153,7 +153,7 @@ export function GeocodingConsentPanel() {
 
   return (
     <section className="space-y-3 rounded-xl border border-border-light bg-surface-primary p-4">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title flex items-center gap-2">
         <MapPin size={14} aria-hidden />
         {t('geo_hub.consent.panel_title', { defaultValue: 'Sending addresses to a map service' })}
       </h2>

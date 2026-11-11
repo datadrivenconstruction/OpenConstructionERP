@@ -128,8 +128,8 @@ export function RegisterAgeingPanel({
 
   return (
     <section className="rounded-xl border border-border bg-surface-elevated shadow-sm p-4" data-testid="register-ageing">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <Hourglass size={15} className="text-oe-blue" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <Hourglass size={16} className="text-oe-blue" />
         {t('interface_management.ageing_title', { defaultValue: 'Register ageing' })}
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -167,9 +167,9 @@ export function RegisterAgeingPanel({
         <div className="mt-4 border-t border-border-light pt-3" data-testid="register-checks">
           <div className="flex flex-wrap items-center gap-2">
             {failing.length === 0 ? (
-              <ShieldCheck size={15} className="text-semantic-success" />
+              <ShieldCheck size={16} className="text-semantic-success" />
             ) : (
-              <ShieldAlert size={15} className={validation.errors > 0 ? 'text-semantic-error' : 'text-semantic-warning'} />
+              <ShieldAlert size={16} className={validation.errors > 0 ? 'text-semantic-error' : 'text-semantic-warning'} />
             )}
             <span className="text-sm font-semibold text-content-primary">
               {t('interface_management.checks_title', { defaultValue: 'Register checks' })}

@@ -198,7 +198,7 @@ export function CoordinatePicker({
             ].join(' ')}
             data-testid="geo-coords-pick-from-map"
           >
-            <Crosshair size={11} strokeWidth={2.25} />
+            <Crosshair size={12} strokeWidth={2.25} />
             {t('geo_hub.coords.pick_from_map', {
               defaultValue: 'Pick from map',
             })}
@@ -224,16 +224,15 @@ export function CoordinatePicker({
                 latState.error ? `${reactId}-lat-err` : undefined
               }
               className={[
-                'h-9 w-full rounded-md border bg-surface-primary px-2',
-                'pr-8 font-mono text-xs tabular-nums text-content-primary',
-                latState.error ? 'border-semantic-error/60' : 'border-border',
+                'oe-input w-full',
+                'pr-8 font-mono text-xs tabular-nums',
                 'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
                 disabled ? 'opacity-60 cursor-not-allowed' : '',
               ].join(' ')}
               data-testid="geo-coords-lat-input"
             />
             <Pencil
-              size={11}
+              size={12}
               className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-tertiary"
               aria-hidden
             />
@@ -266,16 +265,15 @@ export function CoordinatePicker({
                 lonState.error ? `${reactId}-lon-err` : undefined
               }
               className={[
-                'h-9 w-full rounded-md border bg-surface-primary px-2',
-                'pr-8 font-mono text-xs tabular-nums text-content-primary',
-                lonState.error ? 'border-semantic-error/60' : 'border-border',
+                'oe-input w-full',
+                'pr-8 font-mono text-xs tabular-nums',
                 'focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent',
                 disabled ? 'opacity-60 cursor-not-allowed' : '',
               ].join(' ')}
               data-testid="geo-coords-lon-input"
             />
             <Pencil
-              size={11}
+              size={12}
               className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-content-tertiary"
               aria-hidden
             />

@@ -13,11 +13,11 @@ import { alertBandClass } from './api';
 import { ruleLabel } from './labels';
 
 export const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 export const selectCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg w-full';
 export const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 export function Money({ value, currency }: { value: string | null | undefined; currency: string }) {
   if (value === null || value === undefined || value === '') return <span>—</span>;
@@ -75,7 +75,7 @@ export function GuaranteesExplainer() {
   return (
     <CollapsibleSection
       storageKey="guarantees.how"
-      icon={<Landmark size={15} className="text-oe-blue" />}
+      icon={<Landmark size={16} className="text-oe-blue" />}
       title={t('guarantees.flow_title', { defaultValue: 'How guarantees work, and what they connect to' })}
     >
       <p className="text-xs text-content-tertiary">

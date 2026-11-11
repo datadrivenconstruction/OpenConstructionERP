@@ -195,7 +195,7 @@ export function EditMarkupModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
       <div
         ref={dialogRef}
@@ -206,7 +206,7 @@ export function EditMarkupModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light">
-          <h2 className="text-base font-semibold text-content-primary flex items-center gap-2">
+          <h2 className="oe-card-title flex items-center gap-2">
             <Edit3 size={16} className="text-oe-blue" />
             {t('markups.editTitle', { defaultValue: 'Edit Markup' })}
           </h2>
@@ -226,7 +226,7 @@ export function EditMarkupModal({
           <div>
             <label
               htmlFor="edit-markup-label"
-              className="block text-xs font-medium text-content-secondary mb-1.5"
+              className="oe-label"
             >
               {t('markups.label_field', { defaultValue: 'Title' })}
             </label>
@@ -253,7 +253,7 @@ export function EditMarkupModal({
           <div>
             <label
               htmlFor="edit-markup-text"
-              className="block text-xs font-medium text-content-secondary mb-1.5"
+              className="oe-label"
             >
               {t('markups.text_field', { defaultValue: 'Description' })}
             </label>
@@ -266,13 +266,13 @@ export function EditMarkupModal({
               })}
               rows={3}
               maxLength={10_000}
-              className="w-full rounded-lg border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors resize-y"
+              className="w-full oe-textarea resize-y"
             />
           </div>
 
           {/* Color */}
           <div>
-            <label className="block text-xs font-medium text-content-secondary mb-1.5">
+            <label className="oe-label">
               {t('markups.color', { defaultValue: 'Color' })}
             </label>
             <div
@@ -309,7 +309,7 @@ export function EditMarkupModal({
           <div>
             <label
               htmlFor="edit-markup-assignee"
-              className="block text-xs font-medium text-content-secondary mb-1.5"
+              className="oe-label"
             >
               {t('markups.assignee', { defaultValue: 'Assignee' })}
             </label>
@@ -336,7 +336,7 @@ export function EditMarkupModal({
             <div className="flex-1">
               <label
                 htmlFor="edit-markup-priority"
-                className="flex items-center gap-1 text-xs font-medium text-content-secondary mb-1.5"
+                className="oe-label flex items-center gap-1"
               >
                 <Flag size={12} />
                 {t('markups.priority', { defaultValue: 'Priority' })}
@@ -360,7 +360,7 @@ export function EditMarkupModal({
             <div className="flex-1">
               <label
                 htmlFor="edit-markup-due"
-                className="flex items-center gap-1 text-xs font-medium text-content-secondary mb-1.5"
+                className="oe-label flex items-center gap-1"
               >
                 <CalendarClock size={12} />
                 {t('markups.due_date', { defaultValue: 'Due date' })}

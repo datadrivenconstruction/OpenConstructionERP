@@ -135,7 +135,7 @@ export function ModulePackagesPanel() {
     <Card className="mb-5 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <FileArchive size={16} />
             {t('module_packages.title', { defaultValue: 'Install module (.zip)' })}
           </h3>
@@ -206,13 +206,13 @@ export function ModulePackagesPanel() {
             <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-content-primary">
               {t('module_packages.files', { defaultValue: 'Files to review ({{count}})', count: preview.files.length })}
             </summary>
-            <table className="w-full text-2xs">
+            <table className="oe-table oe-table-compact text-2xs">
               <tbody>
                 {preview.files.map((f) => (
-                  <tr key={f.path} className="border-t border-border">
-                    <td className="px-3 py-1 font-mono text-content-primary">{f.path}</td>
-                    <td className="px-3 py-1 text-right text-content-secondary">{formatFileSize(f.size)}</td>
-                    <td className="hidden px-3 py-1 font-mono text-content-tertiary md:table-cell">{f.sha256.slice(0, 16)}</td>
+                  <tr key={f.path}>
+                    <td className="font-mono">{f.path}</td>
+                    <td className="text-right text-content-secondary">{formatFileSize(f.size)}</td>
+                    <td className="hidden font-mono text-content-tertiary md:table-cell">{f.sha256.slice(0, 16)}</td>
                   </tr>
                 ))}
               </tbody>

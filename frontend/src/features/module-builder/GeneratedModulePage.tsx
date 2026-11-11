@@ -409,7 +409,7 @@ export function GeneratedModulePage() {
                 {exportOpen && (
                   <div
                     role="menu"
-                    className="absolute end-0 z-30 mt-1 min-w-[10rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
+                    className="absolute end-0 z-dropdown mt-1 min-w-[10rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
                   >
                     <button
                       type="button"
@@ -459,7 +459,7 @@ export function GeneratedModulePage() {
       <CollapsibleSection
         storageKey={`runtime_module.${spec.key}.how`}
         title={spec.display_name}
-        icon={<Boxes size={15} strokeWidth={1.9} />}
+        icon={<Boxes size={16} strokeWidth={1.9} />}
         subtitle={t('runtime_module.built_here_v2', {
           defaultValue: 'Built on this instance with the module builder.',
         })}
@@ -469,7 +469,7 @@ export function GeneratedModulePage() {
         <div className="space-y-3 text-sm text-content-secondary">
           <div>
             <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-              <ShieldCheck size={13} strokeWidth={2} />
+              <ShieldCheck size={14} strokeWidth={2} />
               {t('runtime_module.rules_heading', { defaultValue: 'What this module checks' })}
             </p>
             {spec.rules.length > 0 ? (
@@ -550,7 +550,7 @@ export function GeneratedModulePage() {
                 placeholder={t('common.search', { defaultValue: 'Search' })}
                 aria-label={t('common.search', { defaultValue: 'Search' })}
                 data-testid="runtime-module-search"
-                className="w-full rounded-lg border border-border-light bg-surface-primary py-1.5 ps-8 pe-8 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="w-full oe-input ps-8 pe-8"
               />
               {query !== '' && (
                 <button
@@ -559,7 +559,7 @@ export function GeneratedModulePage() {
                   aria-label={t('common.clear', { defaultValue: 'Clear' })}
                   className="absolute end-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-content-tertiary hover:text-content-primary"
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -621,9 +621,9 @@ export function GeneratedModulePage() {
           )}
 
           <div className="overflow-x-auto rounded-xl border border-border-light bg-surface-primary">
-          <table className="w-full text-sm" data-testid="runtime-module-table">
+          <table className="oe-table" data-testid="runtime-module-table">
             <thead>
-              <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
+              <tr>
                 {columns.map((column) => {
                   const active = sort?.name === column.name;
                   // The author's label. Not translated: it is their data.
@@ -637,7 +637,6 @@ export function GeneratedModulePage() {
                     <th
                       key={column.name}
                       scope="col"
-                      className="px-3 py-2 font-medium"
                       aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                     >
                       {canSort ? (
@@ -674,11 +673,11 @@ export function GeneratedModulePage() {
                   );
                 })}
                 {states.length > 0 && (
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col">
                     {t('runtime_module.status', { defaultValue: 'Status' })}
                   </th>
                 )}
-                <th scope="col" className="w-20 px-3 py-2 text-right font-medium">
+                <th scope="col" className="w-20 text-right">
                   {t('common.actions', { defaultValue: 'Actions' })}
                 </th>
               </tr>
@@ -687,7 +686,7 @@ export function GeneratedModulePage() {
               {visible.map((record) => (
                 <tr
                   key={record.id}
-                  className="border-b border-border-light/60 last:border-0 hover:bg-surface-secondary/60"
+                  className="last:border-0"
                 >
                   {columns.map((column) => {
                     const text = cellText(column, record);
@@ -714,7 +713,7 @@ export function GeneratedModulePage() {
                         data-due={deadline ?? undefined}
                       >
                         <span className="inline-flex items-center gap-1.5">
-                          {deadline && <AlarmClock size={13} aria-hidden className="shrink-0" />}
+                          {deadline && <AlarmClock size={14} aria-hidden className="shrink-0" />}
                           {text}
                           {deadline && (
                             <span className="sr-only">
@@ -728,11 +727,11 @@ export function GeneratedModulePage() {
                     );
                   })}
                   {states.length > 0 && (
-                    <td className="px-3 py-2">
+                    <td>
                       <StatusBadge spec={spec} code={record[STATUS_KEY]} />
                     </td>
                   )}
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"

@@ -55,7 +55,7 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
     <Card padding="lg">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('methodology.funding.title', { defaultValue: 'Funding sources' })}
           </h3>
           <p className="mt-0.5 text-xs text-content-secondary">
@@ -95,25 +95,25 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
           />
         ) : (
           <div className="overflow-hidden rounded-lg border border-border-light">
-            <table className="min-w-full text-sm">
-              <thead className="bg-surface-secondary/40 text-xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table min-w-full">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">
+                  <th>
                     {t('methodology.funding.col_code', { defaultValue: 'Code' })}
                   </th>
-                  <th className="px-3 py-2 text-left font-medium">
+                  <th>
                     {t('methodology.funding.col_name', { defaultValue: 'Name' })}
                   </th>
-                  {!readOnly && <th className="w-24 px-3 py-2" />}
+                  {!readOnly && <th className="w-24" />}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {(fsQ.data ?? []).map((fs) => (
-                  <tr key={fs.id} className="hover:bg-surface-secondary/40">
-                    <td className="px-3 py-2 font-mono text-xs text-content-secondary">{fs.code}</td>
-                    <td className="px-3 py-2 text-content-primary">{fs.name}</td>
+                  <tr key={fs.id}>
+                    <td className="font-mono text-xs text-content-secondary">{fs.code}</td>
+                    <td>{fs.name}</td>
                     {!readOnly && (
-                      <td className="px-3 py-2">
+                      <td>
                         <div className="flex justify-end gap-1">
                           <button
                             type="button"
@@ -121,7 +121,7 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
                             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
                             aria-label={t('common.edit', { defaultValue: 'Edit' })}
                           >
-                            <Pencil size={13} />
+                            <Pencil size={14} />
                           </button>
                           <button
                             type="button"
@@ -129,7 +129,7 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
                             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                             aria-label={t('common.delete', { defaultValue: 'Delete' })}
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

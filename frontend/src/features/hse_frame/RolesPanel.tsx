@@ -69,7 +69,7 @@ function AddRole({ projectId, kind, write }: { projectId: string; kind: CatRole;
       )}
       <label className="flex flex-col gap-1 text-xs text-content-secondary">
         {t('hseFrame.role.status', { defaultValue: 'Status' })}
-        <select className="h-10 rounded-lg border border-border bg-surface-primary px-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
+        <select className="oe-select oe-input-lg" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
           <option value="appointed">{t('hseFrame.role_status.appointed', { defaultValue: 'Appointed' })}</option>
           <option value="proposed">{t('hseFrame.role_status.proposed', { defaultValue: 'Proposed' })}</option>
         </select>
@@ -124,7 +124,7 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
           <section key={kind.code} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid={`role-${kind.code}`} data-required={word} data-held={held}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h2 className="text-sm font-semibold text-content-primary">{labelOf(kind, i18n.language)}</h2>
+                <h2 className="oe-card-title">{labelOf(kind, i18n.language)}</h2>
                 <p className="text-xs text-content-secondary">{[kind.national_name, kind.legal_basis].filter(Boolean).join(' | ')}</p>
               </div>
               <div className="flex items-center gap-2">

@@ -93,7 +93,7 @@ export function DescribeScreen({
             data-testid="module-builder-description"
           />
           <p className="mt-1 flex items-start gap-1.5 px-1 text-xs text-content-tertiary">
-            <Sparkles size={13} className="mt-px shrink-0 text-oe-blue-text" />
+            <Sparkles size={14} className="mt-px shrink-0 text-oe-blue-text" />
             {t('module_builder.describe_note_v2', {
               defaultValue: 'The AI suggests the fields and checks. Nothing is created until you confirm it.',
             })}
@@ -130,7 +130,7 @@ export function DescribeScreen({
             ? t('module_builder.templates_heading', { defaultValue: 'Or start from a template' })
             : t('module_builder.templates_heading_manual', { defaultValue: 'Start from a template' })}
         </p>
-        <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {MODULE_TEMPLATES.map((template) => (
             <li key={template.id}>
               <button
@@ -140,7 +140,7 @@ export function DescribeScreen({
                 data-testid={`module-builder-template-${template.id}`}
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-                  <ModuleIcon name={template.icon} size={18} />
+                  <ModuleIcon name={template.icon} size={20} />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-content-primary">{say(t, template.name)}</span>
@@ -158,7 +158,7 @@ export function DescribeScreen({
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-xs font-medium text-content-secondary transition-colors hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           data-testid="module-builder-scratch"
         >
-          <PenLine size={13} />
+          <PenLine size={14} />
           {t('module_builder.start_scratch', { defaultValue: 'Start from scratch and build it by hand' })}
         </button>
       </div>
@@ -175,7 +175,7 @@ function DraftingState() {
         role="status"
         className="flex items-center justify-center gap-2 pt-2 text-sm text-content-secondary"
       >
-        <Sparkles size={15} className="animate-pulse text-oe-blue-text" />
+        <Sparkles size={16} className="animate-pulse text-oe-blue-text" />
         {t('module_builder.drafting', { defaultValue: 'Drafting your register, this takes up to 20 seconds' })}
       </p>
       <div className="rounded-2xl border border-border-light p-5">
@@ -192,7 +192,7 @@ function DraftingState() {
           ))}
         </div>
       </div>
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <Skeleton height={64} rounded="lg" />
         <Skeleton height={64} rounded="lg" />
       </div>

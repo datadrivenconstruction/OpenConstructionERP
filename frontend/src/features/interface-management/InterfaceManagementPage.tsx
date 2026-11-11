@@ -129,11 +129,11 @@ const ACTION_STATUS_VARIANT: Record<string, BadgeVariant> = {
 const humanize = (value: string): string => value.replace(/_/g, ' ');
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 const selectCls =
-  'h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg w-full';
 
 const todayIso = (): string => new Date().toISOString().slice(0, 10);
 const orNull = (s: string): string | null => (s.trim() ? s.trim() : null);
@@ -406,7 +406,7 @@ function InterfaceModal({
     : t('interface_management.new_interface', { defaultValue: 'New interface' });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div
         className="mx-4 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
         role="dialog"
@@ -414,20 +414,20 @@ function InterfaceModal({
         aria-label={heading}
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="text-lg font-semibold text-content-primary">{heading}</h2>
+          <h2 className="oe-section-title">{heading}</h2>
           <button
             onClick={onClose}
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="space-y-4 px-6 py-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label htmlFor="if-reference" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-reference" className="oe-label">
                 {t('interface_management.field_reference', { defaultValue: 'Reference' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -440,7 +440,8 @@ function InterfaceModal({
                   setTouched(true);
                 }}
                 placeholder={t('interface_management.reference_placeholder', { defaultValue: 'e.g. IF-014' })}
-                className={clsx(inputCls, refError && 'border-semantic-error focus:ring-semantic-error/30')}
+                className={inputCls}
+                aria-invalid={refError ? true : undefined}
                 autoFocus
               />
               {refError && (
@@ -450,7 +451,7 @@ function InterfaceModal({
               )}
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="if-title" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-title" className="oe-label">
                 {t('interface_management.field_title', { defaultValue: 'Title' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -465,7 +466,8 @@ function InterfaceModal({
                 placeholder={t('interface_management.title_placeholder', {
                   defaultValue: 'e.g. Duct penetration through core wall at Level 3',
                 })}
-                className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-semantic-error/30')}
+                className={inputCls}
+                aria-invalid={titleError ? true : undefined}
               />
               {titleError && (
                 <p className="mt-1 text-xs text-semantic-error">
@@ -477,7 +479,7 @@ function InterfaceModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label htmlFor="if-type" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-type" className="oe-label">
                 {t('interface_management.field_type', { defaultValue: 'Type' })}
               </label>
               <select
@@ -495,7 +497,7 @@ function InterfaceModal({
               </select>
             </div>
             <div>
-              <label htmlFor="if-status" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-status" className="oe-label">
                 {t('interface_management.field_status', { defaultValue: 'Status' })}
               </label>
               <select
@@ -512,7 +514,7 @@ function InterfaceModal({
               </select>
             </div>
             <div>
-              <label htmlFor="if-priority" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-priority" className="oe-label">
                 {t('interface_management.field_priority', { defaultValue: 'Priority' })}
               </label>
               <select
@@ -533,7 +535,7 @@ function InterfaceModal({
 
           {initial && form.status !== initial.status && (
             <div>
-              <label htmlFor="if-status-comment" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-status-comment" className="oe-label">
                 {t('interface_management.field_status_comment', { defaultValue: 'Comment on the status change' })}
               </label>
               <textarea
@@ -552,7 +554,7 @@ function InterfaceModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="if-owner" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-owner" className="oe-label">
                 {t('interface_management.field_owner_party', { defaultValue: 'Owner party' })}
               </label>
               <input
@@ -565,7 +567,7 @@ function InterfaceModal({
               />
             </div>
             <div>
-              <label htmlFor="if-accepter" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-accepter" className="oe-label">
                 {t('interface_management.field_accepter_party', { defaultValue: 'Accepter party' })}
               </label>
               <input
@@ -581,7 +583,7 @@ function InterfaceModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="if-wp-from" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-wp-from" className="oe-label">
                 {t('interface_management.field_work_package_from', { defaultValue: 'Work package (from)' })}
               </label>
               <input
@@ -593,7 +595,7 @@ function InterfaceModal({
               />
             </div>
             <div>
-              <label htmlFor="if-wp-to" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-wp-to" className="oe-label">
                 {t('interface_management.field_work_package_to', { defaultValue: 'Work package (to)' })}
               </label>
               <input
@@ -608,7 +610,7 @@ function InterfaceModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label htmlFor="if-disc-from" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-disc-from" className="oe-label">
                 {t('interface_management.field_discipline_from', { defaultValue: 'Discipline (from)' })}
               </label>
               <input
@@ -620,7 +622,7 @@ function InterfaceModal({
               />
             </div>
             <div>
-              <label htmlFor="if-disc-to" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-disc-to" className="oe-label">
                 {t('interface_management.field_discipline_to', { defaultValue: 'Discipline (to)' })}
               </label>
               <input
@@ -632,7 +634,7 @@ function InterfaceModal({
               />
             </div>
             <div>
-              <label htmlFor="if-need-by" className="mb-1.5 block text-sm font-medium text-content-primary">
+              <label htmlFor="if-need-by" className="oe-label">
                 {t('interface_management.field_need_by_date', { defaultValue: 'Need-by date' })}
               </label>
               <input
@@ -646,7 +648,7 @@ function InterfaceModal({
           </div>
 
           <div>
-            <label htmlFor="if-location" className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label htmlFor="if-location" className="oe-label">
               {t('interface_management.field_location', { defaultValue: 'Location' })}
             </label>
             <input
@@ -660,7 +662,7 @@ function InterfaceModal({
           </div>
 
           <div>
-            <label htmlFor="if-description" className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label htmlFor="if-description" className="oe-label">
               {t('interface_management.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -676,7 +678,7 @@ function InterfaceModal({
           </div>
 
           <div>
-            <label htmlFor="if-notes" className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label htmlFor="if-notes" className="oe-label">
               {t('interface_management.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -701,7 +703,7 @@ function InterfaceModal({
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="if-rfi" className="mb-1.5 block text-sm font-medium text-content-primary">
+                <label htmlFor="if-rfi" className="oe-label">
                   {t('interface_management.field_rfi', { defaultValue: 'Related RFI' })}
                 </label>
                 <select
@@ -724,7 +726,7 @@ function InterfaceModal({
                 )}
               </div>
               <div>
-                <label htmlFor="if-activity" className="mb-1.5 block text-sm font-medium text-content-primary">
+                <label htmlFor="if-activity" className="oe-label">
                   {t('interface_management.field_schedule_activity', { defaultValue: 'Schedule activity' })}
                 </label>
                 <select
@@ -865,7 +867,7 @@ function ActionsPanel({
                       dueOverdue ? 'text-semantic-error' : 'text-content-tertiary',
                     )}
                   >
-                    <Clock size={11} />
+                    <Clock size={12} />
                     <DateDisplay value={a.due_date} />
                   </span>
                 )}
@@ -882,7 +884,7 @@ function ActionsPanel({
                     aria-label={t('interface_management.cancel_action', { defaultValue: 'Cancel action' })}
                     className="shrink-0 text-content-tertiary hover:text-semantic-error transition-colors"
                   >
-                    <Ban size={13} />
+                    <Ban size={14} />
                   </button>
                 )}
                 {a.status !== 'open' && (
@@ -893,7 +895,7 @@ function ActionsPanel({
                     aria-label={t('interface_management.reopen_action', { defaultValue: 'Reopen action' })}
                     className="shrink-0 text-content-tertiary hover:text-oe-blue transition-colors"
                   >
-                    <RotateCcw size={13} />
+                    <RotateCcw size={14} />
                   </button>
                 )}
               </li>
@@ -1000,7 +1002,7 @@ const InterfaceRow = React.memo(function InterfaceRow({
         {/* Owner -> accepter */}
         <span className="hidden min-w-0 shrink items-center gap-1 text-xs text-content-tertiary lg:flex">
           <span className="truncate max-w-[9rem]">{iface.owner_party || notSet}</span>
-          <ArrowRight size={11} className="shrink-0" />
+          <ArrowRight size={12} className="shrink-0" />
           <span className="truncate max-w-[9rem]">{iface.accepter_party || notSet}</span>
         </span>
 
@@ -1107,7 +1109,7 @@ const InterfaceRow = React.memo(function InterfaceRow({
           {(iface.rfi_id || iface.schedule_activity_id) && (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="inline-flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-                <Link2 size={11} />
+                <Link2 size={12} />
                 {t('interface_management.section_links', { defaultValue: 'Linked references' })}
               </span>
               {iface.rfi_id && (
@@ -1116,7 +1118,7 @@ const InterfaceRow = React.memo(function InterfaceRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
                 >
-                  <HelpCircle size={11} />
+                  <HelpCircle size={12} />
                   {t('interface_management.view_rfi', { defaultValue: 'View RFI' })}
                   <ExternalLink size={10} aria-hidden="true" />
                 </Link>
@@ -1127,7 +1129,7 @@ const InterfaceRow = React.memo(function InterfaceRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
                 >
-                  <CalendarClock size={11} />
+                  <CalendarClock size={12} />
                   {t('interface_management.view_activity', { defaultValue: 'Open in schedule' })}
                   <ExternalLink size={10} aria-hidden="true" />
                 </Link>
@@ -1424,8 +1426,8 @@ export function InterfaceManagementPage() {
         {/* SIGNAL: work-package health band */}
         <section className="rounded-xl border border-border bg-surface-elevated shadow-sm p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-              <Network size={15} className="text-oe-blue" />
+            <h2 className="oe-card-title flex items-center gap-1.5">
+              <Network size={16} className="text-oe-blue" />
               {t('interface_management.health_title', { defaultValue: 'Work package health' })}
             </h2>
             {report && (

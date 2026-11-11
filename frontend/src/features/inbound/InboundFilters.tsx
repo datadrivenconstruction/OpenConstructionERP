@@ -89,9 +89,9 @@ export function filterInboundMessages(
 /* Native select / date control - matched to the Input height so the row lines
    up. The select keeps its native arrow (no appearance-none) for a11y. */
 const controlCls =
-  'h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary ' +
+  'oe-input' +
   'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'mb-1.5 block text-xs font-medium text-content-secondary';
+const labelCls = 'oe-label';
 
 export function InboundFilters({
   value,
@@ -131,7 +131,7 @@ export function InboundFilters({
           id="inbound-channel"
           value={value.channel}
           onChange={(e) => set('channel', e.target.value)}
-          className={`${controlCls} pr-8`}
+          className={`${controlCls} oe-select pr-8`}
         >
           <option value="">
             {t('inbound.filter_all_channels', { defaultValue: 'All channels' })}

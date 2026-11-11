@@ -285,7 +285,7 @@ export function RecordFormModal({
             className="border-t border-border-light pt-4"
             data-testid="runtime-module-comments"
           >
-            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-2 flex items-center gap-1.5">
               <MessageSquare size={14} className="text-content-tertiary" />
               {t('runtime_module.comments', { defaultValue: 'Comments' })}
             </h3>
@@ -321,7 +321,7 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
   if (field.type === 'link' && field.target) {
     return (
       <div>
-        <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-secondary">
+        <label htmlFor={id} className="oe-label">
           {field.label}
           {field.required && <span className="ml-0.5 text-semantic-error">*</span>}
         </label>
@@ -341,7 +341,7 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
 
   if (field.type === 'boolean') {
     return (
-      <label className="flex items-start gap-2.5" htmlFor={id}>
+      <label className="flex items-start gap-2" htmlFor={id}>
         <input
           id={id}
           type="checkbox"
@@ -362,7 +362,7 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
   if (field.type === 'select') {
     return (
       <div>
-        <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-secondary">
+        <label htmlFor={id} className="oe-label">
           {field.label}
           {field.required && <span className="ml-0.5 text-semantic-error">*</span>}
         </label>
@@ -370,11 +370,8 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
           id={id}
           value={text}
           onChange={(e) => onChange(e.target.value)}
-          className={clsx(
-            'w-full rounded-lg border bg-surface-primary px-3 py-2 text-sm text-content-primary',
-            'focus:outline-none focus:ring-2 focus:ring-oe-blue/40',
-            error ? 'border-semantic-error' : 'border-border-light',
-          )}
+          className="w-full oe-select"
+          aria-invalid={error ? true : undefined}
         >
           <option value="">{t('common.select', { defaultValue: 'Select…' })}</option>
           {field.options.map((option) => (
@@ -391,7 +388,7 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
   if (field.type === 'long_text') {
     return (
       <div>
-        <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-secondary">
+        <label htmlFor={id} className="oe-label">
           {field.label}
           {field.required && <span className="ml-0.5 text-semantic-error">*</span>}
         </label>
@@ -400,11 +397,8 @@ function FieldInput({ field, value, errors, onChange, projectId }: FieldInputPro
           value={text}
           rows={4}
           onChange={(e) => onChange(e.target.value)}
-          className={clsx(
-            'w-full rounded-lg border bg-surface-primary px-3 py-2 text-sm text-content-primary',
-            'focus:outline-none focus:ring-2 focus:ring-oe-blue/40',
-            error ? 'border-semantic-error' : 'border-border-light',
-          )}
+          className="w-full oe-textarea"
+          aria-invalid={error ? true : undefined}
         />
         <FieldFooter help={field.help_text} error={error} />
       </div>

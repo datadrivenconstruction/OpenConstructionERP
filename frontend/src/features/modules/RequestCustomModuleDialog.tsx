@@ -7,8 +7,8 @@
 // Design intent:
 //   • Full viewport modal — NOT a sidebar-width drawer. Renders via a
 //     fixed inset-0 backdrop so it lives above the entire app shell
-//     (sidebar + topbar + page content). z-[1000] keeps it above the
-//     z-30 sticky header and the z-50 page modals.
+//     (sidebar + topbar + page content). z-popover keeps it above the
+//     sticky header and the page modals.
 //   • Two large CTA cards, no inline form. The user picks an audience
 //     and is routed to a hosted contact form on our marketing site,
 //     where the actual lead-capture happens (richer fields, CRM
@@ -123,7 +123,7 @@ export function RequestCustomModuleDialog({ open, onClose }: Props) {
   const panel = (
     <div
       className={clsx(
-        'fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6 lg:p-10',
+        'fixed inset-0 z-popover flex items-center justify-center p-3 sm:p-6 lg:p-10',
         // Backdrop sits BEHIND the inner panel — use bg here so the
         // entire app dims uniformly regardless of viewport size.
         'bg-black/45 backdrop-blur-[3px]',
@@ -167,7 +167,7 @@ export function RequestCustomModuleDialog({ open, onClose }: Props) {
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="absolute top-3 right-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
           <div className="relative px-6 sm:px-10 py-8 sm:py-10 text-center">
             <div className="inline-flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center mb-4">
@@ -385,7 +385,7 @@ export function RequestCustomModuleDialog({ open, onClose }: Props) {
                 key={it.key}
                 className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-secondary/60 px-3 py-1 text-2xs text-content-secondary"
               >
-                <it.icon size={11} className="text-content-tertiary" />
+                <it.icon size={12} className="text-content-tertiary" />
                 {t(it.key, { defaultValue: it.fallback })}
               </span>
             ))}

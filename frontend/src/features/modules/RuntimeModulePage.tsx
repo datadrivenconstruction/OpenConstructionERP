@@ -46,7 +46,7 @@ export function RuntimeModulePage() {
     return (
       <Card className="m-6 p-6">
         <div className="flex items-start gap-3">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-warning" />
           <div>
             <p className="font-medium text-content-primary">
               {t('module_packages.host_missing_title', { defaultValue: 'This module page is not available' })}
@@ -143,7 +143,7 @@ function HostedFrame({ entry, locale }: { entry: RuntimeUiEntry; locale: string 
       {needsProject ? (
         <Card className="p-6">
           <div className="flex items-center gap-3 text-content-secondary">
-            <FolderOpen size={18} />
+            <FolderOpen size={20} />
             {t('module_packages.host_pick_project', { defaultValue: 'Select a project in the top bar to open this module.' })}
           </div>
         </Card>

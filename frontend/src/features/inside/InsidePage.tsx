@@ -79,8 +79,8 @@ function LockedTeaser() {
       <Card className="lg:col-span-3 overflow-hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={18} className="text-semantic-warning" />
-            <h2 className="text-lg font-semibold text-content-primary">
+            <Sparkles size={20} className="text-semantic-warning" />
+            <h2 className="oe-section-title">
               {t('inside.teaser_title', { defaultValue: 'What backers see first' })}
             </h2>
           </div>
@@ -90,7 +90,7 @@ function LockedTeaser() {
             </div>
             <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-surface-primary via-surface-primary/70 to-transparent pt-10">
               <div className="pb-2 flex items-center gap-2 text-xs font-medium text-content-secondary">
-                <Lock size={13} />
+                <Lock size={14} />
                 {t('inside.teaser_locked_hint', {
                   defaultValue: 'Enter a supporter code to unlock the full panel',
                 })}
@@ -104,8 +104,8 @@ function LockedTeaser() {
       <Card className="lg:col-span-2">
         <div className="p-6 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-2">
-            <KeyRound size={18} className="text-oe-blue" />
-            <h2 className="text-base font-semibold text-content-primary">
+            <KeyRound size={20} className="text-oe-blue" />
+            <h2 className="oe-card-title">
               {t('inside.unlock_title', { defaultValue: 'Enter supporter code' })}
             </h2>
           </div>
@@ -153,12 +153,12 @@ function LockedTeaser() {
             </p>
             <div className="flex flex-wrap gap-2">
               <a href={PAYPAL_DONATE_URL} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="sm" icon={<Heart size={13} />}>
+                <Button variant="secondary" size="sm" icon={<Heart size={14} />}>
                   {t('inside.donate_paypal', { defaultValue: 'Donate with PayPal' })}
                 </Button>
               </a>
               <a href={GITHUB_SPONSORS_URL} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="sm" icon={<Github size={13} />}>
+                <Button variant="secondary" size="sm" icon={<Github size={14} />}>
                   {t('inside.donate_github', { defaultValue: 'Sponsor on GitHub' })}
                 </Button>
               </a>
@@ -183,7 +183,7 @@ function LockedTeaser() {
 function TeaserPreviewList() {
   const { t } = useTranslation();
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {[0, 1, 2].map((i) => (
         <div key={i} className="rounded-lg border border-border-light px-3.5 py-2.5">
           <div className="flex items-center gap-2">
@@ -215,14 +215,14 @@ function UnlockedPanel() {
     <div className="space-y-5">
       <Card className="border-semantic-success/30 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
         <div className="p-4 flex items-center gap-3">
-          <ShieldCheck size={18} className="shrink-0 text-semantic-success" />
+          <ShieldCheck size={20} className="shrink-0 text-semantic-success" />
           <p className="text-xs text-content-secondary leading-relaxed flex-1">
             {t('inside.unlocked_banner', {
               defaultValue:
                 'Inside track unlocked on this device. Thank you for backing the project.',
             })}
           </p>
-          <Button variant="ghost" size="sm" onClick={lock} icon={<Lock size={13} />}>
+          <Button variant="ghost" size="sm" onClick={lock} icon={<Lock size={14} />}>
             {t('inside.relock', { defaultValue: 'Lock again' })}
           </Button>
         </div>
@@ -234,7 +234,7 @@ function UnlockedPanel() {
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
               <Unlock size={17} className="text-semantic-success" />
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('inside.shipped_title', { defaultValue: 'Just shipped' })}
               </h2>
               <Badge variant="success" size="sm">
@@ -270,7 +270,7 @@ function UnlockedPanel() {
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
               <Rocket size={17} className="text-oe-blue" />
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('inside.next_title', { defaultValue: 'Coming next' })}
               </h2>
             </div>
@@ -285,7 +285,7 @@ function UnlockedPanel() {
                   key={item.id}
                   className="flex items-start gap-2 text-xs text-content-secondary"
                 >
-                  <ListChecks size={13} className="mt-0.5 shrink-0 text-oe-blue" />
+                  <ListChecks size={14} className="mt-0.5 shrink-0 text-oe-blue" />
                   <span>{t(item.titleKey, { defaultValue: item.titleDefault })}</span>
                 </li>
               ))}

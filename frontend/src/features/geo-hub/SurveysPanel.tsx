@@ -202,7 +202,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
       aria-label={t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+        <h2 className="oe-overline">
           {t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
         </h2>
         <button
@@ -217,8 +217,8 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 text-xs">
         {/* Upload card */}
-        <section data-testid="geo-surveys-upload" className="space-y-2 rounded-lg border border-black/10 p-2.5 dark:border-white/10">
-          <h3 className="font-semibold text-content-primary">
+        <section data-testid="geo-surveys-upload" className="space-y-2 rounded-lg border border-black/10 p-3 dark:border-white/10">
+          <h3 className="oe-card-title">
             {t('geo_hub.surveys.upload.title', { defaultValue: 'Add a survey' })}
           </h3>
           <label
@@ -233,7 +233,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
               }
             }}
           >
-            <UploadCloud size={18} />
+            <UploadCloud size={20} />
             <span>{file ? file.name : t('geo_hub.surveys.upload.drop', { defaultValue: 'Drop a GeoTIFF here or click to choose' })}</span>
             <span className="text-2xs text-content-tertiary">
               {t('geo_hub.surveys.upload.file_hint', { defaultValue: 'GeoTIFF (.tif, .tiff)' })}
@@ -323,7 +323,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
             data-testid="geo-surveys-submit"
             className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           >
-            {addMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
+            {addMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
             {addMutation.isPending
               ? t('geo_hub.surveys.upload.uploading', { defaultValue: 'Uploading...' })
               : t('geo_hub.surveys.upload.submit', { defaultValue: 'Add survey' })}
@@ -364,7 +364,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
         {/* Survey list */}
         {surveysQuery.isLoading && (
           <div className="flex items-center gap-2 text-content-tertiary">
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
             {t('geo_hub.surveys.loading', { defaultValue: 'Loading surveys...' })}
           </div>
         )}
@@ -380,7 +380,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
         )}
         {surveys.length > 0 && (
           <section className="space-y-1">
-            <h3 className="font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('geo_hub.surveys.list.title', { defaultValue: 'Surveys by date' })}
             </h3>
             <ul className="space-y-1">
@@ -442,7 +442,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
         {/* Compare two dates */}
         {withImage.length >= 2 && (
           <section data-testid="geo-surveys-compare" className="space-y-1.5">
-            <h3 className="font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('geo_hub.surveys.compare.title', { defaultValue: 'Compare two dates' })}
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -528,7 +528,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
 
   return (
     <section data-testid="geo-surveys-progress" className="space-y-1.5">
-      <h3 className="font-semibold text-content-primary">{title}</h3>
+      <h3 className="oe-card-title">{title}</h3>
       <p className="text-2xs text-content-tertiary">
         {t('geo_hub.surveys.progress.hint', {
           defaultValue: 'Enter how far each activity really is on the survey date. The variance compares it with the schedule.',
@@ -548,25 +548,25 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
         </p>
       )}
       {rows && rows.length > 0 && (
-        <table className="w-full border-collapse text-left">
+        <table className="oe-table oe-table-compact">
           <thead>
-            <tr className="text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="py-1 pr-1 font-medium">{t('geo_hub.surveys.progress.col_name', { defaultValue: 'Activity' })}</th>
-              <th className="px-1 text-right font-medium">{t('geo_hub.surveys.progress.col_planned', { defaultValue: 'Planned %' })}</th>
-              <th className="px-1 text-right font-medium">{t('geo_hub.surveys.progress.col_observed', { defaultValue: 'Observed %' })}</th>
-              <th className="pl-1 font-medium">{t('geo_hub.surveys.progress.col_variance', { defaultValue: 'Variance' })}</th>
+            <tr>
+              <th>{t('geo_hub.surveys.progress.col_name', { defaultValue: 'Activity' })}</th>
+              <th className="text-right">{t('geo_hub.surveys.progress.col_planned', { defaultValue: 'Planned %' })}</th>
+              <th className="text-right">{t('geo_hub.surveys.progress.col_observed', { defaultValue: 'Observed %' })}</th>
+              <th>{t('geo_hub.surveys.progress.col_variance', { defaultValue: 'Variance' })}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => {
               const badge = varianceBadge(row.status);
               return (
-                <tr key={row.activity_id} data-testid="geo-survey-progress-row" className="border-t border-black/5 dark:border-white/10">
-                  <td className="max-w-[9rem] truncate py-1 pr-1" title={`${row.code} ${row.name}`}>
+                <tr key={row.activity_id} data-testid="geo-survey-progress-row" className="border-black/5 dark:border-white/10">
+                  <td className="max-w-[9rem] truncate" title={`${row.code} ${row.name}`}>
                     <span className="text-content-tertiary">{row.code}</span> {row.name}
                   </td>
-                  <td className="px-1 text-right tabular-nums">{fmtFixed(row.planned_pct_on_date, 0)}</td>
-                  <td className="px-1 text-right">
+                  <td className="text-right tabular-nums">{fmtFixed(row.planned_pct_on_date, 0)}</td>
+                  <td className="text-right">
                     <input
                       type="text"
                       inputMode="decimal"
@@ -584,7 +584,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
                       ].join(' ')}
                     />
                   </td>
-                  <td className="pl-1">
+                  <td>
                     <Badge variant={badge.variant} size="sm">
                       {formatVariance(row.variance_pct)} · {t(badge.labelKey, { defaultValue: badge.labelDefault })}
                     </Badge>

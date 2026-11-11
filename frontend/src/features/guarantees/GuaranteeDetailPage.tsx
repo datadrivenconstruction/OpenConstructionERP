@@ -274,7 +274,7 @@ export function GuaranteeDetailPage() {
 
             {g.guarantee_type === 'advance_payment' && (
               <Card padding="md" data-testid="guarantees-advance">
-                <h3 className="text-sm font-semibold text-content-primary">{t('guarantees.advance_title', { defaultValue: 'Advance recovery' })}</h3>
+                <h3 className="oe-card-title">{t('guarantees.advance_title', { defaultValue: 'Advance recovery' })}</h3>
                 <dl className="mt-3 grid grid-cols-3 gap-4">
                   <Fact label={t('guarantees.advance_original', { defaultValue: 'Advance paid' })}><Money value={g.advance_amount} currency={g.currency} /></Fact>
                   <Fact label={t('guarantees.advance_recovered', { defaultValue: 'Recovered so far' })}><Money value={g.advance_recovered} currency={g.currency} /></Fact>
@@ -295,7 +295,7 @@ export function GuaranteeDetailPage() {
             )}
 
             <Card padding="md">
-              <h3 className="text-sm font-semibold text-content-primary">{t('guarantees.documents_title', { defaultValue: 'Documents' })}</h3>
+              <h3 className="oe-card-title">{t('guarantees.documents_title', { defaultValue: 'Documents' })}</h3>
               {g.documents.length === 0 ? (
                 <p className="mt-2 text-sm text-content-tertiary">{t('guarantees.documents_empty', { defaultValue: 'No documents linked' })}</p>
               ) : (
@@ -335,7 +335,7 @@ export function GuaranteeDetailPage() {
 
             {g.commission_rate_pct && (
               <Card padding="md">
-                <h3 className="text-sm font-semibold text-content-primary">{t('guarantees.commission_title', { defaultValue: 'Bank commission' })}</h3>
+                <h3 className="oe-card-title">{t('guarantees.commission_title', { defaultValue: 'Bank commission' })}</h3>
                 <p className="mt-1 text-xs text-content-tertiary">
                   {t('guarantees.commission_hint', { defaultValue: 'Posts the commission accrued up to the period end as a finance cost.' })}
                 </p>
@@ -351,7 +351,7 @@ export function GuaranteeDetailPage() {
             )}
 
             <Card padding="md">
-              <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('guarantees.timeline_title', { defaultValue: 'Timeline' })}</h3>
+              <h3 className="oe-card-title mb-3">{t('guarantees.timeline_title', { defaultValue: 'Timeline' })}</h3>
               <Timeline events={g.events} currency={g.currency} />
             </Card>
           </div>

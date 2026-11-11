@@ -158,7 +158,7 @@ function CapturedRow({
           <Button
             variant="secondary"
             size="sm"
-            icon={<ListTodo size={13} />}
+            icon={<ListTodo size={14} />}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

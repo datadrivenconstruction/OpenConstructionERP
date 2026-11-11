@@ -32,7 +32,7 @@ interface ActionRegisterPanelProps {
 }
 
 const inputCls =
-  'h-8 rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select';
 
 function statusLabel(t: ReturnType<typeof useTranslation>['t'], status: ActionStatus): string {
   const fallback: Record<ActionStatus, string> = {
@@ -95,14 +95,14 @@ function ActionRow({
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {action.brought_forward && (
             <Badge variant="warning" size="sm">
-              <ArrowUpRight size={11} className="mr-0.5" />
+              <ArrowUpRight size={12} className="mr-0.5" />
               {t('meetings.brought_forward', { defaultValue: 'Brought forward' })}
               {action.origin_meeting_number ? ` · ${action.origin_meeting_number}` : ''}
             </Badge>
           )}
           {action.overdue && (
             <Badge variant="error" size="sm">
-              <AlertTriangle size={11} className="mr-0.5" />
+              <AlertTriangle size={12} className="mr-0.5" />
               {t('meetings.overdue', { defaultValue: 'Overdue' })}
             </Badge>
           )}
@@ -153,7 +153,7 @@ function ActionRow({
         aria-label={t('common.delete', { defaultValue: 'Delete' })}
         className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
       >
-        <Trash2 size={13} />
+        <Trash2 size={14} />
       </button>
     </div>
   );

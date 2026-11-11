@@ -446,7 +446,7 @@ export function MatchProgressCard({
       {/* Header — title + elapsed */}
       <header className="flex items-start justify-between gap-3 mb-5">
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-semibold tracking-tight text-content-primary inline-flex items-center gap-2">
+          <h3 className="oe-section-title inline-flex items-center gap-2">
             {isError ? (
               <>
                 <TriangleAlert className="w-5 h-5 text-semantic-error" />

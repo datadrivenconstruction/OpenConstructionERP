@@ -34,7 +34,7 @@ import { STATUS_VARIANT } from './LeasingPage';
 type Tab = 'overview' | 'schedule' | 'documents' | 'events';
 
 const inputCls =
-  'rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-select';
 
 export function LeaseDetailPage() {
   const { t } = useTranslation();
@@ -241,28 +241,28 @@ export function LeaseDetailPage() {
               description={t('leasing.schedule_empty_desc', { defaultValue: 'The schedule is built when the lease is activated.' })}
             />
           ) : (
-            <table className="w-full text-sm">
-              <thead className="text-xs text-content-tertiary">
-                <tr className="border-b border-border-light">
-                  <th className="px-3 py-2 text-start">#</th>
-                  <th className="px-3 py-2 text-start">{t('leasing.col_period', { defaultValue: 'Period' })}</th>
-                  <th className="px-3 py-2 text-start">{t('leasing.col_due_date', { defaultValue: 'Due' })}</th>
-                  <th className="px-3 py-2 text-end">{t('leasing.col_amount', { defaultValue: 'Rent' })}</th>
-                  <th className="px-3 py-2 text-end">{t('leasing.col_tax', { defaultValue: 'Tax' })}</th>
-                  <th className="px-3 py-2 text-start">{t('leasing.col_invoice', { defaultValue: 'Invoice' })}</th>
+            <table className="oe-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{t('leasing.col_period', { defaultValue: 'Period' })}</th>
+                  <th>{t('leasing.col_due_date', { defaultValue: 'Due' })}</th>
+                  <th className="text-end">{t('leasing.col_amount', { defaultValue: 'Rent' })}</th>
+                  <th className="text-end">{t('leasing.col_tax', { defaultValue: 'Tax' })}</th>
+                  <th>{t('leasing.col_invoice', { defaultValue: 'Invoice' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {(scheduleQ.data?.items ?? []).map((x) => (
-                  <tr key={x.id} className="border-b border-border-light last:border-0">
-                    <td className="px-3 py-2 tabular-nums">{x.seq}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                  <tr key={x.id} className="last:border-0">
+                    <td className="tabular-nums">{x.seq}</td>
+                    <td className="whitespace-nowrap">
                       {fmtDate(x.period_start)} – {fmtDate(x.period_end)}
                     </td>
-                    <td className="px-3 py-2">{fmtDate(x.due_date)}</td>
-                    <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(x.amount, lease.currency)}</td>
-                    <td className="px-3 py-2 text-end tabular-nums">{fmtCurrency(x.tax_amount, lease.currency)}</td>
-                    <td className="px-3 py-2">
+                    <td>{fmtDate(x.due_date)}</td>
+                    <td className="text-end tabular-nums">{fmtCurrency(x.amount, lease.currency)}</td>
+                    <td className="text-end tabular-nums">{fmtCurrency(x.tax_amount, lease.currency)}</td>
+                    <td>
                       {x.invoice_id ? (
                         <Badge variant="success" size="sm">{t('leasing.invoiced', { defaultValue: 'Invoiced' })}</Badge>
                       ) : (
@@ -274,8 +274,8 @@ export function LeaseDetailPage() {
               </tbody>
               <tfoot>
                 <tr className="font-semibold">
-                  <td className="px-3 py-2" colSpan={3}>{t('leasing.total', { defaultValue: 'Total' })}</td>
-                  <td className="px-3 py-2 text-end tabular-nums" colSpan={2}>{fmtCurrency(scheduleQ.data?.total ?? '0', lease.currency)}</td>
+                  <td colSpan={3}>{t('leasing.total', { defaultValue: 'Total' })}</td>
+                  <td className="text-end tabular-nums" colSpan={2}>{fmtCurrency(scheduleQ.data?.total ?? '0', lease.currency)}</td>
                   <td />
                 </tr>
               </tfoot>

@@ -161,9 +161,9 @@ export function OverlayPanel({
         aria-expanded={false}
         aria-label={t('geo.overlays.expand', { defaultValue: 'Show overlays' })}
       >
-        <Layers size={13} strokeWidth={2} className="text-sky-300" />
+        <Layers size={14} strokeWidth={2} className="text-sky-300" />
         <span className="tabular-nums">{overlays.length}</span>
-        <ChevronLeft size={13} strokeWidth={2.25} className="text-white/70" />
+        <ChevronLeft size={14} strokeWidth={2.25} className="text-white/70" />
       </button>
     );
   }
@@ -183,7 +183,7 @@ export function OverlayPanel({
     >
       <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <h2 className="oe-overline">
             {t('geo.overlays.title', { defaultValue: 'Overlays' })}
           </h2>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -255,7 +255,7 @@ export function OverlayPanel({
               onClick={() => setShowUpload(true)}
               className="inline-flex items-center gap-1 rounded-md border border-oe-blue/50 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
             >
-              <Plus size={11} aria-hidden />
+              <Plus size={12} aria-hidden />
               {t('geo.overlays.empty_cta', {
                 defaultValue: 'Add your first overlay',
               })}
@@ -315,7 +315,7 @@ export function OverlayPanel({
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                       ].join(' ')}
                     >
-                      {o.visible ? <Eye size={13} aria-hidden /> : <EyeOff size={13} aria-hidden />}
+                      {o.visible ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
                     </button>
                     <button
                       type="button"
@@ -415,7 +415,7 @@ export function OverlayPanel({
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                         ].join(' ')}
                       >
-                        <Move size={11} />
+                        <Move size={12} />
                         {t('geo.overlays.edit_corners', {
                           defaultValue: 'Edit corners',
                         })}
@@ -437,7 +437,7 @@ export function OverlayPanel({
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                         ].join(' ')}
                       >
-                        <Crop size={11} />
+                        <Crop size={12} />
                         {t('geo.overlays.crop', { defaultValue: 'Crop' })}
                       </button>
                       <button
@@ -464,7 +464,7 @@ export function OverlayPanel({
                         data-testid="geo-overlay-delete"
                         className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-1.5 py-0.5 text-2xs font-medium text-semantic-error hover:bg-semantic-error-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                       >
-                        <Trash2 size={11} />
+                        <Trash2 size={12} />
                         {t('common.delete', { defaultValue: 'Delete' })}
                       </button>
                     </div>
@@ -622,7 +622,7 @@ function OverlayUploadModal({
 
         {busy && (
           <div className="mt-3 flex items-center gap-2 text-xs text-content-secondary">
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
             <span>
               {t('geo.overlays.uploading', { defaultValue: 'Uploading…' })}
             </span>
@@ -630,9 +630,9 @@ function OverlayUploadModal({
         )}
         <div className="mt-3 flex items-center gap-2 text-2xs text-content-tertiary">
           {tab === 'pdf' ? (
-            <Upload size={11} aria-hidden />
+            <Upload size={12} aria-hidden />
           ) : (
-            <ImageIcon size={11} aria-hidden />
+            <ImageIcon size={12} aria-hidden />
           )}
           <span>
             {t('geo.overlays.max_hint', {

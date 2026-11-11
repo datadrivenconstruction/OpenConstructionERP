@@ -193,14 +193,14 @@ export function ElementCostMatchPanel({
   return (
     <div className={clsx('flex flex-col h-full', className)}>
       <div className="px-3 py-2 border-b border-border-light bg-surface-secondary">
-        <label className="block text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+        <label className="oe-overline block mb-1">
           {t('match.target_boq', { defaultValue: 'Target BOQ' })}
         </label>
         <select
           value={selectedBOQId ?? ''}
           onChange={(e) => setUserSelectedBOQId(e.target.value || null)}
           disabled={boqs.length === 0}
-          className="w-full px-2 py-1 text-xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="w-full oe-select oe-input-sm"
           data-testid="match-target-boq-select"
         >
           {boqs.length === 0 ? (

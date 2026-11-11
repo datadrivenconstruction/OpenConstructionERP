@@ -235,7 +235,7 @@ export function ProposalScreen({
         <section className="space-y-4" data-testid="module-builder-suggestions">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('module_builder.proposals_heading', { defaultValue: 'Make it more useful' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -251,7 +251,7 @@ export function ProposalScreen({
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-oe-blue/40 px-2.5 py-1.5 text-xs font-semibold text-oe-blue-text transition-colors hover:bg-oe-blue/10"
                 data-testid="module-builder-accept-all"
               >
-                <CheckCheck size={13} />
+                <CheckCheck size={14} />
                 {t('module_builder.accept_all', { defaultValue: 'Accept all suggested' })}
               </button>
             )}
@@ -315,7 +315,7 @@ export function ProposalScreen({
         hint={t('module_builder.fine_tune_hint', {
           defaultValue: 'Change the fields, the checks and the names. Optional.',
         })}
-        icon={<SlidersHorizontal size={15} />}
+        icon={<SlidersHorizontal size={16} />}
         testId="module-builder-fine-tune"
       >
         <FineTune
@@ -354,7 +354,7 @@ function SuggestionGroup({
   return (
     <div>
       <SectionHeading icon={icon}>{title}</SectionHeading>
-      <ul className="grid gap-2.5 sm:grid-cols-2">
+      <ul className="grid gap-2 sm:grid-cols-2">
         {items.map((suggestion) => {
           const on = isApplied(spec, suggestion);
           // A function the installed module already has stays on: switching it
