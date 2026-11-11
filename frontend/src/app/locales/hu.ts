@@ -34207,6 +34207,8 @@ const resource = {
     "header.subscribe.button_aria": "Kérje a kiadási jegyzeteket e-mailben - megnyitja a hírlevél-űrlapot az openconstructionerp.com oldalon",
     "header.subscribe.button_title": "Kiadási jegyzetek e-mailben (megnyitja: openconstructionerp.com)",
     "header.ask_ai": "Kérdezze az AI-t",
+    "header.search_palette": "Modul vagy parancs keresése…",
+    "header.search_projects": "Projektek keresése…",
     "homeportal.back_to_app": "Vissza az OpenConstructionERP-hez",
     "homeportal.co_amount": "Jóváhagyott összeg",
     "homeportal.co_approved_at": "Jóváhagyva",

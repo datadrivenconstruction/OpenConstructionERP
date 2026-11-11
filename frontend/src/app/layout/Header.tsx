@@ -578,7 +578,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           )}
         >
           <Search size={14} strokeWidth={1.75} className="shrink-0" />
-          <span className="truncate">{t('common.search')}</span>
+          <span className="truncate">{t('header.search_palette', { defaultValue: 'Find a module or command…' })}</span>
           <kbd className="ml-auto inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-2xs font-medium text-content-quaternary">
             ⌘K
           </kbd>
@@ -587,7 +587,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Mobile search icon — collapses the search bar on tiny screens. */}
         <button
           onClick={openCommandPalette}
-          aria-label={t('common.search', { defaultValue: 'Search' })}
+          aria-label={t('header.search_palette', { defaultValue: 'Find a module or command…' })}
           className={clsx(
             'flex sm:hidden',
             'h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary transition-colors',
@@ -2013,7 +2013,7 @@ function ProjectSwitcher() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('common.search', { defaultValue: 'Search...' })}
+                placeholder={t('header.search_projects', { defaultValue: 'Search projects…' })}
                 className="oe-input ps-8"
               />
             </div>

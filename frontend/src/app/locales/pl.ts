@@ -35218,6 +35218,8 @@ const resource = {
     "header.subscribe.button_aria": "Otrzymuj notatki wydania pocztą e-mail - otwiera formularz biuletynu na openconstructionerp.com",
     "header.subscribe.button_title": "Otrzymuj notatki wydania pocztą e-mail (otwiera openconstructionerp.com)",
     "header.ask_ai": "Zapytaj AI",
+    "header.search_palette": "Znajdź moduł lub polecenie…",
+    "header.search_projects": "Szukaj projektów…",
     "homeportal.back_to_app": "Powrót do OpenConstructionERP",
     "homeportal.co_amount": "Zatwierdzona kwota",
     "homeportal.co_approved_at": "Zatwierdzone",

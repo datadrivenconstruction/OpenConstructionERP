@@ -33477,6 +33477,8 @@ const resource = {
     "header.subscribe.button_aria": "دریافت یادداشت‌های نسخه از طریق ایمیل - فرم خبرنامه را در openconstructionerp.com باز می‌کند",
     "header.subscribe.button_title": "دریافت یادداشت‌های نسخه از طریق ایمیل (openconstructionerp.com را باز می‌کند)",
     "header.ask_ai": "پرسش از AI",
+    "header.search_palette": "یافتن ماژول یا دستور…",
+    "header.search_projects": "جستجوی پروژه‌ها…",
     "homeportal.back_to_app": "بازگشت به OpenConstructionERP",
     "homeportal.co_amount": "مبلغ تأییدشده",
     "homeportal.co_approved_at": "تأییدشده",

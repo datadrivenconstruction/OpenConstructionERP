@@ -34209,6 +34209,8 @@ const resource = {
     "header.subscribe.button_aria": "通过邮件获取发布说明 - 在 openconstructionerp.com 上打开新闻通讯表单",
     "header.subscribe.button_title": "通过邮件获取发布说明（打开 openconstructionerp.com）",
     "header.ask_ai": "询问 AI",
+    "header.search_palette": "查找模块或命令…",
+    "header.search_projects": "搜索项目…",
     "homeportal.back_to_app": "返回 OpenConstructionERP",
     "homeportal.co_amount": "批准金额",
     "homeportal.co_approved_at": "已批准",

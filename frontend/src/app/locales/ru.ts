@@ -34794,6 +34794,8 @@ const resource = {
     "header.subscribe.button_aria": "Получайте заметки о версии по электронной почте - открывает форму подписки на openconstructionerp.com",
     "header.subscribe.button_title": "Получайте заметки о версии по электронной почте (открывает openconstructionerp.com)",
     "header.ask_ai": "Спросить AI",
+    "header.search_palette": "Найти модуль или команду…",
+    "header.search_projects": "Поиск по проектам…",
     "homeportal.back_to_app": "Вернуться в OpenConstructionERP",
     "homeportal.co_amount": "Утвержденная сумма",
     "homeportal.co_approved_at": "Одобрено",

@@ -34784,6 +34784,8 @@ const resource = {
     "header.subscribe.button_aria": "Získejte poznámky k verzi e-mailem - otevře formulář zpravodaje na openconstructionerp.com",
     "header.subscribe.button_title": "Získejte poznámky k verzi e-mailem (otevře openconstructionerp.com)",
     "header.ask_ai": "Zeptat se AI",
+    "header.search_palette": "Najít modul nebo příkaz…",
+    "header.search_projects": "Hledat projekty…",
     "homeportal.back_to_app": "Zpět na OpenConstructionERP",
     "homeportal.co_amount": "Schválená výše",
     "homeportal.co_approved_at": "Schváleno",

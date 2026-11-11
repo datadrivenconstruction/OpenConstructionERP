@@ -33762,6 +33762,8 @@ const resource = {
     "header.subscribe.button_aria": "Имэйлээр гаралтын тэмдэглэлүүдийг авах - openconstructionerp.com дээрх мэдээллийн хүснэгтийн маягтыг нээх",
     "header.subscribe.button_title": "Имэйлээр гаралтын тэмдэглэлүүдийг авах (openconstructionerp.com нээнэ)",
     "header.ask_ai": "AI-д асуух",
+    "header.search_palette": "Модуль эсвэл тушаал хайх…",
+    "header.search_projects": "Төслүүдээс хайх…",
     "homeportal.back_to_app": "OpenConstructionERP руу буцах",
     "homeportal.co_amount": "Баталсан дүн",
     "homeportal.co_approved_at": "Баталсан",

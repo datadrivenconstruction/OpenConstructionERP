@@ -34225,6 +34225,8 @@ const resource = {
     "header.subscribe.button_aria": "Nhận ghi chú phát hành qua email - mở biểu mẫu bản tin trên openconstructionerp.com",
     "header.subscribe.button_title": "Nhận ghi chú phát hành qua email (mở openconstructionerp.com)",
     "header.ask_ai": "Hỏi AI",
+    "header.search_palette": "Tìm mô-đun hoặc lệnh…",
+    "header.search_projects": "Tìm dự án…",
     "homeportal.back_to_app": "Quay lại OpenConstructionERP",
     "homeportal.co_amount": "Số tiền được phê duyệt",
     "homeportal.co_approved_at": "Được phê duyệt",

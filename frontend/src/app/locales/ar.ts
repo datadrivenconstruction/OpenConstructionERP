@@ -35315,6 +35315,8 @@ const resource = {
     "header.subscribe.button_aria": "احصل على ملاحظات الإصدار عبر البريد الإلكتروني - يفتح نموذج الرسالة الإخبارية على openconstructionerp.com",
     "header.subscribe.button_title": "احصل على ملاحظات الإصدار عبر البريد الإلكتروني (يفتح openconstructionerp.com)",
     "header.ask_ai": "اسأل AI",
+    "header.search_palette": "ابحث عن وحدة أو أمر…",
+    "header.search_projects": "ابحث في المشاريع…",
     "homeportal.back_to_app": "العودة إلى OpenConstructionERP",
     "homeportal.co_amount": "المبلغ المعتمد",
     "homeportal.co_approved_at": "معتمد",

@@ -834,6 +834,8 @@ const resource = {
     "learn.hive.mark_undone": "Not done yet",
     "learn.hive.local_note": "Progress is kept in this browser only.",
     "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
+    "header.search_palette": "Find a module or command…",
+    "header.search_projects": "Search projects…",
   }
 } as { translation: Record<string, string> };
 

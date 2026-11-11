@@ -34678,6 +34678,8 @@ const resource = {
     "header.subscribe.button_aria": "Ricevi le note sulla versione per email - apre il modulo newsletter su openconstructionerp.com",
     "header.subscribe.button_title": "Ricevi le note sulla versione per email (apre openconstructionerp.com)",
     "header.ask_ai": "Chiedi all'IA",
+    "header.search_palette": "Trova un modulo o un comando…",
+    "header.search_projects": "Cerca progetti…",
     "homeportal.back_to_app": "Torna a OpenConstructionERP",
     "homeportal.co_amount": "Importo approvato",
     "homeportal.co_approved_at": "Approvato",

@@ -33701,6 +33701,8 @@ const resource = {
     "header.subscribe.button_aria": "קבלו הערות שחרור באימייל - פותח את טופס הניוזלטר ב-openconstructionerp.com",
     "header.subscribe.button_title": "קבלו הערות שחרור באימייל (פותח openconstructionerp.com)",
     "header.ask_ai": "שאל את AI",
+    "header.search_palette": "מצא מודול או פקודה…",
+    "header.search_projects": "חיפוש פרויקטים…",
     "homeportal.back_to_app": "חזרה ל-OpenConstructionERP",
     "homeportal.co_amount": "סכום מאושר",
     "homeportal.co_approved_at": "אושר",

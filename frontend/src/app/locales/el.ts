@@ -33418,6 +33418,8 @@ const resource = {
     "header.subscribe.button_aria": "Λάβετε σημειώσεις έκδοσης με email - ανοίγει τη φόρμα newsletter στο openconstructionerp.com",
     "header.subscribe.button_title": "Λάβετε σημειώσεις έκδοσης με email (ανοίγει το openconstructionerp.com)",
     "header.ask_ai": "Ρωτήστε το AI",
+    "header.search_palette": "Βρείτε μια ενότητα ή εντολή…",
+    "header.search_projects": "Αναζήτηση έργων…",
     "homeportal.back_to_app": "Επιστροφή στο OpenConstructionERP",
     "homeportal.co_amount": "Εγκεκριμένο ποσό",
     "homeportal.co_approved_at": "Εγκρίθηκε",

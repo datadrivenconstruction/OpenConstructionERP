@@ -34522,6 +34522,8 @@ const resource = {
     "header.subscribe.button_aria": "Chiqarilish yangiliklarini email orqali oling - openconstructionerp.com dagi bulleten formasini ochadi",
     "header.subscribe.button_title": "Chiqarilish yangiliklarini email orqali oling (openconstructionerp.com ni ochadi)",
     "header.ask_ai": "AI ga soʻrash",
+    "header.search_palette": "Modul yoki buyruqni topish…",
+    "header.search_projects": "Loyihalarni qidirish…",
     "homeportal.back_to_app": "OpenConstructionERP ga qaytish",
     "homeportal.co_amount": "Tasdiqlangan summa",
     "homeportal.co_approved_at": "Tasdiqlangan",

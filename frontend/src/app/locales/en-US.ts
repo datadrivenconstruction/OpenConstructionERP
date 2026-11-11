@@ -1686,6 +1686,8 @@ const resource = {
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
     "site_sensors.import.bad_time": "Time not recognized",
+    "header.search_palette": "Find a module or command…",
+    "header.search_projects": "Search projects…",
   }
 } as { translation: Record<string, string> };
 

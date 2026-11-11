@@ -34214,6 +34214,8 @@ const resource = {
     "header.subscribe.button_aria": "รับหมายเหตุเวอร์ชั่นผ่านอีเมล - เปิดแบบฟอร์มจดหมายข่าวใน openconstructionerp.com",
     "header.subscribe.button_title": "รับหมายเหตุเวอร์ชั่นผ่านอีเมล (เปิด openconstructionerp.com)",
     "header.ask_ai": "ถาม AI",
+    "header.search_palette": "ค้นหาโมดูลหรือคำสั่ง…",
+    "header.search_projects": "ค้นหาโครงการ…",
     "homeportal.back_to_app": "กลับไปที่ OpenConstructionERP",
     "homeportal.co_amount": "จำนวนเงินที่อนุมัติ",
     "homeportal.co_approved_at": "อนุมัติแล้ว",

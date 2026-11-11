@@ -34265,6 +34265,8 @@ const resource = {
     "header.subscribe.button_aria": "Saa väljalaskeuudised e-postiga - avab uudiskirja vormi lehel openconstructionerp.com",
     "header.subscribe.button_title": "Saa väljalaskeuudised e-postiga (avab lehe openconstructionerp.com)",
     "header.ask_ai": "Küsi AI-lt",
+    "header.search_palette": "Leia moodul või käsk…",
+    "header.search_projects": "Otsi projekte…",
     "homeportal.back_to_app": "Tagasi OpenConstructionERP juurde",
     "homeportal.co_amount": "Kinnitatud summa",
     "homeportal.co_approved_at": "Kinnitatud",

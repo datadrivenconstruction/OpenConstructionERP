@@ -34388,6 +34388,8 @@ const resource = {
     "header.subscribe.button_aria": "Ontvang releaseopmerkingen per e-mail - opent het nieuwsbriefformulier op openconstructionerp.com",
     "header.subscribe.button_title": "Ontvang releaseopmerkingen per e-mail (opent openconstructionerp.com)",
     "header.ask_ai": "Vraag AI",
+    "header.search_palette": "Zoek een module of opdracht…",
+    "header.search_projects": "Projecten zoeken…",
     "homeportal.back_to_app": "Terug naar OpenConstructionERP",
     "homeportal.co_amount": "Goedgekeurd bedrag",
     "homeportal.co_approved_at": "Goedgekeurd",

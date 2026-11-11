@@ -33537,6 +33537,8 @@ const resource = {
     "header.subscribe.button_aria": "ای میل سے release notes حاصل کریں - openconstructionerp.com پر newsletter فارم کھولتا ہے",
     "header.subscribe.button_title": "ای میل سے release notes حاصل کریں (openconstructionerp.com کھولتا ہے)",
     "header.ask_ai": "AI سے پوچھیں",
+    "header.search_palette": "ماڈیول یا کمانڈ تلاش کریں…",
+    "header.search_projects": "منصوبے تلاش کریں…",
     "homeportal.back_to_app": "OpenConstructionERP پر واپس",
     "homeportal.co_amount": "منظور شدہ رقم",
     "homeportal.co_approved_at": "منظور شدہ",

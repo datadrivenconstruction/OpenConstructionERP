@@ -34168,6 +34168,8 @@ const resource = {
     "header.subscribe.button_aria": "이메일로 릴리스 노트 받기 - openconstructionerp.com의 뉴스레터 양식 열기",
     "header.subscribe.button_title": "이메일로 릴리스 노트 받기 (openconstructionerp.com 열기)",
     "header.ask_ai": "AI에게 질문",
+    "header.search_palette": "모듈 또는 명령 찾기…",
+    "header.search_projects": "프로젝트 검색…",
     "homeportal.back_to_app": "OpenConstructionERP로 돌아가기",
     "homeportal.co_amount": "승인된 금액",
     "homeportal.co_approved_at": "승인됨",

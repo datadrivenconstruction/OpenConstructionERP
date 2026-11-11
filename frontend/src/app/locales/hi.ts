@@ -33885,6 +33885,8 @@ const resource = {
     "header.subscribe.button_aria": "ईमेल द्वारा रिलीज़ नोट्स प्राप्त करें - openconstructionerp.com पर न्यूजलेटर फॉर्म खोलता है",
     "header.subscribe.button_title": "ईमेल द्वारा रिलीज़ नोट्स प्राप्त करें (openconstructionerp.com खोलता है)",
     "header.ask_ai": "AI से पूछें",
+    "header.search_palette": "मॉड्यूल या कमांड खोजें…",
+    "header.search_projects": "प्रोजेक्ट खोजें…",
     "homeportal.back_to_app": "OpenConstructionERP पर वापस जाएं",
     "homeportal.co_amount": "अनुमोदित राशि",
     "homeportal.co_approved_at": "अनुमोदित",

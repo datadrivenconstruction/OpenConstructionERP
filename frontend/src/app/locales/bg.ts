@@ -34377,6 +34377,8 @@ const resource = {
     "header.subscribe.button_aria": "Получете бележки за издание по имейл - отваря формата на информационния бюлетин в openconstructionerp.com",
     "header.subscribe.button_title": "Получете бележки за издание по имейл (отваря openconstructionerp.com)",
     "header.ask_ai": "Попитай AI",
+    "header.search_palette": "Намерете модул или команда…",
+    "header.search_projects": "Търсене на проекти…",
     "homeportal.back_to_app": "Назад към OpenConstructionERP",
     "homeportal.co_amount": "Одобрена сума",
     "homeportal.co_approved_at": "Одобрено",

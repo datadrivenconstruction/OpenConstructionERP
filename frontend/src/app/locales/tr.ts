@@ -34882,6 +34882,8 @@ const resource = {
     "header.subscribe.button_aria": "E-posta ile sürüm notlarını alın - openconstructionerp.com adresindeki bülten formunu açar",
     "header.subscribe.button_title": "E-posta ile sürüm notlarını alın (openconstructionerp.com açılır)",
     "header.ask_ai": "AI'ya sor",
+    "header.search_palette": "Bir modül veya komut bul…",
+    "header.search_projects": "Projelerde ara…",
     "homeportal.back_to_app": "OpenConstructionERP'ye geri dön",
     "homeportal.co_amount": "Onaylı tutar",
     "homeportal.co_approved_at": "Onaylandı",

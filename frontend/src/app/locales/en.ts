@@ -25041,6 +25041,8 @@ const resource = {
     "header.subscribe.button_aria": "Get release notes by email - opens the newsletter form on openconstructionerp.com",
     "header.subscribe.button_title": "Get release notes by email (opens openconstructionerp.com)",
     "header.ask_ai": "Ask AI",
+    "header.search_palette": "Find a module or command…",
+    "header.search_projects": "Search projects…",
     "support.donate_perk_line": "Backers get a supporter access code that unlocks the Inside track panel - early word on what just shipped and a say in what gets built next.",
     "support.inside_track_link": "Backers inside track",
     "about.tagline": "The #1 open-source platform for construction cost estimation, project management and resource control",

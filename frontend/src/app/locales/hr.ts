@@ -34499,6 +34499,8 @@ const resource = {
     "header.subscribe.button_aria": "Primit ćete napomene o izdanju putem e-pošte - otvara obrazac newsletter na openconstructionerp.com",
     "header.subscribe.button_title": "Primit ćete napomene o izdanju putem e-pošte (otvara openconstructionerp.com)",
     "header.ask_ai": "Pitaj AI",
+    "header.search_palette": "Pronađi modul ili naredbu…",
+    "header.search_projects": "Pretraži projekte…",
     "homeportal.back_to_app": "Natrag na OpenConstructionERP",
     "homeportal.co_amount": "Odobreni iznos",
     "homeportal.co_approved_at": "Odobreno",

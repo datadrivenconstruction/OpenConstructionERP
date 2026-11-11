@@ -35090,6 +35090,8 @@ const resource = {
     "header.subscribe.button_aria": "Отримувати нотатки про випуски електронною поштою - відкриває форму розсилки на openconstructionerp.com",
     "header.subscribe.button_title": "Отримувати нотатки про випуски електронною поштою (відкриває openconstructionerp.com)",
     "header.ask_ai": "Запитати AI",
+    "header.search_palette": "Знайти модуль або команду…",
+    "header.search_projects": "Пошук у проєктах…",
     "homeportal.back_to_app": "Повернутися до OpenConstructionERP",
     "homeportal.co_amount": "Затверджена сума",
     "homeportal.co_approved_at": "Затверджено",

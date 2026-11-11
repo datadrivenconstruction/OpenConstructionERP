@@ -34399,6 +34399,8 @@ const resource = {
     "header.subscribe.button_aria": "Få release-noter via e-mail - åbner nyhedsbrevet på openconstructionerp.com",
     "header.subscribe.button_title": "Få release-noter via e-mail (åbner openconstructionerp.com)",
     "header.ask_ai": "Spørg AI",
+    "header.search_palette": "Find et modul eller en kommando…",
+    "header.search_projects": "Søg i projekter…",
     "homeportal.back_to_app": "Tilbage til OpenConstructionERP",
     "homeportal.co_amount": "Godkendt beløb",
     "homeportal.co_approved_at": "Godkendt",

@@ -34333,6 +34333,8 @@ const resource = {
     "header.subscribe.button_aria": "Få lanseringsanteckningar via e-post - öppnar nyhetsbrevet på openconstructionerp.com",
     "header.subscribe.button_title": "Få lanseringsanteckningar via e-post (öppnar openconstructionerp.com)",
     "header.ask_ai": "Fråga AI",
+    "header.search_palette": "Hitta en modul eller ett kommando…",
+    "header.search_projects": "Sök projekt…",
     "homeportal.back_to_app": "Tillbaka till OpenConstructionERP",
     "homeportal.co_amount": "Godkänd belopp",
     "homeportal.co_approved_at": "Godkänd",

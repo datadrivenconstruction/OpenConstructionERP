@@ -34071,6 +34071,8 @@ const resource = {
     "header.subscribe.button_aria": "Dapatkan catatan rilis melalui email - membuka formulir buletin di openconstructionerp.com",
     "header.subscribe.button_title": "Dapatkan catatan rilis melalui email (membuka openconstructionerp.com)",
     "header.ask_ai": "Tanya AI",
+    "header.search_palette": "Cari modul atau perintah…",
+    "header.search_projects": "Cari proyek…",
     "homeportal.back_to_app": "Kembali ke OpenConstructionERP",
     "homeportal.co_amount": "Jumlah disetujui",
     "homeportal.co_approved_at": "Disetujui",

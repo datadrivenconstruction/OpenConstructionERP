@@ -34278,6 +34278,8 @@ const resource = {
     "header.subscribe.button_aria": "Få utgivelsesnoter via e-post - åpner nyhetsbrevskjemaet på openconstructionerp.com",
     "header.subscribe.button_title": "Få utgivelsesnoter via e-post (åpner openconstructionerp.com)",
     "header.ask_ai": "Spør AI",
+    "header.search_palette": "Finn en modul eller kommando…",
+    "header.search_projects": "Søk i prosjekter…",
     "homeportal.back_to_app": "Tilbake til OpenConstructionERP",
     "homeportal.co_amount": "Godkjent beløp",
     "homeportal.co_approved_at": "Godkjent",

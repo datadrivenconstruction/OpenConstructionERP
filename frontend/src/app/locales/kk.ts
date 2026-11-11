@@ -33387,6 +33387,8 @@ const resource = {
     "header.subscribe.button_aria": "Шығарылым жаңалықтарын электрондық поштамен алу - openconstructionerp.com сайтындағы жаңалықтар формасын ашады",
     "header.subscribe.button_title": "Шығарылым жаңалықтарын электрондық поштамен алу (openconstructionerp.com ашылады)",
     "header.ask_ai": "AI-дан сұрау",
+    "header.search_palette": "Модульді немесе пәрменді табу…",
+    "header.search_projects": "Жобаларды іздеу…",
     "homeportal.back_to_app": "OpenConstructionERP-ке қайту",
     "homeportal.co_amount": "Бекітілген сома",
     "homeportal.co_approved_at": "Бекітілді",

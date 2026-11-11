@@ -34258,6 +34258,8 @@ const resource = {
     "header.subscribe.button_aria": "Saa julkaisutiedot sähköpostiin - avaa uutiskirjeen lomakkeen openconstructionerp.com-sivustolla",
     "header.subscribe.button_title": "Saa julkaisutiedot sähköpostiin (avaa openconstructionerp.com)",
     "header.ask_ai": "Kysy AI:lta",
+    "header.search_palette": "Etsi moduuli tai komento…",
+    "header.search_projects": "Hae projekteja…",
     "homeportal.back_to_app": "Takaisin OpenConstructionERP:ään",
     "homeportal.co_amount": "Hyväksytty summa",
     "homeportal.co_approved_at": "Hyväksytty",

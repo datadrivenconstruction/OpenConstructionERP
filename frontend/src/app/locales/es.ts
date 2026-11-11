@@ -34617,6 +34617,8 @@ const resource = {
     "header.subscribe.button_aria": "Obtener notas de lanzamiento por correo - abre el formulario de boletín en openconstructionerp.com",
     "header.subscribe.button_title": "Obtener notas de lanzamiento por correo (abre openconstructionerp.com)",
     "header.ask_ai": "Preguntar a la IA",
+    "header.search_palette": "Buscar un módulo o comando…",
+    "header.search_projects": "Buscar proyectos…",
     "homeportal.back_to_app": "Volver a OpenConstructionERP",
     "homeportal.co_amount": "Monto aprobado",
     "homeportal.co_approved_at": "Aprobado",

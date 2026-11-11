@@ -34161,6 +34161,8 @@ const resource = {
     "header.subscribe.button_aria": "メールでリリースノートを取得 - openconstructionerp.comのニュースレターフォームが開く",
     "header.subscribe.button_title": "メールでリリースノートを取得(openconstructionerp.comを開く)",
     "header.ask_ai": "AI に質問",
+    "header.search_palette": "モジュールまたはコマンドを検索…",
+    "header.search_projects": "プロジェクトを検索…",
     "homeportal.back_to_app": "OpenConstructionERPに戻る",
     "homeportal.co_amount": "承認額",
     "homeportal.co_approved_at": "承認日時",

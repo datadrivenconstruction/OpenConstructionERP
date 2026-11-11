@@ -33329,6 +33329,8 @@ const resource = {
     "header.subscribe.button_aria": "ইমেইলে রিলিজ নোট পান - openconstructionerp.com এ নিউজলেটার ফর্ম খোলে",
     "header.subscribe.button_title": "ইমেইলে রিলিজ নোট পান (openconstructionerp.com খোলে)",
     "header.ask_ai": "AI-কে জিজ্ঞাসা করুন",
+    "header.search_palette": "মডিউল বা কমান্ড খুঁজুন…",
+    "header.search_projects": "প্রকল্প অনুসন্ধান করুন…",
     "homeportal.back_to_app": "OpenConstructionERP এ ফিরে যান",
     "homeportal.co_amount": "অনুমোদিত পরিমাণ",
     "homeportal.co_approved_at": "অনুমোদিত",

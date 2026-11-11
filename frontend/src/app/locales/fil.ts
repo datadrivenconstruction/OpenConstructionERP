@@ -33329,6 +33329,8 @@ const resource = {
     "header.subscribe.button_aria": "Kumuha ng release notes sa email - binubuksan ang newsletter form sa openconstructionerp.com",
     "header.subscribe.button_title": "Kumuha ng release notes sa email (binubuksan ang openconstructionerp.com)",
     "header.ask_ai": "Itanong sa AI",
+    "header.search_palette": "Maghanap ng module o command…",
+    "header.search_projects": "Maghanap ng mga proyekto…",
     "homeportal.back_to_app": "Bumalik sa OpenConstructionERP",
     "homeportal.co_amount": "Aprubadong halaga",
     "homeportal.co_approved_at": "Aprubado",

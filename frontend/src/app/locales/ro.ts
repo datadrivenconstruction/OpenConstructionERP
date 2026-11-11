@@ -34530,6 +34530,8 @@ const resource = {
     "header.subscribe.button_aria": "Obțineți note de lansare prin e-mail - deschide formularul buletinului pe openconstructionerp.com",
     "header.subscribe.button_title": "Obțineți note de lansare prin e-mail (deschide openconstructionerp.com)",
     "header.ask_ai": "Întreabă AI",
+    "header.search_palette": "Găsește un modul sau o comandă…",
+    "header.search_projects": "Caută proiecte…",
     "homeportal.back_to_app": "Înapoi la OpenConstructionERP",
     "homeportal.co_amount": "Suma aprobată",
     "homeportal.co_approved_at": "Aprobat",
