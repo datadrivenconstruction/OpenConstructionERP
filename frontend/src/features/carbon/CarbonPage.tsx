@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -230,7 +230,9 @@ function useEscapeToClose(onClose: () => void) {
 export function CarbonPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('inventory');
+  const [searchParams] = useSearchParams();
+  // `?tab=epds` deep-links from material pickers ("Manage materials").
+  const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'epds' ? 'epds' : 'inventory');
   const activeProjectId = useActiveProjectId();
   // `/sustainability` comes from the sustainability plugin module. With the
   // module off there is no such route, so the explainer link would land on

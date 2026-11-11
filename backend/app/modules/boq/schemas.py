@@ -2057,7 +2057,7 @@ class CO2EnrichResponse(BaseModel):
 class CO2AssignRequest(BaseModel):
     """Request to manually assign an EPD material to a position."""
 
-    epd_id: str = Field(..., min_length=1, max_length=100)
+    epd_id: str = Field(..., min_length=1, max_length=130)
 
 
 # ── AACE Estimate Classification schemas ────────────────────────────────────

@@ -14,6 +14,8 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Plus,
+  Settings2,
 } from 'lucide-react';
 import { Breadcrumb, Card, CardHeader, CardContent, Button, EmptyState, Skeleton, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -29,6 +31,8 @@ import {
   enrichCO2,
   assignPositionCO2,
   fetchEPDMaterials,
+  createOwnMaterial,
+  isDecimalString,
   type SustainabilityData,
   type PositionCO2Detail,
   type EPDMaterial,
@@ -147,12 +151,120 @@ function EPDSelect({
       className="oe-select oe-input-sm max-w-[220px] truncate"
     >
       <option value="">{t('sustainability.epd_none', { defaultValue: '-- none --' })}</option>
-      {materials.map((m) => (
-        <option key={m.id} value={m.id}>
-          {m.name} ({m.gwp} kg/{m.unit})
-        </option>
-      ))}
+      {materials.some((m) => m.own) && (
+        <optgroup label={t('sustainability.own_materials_group', { defaultValue: 'My materials' })}>
+          {materials.filter((m) => m.own).map((m) => (
+            <option key={m.id} value={m.id}>{m.name} ({m.gwp} kg/{m.unit})</option>
+          ))}
+        </optgroup>
+      )}
+      <optgroup label={t('sustainability.reference_materials_group', { defaultValue: 'Reference library' })}>
+        {materials.filter((m) => !m.own).map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name} ({m.gwp} kg/{m.unit})
+          </option>
+        ))}
+      </optgroup>
     </select>
+  );
+}
+
+/* ── Own material: toolbar + quick form ────────────────────────────── */
+
+function OwnMaterialBar({
+  categories,
+  ownCount,
+  onManage,
+}: {
+  categories: { id: string; label: string }[];
+  ownCount: number;
+  onManage: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState(categories[0]?.id ?? 'concrete');
+  const [unit, setUnit] = useState('m3');
+  const [gwp, setGwp] = useState('');
+  const gwpValid = isDecimalString(gwp);
+  const canSave = name.trim().length > 0 && unit.trim().length > 0 && gwpValid;
+
+  const saveMut = useMutation({
+    mutationFn: () => createOwnMaterial({ name: name.trim(), category, unit: unit.trim(), gwp: gwp.trim() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['epd-materials'] });
+      addToast({ type: 'success', title: t('sustainability.own_saved', { defaultValue: 'Material added. Pick it in the EPD Material column.' }) });
+      setName('');
+      setGwp('');
+      setOpen(false);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('sustainability.own_save_failed', { defaultValue: 'Could not save the material' }), message: err.message });
+    },
+  });
+
+  return (
+    <div className="mb-3 rounded-lg border border-border-light bg-surface-secondary p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setOpen((v) => !v)}>
+          {t('sustainability.own_add', { defaultValue: 'Add own material' })}
+        </Button>
+        <Button variant="ghost" size="sm" icon={<Settings2 size={14} />} onClick={onManage}>
+          {t('sustainability.own_manage', { defaultValue: 'Manage materials' })}
+        </Button>
+        {ownCount === 0 && !open && (
+          <span className="text-xs text-content-tertiary">
+            {t('sustainability.own_empty_hint', {
+              defaultValue: 'Missing a product? Add it with its EPD value (kg CO2e per unit) and pick it for any position. Edit or delete it later under Carbon & ESG, EPDs.',
+            })}
+          </span>
+        )}
+      </div>
+      {open && (
+        <form
+          className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-5 sm:items-end"
+          onSubmit={(e) => { e.preventDefault(); if (canSave) saveMut.mutate(); }}
+        >
+          <label className="sm:col-span-2 text-xs text-content-secondary">
+            {t('sustainability.own_name', { defaultValue: 'Material name' })}
+            <input className="oe-input oe-input-sm mt-1 w-full" value={name} onChange={(e) => setName(e.target.value)} maxLength={500} required />
+          </label>
+          <label className="text-xs text-content-secondary">
+            {t('sustainability.col_category', { defaultValue: 'Category' })}
+            <select className="oe-select oe-input-sm mt-1 w-full" value={category} onChange={(e) => setCategory(e.target.value)}>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{t(`sustainability.cat_${c.id}`, { defaultValue: c.label })}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs text-content-secondary">
+            {t('sustainability.col_unit', { defaultValue: 'Unit' })}
+            <input className="oe-input oe-input-sm mt-1 w-full" value={unit} onChange={(e) => setUnit(e.target.value)} maxLength={20} required />
+          </label>
+          <label className="text-xs text-content-secondary">
+            {t('sustainability.own_gwp', { defaultValue: 'GWP A1-A3 (kg CO2e per unit)' })}
+            <input
+              className="oe-input oe-input-sm mt-1 w-full tabular-nums"
+              inputMode="decimal"
+              value={gwp}
+              onChange={(e) => setGwp(e.target.value.replace(',', '.'))}
+              aria-invalid={gwp !== '' && !gwpValid}
+              required
+            />
+          </label>
+          <div className="sm:col-span-5 flex gap-2">
+            <Button type="submit" variant="primary" size="sm" disabled={!canSave} loading={saveMut.isPending}>
+              {t('common.save', { defaultValue: 'Save' })}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
 
@@ -280,6 +392,8 @@ export function SustainabilityPage() {
     queryFn: () => fetchEPDMaterials(),
   });
   const epdMaterials = epdData?.materials || [];
+  const epdCategories = epdData?.categories || [];
+  const ownMaterialCount = epdMaterials.filter((m) => m.own).length;
 
   // Enrich mutation
   const enrichMut = useMutation({
@@ -642,6 +756,11 @@ export function SustainabilityPage() {
             <Card>
               <CardHeader title={t('sustainability.positions_title', 'Position-Level CO2 Data')} />
               <CardContent>
+                <OwnMaterialBar
+                  categories={epdCategories}
+                  ownCount={ownMaterialCount}
+                  onManage={() => navigate('/carbon?tab=epds')}
+                />
                 <div className="overflow-x-auto">
                   <table className="oe-table">
                     <thead>

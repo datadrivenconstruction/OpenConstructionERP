@@ -836,6 +836,15 @@ const resource = {
     "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
     "header.search_palette": "Find a module or command…",
     "header.search_projects": "Search projects…",
+    "sustainability.own_add": "Add own material",
+    "sustainability.own_manage": "Manage materials",
+    "sustainability.own_materials_group": "My materials",
+    "sustainability.reference_materials_group": "Reference library",
+    "sustainability.own_name": "Material name",
+    "sustainability.own_gwp": "GWP A1-A3 (kg CO2e per unit)",
+    "sustainability.own_saved": "Material added. Pick it in the EPD Material column.",
+    "sustainability.own_save_failed": "Could not save the material",
+    "sustainability.own_empty_hint": "Missing a product? Add it with its EPD value (kg CO2e per unit) and pick it for any position. Edit or delete it later under Carbon & ESG, EPDs.",
   }
 } as { translation: Record<string, string> };
 

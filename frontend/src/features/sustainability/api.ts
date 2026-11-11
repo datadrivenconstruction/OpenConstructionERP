@@ -54,6 +54,7 @@ export interface EPDMaterial {
   density?: number;
   source: string;
   stages: string;
+  own?: boolean;
 }
 
 export interface EPDMaterialsResponse {
@@ -93,4 +94,31 @@ export function fetchEPDMaterials(category?: string, search?: string) {
   if (search) params.set('search', search);
   const qs = params.toString();
   return apiGet<EPDMaterialsResponse>(`/v1/boq/epd-materials/${qs ? `?${qs}` : ''}`);
+}
+
+export interface OwnMaterialInput {
+  name: string;
+  category: string;
+  unit: string;
+  /** kg CO2e per declared unit (A1-A3), kept as a decimal string. */
+  gwp: string;
+}
+
+/** Saves a user material as a custom EPD record in the carbon module's EPD library. */
+export function createOwnMaterial(input: OwnMaterialInput) {
+  const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return apiPost<{ id: string; epd_id: string }>('/v1/carbon/epd', {
+    epd_id: `own-${slug || 'material'}-${suffix}`,
+    source: 'custom',
+    material_class: input.category,
+    product_name: input.name,
+    declared_unit: input.unit,
+    gwp_a1a3: input.gwp,
+  });
+}
+
+/** Strict decimal check for the GWP field (negative allowed for biogenic credits). */
+export function isDecimalString(v: string): boolean {
+  return /^-?\d+(\.\d+)?$/.test(v.trim());
 }

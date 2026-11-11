@@ -10334,17 +10334,59 @@ async def enrich_resources(
     }
 
 
+OWN_EPD_PREFIX = "own:"
+
+
+def _own_epd_to_material(rec: Any) -> dict[str, Any]:
+    """Map a carbon-module EPD record to the picker shape used by the embedded set."""
+    return {
+        "id": f"{OWN_EPD_PREFIX}{rec.epd_id}",
+        "name": rec.product_name,
+        "category": rec.material_class,
+        "gwp": float(rec.gwp_a1a3 or 0),
+        "unit": rec.declared_unit,
+        "source": rec.source,
+        "stages": "A1-A3",
+        "own": True,
+    }
+
+
+async def _own_epd_materials(
+    session: Any, *, category: str | None = None, query: str | None = None, epd_id: str | None = None
+) -> list[dict[str, Any]]:
+    """User-maintained EPD records (source=custom) from the carbon module; empty if it is not installed."""
+    try:
+        from sqlalchemy import select
+
+        from app.modules.carbon.models import EPDRecord
+    except ImportError:
+        return []
+    stmt = select(EPDRecord).where(EPDRecord.source == "custom")
+    if category:
+        stmt = stmt.where(EPDRecord.material_class == category)
+    if epd_id:
+        stmt = stmt.where(EPDRecord.epd_id == epd_id)
+    rows = (await session.execute(stmt.order_by(EPDRecord.product_name).limit(500))).scalars().all()
+    items = [_own_epd_to_material(r) for r in rows]
+    if query:
+        q = query.lower()
+        items = [m for m in items if q in m["name"].lower() or q in m["id"].lower()]
+    return items
+
+
 @router.get(
     "/epd-materials/",
     summary="List EPD materials",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
 async def list_epd_materials(
+    session: SessionDep,
     category: str | None = Query(default=None, description="Filter by category"),
     search: str | None = Query(default=None, description="Search by name or ID"),
 ) -> dict[str, Any]:
-    """List available EPD materials with optional filtering."""
-    materials = search_epd_materials(category=category, query=search)
+    """List EPD materials: user-added carbon EPD records first, then the embedded reference set."""
+    own = await _own_epd_materials(session, category=category, query=search)
+    materials = own + search_epd_materials(category=category, query=search)
     return {
         "materials": materials,
         "categories": EPD_CATEGORIES,
@@ -10441,6 +10483,9 @@ async def assign_position_co2(
     from fastapi import HTTPException
 
     epd = EPD_INDEX.get(payload.epd_id)
+    if not epd and payload.epd_id.startswith(OWN_EPD_PREFIX):
+        own = await _own_epd_materials(session, epd_id=payload.epd_id[len(OWN_EPD_PREFIX) :])
+        epd = own[0] if own else None
     if not epd:
         raise HTTPException(
             status_code=404,
