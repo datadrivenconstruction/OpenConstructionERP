@@ -377,7 +377,7 @@ export function NotificationsPage() {
           title + icon live in the global top bar, so the page-level chrome
           here is just the counts and the filter. */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           {total > 0 && (
             <span className="text-xs text-content-tertiary tabular-nums">
               {total} {t('notifications.total', { defaultValue: 'total' })}
@@ -392,7 +392,7 @@ export function NotificationsPage() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Filter
-              size={13}
+              size={14}
               className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary pointer-events-none"
             />
             <select
@@ -401,7 +401,7 @@ export function NotificationsPage() {
                 setFilter(e.target.value as NotificationFilter);
                 setPage(0);
               }}
-              className="h-9 ps-8 pe-3 text-xs rounded-lg border border-border bg-surface-primary text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+              className="oe-select ps-8 pe-3"
             >
               <option value="all">{t('notifications.filter_all', { defaultValue: 'All' })}</option>
               <option value="unread">
@@ -537,9 +537,9 @@ export function NotificationsPage() {
                             aria-label={t('common.delete', { defaultValue: 'Delete' })}
                           >
                             {deleting ? (
-                              <Loader2 size={13} className="animate-spin" />
+                              <Loader2 size={14} className="animate-spin" />
                             ) : (
-                              <Trash2 size={13} />
+                              <Trash2 size={14} />
                             )}
                           </button>
                         </li>

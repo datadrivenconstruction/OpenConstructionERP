@@ -50,19 +50,19 @@ export function PortLegend({ defaultOpen = false, testId }: PortLegendProps) {
         )}
       >
         {open ? (
-          <ChevronDown size={13} aria-hidden="true" />
+          <ChevronDown size={14} aria-hidden="true" />
         ) : (
-          <ChevronRight size={13} aria-hidden="true" className="rtl:scale-x-[-1]" />
+          <ChevronRight size={14} aria-hidden="true" className="rtl:scale-x-[-1]" />
         )}
         {t('pipeline.legend.title', { defaultValue: 'How ports work' })}
       </button>
 
       {open && (
-        <div className="mt-1.5 space-y-2.5 px-1.5 pb-1">
+        <div className="mt-1.5 space-y-2 px-1.5 pb-1">
           {/* Plain-language connect hint */}
           <p className="flex items-start gap-1.5 text-2xs leading-relaxed text-content-secondary">
             <Cable
-              size={13}
+              size={14}
               aria-hidden="true"
               className="mt-px shrink-0 text-content-tertiary"
             />

@@ -18,7 +18,7 @@ import {
 import { PlaceholderChips } from './offerParts';
 
 const inputCls =
-  'h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm focus:border-oe-blue focus:outline-none';
+  'oe-input w-full';
 const MARKETS = ['DE', 'GB', 'FR', 'US'] as const;
 
 /** Whether a numbering pattern keeps a sequence part, which every pattern must. */
@@ -109,7 +109,7 @@ function TextLibraryCard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select className={`${inputCls} w-20`} value={market} onChange={(e) => setMarket(e.target.value)} aria-label={t('offers.settings.market', { defaultValue: 'Market' })}>
+          <select className={`${inputCls} oe-select w-20`} value={market} onChange={(e) => setMarket(e.target.value)} aria-label={t('offers.settings.market', { defaultValue: 'Market' })}>
             {MARKETS.map((m) => (
               <option key={m} value={m}>
                 {m}
@@ -178,7 +178,7 @@ function BlockEditor({ block, onSave, onDelete }: { block: TextBlock; onSave: (b
       <PlaceholderChips
         onInsert={(token) => setBody(insertAt(body, area?.selectionStart ?? body.length, area?.selectionEnd ?? body.length, token).text)}
       />
-      <textarea ref={(el) => { area = el; }} className={`${inputCls} h-20 py-2`} value={body} onChange={(e) => setBody(e.target.value)} onBlur={commit} />
+      <textarea ref={(el) => { area = el; }} className={`${inputCls} oe-textarea h-20 py-2`} value={body} onChange={(e) => setBody(e.target.value)} onBlur={commit} />
     </div>
   );
 }

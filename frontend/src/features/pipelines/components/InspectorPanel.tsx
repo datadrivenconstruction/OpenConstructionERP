@@ -224,7 +224,7 @@ export function InspectorPanel({
                     />
                   );
                 })()}
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {selected.title}
                 </h3>
               </div>
@@ -258,7 +258,7 @@ export function InspectorPanel({
                     });
                   return (
                     <div key={f.key}>
-                      <label className="mb-1 block text-xs font-medium text-content-secondary">
+                      <label className="oe-label">
                         {fieldLabel}
                         {f.required && (
                           <span
@@ -288,7 +288,7 @@ export function InspectorPanel({
                           value={String(value ?? '')}
                           onChange={(e) => setParam(f.key, e.target.value)}
                           data-testid={`pipeline-param-${f.key}`}
-                          className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="oe-select w-full"
                         >
                           <option value="">
                             {t('pipeline.inspector.choose', {
@@ -320,7 +320,7 @@ export function InspectorPanel({
                             )
                           }
                           data-testid={`pipeline-param-${f.key}`}
-                          className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          className="oe-input w-full"
                         />
                       )}
                       {help && (
@@ -341,7 +341,7 @@ export function InspectorPanel({
                 data-testid="pipeline-inspector-duplicate"
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-xs font-medium hover:bg-surface-tertiary"
               >
-                <Copy size={13} aria-hidden="true" />
+                <Copy size={14} aria-hidden="true" />
                 {t('pipeline.inspector.duplicate', {
                   defaultValue: 'Duplicate',
                 })}
@@ -352,7 +352,7 @@ export function InspectorPanel({
                 data-testid="pipeline-inspector-delete"
                 className="inline-flex items-center gap-1.5 rounded-md border border-semantic-error/40 bg-semantic-error-bg px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:opacity-90"
               >
-                <Trash2 size={13} aria-hidden="true" />
+                <Trash2 size={14} aria-hidden="true" />
                 {t('pipeline.inspector.delete', { defaultValue: 'Delete' })}
               </button>
             </div>
@@ -360,7 +360,7 @@ export function InspectorPanel({
         ) : (
           <div className="space-y-4" data-testid="pipeline-inspector-pipeline">
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('pipeline.inspector.name', { defaultValue: 'Name' })}
               </label>
               <input
@@ -371,11 +371,11 @@ export function InspectorPanel({
                 placeholder={t('pipeline.inspector.name_ph', {
                   defaultValue: 'My automation',
                 })}
-                className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-input w-full"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('pipeline.inspector.description', {
                   defaultValue: 'Description',
                 })}
@@ -385,7 +385,7 @@ export function InspectorPanel({
                 onChange={(e) => patchMeta({ description: e.target.value })}
                 data-testid="pipeline-meta-description"
                 rows={3}
-                className="w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="w-full oe-textarea"
               />
             </div>
             <label className="flex items-center gap-2 text-xs text-content-secondary">

@@ -192,12 +192,12 @@ export function SheetCompletenessPanel({
 
         {mode === 'document' ? (
           <div className="space-y-2">
-            <label className="block text-2xs font-medium text-content-tertiary">
+            <label className="oe-label">
               {t('sheetCompleteness.pick_index', { defaultValue: 'Index drawing' })}
               <select
                 value={indexDocId}
                 onChange={(e) => setIndexDocId(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                className="mt-1 w-full oe-select"
               >
                 <option value="">
                   {t('sheetCompleteness.pick_index_placeholder', { defaultValue: 'Choose a drawing…' })}
@@ -209,7 +209,7 @@ export function SheetCompletenessPanel({
                 ))}
               </select>
             </label>
-            <label className="block text-2xs font-medium text-content-tertiary">
+            <label className="oe-label">
               {t('sheetCompleteness.index_page', { defaultValue: 'Index page (optional)' })}
               <input
                 type="number"
@@ -217,7 +217,7 @@ export function SheetCompletenessPanel({
                 value={indexPage}
                 onChange={(e) => setIndexPage(e.target.value)}
                 placeholder={t('sheetCompleteness.index_page_placeholder', { defaultValue: 'All pages' })}
-                className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                className="mt-1 w-full oe-input"
               />
             </label>
           </div>
@@ -229,7 +229,7 @@ export function SheetCompletenessPanel({
             placeholder={t('sheetCompleteness.paste_placeholder', {
               defaultValue: 'One sheet per line, or number,title,rev',
             })}
-            className="w-full rounded-lg border border-border bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary"
+            className="w-full oe-textarea font-mono"
           />
         )}
 
@@ -284,7 +284,7 @@ export function SheetCompletenessPanel({
       <div className="flex items-start gap-2">
         <ClipboardCheck size={16} className="mt-0.5 shrink-0 text-content-tertiary" />
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('sheetCompleteness.title', { defaultValue: 'Sheet completeness' })}
           </h3>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -333,7 +333,7 @@ function SheetCompletenessResult({
       </div>
 
       {allPresent ? (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-semantic-success/10 px-3 py-2.5 text-sm text-semantic-success dark:text-emerald-300">
+        <div className="flex items-center gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success/10 px-3 py-2.5 text-sm text-semantic-success">
           <CheckCircle2 size={16} className="shrink-0" />
           {t('sheetCompleteness.all_present', {
             defaultValue: 'All {{count}} index sheets are present',
@@ -354,7 +354,7 @@ function SheetCompletenessResult({
           />
           {summary.rev_mismatch.length > 0 && (
             <div>
-              <h4 className="mb-1.5 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <h4 className="oe-overline mb-1.5 flex items-center gap-1.5">
                 <GitBranch size={14} className="text-semantic-warning" />
                 {t('sheetCompleteness.rev_mismatch', { defaultValue: 'Revision mismatch' })}
                 <span className="text-content-quaternary">({summary.rev_mismatch.length})</span>
@@ -390,7 +390,7 @@ function FindingGroup({ icon, title, items }: { icon: ReactNode; title: string; 
   if (items.length === 0) return null;
   return (
     <div>
-      <h4 className="mb-1.5 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+      <h4 className="oe-overline mb-1.5 flex items-center gap-1.5">
         {icon}
         {title}
         <span className="text-content-quaternary">({items.length})</span>

@@ -337,7 +337,7 @@ export function PlanRoomViewer({
           <div className="ml-auto flex min-w-0 items-center gap-2">
             {placing ? (
               <span className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue/10 px-2 py-1 text-xs font-medium text-oe-blue">
-                <Crosshair size={13} />
+                <Crosshair size={14} />
                 {t('plan_room.click_to_place', { defaultValue: 'Click the drawing to drop a pin' })}
                 <button
                   type="button"
@@ -345,7 +345,7 @@ export function PlanRoomViewer({
                   aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
                   className="ml-1 rounded hover:bg-oe-blue/20"
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               </span>
             ) : (
@@ -369,7 +369,7 @@ export function PlanRoomViewer({
           </div>
         ) : (
           <span className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
-            <Lock size={13} className="shrink-0" />
+            <Lock size={14} className="shrink-0" />
             {t('plan_room.view_only', {
               defaultValue: 'View only. You can look at the drawing but not add pins.',
             })}
@@ -473,7 +473,7 @@ export function PlanRoomViewer({
             {draft && (
               <div
                 style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%` }}
-                className="absolute z-40 w-64 -translate-x-1/2 translate-y-2 rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
+                className="absolute z-popover w-64 -translate-x-1/2 translate-y-2 rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
               >
                 <h5 className="mb-1.5 text-xs font-semibold text-content-primary">
                   {t('plan_room.new_pin', { defaultValue: 'New plan pin' })}
@@ -486,7 +486,7 @@ export function PlanRoomViewer({
                   placeholder={t('plan_room.note_placeholder', {
                     defaultValue: 'Add a note (optional)...',
                   })}
-                  className="w-full resize-none rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="w-full resize-none oe-textarea"
                 />
                 <div className="mt-2 flex justify-end gap-2">
                   <Button variant="ghost" size="sm" onClick={cancelDraft} disabled={isSaving}>
@@ -497,7 +497,7 @@ export function PlanRoomViewer({
                     size="sm"
                     onClick={saveDraft}
                     disabled={isSaving}
-                    icon={isSaving ? <Loader2 size={13} className="animate-spin" /> : undefined}
+                    icon={isSaving ? <Loader2 size={14} className="animate-spin" /> : undefined}
                   >
                     {t('plan_room.save_pin', { defaultValue: 'Save pin' })}
                   </Button>
@@ -688,7 +688,7 @@ function PinPopover({
   return (
     <div
       style={{ left: `${pin.x * 100}%`, top: `${pin.y * 100}%` }}
-      className="absolute z-40 w-60 -translate-x-1/2 -translate-y-[calc(100%+0.75rem)] rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
+      className="absolute z-popover w-60 -translate-x-1/2 -translate-y-[calc(100%+0.75rem)] rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
     >
       <div className="mb-1.5 flex items-start justify-between gap-2">
         <h5 className="min-w-0 text-sm font-semibold text-content-primary">{heading}</h5>
@@ -732,7 +732,7 @@ function PinPopover({
           permission, so any editor can remove a plan pin. */}
       {pin.kind === 'plan' && canWrite && (
         <div className="mt-2.5 flex justify-end border-t border-border-light pt-2">
-          <Button variant="ghost" size="sm" icon={<Trash2 size={13} />} onClick={onDelete}>
+          <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={onDelete}>
             {t('common.delete', { defaultValue: 'Delete' })}
           </Button>
         </div>

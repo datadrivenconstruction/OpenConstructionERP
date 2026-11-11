@@ -162,11 +162,11 @@ function TemplatesTab({ onPick }: { onPick: (tpl: PipelineTemplate) => void }) {
           type="button"
           data-testid={`pipeline-template-${tpl.id}`}
           onClick={() => onPick(tpl)}
-          className="group flex flex-col rounded-xl border border-border bg-surface-secondary/50 p-3.5 text-start transition-colors hover:border-oe-blue/50 hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30"
+          className="group flex flex-col rounded-xl border border-border bg-surface-secondary/50 p-3 text-start transition-colors hover:border-oe-blue/50 hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30"
         >
           <div className="mb-1.5 flex items-center gap-2">
             <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-              <Workflow size={15} aria-hidden="true" />
+              <Workflow size={16} aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-content-primary">
               {tpl.name}
@@ -227,7 +227,7 @@ function SavedTab({
   if (listQuery.isLoading) {
     return (
       <div className="flex items-center justify-center py-12 text-content-tertiary">
-        <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+        <Loader2 size={20} className="animate-spin" aria-hidden="true" />
       </div>
     );
   }
@@ -252,7 +252,7 @@ function SavedTab({
       {rows.map((p: PipelineSummary) => (
         <li key={p.id} className="flex items-center gap-3 py-2.5">
           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary text-content-tertiary">
-            <Workflow size={15} aria-hidden="true" />
+            <Workflow size={16} aria-hidden="true" />
           </span>
           <button
             type="button"
@@ -304,7 +304,7 @@ function SavedTab({
               })}
               className="rounded-md p-1.5 text-content-quaternary hover:bg-semantic-error-bg hover:text-semantic-error"
             >
-              <Trash2 size={15} aria-hidden="true" />
+              <Trash2 size={16} aria-hidden="true" />
             </button>
           )}
         </li>

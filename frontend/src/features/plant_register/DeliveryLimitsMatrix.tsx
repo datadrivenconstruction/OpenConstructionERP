@@ -48,21 +48,21 @@ export function DeliveryLimitsMatrix({ matrix, catalogue, labels, onOpen }: Deli
         })}
       </p>
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[60rem] text-left text-xs">
-          <thead className="bg-surface-secondary text-content-secondary">
+        <table className="oe-table oe-table-compact min-w-[60rem] text-xs">
+          <thead>
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">{t('plant.limits.item', { defaultValue: 'Item' })}</th>
+              <th scope="col">{t('plant.limits.item', { defaultValue: 'Item' })}</th>
               {matrix.steps.map((step) => (
-                <th key={step} scope="col" className="px-2 py-2 font-medium">
+                <th key={step} scope="col">
                   {catalogueName(labels, catalogue, 'delivery_limit_steps', step)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {rows.map((row) => (
               <tr key={row.item_id} data-testid="limit-matrix-row">
-                <th scope="row" className="px-3 py-2 text-left font-normal">
+                <th scope="row" className="font-normal">
                   <button type="button" className="font-mono text-oe-blue-text hover:underline" onClick={() => onOpen(row.item_id)}>
                     {row.code}
                   </button>

@@ -377,7 +377,7 @@ export function PipelineNode({ id, data, selected }: PipelineNodeProps) {
             tokens.classes.headerHover,
           )}
         >
-          <Info size={13} aria-hidden="true" />
+          <Info size={14} aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -493,7 +493,7 @@ export function PipelineNode({ id, data, selected }: PipelineNodeProps) {
           aria-live="polite"
         >
           <rv.Icon
-            size={13}
+            size={14}
             aria-hidden="true"
             className={rv.spin ? 'animate-spin' : undefined}
           />

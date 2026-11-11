@@ -411,7 +411,7 @@ function ToolbarButton({
           </span>
         )}
       </button>
-      <span className="pointer-events-none absolute left-1/2 top-full z-40 mt-2 hidden -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md bg-content-primary px-2 py-1 text-2xs font-medium text-surface-primary shadow-lg group-hover:flex">
+      <span className="pointer-events-none absolute left-1/2 top-full z-tooltip mt-2 hidden -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md bg-content-primary px-2 py-1 text-2xs font-medium text-surface-primary shadow-lg group-hover:flex">
         {label}
         {shortcut && (
           <kbd className="rounded border border-surface-primary/30 px-1 font-sans text-2xs font-semibold uppercase leading-tight">
@@ -2023,13 +2023,13 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
                 data-testid="pointcloud-panel-close"
               >
-                <PanelRightClose size={15} />
+                <PanelRightClose size={16} />
               </button>
             </div>
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
               {/* ── Display settings ─────────────────────────────────────── */}
               <section className="space-y-3" data-testid="pointcloud-display-section">
-                <h4 className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <h4 className="oe-overline flex items-center gap-1.5">
                   <Palette size={12} />
                   {t('pointcloud.group_display', { defaultValue: 'Display' })}
                 </h4>
@@ -2037,13 +2037,13 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
           <div>
             <label
               htmlFor="pointcloud-color-mode"
-            className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+            className="oe-overline mb-1 block"
           >
             {t('pointcloud.viewer_color_mode', { defaultValue: 'Color by' })}
           </label>
           <select
             id="pointcloud-color-mode"
-            className="rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-select"
             value={colorMode}
             onChange={(e) => setColorMode(e.target.value as ColorMode)}
             disabled={phase !== 'ready'}
@@ -2060,13 +2060,13 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         <div>
           <label
             htmlFor="pointcloud-density"
-            className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+            className="oe-overline mb-1 block"
           >
             {t('pointcloud.viewer_density', { defaultValue: 'Density' })}
           </label>
           <select
             id="pointcloud-density"
-            className="rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-select"
             value={maxPoints}
             onChange={(e) => setMaxPoints(Number(e.target.value))}
             disabled={phase !== 'ready'}
@@ -2083,7 +2083,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         <div className="min-w-[150px]">
           <label
             htmlFor="pointcloud-point-size"
-            className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+            className="oe-overline mb-1 block"
           >
             {t('pointcloud.viewer_point_size', { defaultValue: 'Point size' })}
           </label>
@@ -2104,9 +2104,9 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         <div className="min-w-[140px]">
           <label
             htmlFor="pointcloud-draw-density"
-            className="mb-1 flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+            className="oe-overline mb-1"
           >
-            <Gauge size={11} />
+            <Gauge size={12} />
             {t('pointcloud.viewer_draw_density', { defaultValue: 'Draw density' })}
             <span className="font-normal normal-case text-content-quaternary">
               {Math.round(drawFraction * 100)}%
@@ -2132,14 +2132,14 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         <div>
           <label
             htmlFor="pointcloud-bg-mode"
-            className="mb-1 flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+            className="oe-overline mb-1"
           >
-            <Palette size={11} />
+            <Palette size={12} />
             {t('pointcloud.viewer_background', { defaultValue: 'Background' })}
           </label>
           <select
             id="pointcloud-bg-mode"
-            className="rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-select"
             value={bgMode}
             onChange={(e) => setBgMode(e.target.value as BgMode)}
             disabled={toolsDisabled}
@@ -2218,7 +2218,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
           <div className="min-w-[160px] flex-1">
             <label
               htmlFor="pointcloud-slice-min"
-              className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+              className="oe-overline mb-1 block"
             >
               {t('pointcloud.slice_min_height', { defaultValue: 'Min height' })}
               <span className="ml-1 font-normal normal-case text-content-quaternary">
@@ -2240,7 +2240,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
           <div className="min-w-[160px] flex-1">
             <label
               htmlFor="pointcloud-slice-max"
-              className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
+              className="oe-overline mb-1 block"
             >
               {t('pointcloud.slice_max_height', { defaultValue: 'Max height' })}
               <span className="ml-1 font-normal normal-case text-content-quaternary">
@@ -2464,7 +2464,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                 <div>
                   <label
                     htmlFor="pointcloud-volume-ref"
-                    className="mb-1 block text-2xs font-medium text-content-tertiary"
+                    className="oe-label"
                   >
                     {t('pointcloud.volume_ref', { defaultValue: 'Reference height (m)' })}
                   </label>
@@ -2477,14 +2477,14 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                       const v = Number(e.target.value);
                       if (Number.isFinite(v)) setVolumeRefY(v);
                     }}
-                    className="w-24 rounded border border-border-light bg-surface-secondary px-2 py-1 text-xs tabular-nums text-content-primary"
+                    className="w-24 oe-input oe-input-sm tabular-nums"
                     data-testid="pointcloud-volume-ref"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="pointcloud-volume-cell"
-                    className="mb-1 block text-2xs font-medium text-content-tertiary"
+                    className="oe-label"
                   >
                     {t('pointcloud.volume_cell', { defaultValue: 'Cell size (m)' })}
                   </label>
@@ -2498,7 +2498,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                       const v = Number(e.target.value);
                       if (Number.isFinite(v) && v > 0) setVolumeCell(v);
                     }}
-                    className="w-24 rounded border border-border-light bg-surface-secondary px-2 py-1 text-xs tabular-nums text-content-primary"
+                    className="w-24 oe-input oe-input-sm tabular-nums"
                     data-testid="pointcloud-volume-cell"
                   />
                 </div>
@@ -2661,7 +2661,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                     placeholder={t('pointcloud.annotate_note_placeholder', {
                       defaultValue: 'Add a note (e.g. crack, spall, RFI)',
                     })}
-                    className="min-w-0 flex-1 rounded border border-border-light bg-surface-secondary px-2 py-1 text-xs text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    className="min-w-0 flex-1 oe-input oe-input-sm"
                     data-testid="pointcloud-annotation-note"
                   />
                   <span className="hidden shrink-0 text-2xs tabular-nums text-content-quaternary sm:inline">
@@ -2833,7 +2833,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                       value={g.name}
                       onChange={(e) => renameGroup(g.id, e.target.value)}
                       aria-label={t('pointcloud.group_name_label', { defaultValue: 'Group name' })}
-                      className="min-w-[7rem] max-w-[12rem] flex-1 rounded border border-border-light bg-surface-secondary px-2 py-1 text-xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                      className="min-w-[7rem] max-w-[12rem] flex-1 oe-input oe-input-sm"
                       data-testid="pointcloud-group-name"
                     />
                     <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">
@@ -2862,7 +2862,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                         }`}
                         data-testid="pointcloud-group-isolate"
                       >
-                        {isolated ? <EyeOff size={13} /> : <Eye size={13} />}
+                        {isolated ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                       <button
                         type="button"
@@ -2874,7 +2874,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                         className="inline-flex items-center justify-center rounded-lg border border-border-light bg-surface-secondary p-1.5 text-content-tertiary transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/10 hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-40"
                         data-testid="pointcloud-group-add-boq"
                       >
-                        <ListPlus size={13} />
+                        <ListPlus size={14} />
                       </button>
                       <button
                         type="button"
@@ -2883,7 +2883,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                         className="inline-flex items-center justify-center rounded-lg border border-border-light bg-surface-secondary p-1.5 text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
                         data-testid="pointcloud-group-copy"
                       >
-                        <Copy size={13} />
+                        <Copy size={14} />
                       </button>
                       <button
                         type="button"
@@ -2893,7 +2893,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                         className="inline-flex items-center justify-center rounded-lg p-1.5 text-content-tertiary transition-colors hover:bg-danger/10 hover:text-danger"
                         data-testid="pointcloud-group-remove"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </li>
@@ -2906,7 +2906,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                   className="inline-flex items-center gap-1 text-2xs text-content-tertiary underline hover:text-danger"
                   data-testid="pointcloud-groups-clear"
                 >
-                  <X size={11} />
+                  <X size={12} />
                   {t('pointcloud.groups_clear_all', { defaultValue: 'Clear all groups' })}
                 </button>
               </li>
@@ -3157,7 +3157,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
               onClick={() => setReloadNonce((n) => n + 1)}
               className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-secondary px-3 py-1.5 text-sm text-content-secondary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
             >
-              <RefreshCw size={13} />
+              <RefreshCw size={14} />
               {t('pointcloud.viewer_retry', { defaultValue: 'Try again' })}
             </button>
           </div>
@@ -3215,7 +3215,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                 className="inline-flex items-center gap-1 text-2xs text-content-tertiary hover:text-oe-blue"
                 data-testid="pointcloud-legend-pin"
               >
-                {legendPinned ? <Pin size={11} /> : <PinOff size={11} />}
+                {legendPinned ? <Pin size={12} /> : <PinOff size={12} />}
                 {t('pointcloud.legend_pin', { defaultValue: 'Pin range' })}
               </button>
               {legendPinned && (
@@ -3231,7 +3231,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                       }
                     }}
                     aria-label={t('pointcloud.legend_max_label', { defaultValue: 'Ramp maximum height in metres' })}
-                    className="w-16 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs tabular-nums text-content-primary"
+                    className="w-16 oe-input oe-input-sm tabular-nums"
                   />
                   <input
                     type="number"
@@ -3244,7 +3244,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                       }
                     }}
                     aria-label={t('pointcloud.legend_min_label', { defaultValue: 'Ramp minimum height in metres' })}
-                    className="w-16 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs tabular-nums text-content-primary"
+                    className="w-16 oe-input oe-input-sm tabular-nums"
                   />
                 </div>
               )}
@@ -3258,7 +3258,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         {pathMetrics && pathMetrics.segmentCount >= 1 && (
           <div
             ref={measureLabelRef}
-            className="pointer-events-none absolute left-0 top-0 z-10 -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-2xs font-medium text-white shadow-lg"
+            className="pointer-events-none absolute left-0 top-0 z-tooltip -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-2xs font-medium text-white shadow-lg"
             data-testid="pointcloud-measure-label"
           >
             <div>{formatLengthMm(pathMetrics.totalLength)}</div>

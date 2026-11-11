@@ -580,7 +580,7 @@ export function PipelinesPage() {
                         onClick={() => openLibrary('templates')}
                         className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-oe-blue bg-oe-blue px-3 py-2 text-sm font-medium text-white hover:bg-oe-blue/90"
                       >
-                        <LayoutTemplate size={15} aria-hidden="true" />
+                        <LayoutTemplate size={16} aria-hidden="true" />
                         {t('pipeline.empty.browse_templates', {
                           defaultValue: 'Browse templates',
                         })}
@@ -590,7 +590,7 @@ export function PipelinesPage() {
                         onClick={() => openLibrary('saved')}
                         className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
                       >
-                        <FolderOpen size={15} aria-hidden="true" />
+                        <FolderOpen size={16} aria-hidden="true" />
                         {t('pipeline.empty.open_saved', {
                           defaultValue: 'Open saved',
                         })}
@@ -601,7 +601,7 @@ export function PipelinesPage() {
                         defaultValue: 'Or build your own',
                       })}
                     </p>
-                    <ol className="space-y-2.5">
+                    <ol className="space-y-2">
                       {[
                         t('pipeline.empty.step_trigger', {
                           defaultValue:
@@ -632,7 +632,7 @@ export function PipelinesPage() {
                     </ol>
                     <p className="mt-3 flex items-start gap-1.5 border-t border-border pt-3 text-xs text-content-tertiary">
                       <Info
-                        size={13}
+                        size={14}
                         aria-hidden="true"
                         className="mt-px shrink-0"
                       />

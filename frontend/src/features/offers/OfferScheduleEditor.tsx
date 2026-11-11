@@ -16,7 +16,7 @@ interface Props {
 
 const DUE_TYPES = ['signing', 'date', 'activity', 'acceptance'] as const;
 const inputCls =
-  'h-8 w-full rounded-md border border-border-light bg-surface-primary px-2 text-sm tabular-nums text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-input w-full tabular-nums';
 
 export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onChange }: Props) {
   const { t } = useTranslation();
@@ -59,14 +59,14 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
 
   return (
     <div className="space-y-3">
-      <table className="w-full text-sm">
+      <table className="oe-table oe-table-compact">
         <thead>
-          <tr className="text-left text-xs text-content-tertiary">
-            <th className="w-8 py-1">#</th>
-            <th className="py-1">{t('offers.schedule.instalment', { defaultValue: 'Instalment' })}</th>
-            <th className="py-1">{t('offers.schedule.due_when', { defaultValue: 'Due when' })}</th>
-            <th className="w-24 py-1 text-right">%</th>
-            <th className="w-36 py-1 text-right">{t('offers.schedule.amount_net', { defaultValue: 'Amount (net)' })}</th>
+          <tr>
+            <th className="w-8">#</th>
+            <th>{t('offers.schedule.instalment', { defaultValue: 'Instalment' })}</th>
+            <th>{t('offers.schedule.due_when', { defaultValue: 'Due when' })}</th>
+            <th className="w-24 text-right">%</th>
+            <th className="w-36 text-right">{t('offers.schedule.amount_net', { defaultValue: 'Amount (net)' })}</th>
             <th className="w-8" />
           </tr>
         </thead>
@@ -75,8 +75,8 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
             const last = i === rows.length - 1;
             return (
               <tr key={i} className="align-top">
-                <td className="py-1 text-content-tertiary">{i + 1}</td>
-                <td className="py-1 pr-2">
+                <td className="text-content-tertiary">{i + 1}</td>
+                <td>
                   <input
                     className={inputCls}
                     value={row.name}
@@ -85,9 +85,9 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
                     onChange={(e) => edit(i, { name: e.target.value })}
                   />
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <select
-                    className={inputCls}
+                    className={`${inputCls} oe-select`}
                     value={String(row.due.type)}
                     disabled={readOnly}
                     aria-label={t('offers.schedule.due_when', { defaultValue: 'Due when' })}
@@ -100,7 +100,7 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
                     ))}
                   </select>
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     className={`${inputCls} text-right`}
                     inputMode="decimal"
@@ -111,7 +111,7 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
                     onBlur={() => edit(i, {}, 'percent')}
                   />
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     className={`${inputCls} text-right`}
                     inputMode="decimal"
@@ -125,7 +125,7 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
                     <span className="text-xs text-content-tertiary">{t('offers.schedule.takes_rest', { defaultValue: 'Takes the rest' })}</span>
                   )}
                 </td>
-                <td className="py-1">
+                <td>
                   {!readOnly && rows.length > 1 && (
                     <button type="button" className="p-1 text-content-tertiary hover:text-semantic-error" onClick={() => removeRow(i)} aria-label={t('common.delete', { defaultValue: 'Delete' })}>
                       <Trash2 size={14} />
@@ -145,7 +145,7 @@ export function OfferScheduleEditor({ rows, net, currency, readOnly = false, onC
               {t('offers.schedule.add', { defaultValue: 'Add instalment' })}
             </Button>
             <select
-              className={`${inputCls} w-auto`}
+              className={`${inputCls} oe-select w-auto`}
               value=""
               aria-label={t('offers.schedule.template', { defaultValue: 'Template' })}
               onChange={(e) => e.target.value && useTemplate(e.target.value)}

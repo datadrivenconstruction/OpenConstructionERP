@@ -33,7 +33,7 @@ import { RecordingPlayer } from './RecordingPlayer';
 import type { PhoneDirection, PhoneLog, ProtocolActionItem } from './types';
 
 const INPUT_CLASS =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary';
+  'oe-input';
 const LABEL_CLASS = 'flex flex-col gap-1 text-sm text-content-secondary';
 // A speech-to-text provider takes these directly, so no local transcode is needed.
 const ACCEPT = 'audio/*,video/*,.mp3,.m4a,.wav,.webm,.mp4,.mpeg,.mpga';
@@ -267,7 +267,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
     return (
       <Card className="space-y-3 p-4">
         <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title flex items-center gap-2">
             <Mic className="h-4 w-4" />
             {t('phonelog.rec.card_title', { defaultValue: 'Create a protocol from a recording' })}
           </h2>
@@ -351,7 +351,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
     <Card className="space-y-4 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title flex items-center gap-2">
             <ListChecks className="h-4 w-4" />
             {t('phonelog.rec.review_title', { defaultValue: 'Review the draft protocol' })}
           </h2>
@@ -413,7 +413,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           <select
             value={state.direction}
             onChange={(e) => setField('direction', e.target.value as PhoneDirection)}
-            className={INPUT_CLASS}
+            className={`${INPUT_CLASS} oe-select`}
           >
             {DIRECTIONS.map((d) => (
               <option key={d} value={d}>
@@ -452,7 +452,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           value={state.summary}
           onChange={(e) => setField('summary', e.target.value)}
           rows={2}
-          className={INPUT_CLASS}
+          className={`${INPUT_CLASS} oe-textarea`}
         />
       </label>
 
@@ -463,7 +463,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           onChange={(e) => setField('decisions', e.target.value)}
           rows={3}
           placeholder={t('phonelog.rec.decisions_ph', { defaultValue: 'One decision per line' })}
-          className={INPUT_CLASS}
+          className={`${INPUT_CLASS} oe-textarea`}
         />
       </label>
 
@@ -529,7 +529,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           onChange={(e) => setField('instructions', e.target.value)}
           rows={3}
           placeholder={t('phonelog.rec.instructions_ph', { defaultValue: 'One instruction per line' })}
-          className={INPUT_CLASS}
+          className={`${INPUT_CLASS} oe-textarea`}
         />
       </label>
 
@@ -540,7 +540,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           onChange={(e) => setField('transcript', e.target.value)}
           rows={6}
           placeholder={t('phonelog.rec.transcript_ph', { defaultValue: 'Paste what was said on the recording.' })}
-          className={INPUT_CLASS}
+          className={`${INPUT_CLASS} oe-textarea`}
         />
       </label>
 

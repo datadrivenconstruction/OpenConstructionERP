@@ -205,7 +205,7 @@ export function ApplicationPanel({
 
       <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="clock-card">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <Clock3 size={16} aria-hidden />
             {t('permits.ui.clock.title', { defaultValue: 'Decision period' })}
           </h3>
@@ -256,7 +256,7 @@ export function ApplicationPanel({
       </section>
 
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.decision.heading', { defaultValue: 'Decision' })}</h3>
+        <h3 className="oe-card-title">{t('permits.ui.decision.heading', { defaultValue: 'Decision' })}</h3>
         {complete.error && <Refusal>{complete.error}</Refusal>}
         {a.decisions.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border-light p-4 text-sm text-content-tertiary" data-testid="decision-empty">

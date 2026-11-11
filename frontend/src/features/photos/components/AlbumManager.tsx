@@ -55,7 +55,7 @@ export function AlbumManager({ projectId, onOpen, onExport }: AlbumManagerProps)
           placeholder={t('photoArchive.albums.name_placeholder')}
           aria-label={t('photoArchive.albums.name')}
           maxLength={200}
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm"
+          className="min-w-0 flex-1 oe-input"
         />
         <button
           type="submit"

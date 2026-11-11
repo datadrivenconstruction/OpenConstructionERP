@@ -31,10 +31,10 @@ export const READINESS_GATE_HINT: Record<ReadinessGate, KeyText> = {
 };
 
 const ITEM_ICON = {
-  met: <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />,
-  at_risk: <CircleAlert size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />,
-  not_met: <CircleX size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />,
-  warning: <CircleAlert size={15} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden />,
+  met: <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-semantic-success" aria-hidden />,
+  at_risk: <CircleAlert size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />,
+  not_met: <CircleX size={16} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />,
+  warning: <CircleAlert size={16} className="mt-0.5 shrink-0 text-content-tertiary" aria-hidden />,
 };
 
 /** The items that need attention first, then the ones already met. */
@@ -49,7 +49,7 @@ export function ReadinessCard({ gate, readiness }: { gate: ReadinessGate; readin
   return (
     <section className="space-y-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid={`readiness-${gate}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-content-primary">{vocab(t, READINESS_GATE, gate)}</h3>
+        <h3 className="oe-card-title">{vocab(t, READINESS_GATE, gate)}</h3>
         <ToneBadge tone={READINESS_TONE[readiness.status]} testId={`readiness-${gate}-status`}>
           {vocab(t, READINESS_STATUS, readiness.status)}
         </ToneBadge>
@@ -122,7 +122,7 @@ export function ChecksPanel({ readiness, validation }: ChecksPanelProps) {
       </div>
 
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.validation.title', { defaultValue: 'Data checks' })}</h3>
+        <h3 className="oe-card-title">{t('permits.ui.validation.title', { defaultValue: 'Data checks' })}</h3>
         {validation.isLoading ? (
           <SkeletonTable rows={3} columns={2} />
         ) : validation.isError ? (

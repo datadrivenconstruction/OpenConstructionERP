@@ -1188,7 +1188,7 @@ function ToggleSwitch({
           enabled ? 'translate-x-[22px] rtl:-translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
         )}
       >
-        {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
+        {enabled && <Check size={12} className="text-oe-blue" strokeWidth={3} />}
       </span>
     </button>
   );
@@ -1260,7 +1260,7 @@ function StepWelcome({
       </div>
 
       <Badge variant="blue" size="sm" className="mb-2">
-        <Sparkles size={11} className="me-1" />
+        <Sparkles size={12} className="me-1" />
         {t('onboarding.welcome_eyebrow', { defaultValue: 'Construction estimation, reimagined' })}
       </Badge>
 
@@ -1282,7 +1282,7 @@ function StepWelcome({
           {t('onboarding.welcome_pick_language', { defaultValue: 'Pick your language' })}
           <span className="h-px w-8 bg-border-light" aria-hidden />
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
             const isSelected = selected === lang.code;
             return (
@@ -1334,7 +1334,7 @@ function StepWelcome({
           localStorage.setItem('oe_lang_explicit', '1');
           onNext();
         }}
-        icon={<ArrowRight size={18} />}
+        icon={<ArrowRight size={20} />}
         iconPosition="right"
         className="mt-5 shadow-lg shadow-oe-blue/20"
       >
@@ -1798,11 +1798,11 @@ export function ReadyPackPicker({
         <span className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary">{label}</span>
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
           <span className="inline-flex items-center gap-1">
-            <Languages size={11} />
+            <Languages size={12} />
             {pack.locale.toUpperCase()}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Database size={11} />
+            <Database size={12} />
             {pack.classification}
           </span>
         </div>
@@ -1840,7 +1840,7 @@ export function ReadyPackPicker({
           data-testid="ready-pack-load-error"
           className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-semantic-warning-bg px-4 py-3 text-xs text-semantic-warning"
         >
-          <AlertTriangle size={15} className="shrink-0" />
+          <AlertTriangle size={16} className="shrink-0" />
           <span className="flex-1">
             {t('onboarding.pp_load_error', {
               defaultValue: 'Could not load country packs. You can still pick a country below.',
@@ -1916,11 +1916,11 @@ export function ReadyPackPicker({
                 <PackVariantBadge pack={pack} />
                 <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
                   <span className="inline-flex items-center gap-1">
-                    <Languages size={11} />
+                    <Languages size={12} />
                     {pack.default_locale.toUpperCase()}
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <Database size={11} />
+                    <Database size={12} />
                     {pack.default_currency}
                   </span>
                 </div>
@@ -1946,7 +1946,7 @@ export function ReadyPackPicker({
             if (shownPresets.length === 0) return null;
             return (
               <section aria-labelledby="ready-pack-presets-title" data-testid="ready-pack-presets">
-                <h3 id="ready-pack-presets-title" className="mb-3 text-sm font-semibold text-content-primary">
+                <h3 id="ready-pack-presets-title" className="oe-card-title mb-3">
                   {t('onboarding.ready_pack_other_markets', { defaultValue: 'Or start from a market preset' })}
                 </h3>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -1997,7 +1997,7 @@ export function ReadyPackPicker({
           className={clsx(
             'mt-6 w-full max-w-lg',
             !installing &&
-              'sticky bottom-3 z-[5] rounded-2xl bg-surface-primary/95 p-3 shadow-lg ring-1 ring-border-light backdrop-blur',
+              'sticky bottom-3 z-sticky rounded-2xl bg-surface-primary/95 p-3 shadow-lg ring-1 ring-border-light backdrop-blur',
           )}
           data-testid="ready-pack-confirm"
         >
@@ -2050,7 +2050,7 @@ export function ReadyPackPicker({
               <>
                 {chosenCompany && (
                   <p className="mb-2 flex items-center justify-center gap-1.5 text-xs text-content-secondary">
-                    <Briefcase size={13} aria-hidden />
+                    <Briefcase size={14} aria-hidden />
                     <span className="min-w-0 truncate" title={companies.profileName(chosenCompany)}>
                       {t('onboarding.ready_pack_company_chosen', {
                         defaultValue: 'Company type: {{name}}',
@@ -2172,7 +2172,7 @@ function ReadyPackProgressPanel({
     <div className="mb-5 rounded-2xl border border-border-light/70 bg-surface-secondary/40 p-5 dark:border-white/10">
       {/* Big status headline + prominent percent. */}
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           {languageReady ? (
             <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
           ) : (
@@ -2216,7 +2216,7 @@ function ReadyPackProgressPanel({
 
       {/* Large, legible per-step checklist. */}
       {steps.length > 0 && (
-        <ul className="mt-4 space-y-2.5">
+        <ul className="mt-4 space-y-2">
           {steps.map((s) => {
             const StepIcon = streamStepIcon(s.step);
             return (
@@ -2565,9 +2565,9 @@ function StepCompanyProfile({
             className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue transition-colors hover:underline"
           >
             {showRoles ? (
-              <ChevronDown size={15} className="shrink-0" aria-hidden />
+              <ChevronDown size={16} className="shrink-0" aria-hidden />
             ) : (
-              <ChevronRight size={15} className="shrink-0 rtl:rotate-180" aria-hidden />
+              <ChevronRight size={16} className="shrink-0 rtl:rotate-180" aria-hidden />
             )}
             {t('onboarding.bizprofile_roles_toggle', { defaultValue: 'Or pick by your role' })}
           </button>
@@ -2606,7 +2606,7 @@ function StepCompanyProfile({
         >
           <div className="flex items-center gap-2">
             <Package size={16} className="shrink-0 text-oe-blue" />
-            <h4 className="min-w-0 text-sm font-semibold text-content-primary break-words">
+            <h4 className="oe-card-title min-w-0 break-words">
               {t('onboarding.bizprofile_you_get', {
                 defaultValue: 'What {{name}} switches on',
                 name: text.label(selectedPreset),
@@ -2773,7 +2773,7 @@ function StepModuleConfig({
         <div className="flex items-center justify-between rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] px-4 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30 shrink-0">
-              <Sparkles size={18} className="text-violet-600" />
+              <Sparkles size={20} className="text-violet-600" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-content-primary">
@@ -2802,7 +2802,7 @@ function StepModuleConfig({
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
               ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
                 ? 'bg-oe-blue'
-                : 'bg-gray-300 dark:bg-gray-600'
+                : 'bg-border'
             }`}
           >
             <span
@@ -2820,7 +2820,7 @@ function StepModuleConfig({
           matching group so a hit is never hidden behind a closed header. */}
       <div className="mt-4 w-full max-w-2xl relative">
         <Search
-          size={15}
+          size={16}
           className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary"
           aria-hidden
         />
@@ -2830,7 +2830,7 @@ function StepModuleConfig({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('onboarding.modpick_search', { defaultValue: 'Search modules' })}
           aria-label={t('onboarding.modpick_search', { defaultValue: 'Search modules' })}
-          className="w-full rounded-xl border border-border-light bg-surface-primary py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+          className="w-full oe-input ps-9 pe-3"
         />
       </div>
 
@@ -2855,9 +2855,9 @@ function StepModuleConfig({
                   className="flex min-w-0 flex-1 items-center gap-2 text-left"
                 >
                   {isOpen ? (
-                    <ChevronDown size={15} className="shrink-0 text-content-tertiary" aria-hidden />
+                    <ChevronDown size={16} className="shrink-0 text-content-tertiary" aria-hidden />
                   ) : (
-                    <ChevronRight size={15} className="shrink-0 text-content-tertiary" aria-hidden />
+                    <ChevronRight size={16} className="shrink-0 text-content-tertiary" aria-hidden />
                   )}
                   <span className="truncate text-sm font-semibold text-content-primary">
                     {label}
@@ -2961,16 +2961,16 @@ export function packDbStateFor(outcome: CostDbLoadOutcome): PackComponentState {
 /** Small status glyph for a Country Pack component (locale / DB / demo). */
 function PackStatusGlyph({ state }: { state: PackComponentState }) {
   if (state === 'running') {
-    return <Loader2 size={15} className="animate-spin text-oe-blue shrink-0" aria-hidden />;
+    return <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" aria-hidden />;
   }
   if (state === 'done') {
-    return <CheckCircle2 size={15} className="text-semantic-success shrink-0" aria-hidden />;
+    return <CheckCircle2 size={16} className="text-semantic-success shrink-0" aria-hidden />;
   }
   if (state === 'skipped') {
     return <span className="text-2xs text-content-quaternary shrink-0">—</span>;
   }
   if (state === 'pending') {
-    return <Clock size={15} className="text-semantic-warning shrink-0" aria-hidden />;
+    return <Clock size={16} className="text-semantic-warning shrink-0" aria-hidden />;
   }
   if (state === 'error') {
     return <span className="text-2xs font-semibold text-semantic-error shrink-0">!</span>;
@@ -3271,7 +3271,7 @@ function PartnerPackInstaller({
           <Globe size={20} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-base font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('onboarding.country_pack_title', { defaultValue: 'Set up by country' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -3291,7 +3291,7 @@ function PartnerPackInstaller({
 
       {!isLoading && isError && (
         <div className="flex items-center gap-2 rounded-xl bg-semantic-warning-bg px-3 py-3 text-xs text-semantic-warning">
-          <AlertTriangle size={15} className="shrink-0" />
+          <AlertTriangle size={16} className="shrink-0" />
           <span className="flex-1">
             {t('onboarding.pp_load_error', {
               defaultValue: 'Could not load country packs. You can still pick a country below.',
@@ -3354,13 +3354,13 @@ function PartnerPackInstaller({
                     {pack.partner_name}
                   </div>
                   <PackVariantBadge pack={pack} />
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-2xs text-content-quaternary">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
                     <span className="inline-flex items-center gap-1">
-                      <Languages size={11} />
+                      <Languages size={12} />
                       {pack.default_locale.toUpperCase()}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Database size={11} />
+                      <Database size={12} />
                       {pack.default_currency}
                     </span>
                   </div>
@@ -3405,9 +3405,9 @@ function PartnerPackInstaller({
               const StepIcon = FULL_INSTALL_STEP_ICONS[step];
               const state = stepStates[step];
               return (
-                <li key={step} className="flex items-center gap-2.5 text-xs">
+                <li key={step} className="flex items-center gap-2 text-xs">
                   <ChecklistGlyph state={state} />
-                  <StepIcon size={13} className="shrink-0 text-content-quaternary" />
+                  <StepIcon size={14} className="shrink-0 text-content-quaternary" />
                   <span
                     className={clsx(
                       'flex-1',
@@ -3490,7 +3490,7 @@ function PackComponentRow({
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-secondary/60 px-3 py-2.5">
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex min-w-0 items-center gap-2">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated text-content-secondary">
           {icon}
         </span>
@@ -3502,14 +3502,14 @@ function PackComponentRow({
       <div className="flex shrink-0 items-center gap-2">
         {state === 'done' ? (
           <span className="flex items-center gap-1 text-2xs font-medium text-semantic-success">
-            <CheckCircle2 size={13} />
+            <CheckCircle2 size={14} />
             {doneLabel}
           </span>
         ) : state === 'skipped' ? (
           <span className="text-2xs text-content-quaternary">{skippedLabel}</span>
         ) : state === 'pending' ? (
           <span className="flex items-center gap-1 text-2xs font-medium text-semantic-warning">
-            <Clock size={13} />
+            <Clock size={14} />
             {t('onboarding.pack_still_loading', { defaultValue: 'Still loading, check later' })}
           </span>
         ) : (
@@ -3594,7 +3594,7 @@ function CountryPackCard({
           <Globe size={20} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-base font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('onboarding.other_countries_title', { defaultValue: 'Other countries' })}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -3763,7 +3763,7 @@ function CountryPackCard({
           ? t('onboarding.country_pack_hide_customize', { defaultValue: 'Hide options' })
           : t('onboarding.country_pack_customize', { defaultValue: 'Customize / install separately' })}
         <ChevronDown
-          size={13}
+          size={14}
           className={clsx('transition-transform duration-200', customizeOpen && 'rotate-180')}
         />
       </button>
@@ -3771,7 +3771,7 @@ function CountryPackCard({
       {customizeOpen && (
         <div className="mt-3 space-y-2">
           <PackComponentRow
-            icon={<Languages size={15} />}
+            icon={<Languages size={16} />}
             label={t('onboarding.country_pack_locale', { defaultValue: 'Language' })}
             detail={selectedPack.locale.toUpperCase()}
             state={localeState}
@@ -3782,7 +3782,7 @@ function CountryPackCard({
             disabled={installing}
           />
           <PackComponentRow
-            icon={<Database size={15} />}
+            icon={<Database size={16} />}
             label={t('onboarding.country_pack_db', { defaultValue: 'Cost database' })}
             detail={selectedPack.region}
             state={dbState}
@@ -3797,7 +3797,7 @@ function CountryPackCard({
               these rows can never reach the finished state, because the demo
               would sit at idle forever with no control able to move it. */}
           <PackComponentRow
-            icon={<Building2 size={15} />}
+            icon={<Building2 size={16} />}
             label={t('onboarding.country_pack_demo', { defaultValue: 'Demo project' })}
             detail={selectedPack.demoId}
             state={demoState}
@@ -4326,7 +4326,7 @@ export function StepDataSetup({
               <Database size={20} />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('onboarding.load_cost_db', { defaultValue: 'Load Cost Database' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -4467,7 +4467,7 @@ export function StepDataSetup({
                 <FolderOpen size={20} />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
                 </h3>
                 <p className="text-xs text-content-tertiary">
@@ -4520,7 +4520,7 @@ export function StepDataSetup({
                 <Sparkles size={20} />
               </div>
               <div className="text-start">
-                <h3 className="text-base font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('onboarding.connect_ai', { defaultValue: 'Connect AI Provider' })}
                 </h3>
                 <p className="text-xs text-content-tertiary">
@@ -4547,7 +4547,7 @@ export function StepDataSetup({
                   setApiKey('');
                   setShowKey(false);
                 }}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                className="oe-select w-full"
               >
                 {AI_PROVIDERS.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -4576,7 +4576,7 @@ export function StepDataSetup({
                   placeholder={t('onboarding.api_key_placeholder', {
                     defaultValue: 'Paste API key...',
                   })}
-                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 pe-8 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                  className="oe-input w-full pe-8 font-mono"
                 />
                 <button
                   type="button"
@@ -4885,7 +4885,7 @@ export function StepFinish({
           size="lg"
           onClick={handleFinish}
           loading={saving}
-          icon={<ArrowRight size={18} />}
+          icon={<ArrowRight size={20} />}
           iconPosition="right"
         >
           {t('onboarding.start_working', { defaultValue: 'Start Working' })}
@@ -5327,7 +5327,7 @@ export function OnboardingWizard() {
                 onClick={handleSkipAll}
                 className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated/70 px-3 py-1 text-xs font-medium text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-surface-elevated hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
               >
-                <Globe size={13} strokeWidth={2} />
+                <Globe size={14} strokeWidth={2} />
                 {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
               </button>
             </div>

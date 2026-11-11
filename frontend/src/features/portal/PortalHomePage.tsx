@@ -1126,12 +1126,12 @@ function ModelViewerModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex flex-col bg-surface-primary"
+      className="fixed inset-0 z-modal flex flex-col bg-surface-primary"
     >
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border-light px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <Boxes size={16} className="shrink-0 text-content-tertiary" />
-          <h2 className="truncate text-sm font-semibold text-content-primary">{model.name}</h2>
+          <h2 className="oe-card-title truncate">{model.name}</h2>
           <Badge variant="neutral" size="sm">
             {t('homeportal.models_view_only', { defaultValue: 'View only' })}
           </Badge>
@@ -1142,7 +1142,7 @@ function ModelViewerModal({
           aria-label={t('common.close', { defaultValue: 'Close' })}
           className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
       </header>
       <div className="relative flex-1 overflow-hidden">

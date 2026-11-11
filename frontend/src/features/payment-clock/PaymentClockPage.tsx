@@ -32,7 +32,7 @@ export function PaymentClockPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="payment_clock.how"
-        icon={<Scale size={15} className="text-oe-blue" />}
+        icon={<Scale size={16} className="text-oe-blue" />}
         title={t('payment_clock.flow_title', {
           defaultValue: 'How the payment clock works, and what it protects',
         })}

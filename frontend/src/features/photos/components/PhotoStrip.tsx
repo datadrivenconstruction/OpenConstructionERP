@@ -38,7 +38,7 @@ export function PhotoStrip({ projectId, kind, targetId, canUpload = true, hideSo
   return (
     <section className={`space-y-2 ${className ?? ''}`} data-testid="photo-strip" aria-label={t('photoArchive.strip.title')}>
       <div className="flex items-center justify-between">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <h4 className="oe-overline flex items-center gap-1.5">
           <Images className="h-3.5 w-3.5" aria-hidden />
           {hideSource ? t('photoArchive.strip.title_linked') : t('photoArchive.strip.title')}
           {photos.length > 0 && <span className="text-content-tertiary">({photos.length})</span>}

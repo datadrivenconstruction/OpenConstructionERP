@@ -157,7 +157,7 @@ function PermitTransitionDialog({ open, onClose, projectId, permit }: { open: bo
           const flag = permit.can?.transition?.[x];
           const refused = flag?.allowed === false;
           return (
-            <label key={x} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2.5 text-sm">
+            <label key={x} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
               <input type="radio" name="permit-target" className="mt-1" disabled={refused} checked={target === x} onChange={() => setTarget(x)} />
               <span>
                 <span className={refused ? 'text-content-tertiary' : undefined}>{vocab(t, PERMIT_STEP, x)}</span>
@@ -172,7 +172,7 @@ function PermitTransitionDialog({ open, onClose, projectId, permit }: { open: bo
         })}
       </fieldset>
       <Field label={t('permits.ui.permit.change_reason', { defaultValue: 'Reason' })} required>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={reason} onChange={(e) => setReason(e.target.value)} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={reason} onChange={(e) => setReason(e.target.value)} />}
       </Field>
     </FormDialog>
   );

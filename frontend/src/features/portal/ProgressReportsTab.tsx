@@ -21,7 +21,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select w-full';
 
 /* ─── Progress reports tab ───────────────────────────────────────────────
  *
@@ -63,7 +63,7 @@ export function ProgressReportsTab() {
         <div className="min-w-[220px] flex-1 max-w-md">
           <label
             htmlFor="portal-progress-project"
-            className="mb-1 block text-xs font-medium uppercase tracking-wide text-content-tertiary"
+            className="oe-overline mb-1 block"
           >
             {t('portal.progress_project', { defaultValue: 'Project' })}
           </label>
@@ -142,22 +142,22 @@ function ReportList({ reports }: { reports: ProgressReport[] }) {
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.progress_report_title', { defaultValue: 'Report' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.progress_generated', { defaultValue: 'Generated' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.progress_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.progress_client', { defaultValue: 'Client' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>

@@ -26,7 +26,7 @@ import { fmtFixed } from '@/shared/lib/formatters';
 import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 /** Parse a free-typed money string into a Number for the live summary only. */
 function toNumber(v: string): number {
@@ -158,7 +158,7 @@ export function PaymentApplicationForm({
         <>
           <Card padding="md" className="space-y-4">
             <div>
-              <label className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+              <label className="oe-overline mb-1 block">
                 {t('payportal.agreement', { defaultValue: 'Agreement' })}
               </label>
               <select
@@ -167,7 +167,7 @@ export function PaymentApplicationForm({
                   setAgreementId(e.target.value);
                   setClaims({});
                 }}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
               >
                 <option value="">
                   {t('payportal.select_agreement', { defaultValue: 'Select an agreement' })}
@@ -182,7 +182,7 @@ export function PaymentApplicationForm({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <label className="oe-overline mb-1 block">
                   {t('payportal.period_start', { defaultValue: 'Period start' })}
                 </label>
                 <input
@@ -193,7 +193,7 @@ export function PaymentApplicationForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <label className="oe-overline mb-1 block">
                   {t('payportal.period_end', { defaultValue: 'Period end' })}
                 </label>
                 <input
@@ -231,7 +231,7 @@ export function PaymentApplicationForm({
                         </p>
                       </div>
                       <div className="mt-2 sm:mt-0 sm:w-44">
-                        <label className="mb-1 block text-2xs uppercase tracking-wide text-content-tertiary">
+                        <label className="oe-overline mb-1 block">
                           {t('payportal.claimed', { defaultValue: 'Claimed this period' })}
                         </label>
                         <input

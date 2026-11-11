@@ -118,7 +118,7 @@ export function DocumentRevisionSelect({
   const options = (containersQ.data ?? []).filter((c) => !!c.current_revision_id);
   return (
     <>
-      <select id={id} className={fieldClass} value={value} disabled={containersQ.isLoading} onChange={(e) => onChange(e.target.value)}>
+      <select id={id} className={`${fieldClass} oe-select`} value={value} disabled={containersQ.isLoading} onChange={(e) => onChange(e.target.value)}>
         <option value="">
           {containersQ.isLoading
             ? t('permits.ui.loading', { defaultValue: 'Loading...' })
@@ -176,7 +176,7 @@ export function ConditionFields({ projectId, draft, onChange, personName, number
           {(id) => (
             <select
               id={id}
-              className={fieldClass}
+              className={`${fieldClass} oe-select`}
               value={draft.kind}
               onChange={(e) => onChange({ kind: e.target.value as ConditionKind })}
             >
@@ -202,7 +202,7 @@ export function ConditionFields({ projectId, draft, onChange, personName, number
           <textarea
             id={id}
             rows={3}
-            className={fieldClass}
+            className={`${fieldClass} oe-textarea`}
             value={draft.text}
             disabled={textLocked}
             onChange={(e) => onChange({ text: e.target.value })}
@@ -216,7 +216,7 @@ export function ConditionFields({ projectId, draft, onChange, personName, number
               {(id) => (
                 <select
                   id={id}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-select`}
                   value={draft.trigger}
                   onChange={(e) => onChange({ trigger: e.target.value as Trigger })}
                 >
@@ -241,7 +241,7 @@ export function ConditionFields({ projectId, draft, onChange, personName, number
             </Field>
             <Field label={t('permits.ui.condition.topic', { defaultValue: 'Topic' })}>
               {(id) => (
-                <select id={id} className={fieldClass} value={draft.topic} onChange={(e) => onChange({ topic: e.target.value as Topic })}>
+                <select id={id} className={`${fieldClass} oe-select`} value={draft.topic} onChange={(e) => onChange({ topic: e.target.value as Topic })}>
                   {TOPICS.map((x) => (
                     <option key={x} value={x}>
                       {vocab(t, TOPIC, x)}
@@ -309,7 +309,7 @@ export function ConditionFields({ projectId, draft, onChange, personName, number
               {(id) => (
                 <select
                   id={id}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-select`}
                   value={draft.purpose}
                   onChange={(e) => onChange({ purpose: e.target.value as ConditionPurpose })}
                 >
@@ -469,7 +469,7 @@ export function EvidenceDialog({ open, onClose, projectId, condition }: Conditio
         {(id) => (
           <select
             id={id}
-            className={fieldClass}
+            className={`${fieldClass} oe-select`}
             value={kind}
             onChange={(e) => {
               setKind(e.target.value as EvidenceKind);
@@ -505,7 +505,7 @@ export function EvidenceDialog({ open, onClose, projectId, condition }: Conditio
         </Field>
       )}
       <Field label={t('permits.ui.note', { defaultValue: 'Note' })}>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={note} onChange={(e) => setNote(e.target.value)} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={note} onChange={(e) => setNote(e.target.value)} />}
       </Field>
     </FormDialog>
   );
@@ -591,7 +591,7 @@ export function DischargeDialog({
           {t('permits.ui.discharge.mode', { defaultValue: 'How it is closed' })}
         </legend>
         {modes.map((m) => (
-          <label key={m} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2.5 text-sm">
+          <label key={m} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
             <input
               type="radio"
               name="discharge-mode"
@@ -629,7 +629,7 @@ export function DischargeDialog({
         </Field>
       )}
       <Field label={t('permits.ui.note', { defaultValue: 'Note' })}>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={note} onChange={(e) => setNote(e.target.value)} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={note} onChange={(e) => setNote(e.target.value)} />}
       </Field>
     </FormDialog>
   );
@@ -706,7 +706,7 @@ export function OngoingDialog({
         }
         required={breach}
       >
-        {(id) => <textarea id={id} rows={3} className={fieldClass} value={note} onChange={(e) => setNote(e.target.value)} />}
+        {(id) => <textarea id={id} rows={3} className={`${fieldClass} oe-textarea`} value={note} onChange={(e) => setNote(e.target.value)} />}
       </Field>
     </FormDialog>
   );
@@ -857,7 +857,7 @@ export function LinkRequirementDialog({ open, onClose, projectId, condition }: C
       <div className="grid gap-3 sm:grid-cols-3">
         <Field label={t('permits.ui.link.constraint', { defaultValue: 'Limit' })}>
           {(id) => (
-            <select id={id} className={fieldClass} value={constraint} onChange={(e) => setConstraint(e.target.value)}>
+            <select id={id} className={`${fieldClass} oe-select`} value={constraint} onChange={(e) => setConstraint(e.target.value)}>
               {constraints.map(([code, key, english]) => (
                 <option key={code} value={code}>
                   {t(key, { defaultValue: english })}

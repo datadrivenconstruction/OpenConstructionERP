@@ -33,7 +33,7 @@ export function PayrollPeriodWidget({ projectId }: { projectId: string }) {
   return (
     <Card className="p-4" data-testid="payroll-period-widget">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('payroll.widget_title', { defaultValue: 'Pay periods' })}
         </h2>
         <Badge variant="blue" size="sm">

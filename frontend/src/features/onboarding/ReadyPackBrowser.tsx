@@ -221,7 +221,7 @@ export function ReadyPackBrowser({
             defaultValue: 'Search by name, country, language or standard',
           })}
           data-testid="ready-pack-search"
-          className="h-10 w-full rounded-lg border border-border bg-surface-primary pe-9 ps-9 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/60 focus:outline-none focus:ring-2 focus:ring-oe-blue/25 [&::-webkit-search-cancel-button]:hidden"
+          className="oe-input oe-input-lg w-full pe-9 ps-9 [&::-webkit-search-cancel-button]:hidden"
         />
         {query && (
           <button
@@ -274,7 +274,7 @@ export function ReadyPackBrowser({
                   : 'border-border bg-surface-primary text-content-secondary hover:border-content-tertiary/60 hover:text-content-primary',
               )}
             >
-              <Icon size={13} aria-hidden />
+              <Icon size={14} aria-hidden />
               {label}
               <span
                 className={clsx(
@@ -395,7 +395,7 @@ export function ReadyPackBrowser({
                         <Check size={12} strokeWidth={3} />
                       </span>
                     )}
-                    <Icon size={18} className="text-oe-blue-text" aria-hidden />
+                    <Icon size={20} className="text-oe-blue-text" aria-hidden />
                     <span className="line-clamp-2 w-full break-words text-sm font-semibold text-content-primary">
                       {e.name}
                     </span>

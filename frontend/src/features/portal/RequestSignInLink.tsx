@@ -45,7 +45,7 @@ export function RequestSignInLink() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-2">
-      <label htmlFor="portal-signin-email" className="text-xs font-medium text-content-secondary">
+      <label htmlFor="portal-signin-email" className="oe-label">
         {t('portal.signin_link_label', { defaultValue: 'Link expired? Get a new one by email' })}
       </label>
       <div className="flex gap-2">
@@ -56,7 +56,7 @@ export function RequestSignInLink() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('portal.signin_link_placeholder', { defaultValue: 'you@example.com' })}
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+          className="min-w-0 flex-1 oe-input"
         />
         <button
           type="submit"

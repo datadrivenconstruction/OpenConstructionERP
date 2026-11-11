@@ -122,7 +122,7 @@ function PaletteItem({ def }: { def: NodeTypeDef }) {
           )}
           {def.side_effecting && (
             <span
-              className="shrink-0 rounded bg-amber-200 px-1 text-2xs font-semibold text-semantic-warning dark:bg-amber-800 dark:text-amber-100"
+              className="shrink-0 rounded bg-semantic-warning/20 px-1 text-2xs font-semibold text-semantic-warning"
               title={t('pipeline.palette.writes_chip', {
                 defaultValue: 'This step writes data - needs a gate before it',
               })}
@@ -253,8 +253,7 @@ export function NodePalette({
             })}
             data-testid="pipeline-palette-search"
             className={clsx(
-              'h-8 w-full rounded-lg border border-border bg-surface-primary ps-7 pe-7 text-sm',
-              'placeholder:text-content-tertiary',
+              'oe-input w-full ps-7 pe-7',
               'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
             )}
           />
@@ -268,7 +267,7 @@ export function NodePalette({
               data-testid="pipeline-palette-search-clear"
               className="absolute end-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-content-secondary"
             >
-              <X size={13} aria-hidden="true" />
+              <X size={14} aria-hidden="true" />
             </button>
           )}
         </label>
@@ -312,7 +311,7 @@ export function NodePalette({
                 data-testid={`pipeline-palette-cat-${category}`}
                 className="mt-3 first:mt-1"
               >
-                <h3 className="mb-1 flex items-center gap-1.5 px-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h3 className="oe-overline mb-1 flex items-center gap-1.5 px-1">
                   <span
                     className={clsx(
                       'flex h-4 w-4 items-center justify-center',

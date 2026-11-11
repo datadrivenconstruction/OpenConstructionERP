@@ -62,7 +62,7 @@ export function LinkToRecordMenu({ projectId }: { projectId: string }) {
       {open && (
         <div
           role="menu"
-          className="absolute z-20 mt-1 w-64 rounded-lg border border-border-light bg-surface-elevated p-1 shadow-lg"
+          className="absolute z-dropdown mt-1 w-64 rounded-lg border border-border-light bg-surface-elevated p-1 shadow-lg"
         >
           <p className="px-2 py-1.5 text-2xs leading-relaxed text-content-tertiary">
             {t('phonelog.link_hint', {

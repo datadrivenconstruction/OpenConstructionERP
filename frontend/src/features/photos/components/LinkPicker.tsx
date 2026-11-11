@@ -82,7 +82,7 @@ export function LinkPicker({ photoId, projectId, linked }: LinkPickerProps) {
         <select
           value={kind}
           onChange={(e) => setKind(e.target.value as PickableKind)}
-          className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="oe-select oe-input-sm"
           aria-label={t('photoArchive.links.kind')}
         >
           {PICKABLE_KINDS.map((k) => (
@@ -95,7 +95,7 @@ export function LinkPicker({ photoId, projectId, linked }: LinkPickerProps) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('photoArchive.links.search')}
-          className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="min-w-0 flex-1 oe-input oe-input-sm"
         />
       </div>
       {options.isLoading ? (

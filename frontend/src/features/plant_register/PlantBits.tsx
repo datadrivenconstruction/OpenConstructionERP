@@ -214,7 +214,7 @@ export function LeadChip({
 }
 
 export const fieldClass =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'oe-input w-full';
 
 /** A labelled form control. The control is passed as a render function so it receives the label's id. */
 export function Field({
@@ -234,7 +234,7 @@ export function Field({
   const id = useId();
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1 block text-xs font-medium text-content-secondary">
+      <label htmlFor={id} className="oe-label">
         {label}
         {required && (
           <span className="ml-1 font-normal text-semantic-error">
@@ -310,7 +310,7 @@ export function Section({
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid={testId}>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-card-title">{title}</h3>
           {hint && <p className="mt-0.5 text-xs text-content-secondary">{hint}</p>}
         </div>
         {action}

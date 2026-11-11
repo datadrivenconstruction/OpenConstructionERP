@@ -111,7 +111,7 @@ export function QuoteDialog({ open, onClose, projectId, item, catalogue, labels,
         <WideModalSection columns={2}>
           <Field label={t('plant.field.source', { defaultValue: 'Source' })} required>
             {(id) => (
-              <select id={id} className={fieldClass} value={draft.source} onChange={(e) => set('source', e.target.value)}>
+              <select id={id} className={`${fieldClass} oe-select`} value={draft.source} onChange={(e) => set('source', e.target.value)}>
                 <option value="">{t('plant.common.choose', { defaultValue: 'Choose' })}</option>
                 {catalogue.lead_time_sources.map((s) => (
                   <option key={s.code} value={s.code}>
@@ -181,7 +181,7 @@ export function QuoteDialog({ open, onClose, projectId, item, catalogue, labels,
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.lead_basis}
                 onChange={(e) => set('lead_basis', e.target.value as LeadBasis)}
               >
@@ -344,7 +344,7 @@ export function SlotDialog({ open, onClose, projectId, item, slot, onSaved }: It
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.fee_refundable}
                 onChange={(e) => set('fee_refundable', e.target.value as FeeRefundable | '')}
               >
@@ -373,7 +373,7 @@ export function SlotDialog({ open, onClose, projectId, item, slot, onSaved }: It
           </Field>
           <Field label={t('plant.slot.terms', { defaultValue: 'Terms' })} className="sm:col-span-2">
             {(id) => (
-              <textarea id={id} rows={2} className={fieldClass} value={draft.terms} onChange={(e) => set('terms', e.target.value)} />
+              <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={draft.terms} onChange={(e) => set('terms', e.target.value)} />
             )}
           </Field>
           <Field label={t('plant.common.document_ref', { defaultValue: 'Document reference' })} className="sm:col-span-2">
@@ -530,7 +530,7 @@ export function LimitsDialog({
                 <span className="text-sm text-content-primary">{name}</span>
                 <select
                   aria-label={t('plant.limits.party_for', { defaultValue: 'Party for {{step}}', step: name })}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-select`}
                   value={rows[s.code]?.party ?? ''}
                   onChange={(e) => patch(s.code, { party: e.target.value })}
                 >
@@ -631,7 +631,7 @@ export function SpareDialog({
         <WideModalSection columns={2}>
           <Field label={t('plant.spare.category', { defaultValue: 'Kind of spare' })} required>
             {(id) => (
-              <select id={id} className={fieldClass} value={draft.category} onChange={(e) => set('category', e.target.value)}>
+              <select id={id} className={`${fieldClass} oe-select`} value={draft.category} onChange={(e) => set('category', e.target.value)}>
                 <option value="">{t('plant.common.choose', { defaultValue: 'Choose' })}</option>
                 {catalogue.spare_categories.map((c) => (
                   <option key={c.code} value={c.code}>
@@ -643,7 +643,7 @@ export function SpareDialog({
           </Field>
           <Field label={t('plant.spare.supply_by', { defaultValue: 'Supplied by' })}>
             {(id) => (
-              <select id={id} className={fieldClass} value={draft.supply_by} onChange={(e) => set('supply_by', e.target.value)}>
+              <select id={id} className={`${fieldClass} oe-select`} value={draft.supply_by} onChange={(e) => set('supply_by', e.target.value)}>
                 <option value="">{t('plant.common.not_set', { defaultValue: 'Not set' })}</option>
                 {catalogue.parties.map((party) => (
                   <option key={party.code} value={party.code}>
@@ -756,7 +756,7 @@ export function HandoverDialog({ open, onClose, projectId, item, onSaved }: Item
             <textarea
               id={id}
               rows={2}
-              className={fieldClass}
+              className={`${fieldClass} oe-textarea`}
               data-testid="handover-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}

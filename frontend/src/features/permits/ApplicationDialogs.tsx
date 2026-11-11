@@ -200,7 +200,7 @@ export function ApplicationDialog({
       {!application && kinds.length > 1 && (
         <Field label={t('permits.ui.application.kind', { defaultValue: 'Kind of application' })}>
           {(id) => (
-            <select id={id} className={fieldClass} value={kind} onChange={(e) => setKind(e.target.value as ApplicationKind)}>
+            <select id={id} className={`${fieldClass} oe-select`} value={kind} onChange={(e) => setKind(e.target.value as ApplicationKind)}>
               {kinds.map((k) => (
                 <option key={k} value={k}>
                   {vocab(t, APPLICATION_KIND, k)}
@@ -215,7 +215,7 @@ export function ApplicationDialog({
           {(id) => (
             <select
               id={id}
-              className={fieldClass}
+              className={`${fieldClass} oe-select`}
               value={parent}
               onChange={(e) => {
                 setParent(e.target.value);
@@ -290,7 +290,7 @@ export function ApplicationDialog({
             defaultValue: 'Whether an appeal is planned or lodged, and by whom.',
           })}
         >
-          {(id) => <textarea id={id} rows={2} className={fieldClass} value={appeal} onChange={(e) => setAppeal(e.target.value)} />}
+          {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={appeal} onChange={(e) => setAppeal(e.target.value)} />}
         </Field>
       )}
     </FormDialog>
@@ -375,7 +375,7 @@ export function TransitionDialog({ open, onClose, projectId, application, target
         </Field>
       )}
       <Field label={t('permits.ui.transition.reason', { defaultValue: 'Reason or note' })} required={withdraw}>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={reason} onChange={(e) => setReason(e.target.value)} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={reason} onChange={(e) => setReason(e.target.value)} />}
       </Field>
     </FormDialog>
   );
@@ -436,7 +436,7 @@ export function ClockEventDialog({ open, onClose, projectId, applicationId, cloc
     >
       <Field label={t('permits.ui.clock.event_kind', { defaultValue: 'What happened' })}>
         {(id) => (
-          <select id={id} className={fieldClass} value={draft.kind} onChange={(e) => set({ kind: e.target.value as ClockEventKind })}>
+          <select id={id} className={`${fieldClass} oe-select`} value={draft.kind} onChange={(e) => set({ kind: e.target.value as ClockEventKind })}>
             {kinds.map((k) => (
               <option key={k} value={k}>
                 {vocab(t, CLOCK_EVENT, k)}
@@ -462,7 +462,7 @@ export function ClockEventDialog({ open, onClose, projectId, applicationId, cloc
             hint={t('permits.ui.clock.event_unit_hint', { defaultValue: 'Use the unit the law uses for this period.' })}
           >
             {(id) => (
-              <select id={id} className={fieldClass} value={draft.unit} onChange={(e) => set({ unit: e.target.value as ClockUnit })}>
+              <select id={id} className={`${fieldClass} oe-select`} value={draft.unit} onChange={(e) => set({ unit: e.target.value as ClockUnit })}>
                 {UNITS.map((u) => (
                   <option key={u} value={u}>
                     {vocab(t, CLOCK_UNIT, u)}
@@ -474,7 +474,7 @@ export function ClockEventDialog({ open, onClose, projectId, applicationId, cloc
         </div>
       )}
       <Field label={t('permits.ui.clock.event_reason', { defaultValue: 'Reason' })} required={draft.kind === 'extension_by_authority'}>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={draft.reason} onChange={(e) => set({ reason: e.target.value })} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={draft.reason} onChange={(e) => set({ reason: e.target.value })} />}
       </Field>
     </FormDialog>
   );

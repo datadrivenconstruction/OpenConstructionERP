@@ -43,7 +43,7 @@ const STATUS_VARIANT: Record<OfferStatus, 'neutral' | 'blue' | 'success' | 'warn
   superseded: 'neutral',
 };
 const inputCls =
-  'h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-input w-full';
 const VALIDITY_CHIPS = [14, 30, 60];
 
 /** The letter after `rev`: A -> B, Z -> AA. */
@@ -138,7 +138,7 @@ export function OfferPage() {
     <div className="space-y-5 animate-fade-in">
       <div className="flex flex-wrap items-center gap-3">
         <Link to={`/boq/${boqId}`} className="text-content-secondary hover:text-content-primary" aria-label={t('common.back', { defaultValue: 'Back' })}>
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} />
         </Link>
         <h1 className="text-lg font-semibold">{t('offers.page_title', { defaultValue: 'Customer offer' })}</h1>
         <span className="text-sm text-content-secondary">
@@ -366,7 +366,7 @@ function DetailsFields({ offer, readOnly, languages, onSave }: { offer: Offer; r
       </div>
       <label className="text-sm">
         {t('offers.document_language', { defaultValue: 'Document language' })}
-        <select className={inputCls} value={offer.locale} disabled={readOnly} onChange={(e) => onSave({ locale: e.target.value })}>
+        <select className={`${inputCls} oe-select`} value={offer.locale} disabled={readOnly} onChange={(e) => onSave({ locale: e.target.value })}>
           {[...new Set([offer.locale, ...languages])].map((l) => (
             <option key={l} value={l}>
               {l}
@@ -417,7 +417,7 @@ function TextCard({ offer, kind, readOnly, onSave }: { offer: Offer; kind: strin
         </span>
       </div>
       {!readOnly && <PlaceholderChips onInsert={insert} />}
-      <textarea ref={area} className={`${inputCls} h-24 py-2`} value={body} disabled={readOnly} onChange={(e) => setBody(e.target.value)} onBlur={commit} />
+      <textarea ref={area} className={`${inputCls} oe-textarea h-24 py-2`} value={body} disabled={readOnly} onChange={(e) => setBody(e.target.value)} onBlur={commit} />
       {!readOnly && (
         <label className="mt-1 flex items-center gap-2 text-xs">
           <input type="checkbox" checked={forProject} onChange={(e) => setForProject(e.target.checked)} />

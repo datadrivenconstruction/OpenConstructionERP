@@ -41,7 +41,7 @@ export function UpcomingMilestones() {
     <Card padding="none" className="w-full">
       <div className="flex items-center gap-2 border-b border-border-light px-4 py-3">
         <Flag size={16} className="text-oe-blue" />
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('homeportal.milestones_title', { defaultValue: 'Coming up on your project' })}
         </h2>
       </div>

@@ -52,7 +52,7 @@ export function ChangeRequestField({ projectId, roadmap, value, onChange, enable
         required
       >
         {(id) => (
-          <select id={id} className={fieldClass} value={value} disabled={requestsQ.isLoading} onChange={(e) => onChange(e.target.value)}>
+          <select id={id} className={`${fieldClass} oe-select`} value={value} disabled={requestsQ.isLoading} onChange={(e) => onChange(e.target.value)}>
             <option value="">
               {requestsQ.isLoading
                 ? t('permits.ui.loading', { defaultValue: 'Loading...' })

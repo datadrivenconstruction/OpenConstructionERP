@@ -50,7 +50,7 @@ export function FlagshipDemoCards({ country }: { country: string | null }) {
       data-testid="flagship-demos"
       className="rounded-2xl bg-surface-elevated p-6 shadow-sm shadow-black/[0.04]"
     >
-      <h3 className="text-base font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('onboarding.flagship_title', { defaultValue: 'Start from a ready-made project' })}
       </h3>
       <p className="mt-1 text-xs text-content-tertiary">
@@ -73,7 +73,7 @@ export function FlagshipDemoCards({ country }: { country: string | null }) {
                   {k ? t(`${k}_tag`, { defaultValue: d.tag }) : d.tag}
                 </span>
               )}
-              <h4 className="mt-1 text-sm font-semibold text-content-primary">
+              <h4 className="oe-card-title mt-1">
                 {k ? t(`${k}_title`, { defaultValue: d.title }) : d.title}
               </h4>
               {d.forWho && (

@@ -97,7 +97,7 @@ export function SetupSummary({
 
   return (
     <div className="mt-6 w-full max-w-md text-start">
-      <h3 className="mb-2 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title mb-2">
         {t('onboarding.summary_title', { defaultValue: 'What is set up' })}
       </h3>
       <ul

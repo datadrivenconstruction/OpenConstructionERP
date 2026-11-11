@@ -101,7 +101,7 @@ function ImportPanel({ boqId }: { boqId: string }) {
         })}
       </p>
       <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border-light px-3 py-2 text-sm hover:bg-surface-secondary">
-        <FileUp size={15} />
+        <FileUp size={16} />
         {file ? file.name : t('owner_schedule.choose_file', { defaultValue: 'Choose file' })}
         <input type="file" accept=".csv,.xlsx,.xlsm,.xml" className="sr-only" onChange={onFile} data-testid="owner-schedule-file" />
       </label>
@@ -115,7 +115,7 @@ function ImportPanel({ boqId }: { boqId: string }) {
             id="owner-schedule-profile"
             value={profileKey}
             onChange={(e) => file && choose(e.target.value, file)}
-            className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-select"
           >
             <option value="" disabled>{t('owner_schedule.profile_pick', { defaultValue: 'Select a format' })}</option>
             {(profiles.data ?? []).map((p) => (
@@ -149,22 +149,22 @@ function ImportPanel({ boqId }: { boqId: string }) {
             </ul>
           )}
           <div className="max-h-72 overflow-auto rounded-lg border border-border-light">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-surface-secondary text-left">
+            <table className="oe-table oe-table-compact">
+              <thead className="sticky top-0 text-left">
                 <tr>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_item', { defaultValue: 'Item' })}</th>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_description', { defaultValue: 'Description' })}</th>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_unit', { defaultValue: 'Unit' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('owner_schedule.col_quantity', { defaultValue: 'Quantity' })}</th>
+                  <th>{t('owner_schedule.col_item', { defaultValue: 'Item' })}</th>
+                  <th>{t('owner_schedule.col_description', { defaultValue: 'Description' })}</th>
+                  <th>{t('owner_schedule.col_unit', { defaultValue: 'Unit' })}</th>
+                  <th className="text-right">{t('owner_schedule.col_quantity', { defaultValue: 'Quantity' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {preview.lines.map((l) => (
                   <tr key={l.row} className={l.is_section ? 'bg-surface-secondary font-medium' : ''}>
-                    <td className="px-2 py-1">{l.item_no}</td>
-                    <td className="px-2 py-1">{l.description}</td>
-                    <td className="px-2 py-1">{l.unit}</td>
-                    <td className="px-2 py-1 text-right tabular-nums">{l.quantity ?? ''}</td>
+                    <td>{l.item_no}</td>
+                    <td>{l.description}</td>
+                    <td>{l.unit}</td>
+                    <td className="text-right tabular-nums">{l.quantity ?? ''}</td>
                   </tr>
                 ))}
               </tbody>
@@ -212,7 +212,7 @@ function AddendumPanel({ boqId }: { boqId: string }) {
         {t('owner_schedule.addendum_hint', { defaultValue: 'Load the revised schedule to see what the owner added, removed or changed before it touches the estimate.' })}
       </p>
       <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border-light px-3 py-2 text-sm hover:bg-surface-secondary">
-        <FileUp size={15} />
+        <FileUp size={16} />
         {t('owner_schedule.addendum_choose', { defaultValue: 'Choose revised file' })}
         <input type="file" accept=".csv,.xlsx,.xlsm" className="sr-only" onChange={onFile} />
       </label>
@@ -332,26 +332,26 @@ export function OwnerSchedulePage() {
           )}
 
           <div className="max-h-96 overflow-auto rounded-lg border border-border-light">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-surface-secondary text-left">
+            <table className="oe-table oe-table-compact">
+              <thead className="sticky top-0 text-left">
                 <tr>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_item', { defaultValue: 'Item' })}</th>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_description', { defaultValue: 'Description' })}</th>
-                  <th className="px-2 py-1.5">{t('owner_schedule.col_unit', { defaultValue: 'Unit' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('owner_schedule.col_quantity', { defaultValue: 'Quantity' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('owner_schedule.col_unit_price', { defaultValue: 'Unit price' })}</th>
-                  <th className="px-2 py-1.5 text-right">{t('owner_schedule.col_amount', { defaultValue: 'Amount' })}</th>
+                  <th>{t('owner_schedule.col_item', { defaultValue: 'Item' })}</th>
+                  <th>{t('owner_schedule.col_description', { defaultValue: 'Description' })}</th>
+                  <th>{t('owner_schedule.col_unit', { defaultValue: 'Unit' })}</th>
+                  <th className="text-right">{t('owner_schedule.col_quantity', { defaultValue: 'Quantity' })}</th>
+                  <th className="text-right">{t('owner_schedule.col_unit_price', { defaultValue: 'Unit price' })}</th>
+                  <th className="text-right">{t('owner_schedule.col_amount', { defaultValue: 'Amount' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {sched.items.map((it) => (
                   <tr key={it.id} className={it.is_section ? 'bg-surface-secondary font-medium' : it.removed ? 'opacity-50 line-through' : ''}>
-                    <td className="px-2 py-1">{it.item_no}</td>
-                    <td className="px-2 py-1">{it.description}</td>
-                    <td className="px-2 py-1">{it.unit}</td>
-                    <td className="px-2 py-1 text-right tabular-nums">{it.quantity ?? ''}</td>
-                    <td className="px-2 py-1 text-right tabular-nums">{it.unit_price ?? ''}</td>
-                    <td className="px-2 py-1 text-right tabular-nums">{it.amount ?? ''}</td>
+                    <td>{it.item_no}</td>
+                    <td>{it.description}</td>
+                    <td>{it.unit}</td>
+                    <td className="text-right tabular-nums">{it.quantity ?? ''}</td>
+                    <td className="text-right tabular-nums">{it.unit_price ?? ''}</td>
+                    <td className="text-right tabular-nums">{it.amount ?? ''}</td>
                   </tr>
                 ))}
               </tbody>

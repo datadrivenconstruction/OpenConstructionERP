@@ -30,7 +30,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 export interface DeliveryLineDraft {
   po_item_id: string;
@@ -118,7 +118,7 @@ function UploadButton({
   });
   return (
     <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-oe-blue">
-      {upload.isPending ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+      {upload.isPending ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
       <span>{name || label}</span>
       <input
         type="file"
@@ -217,7 +217,7 @@ export function PortalDeliveriesTab() {
     <div className="space-y-4">
       {deliverable.length > 0 && (
         <Card className="space-y-4 p-4">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('portal.deliveries.new', { defaultValue: 'Announce a delivery' })}
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -228,7 +228,7 @@ export function PortalDeliveriesTab() {
                 const next = orders.find((o) => o.id === e.target.value);
                 setDraft((d) => ({ ...d, po_id: e.target.value, delivery_note_document_id: '', lines: draftLinesFor(next) }));
               }}
-              className={inputCls}
+              className={`${inputCls} oe-select`}
             >
               <option value="">{t('portal.deliveries.order', { defaultValue: 'Purchase order' })}</option>
               {deliverable.map((o) => (
@@ -310,7 +310,7 @@ export function PortalDeliveriesTab() {
                           aria-label={t('portal.deliveries.certificate_type', { defaultValue: 'Certificate type' })}
                           value={l.certificate_type}
                           onChange={(e) => setLine(idx, { certificate_type: e.target.value })}
-                          className={inputCls}
+                          className={`${inputCls} oe-select`}
                         >
                           <option value="">
                             {t('portal.deliveries.no_certificate', { defaultValue: 'No certificate' })}
@@ -358,7 +358,7 @@ export function PortalDeliveriesTab() {
       )}
 
       <Card className="p-4">
-        <h2 className="mb-3 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-3">
           {t('portal.deliveries.sent', { defaultValue: 'Deliveries you announced' })}
         </h2>
         {deliveries.length === 0 ? (

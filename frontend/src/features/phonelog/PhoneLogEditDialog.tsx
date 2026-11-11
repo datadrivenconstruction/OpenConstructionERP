@@ -19,7 +19,7 @@ import { CHANNELS, DIRECTIONS, channelLabel, directionLabel } from './labels';
 import type { PhoneChannel, PhoneDirection, PhoneLog } from './types';
 
 const CONTROL =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  'oe-input';
 
 const DIRECTION_SET: PhoneDirection[] = ['inbound', 'outbound', 'internal', 'unknown'];
 const CHANNEL_SET: PhoneChannel[] = ['phone', 'voice_note', 'chat', 'other'];
@@ -180,7 +180,7 @@ export function PhoneLogEditDialog({
           <select
             value={form.direction}
             onChange={(e) => set('direction', e.target.value as PhoneDirection)}
-            className={CONTROL}
+            className={`${CONTROL} oe-select`}
           >
             {directionOptions.map((d) => (
               <option key={d} value={d}>
@@ -194,7 +194,7 @@ export function PhoneLogEditDialog({
           <select
             value={form.channel}
             onChange={(e) => set('channel', e.target.value as PhoneChannel)}
-            className={CONTROL}
+            className={`${CONTROL} oe-select`}
           >
             {channelOptions.map((c) => (
               <option key={c} value={c}>
@@ -218,7 +218,7 @@ export function PhoneLogEditDialog({
             value={form.transcript}
             onChange={(e) => set('transcript', e.target.value)}
             rows={5}
-            className={CONTROL}
+            className={`${CONTROL} oe-textarea`}
           />
         </WideModalField>
       </WideModalSection>

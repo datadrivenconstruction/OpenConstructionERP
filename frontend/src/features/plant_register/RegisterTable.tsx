@@ -79,28 +79,28 @@ export function RegisterTable({ items, total, catalogue, labels, onOpen }: Regis
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full min-w-[56rem] text-left text-sm">
-            <thead className="bg-surface-secondary text-xs text-content-secondary">
+          <table className="oe-table min-w-[56rem]">
+            <thead>
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.code', { defaultValue: 'Code' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.title', { defaultValue: 'Title' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.state', { defaultValue: 'State' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.lead_weeks', { defaultValue: 'Lead time (weeks)' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.need_date', { defaultValue: 'Need date' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.latest_order_date', { defaultValue: 'Latest order date' })}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{t('plant.field.float_days', { defaultValue: 'Float (days)' })}</th>
-                <th scope="col" className="px-3 py-2 font-medium">{t('plant.field.route', { defaultValue: 'Procurement route' })}</th>
+                <th scope="col">{t('plant.field.code', { defaultValue: 'Code' })}</th>
+                <th scope="col">{t('plant.field.title', { defaultValue: 'Title' })}</th>
+                <th scope="col">{t('plant.field.state', { defaultValue: 'State' })}</th>
+                <th scope="col">{t('plant.field.lead_weeks', { defaultValue: 'Lead time (weeks)' })}</th>
+                <th scope="col">{t('plant.field.need_date', { defaultValue: 'Need date' })}</th>
+                <th scope="col">{t('plant.field.latest_order_date', { defaultValue: 'Latest order date' })}</th>
+                <th scope="col" className="text-right">{t('plant.field.float_days', { defaultValue: 'Float (days)' })}</th>
+                <th scope="col">{t('plant.field.route', { defaultValue: 'Procurement route' })}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {shown.map((item) => (
                 <tr
                   key={item.id}
                   data-testid="register-row"
-                  className="cursor-pointer hover:bg-surface-secondary"
+                  className="cursor-pointer"
                   onClick={() => onOpen(item.id)}
                 >
-                  <td className="px-3 py-2 align-top">
+                  <td className="align-top">
                     <button
                       type="button"
                       className="font-mono text-oe-blue-text hover:underline"
@@ -112,7 +112,7 @@ export function RegisterTable({ items, total, catalogue, labels, onOpen }: Regis
                       {item.code}
                     </button>
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="align-top">
                     <span className="text-content-primary">{item.title}</span>
                     <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-content-tertiary">
                       {catalogueName(labels, catalogue, 'component_classes', item.component_class_code)}
@@ -128,14 +128,14 @@ export function RegisterTable({ items, total, catalogue, labels, onOpen }: Regis
                       )}
                     </span>
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="align-top">
                     <ToneBadge tone={ITEM_STATE_TONE[item.status]}>{vocab(t, ITEM_STATE, item.status)}</ToneBadge>
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="align-top">
                     <LeadChip item={item} catalogue={catalogue} labels={labels} />
                   </td>
-                  <td className="px-3 py-2 align-top text-content-secondary">{item.need_date ? fmtDate(item.need_date) : dash}</td>
-                  <td className="px-3 py-2 align-top text-content-secondary">
+                  <td className="align-top text-content-secondary">{item.need_date ? fmtDate(item.need_date) : dash}</td>
+                  <td className="align-top text-content-secondary">
                     {item.latest_order_date ? fmtDate(item.latest_order_date) : dash}
                     {orderDateOpen(item) && item.latest_order_date && item.order_status !== 'ok' && (
                       <span className="mt-0.5 block">
@@ -151,7 +151,7 @@ export function RegisterTable({ items, total, catalogue, labels, onOpen }: Regis
                   >
                     {item.float_days === null ? dash : fmtNumber(item.float_days, 0)}
                   </td>
-                  <td className="px-3 py-2 align-top text-content-secondary">
+                  <td className="align-top text-content-secondary">
                     {item.procurement_route ? catalogueName(labels, catalogue, 'procurement_routes', item.procurement_route) : dash}
                   </td>
                 </tr>
