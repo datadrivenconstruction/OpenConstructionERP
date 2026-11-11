@@ -1686,6 +1686,20 @@ const resource = {
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
     "site_sensors.import.bad_time": "Time not recognized",
+    "learn.hive.title": "Learning paths",
+    "learn.hive.subtitle": "One project from take-off to handover. Each cell is a course, numbered in the order the work happens.",
+    "learn.hive.choose_path": "Project",
+    "learn.hive.status_done": "Done",
+    "learn.hive.status_next": "Next",
+    "learn.hive.status_ahead": "Ahead",
+    "learn.hive.keys_hint": "Follow the numbers. Arrow keys move along the path, Enter opens a course.",
+    "learn.hive.goal": "{{project}}: take-off to handover",
+    "learn.hive.progress": "{{done}} of {{total}} courses done",
+    "learn.hive.open": "Open course",
+    "learn.hive.mark_done": "Mark as done",
+    "learn.hive.mark_undone": "Not done yet",
+    "learn.hive.local_note": "Progress is kept in this browser only.",
+    "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
   }
 } as { translation: Record<string, string> };
 

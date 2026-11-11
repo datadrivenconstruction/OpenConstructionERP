@@ -18,6 +18,8 @@ import { CountryFlag } from '@/shared/ui/CountryFlag';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { AcademyItemCard } from './AcademyItemLinks';
+import { CourseHive } from './CourseHive';
+import { defaultPath, learningPaths } from './learningPaths';
 import {
   DURATION_KEYS,
   ITEMS,
@@ -171,6 +173,7 @@ export function CoursesPage() {
     () => Object.fromEntries(DIMENSIONS.map((d) => [d, facetCounts(d, filters, reader)])) as Record<FilterDimension, Map<string, number>>,
     [filters, reader],
   );
+  const paths = useMemo(() => learningPaths(ITEMS), []);
   const topics = useMemo(() => allTopics(), []);
   const tracks = useMemo(() => allTracks(), []);
   // Most material first, so the reader sees which country has most.
@@ -468,6 +471,10 @@ export function CoursesPage() {
             </button>
           </span>
         </p>
+      )}
+
+      {!filtered && paths.length > 0 && (
+        <CourseHive paths={paths} initialPath={defaultPath(paths, ctx.market)?.id} />
       )}
 
       {hits.length === 0 ? (

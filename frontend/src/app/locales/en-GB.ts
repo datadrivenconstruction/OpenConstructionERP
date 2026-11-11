@@ -820,6 +820,20 @@ const resource = {
     "project.settings.folder.too_long": "The link is too long. Use at most {{max}} characters.",
     "project.settings.folder.invalid": "Start with http://, https://, file://, smb:// or a network path like \\\\server\\share.",
     "project.folder_link": "Project folder",
+    "learn.hive.title": "Learning paths",
+    "learn.hive.subtitle": "One project from take-off to handover. Each cell is a course, numbered in the order the work happens.",
+    "learn.hive.choose_path": "Project",
+    "learn.hive.status_done": "Done",
+    "learn.hive.status_next": "Next",
+    "learn.hive.status_ahead": "Ahead",
+    "learn.hive.keys_hint": "Follow the numbers. Arrow keys move along the path, Enter opens a course.",
+    "learn.hive.goal": "{{project}}: take-off to handover",
+    "learn.hive.progress": "{{done}} of {{total}} courses done",
+    "learn.hive.open": "Open course",
+    "learn.hive.mark_done": "Mark as done",
+    "learn.hive.mark_undone": "Not done yet",
+    "learn.hive.local_note": "Progress is kept in this browser only.",
+    "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
   }
 } as { translation: Record<string, string> };
 
