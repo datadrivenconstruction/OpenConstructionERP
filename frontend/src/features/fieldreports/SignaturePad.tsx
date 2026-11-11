@@ -127,7 +127,7 @@ export function SignaturePad({
             onClick={handleClear}
             className="flex items-center gap-1.5 text-xs text-content-secondary hover:text-semantic-error"
           >
-            <Eraser size={13} />
+            <Eraser size={14} />
             {t('fieldreports.signature_clear', { defaultValue: 'Clear signature' })}
           </button>
         )}
@@ -150,7 +150,7 @@ export function SignaturePad({
       />
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-xs text-content-tertiary">
-          <PenLine size={13} />
+          <PenLine size={14} />
           {t('fieldreports.signature_hint', {
             defaultValue: 'Draw the site representative signature above.',
           })}
@@ -161,7 +161,7 @@ export function SignaturePad({
             onClick={handleClear}
             className="flex items-center gap-1.5 text-xs text-content-secondary hover:text-semantic-error"
           >
-            <Eraser size={13} />
+            <Eraser size={14} />
             {t('fieldreports.signature_clear', { defaultValue: 'Clear' })}
           </button>
         )}

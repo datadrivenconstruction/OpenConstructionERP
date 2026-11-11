@@ -183,7 +183,7 @@ export function ClearanceRegistrationForm({
           onChange={(e) => setCompanyKey(e.target.value)}
           maxLength={120}
           required
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-input"
           placeholder={t('einvoice_clearance.field_company_key_hint', {
             defaultValue: 'The entity that issues the invoices, as your finance records name it',
           })}
@@ -199,7 +199,7 @@ export function ClearanceRegistrationForm({
             setAdapterKey('');
           }}
           required
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-select"
         >
           <option value="">
             {t('einvoice_clearance.field_country_none', { defaultValue: 'Choose a country' })}
@@ -271,7 +271,7 @@ export function ClearanceRegistrationForm({
             onChange={(e) => setters[field](e.target.value)}
             maxLength={255}
             required
-            className="rounded border border-border-light bg-surface-primary p-2 font-mono"
+            className="oe-input font-mono"
           />
         </label>
       ))}
@@ -282,7 +282,7 @@ export function ClearanceRegistrationForm({
           <select
             value={companySize}
             onChange={(e) => setCompanySize(e.target.value)}
-            className="rounded border border-border-light bg-surface-primary p-2"
+            className="oe-select"
           >
             <option value="">
               {t('einvoice_clearance.option_unset', { defaultValue: 'Not set' })}
@@ -320,7 +320,7 @@ export function ClearanceRegistrationForm({
         <select
           value={adapterKey}
           onChange={(e) => setAdapterKey(e.target.value)}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-select"
         >
           <option value="">
             {t('einvoice_clearance.field_adapter_none', { defaultValue: 'None' })}
@@ -387,7 +387,7 @@ export function ClearanceRegistrationForm({
           onChange={(e) => setNotes(e.target.value)}
           maxLength={1000}
           rows={2}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-textarea"
         />
       </label>
 

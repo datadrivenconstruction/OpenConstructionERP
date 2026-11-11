@@ -98,7 +98,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 /* ── Tab ───────────────────────────────────────────────────────────────── */
 
@@ -494,36 +494,36 @@ function SyncHistory({ configId }: { configId: string }) {
 
   return (
     <div className="border-t border-border-light overflow-x-auto">
-      <table className="w-full text-xs">
+      <table className="oe-table oe-table-compact text-xs">
         <thead>
-          <tr className="bg-surface-secondary/50 text-content-tertiary">
-            <th className="px-4 py-2 text-left font-medium">{t('finance.connectors.col_when', { defaultValue: 'When' })}</th>
-            <th className="px-4 py-2 text-left font-medium">{t('finance.connectors.col_direction', { defaultValue: 'Direction' })}</th>
-            <th className="px-4 py-2 text-left font-medium">{t('finance.connectors.col_trigger', { defaultValue: 'Trigger' })}</th>
-            <th className="px-4 py-2 text-left font-medium">{t('finance.connectors.col_status', { defaultValue: 'Status' })}</th>
-            <th className="px-4 py-2 text-right font-medium">{t('finance.connectors.records_out', { defaultValue: 'Sent' })}</th>
-            <th className="px-4 py-2 text-right font-medium">{t('finance.connectors.records_in', { defaultValue: 'Read' })}</th>
+          <tr>
+            <th>{t('finance.connectors.col_when', { defaultValue: 'When' })}</th>
+            <th>{t('finance.connectors.col_direction', { defaultValue: 'Direction' })}</th>
+            <th>{t('finance.connectors.col_trigger', { defaultValue: 'Trigger' })}</th>
+            <th>{t('finance.connectors.col_status', { defaultValue: 'Status' })}</th>
+            <th className="text-right">{t('finance.connectors.records_out', { defaultValue: 'Sent' })}</th>
+            <th className="text-right">{t('finance.connectors.records_in', { defaultValue: 'Read' })}</th>
           </tr>
         </thead>
         <tbody>
           {logs.map((log) => (
-            <tr key={log.id} className="border-t border-border-light">
-              <td className="px-4 py-2 text-content-secondary">
+            <tr key={log.id}>
+              <td className="text-content-secondary">
                 <DateDisplay value={log.started_at} format="datetime" />
               </td>
-              <td className="px-4 py-2 capitalize text-content-secondary">{log.direction}</td>
-              <td className="px-4 py-2 text-content-tertiary">
+              <td className="capitalize text-content-secondary">{log.direction}</td>
+              <td className="text-content-tertiary">
                 {log.is_dry_run ? t('finance.connectors.dry', { defaultValue: 'dry run' }) : log.trigger}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={STATUS_COLORS[log.status] ?? 'neutral'}>
                   {t(`finance.connectors.log_status_${log.status}`, {
                     defaultValue: STATUS_LABELS[log.status] ?? log.status,
                   })}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-right tabular-nums">{log.records_out}</td>
-              <td className="px-4 py-2 text-right tabular-nums">{log.records_in}</td>
+              <td className="text-right tabular-nums">{log.records_out}</td>
+              <td className="text-right tabular-nums">{log.records_in}</td>
             </tr>
           ))}
         </tbody>
@@ -686,7 +686,7 @@ function ConnectorModal({
           <select
             value={connectorType}
             onChange={(e) => setConnectorType(e.target.value)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
             disabled={isEdit}
           >
             {types.map((tp) => (
@@ -698,7 +698,7 @@ function ConnectorModal({
         </WideModalField>
 
         <WideModalField label={t('finance.connectors.field_direction', { defaultValue: 'Direction' })}>
-          <select value={direction} onChange={(e) => setDirection(e.target.value)} className={inputCls}>
+          <select value={direction} onChange={(e) => setDirection(e.target.value)} className={`${inputCls} oe-select`}>
             <option value="both">{t('finance.connectors.dir_both', { defaultValue: 'Push and pull' })}</option>
             <option value="push">{t('finance.connectors.dir_push', { defaultValue: 'Push only (export)' })}</option>
             <option value="pull">{t('finance.connectors.dir_pull', { defaultValue: 'Pull only (import ledger)' })}</option>
@@ -719,7 +719,7 @@ function ConnectorModal({
               <select
                 value={settings[f.key] ?? f.options[0] ?? ''}
                 onChange={(e) => setSettings((p) => ({ ...p, [f.key]: e.target.value }))}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
               >
                 {f.options.map((opt) => (
                   <option key={opt} value={opt}>

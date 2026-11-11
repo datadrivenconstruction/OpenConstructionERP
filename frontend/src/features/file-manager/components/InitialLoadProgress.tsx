@@ -69,7 +69,7 @@ export function InitialLoadProgress({
             <FolderOpen size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-content-primary leading-tight">
+            <h2 className="oe-card-title">
               {t('files.loading.title', { defaultValue: 'Preparing your file manager' })}
             </h2>
             {projectName ? (
@@ -109,7 +109,7 @@ export function InitialLoadProgress({
           {steps.map((step) => {
             const isCurrent = !step.done && currentStep?.id === step.id;
             return (
-              <li key={step.id} className="flex items-center gap-2.5 text-sm">
+              <li key={step.id} className="flex items-center gap-2 text-sm">
                 {step.done ? (
                   <CheckCircle2 size={16} className="text-semantic-success shrink-0" />
                 ) : isCurrent ? (

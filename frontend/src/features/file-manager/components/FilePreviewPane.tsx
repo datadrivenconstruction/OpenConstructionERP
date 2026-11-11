@@ -366,7 +366,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-content-primary break-words" title={row.name}>
+          <h3 className="oe-card-title break-words" title={row.name}>
             {row.name}
           </h3>
           <p className="mt-0.5 text-2xs text-content-tertiary">
@@ -399,7 +399,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors"
             title={t(primary.descriptionI18nKey, { defaultValue: primary.description })}
           >
-            <PrimaryIcon size={13} strokeWidth={2.25} />
+            <PrimaryIcon size={14} strokeWidth={2.25} />
             {primary.inlinePreview
               ? t('files.actions.view_file', { defaultValue: 'View' })
               : primary.mediaPreview
@@ -410,7 +410,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
                     module: t(primary.i18nKey, { defaultValue: primary.label }),
                   })}
             {!primary.inlinePreview && !primary.mediaPreview && (
-              <ExternalLink size={11} className="opacity-80" />
+              <ExternalLink size={12} className="opacity-80" />
             )}
           </button>
 
@@ -450,7 +450,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               disabled={downloading}
               className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {downloading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               {t('files.actions.download', { defaultValue: 'Download' })}
             </button>
           )}
@@ -486,7 +486,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             onClick={() => onEmail(row)}
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <Mail size={13} />
+            <Mail size={14} />
             {t('files.actions.email', { defaultValue: 'Email link' })}
           </button>
           {/* W7 — Send transmittal (formal AEC issue record). */}
@@ -495,7 +495,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             onClick={() => setTransmittalOpen(true)}
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <Send size={13} />
+            <Send size={14} />
             {t('files.transmittals.send_action', { defaultValue: 'Send transmittal' })}
           </button>
           {/* W8 — Submit for approval / View approval status. */}
@@ -504,7 +504,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             onClick={() => setSubmitApprovalOpen(true)}
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <ClipboardCheck size={13} />
+            <ClipboardCheck size={14} />
             {t('files.approvals.submit_action', { defaultValue: 'Submit for approval' })}
           </button>
           {activeWorkflow && (
@@ -513,7 +513,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               onClick={() => setApprovalDrawerOpen(true)}
               className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-oe-blue/30 bg-oe-blue/5 text-oe-blue hover:bg-oe-blue/10 transition-colors"
             >
-              <CheckCircle2 size={13} />
+              <CheckCircle2 size={14} />
               {t('files.approvals.view_status', { defaultValue: 'Approval status' })}
             </button>
           )}
@@ -523,7 +523,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             onClick={() => setLinkOpen(true)}
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <LinkIcon size={13} />
+            <LinkIcon size={14} />
             {t('files.references.link_action', { defaultValue: 'Link to entity' })}
           </button>
           {onShare && row.kind === 'document' && (
@@ -533,7 +533,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               data-testid="file-share-button"
               className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
             >
-              <Share2 size={13} />
+              <Share2 size={14} />
               {t('files.actions.share', { defaultValue: 'Share' })}
             </button>
           )}
@@ -547,7 +547,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
             className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
             title={t('files.activity.open', { defaultValue: 'View activity history' })}
           >
-            <Activity size={13} />
+            <Activity size={14} />
             {t('files.activity.open', { defaultValue: 'View activity history' })}
           </button>
           {onManageAccess && (
@@ -557,7 +557,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               data-testid="file-manage-access-button"
               className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
             >
-              <Lock size={13} />
+              <Lock size={14} />
               {t('files.permissions.manage', { defaultValue: 'Manage access' })}
             </button>
           )}
@@ -567,7 +567,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               onClick={() => openInOSFinder(row.physical_path)}
               className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
             >
-              <FolderOpen size={13} />
+              <FolderOpen size={14} />
               {t('files.actions.open_in_os', { defaultValue: 'Open in OS' })}
             </button>
           )}
@@ -612,7 +612,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
 
         {extras.length > 0 && (
           <div className="border-t border-border-light pt-3">
-            <h4 className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
+            <h4 className="oe-overline mb-2">
               {t('files.detail.extra', { defaultValue: 'Metadata' })}
             </h4>
             <dl className="space-y-1.5 text-xs">
@@ -846,8 +846,8 @@ function ActivityLogSection({ documentId, kind }: { documentId: string; kind: Fi
   if (!isLoading && events.length === 0) return null;
   return (
     <div className="border-t border-border-light pt-3">
-      <h4 className="flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
-        <Activity size={11} strokeWidth={2} />
+      <h4 className="oe-overline flex items-center gap-1.5 mb-2">
+        <Activity size={12} strokeWidth={2} />
         {t('files.detail.activity', { defaultValue: 'Activity' })}
         {/* The file's event count, from the server. The list below holds the
             newest twenty of them, and the notice under it says so. */}
@@ -968,8 +968,8 @@ function VersionHistorySection({
 
   return (
     <div className="border-t border-border-light pt-3 mt-3">
-      <h4 className="flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
-        <History size={11} strokeWidth={2} />
+      <h4 className="oe-overline flex items-center gap-1.5 mb-2">
+        <History size={12} strokeWidth={2} />
         {t('files.versions.section_label', { defaultValue: 'Versions' })}
         {rows.length > 0 && (
           <span className="ms-1 text-content-quaternary tabular-nums">({rows.length})</span>
@@ -1188,7 +1188,7 @@ function CdeStatusControl({
         })}
       >
         {setState.isPending ? (
-          <Loader2 size={11} className="animate-spin" />
+          <Loader2 size={12} className="animate-spin" />
         ) : activeCfg ? (
           <span
             className={clsx(
@@ -1203,12 +1203,12 @@ function CdeStatusControl({
             {t('files.status.unset', { defaultValue: 'Set status' })}
           </span>
         )}
-        <ChevronDown size={11} className={clsx('transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={12} className={clsx('transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-20 overflow-hidden"
+          className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown overflow-hidden"
         >
           {CDE_ORDER.map((key) => {
             const cfg = CDE_BADGE[key]!;

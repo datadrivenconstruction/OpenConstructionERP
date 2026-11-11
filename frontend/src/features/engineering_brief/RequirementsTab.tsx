@@ -140,7 +140,7 @@ export function RequirementDialog({
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <WideModalField label={t('engineeringBrief.requirements.category', { defaultValue: 'Category' })} required error={tried && !form.category ? required : undefined}>
-          <select className={FIELD_CLASS} value={form.category} onChange={(e) => set('category', e.target.value)} data-testid="brief-requirement-category">
+          <select className={`${FIELD_CLASS} oe-select`} value={form.category} onChange={(e) => set('category', e.target.value)} data-testid="brief-requirement-category">
             {catalogue.requirement_categories.map((c) => (
               <option key={c.code} value={c.code}>
                 {itemLabel(labels, c, c.code)}
@@ -152,7 +152,7 @@ export function RequirementDialog({
           </select>
         </WideModalField>
         <WideModalField label={t('engineeringBrief.requirements.priority', { defaultValue: 'Priority' })}>
-          <select className={FIELD_CLASS} value={form.priority} onChange={(e) => set('priority', e.target.value as Priority)}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.priority} onChange={(e) => set('priority', e.target.value as Priority)}>
             {PRIORITIES.map((p) => (
               <option key={p} value={p}>
                 {keyText(t as TFn, PRIORITY_LABEL[p])}
@@ -167,7 +167,7 @@ export function RequirementDialog({
           <input className={FIELD_CLASS} value={form.attribute} maxLength={255} onChange={(e) => set('attribute', e.target.value)} data-testid="brief-requirement-attribute" />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.requirements.constraint', { defaultValue: 'Condition' })}>
-          <select className={FIELD_CLASS} value={form.constraint_type} onChange={(e) => set('constraint_type', e.target.value as ConstraintType)}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.constraint_type} onChange={(e) => set('constraint_type', e.target.value as ConstraintType)}>
             {CONSTRAINT_TYPES.map((c) => (
               <option key={c} value={c}>
                 {keyText(t as TFn, CONSTRAINT_LABEL[c])}
@@ -184,7 +184,7 @@ export function RequirementDialog({
           </WideModalField>
         </div>
         <WideModalField label={t('engineeringBrief.requirements.verification', { defaultValue: 'Verification' })}>
-          <select className={FIELD_CLASS} value={form.verification_method} onChange={(e) => set('verification_method', e.target.value)}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.verification_method} onChange={(e) => set('verification_method', e.target.value)}>
             <option value="">{t('engineeringBrief.none', { defaultValue: 'None' })}</option>
             {catalogue.verification_methods.map((m) => (
               <option key={m} value={m}>
@@ -194,7 +194,7 @@ export function RequirementDialog({
           </select>
         </WideModalField>
         <WideModalField label={t('engineeringBrief.requirements.phase', { defaultValue: 'Phase' })}>
-          <select className={FIELD_CLASS} value={form.phase} onChange={(e) => set('phase', e.target.value)}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.phase} onChange={(e) => set('phase', e.target.value)}>
             <option value="">{t('engineeringBrief.none', { defaultValue: 'None' })}</option>
             {catalogue.phases.map((p) => (
               <option key={p} value={p}>
@@ -207,7 +207,7 @@ export function RequirementDialog({
           <input className={FIELD_CLASS} value={form.originator} maxLength={255} onChange={(e) => set('originator', e.target.value)} />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.requirements.originator_role', { defaultValue: 'Originator role' })}>
-          <select className={FIELD_CLASS} value={form.originator_role} onChange={(e) => set('originator_role', e.target.value)}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.originator_role} onChange={(e) => set('originator_role', e.target.value)}>
             <option value="">{t('engineeringBrief.none', { defaultValue: 'None' })}</option>
             {catalogue.originator_roles.map((r) => (
               <option key={r} value={r}>
@@ -220,7 +220,7 @@ export function RequirementDialog({
           <input className={FIELD_CLASS} value={form.source_ref} maxLength={500} onChange={(e) => set('source_ref', e.target.value)} />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.requirements.rationale', { defaultValue: 'Rationale' })} span={2}>
-          <textarea className={FIELD_CLASS} rows={3} value={form.rationale} maxLength={20000} onChange={(e) => set('rationale', e.target.value)} />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={form.rationale} maxLength={20000} onChange={(e) => set('rationale', e.target.value)} />
         </WideModalField>
       </div>
     </WideModal>
@@ -308,39 +308,39 @@ export function RequirementsTab({
           const category = catalogue.requirement_categories.find((c) => c.code === g.code);
           return (
             <section key={g.code} className="space-y-1.5" data-testid={`brief-requirements-group-${g.code}`}>
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {categoryName(g.code)}
                 {category?.reference ? <span className="ml-2 text-xs font-normal text-content-tertiary">{category.reference}</span> : null}
               </h3>
               <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+                <table className="oe-table">
+                  <thead className="text-left">
                     <tr>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.entity', { defaultValue: 'Subject' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.attribute', { defaultValue: 'Property' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.constraint', { defaultValue: 'Condition' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.priority', { defaultValue: 'Priority' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.verification', { defaultValue: 'Verification' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.requirements.answered', { defaultValue: 'Concept' })}</th>
-                      <th className="w-20 px-3 py-2" />
+                      <th>{t('engineeringBrief.requirements.entity', { defaultValue: 'Subject' })}</th>
+                      <th>{t('engineeringBrief.requirements.attribute', { defaultValue: 'Property' })}</th>
+                      <th>{t('engineeringBrief.requirements.constraint', { defaultValue: 'Condition' })}</th>
+                      <th>{t('engineeringBrief.requirements.priority', { defaultValue: 'Priority' })}</th>
+                      <th>{t('engineeringBrief.requirements.verification', { defaultValue: 'Verification' })}</th>
+                      <th>{t('engineeringBrief.requirements.answered', { defaultValue: 'Concept' })}</th>
+                      <th className="w-20" />
                     </tr>
                   </thead>
                   <tbody>
                     {g.rows.map((r) => (
-                      <tr key={r.id} className="border-t border-border-light" data-testid="brief-requirement-row">
-                        <td className="px-3 py-2 text-content-primary">{r.entity}</td>
-                        <td className="px-3 py-2 text-content-primary">{r.attribute}</td>
-                        <td className="px-3 py-2 text-content-secondary">
+                      <tr key={r.id} data-testid="brief-requirement-row">
+                        <td>{r.entity}</td>
+                        <td>{r.attribute}</td>
+                        <td className="text-content-secondary">
                           {keyText(t as TFn, CONSTRAINT_LABEL[r.constraint_type])} {r.constraint_value} {r.unit}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           <Badge variant={PRIORITY_TONE[r.priority]} size="sm">
                             {keyText(t as TFn, PRIORITY_LABEL[r.priority])}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2 text-content-secondary">{vocabularyLabel(t as TFn, 'verification', r.verification_method) || '-'}</td>
-                        <td className="px-3 py-2 font-mono text-xs text-content-secondary">{fmtList(r.answered_by) || '-'}</td>
-                        <td className="px-3 py-2">
+                        <td className="text-content-secondary">{vocabularyLabel(t as TFn, 'verification', r.verification_method) || '-'}</td>
+                        <td className="font-mono text-xs text-content-secondary">{fmtList(r.answered_by) || '-'}</td>
+                        <td>
                           {edit.allowed ? (
                             <div className="flex justify-end gap-1">
                               <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: r, category: r.category })} />

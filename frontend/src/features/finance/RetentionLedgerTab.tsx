@@ -203,35 +203,35 @@ export function RetentionLedgerTab({ projectId }: { projectId: string }) {
 
           {/* Per-counterparty breakdown */}
           <div>
-            <h4 className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <h4 className="oe-overline mb-2">
               {t('finance.retention_by_counterparty', { defaultValue: 'By counterparty' })}
             </h4>
             <Card padding="none" className="overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                      <th className="px-4 py-3 font-medium">
+                    <tr>
+                      <th>
                         {t('finance.retention_col_counterparty', {
                           defaultValue: 'Counterparty',
                         })}
                       </th>
-                      <th className="px-4 py-3 font-medium">
+                      <th>
                         {t('finance.retention_col_direction', { defaultValue: 'Direction' })}
                       </th>
-                      <th className="px-4 py-3 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.retention_col_held', { defaultValue: 'Held to date' })}
                       </th>
-                      <th className="px-4 py-3 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.retention_col_released', { defaultValue: 'Released' })}
                       </th>
-                      <th className="px-4 py-3 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.retention_col_outstanding', { defaultValue: 'Outstanding' })}
                       </th>
-                      <th className="px-4 py-3 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.retention_col_payments', { defaultValue: 'Payments' })}
                       </th>
-                      <th className="px-4 py-3 font-medium">
+                      <th>
                         {t('finance.retention_col_latest_release', {
                           defaultValue: 'Latest release',
                         })}
@@ -242,9 +242,9 @@ export function RetentionLedgerTab({ projectId }: { projectId: string }) {
                     {(ledgerQ.data?.groups ?? []).map((row) => (
                       <tr
                         key={`${row.contact_id ?? 'none'}-${row.currency_code}-${row.direction}`}
-                        className="border-b border-border/60 last:border-0 hover:bg-surface-secondary/50"
+                        className="last:border-0"
                       >
-                        <td className="px-4 py-2.5 text-content-primary">
+                        <td>
                           {row.counterparty_name ||
                             t('finance.retention_unnamed', {
                               defaultValue: 'Unspecified counterparty',
@@ -253,33 +253,33 @@ export function RetentionLedgerTab({ projectId }: { projectId: string }) {
                             {row.currency_code}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td>
                           <Badge variant={directionVariant(row.direction)} size="sm">
                             {directionLabel(t, row.direction)}
                           </Badge>
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                        <td className="text-right tabular-nums">
                           <MoneyDisplay
                             amount={row.held_to_date}
                             currency={row.currency_code || undefined}
                           />
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           <MoneyDisplay
                             amount={row.released_to_date}
                             currency={row.currency_code || undefined}
                           />
                         </td>
-                        <td className="px-4 py-2.5 text-right font-medium tabular-nums text-content-primary">
+                        <td className="text-right font-medium tabular-nums">
                           <MoneyDisplay
                             amount={row.outstanding}
                             currency={row.currency_code || undefined}
                           />
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {row.payment_count}
                         </td>
-                        <td className="px-4 py-2.5 text-content-secondary">
+                        <td className="text-content-secondary">
                           {row.latest_release_date ? (
                             <DateDisplay value={row.latest_release_date} />
                           ) : (

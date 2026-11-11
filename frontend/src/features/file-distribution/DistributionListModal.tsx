@@ -322,7 +322,7 @@ export function DistributionListModal({
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 data-testid="distribution-new-member-role"
-                className="h-8 rounded-md border border-border bg-surface-primary px-2 text-sm"
+                className="oe-select"
               >
                 {ROLE_OPTIONS.map((r) => (
                   <option key={r} value={r}>

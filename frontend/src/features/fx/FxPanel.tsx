@@ -223,7 +223,7 @@ function ConvertTab({ projectId }: { projectId: string | null }) {
             {t('fx.field_amount', { defaultValue: 'Amount' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+            className="mt-1 w-full oe-input tabular-nums"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             inputMode="decimal"
@@ -234,7 +234,7 @@ function ConvertTab({ projectId }: { projectId: string | null }) {
             {t('fx.field_from', { defaultValue: 'From' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm uppercase"
+            className="mt-1 w-full oe-input uppercase"
             value={from}
             maxLength={3}
             onChange={(e) => setFrom(e.target.value)}
@@ -245,7 +245,7 @@ function ConvertTab({ projectId }: { projectId: string | null }) {
             {t('fx.field_to', { defaultValue: 'To' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm uppercase"
+            className="mt-1 w-full oe-input uppercase"
             value={to}
             maxLength={3}
             onChange={(e) => setTo(e.target.value)}
@@ -257,7 +257,7 @@ function ConvertTab({ projectId }: { projectId: string | null }) {
           </span>
           <input
             type="date"
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="mt-1 w-full oe-input"
             value={onDate}
             onChange={(e) => setOnDate(e.target.value)}
           />
@@ -443,7 +443,7 @@ function RateSetsTab() {
       {sets.length > 0 && (
         <ul className="space-y-1.5">
           {sets.map((set) => (
-            <li key={set.id} className="rounded-lg border border-border bg-surface-primary p-2.5">
+            <li key={set.id} className="rounded-lg border border-border bg-surface-primary p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
@@ -466,7 +466,7 @@ function RateSetsTab() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    icon={set.is_locked ? <Unlock size={13} /> : <Lock size={13} />}
+                    icon={set.is_locked ? <Unlock size={14} /> : <Lock size={14} />}
                     onClick={() => lockMutation.mutate({ id: set.id, locked: !set.is_locked })}
                   >
                     {set.is_locked
@@ -477,7 +477,7 @@ function RateSetsTab() {
                     variant="ghost"
                     size="sm"
                     disabled={set.is_locked}
-                    icon={<Trash2 size={13} />}
+                    icon={<Trash2 size={14} />}
                     onClick={() => setPendingDelete(set)}
                   >
                     {t('common.delete', { defaultValue: 'Delete' })}
@@ -686,7 +686,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
                   {currencyFieldLabel(t, field)}
                 </span>
                 <input
-                  className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm uppercase"
+                  className="mt-1 w-full oe-input uppercase"
                   maxLength={3}
                   value={draft[field]}
                   onChange={(e) =>
@@ -703,7 +703,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
                 {t('fx.field_rate_mode', { defaultValue: 'Which rates apply' })}
               </span>
               <select
-                className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                className="mt-1 w-full oe-select"
                 value={draft.rate_mode}
                 onChange={(e) =>
                   setDraft({ ...draft, rate_mode: e.target.value as RateMode })
@@ -724,7 +724,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
               <input
                 type="number"
                 min={0}
-                className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+                className="mt-1 w-full oe-input tabular-nums"
                 value={draft.max_rate_age_days}
                 onChange={(e) =>
                   setDraft({ ...draft, max_rate_age_days: Number(e.target.value) })
@@ -739,7 +739,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
                 {t('fx.field_pinned_set', { defaultValue: 'Pinned to' })}
               </span>
               <select
-                className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                className="mt-1 w-full oe-select"
                 value={draft.pinned_rate_set_id ?? ''}
                 onChange={(e) =>
                   setDraft({ ...draft, pinned_rate_set_id: e.target.value || null })
@@ -826,7 +826,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
 
             {policy.rate_mode === 'pinned' && !holds && (
               <p className="flex items-start gap-1.5 rounded-md bg-semantic-warning-bg px-2 py-1.5 text-xs text-[#b45309]">
-                <CircleAlert size={13} className="mt-0.5 shrink-0" />
+                <CircleAlert size={14} className="mt-0.5 shrink-0" />
                 {policy.pinned_rate_set === null
                   ? t('fx.pin_missing', {
                       defaultValue:
@@ -841,7 +841,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
 
             {uncovered.length > 0 && (
               <p className="flex items-start gap-1.5 rounded-md bg-semantic-error-bg px-2 py-1.5 text-xs text-semantic-error">
-                <CircleAlert size={13} className="mt-0.5 shrink-0" />
+                <CircleAlert size={14} className="mt-0.5 shrink-0" />
                 {t('fx.policy_uncovered', {
                   defaultValue:
                     'The current rates cannot price {{codes}}, which this project declares. Figures in it will look finished and cannot be converted.',
@@ -864,7 +864,7 @@ function PolicyTab({ projectId }: { projectId: string }) {
       {/* The rule set's own verdict, kept apart from what this screen derives. */}
       <div className="rounded-lg border border-border bg-surface-secondary p-3">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck size={13} />
+          <ShieldCheck size={14} />
           <span className="text-xs font-medium text-content-primary">
             {t('fx.validation_title', { defaultValue: 'What the rules say' })}
           </span>
@@ -1020,7 +1020,7 @@ export function FxPanel() {
         <Button
           variant="secondary"
           size="sm"
-          icon={<RefreshCw size={13} />}
+          icon={<RefreshCw size={14} />}
           loading={refreshMutation.isPending}
           onClick={() => refreshMutation.mutate()}
         >

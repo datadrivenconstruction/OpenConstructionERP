@@ -293,7 +293,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
                   <Button
                     variant="primary"
                     size="sm"
-                    icon={<Check size={13} />}
+                    icon={<Check size={14} />}
                     loading={confirmMutation.isPending}
                     onClick={() => confirmMutation.mutate({})}
                   >
@@ -312,7 +312,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={() => {
                 saveMutation.reset();
                 confirmMutation.reset();
@@ -413,7 +413,7 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
             the chain - a one-entry chain says nothing a badge has not said. */}
         {(versionsLoading || chain.length > 1) && (
           <section className="mt-6">
-            <h3 className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-1 flex items-center gap-1.5">
               <History size={14} className="text-oe-blue" />
               {t('sheets.version_history', { defaultValue: 'Revision history' })}
             </h3>
@@ -467,27 +467,27 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
 
         {/* Where this sheet goes next */}
         <section className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-2">
             {t('sheets.open_in', { defaultValue: 'Open this sheet in' })}
           </h3>
           <div className="flex flex-col gap-2">
             <Link to={planRoomTo} className={actionCls}>
               <span className="flex items-center gap-2">
-                <FileText size={15} className="text-oe-blue" />
+                <FileText size={16} className="text-oe-blue" />
                 {t('sheets.open_plan_room', { defaultValue: 'Plan room' })}
               </span>
               <ArrowRight size={14} className="text-content-tertiary" />
             </Link>
             <Link to={takeoffTo} className={actionCls}>
               <span className="flex items-center gap-2">
-                <Ruler size={15} className="text-oe-blue" />
+                <Ruler size={16} className="text-oe-blue" />
                 {t('sheets.open_takeoff', { defaultValue: 'PDF takeoff, to measure it' })}
               </span>
               <ArrowRight size={14} className="text-content-tertiary" />
             </Link>
             <Link to={filesTo} className={actionCls}>
               <span className="flex items-center gap-2">
-                <FileText size={15} className="text-oe-blue" />
+                <FileText size={16} className="text-oe-blue" />
                 {t('sheets.open_source_document', { defaultValue: 'The drawing set it came from' })}
               </span>
               <ArrowRight size={14} className="text-content-tertiary" />

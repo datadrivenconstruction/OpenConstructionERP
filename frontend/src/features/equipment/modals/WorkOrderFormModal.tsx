@@ -18,8 +18,8 @@ import {
 } from '../api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input w-full';
+const labelCls = 'oe-label';
 
 interface WorkOrderFormModalProps {
   mode: 'create' | 'edit';
@@ -180,7 +180,7 @@ export function WorkOrderFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -194,7 +194,7 @@ export function WorkOrderFormModal({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="workorder-form-title"
-            className="text-lg font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {isEdit
               ? t('equipment.workorder.edit_title', {
@@ -217,7 +217,7 @@ export function WorkOrderFormModal({
 
         <div className="space-y-4">
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.workorder.section_schedule', {
                 defaultValue: 'Schedule',
               })}
@@ -262,7 +262,7 @@ export function WorkOrderFormModal({
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as WorkOrderStatus)}
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(
                     ['scheduled', 'in_progress', 'completed', 'cancelled'] as WorkOrderStatus[]
@@ -277,7 +277,7 @@ export function WorkOrderFormModal({
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.workorder.section_work', {
                 defaultValue: 'Work',
               })}

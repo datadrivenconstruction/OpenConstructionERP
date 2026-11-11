@@ -91,7 +91,7 @@ export function EstimateCheckPanel({
           if (items.length === 0) return null;
           return (
             <section key={g}>
-              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <h3 className="oe-overline mb-1">
                 {tx(t, `estimate_checks.group.${g}`)}
               </h3>
               <ul className="divide-y divide-border-light rounded-lg border border-border-light">
@@ -239,7 +239,7 @@ function KpiRow({
             >
               <p className="text-2xs text-content-tertiary">{tx(t, 'estimate_checks.accept_hint')}</p>
               <textarea
-                className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+                className="w-full oe-textarea"
                 rows={2}
                 maxLength={2000}
                 value={reason}

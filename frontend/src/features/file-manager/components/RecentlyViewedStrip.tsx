@@ -183,7 +183,7 @@ function RecentChip({ item, onOpen, onRemove }: RecentChipProps) {
         aria-label={t('files.recent.remove', { defaultValue: 'Remove from recent' })}
         className="inline-flex h-5 w-5 items-center justify-center rounded-full text-content-quaternary hover:text-content-primary hover:bg-surface-secondary opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <X size={11} />
+        <X size={12} />
       </button>
     </div>
   );

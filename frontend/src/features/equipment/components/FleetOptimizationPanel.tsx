@@ -61,7 +61,7 @@ export function FleetOptimizationPanel({
     return (
       <Card padding="md">
         <p className="flex items-center gap-1.5 text-xs text-content-secondary">
-          <AlertTriangle size={13} className="text-semantic-warning" />
+          <AlertTriangle size={14} className="text-semantic-warning" />
           {optQ.error
             ? getErrorMessage(optQ.error)
             : t('equipment.fleet_intel.unavailable', {
@@ -87,7 +87,7 @@ export function FleetOptimizationPanel({
             <Sparkles size={14} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('equipment.fleet_intel.title', {
                 defaultValue: 'Fleet Intelligence',
               })}
@@ -107,7 +107,7 @@ export function FleetOptimizationPanel({
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-border-light bg-surface-primary px-3 py-2.5">
           <p className="flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-            <PiggyBank size={11} />
+            <PiggyBank size={12} />
             {t('equipment.fleet_intel.savings', {
               defaultValue: 'Savings opportunity',
             })}
@@ -127,7 +127,7 @@ export function FleetOptimizationPanel({
 
         <div className="rounded-lg border border-border-light bg-surface-primary px-3 py-2.5">
           <p className="flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-            <TrendingDown size={11} />
+            <TrendingDown size={12} />
             {t('equipment.fleet_intel.underutilized', {
               defaultValue: 'Underutilised units',
             })}
@@ -142,7 +142,7 @@ export function FleetOptimizationPanel({
 
         <div className="rounded-lg border border-border-light bg-surface-primary px-3 py-2.5">
           <p className="flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-            <Wrench size={11} />
+            <Wrench size={12} />
             {t('equipment.fleet_intel.service_bundles', {
               defaultValue: 'Service bundles',
             })}
@@ -168,34 +168,34 @@ export function FleetOptimizationPanel({
               : t('equipment.fleet_intel.show_details', {
                   defaultValue: 'Show details',
                 })}
-            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {expanded && (
             <div className="mt-3 space-y-4">
               {o.underutilized.length > 0 && (
                 <div>
-                  <h4 className="mb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h4 className="oe-overline mb-1.5">
                     {t('equipment.fleet_intel.idle_units_title', {
                       defaultValue: 'Idle units worth redeploying',
                     })}
                   </h4>
                   <div className="overflow-x-auto rounded-lg border border-border-light">
-                    <table className="w-full text-xs">
-                      <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+                    <table className="oe-table oe-table-compact text-xs">
+                      <thead>
                         <tr>
-                          <th className="px-3 py-2 text-left">
+                          <th>
                             {t('equipment.col_code', { defaultValue: 'Code' })}
                           </th>
-                          <th className="px-3 py-2 text-left">
+                          <th>
                             {t('equipment.col_name', { defaultValue: 'Name' })}
                           </th>
-                          <th className="px-3 py-2 text-right">
+                          <th className="text-right">
                             {t('equipment.fleet_intel.utilization', {
                               defaultValue: 'Utilisation',
                             })}
                           </th>
-                          <th className="px-3 py-2 text-right">
+                          <th className="text-right">
                             {t('equipment.fleet_intel.saving', {
                               defaultValue: 'Saving',
                             })}
@@ -213,16 +213,16 @@ export function FleetOptimizationPanel({
                                 'cursor-pointer hover:bg-surface-secondary',
                             )}
                           >
-                            <td className="px-3 py-2 font-mono text-content-secondary">
+                            <td className="font-mono text-content-secondary">
                               {u.code}
                             </td>
-                            <td className="px-3 py-2 truncate max-w-[180px]">
+                            <td className="truncate max-w-[180px]">
                               {u.name}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-semantic-warning">
+                            <td className="text-right tabular-nums text-semantic-warning">
                               {fmtPercent(u.utilization_pct, 0)}
                             </td>
-                            <td className="px-3 py-2 text-right tabular-nums text-semantic-success">
+                            <td className="text-right tabular-nums text-semantic-success">
                               <MoneyDisplay
                                 amount={u.estimated_monthly_saving}
                                 currency={currency || undefined}
@@ -238,7 +238,7 @@ export function FleetOptimizationPanel({
 
               {o.maintenance_bundles.length > 0 && (
                 <div>
-                  <h4 className="mb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h4 className="oe-overline mb-1.5">
                     {t('equipment.fleet_intel.bundles_title', {
                       defaultValue: 'Suggested service bundles',
                     })}
@@ -251,7 +251,7 @@ export function FleetOptimizationPanel({
                       >
                         <div className="flex items-center gap-2">
                           <Wrench
-                            size={13}
+                            size={14}
                             className="shrink-0 text-content-tertiary"
                           />
                           <span className="text-xs font-medium text-content-primary">

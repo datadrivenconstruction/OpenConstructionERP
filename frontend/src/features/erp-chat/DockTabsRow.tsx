@@ -122,7 +122,7 @@ export function DockTabsRow({
                   : 'text-[color:var(--chat-text-secondary)] hover:text-[color:var(--chat-text-primary)]',
               )}
             >
-              <Icon size={13} aria-hidden />
+              <Icon size={14} aria-hidden />
               <span>{tabLabel(tab)}</span>
               {tab === 'changes' && waitingCount > 0 && (
                 <>
@@ -163,7 +163,7 @@ export function DockTabsRow({
         )}
       >
         <FolderOpen
-          size={13}
+          size={14}
           aria-hidden
           className={clsx('shrink-0', hasProject ? 'text-oe-blue' : 'text-[color:var(--chat-text-secondary)]')}
         />

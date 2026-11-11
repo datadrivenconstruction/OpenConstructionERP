@@ -52,7 +52,7 @@ const FIELDREPORTS_FIELDTYPE_LABELS: Record<string, string> = {
 
 
 const inputCls =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary';
+  'oe-input w-full';
 
 interface DraftField {
   key: string;
@@ -391,7 +391,7 @@ export function ManageTemplatesModal({
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value as ReportType)}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 aria-label={t('fieldreports.report_type', {
                   defaultValue: 'Report Type',
                 })}
@@ -459,7 +459,7 @@ export function ManageTemplatesModal({
                       aria-label={t('fieldreports.field_type', {
                         defaultValue: 'Field type',
                       })}
-                      className={`${inputCls} w-32`}
+                      className={`${inputCls} oe-select w-32`}
                     >
                       {TEMPLATE_FIELD_TYPES.map((ft) => (
                         <option key={ft} value={ft}>

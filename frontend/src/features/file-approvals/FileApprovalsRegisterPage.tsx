@@ -134,7 +134,7 @@ function HowApprovalsWork() {
   return (
     <CollapsibleSection
       storageKey="files.approvals.how"
-      icon={<ShieldCheck size={15} className="text-oe-blue" />}
+      icon={<ShieldCheck size={16} className="text-oe-blue" />}
       title={t('files.approvals.flow_title', {
         defaultValue: 'How file approvals fit together',
       })}
@@ -316,7 +316,7 @@ function RegisterInner() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as WorkflowStatus | '')}
-          className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+          className="oe-select oe-input-sm cursor-pointer"
           aria-label={t('files.approvals.filter_status', { defaultValue: 'Status' })}
         >
           <option value="">
@@ -351,54 +351,53 @@ function RegisterInner() {
       ) : (
         <Card padding="none" className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[760px]">
+            <table className="oe-table min-w-[760px]">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary/40">
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <tr>
+                  <th>
                     {t('files.approvals.col_file', { defaultValue: 'File' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[120px]">
+                  <th className="w-[120px]">
                     {t('files.approvals.col_kind', { defaultValue: 'Type' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[140px]">
+                  <th className="w-[140px]">
                     {t('files.approvals.col_submitted', {
                       defaultValue: 'Submitted',
                     })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary w-[120px]">
+                  <th className="w-[120px]">
                     {t('files.approvals.col_status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                  <th>
                     {t('files.approvals.col_current_step', {
                       defaultValue: 'Current step',
                     })}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {workflows.map((w) => {
                   const step = currentStepLabel(w);
                   return (
                     <tr
                       key={w.id}
-                      className="hover:bg-surface-secondary/30 transition-colors"
                     >
-                      <td className="px-3 py-2.5">
+                      <td>
                         <span className="text-sm font-medium text-content-primary break-all">
                           {w.file_id}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-xs text-content-secondary">
+                      <td className="text-xs text-content-secondary">
                         {t(`files.approvals.kind_${w.file_kind}`, {
                           defaultValue:
                             String(w.file_kind).charAt(0).toUpperCase() +
                             String(w.file_kind).slice(1).replace(/_/g, ' '),
                         })}
                       </td>
-                      <td className="px-3 py-2.5 text-xs text-content-tertiary">
+                      <td className="text-xs text-content-tertiary">
                         <DateDisplay value={w.submitted_at} />
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         <Badge
                           variant={STATUS_VARIANT[w.status] ?? 'neutral'}
                           size="sm"
@@ -410,7 +409,7 @@ function RegisterInner() {
                           })}
                         </Badge>
                       </td>
-                      <td className="px-3 py-2.5 text-xs text-content-secondary">
+                      <td className="text-xs text-content-secondary">
                         {step || (
                           <span className="text-content-tertiary">
                             {t('files.approvals.no_current_step', {

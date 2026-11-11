@@ -101,7 +101,7 @@ export function BulkTagDrawer({
   return (
     <>
       <div
-        className="fixed inset-x-0 bottom-0 z-40 bg-surface-elevated border-t border-border-light shadow-lg"
+        className="fixed inset-x-0 bottom-0 z-drawer bg-surface-elevated border-t border-border-light shadow-lg"
         role="dialog"
         aria-label={t('files.tags.bulk.drawer_label', {
           defaultValue: 'Bulk tag operations',

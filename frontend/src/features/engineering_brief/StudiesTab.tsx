@@ -179,7 +179,7 @@ function StudyDialog({
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <WideModalField label={t('engineeringBrief.studies.kind', { defaultValue: 'Kind' })} required>
-            <select className={FIELD_CLASS} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as StudyKind })} data-testid="brief-study-kind">
+            <select className={`${FIELD_CLASS} oe-select`} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as StudyKind })} data-testid="brief-study-kind">
               {STUDY_KINDS.map((k) => (
                 <option key={k} value={k}>
                   {keyText(t as TFn, STUDY_KIND_LABEL[k])}
@@ -188,7 +188,7 @@ function StudyDialog({
             </select>
           </WideModalField>
           <WideModalField label={t('engineeringBrief.studies.conclusion', { defaultValue: 'Conclusion' })} required>
-            <select className={FIELD_CLASS} value={form.conclusion} onChange={(e) => setForm({ ...form, conclusion: e.target.value as StudyConclusion })} data-testid="brief-study-conclusion">
+            <select className={`${FIELD_CLASS} oe-select`} value={form.conclusion} onChange={(e) => setForm({ ...form, conclusion: e.target.value as StudyConclusion })} data-testid="brief-study-conclusion">
               {STUDY_CONCLUSIONS.map((c) => (
                 <option key={c} value={c}>
                   {keyText(t as TFn, STUDY_CONCLUSION_LABEL[c])}
@@ -209,10 +209,10 @@ function StudyDialog({
           </WideModalField>
         </div>
         <WideModalField label={t('engineeringBrief.studies.scope', { defaultValue: 'Scope' })}>
-          <textarea className={FIELD_CLASS} rows={2} value={form.scope} maxLength={20000} onChange={(e) => setForm({ ...form, scope: e.target.value })} />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={2} value={form.scope} maxLength={20000} onChange={(e) => setForm({ ...form, scope: e.target.value })} />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.studies.result', { defaultValue: 'Result' })}>
-          <textarea className={FIELD_CLASS} rows={3} value={form.result} maxLength={20000} onChange={(e) => setForm({ ...form, result: e.target.value })} data-testid="brief-study-result" />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={form.result} maxLength={20000} onChange={(e) => setForm({ ...form, result: e.target.value })} data-testid="brief-study-result" />
         </WideModalField>
         <WideModalField
           label={t('engineeringBrief.studies.document', { defaultValue: 'Report document' })}
@@ -227,7 +227,7 @@ function StudyDialog({
             aria-label={t('engineeringBrief.studies.document_search', { defaultValue: 'Search documents by name' })}
             data-testid="brief-study-document-search"
           />
-          <select className={FIELD_CLASS} value={form.document_id ?? ''} onChange={(e) => setForm({ ...form, document_id: e.target.value || null })} data-testid="brief-study-document">
+          <select className={`${FIELD_CLASS} oe-select`} value={form.document_id ?? ''} onChange={(e) => setForm({ ...form, document_id: e.target.value || null })} data-testid="brief-study-document">
             <option value="">{t('engineeringBrief.studies.no_document', { defaultValue: 'No document' })}</option>
             {documents.map((d) => (
               <option key={d.id} value={d.id}>
@@ -305,7 +305,7 @@ export function StudiesTab({
           <section key={kind} className="space-y-2" data-testid={`brief-studies-group-${kind}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="space-y-0.5">
-                <h3 className="text-sm font-semibold text-content-primary">{keyText(t as TFn, STUDY_KIND_LABEL[kind])}</h3>
+                <h3 className="oe-card-title">{keyText(t as TFn, STUDY_KIND_LABEL[kind])}</h3>
                 <GateIndicator kind={kind} gate={studyGate(kind, studies)} />
               </div>
               {canWrite ? (
@@ -323,31 +323,31 @@ export function StudiesTab({
               />
             ) : (
               <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-                <table className="w-full text-sm">
-                  <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+                <table className="oe-table">
+                  <thead className="text-left">
                     <tr>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.code', { defaultValue: 'No.' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.title', { defaultValue: 'Title' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.author', { defaultValue: 'Author' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.date', { defaultValue: 'Date' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.conclusion', { defaultValue: 'Conclusion' })}</th>
-                      <th className="px-3 py-2">{t('engineeringBrief.studies.document', { defaultValue: 'Report document' })}</th>
-                      <th className="w-20 px-3 py-2" />
+                      <th>{t('engineeringBrief.studies.code', { defaultValue: 'No.' })}</th>
+                      <th>{t('engineeringBrief.studies.title', { defaultValue: 'Title' })}</th>
+                      <th>{t('engineeringBrief.studies.author', { defaultValue: 'Author' })}</th>
+                      <th>{t('engineeringBrief.studies.date', { defaultValue: 'Date' })}</th>
+                      <th>{t('engineeringBrief.studies.conclusion', { defaultValue: 'Conclusion' })}</th>
+                      <th>{t('engineeringBrief.studies.document', { defaultValue: 'Report document' })}</th>
+                      <th className="w-20" />
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((s) => (
-                      <tr key={s.id} className="border-t border-border-light" data-testid="brief-study-row">
-                        <td className="px-3 py-2 font-mono text-xs text-content-tertiary">{s.code}</td>
-                        <td className="px-3 py-2 text-content-primary">{s.title}</td>
-                        <td className="px-3 py-2 text-content-secondary">{s.author || '-'}</td>
-                        <td className="px-3 py-2 text-content-secondary">{s.study_date ? fmtDate(s.study_date) : '-'}</td>
-                        <td className="px-3 py-2">
+                      <tr key={s.id} data-testid="brief-study-row">
+                        <td className="font-mono text-xs text-content-tertiary">{s.code}</td>
+                        <td>{s.title}</td>
+                        <td className="text-content-secondary">{s.author || '-'}</td>
+                        <td className="text-content-secondary">{s.study_date ? fmtDate(s.study_date) : '-'}</td>
+                        <td>
                           <Badge variant={CONCLUSION_TONE[s.conclusion]} size="sm">
                             {keyText(t as TFn, STUDY_CONCLUSION_LABEL[s.conclusion])}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           {s.document_id ? (
                             <Link to={documentLink(s.document_id)} className="text-oe-blue hover:underline" data-testid="brief-study-document-link">
                               {s.document_name || t('engineeringBrief.studies.open_document', { defaultValue: 'Open document' })}
@@ -356,7 +356,7 @@ export function StudiesTab({
                             <span className="text-content-tertiary">-</span>
                           )}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           {canWrite ? (
                             <div className="flex justify-end gap-1">
                               <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: s, kind: s.kind })} />

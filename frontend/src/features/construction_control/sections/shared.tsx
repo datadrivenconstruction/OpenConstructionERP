@@ -18,7 +18,7 @@ export const inputCls =
 export const textareaCls =
   'oe-textarea w-full resize-y';
 
-export const labelCls = 'block text-sm font-medium text-content-primary mb-1.5';
+export const labelCls = 'oe-label';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 

@@ -199,7 +199,7 @@ function FolderCard({
         type="button"
         onClick={onUpload}
         className={clsx(
-          'group relative flex flex-col items-start text-left rounded-xl p-3.5 min-h-[124px]',
+          'group relative flex flex-col items-start text-left rounded-xl p-3 min-h-[124px]',
           'border border-dashed border-border-light bg-surface-primary/40',
           'hover:border-oe-blue/40 hover:bg-surface-primary transition-colors',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
@@ -212,10 +212,10 @@ function FolderCard({
               tone.tile,
             )}
           >
-            <Icon size={15} strokeWidth={2} className={tone.icon} />
+            <Icon size={16} strokeWidth={2} className={tone.icon} />
           </span>
           <h3
-            className="text-sm font-semibold text-content-primary truncate"
+            className="oe-card-title truncate"
             title={label}
           >
             {label}
@@ -272,7 +272,7 @@ function FolderCard({
             title={t('files.permissions.manage', { defaultValue: 'Manage access' })}
             className="inline-flex h-5 w-5 items-center justify-center rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:bg-surface-secondary hover:text-content-primary transition-all"
           >
-            <Settings size={11} />
+            <Settings size={12} />
           </button>
         )}
       </div>
@@ -281,7 +281,7 @@ function FolderCard({
         type="button"
         onClick={onOpen}
         className={clsx(
-          'flex flex-col text-left p-3.5 w-full h-full min-h-[124px]',
+          'flex flex-col text-left p-3 w-full h-full min-h-[124px]',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded-xl',
         )}
       >
@@ -295,10 +295,10 @@ function FolderCard({
               tone.ring,
             )}
           >
-            <Icon size={15} strokeWidth={2} className={tone.icon} />
+            <Icon size={16} strokeWidth={2} className={tone.icon} />
           </span>
           <h3
-            className="text-sm font-semibold text-content-primary truncate"
+            className="oe-card-title truncate"
             title={label}
           >
             {label}
@@ -351,7 +351,7 @@ function FolderCard({
           </span>
           <span className="hidden group-hover:inline-flex items-center gap-0.5 text-2xs font-medium text-oe-blue shrink-0">
             {t('files.folder.open', { defaultValue: 'Open' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </span>
         </div>
       </button>

@@ -277,7 +277,7 @@ export function NewTransmittalWizard({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               maxLength={255}
-              className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+              className="oe-input"
               placeholder={t('files.transmittals.subject_placeholder', {
                 defaultValue: 'e.g. Issue for review - package R1',
               })}
@@ -291,7 +291,7 @@ export function NewTransmittalWizard({
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value as TransmittalReason)}
-              className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+              className="oe-select"
             >
               {REASON_CODES.map((code) => (
                 <option key={code} value={code}>
@@ -312,7 +312,7 @@ export function NewTransmittalWizard({
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
               maxLength={4000}
-              className="px-3 py-2 rounded-md border border-border bg-surface-primary text-sm resize-y"
+              className="oe-textarea resize-y"
               placeholder={t('files.transmittals.notes_placeholder', {
                 defaultValue: 'Anything the recipients should know.',
               })}
@@ -397,7 +397,7 @@ export function NewTransmittalWizard({
                 onChange={(e) =>
                   setRecipientDraft((prev) => ({ ...prev, email: e.target.value }))
                 }
-                className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+                className="oe-input"
                 placeholder="user@example.com"
               />
             </div>
@@ -416,7 +416,7 @@ export function NewTransmittalWizard({
                     display_name: e.target.value,
                   }))
                 }
-                className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+                className="oe-input"
               />
             </div>
             <div className="flex flex-col">
@@ -431,7 +431,7 @@ export function NewTransmittalWizard({
                 onChange={(e) =>
                   setRecipientDraft((prev) => ({ ...prev, role: e.target.value }))
                 }
-                className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+                className="oe-input"
               />
             </div>
             <Button

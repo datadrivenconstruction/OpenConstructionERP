@@ -25,7 +25,7 @@ export function SavedOnDeviceBadge({ flag }: { flag?: 'new' | 'edited' | null })
       })}
       className="inline-flex shrink-0 items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning"
     >
-      <HardDrive size={11} aria-hidden="true" />
+      <HardDrive size={12} aria-hidden="true" />
       {t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })}
     </span>
   );
@@ -43,7 +43,7 @@ export function MergeHistoryList({ kind, id }: { kind: OfflineEntityKind; id: st
   if (data.length === 0) return null;
   return (
     <section data-testid="merge-history" className="space-y-1">
-      <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase text-content-tertiary">
+      <h4 className="oe-overline flex items-center gap-1.5">
         <GitMerge size={12} aria-hidden="true" />
         {t('offline_sync.merge_history', { defaultValue: 'Merge history' })}
       </h4>

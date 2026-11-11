@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui';
 import type { SheetBulkPatch } from './api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
 type BulkKey = 'discipline' | 'revision' | 'revision_date' | 'scale';
 
@@ -85,7 +85,7 @@ export function SheetsBulkEditBar({
           const id = `sheets-bulk-${f.key}`;
           return (
             <div key={f.key} className="flex flex-col gap-1">
-              <label htmlFor={id} className="text-2xs uppercase tracking-wider text-content-tertiary">
+              <label htmlFor={id} className="oe-overline">
                 {f.label}
               </label>
               <input

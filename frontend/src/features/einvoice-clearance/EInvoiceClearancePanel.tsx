@@ -202,7 +202,7 @@ export function EInvoiceClearancePanel() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded border border-border-light bg-surface-primary p-1.5 text-sm"
+            className="oe-select"
           >
             <option value="">
               {t('einvoice_clearance.filter_status_any', { defaultValue: 'Any status' })}
@@ -1070,7 +1070,7 @@ function CancelForm({
           onChange={(e) => setReason(e.target.value)}
           maxLength={1000}
           rows={3}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-textarea"
           required
         />
       </label>
@@ -1144,7 +1144,7 @@ function ResolveForm({
         <select
           value={outcome}
           onChange={(e) => setOutcome(e.target.value as 'cleared' | 'rejected')}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-select"
         >
           <option value="cleared">
             {t('einvoice_clearance.outcome_cleared', { defaultValue: 'It accepted the document' })}
@@ -1165,7 +1165,7 @@ function ResolveForm({
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             maxLength={255}
-            className="rounded border border-border-light bg-surface-primary p-2 font-mono"
+            className="oe-input font-mono"
             required={needsIdentifier}
           />
           {needsIdentifier && (
@@ -1186,7 +1186,7 @@ function ResolveForm({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               maxLength={64}
-              className="rounded border border-border-light bg-surface-primary p-2 font-mono"
+              className="oe-input font-mono"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -1198,7 +1198,7 @@ function ResolveForm({
               onChange={(e) => setRejectionMessage(e.target.value)}
               maxLength={2000}
               rows={2}
-              className="rounded border border-border-light bg-surface-primary p-2"
+              className="oe-textarea"
             />
           </label>
         </>
@@ -1211,7 +1211,7 @@ function ResolveForm({
           onChange={(e) => setNote(e.target.value)}
           maxLength={1000}
           rows={2}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-textarea"
           required
         />
       </label>

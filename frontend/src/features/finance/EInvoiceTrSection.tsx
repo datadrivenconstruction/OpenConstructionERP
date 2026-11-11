@@ -56,7 +56,7 @@ export interface EInvoiceTrSectionProps {
 }
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm ' +
+  'oe-input oe-input-lg w-full' +
   'text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:opacity-60';
 
 const codeCls = `${inputCls} font-mono uppercase`;
@@ -102,7 +102,7 @@ export function EInvoiceTrSection({
             id={trFieldId('profile_id')}
             value={form.profile_id}
             onChange={(e) => onField('profile_id', e.target.value)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
             disabled={disabled}
           >
             <option value="">{t('einvoice.tr.fields.profile_id_unset')}</option>
@@ -123,7 +123,7 @@ export function EInvoiceTrSection({
             id={trFieldId('invoice_type')}
             value={form.invoice_type}
             onChange={(e) => onField('invoice_type', e.target.value)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
             disabled={disabled}
           >
             <option value="">{t('einvoice.tr.fields.invoice_type_auto')}</option>
@@ -279,7 +279,7 @@ export function EInvoiceTrSection({
               id={trFieldId('original_invoice_id')}
               value={form.original_invoice_id}
               onChange={(e) => onField('original_invoice_id', e.target.value)}
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               disabled={disabled}
             >
               <option value="">{t('einvoice.tr.fields.original_invoice_none')}</option>

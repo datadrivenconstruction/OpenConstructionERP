@@ -444,7 +444,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-content-tertiary" aria-hidden />
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('estimateBasis.heading', { defaultValue: 'Basis of estimate' })}
           </h2>
           {draft && (
@@ -535,7 +535,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
             aria-label={t('estimateBasis.titleLabel', { defaultValue: 'Document title' })}
             value={draft.title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm font-medium text-content-primary"
+            className="w-full oe-input font-medium"
           />
 
           <VersionPicker
@@ -625,7 +625,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           <div>
             <label
               htmlFor="estimate-basis-notes"
-              className="mb-1.5 block text-sm font-medium text-content-primary"
+              className="oe-label"
             >
               {t('estimateBasis.section.notes', { defaultValue: 'Notes' })}
             </label>
@@ -637,7 +637,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
               placeholder={t('estimateBasis.notesPlaceholder', {
                 defaultValue: 'Any additional qualification for the client...',
               })}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+              className="w-full oe-textarea"
             />
           </div>
 
@@ -742,7 +742,7 @@ function JudgementField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-content-primary">
+      <label htmlFor={id} className="oe-label">
         {label}
       </label>
       <p className="mb-1.5 text-2xs text-content-tertiary">{hint}</p>
@@ -752,7 +752,7 @@ function JudgementField({
         onChange={(e) => onChange(e.target.value)}
         rows={3}
         placeholder={hint}
-        className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+        className="w-full oe-textarea"
       />
     </div>
   );
@@ -1009,7 +1009,7 @@ function Section({
               onChange={(e) => onText(it.id, e.target.value)}
               rows={1}
               aria-label={t('estimateBasis.lineText', { defaultValue: 'Line text' })}
-              className={`min-h-[2.25rem] flex-1 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary ${
+              className={`min-h-[2.25rem] flex-1 oe-textarea${
                 it.enabled ? '' : 'text-content-tertiary line-through'
               }`}
             />

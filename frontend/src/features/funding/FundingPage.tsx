@@ -505,19 +505,19 @@ export function FundingPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase text-content-tertiary">
+              <table className="oe-table">
+                <thead className="text-left">
                   <tr>
-                    <th className="px-3 py-2">{t('funding.field.code', { defaultValue: 'Reference' })}</th>
-                    <th className="px-3 py-2">{t('funding.field.programme', { defaultValue: 'Programme' })}</th>
-                    <th className="px-3 py-2">{t('funding.field.status', { defaultValue: 'Status' })}</th>
-                    <th className="px-3 py-2 text-right">
+                    <th>{t('funding.field.code', { defaultValue: 'Reference' })}</th>
+                    <th>{t('funding.field.programme', { defaultValue: 'Programme' })}</th>
+                    <th>{t('funding.field.status', { defaultValue: 'Status' })}</th>
+                    <th className="text-right">
                       {t('funding.field.requested', { defaultValue: 'Requested' })}
                     </th>
-                    <th className="px-3 py-2 text-right">
+                    <th className="text-right">
                       {t('funding.field.approved', { defaultValue: 'Approved' })}
                     </th>
-                    <th className="px-3 py-2">{t('funding.field.period', { defaultValue: 'Award period' })}</th>
+                    <th>{t('funding.field.period', { defaultValue: 'Award period' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -527,9 +527,9 @@ export function FundingPage() {
                       <tr
                         key={row.id}
                         onClick={() => setOpenApplication(row.id)}
-                        className="cursor-pointer border-t border-border-light hover:bg-surface-secondary"
+                        className="cursor-pointer"
                       >
-                        <td className="px-3 py-2 font-medium">
+                        <td className="font-medium">
                           <button
                             type="button"
                             onClick={() => setOpenApplication(row.id)}
@@ -538,19 +538,19 @@ export function FundingPage() {
                             {row.code}
                           </button>
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           {programme ? programme.name || programme.code : '—'}
                         </td>
-                        <td className="px-3 py-2">
+                        <td>
                           <Badge variant={statusVariant(row.status)}>
                             {t(`funding.status.${row.status}`, { defaultValue: row.status })}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums">{money(row.requested_amount)}</td>
-                        <td className="px-3 py-2 text-right tabular-nums">{money(row.approved_amount)}</td>
+                        <td className="text-right tabular-nums">{money(row.requested_amount)}</td>
+                        <td className="text-right tabular-nums">{money(row.approved_amount)}</td>
                         {/* Two dates and a separator: keep the browser from choosing
                             the middle of one of them as the place to break. */}
-                        <td className="whitespace-nowrap px-3 py-2 tabular-nums text-content-secondary">
+                        <td className="whitespace-nowrap tabular-nums text-content-secondary">
                           {row.award_period_start || row.award_period_end
                             ? `${date(row.award_period_start)} … ${date(row.award_period_end)}`
                             : '—'}
@@ -632,19 +632,19 @@ export function FundingPage() {
         <Card>
           <div className="flex flex-wrap items-center gap-2 border-b border-border-light p-3">
             <div className="relative">
-              <Search className="pointer-events-none absolute start-2 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="pointer-events-none absolute start-2 top-2.5 h-4 w-4 text-content-tertiary" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('funding.search_programmes', { defaultValue: 'Search programmes' })}
-                className="rounded border border-border py-1.5 ps-8 pe-2 text-sm"
+                className="oe-input ps-8 pe-2"
               />
             </div>
             <input
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value.toUpperCase().slice(0, 2))}
               placeholder={t('funding.filter_country', { defaultValue: 'Country' })}
-              className="w-24 rounded border border-border px-2 py-1.5 text-sm uppercase"
+              className="w-24 oe-input uppercase"
             />
             <Button
               variant="secondary"
@@ -710,7 +710,7 @@ export function FundingPage() {
       )}
 
       {showProgrammeForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center overflow-y-auto bg-black/40 p-4">
           <Card className="my-auto w-full max-w-2xl p-4">
             <h2 className="mb-3 text-lg font-semibold">
               {t('funding.new_programme', { defaultValue: 'New programme' })}
@@ -724,7 +724,7 @@ export function FundingPage() {
                   <input
                     value={programmeDraft.code}
                     onChange={(e) => setProgrammeField('code', e.target.value)}
-                    className="w-full rounded border border-border px-2 py-1.5"
+                    className="w-full oe-input"
                   />
                 </label>
                 <label className="block text-sm">
@@ -734,7 +734,7 @@ export function FundingPage() {
                   <input
                     value={programmeDraft.name}
                     onChange={(e) => setProgrammeField('name', e.target.value)}
-                    className="w-full rounded border border-border px-2 py-1.5"
+                    className="w-full oe-input"
                   />
                 </label>
                 <label className="block text-sm">
@@ -744,7 +744,7 @@ export function FundingPage() {
                   <input
                     value={programmeDraft.authority_name}
                     onChange={(e) => setProgrammeField('authority_name', e.target.value)}
-                    className="w-full rounded border border-border px-2 py-1.5"
+                    className="w-full oe-input"
                   />
                 </label>
                 <label className="block text-sm">
@@ -754,7 +754,7 @@ export function FundingPage() {
                   <input
                     value={programmeDraft.country}
                     onChange={(e) => setProgrammeField('country', e.target.value.toUpperCase().slice(0, 2))}
-                    className="w-full rounded border border-border px-2 py-1.5 uppercase"
+                    className="w-full oe-input uppercase"
                   />
                 </label>
               </div>
@@ -773,7 +773,7 @@ export function FundingPage() {
                       onChange={(e) =>
                         setProgrammeField('instrument', e.target.value as FundingProgramme['instrument'])
                       }
-                      className="w-full rounded border border-border px-2 py-1.5"
+                      className="w-full oe-select"
                     >
                       {INSTRUMENTS.map((value) => (
                         <option key={value} value={value}>
@@ -791,7 +791,7 @@ export function FundingPage() {
                       onChange={(e) =>
                         setProgrammeField('status', e.target.value as FundingProgramme['status'])
                       }
-                      className="w-full rounded border border-border px-2 py-1.5"
+                      className="w-full oe-select"
                     >
                       {PROGRAMME_STATUSES.map((value) => (
                         <option key={value} value={value}>
@@ -810,7 +810,7 @@ export function FundingPage() {
                       value={programmeDraft.funding_rate_percent}
                       onChange={(e) => setProgrammeField('funding_rate_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
@@ -821,7 +821,7 @@ export function FundingPage() {
                       value={programmeDraft.aid_intensity_cap_percent}
                       onChange={(e) => setProgrammeField('aid_intensity_cap_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
@@ -832,7 +832,7 @@ export function FundingPage() {
                       value={programmeDraft.own_share_percent}
                       onChange={(e) => setProgrammeField('own_share_percent', e.target.value)}
                       inputMode="decimal"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                 </div>
@@ -866,7 +866,7 @@ export function FundingPage() {
                       value={programmeDraft.proof_of_use_due_days}
                       onChange={(e) => setProgrammeField('proof_of_use_due_days', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
@@ -877,7 +877,7 @@ export function FundingPage() {
                       value={programmeDraft.disbursement_spend_days}
                       onChange={(e) => setProgrammeField('disbursement_spend_days', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                   <label className="block text-sm">
@@ -888,7 +888,7 @@ export function FundingPage() {
                       value={programmeDraft.retention_years}
                       onChange={(e) => setProgrammeField('retention_years', e.target.value)}
                       inputMode="numeric"
-                      className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                      className="w-full oe-input text-right tabular-nums"
                     />
                   </label>
                 </div>
@@ -922,7 +922,7 @@ export function FundingPage() {
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4">
           <Card className="w-full max-w-lg p-4">
             <h2 className="mb-3 text-lg font-semibold">
               {t('funding.new_application', { defaultValue: 'New application' })}
@@ -935,7 +935,7 @@ export function FundingPage() {
                 <input
                   value={draftCode}
                   onChange={(e) => setDraftCode(e.target.value)}
-                  className="w-full rounded border border-border px-2 py-1.5"
+                  className="w-full oe-input"
                 />
               </label>
               <label className="block text-sm">
@@ -945,7 +945,7 @@ export function FundingPage() {
                 <input
                   value={draftTitle}
                   onChange={(e) => setDraftTitle(e.target.value)}
-                  className="w-full rounded border border-border px-2 py-1.5"
+                  className="w-full oe-input"
                 />
               </label>
               <label className="block text-sm">
@@ -955,7 +955,7 @@ export function FundingPage() {
                 <select
                   value={draftProgramme}
                   onChange={(e) => setDraftProgramme(e.target.value)}
-                  className="w-full rounded border border-border px-2 py-1.5"
+                  className="w-full oe-select"
                 >
                   <option value="">
                     {t('funding.choose_programme', { defaultValue: 'Choose a programme' })}
@@ -976,7 +976,7 @@ export function FundingPage() {
                     value={draftBase}
                     onChange={(e) => setDraftBase(e.target.value)}
                     inputMode="decimal"
-                    className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                    className="w-full oe-input text-right tabular-nums"
                   />
                 </label>
                 <label className="block text-sm">
@@ -987,7 +987,7 @@ export function FundingPage() {
                     value={draftRequested}
                     onChange={(e) => setDraftRequested(e.target.value)}
                     inputMode="decimal"
-                    className="w-full rounded border border-border px-2 py-1.5 text-right tabular-nums"
+                    className="w-full oe-input text-right tabular-nums"
                   />
                 </label>
               </div>

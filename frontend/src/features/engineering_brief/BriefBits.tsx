@@ -17,7 +17,7 @@ import { downloadExport, type Can, type ExportFormat, type ExportWhat } from './
 import { refusalText, type TFn } from './labels';
 
 export const FIELD_CLASS =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none disabled:opacity-60';
+  'oe-input w-full';
 
 /**
  * A write whose refusal the reader sees in the server's own words. The client

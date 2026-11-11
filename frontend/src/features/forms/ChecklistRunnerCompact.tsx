@@ -322,7 +322,7 @@ export function ChecklistRunnerCompact({
   if (!submission) {
     return (
       <div className={clsx('flex items-center justify-center rounded-xl border border-border p-8 text-content-tertiary', className)}>
-        <Loader2 className="animate-spin" size={18} />
+        <Loader2 className="animate-spin" size={20} />
       </div>
     );
   }
@@ -445,7 +445,7 @@ function ChecklistItem({
   if (LAYOUT_TYPES.has(field.type)) {
     return (
       <div className="pt-1">
-        <h4 className="border-b border-border-light pb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline border-b border-border-light pb-1">
           {field.label}
         </h4>
       </div>
@@ -465,8 +465,8 @@ function ChecklistItem({
     (readOnly ? note.trim().length > 0 || (isFail && allowRaiseIssue) : answered || note.trim().length > 0);
 
   return (
-    <div className="rounded-lg border border-border-light p-2.5">
-      <label className="mb-1.5 flex items-start gap-1 text-sm font-medium text-content-secondary">
+    <div className="rounded-lg border border-border-light p-3">
+      <label className="oe-label flex items-start gap-1">
         <span>{field.label}</span>
         {field.required && <span className="text-semantic-error">*</span>}
       </label>
@@ -511,7 +511,7 @@ function ChecklistItem({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Flag size={13} />}
+                  icon={<Flag size={14} />}
                   loading={raising}
                   onClick={onRaise}
                 >

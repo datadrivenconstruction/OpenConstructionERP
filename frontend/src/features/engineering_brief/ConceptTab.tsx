@@ -116,7 +116,7 @@ function ConceptDialog({
     >
       <div className="space-y-3">
         <WideModalField label={t('engineeringBrief.concept.topic', { defaultValue: 'Topic' })} required>
-          <select className={FIELD_CLASS} value={form.topic_code} onChange={(e) => setForm({ ...form, topic_code: e.target.value })}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.topic_code} onChange={(e) => setForm({ ...form, topic_code: e.target.value })}>
             {catalogue.concept_topics.map((c) => (
               <option key={c.code} value={c.code}>
                 {itemLabel(labels, c, c.code)}
@@ -135,13 +135,13 @@ function ConceptDialog({
           <input className={FIELD_CLASS} value={form.title} maxLength={255} onChange={(e) => setForm({ ...form, title: e.target.value })} data-testid="brief-concept-title" />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.concept.description', { defaultValue: 'Description' })}>
-          <textarea className={FIELD_CLASS} rows={3} value={form.description} maxLength={20000} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={form.description} maxLength={20000} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         </WideModalField>
         <WideModalField
           label={t('engineeringBrief.concept.decision', { defaultValue: 'Decision' })}
           hint={t('engineeringBrief.concept.decision_hint', { defaultValue: 'A written decision marks the item as agreed.' })}
         >
-          <textarea className={FIELD_CLASS} rows={3} value={form.decision} maxLength={20000} onChange={(e) => setForm({ ...form, decision: e.target.value })} data-testid="brief-concept-decision" />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={form.decision} maxLength={20000} onChange={(e) => setForm({ ...form, decision: e.target.value })} data-testid="brief-concept-decision" />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.concept.requirements', { defaultValue: 'Requirements answered' })}>
           {requirements.length === 0 ? (
@@ -232,7 +232,7 @@ export function ConceptTab({
       ) : (
         topics.map((code) => (
           <section key={code} className="space-y-1.5" data-testid={`brief-concept-topic-${code}`}>
-            <h3 className="text-sm font-semibold text-content-primary">{topicName(code)}</h3>
+            <h3 className="oe-card-title">{topicName(code)}</h3>
             <ul className="space-y-2">
               {items
                 .filter((i) => i.topic_code === code)

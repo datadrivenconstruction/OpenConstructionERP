@@ -189,7 +189,7 @@ export function FileContextMenu({
       ref={menuRef}
       role="menu"
       className={clsx(
-        'fixed z-50 w-48 rounded-lg border border-border-light bg-surface-elevated shadow-xl overflow-hidden',
+        'fixed z-popover w-48 rounded-lg border border-border-light bg-surface-elevated shadow-xl overflow-hidden',
         'animate-fade-in',
       )}
       style={{ left: adjustedX, top: adjustedY }}
@@ -198,15 +198,15 @@ export function FileContextMenu({
       <MenuItem
         icon={
           inlinePreview ? (
-            <Eye size={13} />
+            <Eye size={14} />
           ) : lightbox ? (
             isVideo ? (
-              <PlayCircle size={13} />
+              <PlayCircle size={14} />
             ) : (
-              <ImageIcon size={13} />
+              <ImageIcon size={14} />
             )
           ) : (
-            <ExternalLink size={13} />
+            <ExternalLink size={14} />
           )
         }
         label={
@@ -227,7 +227,7 @@ export function FileContextMenu({
           now that the default open just reads the file inline. */}
       {takeoffTarget && (
         <MenuItem
-          icon={<Ruler size={13} />}
+          icon={<Ruler size={14} />}
           label={t('files.context.open_in_pdf_takeoff', {
             defaultValue: 'Open in PDF Takeoff',
           })}
@@ -239,21 +239,21 @@ export function FileContextMenu({
       )}
       {row.download_url && (
         <MenuItem
-          icon={<Download size={13} />}
+          icon={<Download size={14} />}
           label={t('files.context.download', { defaultValue: 'Download' })}
           onClick={handleDownload}
         />
       )}
       {row.download_url && (
         <MenuItem
-          icon={<LinkIcon size={13} />}
+          icon={<LinkIcon size={14} />}
           label={t('files.context.copy_link', { defaultValue: 'Copy link' })}
           onClick={handleCopyLink}
         />
       )}
       <div className="h-px bg-border-light" />
       <MenuItem
-        icon={<Pencil size={13} />}
+        icon={<Pencil size={14} />}
         label={t('files.context.rename', { defaultValue: 'Rename' })}
         onClick={() => {
           onRename(row);
@@ -273,7 +273,7 @@ export function FileContextMenu({
       {row.kind === 'document' && <DocumentDeleteWarning documentId={row.id} />}
       <div className="h-px bg-border-light" />
       <MenuItem
-        icon={<Trash2 size={13} />}
+        icon={<Trash2 size={14} />}
         label={t('files.context.delete', { defaultValue: 'Delete' })}
         onClick={() => {
           onDelete(row);

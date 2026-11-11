@@ -855,7 +855,7 @@ export function FileManagerPage() {
             )}
             disabled={showFolderGrid}
           >
-            {!showFolderGrid && <ArrowLeft size={13} />}
+            {!showFolderGrid && <ArrowLeft size={14} />}
             {t('files.title_all', { defaultValue: 'All files' })}
           </button>
           {!showFolderGrid && (
@@ -882,7 +882,7 @@ export function FileManagerPage() {
             className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             title={t('files.global_search.title', { defaultValue: 'Search across projects' })}
           >
-            <Search size={13} />
+            <Search size={14} />
             <span className="hidden md:inline">
               {t('files.global_search.short', { defaultValue: 'Search all projects' })}
             </span>
@@ -894,7 +894,7 @@ export function FileManagerPage() {
             className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             title={t('files.transmittals.open_log', { defaultValue: 'Transmittal log' })}
           >
-            <Send size={13} />
+            <Send size={14} />
             <span className="hidden md:inline">
               {t('files.transmittals.open_log', { defaultValue: 'Transmittal log' })}
             </span>
@@ -906,7 +906,7 @@ export function FileManagerPage() {
             className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             title={t('files.approvals.register_title', { defaultValue: 'Approvals register' })}
           >
-            <ClipboardCheck size={13} />
+            <ClipboardCheck size={14} />
             <span className="hidden md:inline">
               {t('files.approvals.register_title', { defaultValue: 'Approvals register' })}
             </span>
@@ -1060,7 +1060,7 @@ export function FileManagerPage() {
                       disabled={isFetchingNextPage}
                       className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium border border-border-light text-content-secondary hover:bg-surface-secondary disabled:opacity-60"
                     >
-                      {isFetchingNextPage && <Loader2 size={13} className="animate-spin" />}
+                      {isFetchingNextPage && <Loader2 size={14} className="animate-spin" />}
                       {t('files.load_more', { defaultValue: 'Load more' })}
                     </button>
                   </div>

@@ -50,13 +50,13 @@ export function FileTree({ nodes, selectedId, onSelect, isLoading, projectId }: 
      into a neutral "Other" wedge. */
   const STORAGE_TINTS: Record<FileKind, string> = {
     document: 'bg-blue-400',
-    photo: 'bg-emerald-400',
-    sheet: 'bg-amber-400',
+    photo: 'bg-semantic-success',
+    sheet: 'bg-semantic-warning',
     bim_model: 'bg-violet-400',
     dwg_drawing: 'bg-orange-400',
     takeoff: 'bg-cyan-400',
     report: 'bg-pink-400',
-    markup: 'bg-rose-400',
+    markup: 'bg-semantic-error',
   };
   const storageBreakdown = totalBytes > 0
     ? [...nodes]
@@ -70,7 +70,7 @@ export function FileTree({ nodes, selectedId, onSelect, isLoading, projectId }: 
       {totalBytes > 0 && (
         <div className="px-3 pt-3 pb-3 border-b border-border-light">
           <div className="flex items-center gap-1.5 mb-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
-            <HardDrive size={11} strokeWidth={2} />
+            <HardDrive size={12} strokeWidth={2} />
             <span>{t('files.tree.storage_used', { defaultValue: 'Storage used' })}</span>
           </div>
           <div className="text-base font-semibold text-content-primary tabular-nums">
@@ -93,7 +93,7 @@ export function FileTree({ nodes, selectedId, onSelect, isLoading, projectId }: 
               return (
                 <span
                   key={node.id}
-                  className={clsx('block h-full', STORAGE_TINTS[kind] ?? 'bg-gray-300')}
+                  className={clsx('block h-full', STORAGE_TINTS[kind] ?? 'bg-border')}
                   style={{ width: `${pct}%` }}
                   title={`${t(`files.category.${kind}`, { defaultValue: node.label })}: ${fmtBytes(node.total_bytes)}`}
                 />

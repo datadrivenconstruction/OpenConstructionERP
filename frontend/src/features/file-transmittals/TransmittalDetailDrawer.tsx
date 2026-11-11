@@ -108,7 +108,7 @@ export function TransmittalDetailDrawer({
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+        className="fixed inset-0 z-drawer bg-black/40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
@@ -119,7 +119,7 @@ export function TransmittalDetailDrawer({
           defaultValue: 'Transmittal details',
         })}
         className={clsx(
-          'fixed inset-y-0 right-0 z-50 w-full max-w-md',
+          'fixed inset-y-0 right-0 z-drawer w-full max-w-md',
           'bg-surface-elevated border-l border-border-light shadow-2xl',
           'flex flex-col animate-slide-in-right',
         )}
@@ -129,7 +129,7 @@ export function TransmittalDetailDrawer({
             <p className="font-mono text-xs text-content-tertiary">
               {data?.number ?? '—'}
             </p>
-            <h2 className="text-base font-semibold text-content-primary truncate">
+            <h2 className="oe-card-title truncate">
               {data?.subject ?? t('common.loading', { defaultValue: 'Loading…' })}
             </h2>
             {data && (
@@ -144,7 +144,7 @@ export function TransmittalDetailDrawer({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="text-content-tertiary hover:text-content-primary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </header>
 
@@ -158,7 +158,7 @@ export function TransmittalDetailDrawer({
           {data && (
             <>
               <section>
-                <h3 className="text-xs font-semibold text-content-secondary uppercase mb-2">
+                <h3 className="oe-overline mb-2">
                   {t('files.transmittals.items', { defaultValue: 'Items' })}
                 </h3>
                 {data.items.length === 0 ? (
@@ -214,7 +214,7 @@ export function TransmittalDetailDrawer({
               </section>
 
               <section>
-                <h3 className="text-xs font-semibold text-content-secondary uppercase mb-2">
+                <h3 className="oe-overline mb-2">
                   {t('files.transmittals.ack_timeline', {
                     defaultValue: 'Acknowledgements',
                   })}
@@ -280,7 +280,7 @@ export function TransmittalDetailDrawer({
 
               {data.notes && (
                 <section>
-                  <h3 className="text-xs font-semibold text-content-secondary uppercase mb-2">
+                  <h3 className="oe-overline mb-2">
                     {t('files.transmittals.notes', { defaultValue: 'Notes' })}
                   </h3>
                   <p className="text-sm text-content-secondary whitespace-pre-wrap">

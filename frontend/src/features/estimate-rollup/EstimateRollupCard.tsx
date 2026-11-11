@@ -62,7 +62,7 @@ export function EstimateRollupCard({ projectId }: { projectId: string }) {
       <div className="mb-3 flex items-center gap-2">
         <Calculator size={16} className="shrink-0 text-oe-blue" />
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('estimate_rollup.title', { defaultValue: 'Estimate rollup' })}
           </h2>
           <p className="text-2xs text-content-tertiary">

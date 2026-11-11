@@ -42,7 +42,7 @@ export function TrashNode({ projectId, active, className }: TrashNodeProps) {
       )}
       title={t('files.trash.sidebar_title', { defaultValue: 'Recycle Bin' })}
     >
-      <Trash2 size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" />
+      <Trash2 size={14} strokeWidth={2} className="shrink-0 text-content-tertiary" />
       <span className="flex-1 truncate">
         {t('files.trash.sidebar_label', { defaultValue: 'Recycle Bin' })}
       </span>

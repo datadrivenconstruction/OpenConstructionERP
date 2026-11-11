@@ -53,7 +53,7 @@ export function EInvoicesTab({ projectId }: { projectId: string }) {
           aria-label={t('common.status', { defaultValue: 'Status' })}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-select"
         >
           <option value="">{t('common.all_statuses', { defaultValue: 'All statuses' })}</option>
           {statuses.map((s) => (
@@ -66,7 +66,7 @@ export function EInvoicesTab({ projectId }: { projectId: string }) {
           aria-label={t('einvoice.list.country', { defaultValue: 'Country' })}
           value={country}
           onChange={(e) => setCountry(e.target.value)}
-          className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-select"
         >
           <option value="">{t('einvoice.list.allCountries', { defaultValue: 'All countries' })}</option>
           {markets.rows.map((m) => (
@@ -84,7 +84,7 @@ export function EInvoicesTab({ projectId }: { projectId: string }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search', { defaultValue: 'Search' })}
-          className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-input"
         />
         <div className="ms-auto flex gap-2">
           <Link to={MARKET_SETTINGS_PATH} className="text-xs underline self-center">
@@ -119,30 +119,30 @@ export function EInvoicesTab({ projectId }: { projectId: string }) {
       )}
       {rows.length > 0 && (
         <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="text-start text-xs text-content-secondary">
-                <th className="px-3 py-2 text-start">{t('einvoice.list.number', { defaultValue: 'Number' })}</th>
-                <th className="px-3 py-2 text-start">{t('einvoice.list.buyer', { defaultValue: 'Buyer' })}</th>
-                <th className="px-3 py-2 text-start">{t('common.date', { defaultValue: 'Date' })}</th>
-                <th className="px-3 py-2 text-end">{t('einvoice.list.amount', { defaultValue: 'Amount' })}</th>
-                <th className="px-3 py-2 text-start">{t('einvoice.list.country', { defaultValue: 'Country' })}</th>
-                <th className="px-3 py-2 text-start">{t('common.status', { defaultValue: 'Status' })}</th>
-                <th className="px-3 py-2 text-start">{t('einvoice.list.deadline', { defaultValue: 'Deadline' })}</th>
+              <tr>
+                <th>{t('einvoice.list.number', { defaultValue: 'Number' })}</th>
+                <th>{t('einvoice.list.buyer', { defaultValue: 'Buyer' })}</th>
+                <th>{t('common.date', { defaultValue: 'Date' })}</th>
+                <th className="text-end">{t('einvoice.list.amount', { defaultValue: 'Amount' })}</th>
+                <th>{t('einvoice.list.country', { defaultValue: 'Country' })}</th>
+                <th>{t('common.status', { defaultValue: 'Status' })}</th>
+                <th>{t('einvoice.list.deadline', { defaultValue: 'Deadline' })}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-t border-border-light">
-                  <td className="px-3 py-2" dir="ltr">{r.invoice_number}</td>
-                  <td className="px-3 py-2">{r.buyer_name}</td>
-                  <td className="px-3 py-2"><DateDisplay value={r.invoice_date} /></td>
-                  <td className="px-3 py-2 text-end"><MoneyDisplay amount={r.total_amount} currency={r.currency_code} /></td>
-                  <td className="px-3 py-2">{r.country}</td>
-                  <td className="px-3 py-2">
+                <tr key={r.id}>
+                  <td dir="ltr">{r.invoice_number}</td>
+                  <td>{r.buyer_name}</td>
+                  <td><DateDisplay value={r.invoice_date} /></td>
+                  <td className="text-end"><MoneyDisplay amount={r.total_amount} currency={r.currency_code} /></td>
+                  <td>{r.country}</td>
+                  <td>
                     <Badge variant={statusVariant(r.status)}>{t(`einvoice.status.${r.status}`, { defaultValue: r.status })}</Badge>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {r.deadline && (
                       <Badge variant={deadlineVariant(r.deadline.state)}>
                         {r.deadline.state === 'overdue'

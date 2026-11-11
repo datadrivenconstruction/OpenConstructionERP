@@ -76,7 +76,7 @@ export function EInvoiceSetupCard({ canEdit }: { canEdit: boolean }) {
                   if (next === 'live') setLiveFor(p);
                   else save.mutate({ p, patch: { mode: next } });
                 }}
-                className="rounded border border-border-light bg-surface-primary px-2 py-1"
+                className="oe-select"
               >
                 <option value="export">{modeLabel('export')}</option>
                 <option value="sandbox">{modeLabel('sandbox')}</option>
@@ -95,7 +95,7 @@ export function EInvoiceSetupCard({ canEdit }: { canEdit: boolean }) {
                   e.target.value !== p.tax_registration_id &&
                   save.mutate({ p, patch: { tax_registration_id: e.target.value } })
                 }
-                className="rounded border border-border-light bg-surface-primary px-2 py-1 w-40"
+                className="oe-input w-40"
               />
             </label>
             <span className="text-xs text-content-secondary" dir="ltr">

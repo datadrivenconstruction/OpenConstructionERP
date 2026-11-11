@@ -21,7 +21,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 const STATUS_VARIANT: Record<OpenItemRowStatus, BadgeVariant> = {
   ready: 'blue',
@@ -298,40 +298,40 @@ export function OpenItemsImportModal({ projectId, onClose }: { projectId: string
 
             {result.control_totals.length > 0 && (
               <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full text-sm" data-testid="open-items-totals">
+                <table className="oe-table" data-testid="open-items-totals">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                      <th className="px-3 py-2 font-medium">
+                    <tr>
+                      <th>
                         {t('finance.openitems_col_direction', { defaultValue: 'Direction' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.openitems_col_count', { defaultValue: 'Items' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.openitems_col_total', { defaultValue: 'Total' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.openitems_col_retention', { defaultValue: 'Retention held' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium">
+                      <th className="text-right">
                         {t('finance.openitems_col_open', { defaultValue: 'Open' })}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {result.control_totals.map((row) => (
-                      <tr key={`${row.direction}-${row.currency_code}`} className="border-b border-border/60">
-                        <td className="px-3 py-2">
+                      <tr key={`${row.direction}-${row.currency_code}`}>
+                        <td>
                           {directionLabel(t, row.direction)} · {row.currency_code}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums">{row.count}</td>
-                        <td className="px-3 py-2 text-right tabular-nums">
+                        <td className="text-right tabular-nums">{row.count}</td>
+                        <td className="text-right tabular-nums">
                           <MoneyDisplay amount={row.total} currency={row.currency_code} />
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           <MoneyDisplay amount={row.retention_held} currency={row.currency_code} />
                         </td>
-                        <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                        <td className="text-right font-semibold tabular-nums">
                           <MoneyDisplay amount={row.open} currency={row.currency_code} />
                         </td>
                       </tr>
@@ -342,29 +342,29 @@ export function OpenItemsImportModal({ projectId, onClose }: { projectId: string
             )}
 
             <div className="max-h-[45vh] overflow-auto rounded-lg border border-border">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-surface-primary">
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                    <th className="px-3 py-2 font-medium">{t('finance.openitems_col_row', { defaultValue: 'Row' })}</th>
-                    <th className="px-3 py-2 font-medium">
+              <table className="oe-table">
+                <thead className="sticky top-0">
+                  <tr>
+                    <th>{t('finance.openitems_col_row', { defaultValue: 'Row' })}</th>
+                    <th>
                       {t('finance.openitems_col_invoice', { defaultValue: 'Invoice' })}
                     </th>
-                    <th className="px-3 py-2 font-medium">
+                    <th>
                       {t('finance.openitems_col_contact', { defaultValue: 'Contact' })}
                     </th>
-                    <th className="px-3 py-2 text-right font-medium">
+                    <th className="text-right">
                       {t('finance.openitems_col_open', { defaultValue: 'Open' })}
                     </th>
-                    <th className="px-3 py-2 font-medium">
+                    <th>
                       {t('finance.openitems_col_status', { defaultValue: 'Status' })}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {ordered(result.rows).map((row) => (
-                    <tr key={row.row} className="border-b border-border/60 align-top">
-                      <td className="px-3 py-2 tabular-nums text-content-tertiary">{row.row}</td>
-                      <td className="px-3 py-2">
+                    <tr key={row.row} className="align-top">
+                      <td className="tabular-nums text-content-tertiary">{row.row}</td>
+                      <td>
                         <span className="text-content-primary">{row.invoice_number || '-'}</span>
                         {row.direction && (
                           <span className="block text-2xs text-content-tertiary">
@@ -372,17 +372,17 @@ export function OpenItemsImportModal({ projectId, onClose }: { projectId: string
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <span className="text-content-primary">{row.contact_name || row.counterparty || '-'}</span>
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums">
+                      <td className="text-right tabular-nums">
                         {row.open != null && row.currency_code ? (
                           <MoneyDisplay amount={row.open} currency={row.currency_code} />
                         ) : (
                           '-'
                         )}
                       </td>
-                      <td className="px-3 py-2">
+                      <td>
                         <Badge variant={STATUS_VARIANT[row.status]} size="sm">
                           {statusLabel(t, row.status)}
                         </Badge>
@@ -400,7 +400,7 @@ export function OpenItemsImportModal({ projectId, onClose }: { projectId: string
 
         {!result && (
           <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-content-tertiary">
-            <FileSpreadsheet size={18} className="shrink-0" />
+            <FileSpreadsheet size={20} className="shrink-0" />
             <span>
               {t('finance.openitems_empty', {
                 defaultValue: 'Choose the cut-over date and a file, then check it. Nothing is written by the check.',

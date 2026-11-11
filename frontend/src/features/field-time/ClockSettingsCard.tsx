@@ -76,8 +76,8 @@ export function ClockSettingsCard({ projectId }: { projectId: string }) {
     }
   };
 
-  const input = 'h-11 w-full rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
-  const label = 'mb-1 block text-xs font-medium text-content-secondary';
+  const input = 'oe-input oe-input-lg w-full h-11';
+  const label = 'oe-label';
 
   if (q.isLoading) {
     return <Loader2 size={16} className="m-6 animate-spin text-content-tertiary" />;
@@ -139,7 +139,7 @@ export function ClockSettingsCard({ projectId }: { projectId: string }) {
           onClick={() => void onSave()}
           className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-oe-blue px-4 text-sm font-semibold text-content-inverse disabled:opacity-50"
         >
-          {save.isPending && <Loader2 size={15} className="animate-spin" />}
+          {save.isPending && <Loader2 size={16} className="animate-spin" />}
           {t('common.save', { defaultValue: 'Save' })}
         </button>
         <button

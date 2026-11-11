@@ -203,10 +203,10 @@ export function FileList({
 
   return (
     <div className="overflow-auto">
-      <table className="w-full border-collapse text-sm">
-        <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border-light">
+      <table className="oe-table">
+        <thead className="sticky top-0 z-10">
           <tr>
-            {showStar && <th className="w-9 px-2 py-2" aria-hidden="true" />}
+            {showStar && <th className="w-9" aria-hidden="true" />}
             {/* w-full on the free-text column is what makes the other seven
                 take their content width and hand the remainder here. Without
                 it, max-w-0 below reads as "make this column as narrow as
@@ -214,18 +214,18 @@ export function FileList({
                 at every window width. */}
             <Header field="name" label={t('files.col.name', { defaultValue: 'Name' })} className="w-full" />
             <Header field="kind" label={t('files.col.kind', { defaultValue: 'Type' })} />
-            <th className="px-3 py-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary text-center">
+            <th className="text-center">
               {t('files.col.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-3 py-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary text-center">
+            <th className="text-center">
               {t('files.col.version', { defaultValue: 'Ver.' })}
             </th>
             <Header field="size" label={t('files.col.size', { defaultValue: 'Size' })} align="right" />
             <Header field="modified" label={t('files.col.modified', { defaultValue: 'Modified' })} align="right" />
-            <th className="px-3 py-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <th>
               {t('files.col.discipline', { defaultValue: 'Discipline' })}
             </th>
-            <th className="px-3 py-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <th>
               {t('files.col.open_in', { defaultValue: 'Open in' })}
             </th>
           </tr>
@@ -233,7 +233,7 @@ export function FileList({
         <tbody>
           {isLoading && items.length === 0 ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <tr key={i} className="border-b border-border-light">
+              <tr key={i}>
                 {Array.from({ length: showStar ? 9 : 8 }).map((_, j) => (
                   // The name column carries the same w-full here, so the
                   // columns do not jump width when the rows arrive.
@@ -245,7 +245,7 @@ export function FileList({
             ))
           ) : items.length === 0 ? (
             <tr>
-              <td colSpan={showStar ? 9 : 8} className="px-3 py-12 text-center text-sm text-content-tertiary">
+              <td colSpan={showStar ? 9 : 8} className="py-12 text-center text-content-tertiary">
                 {t('files.empty', { defaultValue: 'No files match your filters.' })}
               </td>
             </tr>
@@ -293,7 +293,7 @@ export function FileList({
                   }
                 >
                   {showStar && (
-                    <td className="px-2 py-2 text-center">
+                    <td className="text-center">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -314,14 +314,14 @@ export function FileList({
                             : t('files.favorites.add', { defaultValue: 'Add to favourites' })
                         }
                       >
-                        <Star size={13} strokeWidth={2} fill={isFavorite ? 'currentColor' : 'none'} />
+                        <Star size={14} strokeWidth={2} fill={isFavorite ? 'currentColor' : 'none'} />
                       </button>
                     </td>
                   )}
                   {/* w-full claims the width the fixed columns leave over;
                       max-w-0 keeps a long filename from pushing the column
                       wider than that, so the truncate below is what gives. */}
-                  <td className="px-3 py-2 w-full max-w-0">
+                  <td className="w-full max-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
                       {typeof row.extra?.drawing_number === 'string' && row.extra.drawing_number && (
@@ -352,35 +352,35 @@ export function FileList({
                     )}
                     <FileListTagsCell projectId={row.project_id} kind={row.kind} fileId={row.id} />
                   </td>
-                  <td className="px-3 py-2 text-content-secondary text-xs">
+                  <td className="text-content-secondary text-xs">
                     {t(`files.category.${row.kind}`, { defaultValue: row.kind })}
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="text-center">
                     {typeof row.extra?.cde_state === 'string' && row.extra.cde_state ? (
                       <CDEBadge state={row.extra.cde_state} />
                     ) : (
                       <span className="text-content-quaternary text-xs">—</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-center text-content-secondary tabular-nums text-xs">
+                  <td className="text-center text-content-secondary tabular-nums text-xs">
                     {versionLabel(row.extra?.version)}
                   </td>
                   {/* A content-search hit comes from the index, not from a
                       directory listing, so it has no size and no modified date.
                       The placeholder zero would read as an empty file, hence
                       the dash. */}
-                  <td className="px-3 py-2 text-right text-content-secondary tabular-nums text-xs">
+                  <td className="text-right text-content-secondary tabular-nums text-xs">
                     {typeof row.extra?.snippet === 'string' && row.extra.snippet
                       ? '—'
                       : fmtBytes(row.size_bytes)}
                   </td>
-                  <td className="px-3 py-2 text-right text-content-secondary text-xs">
+                  <td className="text-right text-content-secondary text-xs">
                     {row.modified_at ? <DateDisplay value={row.modified_at} format="relative" /> : '—'}
                   </td>
-                  <td className="px-3 py-2 text-content-tertiary text-xs truncate">
+                  <td className="text-content-tertiary text-xs truncate">
                     {row.discipline ?? '—'}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <button
                       type="button"
                       onClick={(e) => {

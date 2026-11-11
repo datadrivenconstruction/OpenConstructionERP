@@ -129,7 +129,7 @@ function HowFieldTimeWorks() {
   return (
     <CollapsibleSection
       storageKey="field_time.how"
-      icon={<Clock size={15} className="text-oe-blue" />}
+      icon={<Clock size={16} className="text-oe-blue" />}
       title={t('field_time.flow_title', { defaultValue: 'How Field Time fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -431,7 +431,7 @@ function TimesheetsTab({
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TimesheetStatus | '')}
             aria-label={t('field_time.filter_status', { defaultValue: 'Filter by status' })}
-            className="h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+            className="oe-select"
           >
             <option value="">{t('field_time.all_statuses', { defaultValue: 'All statuses' })}</option>
             {STATUS_ORDER.map((s) => (
@@ -445,14 +445,14 @@ function TimesheetsTab({
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             aria-label={t('field_time.date_from', { defaultValue: 'From date' })}
-            className="h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+            className="oe-input"
           />
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             aria-label={t('field_time.date_to', { defaultValue: 'To date' })}
-            className="h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+            className="oe-input"
           />
         </div>
         <Button
@@ -561,14 +561,14 @@ function TimesheetRow({
       </div>
       <div className="hidden shrink-0 items-center gap-4 text-xs text-content-secondary sm:flex">
         <span className="inline-flex items-center gap-1 tabular-nums">
-          <HardHat size={13} className="text-oe-blue" />
+          <HardHat size={14} className="text-oe-blue" />
           {t('field_time.hours_value', {
             defaultValue: '{{hours}} h',
             hours: formatHours(timesheet.labour_hours),
           })}
         </span>
         <span className="inline-flex items-center gap-1 tabular-nums">
-          <Wrench size={13} />
+          <Wrench size={14} />
           {t('field_time.hours_value', {
             defaultValue: '{{hours}} h',
             hours: formatHours(timesheet.plant_hours),

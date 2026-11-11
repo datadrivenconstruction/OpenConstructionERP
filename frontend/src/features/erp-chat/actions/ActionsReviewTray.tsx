@@ -160,7 +160,7 @@ function ReviewTrayBar({ waiting, onReview }: { waiting: ChatAction[]; onReview:
       data-testid="actions-review-tray"
     >
       <p className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-[var(--act-text)]" aria-live="polite">
-        <Inbox size={15} className="shrink-0 text-[var(--act-accent)]" aria-hidden="true" />
+        <Inbox size={16} className="shrink-0 text-[var(--act-accent)]" aria-hidden="true" />
         <span data-testid="actions-review-tray-count">
           {t('erp_chat.tray.waiting', {
             count,
@@ -170,7 +170,7 @@ function ReviewTrayBar({ waiting, onReview }: { waiting: ChatAction[]; onReview:
         </span>
       </p>
       <div className="flex shrink-0 items-center gap-2">
-        <ActionButton tone="secondary" onClick={onReview} icon={<Eye size={13} />} data-testid="actions-review-tray-review">
+        <ActionButton tone="secondary" onClick={onReview} icon={<Eye size={14} />} data-testid="actions-review-tray-review">
           {t('erp_chat.tray.review', { defaultValue: 'Review' })}
         </ActionButton>
         {applicable.length > 0 && (
@@ -179,7 +179,7 @@ function ReviewTrayBar({ waiting, onReview }: { waiting: ChatAction[]; onReview:
             onClick={() => setConfirmOpen(true)}
             busy={batch.isPending}
             busyLabel={String(t('erp_chat.action.busy.apply', { defaultValue: 'Applying…' }))}
-            icon={<CheckCheck size={13} />}
+            icon={<CheckCheck size={14} />}
             data-testid="actions-review-tray-apply-all"
           >
             {applicable.length === 1

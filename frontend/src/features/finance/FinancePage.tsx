@@ -668,7 +668,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_total_budget', { defaultValue: 'Total Budget' }),
       basis: basisNet,
       value: totalBudget,
-      icon: <Wallet size={18} />,
+      icon: <Wallet size={20} />,
       color: 'bg-oe-blue/10 text-oe-blue',
       accent: 'bg-oe-blue',
     },
@@ -679,7 +679,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_committed', { defaultValue: 'Committed' }),
       basis: basisNet,
       value: totalCommitted,
-      icon: <FileText size={18} />,
+      icon: <FileText size={20} />,
       color: 'bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400',
       accent: 'bg-violet-500',
     },
@@ -688,7 +688,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_invoiced', { defaultValue: 'Invoiced' }),
       basis: basisNet,
       value: totalInvoiced,
-      icon: <Receipt size={18} />,
+      icon: <Receipt size={20} />,
       color: 'bg-semantic-warning-bg text-semantic-warning',
       accent: 'bg-semantic-warning',
     },
@@ -697,7 +697,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_paid', { defaultValue: 'Paid' }),
       basis: basisGross,
       value: totalPaid,
-      icon: <CreditCard size={18} />,
+      icon: <CreditCard size={20} />,
       color: 'bg-semantic-info-bg text-semantic-info',
       accent: 'bg-semantic-info',
     },
@@ -708,7 +708,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_unpaid_payables', { defaultValue: 'Unpaid supplier invoices' }),
       basis: basisGross,
       value: totalUnpaid,
-      icon: <Inbox size={18} />,
+      icon: <Inbox size={20} />,
       color: 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400',
       accent: 'bg-orange-500',
     },
@@ -717,7 +717,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_receivable', { defaultValue: 'Receivable' }),
       basis: basisGross,
       value: totalReceivable,
-      icon: <PiggyBank size={18} />,
+      icon: <PiggyBank size={20} />,
       color: 'bg-semantic-success-bg text-semantic-success',
       accent: 'bg-semantic-success',
     },
@@ -731,7 +731,7 @@ export function FinanceSummaryCards({
       label: t('reporting.overdue_total', { defaultValue: 'Total Overdue' }),
       basis: basisGross,
       value: totalOverdue,
-      icon: <AlertTriangle size={18} />,
+      icon: <AlertTriangle size={20} />,
       color:
         totalOverdue > 0
           ? 'bg-semantic-error-bg text-semantic-error'
@@ -743,7 +743,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_remaining', { defaultValue: 'Remaining Budget' }),
       basis: basisNet,
       value: remaining,
-      icon: <DollarSign size={18} />,
+      icon: <DollarSign size={20} />,
       color: remaining >= 0
         ? 'bg-semantic-success-bg text-semantic-success'
         : 'bg-semantic-error-bg text-semantic-error',
@@ -758,7 +758,7 @@ export function FinanceSummaryCards({
       label: t('finance.summary_over_commitment', { defaultValue: 'Beyond commitment' }),
       basis: basisNet,
       value: totalOverCommitment,
-      icon: <AlertTriangle size={18} />,
+      icon: <AlertTriangle size={20} />,
       color: 'bg-semantic-error-bg text-semantic-error',
       accent: 'bg-semantic-error',
     });
@@ -982,62 +982,62 @@ export function FinancePage() {
     {
       key: 'budgets',
       label: t('finance.budgets', { defaultValue: 'Budgets' }),
-      icon: <Wallet size={15} />,
+      icon: <Wallet size={16} />,
     },
     {
       key: 'invoices',
       label: t('finance.invoices', { defaultValue: 'Invoices' }),
-      icon: <FileText size={15} />,
+      icon: <FileText size={16} />,
     },
     {
       key: 'einvoices',
       label: t('einvoice.tab', { defaultValue: 'E-invoices' }),
-      icon: <ReceiptText size={15} />,
+      icon: <ReceiptText size={16} />,
     },
     {
       key: 'inbox',
       label: t('finance.inbox.tab', { defaultValue: 'Invoice inbox' }),
-      icon: <Inbox size={15} />,
+      icon: <Inbox size={16} />,
     },
     {
       key: 'payments',
       label: t('finance.payments', { defaultValue: 'Payments' }),
-      icon: <CreditCard size={15} />,
+      icon: <CreditCard size={16} />,
     },
     {
       key: 'payment_runs',
       label: t('finance.payrun_tab', { defaultValue: 'Payment runs' }),
-      icon: <Banknote size={15} />,
+      icon: <Banknote size={16} />,
     },
     {
       key: 'statements',
       label: t('finance.stmt_tab', { defaultValue: 'Statements' }),
-      icon: <Scale size={15} />,
+      icon: <Scale size={16} />,
     },
     {
       key: 'ageing',
       label: t('finance.ageing_tab', { defaultValue: 'Ageing' }),
-      icon: <Hourglass size={15} />,
+      icon: <Hourglass size={16} />,
     },
     {
       key: 'payee_totals',
       label: t('finance.payee_tab', { defaultValue: 'Supplier payments' }),
-      icon: <ReceiptText size={15} />,
+      icon: <ReceiptText size={16} />,
     },
     {
       key: 'retention',
       label: t('finance.retention_tab', { defaultValue: 'Retention' }),
-      icon: <Landmark size={15} />,
+      icon: <Landmark size={16} />,
     },
     {
       key: 'evm',
       label: t('finance.evm_dashboard', { defaultValue: 'EVM Dashboard' }),
-      icon: <BarChart3 size={15} />,
+      icon: <BarChart3 size={16} />,
     },
     {
       key: 'connectors',
       label: t('finance.connectors.tab', { defaultValue: 'Connectors' }),
-      icon: <Plug size={15} />,
+      icon: <Plug size={16} />,
     },
   ];
   // Absent, not empty, for a tenant without an e-invoicing market.
@@ -1512,7 +1512,8 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
                 if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
               }}
-              className={clsx(inputCls, 'pl-12', budgetErrors.original_budget && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+              className={clsx(inputCls, 'pl-12')}
+              aria-invalid={budgetErrors.original_budget ? true : undefined}
               placeholder="0.00"
             />
           </div>
@@ -1600,7 +1601,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       <div className="space-y-4">
         {/* BOQ tip */}
         <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 text-sm flex items-start gap-3">
-          <Lightbulb size={18} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+          <Lightbulb size={20} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
           <div>
             <strong className="text-blue-800 dark:text-blue-200">
               {t('finance.boq_tip_title', { defaultValue: 'Tip:' })}
@@ -1703,7 +1704,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             placeholder={t('finance.search_budgets', {
               defaultValue: 'Search by WBS or category...',
             })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            className="oe-input oe-input-lg w-full ps-10 pe-3"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -1748,34 +1749,34 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+            <tr>
+              <th>
                 {t('finance.wbs', { defaultValue: 'WBS' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('finance.category', { defaultValue: 'Category' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.original', { defaultValue: 'Original' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.revised', { defaultValue: 'Revised' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.committed', { defaultValue: 'Committed' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.actual', { defaultValue: 'Actual' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.forecast', { defaultValue: 'Forecast' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.variance', { defaultValue: 'Variance' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('common.actions', { defaultValue: 'Actions' })}
               </th>
             </tr>
@@ -1783,7 +1784,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={9} className="py-8 text-center text-content-tertiary">
                   {t('finance.no_budget_match', { defaultValue: 'No matching budget lines' })}
                 </td>
               </tr>
@@ -1793,16 +1794,15 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               return (
                 <tr
                   key={b.id}
-                  className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
                 >
                   <td
-                    className="px-4 py-3 text-xs text-content-primary"
+                    className="text-xs"
                     title={wbsLabel(b.wbs_id ?? b.wbs_code, wbsNodes, b.wbs_label).title}
                     data-testid="budget-wbs"
                   >
                     {wbsLabel(b.wbs_id ?? b.wbs_code, wbsNodes, b.wbs_label).text}
                   </td>
-                  <td className="px-4 py-3 text-content-secondary" data-testid="budget-category">
+                  <td className="text-content-secondary" data-testid="budget-category">
                     {budgetCategoryLabel(t, b.category)}
                     <ContingencyBudgetNote
                       projectId={projectId}
@@ -1813,19 +1813,19 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                       currency={rowCurrency}
                     />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={b.original_budget} currency={rowCurrency} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={b.revised_budget} currency={rowCurrency} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={b.committed} currency={rowCurrency} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={b.actual} currency={rowCurrency} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={forecastValue} currency={rowCurrency} />
                   </td>
                   {/* One authority for the colour. The wrapper span used to
@@ -1834,10 +1834,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                       one figure, and the outer one compared a string that
                       arrives as money on the wire, so an empty variance read
                       as a surplus and painted green. MoneyDisplay decides. */}
-                  <td className="px-4 py-3 text-right font-medium">
+                  <td className="text-right font-medium">
                     <MoneyDisplay amount={b.variance} currency={rowCurrency} colorize />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       onClick={() => openEditBudget(b)}
@@ -1864,25 +1864,25 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           {totals && (
             <tfoot>
               <tr className="bg-surface-secondary/60 font-semibold">
-                <td className="px-4 py-3 text-content-primary" colSpan={2}>
+                <td colSpan={2}>
                   {t('common.total')}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.original} variant="inline" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.revised} variant="inline" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.committed} variant="inline" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.actual} variant="inline" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.forecast} variant="inline" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={totals.variance} variant="inline" />
                 </td>
                 <td />
@@ -1911,7 +1911,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   >
                     {wbsLabel(b.wbs_id ?? b.wbs_code, wbsNodes, b.wbs_label).text}
                   </span>
-                  <h4 className="text-sm font-semibold text-content-primary truncate">
+                  <h4 className="oe-card-title truncate">
                     {budgetCategoryLabel(t, b.category)}
                   </h4>
                   <ContingencyBudgetNote
@@ -1989,10 +1989,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
     {/* Budget Import Modal */}
     {showImport && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
         <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.import_budgets', { defaultValue: 'Import Budgets' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('finance.import_budgets', { defaultValue: 'Import Budgets' })}
             </h2>
             <button
@@ -2000,7 +2000,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
           <div className="px-6 py-4 space-y-4">
@@ -2601,7 +2601,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
               placeholder={t('finance.search_invoices', {
                 defaultValue: 'Search invoices...',
               })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              className="oe-input oe-input-lg w-full ps-10 pe-3"
             />
           </div>
           <div className="relative shrink-0">
@@ -2609,7 +2609,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={t('finance.filter_status', { defaultValue: 'Filter by status' })}
-              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+              className="oe-select oe-input-lg ps-3 pe-9 sm:w-36"
             >
               <option value="">{t('finance.filter_all_statuses', { defaultValue: 'All Statuses' })}</option>
               <option value="draft">{t('finance.status_draft', { defaultValue: 'Draft' })}</option>
@@ -2666,30 +2666,30 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           <>
             {/* Desktop table */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/50">
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                  <tr>
+                    <th>
                       {t('finance.invoice_number', { defaultValue: 'Invoice #' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {subTab === 'payable'
                         ? t('finance.vendor', { defaultValue: 'Vendor' })
                         : t('finance.client', { defaultValue: 'Client' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('finance.issue_date', { defaultValue: 'Date' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('finance.due_date', { defaultValue: 'Due Date' })}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+                    <th className="text-right">
                       {t('finance.amount', { defaultValue: 'Amount' })}
                     </th>
-                    <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+                    <th className="text-center">
                       {t('common.status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+                    <th className="text-right">
                       {t('common.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -2698,12 +2698,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   {filtered.map((inv) => (
                     <tr
                       key={inv.id}
-                      className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                      <td className="font-mono text-xs">
                         {inv.invoice_number}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         <div>{inv.counterparty_name}</div>
                         {/* Gap E: a receivable raised from a certified progress
                             claim deep-links straight back to that claim, instead
@@ -2764,16 +2763,16 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         <DateDisplay value={inv.issue_date} format="numeric" />
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">
                         <DateDisplay value={inv.due_date} format="numeric" />
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-right">
                         <MoneyDisplay amount={inv.amount} currency={inv.currency} />
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="text-center">
                         <Badge
                           variant={INVOICE_STATUS_COLORS[inv.status] ?? 'neutral'}
                           size="sm"
@@ -2783,7 +2782,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                           })}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -2870,13 +2869,13 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                 {invoiceTotals && (
                   <tfoot>
                     <tr className="bg-surface-secondary/60 font-semibold">
-                      <td className="px-4 py-3 text-content-primary" colSpan={4}>
+                      <td colSpan={4}>
                         {t('common.total')}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-right">
                         <MultiCurrencyTotal items={invoiceTotals.totalAmount} variant="inline" />
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-content-tertiary">
+                      <td className="text-center text-xs text-content-tertiary">
                         {t('finance.total_paid', { defaultValue: 'Paid' })}:{' '}
                         <MultiCurrencyTotal items={invoiceTotals.totalPaid} variant="inline" />
                       </td>
@@ -2894,7 +2893,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
                       <span className="text-xs font-mono text-content-tertiary">{inv.invoice_number}</span>
-                      <h4 className="text-sm font-semibold text-content-primary truncate">{inv.counterparty_name}</h4>
+                      <h4 className="oe-card-title truncate">{inv.counterparty_name}</h4>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Badge variant={INVOICE_STATUS_COLORS[inv.status] ?? 'neutral'} size="sm">
@@ -3237,7 +3236,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   setInvoiceForm((f) => ({ ...f, invoice_date: e.target.value }));
                   if (invoiceErrors.invoice_date) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.invoice_date; return next; });
                 }}
-                className={clsx(inputCls, invoiceErrors.invoice_date && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error')}
+                className={inputCls}
+                aria-invalid={invoiceErrors.invoice_date ? true : undefined}
               />
             </WideModalField>
 
@@ -3505,25 +3505,25 @@ function PaymentsTab({
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+            <tr>
+              <th>
                 {t('finance.invoice_ref', { defaultValue: 'Invoice Ref' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('finance.payment_date', { defaultValue: 'Payment Date' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('finance.amount', { defaultValue: 'Amount' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th>
                 {t('finance.reference', { defaultValue: 'Reference' })}
               </th>
-              <th className="px-4 py-3 text-center font-medium text-content-tertiary">
+              <th className="text-center">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+              <th className="text-right">
                 {t('common.actions', { defaultValue: 'Actions' })}
               </th>
             </tr>
@@ -3532,21 +3532,20 @@ function PaymentsTab({
             {payments.map((p) => (
               <tr
                 key={p.id}
-                className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="font-mono text-xs">
                   {p.invoice_number || '\u2014'}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="text-content-secondary">
                   <DateDisplay value={p.payment_date} format="numeric" />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MoneyDisplay amount={p.amount} currency={p.currency_code || p.currency} />
                 </td>
-                <td className="px-4 py-3 text-content-secondary font-mono text-xs">
+                <td className="text-content-secondary font-mono text-xs">
                   {p.reference || '\u2014'}
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="text-center">
                   {(() => {
                     // PaymentResponse derives status server-side: "completed"
                     // for a forward payment, "refunded" for a refund. Fall
@@ -3559,7 +3558,7 @@ function PaymentsTab({
                     );
                   })()}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <RecordPdfButton
                     download={(locale) => downloadPaymentPdf(p.id, locale)}
                     locales={PURCHASING_DOCUMENT_LOCALES}
@@ -3572,10 +3571,10 @@ function PaymentsTab({
           {paymentTotals && (
             <tfoot>
               <tr className="bg-surface-secondary/60 font-semibold">
-                <td className="px-4 py-3 text-content-primary" colSpan={2}>
+                <td colSpan={2}>
                   {t('common.total', { defaultValue: 'Total' })}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="text-right">
                   <MultiCurrencyTotal items={paymentTotals.total} variant="inline" />
                 </td>
                 <td colSpan={3} />

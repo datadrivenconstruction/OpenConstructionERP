@@ -81,7 +81,7 @@ const CHIP_BAD = 'bg-semantic-error-bg text-semantic-error';
 const CHIP_NEUTRAL = 'bg-surface-tertiary text-content-tertiary';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 /** Two decimals, written the way the reader's language writes them. Built per
  *  call rather than once at module scope, because the language switcher does
@@ -223,7 +223,7 @@ function buildEsgReportHtml(model: EsgReportModel): string {
       return `
         <section class="pillar" style="border-left-color:${p.accent}">
           <h2>${esc(p.label)}</h2>
-          <table>
+          <table className="oe-table">
             <thead>
               <tr>
                 <th>${esc(L.colMetric)}</th>
@@ -407,11 +407,11 @@ function MetricCard({
                 }
               >
                 {summary.delta_pct > 0 ? (
-                  <ArrowUpRight size={11} />
+                  <ArrowUpRight size={12} />
                 ) : summary.delta_pct < 0 ? (
-                  <ArrowDownRight size={11} />
+                  <ArrowDownRight size={12} />
                 ) : (
-                  <Minus size={11} />
+                  <Minus size={12} />
                 )}
                 {summary.delta_pct > 0 ? '+' : ''}
                 {numberFmt(summary.delta_pct)}%
@@ -561,7 +561,7 @@ function ReadingModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       role="dialog"
       aria-label={
         isEdit
@@ -572,7 +572,7 @@ function ReadingModal({
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {isEdit
               ? t('esg.edit_reading', { defaultValue: 'Edit reading' })
               : t('esg.new_reading', { defaultValue: 'New reading' })}
@@ -582,7 +582,7 @@ function ReadingModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -591,7 +591,7 @@ function ReadingModal({
           {/* Metric + period */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="esg-metric" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="esg-metric" className="oe-label">
                 {t('esg.field_metric', { defaultValue: 'Metric' })}
               </label>
               <select
@@ -616,7 +616,7 @@ function ReadingModal({
               </select>
             </div>
             <div>
-              <label htmlFor="esg-period" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="esg-period" className="oe-label">
                 {t('esg.field_period', { defaultValue: 'Period' })}
               </label>
               <input
@@ -633,7 +633,7 @@ function ReadingModal({
           {/* Value + target */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="esg-value" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="esg-value" className="oe-label">
                 {t('esg.field_value', { defaultValue: 'Value' })}{' '}
                 {selectedMetric && (
                   <span className="text-content-tertiary font-normal">({selectedMetric.unit})</span>
@@ -650,10 +650,8 @@ function ReadingModal({
                   setValue(e.target.value);
                   setTouched(true);
                 }}
-                className={clsx(
-                  inputCls,
-                  valueError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-                )}
+                className={inputCls}
+                aria-invalid={valueError ? true : undefined}
                 autoFocus
               />
               {valueError && (
@@ -663,7 +661,7 @@ function ReadingModal({
               )}
             </div>
             <div>
-              <label htmlFor="esg-target" className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="esg-target" className="oe-label">
                 {t('esg.field_target', { defaultValue: 'Target' })}{' '}
                 <span className="text-content-tertiary font-normal">
                   ({t('common.optional', { defaultValue: 'optional' })})
@@ -683,7 +681,7 @@ function ReadingModal({
 
           {/* Note */}
           <div>
-            <label htmlFor="esg-note" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="esg-note" className="oe-label">
               {t('esg.field_note', { defaultValue: 'Note' })}
             </label>
             <textarea
@@ -691,7 +689,7 @@ function ReadingModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              className="w-full oe-textarea resize-none"
               placeholder={t('esg.note_placeholder', {
                 defaultValue: 'Optional context for this reading...',
               })}
@@ -839,7 +837,7 @@ function RecentReadings({
             {expanded ? (
               <>
                 {t('esg.show_fewer', { defaultValue: 'Show fewer' })}
-                <ChevronUp size={13} />
+                <ChevronUp size={14} />
               </>
             ) : (
               <>
@@ -847,7 +845,7 @@ function RecentReadings({
                   defaultValue: 'Show all {{count}} readings',
                   count: sorted.length,
                 })}
-                <ChevronDown size={13} />
+                <ChevronDown size={14} />
               </>
             )}
           </button>
@@ -1242,7 +1240,7 @@ export function EsgPage() {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-content-secondary">
                 {summary?.latest_period && (
                   <span className="inline-flex items-center gap-2">
-                    <Activity size={15} className="text-oe-blue shrink-0" />
+                    <Activity size={16} className="text-oe-blue shrink-0" />
                     <span>
                       {t('esg.latest_period', { defaultValue: 'Latest reporting period' })}:{' '}
                       <span className="font-semibold text-content-primary">
@@ -1311,8 +1309,8 @@ export function EsgPage() {
             return (
               <section key={cat} className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Icon size={18} className={meta.accent} />
-                  <h2 className="text-base font-semibold text-content-primary">
+                  <Icon size={20} className={meta.accent} />
+                  <h2 className="oe-card-title">
                     {t(`esg.category_${cat}`, { defaultValue: meta.label })}
                   </h2>
                 </div>
@@ -1328,7 +1326,7 @@ export function EsgPage() {
           {/* Recent readings */}
           {hasAnyReading ? (
             <section className="space-y-3">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('esg.recent_readings', { defaultValue: 'Recent readings' })}
               </h2>
               <RecentReadings

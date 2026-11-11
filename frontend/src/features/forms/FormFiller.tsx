@@ -50,7 +50,7 @@ import {
 import { getIntlLocale } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 export interface FormFillerProps {
   open: boolean;
@@ -296,7 +296,7 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="secondary"
-                  icon={<Download size={15} />}
+                  icon={<Download size={16} />}
                   loading={exportMut.isPending}
                   onClick={() => exportMut.mutate()}
                 >
@@ -305,7 +305,7 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
                 {canRaiseInspection && (
                   <Button
                     variant="secondary"
-                    icon={<ShieldCheck size={15} />}
+                    icon={<ShieldCheck size={16} />}
                     loading={inspectionMut.isPending}
                     onClick={() => inspectionMut.mutate()}
                   >
@@ -328,7 +328,7 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
                   {t('forms.save_draft', { defaultValue: 'Save draft' })}
                 </Button>
                 <Button
-                  icon={<Check size={15} />}
+                  icon={<Check size={16} />}
                   loading={completeMut.isPending}
                   onClick={onComplete}
                 >
@@ -361,7 +361,7 @@ function FieldInput({ field, value, readOnly, invalid, requiredOverride, onChang
   if (LAYOUT_TYPES.has(field.type)) {
     return (
       <div className="pt-2">
-        <h3 className="border-b border-border-light pb-1 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title border-b border-border-light pb-1">
           {field.label}
         </h3>
       </div>
@@ -373,7 +373,7 @@ function FieldInput({ field, value, readOnly, invalid, requiredOverride, onChang
 
   return (
     <div>
-      <label className="mb-1 flex items-start gap-1 text-sm font-medium text-content-secondary">
+      <label className="oe-label flex items-start gap-1">
         <span>{field.label}</span>
         {required && <span className="text-semantic-error">*</span>}
       </label>
@@ -671,7 +671,7 @@ function PhotoInput({
                   onClick={() => onChange(value.filter((_, idx) => idx !== i))}
                   className="absolute -right-1.5 -top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-semantic-error text-white shadow"
                 >
-                  <X size={11} />
+                  <X size={12} />
                 </button>
               )}
             </div>
@@ -680,7 +680,7 @@ function PhotoInput({
       )}
       {!disabled && (
         <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-content-secondary hover:bg-surface-secondary">
-          {busy ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
           {t('forms.add_photo', { defaultValue: 'Add photo' })}
           <input
             type="file"
@@ -713,7 +713,7 @@ function SignatureInput({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-2">
-        <PenLine size={15} className="shrink-0 text-content-tertiary" />
+        <PenLine size={16} className="shrink-0 text-content-tertiary" />
         <input
           className={inputCls}
           disabled={disabled}

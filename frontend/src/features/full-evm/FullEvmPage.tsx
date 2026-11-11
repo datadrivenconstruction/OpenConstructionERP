@@ -31,7 +31,7 @@ export function FullEvmPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="full_evm.how"
-        icon={<LineChart size={15} className="text-oe-blue" />}
+        icon={<LineChart size={16} className="text-oe-blue" />}
         title={t('full_evm.flow_title', {
           defaultValue: 'How earned value answers "are we actually on track"',
         })}

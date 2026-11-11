@@ -65,7 +65,7 @@ export function ActionStatusPill({ status, busyOp, className }: ActionStatusPill
     return (
       <Badge variant="blue" size="sm" className={className}>
         <span className="inline-flex items-center gap-1" data-testid="action-status-pill" data-status="busy">
-          <Loader2 size={11} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+          <Loader2 size={12} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
           {busyLabel(busyOp, t)}
         </span>
       </Badge>

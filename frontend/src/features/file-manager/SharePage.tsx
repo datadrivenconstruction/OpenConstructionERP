@@ -158,7 +158,7 @@ export function SharePage() {
                 strokeWidth={1.5}
                 className="mx-auto text-semantic-error"
               />
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('share.page.not_found_title', {
                   defaultValue: 'Link not found',
                 })}
@@ -182,7 +182,7 @@ export function SharePage() {
                 strokeWidth={1.5}
                 className="mx-auto text-semantic-warning"
               />
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('share.page.expired_title', {
                   defaultValue: 'This link has expired',
                 })}
@@ -200,7 +200,7 @@ export function SharePage() {
             <>
               <div className="flex items-start gap-3 rounded-lg bg-surface-secondary/40 border border-border-light p-3">
                 <FileText
-                  size={18}
+                  size={20}
                   strokeWidth={1.75}
                   className="text-oe-blue shrink-0 mt-0.5"
                 />
@@ -223,9 +223,9 @@ export function SharePage() {
                   <div>
                     <label
                       htmlFor="share-password"
-                      className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5"
+                      className="oe-overline block mb-1.5"
                     >
-                      <Lock size={11} className="inline-block me-1 -mt-0.5" />
+                      <Lock size={12} className="inline-block me-1 -mt-0.5" />
                       {t('share.page.password_prompt', {
                         defaultValue: 'Enter the password to download.',
                       })}
@@ -241,14 +241,14 @@ export function SharePage() {
                       })}
                       autoFocus
                       autoComplete="off"
-                      className="w-full h-10 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/50"
+                      className="w-full oe-input oe-input-lg"
                     />
                   </div>
                   {error && (
                     <div
                       data-testid="share-error"
                       role="alert"
-                      className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs"
+                      className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs"
                     >
                       <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                       <p>{error}</p>
@@ -297,7 +297,7 @@ export function SharePage() {
                 <div
                   data-testid="share-error"
                   role="alert"
-                  className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs"
+                  className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs"
                 >
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>

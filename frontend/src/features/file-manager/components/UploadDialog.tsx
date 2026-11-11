@@ -74,7 +74,7 @@ export function UploadDialog({
       role="dialog"
       aria-modal="true"
       aria-label={t('files.upload', { defaultValue: 'Upload files' })}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -82,7 +82,7 @@ export function UploadDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('files.upload', { defaultValue: 'Upload files' })}
           </h3>
           <button

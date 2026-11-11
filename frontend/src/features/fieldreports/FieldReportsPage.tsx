@@ -521,7 +521,7 @@ export function FieldReportsPage() {
                   : 'text-content-secondary hover:text-content-primary',
               )}
             >
-              <Calendar size={15} />
+              <Calendar size={16} />
               {t('fieldreports.calendar_view', { defaultValue: 'Calendar' })}
             </button>
             <button
@@ -536,7 +536,7 @@ export function FieldReportsPage() {
                   : 'text-content-secondary hover:text-content-primary',
               )}
             >
-              <LayoutList size={15} />
+              <LayoutList size={16} />
               {t('fieldreports.list_view', { defaultValue: 'List' })}
             </button>
           </div>
@@ -682,7 +682,7 @@ export function FieldReportsPage() {
               >
                 <ChevronLeft size={20} />
               </button>
-              <h2 className="text-lg font-semibold text-content-primary">{monthLabel}</h2>
+              <h2 className="oe-section-title">{monthLabel}</h2>
               <button
                 onClick={nextMonth}
                 className="rounded-lg p-2 text-content-secondary hover:bg-surface-secondary transition-colors"
@@ -798,7 +798,7 @@ export function FieldReportsPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ReportStatus | '')}
               aria-label={t('fieldreports.filter_status', { defaultValue: 'Filter by status' })}
-              className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary"
+              className="oe-select"
             >
               <option value="">{t('fieldreports.all_statuses', { defaultValue: 'All Statuses' })}</option>
               <option value="draft">{t('fieldreports.status_draft', { defaultValue: 'Draft' })}</option>
@@ -809,7 +809,7 @@ export function FieldReportsPage() {
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as ReportType | '')}
               aria-label={t('fieldreports.filter_type', { defaultValue: 'Filter by type' })}
-              className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary"
+              className="oe-select"
             >
               <option value="">{t('fieldreports.all_types', { defaultValue: 'All Types' })}</option>
               {REPORT_TYPES.map((rt) => (
@@ -858,25 +858,25 @@ export function FieldReportsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/50">
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                  <tr>
+                    <th>
                       {t('fieldreports.col_date', { defaultValue: 'Date' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('fieldreports.col_type', { defaultValue: 'Type' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('fieldreports.col_weather', { defaultValue: 'Weather' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('fieldreports.col_workforce', { defaultValue: 'Workforce' })}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+                    <th>
                       {t('fieldreports.col_status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+                    <th className="text-right">
                       {t('common.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -888,18 +888,18 @@ export function FieldReportsPage() {
                     return (
                       <tr
                         key={report.id}
-                        className="border-b border-border-light last:border-b-0 hover:bg-surface-secondary/30 transition-colors cursor-pointer"
+                        className="last:border-b-0 cursor-pointer"
                         onClick={() => handleOpenEdit(report)}
                       >
-                        <td className="px-4 py-3 font-medium text-content-primary">
+                        <td className="font-medium">
                           {formatDate(report.report_date)}
                         </td>
-                        <td className="px-4 py-3 text-content-secondary capitalize">
+                        <td className="text-content-secondary capitalize">
                           {t(`fieldreports.type_${report.report_type}`, {
                             defaultValue: report.report_type.replace(/_/g, ' '),
                           })}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <span className="flex items-center gap-1.5 text-content-secondary">
                             <WeatherIcon size={16} />
                             {t(`fieldreports.weather_${report.weather_condition}`, {
@@ -912,19 +912,19 @@ export function FieldReportsPage() {
                             )}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-content-secondary">
+                        <td className="text-content-secondary">
                           {wf.workers > 0
                             ? `${wf.workers} ${t('fieldreports.workers', { defaultValue: 'workers' })}`
                             : '-'}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <Badge variant={STATUS_BADGE_VARIANT[report.status]}>
                             {t(`fieldreports.status_${report.status}`, {
                               defaultValue: report.status,
                             })}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="text-right">
                           <div
                             className="flex items-center justify-end gap-1"
                             onClick={(e) => e.stopPropagation()}
@@ -936,7 +936,7 @@ export function FieldReportsPage() {
                                 title={t('fieldreports.submit', { defaultValue: 'Submit' })}
                                 aria-label={t('fieldreports.submit', { defaultValue: 'Submit' })}
                               >
-                                <Send size={15} />
+                                <Send size={16} />
                               </button>
                             )}
                             {report.status === 'submitted' && (
@@ -946,7 +946,7 @@ export function FieldReportsPage() {
                                 title={t('fieldreports.approve_hint', { defaultValue: 'Approve (locks the report permanently)' })}
                                 aria-label={t('fieldreports.approve', { defaultValue: 'Approve' })}
                               >
-                                <CheckCircle2 size={15} />
+                                <CheckCircle2 size={16} />
                               </button>
                             )}
                             <button
@@ -956,7 +956,7 @@ export function FieldReportsPage() {
                               title={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
                               aria-label={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
                             >
-                              <Download size={15} />
+                              <Download size={16} />
                             </button>
                             {report.status !== 'approved' && (
                               <button
@@ -965,7 +965,7 @@ export function FieldReportsPage() {
                                 title={t('common.delete', { defaultValue: 'Delete' })}
                                 aria-label={t('common.delete', { defaultValue: 'Delete' })}
                               >
-                                <Trash2 size={15} />
+                                <Trash2 size={16} />
                               </button>
                             )}
                           </div>
@@ -1092,11 +1092,11 @@ function ImportFieldReportsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('fieldreports.import_reports', { defaultValue: 'Import Field Reports' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('fieldreports.import_reports', { defaultValue: 'Import Field Reports' })}
           </h2>
           <button
@@ -1104,7 +1104,7 @@ function ImportFieldReportsModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -1156,7 +1156,7 @@ function ImportFieldReportsModal({
             }}
             className="flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
-            <FileDown size={13} />
+            <FileDown size={14} />
             {t('fieldreports.download_template', { defaultValue: 'Download import template' })}
           </button>
           <p className="text-xs text-content-tertiary">
@@ -1248,7 +1248,7 @@ function StatCard({
 }) {
   const colorCls = {
     default: 'text-content-primary',
-    gray: 'text-gray-500',
+    gray: 'text-content-tertiary',
     blue: 'text-blue-600 dark:text-blue-400',
     green: 'text-semantic-success',
     amber: 'text-semantic-warning',
@@ -1789,8 +1789,8 @@ function ReportModal({
     }
   }, [effectiveReport, reportDate, reportType, projectId, onCreateDraft, addToast, t]);
 
-  const inputCls = 'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary';
-  const textareaCls = 'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary resize-y';
+  const inputCls = 'oe-input w-full';
+  const textareaCls = 'oe-textarea w-full resize-y';
 
   return (
     <WideModal
@@ -1911,7 +1911,7 @@ function ReportModal({
           <select
             value={reportType}
             onChange={(e) => setReportType(e.target.value as ReportType)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
             disabled={isEdit && effectiveReport?.status === 'approved'}
           >
             {REPORT_TYPES.map((rt) => (
@@ -2017,7 +2017,7 @@ function ReportModal({
           <select
             value={weatherCondition}
             onChange={(e) => setWeatherCondition(e.target.value as WeatherCondition)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             {WEATHER_CONDITIONS.map((wc) => (
               <option key={wc} value={wc}>

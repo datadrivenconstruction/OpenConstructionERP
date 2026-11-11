@@ -107,7 +107,7 @@ export default function AttachExistingFileModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-popover flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -120,7 +120,7 @@ export default function AttachExistingFileModal({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-light shrink-0">
           <div className="flex items-center gap-2">
             <Paperclip size={16} className="text-oe-blue" />
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('fieldreports.attach_existing_title', {
                 defaultValue: 'Attach a file from project files',
               })}
@@ -139,7 +139,7 @@ export default function AttachExistingFileModal({
         <div className="px-5 py-3 border-b border-border-light shrink-0">
           <div className="relative">
             <Search
-              size={13}
+              size={14}
               className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none"
             />
             <input
@@ -150,7 +150,7 @@ export default function AttachExistingFileModal({
                 defaultValue: 'Search project files by name or category…',
               })}
               autoFocus
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="w-full ps-8 pe-3 oe-input"
             />
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function AttachExistingFileModal({
                       type="button"
                       disabled={isAttached}
                       onClick={() => toggle(d.id)}
-                      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded text-start border transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-start border transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
                         isSelected
                           ? 'bg-oe-blue-subtle border-oe-blue/40'
                           : 'border-transparent hover:bg-surface-secondary hover:border-border-light'
@@ -197,7 +197,7 @@ export default function AttachExistingFileModal({
                             : 'border-border-strong'
                         }`}
                       >
-                        {isSelected && <Check size={11} strokeWidth={3} />}
+                        {isSelected && <Check size={12} strokeWidth={3} />}
                       </span>
                       {isImage ? (
                         <ImageIcon size={14} className="shrink-0 text-content-tertiary" />

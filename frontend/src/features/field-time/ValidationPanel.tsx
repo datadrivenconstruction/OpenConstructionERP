@@ -30,9 +30,9 @@ const SEVERITY_STYLES: Record<Severity, { border: string; icon: string }> = {
 
 function ResultIcon({ severity }: { severity: Severity }) {
   const cls = clsx('mt-0.5 shrink-0', SEVERITY_STYLES[severity].icon);
-  if (severity === 'error') return <XCircle size={15} className={cls} />;
-  if (severity === 'warning') return <AlertTriangle size={15} className={cls} />;
-  return <Info size={15} className={cls} />;
+  if (severity === 'error') return <XCircle size={16} className={cls} />;
+  if (severity === 'warning') return <AlertTriangle size={16} className={cls} />;
+  return <Info size={16} className={cls} />;
 }
 
 export interface ValidationPanelProps {
@@ -57,7 +57,7 @@ export function ValidationPanel({ report, isLoading }: ValidationPanelProps) {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary p-3 text-sm text-content-tertiary">
-        <Loader2 size={15} className="animate-spin" />
+        <Loader2 size={16} className="animate-spin" />
         {t('field_time.validation_loading', { defaultValue: 'Checking timesheet...' })}
       </div>
     );
@@ -71,23 +71,23 @@ export function ValidationPanel({ report, isLoading }: ValidationPanelProps) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-primary p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-sm font-semibold text-content-primary">
+        <h4 className="oe-card-title">
           {t('field_time.validation', { defaultValue: 'Validation' })}
         </h4>
         <div className="ml-auto flex items-center gap-1.5">
           <span className="inline-flex items-center gap-1 rounded-full bg-semantic-error-bg px-2 py-0.5 text-2xs font-medium text-semantic-error">
-            <XCircle size={11} />
+            <XCircle size={12} />
             {t('field_time.validation_errors', { defaultValue: '{{count}} errors', count: errors })}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-medium text-[#b45309]">
-            <AlertTriangle size={11} />
+            <AlertTriangle size={12} />
             {t('field_time.validation_warnings', {
               defaultValue: '{{count}} warnings',
               count: warnings,
             })}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-semantic-success-bg px-2 py-0.5 text-2xs font-medium text-semantic-success">
-            <CheckCircle2 size={11} />
+            <CheckCircle2 size={12} />
             {t('field_time.validation_passed_count', {
               defaultValue: '{{count}} passed',
               count: passedCount,
@@ -111,7 +111,7 @@ export function ValidationPanel({ report, isLoading }: ValidationPanelProps) {
               <li
                 key={r.rule_id}
                 className={clsx(
-                  'rounded-md border border-border-light border-l-2 bg-surface-secondary/40 p-2.5',
+                  'rounded-md border border-border-light border-l-2 bg-surface-secondary/40 p-2',
                   SEVERITY_STYLES[severity].border,
                 )}
               >

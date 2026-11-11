@@ -44,7 +44,7 @@ export function FormPreview({ fields }: FormPreviewProps) {
   }
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-3">
       {fields.map((field, idx) => {
         const state = field.key ? visibility[field.key] : undefined;
         if (state && !state.visible) return null;
@@ -52,7 +52,7 @@ export function FormPreview({ fields }: FormPreviewProps) {
           return (
             <h4
               key={field.key || idx}
-              className="border-b border-border-light pb-1 pt-1 text-xs font-semibold text-content-primary"
+              className="oe-card-title border-b border-border-light pb-1 pt-1"
             >
               {field.label || t('forms.untitled_section', { defaultValue: 'Section' })}
             </h4>
@@ -63,7 +63,7 @@ export function FormPreview({ fields }: FormPreviewProps) {
         const value = isFormula ? (computed[field.key] ?? null) : seeded[field.key] ?? null;
         return (
           <div key={field.key || idx}>
-            <label className="mb-1 flex items-start gap-1 text-xs font-medium text-content-secondary">
+            <label className="oe-label flex items-start gap-1">
               <span>{field.label || t('forms.untitled_field', { defaultValue: 'Untitled' })}</span>
               {required && <span className="text-semantic-error">*</span>}
             </label>

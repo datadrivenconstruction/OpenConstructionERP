@@ -93,7 +93,7 @@ type StatementKey = 'income' | 'balance' | 'cashflow' | 'trial';
 /* ── Constants / helpers ────────────────────────────────────────────────── */
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 // Construction-market currency shortlist for the statement filter. The active
 // project currency (resolved from the finance dashboard) is merged in, so a
@@ -173,7 +173,7 @@ function StatementSection({
   const { t } = useTranslation();
   return (
     <section>
-      <h4 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+      <h4 className="oe-overline mb-1">
         {title}
       </h4>
       <div className="divide-y divide-border-light">
@@ -530,22 +530,22 @@ function TrialBalanceView({
       </div>
       <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                <th className="px-4 py-3 font-medium">
+              <tr>
+                <th>
                   {t('finance.stmt_col_account', { defaultValue: 'Account' })}
                 </th>
-                <th className="px-4 py-3 font-medium">
+                <th>
                   {t('finance.stmt_col_type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-4 py-3 text-right font-medium">
+                <th className="text-right">
                   {t('finance.stmt_col_debit', { defaultValue: 'Debit' })}
                 </th>
-                <th className="px-4 py-3 text-right font-medium">
+                <th className="text-right">
                   {t('finance.stmt_col_credit', { defaultValue: 'Credit' })}
                 </th>
-                <th className="px-4 py-3 text-right font-medium">
+                <th className="text-right">
                   {t('finance.stmt_col_balance', { defaultValue: 'Balance' })}
                 </th>
               </tr>
@@ -554,24 +554,24 @@ function TrialBalanceView({
               {data.rows.map((r) => (
                 <tr
                   key={r.account_code}
-                  className="border-b border-border/60 last:border-0 hover:bg-surface-secondary/50"
+                  className="last:border-0"
                 >
-                  <td className="px-4 py-2.5">
+                  <td>
                     <span className="mr-2 font-mono text-2xs text-content-tertiary">
                       {r.account_code}
                     </span>
                     <span className="text-content-primary">{r.name}</span>
                   </td>
-                  <td className="px-4 py-2.5 capitalize text-content-secondary">
+                  <td className="capitalize text-content-secondary">
                     {r.account_type}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     <MoneyDisplay amount={r.debit_total} currency={cur} />
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     <MoneyDisplay amount={r.credit_total} currency={cur} />
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     <MoneyDisplay amount={r.balance} currency={cur} />
                   </td>
                 </tr>
@@ -579,16 +579,16 @@ function TrialBalanceView({
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-border font-semibold text-content-primary">
-                <td className="px-4 py-3" colSpan={2}>
+                <td colSpan={2}>
                   {t('finance.stmt_totals', { defaultValue: 'Totals' })}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   <MoneyDisplay amount={data.total_debits} currency={cur} />
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   <MoneyDisplay amount={data.total_credits} currency={cur} />
                 </td>
-                <td className="px-4 py-3" />
+                <td />
               </tr>
             </tfoot>
           </table>

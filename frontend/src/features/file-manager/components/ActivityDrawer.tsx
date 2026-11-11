@@ -221,7 +221,7 @@ export function ActivityDrawer({
         aria-hidden="true"
         onClick={onClose}
         className={clsx(
-          'fixed inset-0 z-40 bg-black/30 transition-opacity duration-200',
+          'fixed inset-0 z-drawer bg-black/30 transition-opacity duration-200',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
       />
@@ -234,7 +234,7 @@ export function ActivityDrawer({
         aria-labelledby="activity-drawer-title"
         data-testid="activity-drawer"
         className={clsx(
-          'fixed top-0 right-0 z-50 h-full w-[360px] max-w-[100vw]',
+          'fixed top-0 right-0 z-drawer h-full w-[360px] max-w-[100vw]',
           'border-s border-border-light bg-surface-elevated shadow-xl',
           'transition-transform duration-200 ease-oe',
           'flex flex-col',
@@ -246,7 +246,7 @@ export function ActivityDrawer({
           <div className="min-w-0 flex-1">
             <h2
               id="activity-drawer-title"
-              className="flex items-center gap-1.5 text-sm font-semibold text-content-primary"
+              className="oe-card-title flex items-center gap-1.5"
             >
               <Activity size={14} strokeWidth={2} />
               {t('files.activity.title', { defaultValue: 'Activity' })}
@@ -362,12 +362,12 @@ function ActivityRow({
 
   return (
     <li
-      className="flex items-start gap-2.5 px-4 py-3"
+      className="flex items-start gap-2 px-4 py-3"
       data-testid="activity-row"
       title={absolute}
     >
       <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-secondary">
-        <Icon size={13} strokeWidth={2} />
+        <Icon size={14} strokeWidth={2} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -405,7 +405,7 @@ function ActivitySkeleton() {
   return (
     <div className="space-y-3 p-4" aria-busy="true" data-testid="activity-loading">
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="flex items-start gap-2.5">
+        <div key={i} className="flex items-start gap-2">
           <div className="h-7 w-7 shrink-0 animate-pulse rounded-md bg-surface-secondary" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3 w-1/3 animate-pulse rounded bg-surface-secondary" />

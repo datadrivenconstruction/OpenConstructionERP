@@ -115,7 +115,7 @@ export function ApprovalPanel({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+            <h2 className="oe-card-title">{title}</h2>
             <span data-testid="brief-status">
               <Badge variant={BRIEF_TONE[brief.status]} size="sm">
                 {keyText(t as TFn, BRIEF_STATUS[brief.status])}
@@ -290,7 +290,7 @@ function DetailsDialog({
           <input className={FIELD_CLASS} type="date" value={proof} onChange={(e) => setProof(e.target.value)} />
         </WideModalField>
         <WideModalField label={t('engineeringBrief.field.summary', { defaultValue: 'Summary' })}>
-          <textarea className={FIELD_CLASS} rows={4} value={summary} maxLength={20000} onChange={(e) => setSummary(e.target.value)} />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={4} value={summary} maxLength={20000} onChange={(e) => setSummary(e.target.value)} />
         </WideModalField>
       </div>
     </WideModal>
@@ -311,7 +311,7 @@ export function BriefSetup({ projectId, labels, onDone }: { projectId: string; l
     <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="brief-setup">
       <WideModalField label={t('engineeringBrief.catalogue', { defaultValue: 'Catalogue' })}>
         <select
-          className={FIELD_CLASS}
+          className={`${FIELD_CLASS} oe-select`}
           value={chosen ? `${chosen.source}:${chosen.id}` : ''}
           onChange={(e) => setPick(e.target.value)}
           disabled={cataloguesQ.isLoading}

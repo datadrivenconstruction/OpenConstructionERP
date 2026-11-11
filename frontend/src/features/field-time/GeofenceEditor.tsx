@@ -205,7 +205,7 @@ export function GeofenceEditor({ projectId }: { projectId: string }) {
     }
   };
 
-  const field = 'h-11 w-full rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
+  const field = 'oe-input oe-input-lg w-full h-11';
   const label = 'mb-1 block text-xs font-medium text-content-secondary';
   const saving = create.isPending || update.isPending;
 
@@ -403,7 +403,7 @@ export function GeofenceEditor({ projectId }: { projectId: string }) {
               <textarea
                 id="fence-vertices"
                 rows={4}
-                className="w-full rounded-lg border border-border-light bg-surface-primary p-3 font-mono text-sm text-content-primary"
+                className="w-full oe-textarea font-mono"
                 value={vertexText}
                 onChange={(e) => {
                   setVertexText(e.target.value);
@@ -519,7 +519,7 @@ export function GeofenceEditor({ projectId }: { projectId: string }) {
               onClick={() => void save()}
               className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-oe-blue px-4 text-sm font-semibold text-content-inverse disabled:opacity-50"
             >
-              {saving && <Loader2 size={15} className="animate-spin" />}
+              {saving && <Loader2 size={16} className="animate-spin" />}
               {t('common.save', { defaultValue: 'Save' })}
             </button>
             <button

@@ -84,7 +84,7 @@ function ConsentDialog({
       role="dialog"
       aria-modal="true"
       aria-label={t('field_clock.consent_title', { defaultValue: 'Location consent' })}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-modal flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
     >
       <div className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-surface-primary p-5 shadow-xl sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center gap-2 text-content-primary">
@@ -129,7 +129,7 @@ function ConsentDialog({
             onClick={onAgree}
             className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-oe-blue px-4 text-sm font-semibold text-content-inverse disabled:opacity-60"
           >
-            {busy && <Loader2 size={15} className="animate-spin" />}
+            {busy && <Loader2 size={16} className="animate-spin" />}
             {t('field_clock.consent_agree', { defaultValue: 'I agree' })}
           </button>
           <button
@@ -282,14 +282,14 @@ export function ClockPanel({ projectId }: { projectId: string }) {
   return (
     <div className="mx-auto flex max-w-md flex-col gap-4">
       <div>
-        <label htmlFor="clock-worker" className="mb-1 block text-xs font-medium text-content-secondary">
+        <label htmlFor="clock-worker" className="oe-label">
           {t('field_clock.worker', { defaultValue: 'Who is clocking?' })}
         </label>
         <select
           id="clock-worker"
           value={resourceId}
           onChange={(e) => setResourceId(e.target.value)}
-          className="h-11 w-full rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+          className="oe-select oe-input-lg w-full h-11"
         >
           <option value="">{t('field_clock.pick_worker', { defaultValue: 'Choose a worker' })}</option>
           {workers.map((r) => (
@@ -341,7 +341,7 @@ export function ClockPanel({ projectId }: { projectId: string }) {
 
       {!online && (
         <p className="flex items-center justify-center gap-1.5 text-xs text-content-tertiary">
-          <CloudOff size={13} />
+          <CloudOff size={14} />
           {t('field_clock.offline_note', {
             defaultValue: 'No signal. The tap is saved on this device and sent when you are back online.',
           })}
@@ -359,9 +359,9 @@ export function ClockPanel({ projectId }: { projectId: string }) {
           )}
         >
           {result.inside === true && !result.positionMissing ? (
-            <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-semantic-success" />
+            <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-semantic-success" />
           ) : (
-            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-warning" />
+            <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-warning" />
           )}
           <div className="space-y-1">
             <p className="font-medium">

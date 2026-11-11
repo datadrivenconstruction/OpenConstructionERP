@@ -14,7 +14,7 @@ import {
 } from './invoiceLines';
 
 const cellInput =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full tabular-nums';
 
 /**
  * The lines of an invoice with a VAT rate each, and the Net / VAT / Gross
@@ -71,22 +71,22 @@ export function InvoiceLinesEditor({
         ))}
       </datalist>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="oe-table oe-table-compact min-w-[640px]">
           <thead>
-            <tr className="text-left text-2xs uppercase tracking-wider text-content-tertiary">
-              <th className="pb-1 pr-2 font-medium">{labels.description}</th>
-              <th className="w-20 pb-1 pr-2 font-medium">{labels.quantity}</th>
-              <th className="w-20 pb-1 pr-2 font-medium">{labels.unit}</th>
-              <th className="w-28 pb-1 pr-2 font-medium">{labels.rate}</th>
-              <th className="w-20 pb-1 pr-2 font-medium">{labels.vat}</th>
-              <th className="w-28 pb-1 pr-2 text-right font-medium">{labels.net}</th>
+            <tr>
+              <th className="pb-1">{labels.description}</th>
+              <th className="w-20 pb-1">{labels.quantity}</th>
+              <th className="w-20 pb-1">{labels.unit}</th>
+              <th className="w-28 pb-1">{labels.rate}</th>
+              <th className="w-20 pb-1">{labels.vat}</th>
+              <th className="w-28 pb-1 text-right">{labels.net}</th>
               <th className="w-8 pb-1" />
             </tr>
           </thead>
           <tbody>
             {lines.map((line, index) => (
               <tr key={line.key} className="align-top" data-testid="invoice-line">
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     className={cellInput}
                     value={line.description}
@@ -107,7 +107,7 @@ export function InvoiceLinesEditor({
                     </div>
                   )}
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     type="number"
                     step="any"
@@ -118,7 +118,7 @@ export function InvoiceLinesEditor({
                     onChange={(e) => update(line.key, 'quantity', e.target.value)}
                   />
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     className={cellInput}
                     value={line.unit}
@@ -126,7 +126,7 @@ export function InvoiceLinesEditor({
                     onChange={(e) => update(line.key, 'unit', e.target.value)}
                   />
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     type="number"
                     step="0.01"
@@ -138,7 +138,7 @@ export function InvoiceLinesEditor({
                     onChange={(e) => update(line.key, 'unit_rate', e.target.value)}
                   />
                 </td>
-                <td className="py-1 pr-2">
+                <td>
                   <input
                     type="number"
                     step="any"
@@ -151,10 +151,10 @@ export function InvoiceLinesEditor({
                     onChange={(e) => update(line.key, 'vat_rate', e.target.value)}
                   />
                 </td>
-                <td className="py-1 pr-2 text-right tabular-nums leading-9">
+                <td className="text-right tabular-nums leading-9">
                   <MoneyDisplay amount={lineNet(line)} currency={currency} />
                 </td>
-                <td className="py-1">
+                <td>
                   {lines.length > 1 && (
                     <button
                       type="button"

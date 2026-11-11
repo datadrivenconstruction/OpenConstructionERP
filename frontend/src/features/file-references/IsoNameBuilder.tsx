@@ -206,7 +206,7 @@ export function IsoNameBuilder({
       )}
       data-testid="iso-name-builder"
     >
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('iso.builder_title', { defaultValue: 'ISO 19650 filename builder' })}
       </h3>
       <p className="mt-0.5 text-xs text-content-tertiary">
@@ -236,7 +236,7 @@ export function IsoNameBuilder({
                 setValues((v) => ({ ...v, [f.key]: e.target.value }))
               }
               placeholder={f.placeholder}
-              className="rounded-md border border-border bg-surface-primary px-2 py-1 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input"
             />
             <span className="text-2xs text-content-tertiary">
               {t(f.helpKey, { defaultValue: f.helpDefault })}

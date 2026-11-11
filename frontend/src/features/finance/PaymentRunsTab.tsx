@@ -18,7 +18,7 @@ import { paymentRunIssuesFrom, paymentRunsApi, type PaymentRun, type PaymentRunI
 import { invalidateFinanceFigures } from './financeQueryKeys';
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 const RUNS_KEY = ['finance', 'payment-runs'] as const;
 
@@ -74,9 +74,9 @@ function IssueList({ issues }: { issues: PaymentRunIssue[] }) {
           )}
         >
           {issue.severity === 'error' ? (
-            <XCircle size={15} className="mt-0.5 shrink-0" />
+            <XCircle size={16} className="mt-0.5 shrink-0" />
           ) : (
-            <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           )}
           <span>{issue.message}</span>
         </li>
@@ -184,7 +184,7 @@ function RunDetail({ runId }: { runId: string }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-mono text-base font-semibold text-content-primary">{run.run_number}</h3>
+            <h3 className="oe-card-title font-mono">{run.run_number}</h3>
             <Badge variant={statusVariant(run.status)} size="sm">
               {runStatusLabel(t, run.status)}
             </Badge>
@@ -212,22 +212,22 @@ function RunDetail({ runId }: { runId: string }) {
       <IssueList issues={issues} />
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table">
           <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-              <th className="px-3 py-2 font-medium">{t('finance.ageing_col_invoice', { defaultValue: 'Invoice' })}</th>
-              <th className="px-3 py-2 font-medium">
+            <tr>
+              <th>{t('finance.ageing_col_invoice', { defaultValue: 'Invoice' })}</th>
+              <th>
                 {t('finance.ageing_col_counterparty', { defaultValue: 'Counterparty' })}
               </th>
-              <th className="px-3 py-2 font-medium">{t('finance.payrun_col_project', { defaultValue: 'Project' })}</th>
-              <th className="px-3 py-2 font-medium">{t('finance.ageing_col_due_date', { defaultValue: 'Due date' })}</th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th>{t('finance.payrun_col_project', { defaultValue: 'Project' })}</th>
+              <th>{t('finance.ageing_col_due_date', { defaultValue: 'Due date' })}</th>
+              <th className="text-right">
                 {t('finance.payrun_col_open', { defaultValue: 'Open when proposed' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('finance.payrun_col_amount', { defaultValue: 'To pay' })}
               </th>
-              {draft && <th className="px-3 py-2" />}
+              {draft && <th />}
             </tr>
           </thead>
           <tbody>
@@ -239,19 +239,19 @@ function RunDetail({ runId }: { runId: string }) {
                   itemIssue(item.id) && 'bg-semantic-error/5',
                 )}
               >
-                <td className="px-3 py-2 font-mono text-content-primary">{item.invoice_number}</td>
-                <td className="px-3 py-2 text-content-primary">
+                <td className="font-mono">{item.invoice_number}</td>
+                <td>
                   {item.counterparty_name ||
                     t('finance.retention_unnamed', { defaultValue: 'Unspecified counterparty' })}
                 </td>
-                <td className="px-3 py-2 text-content-secondary">{item.project_name ?? '-'}</td>
-                <td className="px-3 py-2 text-content-secondary">
+                <td className="text-content-secondary">{item.project_name ?? '-'}</td>
+                <td className="text-content-secondary">
                   {item.due_date ? <DateDisplay value={item.due_date} /> : '-'}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                <td className="text-right tabular-nums text-content-secondary">
                   <MoneyDisplay amount={item.open_at_proposal} currency={run.currency_code || undefined} />
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   {draft ? (
                     <AmountCell
                       value={item.amount}
@@ -269,7 +269,7 @@ function RunDetail({ runId }: { runId: string }) {
                   )}
                 </td>
                 {draft && (
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       disabled={busy || run.items.length <= 1}

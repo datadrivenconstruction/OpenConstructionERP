@@ -169,10 +169,10 @@ function CreateWorkflowDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="mx-4 w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('enterprise_workflows.create_workflow', { defaultValue: 'Create Workflow' })}
           </h2>
           <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
@@ -182,7 +182,7 @@ function CreateWorkflowDialog({
 
         <div className="space-y-3">
           <div>
-            <label htmlFor="ew-create-name" className="mb-1 block text-xs font-medium text-content-secondary">
+            <label htmlFor="ew-create-name" className="oe-label">
               {t('enterprise_workflows.workflow_name', { defaultValue: 'Workflow Name' })}
             </label>
             <input
@@ -193,22 +193,19 @@ function CreateWorkflowDialog({
               placeholder={t('enterprise_workflows.name_placeholder', {
                 defaultValue: 'e.g. Change Order Approval',
               })}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary placeholder:text-content-tertiary
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="w-full oe-input"
             />
           </div>
 
           <div>
-            <label htmlFor="ew-create-entity" className="mb-1 block text-xs font-medium text-content-secondary">
+            <label htmlFor="ew-create-entity" className="oe-label">
               {t('enterprise_workflows.entity_type', { defaultValue: 'Entity Type' })}
             </label>
             <select
               id="ew-create-entity"
               value={entityType}
               onChange={(e) => setEntityType(e.target.value)}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="w-full oe-select"
             >
               <option value="">
                 {t('enterprise_workflows.entity_type_choose', { defaultValue: 'Choose a record type' })}
@@ -222,7 +219,7 @@ function CreateWorkflowDialog({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('enterprise_workflows.description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -232,9 +229,7 @@ function CreateWorkflowDialog({
               placeholder={t('enterprise_workflows.description_placeholder', {
                 defaultValue: 'Optional description of this workflow',
               })}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary placeholder:text-content-tertiary resize-none
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="w-full oe-textarea resize-none"
             />
           </div>
 
@@ -252,8 +247,7 @@ function CreateWorkflowDialog({
                       value={step.role}
                       onChange={(e) => updateStep(i, { role: e.target.value })}
                       aria-label={`${stepName} ${t('enterprise_workflows.step_role', { defaultValue: 'Required role' })}`}
-                      className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm
-                        text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                      className="min-w-0 flex-1 oe-select"
                     >
                       <option value="">{t('enterprise_workflows.any_role', { defaultValue: 'Any role' })}</option>
                       {WORKFLOW_STEP_ROLES.map((r) => (
@@ -266,8 +260,7 @@ function CreateWorkflowDialog({
                       value={step.action_type}
                       onChange={(e) => updateStep(i, { action_type: e.target.value as WorkflowActionType })}
                       aria-label={`${stepName} ${t('enterprise_workflows.step_action', { defaultValue: 'Action' })}`}
-                      className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm
-                        text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                      className="min-w-0 flex-1 oe-select"
                     >
                       {OFFERED_ACTION_TYPES.map((a) => (
                         <option key={a} value={a}>
@@ -550,7 +543,7 @@ function WorkflowsExplainer() {
   return (
     <CollapsibleSection
       storageKey="enterprise_workflows.how"
-      icon={<GitBranch size={15} className="text-oe-blue" />}
+      icon={<GitBranch size={16} className="text-oe-blue" />}
       title={t('enterprise_workflows.flow_title', { defaultValue: 'How enterprise workflows work' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -892,8 +885,7 @@ export function WorkflowsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ApprovalStatus | '')}
-              className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-select"
             >
               <option value="">
                 {t('enterprise_workflows.all_statuses', { defaultValue: 'All statuses' })}

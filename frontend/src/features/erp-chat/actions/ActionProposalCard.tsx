@@ -263,12 +263,12 @@ export function ActionProposalCard({
   );
 
   const header = variant === 'card' && (
-    <header className="flex items-start gap-2.5">
+    <header className="flex items-start gap-2">
       <span
         className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--act-accent-subtle)] text-[var(--act-accent)]"
         aria-hidden="true"
       >
-        <Icon size={15} />
+        <Icon size={16} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -308,7 +308,7 @@ export function ActionProposalCard({
     >
       {header}
 
-      <div className={clsx('space-y-2.5', variant === 'card' && 'mt-2.5')}>
+      <div className={clsx('space-y-2', variant === 'card' && 'mt-2.5')}>
         {action.summary && (
           <p className="text-sm leading-snug text-[var(--act-text-2)]">{action.summary}</p>
         )}
@@ -322,7 +322,7 @@ export function ActionProposalCard({
             className="inline-flex items-center gap-1 rounded text-xs font-medium text-[var(--act-text-2)] hover:text-[var(--act-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)]"
           >
             <ChevronDown
-              size={13}
+              size={14}
               aria-hidden="true"
               className={clsx('transition-transform motion-reduce:transition-none', detailsOpen && 'rotate-180')}
             />
@@ -458,7 +458,7 @@ export function ActionProposalCard({
                     busy={pendingOp === 'apply'}
                     busyLabel={String(t('erp_chat.action.busy.apply', { defaultValue: 'Applying…' }))}
                     disabled={busy}
-                    icon={status === 'failed' ? <RotateCcw size={13} /> : <Check size={13} />}
+                    icon={status === 'failed' ? <RotateCcw size={14} /> : <Check size={14} />}
                     data-testid="action-apply"
                   >
                     {status === 'failed'
@@ -485,7 +485,7 @@ export function ActionProposalCard({
                     busy={pendingOp === 'reject'}
                     busyLabel={String(t('erp_chat.action.busy.reject', { defaultValue: 'Rejecting…' }))}
                     disabled={busy}
-                    icon={<X size={13} />}
+                    icon={<X size={14} />}
                     data-testid="action-reject"
                   >
                     {t('erp_chat.action.reject', { defaultValue: 'Reject' })}
@@ -514,7 +514,7 @@ export function ActionProposalCard({
                 <ActionButton
                   tone="secondary"
                   onClick={onOpen}
-                  icon={<ArrowUpRight size={13} className="rtl:-scale-x-100" />}
+                  icon={<ArrowUpRight size={14} className="rtl:-scale-x-100" />}
                   data-testid="action-open"
                   title={openLabel}
                   aria-label={openLabel}
@@ -529,7 +529,7 @@ export function ActionProposalCard({
                   busy={pendingOp === 'revert'}
                   busyLabel={String(t('erp_chat.action.busy.revert', { defaultValue: 'Undoing…' }))}
                   disabled={busy}
-                  icon={<Undo2 size={13} />}
+                  icon={<Undo2 size={14} />}
                   data-testid="action-undo"
                 >
                   {t('erp_chat.action.undo', { defaultValue: 'Undo' })}

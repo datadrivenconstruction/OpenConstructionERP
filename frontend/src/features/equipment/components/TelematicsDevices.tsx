@@ -79,7 +79,7 @@ export function TelematicsDevices() {
             <select
               value={equipmentId}
               onChange={(e) => setEquipmentId(e.target.value)}
-              className="h-9 min-w-[200px] rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+              className="oe-select min-w-[200px]"
             >
               <option value="">{t('equipment.telematics.device_pick', { defaultValue: 'Choose a machine' })}</option>
               {equipment.map((e) => (
@@ -96,7 +96,7 @@ export function TelematicsDevices() {
               value={label}
               maxLength={200}
               onChange={(e) => setLabel(e.target.value)}
-              className="h-9 w-48 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary"
+              className="oe-input w-48"
             />
           </label>
           <Button

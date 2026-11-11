@@ -125,7 +125,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -135,7 +135,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('files.export.title', { defaultValue: 'Export project bundle' })}
           </h2>
           <button
@@ -144,7 +144,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
@@ -210,21 +210,21 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
               </div>
 
               <div>
-                <h3 className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+                <h3 className="oe-overline mb-1.5">
                   {t('files.export.tables', { defaultValue: 'Tables' })}
                 </h3>
                 <div className="rounded-lg border border-border-light overflow-hidden text-xs">
                   <div className="max-h-48 overflow-y-auto">
-                    <table className="w-full">
+                    <table className="oe-table oe-table-compact">
                       <tbody>
                         {Object.entries(preview.table_counts)
                           .sort(([, a], [, b]) => b - a)
                           .map(([tbl, count]) => (
-                            <tr key={tbl} className="border-b border-border-light last:border-0">
-                              <td className="px-3 py-1.5 font-mono text-2xs text-content-secondary truncate">
+                            <tr key={tbl} className="last:border-0">
+                              <td className="font-mono text-2xs text-content-secondary truncate">
                                 {tbl}
                               </td>
-                              <td className="px-3 py-1.5 text-right tabular-nums text-content-tertiary">
+                              <td className="text-right tabular-nums text-content-tertiary">
                                 {count}
                               </td>
                             </tr>
@@ -236,7 +236,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
               </div>
 
               {preview.estimated_size_bytes > 200 * 1024 * 1024 && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning-bg text-semantic-warning text-xs">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-warning-bg text-semantic-warning text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>
                     {t('files.export.large_warn', {
@@ -250,7 +250,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
           )}
 
           {error && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+            <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <p>{error}</p>
             </div>

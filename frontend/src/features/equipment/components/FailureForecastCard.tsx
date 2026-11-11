@@ -31,7 +31,7 @@ export function FailureForecastCard({ equipmentId }: { equipmentId: string }) {
     return (
       <Card padding="sm">
         <p className="flex items-center gap-1.5 text-xs text-content-secondary">
-          <AlertTriangle size={13} className="text-semantic-warning" />
+          <AlertTriangle size={14} className="text-semantic-warning" />
           {fcQ.error
             ? getErrorMessage(fcQ.error)
             : t('equipment.forecast.unavailable', {
@@ -71,8 +71,8 @@ export function FailureForecastCard({ equipmentId }: { equipmentId: string }) {
   return (
     <Card padding="md">
       <div className="flex items-center gap-1.5">
-        <CalendarClock size={15} className="text-oe-blue" />
-        <h4 className="text-sm font-semibold text-content-primary">
+        <CalendarClock size={16} className="text-oe-blue" />
+        <h4 className="oe-card-title">
           {t('equipment.forecast.title', {
             defaultValue: 'Predicted next service',
           })}
@@ -130,7 +130,7 @@ export function FailureForecastCard({ equipmentId }: { equipmentId: string }) {
             })}
           </p>
           <p className="mt-1 flex items-center gap-1 text-base font-semibold tabular-nums text-content-primary">
-            <Gauge size={13} className="text-content-tertiary" />
+            <Gauge size={14} className="text-content-tertiary" />
             {fmtFixed(fc.daily_usage, 1)}
             <span className="text-2xs font-normal text-content-tertiary">
               {t('equipment.forecast.hours_per_day', {

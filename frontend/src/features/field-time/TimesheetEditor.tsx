@@ -367,7 +367,7 @@ export function TimesheetEditor({
                   type="date"
                   defaultValue={timesheet.date}
                   disabled={!isDraft}
-                  className="h-9 w-full rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary disabled:opacity-60"
+                  className="oe-input w-full"
                   onChange={(e) => {
                     if (e.target.value && e.target.value !== timesheet.date) {
                       headerMut.mutate({ date: e.target.value });
@@ -385,7 +385,7 @@ export function TimesheetEditor({
                   placeholder={t('field_time.note_placeholder', {
                     defaultValue: 'Crew, area, shift notes (optional)',
                   })}
-                  className="h-9 w-full rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary disabled:opacity-60"
+                  className="oe-input w-full"
                   onBlur={(e) => {
                     const next = e.target.value.trim();
                     if (next !== (timesheet.note ?? '')) {
@@ -415,7 +415,7 @@ export function TimesheetEditor({
                     <select
                       value={timesheet.working_time_regime ?? ''}
                       disabled={!isDraft}
-                      className="h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary disabled:opacity-60"
+                      className="oe-select"
                       onChange={(e) => headerMut.mutate({ working_time_regime: e.target.value || null })}
                     >
                       <option value="">
@@ -461,17 +461,17 @@ export function TimesheetEditor({
             {/* Hours rollup */}
             <div className="grid grid-cols-3 gap-3">
               <RollupTile
-                icon={<HardHat size={15} className="text-oe-blue" />}
+                icon={<HardHat size={16} className="text-oe-blue" />}
                 label={t('field_time.labour_hours', { defaultValue: 'Labour hours' })}
                 value={formatHours(timesheet.labour_hours)}
               />
               <RollupTile
-                icon={<Wrench size={15} className="text-content-secondary" />}
+                icon={<Wrench size={16} className="text-content-secondary" />}
                 label={t('field_time.plant_hours', { defaultValue: 'Plant hours' })}
                 value={formatHours(timesheet.plant_hours)}
               />
               <RollupTile
-                icon={<ListChecks size={15} className="text-content-secondary" />}
+                icon={<ListChecks size={16} className="text-content-secondary" />}
                 label={t('field_time.lines', { defaultValue: 'Lines' })}
                 value={String(timesheet.lines.length)}
               />
@@ -479,7 +479,7 @@ export function TimesheetEditor({
 
             {/* Lines */}
             <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('field_time.lines', { defaultValue: 'Lines' })}
               </h3>
               {timesheet.lines.length === 0 ? (
@@ -567,7 +567,7 @@ export function TimesheetEditor({
             placeholder={t('field_time.reverse_reason_placeholder', {
               defaultValue: 'e.g. hours booked to the wrong cost code',
             })}
-            className="w-full resize-y rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+            className="w-full resize-y oe-textarea"
           />
         </label>
       </WideModal>

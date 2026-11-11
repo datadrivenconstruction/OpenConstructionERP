@@ -247,7 +247,7 @@ export function CommentComposer({
         }
         rows={2}
         maxLength={10_000}
-        className="w-full resize-y rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+        className="w-full resize-y oe-textarea"
         data-testid="comment-composer-textarea"
       />
       <div className="flex justify-end gap-2">
@@ -275,7 +275,7 @@ export function CommentComposer({
           id="mention-popover"
           role="listbox"
           aria-label={t('comments.mentions', { defaultValue: 'Mentions' })}
-          className="absolute left-0 top-full z-20 mt-1 w-64 rounded-lg border border-border bg-surface-primary shadow-lg"
+          className="absolute left-0 top-full z-dropdown mt-1 w-64 rounded-lg border border-border bg-surface-primary shadow-lg"
         >
           {filtered.map((s, idx) => (
             <button

@@ -30,7 +30,7 @@ export interface PickOption {
 }
 
 const fieldCls =
-  'h-8 w-full rounded-lg border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary disabled:opacity-60';
+  'oe-input w-full';
 
 export interface TimesheetLineRowProps {
   line: FieldTimesheetLine;
@@ -104,14 +104,14 @@ export function TimesheetLineRow({
   };
 
   return (
-    <div className="rounded-lg border border-border-light bg-surface-primary p-2.5">
+    <div className="rounded-lg border border-border-light bg-surface-primary p-3">
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-12 lg:items-end">
       {/* Kind */}
       <div className="col-span-2 flex items-center gap-1.5 lg:col-span-1">
         {isLabour ? (
-          <HardHat size={15} className="text-oe-blue" />
+          <HardHat size={16} className="text-oe-blue" />
         ) : (
-          <Wrench size={15} className="text-content-secondary" />
+          <Wrench size={16} className="text-content-secondary" />
         )}
         <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
           {isLabour
@@ -130,7 +130,7 @@ export function TimesheetLineRow({
         <select
           value={currentId ?? ''}
           disabled={!editable}
-          className={fieldCls}
+          className={`${fieldCls} oe-select`}
           onChange={(e) =>
             commit(isLabour ? { resource_id: e.target.value } : { equipment_id: e.target.value })
           }
@@ -245,7 +245,7 @@ export function TimesheetLineRow({
           <select
             value={line.variation_id ?? ''}
             disabled={!editable}
-            className={clsx(fieldCls, 'mt-1.5')}
+            className={clsx(fieldCls, 'oe-select', 'mt-1.5')}
             onChange={(e) => commit({ variation_id: e.target.value || null })}
           >
             <option value="">
@@ -270,7 +270,7 @@ export function TimesheetLineRow({
             aria-label={t('field_time.delete_line', { defaultValue: 'Delete line' })}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error disabled:opacity-40"
           >
-            <Trash2 size={15} />
+            <Trash2 size={16} />
           </button>
         )}
       </div>
@@ -329,7 +329,7 @@ export function TimesheetLineRow({
             <select
               value={line.employer_kind ?? ''}
               disabled={!editable}
-              className={fieldCls}
+              className={`${fieldCls} oe-select`}
               onChange={(e) => {
                 const kind = (e.target.value || null) as EmployerKind | null;
                 commit({
@@ -360,7 +360,7 @@ export function TimesheetLineRow({
               <select
                 value={line.employer_subcontractor_id ?? ''}
                 disabled={!editable}
-                className={fieldCls}
+                className={`${fieldCls} oe-select`}
                 onChange={(e) => commit({ employer_subcontractor_id: e.target.value || null })}
               >
                 <option value="">

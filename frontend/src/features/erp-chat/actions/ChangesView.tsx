@@ -213,7 +213,7 @@ function ChangesRow({ action, showProject }: { action: ChatAction; showProject: 
       data-action-id={action.id}
       data-action-status={action.status}
     >
-      <div className="flex items-start gap-2.5 px-3 py-2.5">
+      <div className="flex items-start gap-2 px-3 py-2.5">
         <span
           className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--act-surface)] text-[var(--act-text-2)]"
           aria-hidden="true"
@@ -348,7 +348,7 @@ function ChangesRow({ action, showProject }: { action: ChatAction; showProject: 
 
 function RowSkeleton() {
   return (
-    <li className="flex items-start gap-2.5 border-b border-[var(--act-border-subtle)] px-3 py-3 last:border-b-0" aria-hidden="true">
+    <li className="flex items-start gap-2 border-b border-[var(--act-border-subtle)] px-3 py-3 last:border-b-0" aria-hidden="true">
       <span className="h-7 w-7 shrink-0 animate-pulse rounded-lg bg-[var(--act-surface-2)] motion-reduce:animate-none" />
       <span className="flex-1 space-y-2">
         <span className="block h-3 w-2/3 animate-pulse rounded bg-[var(--act-surface-2)] motion-reduce:animate-none" />
@@ -564,7 +564,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
         {empty && (
           <div className="flex flex-col items-center px-6 py-10 text-center" data-testid="changes-empty">
             <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--act-accent-subtle)] text-[var(--act-accent)]" aria-hidden="true">
-              <Sparkles size={18} />
+              <Sparkles size={20} />
             </span>
             <p className="text-sm font-semibold text-[var(--act-text)]">{emptyCopy.title}</p>
             {emptyCopy.body && (
@@ -579,7 +579,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
             <section key={group.key} aria-labelledby={groupHeadingId}>
               <h4
                 id={groupHeadingId}
-                className="sticky top-0 z-[1] border-b border-[var(--act-border-subtle)] bg-[var(--act-surface)] px-3 py-1 text-2xs font-semibold uppercase tracking-wide text-[var(--act-text-3)]"
+                className="sticky top-0 z-raised border-b border-[var(--act-border-subtle)] bg-[var(--act-surface)] px-3 py-1 text-2xs font-semibold uppercase tracking-wide text-[var(--act-text-3)]"
               >
                 {formatDayHeading(group.iso, t)}
               </h4>
@@ -629,7 +629,7 @@ export function ChangesView({ projectId, projectName, className, listRef }: Chan
             className="inline-flex items-center gap-1.5 rounded text-xs font-medium text-[var(--act-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--act-accent)]"
             data-testid="changes-full-history"
           >
-            <History size={13} aria-hidden="true" />
+            <History size={14} aria-hidden="true" />
             {t('erp_chat.changes.full_history', { defaultValue: 'Full project history' })}
           </button>
         </footer>

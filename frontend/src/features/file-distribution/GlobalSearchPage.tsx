@@ -302,7 +302,7 @@ export function GlobalSearchPage() {
           data-testid="global-search-filter-rail"
         >
           <section className="flex flex-col gap-2">
-            <h2 className="text-xs uppercase tracking-wide text-content-tertiary">
+            <h2 className="oe-overline">
               {t('files.global_search.kind_filter_label', { defaultValue: 'File types' })}
             </h2>
             <div className="flex flex-wrap gap-1.5" data-testid="global-search-kind-filters">
@@ -334,7 +334,7 @@ export function GlobalSearchPage() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-xs uppercase tracking-wide text-content-tertiary">
+            <h2 className="oe-overline">
               {t('files.global_search.sort_label', { defaultValue: 'Sort by' })}
             </h2>
             <div className="flex flex-col gap-1">
@@ -366,7 +366,7 @@ export function GlobalSearchPage() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-xs uppercase tracking-wide text-content-tertiary">
+            <h2 className="oe-overline">
               {t('files.global_search.view_label', { defaultValue: 'View' })}
             </h2>
             <button
@@ -459,7 +459,7 @@ export function GlobalSearchPage() {
           {groupByProject && grouped ? (
             grouped.map((group) => (
               <div key={group.id} className="flex flex-col gap-2">
-                <h3 className="sticky top-0 z-[1] bg-surface-secondary/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary backdrop-blur">
+                <h3 className="oe-overline sticky top-0 z-raised bg-surface-secondary/80 px-3 py-1.5 backdrop-blur">
                   {group.project_name} · {group.items.length}
                 </h3>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

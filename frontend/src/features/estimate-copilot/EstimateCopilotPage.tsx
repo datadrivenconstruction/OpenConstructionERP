@@ -63,7 +63,7 @@ const STEP_ICON: Record<CopilotStepId, React.ReactNode> = {
 
 /** Shared field styling for the conceptual step's ROM inputs (mirrors the ROM page). */
 const ROM_INPUT_CLASS =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary ' +
+  'oe-input w-full' +
   'placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue ' +
   'disabled:cursor-not-allowed disabled:opacity-60';
 
@@ -98,7 +98,7 @@ export function EstimateCopilotPage() {
 
       <Card padding="md" className="space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('copilot.pick_title', { defaultValue: 'Choose what to work on' })}
           </h2>
           <p className="mt-0.5 text-xs text-content-tertiary">
@@ -172,7 +172,7 @@ function CopilotFlowPanel({ projectId, boqId }: CopilotFlowPanelProps) {
           className="border-semantic-success/40 bg-semantic-success/5 flex flex-wrap items-center justify-between gap-3"
         >
           <div className="flex items-start gap-2">
-            <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-semantic-success" />
+            <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-semantic-success" />
             <div>
               <p className="text-sm font-semibold text-content-primary">
                 {t('copilot.done_title', { defaultValue: 'Estimate is ready to defend' })}
@@ -223,9 +223,9 @@ function ReadinessSummary({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex items-start gap-2">
           {reviewReady ? (
-            <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-semantic-success" />
+            <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-semantic-success" />
           ) : (
-            <Gauge size={18} className="mt-0.5 shrink-0 text-oe-blue" />
+            <Gauge size={20} className="mt-0.5 shrink-0 text-oe-blue" />
           )}
           <div>
             <p className="text-sm font-semibold text-content-primary">
@@ -310,12 +310,12 @@ function ReadinessRow({ step }: { step: StepReadiness }) {
 
 function ReadinessMarker({ step }: { step: StepReadiness }) {
   if (step.confirmed) {
-    return <CheckCircle2 size={15} className="shrink-0 text-semantic-success" />;
+    return <CheckCircle2 size={16} className="shrink-0 text-semantic-success" />;
   }
   if (step.phase === 'active') {
-    return <CircleDot size={15} className="shrink-0 text-oe-blue" />;
+    return <CircleDot size={16} className="shrink-0 text-oe-blue" />;
   }
-  return <Lock size={13} strokeWidth={1.8} className="shrink-0 text-content-tertiary" />;
+  return <Lock size={14} strokeWidth={1.8} className="shrink-0 text-content-tertiary" />;
 }
 
 // ── Step card ────────────────────────────────────────────────────────────────
@@ -354,7 +354,7 @@ function StepCard({
 
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t(def.titleKey, { defaultValue: def.titleFallback })}
             </h3>
             <Badge variant={badge.tone} size="sm">
@@ -381,7 +381,7 @@ function StepCard({
               <Button
                 variant="ghost"
                 size="sm"
-                icon={<RotateCcw size={13} />}
+                icon={<RotateCcw size={14} />}
                 onClick={() => flow.revisit(def.id)}
               >
                 {t('copilot.redo', { defaultValue: 'Redo this step' })}
@@ -408,7 +408,7 @@ function StepMarker({
   if (phase === 'confirmed') {
     return (
       <div className={`${base} bg-semantic-success/15 text-semantic-success`}>
-        <CheckCircle2 size={18} />
+        <CheckCircle2 size={20} />
       </div>
     );
   }
@@ -491,7 +491,7 @@ function ActiveStepBody({
               variant="ghost"
               size="sm"
               loading={isRunning}
-              icon={<RotateCcw size={13} />}
+              icon={<RotateCcw size={14} />}
               onClick={() => flow.run(def.id)}
             >
               {t('copilot.rerun', { defaultValue: 'Re-run' })}
@@ -525,7 +525,7 @@ function ConceptualInputFields({
       <div>
         <label
           htmlFor="copilot-rom-type"
-          className="mb-1 block text-xs font-medium text-content-secondary"
+          className="oe-label"
         >
           {t('copilot.conceptual.building_type', { defaultValue: 'Building type' })}
         </label>
@@ -534,7 +534,7 @@ function ConceptualInputFields({
           value={conceptualInputs.buildingType}
           disabled={disabled}
           onChange={(e) => setConceptualInput({ buildingType: e.target.value })}
-          className={ROM_INPUT_CLASS}
+          className={`${ROM_INPUT_CLASS} oe-select`}
         >
           <option value="">
             {t('copilot.conceptual.building_type_placeholder', {
@@ -552,7 +552,7 @@ function ConceptualInputFields({
       <div>
         <label
           htmlFor="copilot-rom-area"
-          className="mb-1 block text-xs font-medium text-content-secondary"
+          className="oe-label"
         >
           {t('copilot.conceptual.gross_floor_area', { defaultValue: 'Gross floor area (m²)' })}
         </label>
@@ -572,7 +572,7 @@ function ConceptualInputFields({
       <div>
         <label
           htmlFor="copilot-rom-quality"
-          className="mb-1 block text-xs font-medium text-content-secondary"
+          className="oe-label"
         >
           {t('copilot.conceptual.quality', { defaultValue: 'Quality level' })}
         </label>
@@ -581,7 +581,7 @@ function ConceptualInputFields({
           value={conceptualInputs.quality}
           disabled={disabled}
           onChange={(e) => setConceptualInput({ quality: e.target.value })}
-          className={ROM_INPUT_CLASS}
+          className={`${ROM_INPUT_CLASS} oe-select`}
         >
           {(reference?.quality_levels ?? []).map((opt) => (
             <option key={opt.key} value={opt.key}>
@@ -594,7 +594,7 @@ function ConceptualInputFields({
       <div>
         <label
           htmlFor="copilot-rom-region"
-          className="mb-1 block text-xs font-medium text-content-secondary"
+          className="oe-label"
         >
           {t('copilot.conceptual.region', { defaultValue: 'Region' })}
         </label>
@@ -603,7 +603,7 @@ function ConceptualInputFields({
           value={conceptualInputs.region}
           disabled={disabled}
           onChange={(e) => setConceptualInput({ region: e.target.value })}
-          className={ROM_INPUT_CLASS}
+          className={`${ROM_INPUT_CLASS} oe-select`}
         >
           {(reference?.regions ?? []).map((opt) => (
             <option key={opt.key} value={opt.key}>
@@ -816,7 +816,7 @@ function BasisResult({ data, compact }: { data: BasisOfEstimateResult | undefine
   return (
     <ResultShell>
       <div className="flex items-center gap-2 text-content-tertiary">
-        <FileText size={13} className="shrink-0" />
+        <FileText size={14} className="shrink-0" />
         <span>{t('copilot.basis.ready', { defaultValue: 'Basis of estimate drafted' })}</span>
       </div>
       {!compact && data.narrative && (

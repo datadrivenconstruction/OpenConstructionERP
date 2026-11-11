@@ -166,7 +166,7 @@ function HowSheetsWork() {
   return (
     <CollapsibleSection
       storageKey="sheets.how"
-      icon={<Layers size={15} className="text-oe-blue" />}
+      icon={<Layers size={16} className="text-oe-blue" />}
       title={t('sheets.flow_title', {
         defaultValue: 'How the Drawing Sheet register fits together',
       })}
@@ -894,11 +894,11 @@ export function SheetsIndexPage() {
               )}
 
               <Card padding="none" className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead className="sticky top-0 z-10 bg-surface-secondary/95 backdrop-blur-sm">
-                    <tr className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+                <table className="oe-table">
+                  <thead className="sticky top-0 z-10 backdrop-blur-sm">
+                    <tr>
                       {canEdit && (
-                        <th className="w-10 px-3 py-2.5 border-b border-border-light">
+                        <th className="w-10">
                           <input
                             type="checkbox"
                             aria-label={t('sheets.select_all', { defaultValue: 'Select all sheets shown' })}
@@ -910,29 +910,29 @@ export function SheetsIndexPage() {
                           />
                         </th>
                       )}
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_number', { defaultValue: 'Sheet #' })}
                       </th>
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_title', { defaultValue: 'Title' })}
                       </th>
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_discipline', { defaultValue: 'Discipline' })}
                       </th>
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_revision', { defaultValue: 'Rev' })}
                       </th>
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_issue_date', { defaultValue: 'Issue Date' })}
                       </th>
-                      <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
+                      <th>
                         {t('sheets.col_scale', { defaultValue: 'Scale' })}
                       </th>
-                      <th className="text-center px-4 py-2.5 border-b border-border-light font-medium">
+                      <th className="text-center">
                         {t('sheets.col_current', { defaultValue: 'Current?' })}
                       </th>
                       {canEdit && reviewCount > 0 && (
-                        <th className="text-center px-4 py-2.5 border-b border-border-light font-medium">
+                        <th className="text-center">
                           {t('sheets.col_review', { defaultValue: 'Review' })}
                         </th>
                       )}
@@ -952,7 +952,7 @@ export function SheetsIndexPage() {
                         )}
                       >
                         {canEdit && (
-                          <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                          <td className="w-10" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               aria-label={t('sheets.select_row', {
@@ -965,7 +965,7 @@ export function SheetsIndexPage() {
                             />
                           </td>
                         )}
-                        <td className="px-4 py-3 font-mono text-content-primary whitespace-nowrap">
+                        <td className="font-mono whitespace-nowrap">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -978,12 +978,12 @@ export function SheetsIndexPage() {
                           </button>
                           <ReadBadge sheet={s} />
                         </td>
-                        <td className="px-4 py-3 text-content-primary">
+                        <td>
                           {s.sheet_title ?? (
                             <span className="text-content-quaternary">&mdash;</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           {s.discipline ? (
                             <Badge variant={disciplineVariant(s.discipline)} size="sm">
                               {t(`sheets.discipline_name.${s.discipline.toLowerCase()}`, { defaultValue: s.discipline })}
@@ -992,7 +992,7 @@ export function SheetsIndexPage() {
                             <span className="text-content-quaternary">&mdash;</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <span className="inline-flex items-center gap-1.5">
                             {s.revision ? (
                               <Badge variant="neutral" size="sm">
@@ -1025,7 +1025,7 @@ export function SheetsIndexPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-content-secondary">
+                        <td className="text-content-secondary">
                           {s.revision_date ? (
                             <span
                               title={new Date(s.revision_date).toLocaleString(getIntlLocale())}
@@ -1036,10 +1036,10 @@ export function SheetsIndexPage() {
                             <span className="text-content-quaternary">&mdash;</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-content-secondary tabular-nums">
+                        <td className="text-content-secondary tabular-nums">
                           {s.scale ?? <span className="text-content-quaternary">&mdash;</span>}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="text-center">
                           {s.is_current ? (
                             <Check
                               size={16}
@@ -1065,7 +1065,7 @@ export function SheetsIndexPage() {
                           )}
                         </td>
                         {canEdit && reviewCount > 0 && (
-                          <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+                          <td className="text-center" onClick={(e) => e.stopPropagation()}>
                             {needsReview(s) && !ocrUnavailable(s) && (
                               <Button
                                 variant="secondary"

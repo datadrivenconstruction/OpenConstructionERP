@@ -98,12 +98,12 @@ export function WorkingTimeRecordPanel({
   };
 
   const fieldCls =
-    'h-9 rounded-lg border border-border-light bg-surface-primary px-3 text-sm text-content-primary';
+    'oe-input';
 
   return (
     <CollapsibleSection
       storageKey="field_time.working_time"
-      icon={<ScrollText size={15} className="text-oe-blue" />}
+      icon={<ScrollText size={16} className="text-oe-blue" />}
       title={t('field_time.working_time.title', { defaultValue: 'Statutory working-time record' })}
       // Closed on a first visit, unlike the module explainer above it. This
       // block answers a question most of the world never asks, and the whole
@@ -129,7 +129,7 @@ export function WorkingTimeRecordPanel({
           <select
             value={regime}
             onChange={(e) => onRegimeChange(e.target.value)}
-            className={fieldCls}
+            className={`${fieldCls} oe-select`}
           >
             <option value="">
               {t('field_time.working_time.regime_none', { defaultValue: 'None' })}
@@ -166,7 +166,7 @@ export function WorkingTimeRecordPanel({
         <Button
           variant="secondary"
           size="md"
-          icon={<Download size={15} />}
+          icon={<Download size={16} />}
           loading={downloading}
           disabled={!record || record.days.length === 0}
           onClick={() => void onExport()}
@@ -247,7 +247,7 @@ export function WorkingTimeRecordPanel({
 
           {!record.regime && (
             <p className="mt-2 flex items-start gap-1.5 text-2xs text-content-tertiary">
-              <AlertTriangle size={13} className="mt-px shrink-0 text-semantic-warning" />
+              <AlertTriangle size={14} className="mt-px shrink-0 text-semantic-warning" />
               {t('field_time.working_time.no_regime_hint', {
                 defaultValue:
                   'No recording regime is set on these days, so nothing is said about when each record was due or how long it has to be kept. The times themselves are still listed.',
@@ -256,34 +256,34 @@ export function WorkingTimeRecordPanel({
           )}
 
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[52rem] text-left text-xs">
-              <thead className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
+            <table className="oe-table oe-table-compact min-w-[52rem] text-xs">
+              <thead>
                 <tr>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.date', { defaultValue: 'Date' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.worker', { defaultValue: 'Worker / crew' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.employer', { defaultValue: 'Employer' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.start', { defaultValue: 'Start' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.end', { defaultValue: 'End' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.break', { defaultValue: 'Break' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.duration', { defaultValue: 'Duration' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th>
                     {t('field_time.working_time.recorded', { defaultValue: 'Recorded' })}
                   </th>
-                  <th className="py-2 font-medium">
+                  <th>
                     {t('field_time.working_time.retain_until', { defaultValue: 'Keep until' })}
                   </th>
                 </tr>
@@ -396,7 +396,7 @@ function Counter({
   tone?: 'warning';
 }) {
   return (
-    <div className="rounded-lg border border-border-light bg-surface-primary p-2.5">
+    <div className="rounded-lg border border-border-light bg-surface-primary p-3">
       <div className="text-2xs text-content-tertiary">{label}</div>
       <div
         className={`mt-0.5 text-lg font-semibold tabular-nums ${
