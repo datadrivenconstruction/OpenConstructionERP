@@ -7,8 +7,8 @@ describe('demo profiles', () => {
 
   it('offers five demos, the full platform first', () => {
     expect(DEMO_PROFILES).toHaveLength(5);
-    expect(DEMO_PROFILES[0].slug).toBe('full-showcase-riyadh');
-    expect(DEMO_PROFILES[0].groups).toBeNull();
+    expect(DEMO_PROFILES[0]!.slug).toBe('full-showcase-riyadh');
+    expect(DEMO_PROFILES[0]!.groups).toBeNull();
   });
 
   it('gives every demo its own accent and its own country line', () => {
