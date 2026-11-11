@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.core.decimal_types import FiniteDecimal
+from app.modules.catalog.schemas import TaxProfile
 
 
 # ── v3 §10 money serialisation helper ─────────────────────────────────────
@@ -150,7 +151,7 @@ class AssemblyParameter(BaseModel):
         return _serialise_money(v)
 
 
-class ComponentCreate(BaseModel):
+class ComponentCreate(TaxProfile):
     """Create a new assembly component.
 
     Accepts ``name`` as an alias for ``description`` and ``unit_rate`` as an
@@ -213,7 +214,7 @@ class ComponentCreate(BaseModel):
         return self.unit_rate if self.unit_rate is not None else Decimal("0")
 
 
-class ComponentUpdate(BaseModel):
+class ComponentUpdate(TaxProfile):
     """Partial update for an assembly component."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -257,6 +258,11 @@ class ComponentResponse(BaseModel):
     quantity: float
     # Issue #365 - the per-component quantity formula (NULL for a static line).
     quantity_formula: str | None = None
+    tax_code: str | None = None
+    tax_rate: str | None = None
+    tax_status: str | None = None
+    price_includes_tax: bool | None = None
+    input_tax_treatment: str | None = None
     unit: str
     unit_cost: Decimal = Decimal("0")
     # Decimal (not float) so JSON serialises an exact string like "90.0"
@@ -422,6 +428,43 @@ class AssemblyWithComponents(AssemblyResponse):
 
     components: list[ComponentResponse] = Field(default_factory=list)
     computed_total: float = 0.0
+
+
+# ── Component tax (issue #559) ───────────────────────────────────────────────
+
+
+class TaxRecalcRequest(BaseModel):
+    """Explicit re-pricing of component tax; ``as_of`` is the day registry rates are read for."""
+
+    as_of: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+
+
+class TaxFinding(BaseModel):
+    """One tax rule finding on a component."""
+
+    rule_id: str
+    severity: str
+    message: str
+    component_id: str = ""
+
+
+class TaxRecalcResponse(BaseModel):
+    """What an explicit tax recalculation did to one assembly."""
+
+    assembly_id: UUID
+    updated: bool
+    skipped_reason: str | None = None
+    tax_totals: dict[str, str] = Field(default_factory=dict)
+    total_rate: float = 0.0
+    findings: list[TaxFinding] = Field(default_factory=list)
+
+
+class ProjectTaxRecalcResponse(BaseModel):
+    """Bulk recalculation of a project's assemblies: approved ones are reported, never changed."""
+
+    updated: list[UUID] = Field(default_factory=list)
+    skipped_approved: list[UUID] = Field(default_factory=list)
+    skipped_other: list[UUID] = Field(default_factory=list)
 
 
 # ── Action schemas ───────────────────────────────────────────────────────────

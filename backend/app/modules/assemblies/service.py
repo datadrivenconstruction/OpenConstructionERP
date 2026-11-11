@@ -54,12 +54,14 @@ from app.modules.assemblies.schemas import (
     ExpandPreviewResponse,
     ParameterValidationResponse,
 )
+from app.modules.assemblies.tax_service import AssemblyTaxMixin, component_cost_with_tax
 from app.modules.boq.quantity_formula import (
     FormulaError,
     FormulaSyntaxError,
     evaluate_formula,
     validate_formula,
 )
+from app.modules.catalog.schemas import TaxProfile
 
 _logger_ev = logging.getLogger(__name__ + ".events")
 
@@ -81,6 +83,7 @@ logger = logging.getLogger(__name__)
 # raise a 400 with a translatable message when the cap is hit or a cycle
 # is detected.
 MAX_ASSEMBLY_DEPTH: int = 8
+_COMPONENT_TAX_FIELDS = ("tax_code", "tax_rate", "tax_status", "price_includes_tax", "input_tax_treatment")
 
 
 class AssemblyCycleError(HTTPException):
@@ -524,7 +527,7 @@ def _clean_tags(tags: Sequence[str]) -> list[str]:
     return list(dict.fromkeys(t.strip().lower() for t in tags if isinstance(t, str) and t.strip()))
 
 
-class AssemblyService:
+class AssemblyService(AssemblyTaxMixin):
     """Business logic for Assembly and Component operations."""
 
     def __init__(self, session: AsyncSession) -> None:
@@ -920,7 +923,13 @@ class AssemblyService:
             total=total,
             sort_order=max_order + 1,
             metadata_=comp_metadata,
+            tax_code=data.tax_code,
+            tax_rate=data.tax_rate,
+            tax_status=data.tax_status,
+            price_includes_tax=data.price_includes_tax,
+            input_tax_treatment=data.input_tax_treatment,
         )
+        await self.tax_price_new_component(assembly, component)
         component = await self.component_repo.create(component)
 
         # Recalculate assembly total
@@ -1028,6 +1037,7 @@ class AssemblyService:
             unit_cost=_str_to_float(new_unit_cost),
             metadata=new_metadata if isinstance(new_metadata, dict) else {},
         )
+        await self.tax_price_update(parent, component, fields)
 
         if fields:
             await self.component_repo.update_fields(component_id, **fields)
@@ -1111,6 +1121,11 @@ class AssemblyService:
                     factor=_str_to_float(comp.factor),
                     quantity=_str_to_float(comp.quantity),
                     quantity_formula=comp.quantity_formula,
+                    tax_code=comp.tax_code,
+                    tax_rate=comp.tax_rate,
+                    tax_status=comp.tax_status,
+                    price_includes_tax=comp.price_includes_tax,
+                    input_tax_treatment=comp.input_tax_treatment,
                     unit=comp.unit,
                     # v3 §10 - money as Decimal; Pydantic coerces str→Decimal
                     unit_cost=Decimal(str(comp.unit_cost or "0")),
@@ -1165,6 +1180,7 @@ class AssemblyService:
         new_total = _compute_assembly_total(components, assembly.bid_factor)
 
         await self.assembly_repo.update_fields(assembly_id, total_rate=new_total)
+        await self.refresh_tax_totals(assembly_id)
 
     # ── Parametric operations (Issue #365) ─────────────────────────────────
 
@@ -1511,7 +1527,9 @@ class AssemblyService:
                 computed_total = Decimal(total_str)
             except (InvalidOperation, ValueError):
                 return Decimal("0")
-            return computed_total if computed_total.is_finite() else Decimal("0")
+            if not computed_total.is_finite():
+                return Decimal("0")
+            return component_cost_with_tax(comp, computed_total, assembly.currency)
 
         comp_effective_totals: dict[str, Decimal] = {
             str(comp.id): _effective_component_total(comp) for comp in components
@@ -1703,6 +1721,14 @@ class AssemblyService:
                 # Issue #457 - present only when the assembly was built from a
                 # production norm; see the note above the dict.
                 **norm_provenance,
+                # Issue #559 - per-unit split of the cost into net, tax in cost and recoverable tax;
+                # present only for a project that uses component tax. The bill's own tax markups are separate.
+                **(
+                    {"component_tax": assembly_metadata["tax_totals"]}
+                    if isinstance(assembly_metadata.get("tax_totals"), dict)
+                    and await self.tax_context(assembly) is not None
+                    else {}
+                ),
             },
         )
 
@@ -1792,6 +1818,11 @@ class AssemblyService:
                 factor=comp.factor,
                 quantity=comp.quantity,
                 quantity_formula=comp.quantity_formula,
+                tax_code=comp.tax_code,
+                tax_rate=comp.tax_rate,
+                tax_status=comp.tax_status,
+                price_includes_tax=comp.price_includes_tax,
+                input_tax_treatment=comp.input_tax_treatment,
                 unit=comp.unit,
                 unit_cost=comp.unit_cost,
                 total=comp.total,
@@ -2055,6 +2086,13 @@ class AssemblyService:
                     "sort_order": comp.sort_order,
                     "cost_item_id": str(comp.cost_item_id) if comp.cost_item_id else None,
                     "metadata": dict(comp.metadata_) if comp.metadata_ else {},
+                    # Optional input-tax profile (issue #559): only written when set,
+                    # so an export of an assembly that does not use it is unchanged.
+                    **{
+                        name: getattr(comp, name)
+                        for name in ("tax_code", "tax_rate", "tax_status", "price_includes_tax", "input_tax_treatment")
+                        if getattr(comp, name) is not None
+                    },
                 }
             )
 
@@ -2126,6 +2164,17 @@ class AssemblyService:
             res_type_raw = comp_data.get("resource_type")
             res_type = str(res_type_raw).lower() if isinstance(res_type_raw, str) and res_type_raw else None
             comp_meta = comp_data.get("metadata") if isinstance(comp_data.get("metadata"), dict) else {}
+            # A breakdown carried in the file is a stale figure; it is recomputed when the project uses component tax.
+            comp_meta = {k: v for k, v in comp_meta.items() if k != "tax"}
+            try:
+                tax_profile = TaxProfile.model_validate(
+                    {n: comp_data[n] for n in _COMPONENT_TAX_FIELDS if comp_data.get(n) is not None}
+                ).model_dump()
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"components[{idx}]: invalid tax profile ({exc.errors()[0]['msg'] if hasattr(exc, 'errors') else exc})",
+                ) from exc
             sort_raw = comp_data.get("sort_order", idx)
             # Issue #365 - carry the per-component quantity formula (empty -> NULL).
             qf_raw = comp_data.get("quantity_formula")
@@ -2145,6 +2194,7 @@ class AssemblyService:
                     "unit": str(comp_data.get("unit", data.unit) or data.unit),
                     "metadata": comp_meta,
                     "sort_order": sort_raw if isinstance(sort_raw, int) else idx,
+                    "tax": tax_profile,
                 }
             )
 
@@ -2202,22 +2252,23 @@ class AssemblyService:
                 unit_cost=float(pc["unit_cost"]),
                 metadata=pc["metadata"],
             )
-            components_to_create.append(
-                Component(
-                    assembly_id=assembly.id,
-                    cost_item_id=pc["cost_item_id"],
-                    description=pc["description"],
-                    resource_type=pc["resource_type"],
-                    factor=str(pc["factor"]),
-                    quantity=str(pc["quantity"]),
-                    quantity_formula=pc["quantity_formula"],
-                    unit=pc["unit"],
-                    unit_cost=str(pc["unit_cost"]),
-                    total=total,
-                    sort_order=pc["sort_order"],
-                    metadata_=pc["metadata"],
-                )
+            imported = Component(
+                assembly_id=assembly.id,
+                cost_item_id=pc["cost_item_id"],
+                description=pc["description"],
+                resource_type=pc["resource_type"],
+                factor=str(pc["factor"]),
+                quantity=str(pc["quantity"]),
+                quantity_formula=pc["quantity_formula"],
+                unit=pc["unit"],
+                unit_cost=str(pc["unit_cost"]),
+                total=total,
+                sort_order=pc["sort_order"],
+                metadata_=pc["metadata"],
+                **pc["tax"],
             )
+            await self.tax_price_new_component(assembly, imported)
+            components_to_create.append(imported)
 
         if components_to_create:
             await self.component_repo.bulk_create(components_to_create)

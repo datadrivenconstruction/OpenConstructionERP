@@ -19,10 +19,10 @@ so new integrations can use the unambiguous name. The old key stays in
 
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.core.decimal_types import FiniteDecimal
 
@@ -46,7 +46,44 @@ def _serialise_money(v: Decimal | None) -> str | None:
 # ── Create ────────────────────────────────────────────────────────────────
 
 
-class CatalogResourceCreate(BaseModel):
+class TaxProfile(BaseModel):
+    """Optional input-tax profile of a resource or an assembly component (issue #559).
+
+    Every field is optional. ``tax_rate`` is a percentage (``"18"``), ``tax_code`` names a row of the
+    tax registry resolved for the project's country, and a missing ``input_tax_treatment`` means the
+    project default.
+    """
+
+    tax_code: str | None = Field(default=None, max_length=50)
+    tax_rate: str | None = Field(default=None, max_length=20)
+    tax_status: Literal["taxable", "exempt", "out_of_scope"] | None = None
+    price_includes_tax: bool | None = None
+    input_tax_treatment: Literal["recoverable", "cost_incorporated"] | None = None
+
+    @field_validator("tax_rate", mode="before")
+    @classmethod
+    def _check_tax_rate(cls, v: Any) -> str | None:
+        if v is None or str(v).strip() == "":
+            return None
+        try:
+            rate = Decimal(str(v).strip())
+        except InvalidOperation as exc:
+            raise ValueError("tax_rate must be a number between 0 and 100") from exc
+        if not rate.is_finite() or rate < 0 or rate > 100:
+            raise ValueError("tax_rate must be between 0 and 100")
+        return str(rate)
+
+    @field_validator("tax_code", mode="before")
+    @classmethod
+    def _blank_code_is_none(cls, v: Any) -> Any:
+        return None if v is None or str(v).strip() == "" else str(v).strip()
+
+
+class CatalogResourceTaxUpdate(TaxProfile):
+    """Replace the tax profile of one catalog resource; omitted fields are cleared."""
+
+
+class CatalogResourceCreate(TaxProfile):
     """Create a new catalog resource."""
 
     resource_code: str = Field(..., min_length=1, max_length=100)
@@ -144,6 +181,11 @@ class CatalogResourceResponse(BaseModel):
     source: str
     region: str | None
     specifications: dict[str, Any]
+    tax_code: str | None = None
+    tax_rate: str | None = None
+    tax_status: str | None = None
+    price_includes_tax: bool | None = None
+    input_tax_treatment: str | None = None
     is_active: bool
     metadata: dict[str, Any] = Field(alias="metadata_")
     created_at: datetime

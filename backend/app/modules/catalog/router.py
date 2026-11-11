@@ -58,6 +58,7 @@ from app.modules.catalog.fx_view import CatalogFxView
 from app.modules.catalog.schemas import (
     CatalogResourceCreate,
     CatalogResourceResponse,
+    CatalogResourceTaxUpdate,
     CatalogSearchResponse,
     CatalogStatsResponse,
 )
@@ -1178,6 +1179,18 @@ async def get_catalog_resource(
 ) -> CatalogResourceResponse:
     """Get a single catalog resource by ID."""
     resource = await service.get_resource(resource_id)
+    return CatalogResourceResponse.model_validate(resource)
+
+
+@router.patch("/{resource_id}/tax/", response_model=CatalogResourceResponse)
+async def update_catalog_resource_tax(
+    resource_id: uuid.UUID,
+    data: CatalogResourceTaxUpdate,
+    service: CatalogResourceService = Depends(_get_service),
+    _user: str = Depends(RequirePermission("catalog.create")),
+) -> CatalogResourceResponse:
+    """Set the optional input-tax profile of a catalog resource."""
+    resource = await service.update_tax_profile(resource_id, data)
     return CatalogResourceResponse.model_validate(resource)
 
 

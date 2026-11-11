@@ -114,7 +114,49 @@ export interface ExpandPreviewResponse {
   errors: ParameterError[];
 }
 
-export interface AssemblyComponent {
+export type TaxStatus = 'taxable' | 'exempt' | 'out_of_scope';
+export type InputTaxTreatment = 'recoverable' | 'cost_incorporated';
+
+/** Optional input-tax profile of a component or catalog resource (issue #559). */
+export interface TaxProfile {
+  tax_code?: string | null;
+  /** Percentage as a string, e.g. "18". */
+  tax_rate?: string | null;
+  tax_status?: TaxStatus | null;
+  price_includes_tax?: boolean | null;
+  /** null = the project default. */
+  input_tax_treatment?: InputTaxTreatment | null;
+}
+
+/** Per-assembly totals, per unit of the assembly, as exact decimal strings. */
+export interface AssemblyTaxTotals {
+  net: string;
+  tax: string;
+  tax_in_cost: string;
+  tax_recoverable: string;
+  cost: string;
+  gross_outlay: string;
+  currency?: string;
+  as_of?: string;
+}
+
+export interface TaxFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  component_id: string;
+}
+
+export interface TaxRecalcResult {
+  assembly_id: string;
+  updated: boolean;
+  skipped_reason: string | null;
+  tax_totals: Partial<AssemblyTaxTotals>;
+  total_rate: number;
+  findings: TaxFinding[];
+}
+
+export interface AssemblyComponent extends TaxProfile {
   id: string;
   assembly_id: string;
   cost_item_id: string | null;
@@ -153,6 +195,8 @@ export interface Assembly {
   component_count: number;
   usage_count: number;
   tags: string[];
+  /** Free-form; `tax_totals` is set when the project uses component tax, `status: 'approved'` freezes prices. */
+  metadata?: Record<string, unknown>;
   // Parametric assembly parameters (Issue #365). Empty for classic recipes.
   // Flows into AssemblyWithComponents (extends Assembly) so the editor can
   // read the parameter graph alongside the components.
@@ -210,12 +254,13 @@ export interface CreateAssemblyData {
   currency?: string;
   bid_factor?: number;
   project_id?: string;
+  metadata?: Record<string, unknown>;
   // Issue #365 — create/update carry the parameter graph. For input/constant
   // send a numeric `value`; for calculated send a non-empty `formula`.
   parameters?: AssemblyParameter[];
 }
 
-export interface CreateComponentData {
+export interface CreateComponentData extends TaxProfile {
   cost_item_id?: string;
   catalog_resource_id?: string;
   description: string;
@@ -456,6 +501,9 @@ export const assembliesApi = {
     apiPost<Assembly>('/v1/assemblies/import/', { assembly: data }),
   updateTags: (assemblyId: string, tags: string[]) =>
     apiPatch<Assembly>(`/v1/assemblies/${assemblyId}/tags/`, { tags }).then(normalizeAssembly),
+  recalculateTax: (id: string, asOf?: string) =>
+    apiPost<TaxRecalcResult>(`/v1/assemblies/${id}/recalculate-tax/`, asOf ? { as_of: asOf } : {}),
+  taxFindings: (id: string) => apiGet<TaxFinding[]>(`/v1/assemblies/${id}/tax-findings/`),
   getStats: () => apiGet<AssemblyStats>(`/v1/assemblies/stats/`),
 
   // Assembly Library templates

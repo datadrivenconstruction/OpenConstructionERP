@@ -118,6 +118,15 @@ class Component(Base):
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
     unit_cost: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # ── Optional input-tax profile (issue #559; overrides the catalog resource) ─────────────────────────
+    # All NULL = unclassified: no component tax is computed for the line.
+    # ``tax_rate`` is a percentage string; ``tax_code`` names a registry row
+    # (i18n_foundation TaxConfiguration.tax_code) resolved for the project's country.
+    tax_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    tax_rate: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    tax_status: Mapped[str | None] = mapped_column(String(20), nullable=True)  # taxable|exempt|out_of_scope
+    price_includes_tax: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    input_tax_treatment: Mapped[str | None] = mapped_column(String(20), nullable=True)  # recoverable|cost_incorporated
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

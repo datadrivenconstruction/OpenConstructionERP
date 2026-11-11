@@ -50,6 +50,10 @@ export interface Project {
   /** ISO 3166-2 state or province (e.g. US-CA). Rules set below the country,
    *  such as a cap on a home-improvement deposit, read it. */
   subdivision_code?: string | null;
+  /** Component-level input tax on assemblies (off by default). */
+  component_tax_enabled?: boolean;
+  /** Default for a component that does not say: recoverable or cost_incorporated. */
+  component_tax_treatment?: 'recoverable' | 'cost_incorporated';
   /** Whether the client is a public buyer; null when not recorded. */
   works?: ProjectWorks | null;
   /** Team-wide project colour "#rrggbb"; null derives one from the id. */
@@ -106,6 +110,8 @@ export interface CreateProjectData {
   country_code?: string | null;
   /** ISO 3166-2 state or province, e.g. US-CA; null clears it. */
   subdivision_code?: string | null;
+  component_tax_enabled?: boolean;
+  component_tax_treatment?: 'recoverable' | 'cost_incorporated';
   /** Public buyer or private client; omitted or null when not recorded. */
   works?: ProjectWorks | null;
   /** http(s), file, smb or UNC link to the project folder; null clears it. */

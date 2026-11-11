@@ -38,6 +38,10 @@ import { fmtPercent } from '@/shared/lib/formatters';
 import { currencyFractionDigits } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { projectsApi } from '@/features/projects/api';
+import { ComponentTaxFields } from './ComponentTaxFields';
+import { AssemblyTaxPanel } from './AssemblyTaxPanel';
+import { componentTaxSplit } from './componentTax';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { unitGlyph, unitLabel } from '@/shared/lib/unitLabels';
@@ -97,6 +101,16 @@ export function AssemblyEditorPage() {
     queryFn: () => assembliesApi.get(assemblyId!),
     enabled: !!assemblyId,
   });
+
+  // Component input tax is a per-project switch (issue #559); without it the
+  // editor shows no tax controls and prices exactly as before.
+  const taxProjectId = assembly?.project_id ?? null;
+  const { data: taxProject } = useQuery({
+    queryKey: ['project', taxProjectId],
+    queryFn: () => projectsApi.get(taxProjectId!),
+    enabled: !!taxProjectId,
+  });
+  const taxEnabled = taxProject?.component_tax_enabled === true;
 
   const addComponentMutation = useMutation({
     mutationFn: (data: CreateComponentData) =>
@@ -610,6 +624,10 @@ export function AssemblyEditorPage() {
           recipe, then reference them from each line's quantity formula. */}
       <ParametersPanel assemblyId={assemblyId!} parameters={parameters} />
 
+      {taxEnabled && (
+        <AssemblyTaxPanel assembly={assembly} canEdit={canEditAssembly} fmt={fmt} />
+      )}
+
       {/* Two-column workspace: components table on the left, M/L/E
           breakdown summary on the right. The summary is sticky so it
           stays visible as the user scrolls a long component list — this
@@ -698,6 +716,7 @@ export function AssemblyEditorPage() {
                     if (canEditAssembly) deleteComponentMutation.mutate(component.id);
                   }}
                   fmt={fmt}
+                  taxEnabled={taxEnabled}
                 />
               ))}
               {components.length === 0 && (
@@ -1071,6 +1090,7 @@ export function ComponentRow({
   onUpdate,
   onDelete,
   fmt,
+  taxEnabled = false,
 }: {
   component: AssemblyComponent;
   isDragOver: boolean;
@@ -1092,6 +1112,8 @@ export function ComponentRow({
   onUpdate: (data: Partial<CreateComponentData>) => void;
   onDelete: () => void;
   fmt: (n: number) => string;
+  /** Show the input-tax fields and the net / tax split (project switch, issue #559). */
+  taxEnabled?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const { confirm, ...confirmProps } = useConfirm();
@@ -1298,6 +1320,18 @@ export function ComponentRow({
       {/* Total (computed) */}
       <td className="px-4 py-2.5 text-right font-semibold text-content-primary tabular-nums">
         {fmt(component.total)}
+        {taxEnabled && (() => {
+          const split = componentTaxSplit(component);
+          return split ? (
+            <div className="text-2xs font-normal text-content-tertiary" data-testid="component-tax-split">
+              {t('assemblies.tax.split', {
+                defaultValue: 'net {{net}} / tax {{tax}}',
+                net: fmt(Number(split.net)),
+                tax: fmt(Number(split.tax)),
+              })}
+            </div>
+          ) : null;
+        })()}
       </td>
 
       {/* Row actions: details toggle + delete. Details opens a sub-row
@@ -1373,6 +1407,7 @@ export function ComponentRow({
               }}
               span="sm:col-span-2 lg:col-span-4"
             />
+            {taxEnabled && <ComponentTaxFields profile={component} onChange={(patch) => onUpdate(patch)} />}
             {resType === 'material' && (
               <>
                 <DetailField

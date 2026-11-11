@@ -81,6 +81,7 @@ async def _on_cost_item_updated(event: Event) -> None:
             # Step 1: find every Component referencing this cost item
             comp_stmt = select(Component).where(Component.cost_item_id == item_id)
             components = list((await session.execute(comp_stmt)).scalars().all())
+            components = await _without_tax_managed(session, components)
             if not components:
                 return
 
@@ -151,6 +152,15 @@ async def _on_cost_item_updated(event: Event) -> None:
         )
 
 
+async def _without_tax_managed(session, components: list[Component]) -> list[Component]:
+    """Drop components of projects that use component tax: their re-pricing is the explicit
+    tax recalculation, which also keeps approved assemblies untouched (issue #559)."""
+    from app.modules.assemblies.tax_service import tax_managed_assembly_ids
+
+    managed = await tax_managed_assembly_ids(session, {c.assembly_id for c in components})
+    return [c for c in components if c.assembly_id not in managed] if managed else components
+
+
 async def _recalc_assemblies(session, assembly_ids: set[uuid.UUID]) -> None:
     """Re-run ``total_rate = sum(component totals) * bid_factor``.
 
@@ -211,6 +221,11 @@ async def refresh_region(session, region: str) -> tuple[int, int, int]:
         .where(CostItem.region == region)
     )
     rows = list((await session.execute(stmt)).all())
+    if rows:
+        from app.modules.assemblies.tax_service import tax_managed_assembly_ids
+
+        managed = await tax_managed_assembly_ids(session, {c.assembly_id for c, _ in rows})
+        rows = [(c, r) for c, r in rows if c.assembly_id not in managed]
     if not rows:
         return (0, 0, 0)
 
@@ -339,6 +354,7 @@ async def _on_catalog_resource_updated(event: Event) -> None:
                 comp_stmt = select(Component).where(Component.catalog_resource_id.isnot(None))
 
             components = list((await session.execute(comp_stmt)).scalars().all())
+            components = await _without_tax_managed(session, components)
             if not components:
                 return
 

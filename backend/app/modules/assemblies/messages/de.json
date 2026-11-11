@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: Der Steuersatz von {label} ist nicht verwendbar: {detail}.",
+      "suggestion": "Geben Sie einen Satz zwischen 0 und 100 ein oder wählen Sie einen Steuercode, der für das Land des Projekts zum Preisstichtag hinterlegt ist."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} ist steuerpflichtig, hat aber weder Steuersatz noch Steuercode.",
+      "suggestion": "Geben Sie den Satz ein, wählen Sie einen Steuercode oder setzen Sie den Status auf steuerfrei oder nicht steuerbar."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} ist steuerfrei, trägt aber einen Steuersatz von {rate} %, der ignoriert wird.",
+      "suggestion": "Löschen Sie den Satz oder setzen Sie den Status auf steuerpflichtig."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: Der Preis von {label} enthält Steuer, aber es ist kein Satz bekannt, um sie herauszurechnen.",
+      "suggestion": "Geben Sie den Satz oder einen Steuercode ein oder entfernen Sie das Häkchen bei Preis inklusive Steuer."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} steht mit {unit_cost} im Preis, der Stammpreis ist {master}.",
+      "suggestion": "Starten Sie die Steuerneuberechnung, um den Stammpreis zu übernehmen, oder genehmigen Sie die Baugruppe, um ihren Preis zu halten."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Für den Steuercode {code} von {label} gilt am {date} kein Satz.",
+      "suggestion": "Wählen Sie den Preisstichtag, für den der Satz gilt, oder geben Sie den Satz von Hand ein."
+    }
+  }
+}

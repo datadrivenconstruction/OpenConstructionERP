@@ -140,6 +140,13 @@ class Project(Base):
     # Victoria a domestic-building one. NULL means not recorded, and a rule
     # scoped to a subdivision then says it could not run rather than guess.
     subdivision_code: Mapped[str | None] = mapped_column(String(6), nullable=True, default=None)
+    # Optional component-level input tax on assemblies (issue #559). Off by default: an
+    # assembly then prices exactly as before. ``component_tax_treatment`` is the project's
+    # default for a component that does not say (recoverable | cost_incorporated).
+    component_tax_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    component_tax_treatment: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="recoverable", server_default="recoverable"
+    )
     # The company in the group that owns the project, a row of the legal
     # entities module. NULL means none was named and the default entity
     # answers. No database foreign key: legal entities is a module that can be

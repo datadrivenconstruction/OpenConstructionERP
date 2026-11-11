@@ -34,6 +34,7 @@ from app.modules.catalog.repository import CatalogResourceRepository
 from app.modules.catalog.schemas import (
     CatalogCategoryStat,
     CatalogResourceCreate,
+    CatalogResourceTaxUpdate,
     CatalogSearchQuery,
     CatalogStatsResponse,
     CatalogTypeStat,
@@ -146,6 +147,11 @@ class CatalogResourceService:
             source=data.source,
             region=data.region,
             specifications=data.specifications,
+            tax_code=data.tax_code,
+            tax_rate=data.tax_rate,
+            tax_status=data.tax_status,
+            price_includes_tax=data.price_includes_tax,
+            input_tax_treatment=data.input_tax_treatment,
             metadata_=data.metadata,
         )
         resource = await self.repo.create(resource)
@@ -170,6 +176,12 @@ class CatalogResourceService:
                 detail="Catalog resource not found",
             )
         return resource
+
+    async def update_tax_profile(self, resource_id: uuid.UUID, data: CatalogResourceTaxUpdate) -> CatalogResource:
+        """Replace a resource's tax profile. Assemblies pick it up on their next explicit tax recalculation."""
+        await self.get_resource(resource_id)
+        await self.repo.update_fields(resource_id, **data.model_dump())
+        return await self.get_resource(resource_id)
 
     async def search_resources(self, query: CatalogSearchQuery) -> tuple[list[CatalogResource], int]:
         """Search catalog resources with filters and pagination."""

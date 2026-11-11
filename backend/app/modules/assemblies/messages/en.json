@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: The tax rate of {label} is not usable: {detail}.",
+      "suggestion": "Enter a rate between 0 and 100, or pick a tax code that is on file for the project country on the pricing date."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} is marked taxable but has neither a tax rate nor a tax code.",
+      "suggestion": "Enter the rate, pick a tax code, or change the status to exempt or out of scope."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} is exempt but carries a tax rate of {rate} %, which is ignored.",
+      "suggestion": "Clear the rate or change the status to taxable."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: The price of {label} includes tax, but no rate is known to take it out.",
+      "suggestion": "Enter the rate or a tax code, or untick that the price includes tax."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} is priced at {unit_cost}, the master price is {master}.",
+      "suggestion": "Run the tax recalculation to take the master price, or approve the assembly to keep its price."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: Tax code {code} of {label} has no rate in force on {date}.",
+      "suggestion": "Pick the pricing date the rate applies to, or enter the rate by hand."
+    }
+  }
+}

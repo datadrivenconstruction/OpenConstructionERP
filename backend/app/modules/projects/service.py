@@ -972,6 +972,9 @@ class ProjectService:
         project = await self.get_project(project_id)
 
         fields = data.model_dump(exclude_unset=True)
+        for non_null in ("component_tax_enabled", "component_tax_treatment"):
+            if fields.get(non_null, "") is None:
+                fields.pop(non_null)
 
         # A client that sends back what it read may carry the owning entity
         # unchanged, which is harmless. A real change goes through the legal

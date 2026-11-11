@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001: La tasa de impuesto de {label} no es utilizable: {detail}.",
+      "suggestion": "Introduzca una tasa entre 0 y 100 o elija un código de impuesto registrado para el país del proyecto en la fecha de precio."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002: {label} está gravado pero no tiene tasa ni código de impuesto.",
+      "suggestion": "Introduzca la tasa, elija un código de impuesto o cambie el estado a exento o fuera de alcance."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003: {label} está exento pero lleva una tasa de {rate} %, que se ignora.",
+      "suggestion": "Borre la tasa o cambie el estado a gravado."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004: El precio de {label} incluye impuesto, pero no se conoce la tasa para extraerlo.",
+      "suggestion": "Introduzca la tasa o un código de impuesto, o desmarque precio con impuesto incluido."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005: {label} está valorado en {unit_cost}, el precio maestro es {master}.",
+      "suggestion": "Ejecute el recálculo de impuestos para tomar el precio maestro, o apruebe el conjunto para conservar su precio."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006: El código de impuesto {code} de {label} no tiene tasa vigente el {date}.",
+      "suggestion": "Elija la fecha de precio en que la tasa se aplica, o introduzca la tasa a mano."
+    }
+  }
+}

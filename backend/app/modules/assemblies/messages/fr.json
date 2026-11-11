@@ -1,0 +1,28 @@
+{
+  "component_tax": {
+    "rate_invalid": {
+      "fail": "TAX-001 : Le taux de taxe de {label} est inutilisable : {detail}.",
+      "suggestion": "Saisissez un taux entre 0 et 100 ou choisissez un code de taxe enregistré pour le pays du projet à la date de prix."
+    },
+    "taxable_without_rate": {
+      "fail": "TAX-002 : {label} est taxable mais n'a ni taux ni code de taxe.",
+      "suggestion": "Saisissez le taux, choisissez un code de taxe ou passez le statut à exonéré ou hors champ."
+    },
+    "exempt_with_rate": {
+      "fail": "TAX-003 : {label} est exonéré mais porte un taux de {rate} %, qui est ignoré.",
+      "suggestion": "Effacez le taux ou passez le statut à taxable."
+    },
+    "inclusive_without_rate": {
+      "fail": "TAX-004 : Le prix de {label} inclut la taxe, mais aucun taux n'est connu pour l'en extraire.",
+      "suggestion": "Saisissez le taux ou un code de taxe, ou décochez prix taxe incluse."
+    },
+    "master_price_drift": {
+      "fail": "TAX-005 : {label} est chiffré à {unit_cost}, le prix de référence est {master}.",
+      "suggestion": "Lancez le recalcul de la taxe pour reprendre le prix de référence, ou approuvez l'ouvrage pour conserver son prix."
+    },
+    "rate_outside_validity": {
+      "fail": "TAX-006 : Le code de taxe {code} de {label} n'a pas de taux en vigueur au {date}.",
+      "suggestion": "Choisissez la date de prix à laquelle le taux s'applique, ou saisissez le taux à la main."
+    }
+  }
+}

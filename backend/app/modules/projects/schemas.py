@@ -4,7 +4,7 @@
 
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
@@ -649,6 +649,9 @@ class ProjectUpdate(BaseModel):
     fx_rates: list[dict[str, Any]] | None = None
     default_vat_rate: str | None = Field(default=None, max_length=10)
     custom_units: list[str] | None = None
+    # Component-level input tax on assemblies (issue #559).
+    component_tax_enabled: bool | None = None
+    component_tax_treatment: Literal["recoverable", "cost_incorporated"] | None = None
 
     # mode="before" so we get the raw input before Pydantic coerces it to
     # ``list[dict[str, Any]]`` - this lets us also accept the convenience
@@ -776,6 +779,8 @@ class ProjectResponse(BaseModel):
     address: dict[str, Any] | None = None
     country_code: str | None = None
     subdivision_code: str | None = None
+    component_tax_enabled: bool = False
+    component_tax_treatment: str = "recoverable"
     # Set through the legal entities module, read-only here.
     legal_entity_id: UUID | None = None
     works: str | None = None

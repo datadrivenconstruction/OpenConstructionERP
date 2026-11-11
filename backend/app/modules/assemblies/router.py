@@ -49,7 +49,11 @@ from app.modules.assemblies.schemas import (
     ExpandPreviewRequest,
     ExpandPreviewResponse,
     ParameterValidationResponse,
+    ProjectTaxRecalcResponse,
     ReorderComponentsRequest,
+    TaxFinding,
+    TaxRecalcRequest,
+    TaxRecalcResponse,
 )
 from app.modules.assemblies.service import AssemblyService, _compute_component_total, _str_to_float
 
@@ -211,6 +215,11 @@ def _component_to_response(comp: object) -> ComponentResponse:
         factor=_str_to_float(comp.factor),  # type: ignore[attr-defined]
         quantity=_str_to_float(comp.quantity),  # type: ignore[attr-defined]
         quantity_formula=getattr(comp, "quantity_formula", None),  # type: ignore[attr-defined]
+        tax_code=getattr(comp, "tax_code", None),  # type: ignore[attr-defined]
+        tax_rate=getattr(comp, "tax_rate", None),  # type: ignore[attr-defined]
+        tax_status=getattr(comp, "tax_status", None),  # type: ignore[attr-defined]
+        price_includes_tax=getattr(comp, "price_includes_tax", None),  # type: ignore[attr-defined]
+        input_tax_treatment=getattr(comp, "input_tax_treatment", None),  # type: ignore[attr-defined]
         unit=comp.unit,  # type: ignore[attr-defined]
         unit_cost=_str_to_float(comp.unit_cost),  # type: ignore[attr-defined]
         # v3 §10 - money as Decimal so the field_serializer emits an exact
@@ -670,6 +679,69 @@ async def validate_assembly_rules(
         "warnings": [finding(r) for r in report.warnings],
         "checked": len(report.results),
     }
+
+
+# ── Component input tax (issue #559) ─────────────────────────────────────────
+
+
+@router.post(
+    "/recalculate-tax/",
+    response_model=ProjectTaxRecalcResponse,
+    dependencies=[Depends(RequirePermission("assemblies.update"))],
+)
+async def recalculate_project_tax(
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    data: TaxRecalcRequest | None = None,
+    service: AssemblyService = Depends(_get_service),
+) -> ProjectTaxRecalcResponse:
+    """Re-price every unapproved assembly of a project; approved ones are listed and left unchanged."""
+    if not (payload and payload.get("role") == "admin"):
+        from app.modules.projects.repository import ProjectRepository
+
+        project = await ProjectRepository(session).get_by_id(project_id)
+        if project is None or str(getattr(project, "owner_id", "")) != str(user_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return await service.recalculate_project_tax(project_id, data.as_of if data else None)
+
+
+@router.post(
+    "/{assembly_id}/recalculate-tax/",
+    response_model=TaxRecalcResponse,
+    dependencies=[Depends(RequirePermission("assemblies.update"))],
+)
+async def recalculate_assembly_tax(
+    assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    data: TaxRecalcRequest | None = None,
+    service: AssemblyService = Depends(_get_service),
+) -> TaxRecalcResponse:
+    """Take the master prices and apply component tax once; 409 for an approved assembly."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    return await service.recalculate_tax(assembly_id, data.as_of if data else None)
+
+
+@router.get(
+    "/{assembly_id}/tax-findings/",
+    response_model=list[TaxFinding],
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def assembly_tax_findings(
+    assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> list[TaxFinding]:
+    """Findings of the component-tax rules TAX-001..006; empty when the project does not use component tax."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    assembly = await service.get_assembly(assembly_id)
+    ctx = await service.tax_context(assembly)
+    return await service.tax_findings(assembly, ctx) if ctx is not None else []
 
 
 @router.post(

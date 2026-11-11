@@ -19,9 +19,13 @@ from __future__ import annotations
 from decimal import Decimal
 
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
-from app.core.validation.money_rules import MoneyRule, currency_of, rows, section, to_dec
+from app.core.validation.money_rules import MoneyRule, currency_of, locale_of, rows, section, to_dec
+from app.modules.assemblies.messages import translate as tax_translate
 
 ASSEMBLIES_RULE_SET = "assemblies"
+#: Component input-tax rules (TAX-001..006). They read ``tax`` on each component row, which the service
+#: only supplies for a project that switched component tax on, so they stay silent everywhere else.
+ASSEMBLIES_TAX_RULE_SET = "assemblies_tax"
 
 #: A waste, productivity or difficulty factor above this is a slipped decimal (1.15 typed as 115).
 MAX_COMPONENT_FACTOR = Decimal("10")
@@ -152,6 +156,147 @@ class AssemblyApplicableRule(_AssemblyRule):
         return [self.ok(ref)]
 
 
+class _TaxRule(MoneyRule):
+    """Base of the component-tax rules: one finding per component row that has a tax profile."""
+
+    standard = ASSEMBLIES_TAX_RULE_SET
+    tax_key = ""
+
+    def _finding(self, context: ValidationContext, comp: dict, **params: object) -> RuleResult:
+        locale = locale_of(context)
+        label = str(comp.get("description") or comp.get("id") or "")
+        text_params = {"label": label, **params}
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.name,
+            severity=self.severity,
+            category=self.category,
+            passed=False,
+            message=tax_translate(f"component_tax.{self.tax_key}.fail", locale=locale, **text_params),
+            element_ref=str(comp.get("id") or ""),
+            suggestion=tax_translate(f"component_tax.{self.tax_key}.suggestion", locale=locale),
+            details={k: str(v) for k, v in text_params.items()},
+        )
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        raise NotImplementedError
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out: list[RuleResult] = []
+        for comp in rows(context, "components"):
+            tax = comp.get("tax")
+            if not isinstance(tax, dict) or not tax.get("classified"):
+                continue
+            found = self.check(context, comp, tax)
+            if found is not None:
+                out.append(found)
+        return out or [self.ok(_ref(context))]
+
+
+class TaxRateValidRule(_TaxRule):
+    """TAX-001: a stated rate lies in 0..100 and a stated tax code resolves to a rate."""
+
+    rule_id = "assemblies.tax_001_rate_valid"
+    name = "Tax rate is valid"
+    description = "Rate between 0 and 100, tax code resolved"
+    tax_key = "rate_invalid"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        raw = to_dec(tax.get("explicit_rate"))
+        if raw is not None and not Decimal("0") <= raw <= Decimal("100"):
+            return self._finding(context, comp, detail=f"{raw} %")
+        if tax.get("code") and tax.get("reason") in ("unknown_code", "no_country", "unresolved", "invalid_rate"):
+            return self._finding(context, comp, detail=f"{tax['code']} / {tax['reason']}")
+        return None
+
+
+class TaxableNeedsRateRule(_TaxRule):
+    """TAX-002: a taxable component carries a rate or a tax code."""
+
+    rule_id = "assemblies.tax_002_taxable_needs_rate"
+    name = "Taxable component has a rate or code"
+    description = "Taxable without rate and code is an error"
+    tax_key = "taxable_without_rate"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        if tax.get("status") == "taxable" and tax.get("reason") == "no_rate":
+            return self._finding(context, comp)
+        return None
+
+
+class ExemptWithRateRule(_TaxRule):
+    """TAX-003: an exempt component states no positive rate."""
+
+    rule_id = "assemblies.tax_003_exempt_with_rate"
+    name = "Exempt component has no rate"
+    severity = Severity.WARNING
+    description = "Exempt with a rate above zero is flagged"
+    tax_key = "exempt_with_rate"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        rate = to_dec(tax.get("explicit_rate"))
+        if tax.get("status") == "exempt" and rate is not None and rate > 0:
+            return self._finding(context, comp, rate=rate)
+        return None
+
+
+class InclusiveNeedsRateRule(_TaxRule):
+    """TAX-004: a tax-inclusive price has a rate to take the tax out with."""
+
+    rule_id = "assemblies.tax_004_inclusive_needs_rate"
+    name = "Inclusive price has a rate"
+    description = "A price that includes tax needs a rate"
+    tax_key = "inclusive_without_rate"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        if tax.get("includes_tax") and tax.get("status") not in ("exempt", "out_of_scope") and tax.get("reason"):
+            return self._finding(context, comp)
+        return None
+
+
+class MasterPriceDriftRule(_TaxRule):
+    """TAX-005: an unapproved assembly still carries the master price it was built from."""
+
+    rule_id = "assemblies.tax_005_master_price_drift"
+    name = "Component follows the master price"
+    severity = Severity.INFO
+    description = "Unapproved assembly price differs from the master price"
+    tax_key = "master_price_drift"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        if section(context, "assembly").get("approved"):
+            return None
+        master, own = to_dec(tax.get("master_price")), to_dec(tax.get("unit_cost"))
+        if master is not None and own is not None and master != own:
+            return self._finding(context, comp, unit_cost=own, master=master)
+        return None
+
+
+class RegistryRateInForceRule(_TaxRule):
+    """TAX-006: the registry has a rate for the tax code on the pricing date."""
+
+    rule_id = "assemblies.tax_006_rate_in_force"
+    name = "Registry rate is in force"
+    severity = Severity.WARNING
+    description = "A tax code whose rate is not valid on the pricing date is flagged"
+    tax_key = "rate_outside_validity"
+
+    def check(self, context: ValidationContext, comp: dict, tax: dict) -> RuleResult | None:
+        if tax.get("in_force") is False:
+            return self._finding(context, comp, code=tax.get("code") or "", date=tax.get("on_date") or "")
+        return None
+
+
+ASSEMBLIES_TAX_RULES = (
+    TaxRateValidRule,
+    TaxableNeedsRateRule,
+    ExemptWithRateRule,
+    InclusiveNeedsRateRule,
+    MasterPriceDriftRule,
+    RegistryRateInForceRule,
+)
+
+
 ASSEMBLIES_RULES = (
     ComponentFactorsRule,
     BidFactorPlausibleRule,
@@ -165,6 +310,14 @@ def register_assemblies_validation_rules() -> None:
     """Register the assembly rules with the platform rule registry."""
     for rule_class in ASSEMBLIES_RULES:
         rule_registry.register(rule_class(), [ASSEMBLIES_RULE_SET])
+    for rule_class in ASSEMBLIES_TAX_RULES:
+        rule_registry.register(rule_class(), [ASSEMBLIES_TAX_RULE_SET])
 
 
-__all__ = ["ASSEMBLIES_RULES", "ASSEMBLIES_RULE_SET", "register_assemblies_validation_rules"]
+__all__ = [
+    "ASSEMBLIES_RULES",
+    "ASSEMBLIES_RULE_SET",
+    "ASSEMBLIES_TAX_RULES",
+    "ASSEMBLIES_TAX_RULE_SET",
+    "register_assemblies_validation_rules",
+]

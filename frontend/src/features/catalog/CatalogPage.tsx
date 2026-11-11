@@ -38,10 +38,13 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { catalogGuide } from './catalogGuide';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { ComponentTaxFields } from '@/features/assemblies/ComponentTaxFields';
+import type { TaxProfile } from '@/features/assemblies/api';
+import { projectsApi } from '@/features/projects/api';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fmtList, fmtPercent, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
-import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
 import {
   assembliesApi,
@@ -2893,6 +2896,16 @@ function CreateResourceModal({
     base_price: '',
     currency: preferredCurrency,
   });
+  // Optional input-tax profile (issue #559), offered only while the open project
+  // uses component tax; assemblies pick it up as the default of their components.
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const { data: activeProject } = useQuery({
+    queryKey: ['project', activeProjectId],
+    queryFn: () => projectsApi.get(activeProjectId!),
+    enabled: !!activeProjectId,
+  });
+  const showTax = activeProject?.component_tax_enabled === true;
+  const [tax, setTax] = useState<TaxProfile>({});
 
   const TYPES = ['material', 'equipment', 'labor', 'operator'];
 
@@ -2914,6 +2927,9 @@ function CreateResourceModal({
         usage_count: 0,
         source: 'manual',
         region: 'CUSTOM',
+        ...(showTax
+          ? Object.fromEntries(Object.entries(tax).filter(([, v]) => v !== null && v !== undefined && v !== ''))
+          : {}),
       });
       addToast({ type: 'success', title: t('catalog.resource_created', { defaultValue: 'Resource created' }) });
       onCreated();
@@ -2922,7 +2938,7 @@ function CreateResourceModal({
     } finally {
       setSubmitting(false);
     }
-  }, [form, addToast, t, onCreated]);
+  }, [form, tax, showTax, addToast, t, onCreated]);
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={onClose}>
@@ -3008,6 +3024,17 @@ function CreateResourceModal({
               />
             </div>
           </div>
+
+          {showTax && (
+            <div data-testid="catalog-resource-tax">
+              <div className="text-xs font-medium text-content-secondary mb-1">
+                {t('assemblies.tax.title', { defaultValue: 'Input tax' })}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <ComponentTaxFields profile={tax} onChange={(patch) => setTax((cur) => ({ ...cur, ...patch }))} />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2 px-6 py-3 border-t border-border-light bg-surface-secondary/30">
