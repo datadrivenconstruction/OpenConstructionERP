@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 import app.modules.projects.models  # noqa: F401
 import app.modules.users.models  # noqa: F401
@@ -18,18 +18,14 @@ from app.modules.contacts.models import Contact
 from app.modules.resources.models import Assignment, Resource
 from app.modules.resources.schemas import BoardEntry, ResourceResponse
 from app.modules.resources.service import ResourcesService
+from tests.modules._partner_db import partner_engine
 
 
 @pytest.fixture
 async def session():
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-    async with engine.begin() as conn:
-        await conn.run_sync(
-            lambda c: Base.metadata.create_all(c, tables=[Contact.__table__, Resource.__table__, Assignment.__table__])
-        )
-    async with async_sessionmaker(engine, expire_on_commit=False)() as s:
+    tables = [Contact.__table__, Resource.__table__, Assignment.__table__]
+    async with partner_engine(tables) as engine, async_sessionmaker(engine, expire_on_commit=False)() as s:
         yield s
-    await engine.dispose()
 
 
 TENANT = "tenant-a"
