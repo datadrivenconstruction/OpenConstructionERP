@@ -197,7 +197,7 @@ function ScanDetails({ scan }: { scan: ScanDataset }) {
   if (status === 'pending') {
     return (
       <div className="mt-1.5 flex items-start gap-1.5 text-2xs text-content-quaternary">
-        <Hourglass size={11} className="mt-px shrink-0" />
+        <Hourglass size={12} className="mt-px shrink-0" />
         <span>
           {t('pointcloud.meta_pending', {
             defaultValue:
@@ -211,7 +211,7 @@ function ScanDetails({ scan }: { scan: ScanDataset }) {
   if (status === 'unreadable') {
     return (
       <div className="mt-1.5 flex items-start gap-1.5 text-2xs text-semantic-warning">
-        <AlertCircle size={11} className="mt-px shrink-0" />
+        <AlertCircle size={12} className="mt-px shrink-0" />
         <span>
           {t('pointcloud.meta_unreadable', {
             defaultValue:
@@ -255,7 +255,7 @@ function ScanDetails({ scan }: { scan: ScanDataset }) {
           className="inline-flex items-center gap-1 text-2xs text-content-tertiary"
           title={t('pointcloud.meta_extent_title', { defaultValue: 'Bounding-box extent (W x D x H)' })}
         >
-          <Move3d size={11} className="text-content-quaternary" />
+          <Move3d size={12} className="text-content-quaternary" />
           {extent}
         </span>
       )}
@@ -263,7 +263,7 @@ function ScanDetails({ scan }: { scan: ScanDataset }) {
         className="inline-flex items-center gap-1 text-2xs text-content-tertiary"
         title={t('pointcloud.meta_crs_title', { defaultValue: 'Coordinate reference system' })}
       >
-        <Globe2 size={11} className="text-content-quaternary" />
+        <Globe2 size={12} className="text-content-quaternary" />
         {crsLabel}
       </span>
     </div>
@@ -581,7 +581,7 @@ export function PointCloudPage() {
     <label className="flex items-center gap-2 text-xs text-content-tertiary">
       <span className="font-medium">{t('pointcloud.project_label', { defaultValue: 'Project' })}</span>
       <select
-        className="max-w-[220px] truncate rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+        className="max-w-[220px] truncate oe-select"
         value={projectId}
         onChange={(e) => handlePickProject(e.target.value)}
         disabled={uploading || projectsLoading}
@@ -657,7 +657,7 @@ export function PointCloudPage() {
                 }}
                 className="inline-flex items-center gap-1 text-2xs text-content-tertiary underline hover:text-danger"
               >
-                <X size={11} />
+                <X size={12} />
                 {t('pointcloud.upload_remove_file', { defaultValue: 'Remove file' })}
               </button>
             )}
@@ -725,12 +725,12 @@ export function PointCloudPage() {
       {/* Capture metadata - the tier gates what the scan may drive. */}
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <label className="oe-overline mb-1 block">
             {t('pointcloud.name_label', { defaultValue: 'Scan name' })}
           </label>
           <input
             type="text"
-            className="w-full rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="w-full oe-input"
             placeholder={t('pointcloud.name_placeholder', { defaultValue: 'e.g. Ground floor scan' })}
             value={scanName}
             onChange={(e) => setScanName(e.target.value)}
@@ -738,11 +738,11 @@ export function PointCloudPage() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <label className="oe-overline mb-1 block">
             {t('pointcloud.source_label', { defaultValue: 'Source' })}
           </label>
           <select
-            className="w-full rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="w-full oe-select"
             value={sourceType}
             onChange={(e) => setSourceType(e.target.value as ScanSourceType)}
             disabled={uploading}
@@ -755,11 +755,11 @@ export function PointCloudPage() {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <label className="oe-overline mb-1 block">
             {t('pointcloud.tier_label', { defaultValue: 'Accuracy tier' })}
           </label>
           <select
-            className="w-full rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="w-full oe-select"
             value={accuracyTier}
             onChange={(e) => setAccuracyTier(e.target.value as AccuracyTier)}
             disabled={uploading}
@@ -819,7 +819,7 @@ export function PointCloudPage() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('pointcloud.upload_title', { defaultValue: 'Upload a scan' })}
             </h2>
             <p className="mt-0.5 text-xs text-content-tertiary">
@@ -861,7 +861,7 @@ export function PointCloudPage() {
           </span>
         </div>
         <ChevronDown
-          size={18}
+          size={20}
           className={`shrink-0 text-content-tertiary transition-transform duration-200 ${
             uploadExpanded ? 'rotate-180' : ''
           }`}
@@ -882,7 +882,7 @@ export function PointCloudPage() {
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('pointcloud.viewer_title', { defaultValue: 'Cloud viewer' })}
             </h2>
             <p className="mt-0.5 text-xs text-content-tertiary">
@@ -964,7 +964,7 @@ export function PointCloudPage() {
       ) : isLoading ? (
         <Card className={GLASS_CARD}>
           <div className="flex items-center justify-center gap-2 py-10 text-content-tertiary">
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin" />
             <span className="text-sm">{t('common.loading', 'Loading...')}</span>
           </div>
         </Card>
@@ -1058,7 +1058,7 @@ export function PointCloudPage() {
                           : 'border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
                       }`}
                     >
-                      <Eye size={13} />
+                      <Eye size={14} />
                       {isActive
                         ? t('pointcloud.viewing', { defaultValue: 'Viewing' })
                         : t('pointcloud.view_scan', { defaultValue: 'View' })}
@@ -1074,9 +1074,9 @@ export function PointCloudPage() {
                     className="inline-flex items-center justify-center rounded-lg border border-border-light bg-surface-secondary px-2 py-1.5 text-content-tertiary transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {deletingId === scan.id ? (
-                      <Loader2 size={13} className="animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                     ) : (
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     )}
                   </button>
                 </li>
@@ -1106,7 +1106,7 @@ export function PointCloudPage() {
                   <Icon size={16} />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-sm font-semibold text-content-primary">
+                  <h3 className="oe-card-title">
                     {t(`pointcloud.cap_${i}_title`, { defaultValue: cap.title })}
                   </h3>
                   {cap.upcoming ? (

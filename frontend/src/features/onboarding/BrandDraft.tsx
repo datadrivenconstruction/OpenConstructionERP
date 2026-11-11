@@ -57,7 +57,7 @@ export function BrandDraftSection({ draft, onChange }: { draft: BrandDraft; onCh
 
   return (
     <section aria-label={title} data-testid="onboarding-brand">
-      <h3 className="mb-1 text-sm font-semibold text-content-primary">{title}</h3>
+      <h3 className="oe-card-title mb-1">{title}</h3>
       <p className="mb-2 text-xs text-content-tertiary">
         {t('onboarding.brand_section_hint', {
           defaultValue: 'Shown at the top of the menu and on the sign-in page for everyone in this workspace. Optional.',
@@ -75,7 +75,7 @@ export function BrandDraftSection({ draft, onChange }: { draft: BrandDraft; onCh
               maxLength={MAX_NAME_LEN}
               onChange={(e) => onChange({ ...draft, name: e.target.value.slice(0, MAX_NAME_LEN) })}
               placeholder={t('branding.name_placeholder', { defaultValue: 'Acme Construction GmbH' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+              className="oe-input w-full ps-8 pe-3"
             />
           </span>
         </label>

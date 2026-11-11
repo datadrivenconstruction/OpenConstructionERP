@@ -123,9 +123,9 @@ const STATUS_CONFIG: Record<
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 const NCR_TYPES: NCRType[] = ['material', 'workmanship', 'design', 'documentation', 'safety'];
 
@@ -143,7 +143,7 @@ const SEVERITY_CARD_CONFIG: Record<NCRSeverity, { icon: React.ElementType; color
   critical: { icon: AlertOctagon, color: 'text-semantic-error bg-semantic-error-bg border-semantic-error/30', ringColor: 'ring-semantic-error/30' },
   major: { icon: AlertCircle, color: 'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800', ringColor: 'ring-orange-300' },
   minor: { icon: AlertTriangle, color: 'text-semantic-warning bg-semantic-warning-bg border-semantic-warning/30', ringColor: 'ring-semantic-warning/30' },
-  observation: { icon: Info, color: 'text-content-tertiary bg-surface-secondary border-border-light', ringColor: 'ring-gray-300' },
+  observation: { icon: Info, color: 'text-content-tertiary bg-surface-secondary border-border-light', ringColor: 'ring-border' },
 };
 
 const NCR_STATUSES: NCRStatus[] = [
@@ -211,12 +211,12 @@ function CreateNCRModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('ncr.new_ncr', { defaultValue: 'New NCR' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('ncr.new_ncr', { defaultValue: 'New NCR' })}
             </h2>
             {projectName && (
@@ -233,7 +233,7 @@ function CreateNCRModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -241,7 +241,7 @@ function CreateNCRModal({
         <div className="px-6 py-4 space-y-5">
           {/* ── NCR Type ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('ncr.field_type', { defaultValue: 'Non-Conformance Type' })}
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -261,7 +261,7 @@ function CreateNCRModal({
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
-                    <TypeIcon size={18} />
+                    <TypeIcon size={20} />
                     <span className="text-2xs font-medium leading-tight">
                       {t(`ncr.type_${nt}`, {
                         defaultValue: nt.charAt(0).toUpperCase() + nt.slice(1),
@@ -275,7 +275,7 @@ function CreateNCRModal({
 
           {/* ── Severity ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label className="oe-label">
               {t('ncr.field_severity', { defaultValue: 'Severity' })}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -318,7 +318,7 @@ function CreateNCRModal({
 
           {/* Title */}
           <div>
-            <label htmlFor="ncr-title" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-title" className="oe-label">
               {t('ncr.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -332,11 +332,8 @@ function CreateNCRModal({
               placeholder={t('ncr.title_placeholder', {
                 defaultValue: 'e.g. Concrete strength below specification at Column C3',
               })}
-              className={clsx(
-                inputCls,
-                titleError &&
-                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              className={inputCls}
+              aria-invalid={titleError ? true : undefined}
               autoFocus
             />
             {titleError && (
@@ -348,7 +345,7 @@ function CreateNCRModal({
 
           {/* Description */}
           <div>
-            <label htmlFor="ncr-description" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-description" className="oe-label">
               {t('ncr.field_description', { defaultValue: 'Description' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -360,11 +357,8 @@ function CreateNCRModal({
                 setTouched(true);
               }}
               rows={5}
-              className={clsx(
-                textareaCls,
-                descError &&
-                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              className={textareaCls}
+              aria-invalid={descError ? true : undefined}
               placeholder={t('ncr.description_placeholder', {
                 defaultValue: 'Describe the non-conformance in detail: what was observed, where, and what specification was not met...',
               })}
@@ -386,7 +380,7 @@ function CreateNCRModal({
           </div>
 
           <div>
-            <label htmlFor="ncr-location" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-location" className="oe-label">
               {t('ncr.field_location', { defaultValue: 'Location' })}
             </label>
             <input
@@ -402,7 +396,7 @@ function CreateNCRModal({
 
           {/* Root Cause */}
           <div>
-            <label htmlFor="ncr-root-cause" className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-root-cause" className="oe-label">
               {t('ncr.field_root_cause', { defaultValue: 'Root Cause (if known)' })}
             </label>
             <textarea
@@ -652,7 +646,7 @@ const NCRRow = React.memo(function NCRRow({
               check, not the full register. */}
           {ncr.linked_inspection_number != null && (
             <div className="flex items-center gap-2">
-              <ClipboardCheck size={13} className="text-content-tertiary" />
+              <ClipboardCheck size={14} className="text-content-tertiary" />
               <span className="text-xs text-content-tertiary">
                 {t('ncr.linked_inspection', { defaultValue: 'Linked Inspection' })}:
               </span>
@@ -681,7 +675,7 @@ const NCRRow = React.memo(function NCRRow({
           {/* Change Order traceability banner */}
           {ncr.change_order_id && (
             <div
-              className="flex items-center gap-2.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-3.5 py-2.5 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors"
+              className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-3.5 py-2.5 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate('/changeorders');
@@ -695,7 +689,7 @@ const NCRRow = React.memo(function NCRRow({
                 }
               }}
             >
-              <Link2 size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+              <Link2 size={16} className="text-blue-600 dark:text-blue-400 shrink-0" />
               <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
                 {t('ncr.linked_change_order', { defaultValue: 'Linked to Change Order' })}
               </span>
@@ -757,7 +751,7 @@ const NCRRow = React.memo(function NCRRow({
                           !done && !current && 'text-content-quaternary',
                         )}
                       >
-                        {done && <CheckCircle2 size={11} />}
+                        {done && <CheckCircle2 size={12} />}
                         {t(`ncr.status_${stage}`, { defaultValue: stage.replace(/_/g, ' ') })}
                       </span>
                     </React.Fragment>
@@ -776,7 +770,7 @@ const NCRRow = React.memo(function NCRRow({
               onClick={(e) => e.stopPropagation()}
             >
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_severity', { defaultValue: 'Severity' })}
                 </label>
                 <select
@@ -784,7 +778,7 @@ const NCRRow = React.memo(function NCRRow({
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, severity: e.target.value as NCRSeverity }))
                   }
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(['critical', 'major', 'minor', 'observation'] as NCRSeverity[]).map((s) => (
                     <option key={s} value={s}>
@@ -794,7 +788,7 @@ const NCRRow = React.memo(function NCRRow({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_root_cause', { defaultValue: 'Root Cause' })}
                 </label>
                 <textarea
@@ -805,7 +799,7 @@ const NCRRow = React.memo(function NCRRow({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_root_cause_category', { defaultValue: 'Root cause category' })}
                 </label>
                 <input
@@ -818,7 +812,7 @@ const NCRRow = React.memo(function NCRRow({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_corrective_action', { defaultValue: 'Corrective Action' })}
                 </label>
                 <textarea
@@ -832,7 +826,7 @@ const NCRRow = React.memo(function NCRRow({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_preventive_action', { defaultValue: 'Preventive Action' })}
                 </label>
                 <textarea
@@ -846,7 +840,7 @@ const NCRRow = React.memo(function NCRRow({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-tertiary mb-1 uppercase tracking-wide">
+                <label className="oe-overline block mb-1">
                   {t('ncr.label_cost_impact', { defaultValue: 'Cost impact' })}
                 </label>
                 <input
@@ -1002,7 +996,7 @@ const NCRRow = React.memo(function NCRRow({
                   navigate(inspectionDeepLink);
                 }}
               >
-                <ClipboardCheck size={11} className="mr-1" />
+                <ClipboardCheck size={12} className="mr-1" />
                 {t('ncr.view_inspection', { defaultValue: 'View Inspection' })}
               </Button>
             )}
@@ -1015,7 +1009,7 @@ const NCRRow = React.memo(function NCRRow({
                 navigate('/changeorders');
               }}
             >
-              <DollarSign size={11} className="mr-1" />
+              <DollarSign size={12} className="mr-1" />
               {t('ncr.view_change_orders', { defaultValue: 'View Change Orders' })}
             </Button>
             <Button
@@ -1027,7 +1021,7 @@ const NCRRow = React.memo(function NCRRow({
                 navigate('/punchlist');
               }}
             >
-              <ListChecks size={11} className="mr-1" />
+              <ListChecks size={12} className="mr-1" />
               {t('ncr.view_punchlist', { defaultValue: 'View Punch List' })}
             </Button>
           </div>
@@ -1092,7 +1086,7 @@ function HowNcrWork() {
   return (
     <CollapsibleSection
       storageKey="ncr.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('ncr.how_title', { defaultValue: 'How NCRs fit together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1583,7 +1577,7 @@ export function NCRPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as NCRStatus | '')}
             aria-label={t('ncr.filter_all_statuses', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+            className="oe-select oe-input-lg ps-3 pe-9 sm:w-40"
           >
             <option value="">
               {t('ncr.filter_all_statuses', { defaultValue: 'All Statuses' })}

@@ -90,7 +90,7 @@ export function SemanticModelCard({
             <Sparkles size={20} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('onboarding.semantic_model_title', {
                 defaultValue: 'Semantic search model',
               })}
@@ -229,7 +229,7 @@ function SwitchControl({ enabled, onToggle }: { enabled: boolean; onToggle: () =
           enabled ? 'translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
         )}
       >
-        {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
+        {enabled && <Check size={12} className="text-oe-blue" strokeWidth={3} />}
       </span>
     </button>
   );

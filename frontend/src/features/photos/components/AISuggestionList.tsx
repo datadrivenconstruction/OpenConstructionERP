@@ -59,7 +59,7 @@ function SuggestionRow({ s, photoId }: { s: Suggestion; photoId: string }) {
           onChange={(e) => setText(e.target.value)}
           aria-label={t(`photoArchive.ai.kind_${s.kind}`)}
           aria-invalid={invalid}
-          className="w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="w-full oe-input oe-input-sm"
         />
       ) : (
         <p className="text-xs text-content-secondary">{original}</p>

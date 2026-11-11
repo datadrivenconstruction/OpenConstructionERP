@@ -172,7 +172,7 @@ function HowPayrollWorks() {
   return (
     <CollapsibleSection
       storageKey="payroll.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('payroll.flow_title', { defaultValue: 'How payroll fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -241,7 +241,7 @@ const DEDUCTION_TYPES: DeductionType[] = ['tax', 'social', 'pension', 'other'];
 
 /** Tailwind classes mirroring the design-system Input, for native selects. */
 const SELECT_CLASS =
-  'h-9 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary ' +
+  'oe-select' +
   'transition-all duration-normal ease-oe hover:border-content-tertiary ' +
   'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
@@ -754,7 +754,7 @@ export default function PayrollPage() {
       <Card className="p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-warning-bg text-semantic-warning">
-            <Coins size={18} />
+            <Coins size={20} />
           </div>
           <div className="flex-1">
             <p className="text-xs uppercase tracking-wide text-content-tertiary">
@@ -783,7 +783,7 @@ export default function PayrollPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-0">
           <div className="border-b border-border-light px-4 py-3">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('payroll.batches', { defaultValue: 'Pay batches' })}
             </h2>
           </div>
@@ -871,7 +871,7 @@ export default function PayrollPage() {
         {/* Entries for the selected batch */}
         <Card className="p-0">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-light px-4 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title flex items-center gap-2">
               <Users size={16} />
               {t('payroll.entries', { defaultValue: 'Entries' })}
             </h2>
@@ -967,7 +967,7 @@ export default function PayrollPage() {
               </div>
               <div>
                 <p className="flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-                  <MinusCircle size={11} />
+                  <MinusCircle size={12} />
                   {t('payroll.summary_deductions', { defaultValue: 'Deductions' })}
                 </p>
                 <p className="text-sm font-semibold tabular-nums text-content-primary">
@@ -976,7 +976,7 @@ export default function PayrollPage() {
               </div>
               <div>
                 <p className="flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
-                  <HandCoins size={11} />
+                  <HandCoins size={12} />
                   {t('payroll.summary_net', { defaultValue: 'Net pay' })}
                 </p>
                 <p className="text-sm font-semibold tabular-nums text-oe-blue">
@@ -1000,24 +1000,24 @@ export default function PayrollPage() {
                 </Badge>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="oe-table oe-table-compact text-xs">
                   <thead>
-                    <tr className="text-left text-content-tertiary">
-                      <th className="px-2 py-1">{t('payroll.reconcile_col.worker', { defaultValue: 'Worker' })}</th>
-                      <th className="px-2 py-1">{t('payroll.reconcile_col.date', { defaultValue: 'Date' })}</th>
-                      <th className="px-2 py-1 text-right">{t('payroll.reconcile_col.batch', { defaultValue: 'Batch h' })}</th>
-                      <th className="px-2 py-1 text-right">{t('payroll.reconcile_col.source', { defaultValue: 'Field h' })}</th>
-                      <th className="px-2 py-1 text-right">{t('payroll.reconcile_col.delta', { defaultValue: 'Delta' })}</th>
+                    <tr>
+                      <th>{t('payroll.reconcile_col.worker', { defaultValue: 'Worker' })}</th>
+                      <th>{t('payroll.reconcile_col.date', { defaultValue: 'Date' })}</th>
+                      <th className="text-right">{t('payroll.reconcile_col.batch', { defaultValue: 'Batch h' })}</th>
+                      <th className="text-right">{t('payroll.reconcile_col.source', { defaultValue: 'Field h' })}</th>
+                      <th className="text-right">{t('payroll.reconcile_col.delta', { defaultValue: 'Delta' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reconciliation.rows.map((r, i) => (
                       <tr key={`${r.worker_key}-${r.work_date}-${i}`} className={r.matched ? '' : 'text-semantic-warning'}>
-                        <td className="px-2 py-1">{r.worker_key}</td>
-                        <td className="px-2 py-1">{r.work_date ?? '-'}</td>
-                        <td className="px-2 py-1 text-right tabular-nums">{r.batch_hours}</td>
-                        <td className="px-2 py-1 text-right tabular-nums">{r.source_hours}</td>
-                        <td className="px-2 py-1 text-right tabular-nums">{r.delta_hours}</td>
+                        <td>{r.worker_key}</td>
+                        <td>{r.work_date ?? '-'}</td>
+                        <td className="text-right tabular-nums">{r.batch_hours}</td>
+                        <td className="text-right tabular-nums">{r.source_hours}</td>
+                        <td className="text-right tabular-nums">{r.delta_hours}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1037,17 +1037,17 @@ export default function PayrollPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-                    <th className="px-4 py-2">{t('payroll.col.worker', { defaultValue: 'Worker' })}</th>
-                    <th className="px-4 py-2">{t('payroll.col.date', { defaultValue: 'Date' })}</th>
-                    <th className="px-4 py-2 text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
-                    <th className="px-4 py-2 text-right">{t('payroll.col.rate', { defaultValue: 'Rate' })}</th>
-                    <th className="px-4 py-2 text-right">{t('payroll.col.amount', { defaultValue: 'Gross' })}</th>
-                    <th className="px-4 py-2 text-right">{t('payroll.col.deductions', { defaultValue: 'Deductions' })}</th>
-                    <th className="px-4 py-2 text-right">{t('payroll.col.net', { defaultValue: 'Net' })}</th>
-                    <th className="px-4 py-2 w-10" aria-hidden="true" />
+                  <tr>
+                    <th>{t('payroll.col.worker', { defaultValue: 'Worker' })}</th>
+                    <th>{t('payroll.col.date', { defaultValue: 'Date' })}</th>
+                    <th className="text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
+                    <th className="text-right">{t('payroll.col.rate', { defaultValue: 'Rate' })}</th>
+                    <th className="text-right">{t('payroll.col.amount', { defaultValue: 'Gross' })}</th>
+                    <th className="text-right">{t('payroll.col.deductions', { defaultValue: 'Deductions' })}</th>
+                    <th className="text-right">{t('payroll.col.net', { defaultValue: 'Net' })}</th>
+                    <th className="w-10" aria-hidden="true" />
                   </tr>
                 </thead>
                 <tbody>
@@ -1061,8 +1061,8 @@ export default function PayrollPage() {
                     const isOpen = Boolean(expandedEntries[e.id]);
                     return (
                       <Fragment key={e.id}>
-                        <tr className="border-b border-border-light">
-                          <td className="px-4 py-2 text-content-primary">
+                        <tr>
+                          <td>
                             {e.resource_id ? (
                               <Link
                                 to={`/resources?resourceId=${encodeURIComponent(e.resource_id)}`}
@@ -1072,25 +1072,25 @@ export default function PayrollPage() {
                                 })}
                               >
                                 {e.worker}
-                                <ExternalLink size={11} className="opacity-70" />
+                                <ExternalLink size={12} className="opacity-70" />
                               </Link>
                             ) : (
                               e.worker
                             )}
                           </td>
-                          <td className="px-4 py-2 text-content-secondary">
+                          <td className="text-content-secondary">
                             {e.work_date ? <DateDisplay value={e.work_date} format="date" /> : '-'}
                           </td>
-                          <td className="px-4 py-2 text-right tabular-nums">{hours(e.hours)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums">{money(e.rate, ccy)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums">{money(e.amount, ccy)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums text-content-secondary">
+                          <td className="text-right tabular-nums">{hours(e.hours)}</td>
+                          <td className="text-right tabular-nums">{money(e.rate, ccy)}</td>
+                          <td className="text-right tabular-nums">{money(e.amount, ccy)}</td>
+                          <td className="text-right tabular-nums text-content-secondary">
                             {dedTotal > 0 ? `-${money(dedTotal, ccy)}` : '-'}
                           </td>
-                          <td className="px-4 py-2 text-right font-medium tabular-nums text-content-primary">
+                          <td className="text-right font-medium tabular-nums">
                             {money(e.net_amount, ccy)}
                           </td>
-                          <td className="px-2 py-2 text-right">
+                          <td className="text-right">
                             <button
                               type="button"
                               onClick={() => toggleEntry(e.id)}
@@ -1106,8 +1106,8 @@ export default function PayrollPage() {
                           </td>
                         </tr>
                         {isOpen && (
-                          <tr className="border-b border-border-light bg-surface-secondary/30">
-                            <td colSpan={8} className="px-4 py-3">
+                          <tr className="bg-surface-secondary/30">
+                            <td colSpan={8}>
                               <DeductionEditor
                                 entry={e}
                                 currency={ccy}
@@ -1124,7 +1124,7 @@ export default function PayrollPage() {
                   })}
                   {(batchDetailQuery.data?.entries ?? []).length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-6 text-center text-content-tertiary">
+                      <td colSpan={8} className="py-6 text-center text-content-tertiary">
                         {t('payroll.no_entries', { defaultValue: 'This batch has no entries.' })}
                       </td>
                     </tr>

@@ -64,7 +64,7 @@ export function filterPhoneLogs(logs: PhoneLog[], f: PhoneLogFilterState): Phone
 }
 
 const CONTROL =
-  'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
+  'oe-input';
 
 export function PhoneLogFilters({
   value,
@@ -104,7 +104,7 @@ export function PhoneLogFilters({
           value={value.direction}
           onChange={(e) => set('direction', e.target.value as PhoneLogFilterState['direction'])}
           aria-label={t('phonelog.direction', { defaultValue: 'Direction' })}
-          className={CONTROL}
+          className={`${CONTROL} oe-select`}
         >
           <option value="">{t('phonelog.filter_all_directions', { defaultValue: 'All directions' })}</option>
           {DIRECTIONS.map((d) => (
@@ -118,7 +118,7 @@ export function PhoneLogFilters({
           value={value.channel}
           onChange={(e) => set('channel', e.target.value as PhoneLogFilterState['channel'])}
           aria-label={t('phonelog.channel', { defaultValue: 'Channel' })}
-          className={CONTROL}
+          className={`${CONTROL} oe-select`}
         >
           <option value="">{t('phonelog.filter_all_channels', { defaultValue: 'All channels' })}</option>
           {CHANNELS.map((c) => (

@@ -238,7 +238,7 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
       {c.kind !== 'information' && (
         <section className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.evidence.heading', { defaultValue: 'Evidence' })}</h3>
+            <h3 className="oe-card-title">{t('permits.ui.evidence.heading', { defaultValue: 'Evidence' })}</h3>
             {can('add_evidence') && (
               <GatedButton gate={gate(c.can?.add_evidence, true)} size="sm" variant={c.evidence.length === 0 ? 'primary' : 'secondary'} onClick={() => setDialog('evidence')} data-testid="condition-add-evidence">
                 {t('permits.ui.evidence.submit', { defaultValue: 'Add evidence' })}
@@ -288,7 +288,7 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
 
       {c.discharges.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.discharge.heading', { defaultValue: 'How it was closed' })}</h3>
+          <h3 className="oe-card-title">{t('permits.ui.discharge.heading', { defaultValue: 'How it was closed' })}</h3>
           <ul className="space-y-1.5" data-testid="discharge-list">
             {c.discharges.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">

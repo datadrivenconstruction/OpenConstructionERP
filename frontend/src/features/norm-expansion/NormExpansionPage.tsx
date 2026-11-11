@@ -68,7 +68,7 @@ import {
 import { useBuildAssembly } from './useBuildAssembly';
 
 const INPUT_CLS =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm ' +
+  'oe-input w-full' +
   'text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none ' +
   'focus:ring-2 focus:ring-oe-blue/30 dark:focus:ring-oe-blue/40';
 
@@ -137,7 +137,7 @@ function HowNormsWork() {
   return (
     <CollapsibleSection
       storageKey="normExpansion.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('normExpansion.flow_title', { defaultValue: 'How production norms fit together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -240,7 +240,7 @@ function ExpandPanel({ norms }: { norms: ProductionNorm[] }) {
 
   return (
     <Card padding="md">
-      <h2 className="mb-1 text-sm font-semibold text-content-primary">
+      <h2 className="oe-card-title mb-1">
         {t('normExpansion.expand_title', { defaultValue: 'Expand a work item' })}
       </h2>
       <p className="mb-3 text-xs text-content-tertiary">
@@ -252,11 +252,11 @@ function ExpandPanel({ norms }: { norms: ProductionNorm[] }) {
 
       <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]">
         <div>
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('normExpansion.work_item', { defaultValue: 'Work item' })}
           </label>
           <select
-            className={INPUT_CLS}
+            className={`${INPUT_CLS} oe-select`}
             value={workKey}
             onChange={(e) => {
               setWorkKey(e.target.value);
@@ -276,7 +276,7 @@ function ExpandPanel({ norms }: { norms: ProductionNorm[] }) {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('normExpansion.quantity', { defaultValue: 'Quantity' })}
             {selectedNorm ? ` (${selectedNorm.unit})` : ''}
           </label>
@@ -365,16 +365,16 @@ function ExpansionResultView({
 
       {result.materials.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[360px] text-sm">
+          <table className="oe-table min-w-[360px]">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-2 pr-3 font-medium">
+              <tr>
+                <th>
                   {t('normExpansion.col_material', { defaultValue: 'Material' })}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_quantity', { defaultValue: 'Quantity' })}
                 </th>
-                <th className="py-2 pr-3 font-medium">
+                <th>
                   {t('normExpansion.col_unit', { defaultValue: 'Unit' })}
                 </th>
               </tr>
@@ -383,13 +383,12 @@ function ExpansionResultView({
               {result.materials.map((m, idx) => (
                 <tr
                   key={`${m.name}-${idx}`}
-                  className="border-b border-border-light/60 hover:bg-surface-secondary/40"
                 >
-                  <td className="py-2 pr-3 text-content-primary">{m.name}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                  <td>{m.name}</td>
+                  <td className="text-right tabular-nums text-content-secondary">
                     {fmtNumber(m.qty, 3)}
                   </td>
-                  <td className="py-2 pr-3 text-content-tertiary">{m.unit}</td>
+                  <td className="text-content-tertiary">{m.unit}</td>
                 </tr>
               ))}
             </tbody>
@@ -513,7 +512,7 @@ function AddToBoqPanel({ norm }: { norm: ProductionNorm }) {
         <div className="space-y-3 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('normExpansion.add_to_boq_title', {
                   defaultValue: 'Add resource breakdown to a BOQ position',
                 })}
@@ -537,11 +536,11 @@ function AddToBoqPanel({ norm }: { norm: ProductionNorm }) {
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('normExpansion.boq_project', { defaultValue: 'Project' })}
               </label>
               <select
-                className={INPUT_CLS}
+                className={`${INPUT_CLS} oe-select`}
                 value={projectId}
                 onChange={(e) => {
                   setProjectId(e.target.value);
@@ -563,11 +562,11 @@ function AddToBoqPanel({ norm }: { norm: ProductionNorm }) {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('normExpansion.boq_boq', { defaultValue: 'BOQ' })}
               </label>
               <select
-                className={INPUT_CLS}
+                className={`${INPUT_CLS} oe-select`}
                 value={boqId}
                 onChange={(e) => {
                   setBoqId(e.target.value);
@@ -589,11 +588,11 @@ function AddToBoqPanel({ norm }: { norm: ProductionNorm }) {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('normExpansion.boq_position', { defaultValue: 'Position' })}
               </label>
               <select
-                className={INPUT_CLS}
+                className={`${INPUT_CLS} oe-select`}
                 value={positionId}
                 onChange={(e) => setPositionId(e.target.value)}
                 disabled={boqId === ''}
@@ -710,8 +709,8 @@ function BuildAssemblyPanel({ norms }: { norms: ProductionNorm[] }) {
 
   return (
     <Card padding="md">
-      <h2 className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <Coins size={15} className="text-oe-blue" />
+      <h2 className="oe-card-title mb-1 flex items-center gap-1.5">
+        <Coins size={16} className="text-oe-blue" />
         {t('normExpansion.build_title', { defaultValue: 'Build priced assembly' })}
       </h2>
       <p className="mb-2 text-xs text-content-tertiary">
@@ -745,11 +744,11 @@ function BuildAssemblyPanel({ norms }: { norms: ProductionNorm[] }) {
       <div className="space-y-3">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('normExpansion.build_norm', { defaultValue: 'Work item' })}
             </label>
             <select
-              className={INPUT_CLS}
+              className={`${INPUT_CLS} oe-select`}
               value={normId}
               onChange={(e) => {
                 setNormId(e.target.value);
@@ -769,11 +768,11 @@ function BuildAssemblyPanel({ norms }: { norms: ProductionNorm[] }) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('normExpansion.build_labor_rate', { defaultValue: 'Labour rate (required)' })}
             </label>
             <select
-              className={INPUT_CLS}
+              className={`${INPUT_CLS} oe-select`}
               value={laborRateTemplateId}
               onChange={(e) => setLaborRateTemplateId(e.target.value)}
               aria-label={t('normExpansion.build_labor_rate', {
@@ -794,11 +793,11 @@ function BuildAssemblyPanel({ norms }: { norms: ProductionNorm[] }) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('normExpansion.build_machine_rate', { defaultValue: 'Machine rate (optional)' })}
             </label>
             <select
-              className={INPUT_CLS}
+              className={`${INPUT_CLS} oe-select`}
               value={machineRateTemplateId}
               onChange={(e) => setMachineRateTemplateId(e.target.value)}
               aria-label={t('normExpansion.build_machine_rate', {
@@ -820,7 +819,7 @@ function BuildAssemblyPanel({ norms }: { norms: ProductionNorm[] }) {
 
         <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_auto_auto]">
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('normExpansion.build_region', { defaultValue: 'Region (optional)' })}
             </label>
             <input
@@ -903,7 +902,7 @@ function BuildAssemblyResultView({ result }: { result: BuildAssemblyResult }) {
             data-testid="norm-build-assembly-link"
           >
             {result.code}
-            <ArrowRight size={13} className="shrink-0" />
+            <ArrowRight size={14} className="shrink-0" />
           </Link>
           <div className="text-2xs text-content-tertiary">
             {t('normExpansion.build_apply_hint', {
@@ -927,7 +926,7 @@ function BuildAssemblyResultView({ result }: { result: BuildAssemblyResult }) {
 
       {/* Flags: unpriced lines and materials with no waste factor */}
       {hasUnpriced && (
-        <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg/50 p-2.5 text-xs text-semantic-error">
+        <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg/50 p-3 text-xs text-semantic-error">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>
             {t('normExpansion.build_unpriced', {
@@ -940,7 +939,7 @@ function BuildAssemblyResultView({ result }: { result: BuildAssemblyResult }) {
         </div>
       )}
       {hasUnmatched && (
-        <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg/50 p-2.5 text-xs text-[#b45309]">
+        <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg/50 p-3 text-xs text-[#b45309]">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>
             {t('normExpansion.build_unmatched', {
@@ -961,29 +960,29 @@ function BuildAssemblyResultView({ result }: { result: BuildAssemblyResult }) {
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="oe-table min-w-[720px]">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-2 pr-3 font-medium">
+              <tr>
+                <th>
                   {t('normExpansion.col_type', { defaultValue: 'Type' })}
                 </th>
-                <th className="py-2 pr-3 font-medium">
+                <th>
                   {t('normExpansion.col_description', { defaultValue: 'Description' })}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_net_qty', { defaultValue: 'Net qty' })}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_waste', { defaultValue: 'Waste %' })}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_gross_qty', { defaultValue: 'Gross qty' })}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_unit_cost', { defaultValue: 'Unit cost' })}
                   {curSuffix}
                 </th>
-                <th className="py-2 pr-3 text-right font-medium">
+                <th className="text-right">
                   {t('normExpansion.col_line_total', { defaultValue: 'Line total' })}
                   {curSuffix}
                 </th>
@@ -1237,7 +1236,7 @@ function MaterialEditor({ norm, onChanged }: { norm: ProductionNorm; onChanged: 
                   className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('normExpansion.delete_material', { defaultValue: 'Delete material' })}
                 >
-                  <Trash2 size={13} />
+                  <Trash2 size={14} />
                 </button>
               </span>
             </li>
@@ -1368,7 +1367,7 @@ function NormLibrary({
         </div>
         {categories.length > 0 && (
           <select
-            className={`${INPUT_CLS} sm:w-56`}
+            className={`${INPUT_CLS} oe-select sm:w-56`}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             aria-label={t('normExpansion.filter_category', { defaultValue: 'Filter by category' })}
@@ -1392,29 +1391,29 @@ function NormLibrary({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="oe-table min-w-[640px]">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-2 pr-3 font-medium" />
-            <th className="py-2 pr-3 font-medium">
+              <tr>
+                <th />
+            <th>
               {t('normExpansion.col_work_key', { defaultValue: 'Work key' })}
             </th>
-            <th className="py-2 pr-3 font-medium">
+            <th>
               {t('normExpansion.col_name', { defaultValue: 'Name' })}
             </th>
-            <th className="py-2 pr-3 font-medium">
+            <th>
               {t('normExpansion.col_unit', { defaultValue: 'Unit' })}
             </th>
-            <th className="py-2 pr-3 text-right font-medium">
+            <th className="text-right">
               {t('normExpansion.col_labor', { defaultValue: 'Labor h/unit' })}
             </th>
-            <th className="py-2 pr-3 text-right font-medium">
+            <th className="text-right">
               {t('normExpansion.col_machine', { defaultValue: 'Machine h/unit' })}
             </th>
-            <th className="py-2 pr-3 text-right font-medium">
+            <th className="text-right">
               {t('normExpansion.col_materials', { defaultValue: 'Materials' })}
             </th>
-            <th className="py-2 pl-1" />
+            <th />
           </tr>
         </thead>
         <tbody>
@@ -1422,8 +1421,8 @@ function NormLibrary({
             const isOpen = expandedId === n.id;
             return (
               <Fragment key={n.id}>
-                <tr className="border-b border-border-light/60 hover:bg-surface-secondary/40">
-                  <td className="py-2 pr-1">
+                <tr>
+                  <td>
                     <button
                       type="button"
                       onClick={() => setExpandedId(isOpen ? null : n.id)}
@@ -1436,19 +1435,19 @@ function NormLibrary({
                       {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     </button>
                   </td>
-                  <td className="py-2 pr-3 font-medium text-content-primary">{n.work_key}</td>
-                  <td className="py-2 pr-3 text-content-secondary">{n.name || '-'}</td>
-                  <td className="py-2 pr-3 text-content-tertiary">{n.unit}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                  <td className="font-medium">{n.work_key}</td>
+                  <td className="text-content-secondary">{n.name || '-'}</td>
+                  <td className="text-content-tertiary">{n.unit}</td>
+                  <td className="text-right tabular-nums text-content-secondary">
                     {fmtNumber(n.labor_hours_per_unit, 3)}
                   </td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                  <td className="text-right tabular-nums text-content-secondary">
                     {fmtNumber(n.machine_hours_per_unit, 3)}
                   </td>
-                  <td className="py-2 pr-3 text-right">
+                  <td className="text-right">
                     <Badge variant="neutral">{n.materials.length}</Badge>
                   </td>
-                  <td className="py-2 pl-1 text-right">
+                  <td className="text-right">
                     <button
                       type="button"
                       onClick={() => deleteMut.mutate(n.id)}
@@ -1461,7 +1460,7 @@ function NormLibrary({
                 </tr>
                 {isOpen && (
                   <tr>
-                    <td colSpan={8} className="p-0">
+                    <td colSpan={8}>
                       <MaterialEditor norm={n} onChanged={onChanged} />
                     </td>
                   </tr>
@@ -1529,7 +1528,7 @@ export function NormExpansionPage() {
           )}
 
           <Card padding="md">
-            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title mb-3">
               {t('normExpansion.library', { defaultValue: 'Norm library' })}
               {norms.length > 0 ? ` (${norms.length})` : ''}
             </h2>

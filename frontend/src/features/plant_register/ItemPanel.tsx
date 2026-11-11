@@ -163,7 +163,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
           <Button variant="ghost" size="sm" icon={<ArrowLeft size={14} />} onClick={onBack}>
             {t('plant.item.back', { defaultValue: 'Back to the register' })}
           </Button>
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             <span className="font-mono text-content-secondary">{item.code}</span> {item.title}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -802,7 +802,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                       <textarea
                         rows={2}
                         data-testid="spare-waiver-reason"
-                        className={fieldClass}
+                        className={`${fieldClass} oe-textarea`}
                         aria-label={t('plant.spare.waiver_reason', { defaultValue: 'Why this spare is not needed (required)' })}
                         placeholder={t('plant.spare.waiver_reason', { defaultValue: 'Why this spare is not needed (required)' })}
                         value={waiverReason}

@@ -210,7 +210,7 @@ export function RequirementPanel({
       </dl>
 
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('permits.ui.requirement.dependencies', { defaultValue: 'What comes first' })}
         </h3>
         {r.depends_on.length === 0 ? (
@@ -232,7 +232,7 @@ export function RequirementPanel({
 
       <section className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.requirement.applications', { defaultValue: 'Applications' })}</h3>
+          <h3 className="oe-card-title">{t('permits.ui.requirement.applications', { defaultValue: 'Applications' })}</h3>
           {r.applicable && (canOpenNew || ownPermits.length > 0) && (
             <GatedButton gate={gate(r.can?.create_application, true)} size="sm" icon={<FilePlus2 size={14} />} onClick={() => setDialog('application')} data-testid="application-open">
               {t('permits.ui.application.submit_new', { defaultValue: 'Open application' })}
@@ -272,7 +272,7 @@ export function RequirementPanel({
 
       {ownPermits.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-content-primary">{t('permits.ui.requirement.permits', { defaultValue: 'Permits granted' })}</h3>
+          <h3 className="oe-card-title">{t('permits.ui.requirement.permits', { defaultValue: 'Permits granted' })}</h3>
           <ul className="space-y-1.5">
             {ownPermits.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">

@@ -29,7 +29,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select oe-input-lg w-full';
 
 export function PortalProgressReportsTab() {
   const { t } = useTranslation();
@@ -108,7 +108,7 @@ export function PortalProgressReportsTab() {
             <div className="max-w-md">
               <label
                 htmlFor="portal-progress-project"
-                className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
+                className="oe-overline mb-1 block"
               >
                 {t('payportal.progress_project', { defaultValue: 'Project' })}
               </label>

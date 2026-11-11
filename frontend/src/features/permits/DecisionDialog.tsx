@@ -183,7 +183,7 @@ export function DecisionDialog({
 
       {draft.outcome === 'partially_granted' && (
         <Field label={t('permits.ui.decision.scope', { defaultValue: 'What the permit covers' })} required>
-          {(id) => <textarea id={id} rows={2} className={fieldClass} value={draft.scope_note} onChange={(e) => set({ scope_note: e.target.value })} />}
+          {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={draft.scope_note} onChange={(e) => set({ scope_note: e.target.value })} />}
         </Field>
       )}
 
@@ -261,7 +261,7 @@ export function DecisionDialog({
       {carriesConditions(draft.outcome) && listed.length === 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('permits.ui.decision.conditions', { defaultValue: 'Conditions of the decision' })}
             </h3>
             <Button

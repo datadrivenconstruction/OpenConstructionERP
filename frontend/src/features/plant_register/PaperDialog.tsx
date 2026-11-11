@@ -129,7 +129,7 @@ export function PaperDialog({ open, onClose, projectId, item, paper, onSaved }: 
             <textarea
               id={id}
               rows={2}
-              className={fieldClass}
+              className={`${fieldClass} oe-textarea`}
               value={draft.question}
               onChange={(e) => setDraft((d) => ({ ...d, question: e.target.value }))}
             />
@@ -138,7 +138,7 @@ export function PaperDialog({ open, onClose, projectId, item, paper, onSaved }: 
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('plant.paper.criteria', { defaultValue: 'What the options are judged on' })}
             </h3>
             <Button
@@ -180,7 +180,7 @@ export function PaperDialog({ open, onClose, projectId, item, paper, onSaved }: 
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">{t('plant.paper.options', { defaultValue: 'Options' })}</h3>
+            <h3 className="oe-card-title">{t('plant.paper.options', { defaultValue: 'Options' })}</h3>
             <Button
               size="sm"
               variant="secondary"
@@ -282,7 +282,7 @@ export function PaperDialog({ open, onClose, projectId, item, paper, onSaved }: 
             <textarea
               id={id}
               rows={3}
-              className={fieldClass}
+              className={`${fieldClass} oe-textarea`}
               value={draft.rationale}
               onChange={(e) => setDraft((d) => ({ ...d, rationale: e.target.value }))}
             />

@@ -61,7 +61,7 @@ export function PhotoMetaEditor({ photo }: { photo: ArchivePhoto }) {
           value={photo.category}
           disabled={save.isPending}
           onChange={(e) => save.mutate({ category: e.target.value })}
-          className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+          className="oe-select oe-input-sm"
         >
           {PHOTO_CATEGORIES.map((c) => (
             <option key={c} value={c}>
@@ -98,7 +98,7 @@ export function PhotoMetaEditor({ photo }: { photo: ArchivePhoto }) {
             }}
             placeholder={t('photos.add_tag')}
             aria-label={t('photos.add_tag')}
-            className="min-w-0 flex-1 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+            className="min-w-0 flex-1 oe-input oe-input-sm"
           />
           <button
             type="button"

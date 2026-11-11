@@ -71,7 +71,7 @@ function FilterBar({
   const { t } = useTranslation();
   const [q, setQ] = useState(filters.q ?? '');
   useEffect(() => setQ(filters.q ?? ''), [filters.q]);
-  const input = 'rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm';
+  const input = 'oe-input';
   return (
     <div className="flex flex-wrap items-end gap-2" data-testid="photo-filter-bar">
       <form
@@ -111,7 +111,7 @@ function FilterBar({
         value={filters.source ?? ''}
         onChange={(e) => onChange({ ...filters, source: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.source')}
-        className={input}
+        className={`${input} oe-select`}
       >
         <option value="">{t('photoArchive.filters.any_source')}</option>
         {SOURCE_MODULES.map((s) => (
@@ -124,7 +124,7 @@ function FilterBar({
         value={filters.category ?? ''}
         onChange={(e) => onChange({ ...filters, category: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.category')}
-        className={input}
+        className={`${input} oe-select`}
       >
         <option value="">{t('photos.all_categories')}</option>
         {PHOTO_CATEGORIES.map((c) => (
@@ -137,7 +137,7 @@ function FilterBar({
         value={filters.album ?? ''}
         onChange={(e) => onChange({ ...filters, album: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.album')}
-        className={input}
+        className={`${input} oe-select`}
       >
         <option value="">{t('photoArchive.filters.any_album')}</option>
         {albums.map((a) => (
@@ -495,7 +495,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
               defaultValue=""
               onChange={(e) => e.target.value && addSelectedToAlbum.mutate(e.target.value)}
               aria-label={t('photoArchive.albums.add_to')}
-              className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+              className="oe-select oe-input-sm"
             >
               <option value="">{t('photoArchive.albums.add_to')}</option>
               {(albums.data ?? []).map((a) => (

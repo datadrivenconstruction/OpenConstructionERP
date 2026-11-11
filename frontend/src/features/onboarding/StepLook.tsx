@@ -342,7 +342,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
           {isAdmin && <BrandDraftSection draft={brand} onChange={setBrand} />}
 
           <section>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">{stylesLabel}</h3>
+            <h3 className="oe-card-title mb-2">{stylesLabel}</h3>
             <RadioRow label={stylesLabel} className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {APPEARANCE_PRESETS.map((p, i) => (
                 <CardRadio
@@ -366,7 +366,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
           </section>
 
           <section>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">{menusLabel}</h3>
+            <h3 className="oe-card-title mb-2">{menusLabel}</h3>
             <RadioRow label={menusLabel} className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {MENU_PRESETS.map((p, i) => (
                 <CardRadio
@@ -389,7 +389,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
           </section>
 
           <section>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">{accentLabel}</h3>
+            <h3 className="oe-card-title mb-2">{accentLabel}</h3>
             <RadioRow label={accentLabel} className="flex flex-wrap gap-2">
               {ACCENTS.map((a) => {
                 const name = t(`settings.style_accent_${a}`, { defaultValue: a });
@@ -419,7 +419,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
         </div>
 
         <div className="min-w-0">
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">{previewLabel}</h3>
+          <h3 className="oe-card-title mb-2">{previewLabel}</h3>
           <LookPreview style={style} menu={menu} label={previewLabel} brand={isAdmin ? brand : undefined} />
         </div>
       </div>

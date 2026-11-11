@@ -146,7 +146,7 @@ function PhoneLogCard({
             {proto.decisions.map((line, i) => (
               <li
                 key={i}
-                className="rounded-md border-s-2 border-green-500/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
+                className="rounded-md border-s-2 border-semantic-success/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
               >
                 {line}
               </li>
@@ -352,7 +352,7 @@ export function PhoneLogPage() {
       <RecordingProtocolCard projectId={projectId} />
 
       <Card className="space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('phonelog.capture_manual', { defaultValue: 'Or capture a call by hand' })}
         </h2>
 
@@ -363,7 +363,7 @@ export function PhoneLogPage() {
               value={form.raw_parties}
               onChange={(e) => set('raw_parties', e.target.value)}
               placeholder={t('phonelog.parties_ph', { defaultValue: 'You -> Acme site office' })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input"
             />
           </label>
 
@@ -373,7 +373,7 @@ export function PhoneLogPage() {
               type="datetime-local"
               value={form.started_at}
               onChange={(e) => set('started_at', e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input"
             />
           </label>
 
@@ -382,7 +382,7 @@ export function PhoneLogPage() {
             <select
               value={form.direction}
               onChange={(e) => set('direction', e.target.value as PhoneDirection)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-select"
             >
               {DIRECTIONS.map((d) => (
                 <option key={d} value={d}>
@@ -397,7 +397,7 @@ export function PhoneLogPage() {
             <select
               value={form.channel}
               onChange={(e) => set('channel', e.target.value as PhoneChannel)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-select"
             >
               {CHANNELS.map((c) => (
                 <option key={c} value={c}>
@@ -415,7 +415,7 @@ export function PhoneLogPage() {
               step="1"
               value={form.duration_minutes}
               onChange={(e) => set('duration_minutes', e.target.value)}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input"
             />
           </label>
 
@@ -425,7 +425,7 @@ export function PhoneLogPage() {
               value={form.summary}
               onChange={(e) => set('summary', e.target.value)}
               placeholder={t('phonelog.summary_ph', { defaultValue: 'Agreed to revise the slab pour date' })}
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+              className="oe-input"
             />
           </label>
         </div>
@@ -439,7 +439,7 @@ export function PhoneLogPage() {
             placeholder={t('phonelog.transcript_ph', {
               defaultValue: 'Type or paste the conversation. Instruction sentences are pulled out automatically.',
             })}
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm text-content-primary"
+            className="oe-textarea"
           />
         </label>
 
@@ -464,7 +464,7 @@ export function PhoneLogPage() {
       </Card>
 
       <div className="space-y-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
           {t('phonelog.recent', { defaultValue: 'Recent calls' })}
         </h2>

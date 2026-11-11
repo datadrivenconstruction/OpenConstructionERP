@@ -138,7 +138,7 @@ export function RoadmapSetupDialog({ open, onClose, projectId, roadmap, labels }
         {(id) => (
           <select
             id={id}
-            className={fieldClass}
+            className={`${fieldClass} oe-select`}
             value={catalogue}
             disabled={cataloguesQ.isLoading}
             onChange={(e) => setCatalogue(e.target.value)}
@@ -303,7 +303,7 @@ export function ProposeDialog({ open, onClose, projectId, roadmap, labels }: Pro
         <ul className="space-y-1.5" data-testid="propose-list">
           {data.proposals.map((p) => (
             <li key={p.permit_type_code}>
-              <label className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2.5 text-sm">
+              <label className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
                 <input
                   type="checkbox"
                   className="mt-1"
@@ -470,7 +470,7 @@ export function RequirementDialog({
         <Field label={t('permits.ui.requirement.type', { defaultValue: 'Kind of permit' })} required>
           {(id) =>
             shipped ? (
-              <select id={id} className={fieldClass} value={code} disabled={typesQ.isLoading} onChange={(e) => setCode(e.target.value)}>
+              <select id={id} className={`${fieldClass} oe-select`} value={code} disabled={typesQ.isLoading} onChange={(e) => setCode(e.target.value)}>
                 <option value="">
                   {typesQ.isLoading
                     ? t('permits.ui.loading', { defaultValue: 'Loading...' })
@@ -511,7 +511,7 @@ export function RequirementDialog({
           })}
         >
           {(id) => (
-            <select id={id} className={fieldClass} value={role} onChange={(e) => setRole(e.target.value as ApplicantRole | '')}>
+            <select id={id} className={`${fieldClass} oe-select`} value={role} onChange={(e) => setRole(e.target.value as ApplicantRole | '')}>
               {(!requirement || !requirement.applicant_role) && (
                 <option value="">{t('permits.ui.requirement.applicant_default', { defaultValue: 'As the catalogue says' })}</option>
               )}
@@ -571,7 +571,7 @@ export function RequirementDialog({
           {!applicable && (
             <Field label={t('permits.ui.requirement.na_rationale', { defaultValue: 'Why it is not needed' })} required>
               {(id) => (
-                <textarea id={id} rows={2} className={fieldClass} value={naWhy} onChange={(e) => setNaWhy(e.target.value)} />
+                <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={naWhy} onChange={(e) => setNaWhy(e.target.value)} />
               )}
             </Field>
           )}
@@ -674,7 +674,7 @@ export function DependenciesDialog({ open, onClose, projectId, roadmap, requirem
           {others.map((r) => {
             const name = r.title || typeName(labels, r.permit_type_code, r.name_key);
             return (
-              <li key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border-light bg-surface-elevated p-2.5 text-sm">
+              <li key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
                 <label className="flex min-w-0 flex-1 items-center gap-2">
                   <input type="checkbox" checked={r.id in chosen} onChange={() => toggle(r.id)} />
                   <span className="truncate text-content-primary">{name}</span>
@@ -682,7 +682,7 @@ export function DependenciesDialog({ open, onClose, projectId, roadmap, requirem
                 {r.id in chosen && (
                   <select
                     aria-label={t('permits.ui.dependencies.on', { defaultValue: 'How far {{name}} must be', name })}
-                    className={`${fieldClass} w-auto`}
+                    className={`${fieldClass} oe-select w-auto`}
                     value={chosen[r.id]}
                     onChange={(e) => setChosen((c) => ({ ...c, [r.id]: e.target.value as DependencyOn }))}
                   >

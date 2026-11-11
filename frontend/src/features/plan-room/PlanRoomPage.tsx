@@ -282,7 +282,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
         <CollapsibleSection
           storageKey="plan_room.steps"
           defaultCollapsed={drawings.length > 0}
-          icon={<MapIcon size={15} className="text-oe-blue" />}
+          icon={<MapIcon size={16} className="text-oe-blue" />}
           title={t('plan_room.steps_title', { defaultValue: 'How it works' })}
         >
           <ol className="list-decimal space-y-1 pl-5 text-sm text-content-secondary">
@@ -318,7 +318,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
                 setPlacing(false);
               }}
               aria-label={t('plan_room.select_drawing', { defaultValue: 'Select drawing' })}
-              className="h-9 max-w-md flex-1 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select max-w-md flex-1"
             >
               {drawings.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -413,7 +413,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
               {/* Nothing on this page yet (the sheet still renders). */}
               {overlaysQuery.isSuccess && totalOverlays === 0 && (
                 <div className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-surface-primary px-3 py-4 text-sm text-content-tertiary">
-                  <LayersIcon size={15} className="shrink-0" />
+                  <LayersIcon size={16} className="shrink-0" />
                   {t('plan_room.nothing_marked', { defaultValue: 'Nothing marked on this page yet.' })}
                 </div>
               )}
@@ -479,14 +479,14 @@ function RevisionIndicator({ version }: { version: OverlayVersion }) {
   if (!version.revision_code) {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs text-content-quaternary">
-        <GitBranch size={13} />
+        <GitBranch size={14} />
         {t('plan_room.revision_none', { defaultValue: 'No revision number' })}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1.5">
-      <GitBranch size={13} className="text-content-tertiary" />
+      <GitBranch size={14} className="text-content-tertiary" />
       <span className="text-xs text-content-secondary">
         {t('plan_room.revision', { defaultValue: 'Rev {{code}}', code: version.revision_code })}
       </span>
@@ -516,8 +516,8 @@ function PhotoGallery({ photos }: { photos: OverlayPhoto[] }) {
   const { t } = useTranslation();
   return (
     <div className="rounded-xl border border-border-light bg-surface-primary p-3">
-      <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-        <Camera size={13} />
+      <h4 className="oe-overline mb-2 flex items-center gap-1.5">
+        <Camera size={14} />
         {t('plan_room.layer_photos', { defaultValue: 'Photos' })}
         <span className="text-content-quaternary">({photos.length})</span>
       </h4>

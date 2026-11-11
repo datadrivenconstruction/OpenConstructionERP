@@ -116,14 +116,14 @@ function ReopenDialog({
   const [reason, setReason] = useState('');
   const valid = reason.trim().length >= 3;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-label={t('payroll.reopen_title', { defaultValue: 'Reopen payroll period' })}
         className="w-full max-w-md space-y-3 rounded-xl bg-surface-primary p-5 shadow-xl"
       >
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('payroll.reopen_title', { defaultValue: 'Reopen payroll period' })}
         </h3>
         <p className="text-xs text-content-tertiary">
@@ -134,7 +134,7 @@ function ReopenDialog({
         <label className="block text-xs text-content-secondary">
           {t('payroll.reopen_reason', { defaultValue: 'Reason (at least 3 characters)' })}
           <textarea
-            className="mt-1 w-full rounded-lg border border-border bg-surface-primary p-2 text-sm"
+            className="mt-1 w-full oe-textarea"
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -286,7 +286,7 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
   return (
     <Card className="space-y-4 p-4" data-testid="payroll-periods">
       <div>
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('payroll.periods_title', { defaultValue: 'Export periods' })}
         </h2>
         <p className="text-xs text-content-tertiary">
@@ -395,7 +395,7 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
       {detail && (
         <div className="space-y-4 border-t border-border-light pt-4" data-testid="period-detail">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">{detail.label}</h3>
+            <h3 className="oe-card-title">{detail.label}</h3>
             <Badge variant={statusVariant(detail.status)}>{statusLabel(detail.status, t)}</Badge>
             <span className="text-xs text-content-tertiary">
               {detail.country} · {detailProfile?.label ?? detail.rule_profile}
@@ -421,28 +421,28 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
 
           {/* Totals by pay type */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table oe-table-compact">
               <thead>
-                <tr className="border-b border-border-light text-left text-2xs uppercase text-content-tertiary">
-                  <th className="py-2 pr-3">{t('payroll.col.pay_type', { defaultValue: 'Pay type' })}</th>
-                  <th className="py-2 pr-3 text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
-                  <th className="py-2 text-right">{t('payroll.col.amount', { defaultValue: 'Amount' })}</th>
+                <tr>
+                  <th>{t('payroll.col.pay_type', { defaultValue: 'Pay type' })}</th>
+                  <th className="text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
+                  <th className="text-right">{t('payroll.col.amount', { defaultValue: 'Amount' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {PAY_TYPES.filter((pt) => detail.totals_by_type[pt]).map((pt) => (
-                  <tr key={pt} className="border-b border-border-light/60">
-                    <td className="py-1.5 pr-3">{payTypeLabel(pt, t)}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{num(detail.totals_by_type[pt]?.hours ?? '0')}</td>
-                    <td className="py-1.5 text-right tabular-nums">
+                  <tr key={pt}>
+                    <td>{payTypeLabel(pt, t)}</td>
+                    <td className="text-right tabular-nums">{num(detail.totals_by_type[pt]?.hours ?? '0')}</td>
+                    <td className="text-right tabular-nums">
                       {num(detail.totals_by_type[pt]?.amount ?? '0')} {detail.currency}
                     </td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
-                  <td className="py-1.5 pr-3">{t('payroll.total', { defaultValue: 'Total' })}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums">{num(detail.total_hours)}</td>
-                  <td className="py-1.5 text-right tabular-nums">
+                  <td>{t('payroll.total', { defaultValue: 'Total' })}</td>
+                  <td className="text-right tabular-nums">{num(detail.total_hours)}</td>
+                  <td className="text-right tabular-nums">
                     {num(detail.total_gross)} {detail.currency}
                   </td>
                 </tr>
@@ -554,7 +554,7 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
           {/* Findings */}
           {detail.findings.length > 0 && (
             <div>
-              <h4 className="mb-1 text-xs font-semibold text-content-primary">
+              <h4 className="oe-card-title mb-1">
                 {t('payroll.findings', { defaultValue: 'Findings' })}
               </h4>
               <ul className="space-y-1">
@@ -572,28 +572,28 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
 
           {/* Lines */}
           <div className="max-h-80 overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-surface-primary">
-                <tr className="border-b border-border-light text-left text-2xs uppercase text-content-tertiary">
-                  <th className="py-2 pr-3">{t('payroll.col.employee', { defaultValue: 'Employee' })}</th>
-                  <th className="py-2 pr-3">{t('payroll.col.date', { defaultValue: 'Date' })}</th>
-                  <th className="py-2 pr-3">{t('payroll.col.pay_type', { defaultValue: 'Pay type' })}</th>
-                  <th className="py-2 pr-3">{t('payroll.col.cost_code', { defaultValue: 'Cost code' })}</th>
-                  <th className="py-2 pr-3 text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
-                  <th className="py-2 pr-3 text-right">{t('payroll.col.rate', { defaultValue: 'Rate' })}</th>
-                  <th className="py-2 text-right">{t('payroll.col.amount', { defaultValue: 'Amount' })}</th>
+            <table className="oe-table oe-table-compact">
+              <thead className="sticky top-0">
+                <tr>
+                  <th>{t('payroll.col.employee', { defaultValue: 'Employee' })}</th>
+                  <th>{t('payroll.col.date', { defaultValue: 'Date' })}</th>
+                  <th>{t('payroll.col.pay_type', { defaultValue: 'Pay type' })}</th>
+                  <th>{t('payroll.col.cost_code', { defaultValue: 'Cost code' })}</th>
+                  <th className="text-right">{t('payroll.col.hours', { defaultValue: 'Hours' })}</th>
+                  <th className="text-right">{t('payroll.col.rate', { defaultValue: 'Rate' })}</th>
+                  <th className="text-right">{t('payroll.col.amount', { defaultValue: 'Amount' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {detail.lines.map((l) => (
-                  <tr key={l.id} className="border-b border-border-light/60">
-                    <td className="py-1.5 pr-3">{l.employee_name}</td>
-                    <td className="py-1.5 pr-3">{l.work_date}</td>
-                    <td className="py-1.5 pr-3">{payTypeLabel(l.pay_type, t)}</td>
-                    <td className="py-1.5 pr-3">{l.cost_code ?? '-'}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{num(l.hours)}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{num(l.rate)}</td>
-                    <td className="py-1.5 text-right tabular-nums">{num(l.amount)}</td>
+                  <tr key={l.id}>
+                    <td>{l.employee_name}</td>
+                    <td>{l.work_date}</td>
+                    <td>{payTypeLabel(l.pay_type, t)}</td>
+                    <td>{l.cost_code ?? '-'}</td>
+                    <td className="text-right tabular-nums">{num(l.hours)}</td>
+                    <td className="text-right tabular-nums">{num(l.rate)}</td>
+                    <td className="text-right tabular-nums">{num(l.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -602,7 +602,7 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
 
           {/* Audit trail */}
           <div>
-            <h4 className="mb-1 text-xs font-semibold text-content-primary">
+            <h4 className="oe-card-title mb-1">
               {t('payroll.audit_trail', { defaultValue: 'Audit trail' })}
             </h4>
             {detail.events.length === 0 ? (

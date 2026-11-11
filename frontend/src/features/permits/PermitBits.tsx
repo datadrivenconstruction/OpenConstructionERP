@@ -18,7 +18,7 @@ import { errorText, type TFn } from './labels';
 import type { Gate } from './rules';
 
 export const fieldClass =
-  'w-full rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary';
+  'oe-input w-full';
 
 export const REQUIREMENT_TONE: Record<RequirementState, BadgeVariant> = {
   not_started: 'neutral',
@@ -158,7 +158,7 @@ export function PanelHeader({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+            <h2 className="oe-section-title">{title}</h2>
             {badge}
           </div>
           {subtitle && <p className="mt-0.5 text-sm text-content-secondary">{subtitle}</p>}
@@ -239,7 +239,7 @@ export function Field({
   const id = useId();
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-primary">
+      <label htmlFor={id} className="oe-label">
         {label}
         {required && (
           <span className="ml-1 text-xs font-normal text-semantic-error">
@@ -395,7 +395,7 @@ export function MoreActions({ items, testId }: { items: MoreAction[]; testId: st
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-1 min-w-[14rem] rounded-md border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute right-0 z-dropdown mt-1 min-w-[14rem] rounded-md border border-border-light bg-surface-primary py-1 shadow-lg"
         >
           {items.map((item) => (
             <button

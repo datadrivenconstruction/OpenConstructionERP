@@ -160,7 +160,7 @@ export function OnboardingStepper({
                           : 'bg-surface-secondary text-content-tertiary opacity-60',
                     )}
                   >
-                    {done && enabled ? <Check size={13} strokeWidth={3} /> : i + 1}
+                    {done && enabled ? <Check size={14} strokeWidth={3} /> : i + 1}
                   </span>
                   <span
                     className={clsx(

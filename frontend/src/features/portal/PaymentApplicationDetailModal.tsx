@@ -50,7 +50,7 @@ export function PaymentApplicationDetailModal({
   const pa = q.data;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
         role="dialog"
@@ -60,7 +60,7 @@ export function PaymentApplicationDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 className="font-mono text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title font-mono">
             {pa?.application_number ?? t('payportal.detail_title', { defaultValue: 'Application detail' })}
           </h2>
           <button
@@ -109,34 +109,34 @@ export function PaymentApplicationDetailModal({
                   {t('payportal.lines_detail', { defaultValue: 'Work package lines' })}
                 </p>
                 <div className="overflow-x-auto rounded-lg border border-border-light">
-                  <table className="w-full text-sm">
-                    <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+                  <table className="oe-table">
+                    <thead>
                       <tr>
-                        <th className="px-3 py-2 text-left">
+                        <th>
                           {t('payportal.work_package', { defaultValue: 'Work package' })}
                         </th>
-                        <th className="px-3 py-2 text-right">
+                        <th className="text-right">
                           {t('payportal.claimed', { defaultValue: 'Claimed' })}
                         </th>
-                        <th className="px-3 py-2 text-right">
+                        <th className="text-right">
                           {t('payportal.certified', { defaultValue: 'Certified' })}
                         </th>
-                        <th className="px-3 py-2 text-right">
+                        <th className="text-right">
                           {t('payportal.approved', { defaultValue: 'Approved' })}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {pa.lines.map((l) => (
-                        <tr key={l.work_package_id} className="border-t border-border-light">
-                          <td className="px-3 py-2 text-content-primary">{l.work_package_name}</td>
-                          <td className="px-3 py-2 text-right text-content-secondary">
+                        <tr key={l.work_package_id}>
+                          <td>{l.work_package_name}</td>
+                          <td className="text-right text-content-secondary">
                             {l.claimed_amount}
                           </td>
-                          <td className="px-3 py-2 text-right text-content-secondary">
+                          <td className="text-right text-content-secondary">
                             {l.certified_amount}
                           </td>
-                          <td className="px-3 py-2 text-right text-content-secondary">
+                          <td className="text-right text-content-secondary">
                             {l.approved_amount}
                           </td>
                         </tr>

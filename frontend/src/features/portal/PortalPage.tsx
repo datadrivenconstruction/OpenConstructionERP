@@ -93,7 +93,7 @@ const ACTION_VARIANT: Record<string, 'neutral' | 'blue' | 'success' | 'warning' 
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
 // Legacy labelCls removed — modals migrated to <WideModalField>.
 
@@ -440,7 +440,7 @@ export function PortalPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={clsx(inputCls, 'max-w-[200px]')}
+            className={clsx(inputCls, 'oe-select', 'max-w-[200px]')}
           >
             <option value="">
               {t('common.all_statuses', { defaultValue: 'All statuses' })}
@@ -599,7 +599,7 @@ function MagicLinkBanner({
   return (
     <Card padding="sm" className="border-oe-blue/30 bg-oe-blue-subtle/40">
       <div className="flex items-start gap-3">
-        <Send size={18} className="mt-0.5 text-oe-blue" />
+        <Send size={20} className="mt-0.5 text-oe-blue" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-content-primary">
             {t('portal.magic_link_for', { defaultValue: 'Magic link for' })}{' '}
@@ -667,22 +667,22 @@ function UserTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.email', { defaultValue: 'Email' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.full_name', { defaultValue: 'Name' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.role', { defaultValue: 'Role' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.last_login', { defaultValue: 'Last login' })}
             </th>
           </tr>
@@ -692,25 +692,25 @@ function UserTable({
             <tr
               key={u.id}
               onClick={() => onSelect(u)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[260px]">
+              <td className="font-mono text-xs text-content-secondary truncate max-w-[260px]">
                 {u.email}
               </td>
-              <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[200px]">
+              <td className="font-medium truncate max-w-[200px]">
                 {u.full_name || '—'}
               </td>
-              <td className="px-4 py-2 text-xs">
+              <td className="text-xs">
                 <Badge variant="neutral">
                   {t(`portal.roles.${u.portal_role}`, { defaultValue: u.portal_role })}
                 </Badge>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={STATUS_VARIANT[u.status] ?? 'neutral'} dot>
                   {t(`portal.status.${u.status}`, { defaultValue: u.status })}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-xs text-content-secondary">
                 {u.last_login_at ? <DateDisplay value={u.last_login_at} /> : '—'}
               </td>
             </tr>
@@ -769,25 +769,25 @@ function AccessRuleTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.user', { defaultValue: 'User' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.resource_type', { defaultValue: 'Resource Type' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.resource_id', { defaultValue: 'Resource ID' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.permission', { defaultValue: 'Permission' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.expires', { defaultValue: 'Expires' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
           </tr>
@@ -796,18 +796,18 @@ function AccessRuleTable({
           {rows.map((r) => {
             const u = userById.get(r.portal_user_id);
             return (
-              <tr key={r.id} className="border-t border-border-light">
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[220px]">
+              <tr key={r.id}>
+                <td className="font-mono text-xs text-content-secondary truncate max-w-[220px]">
                   {u?.email ?? r.portal_user_id.slice(0, 8)}
                 </td>
-                <td className="px-4 py-2 text-xs">
+                <td className="text-xs">
                   <Badge variant="neutral">
                     {t(`portal.resource_types.${r.resource_type}`, {
                       defaultValue: r.resource_type,
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[200px]">
+                <td className="font-mono text-xs text-content-secondary truncate max-w-[200px]">
                   {(() => {
                     const to = portalResourceLink(r.resource_type, r.resource_id);
                     return to ? (
@@ -819,22 +819,22 @@ function AccessRuleTable({
                         })}
                       >
                         <span className="truncate">{r.resource_id}</span>
-                        <ExternalLink size={11} className="shrink-0" />
+                        <ExternalLink size={12} className="shrink-0" />
                       </Link>
                     ) : (
                       r.resource_id
                     );
                   })()}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant="blue">
                     {t(`portal.permissions.${r.permission}`, { defaultValue: r.permission })}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-xs text-content-secondary">
                   {r.expires_at ? <DateDisplay value={r.expires_at} /> : '—'}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="text-right">
                   <Button
                     size="sm"
                     variant="ghost"
@@ -881,25 +881,25 @@ function AuditLogTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.user', { defaultValue: 'User' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.document_type', { defaultValue: 'Document Type' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.document_id', { defaultValue: 'Document ID' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.action', { defaultValue: 'Action' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.ip', { defaultValue: 'IP' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('portal.when', { defaultValue: 'When' })}
             </th>
           </tr>
@@ -908,18 +908,18 @@ function AuditLogTable({
           {rows.map((e) => {
             const u = userById.get(e.portal_user_id);
             return (
-              <tr key={e.id} className="border-t border-border-light">
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[220px]">
+              <tr key={e.id}>
+                <td className="font-mono text-xs text-content-secondary truncate max-w-[220px]">
                   {u?.email ?? e.portal_user_id.slice(0, 8)}
                 </td>
-                <td className="px-4 py-2 text-xs">
+                <td className="text-xs">
                   <Badge variant="neutral">
                     {t(`portal.document_types.${e.document_type}`, {
                       defaultValue: e.document_type,
                     })}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[180px]">
+                <td className="font-mono text-xs text-content-secondary truncate max-w-[180px]">
                   {(() => {
                     const to = portalResourceLink(e.document_type, e.document_id);
                     return to ? (
@@ -931,22 +931,22 @@ function AuditLogTable({
                         })}
                       >
                         <span className="truncate">{e.document_id}</span>
-                        <ExternalLink size={11} className="shrink-0" />
+                        <ExternalLink size={12} className="shrink-0" />
                       </Link>
                     ) : (
                       e.document_id
                     );
                   })()}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant={ACTION_VARIANT[e.action] ?? 'neutral'}>
                     {t(`portal.actions.${e.action}`, { defaultValue: e.action })}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+                <td className="font-mono text-xs text-content-secondary">
                   {e.ip_address ?? '—'}
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-xs text-content-secondary">
                   {e.occurred_at ? <DateDisplay value={e.occurred_at} /> : <DateDisplay value={e.created_at} />}
                 </td>
               </tr>
@@ -1027,7 +1027,7 @@ function UserDrawer({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1509,7 +1509,7 @@ function GrantAccessModal({
           <select
             value={form.portal_user_id}
             onChange={(e) => setForm({ ...form, portal_user_id: e.target.value })}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
             {users.map((u) => (
@@ -1541,7 +1541,7 @@ function GrantAccessModal({
               setForm({ ...form, resource_type: e.target.value, resource_id: '' });
               setDocProjectId('');
             }}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             <option value="project">{t('portal.rt_project', { defaultValue: 'Project' })}</option>
             <option value="development">{t('portal.rt_development', { defaultValue: 'Development' })}</option>
@@ -1563,7 +1563,7 @@ function GrantAccessModal({
             onChange={(e) =>
               setForm({ ...form, permission: e.target.value as AccessPermission })
             }
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             {PERMISSIONS.map((p) => (
               <option key={p} value={p}>
@@ -1584,7 +1584,7 @@ function GrantAccessModal({
             <select
               value={form.resource_id}
               onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               disabled={projectsQ.isLoading}
             >
               <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
@@ -1611,7 +1611,7 @@ function GrantAccessModal({
                   setDocProjectId(e.target.value);
                   setForm({ ...form, resource_id: '' });
                 }}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 disabled={projectsQ.isLoading}
               >
                 <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
@@ -1633,7 +1633,7 @@ function GrantAccessModal({
               <select
                 value={form.resource_id}
                 onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 disabled={!docProjectId || documentsQ.isLoading}
               >
                 <option value="">
@@ -1670,7 +1670,7 @@ function GrantAccessModal({
                   setDocProjectId(e.target.value);
                   setForm({ ...form, resource_id: '' });
                 }}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 disabled={projectsQ.isLoading}
               >
                 <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
@@ -1693,7 +1693,7 @@ function GrantAccessModal({
               <select
                 value={form.resource_id}
                 onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 disabled={!docProjectId || bimModelsQ.isLoading}
               >
                 <option value="">
@@ -1723,7 +1723,7 @@ function GrantAccessModal({
             <select
               value={form.resource_id}
               onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               disabled={ticketsQ.isLoading}
             >
               <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>

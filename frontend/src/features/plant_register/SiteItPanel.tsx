@@ -101,7 +101,7 @@ export function ItServiceDialog({ onClose, projectId, service, catalogue, labels
         <WideModalSection columns={2}>
           <Field label={t('plant.it.kind', { defaultValue: 'Service' })} required>
             {(id) => (
-              <select id={id} className={fieldClass} value={draft.kind} onChange={(e) => chooseKind(e.target.value)}>
+              <select id={id} className={`${fieldClass} oe-select`} value={draft.kind} onChange={(e) => chooseKind(e.target.value)}>
                 <option value="">{t('plant.common.choose', { defaultValue: 'Choose' })}</option>
                 {catalogue.it_service_kinds.map((k) => (
                   <option key={k.code} value={k.code}>
@@ -115,7 +115,7 @@ export function ItServiceDialog({ onClose, projectId, service, catalogue, labels
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.responsible_party}
                 onChange={(e) => set('responsible_party', e.target.value)}
               >
@@ -146,7 +146,7 @@ export function ItServiceDialog({ onClose, projectId, service, catalogue, labels
           </Field>
           <Field label={t('plant.item.description', { defaultValue: 'Description' })} className="sm:col-span-2">
             {(id) => (
-              <textarea id={id} rows={2} className={fieldClass} value={draft.description} onChange={(e) => set('description', e.target.value)} />
+              <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={draft.description} onChange={(e) => set('description', e.target.value)} />
             )}
           </Field>
         </WideModalSection>

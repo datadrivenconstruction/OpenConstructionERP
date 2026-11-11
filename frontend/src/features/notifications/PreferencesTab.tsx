@@ -206,8 +206,8 @@ export function PreferencesTab(): JSX.Element {
           route events to an outside tool, not just the channels in this
           matrix. Closes the issue #279 gap: settings here did not explain or
           link the integration delivery path. */}
-      <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2.5">
-        <Cable size={15} className="mt-0.5 shrink-0 text-oe-blue" />
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2.5">
+        <Cable size={16} className="mt-0.5 shrink-0 text-oe-blue" />
         <div className="min-w-0 text-xs text-content-secondary">
           <span>
             {t('notifications.preferences.integrations_note', {
@@ -229,10 +229,10 @@ export function PreferencesTab(): JSX.Element {
       </div>
 
       <div className="rounded-xl border border-border-light bg-surface-elevated overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-surface-secondary">
+        <table className="oe-table min-w-full">
+          <thead>
             <tr>
-              <th className="text-left px-4 py-2 font-medium text-content-secondary">
+              <th>
                 {t('notifications.preferences.col_event', {
                   defaultValue: 'Event',
                 })}
@@ -240,7 +240,6 @@ export function PreferencesTab(): JSX.Element {
               {CHANNELS.map((ch) => (
                 <th
                   key={ch}
-                  className="text-left px-4 py-2 font-medium text-content-secondary"
                 >
                   {t(`notifications.preferences.channel_${ch}`, {
                     defaultValue: PREFERENCES_CHANNEL_LABELS[ch] ?? ch,
@@ -249,10 +248,10 @@ export function PreferencesTab(): JSX.Element {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {eventTypes.map((et) => (
-              <tr key={et.event_type} className="hover:bg-surface-secondary/40">
-                <td className="px-4 py-2 align-top">
+              <tr key={et.event_type}>
+                <td className="align-top">
                   <div className="font-medium text-content-primary">
                     {t(`notifications.event.${et.event_type}.label`, {
                       defaultValue: et.description,
@@ -272,7 +271,7 @@ export function PreferencesTab(): JSX.Element {
                     upsertMut.variables?.event_type === et.event_type &&
                     upsertMut.variables?.channel === ch;
                   return (
-                    <td key={ch} className="px-4 py-2 align-top">
+                    <td key={ch} className="align-top">
                       <div
                         className={clsx(
                           'flex flex-col gap-1',
@@ -308,7 +307,7 @@ export function PreferencesTab(): JSX.Element {
                               digest: e.target.value as NotificationDigest,
                             });
                           }}
-                          className="h-7 text-2xs rounded-md border border-border bg-surface-primary text-content-primary disabled:opacity-40 px-1"
+                          className="oe-select oe-input-sm"
                           aria-label={`${et.event_type} ${ch} digest`}
                           data-cell={cellKey}
                         >

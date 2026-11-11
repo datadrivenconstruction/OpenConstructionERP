@@ -104,7 +104,7 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             aria-label={t('photos.category')}
-            className="rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+            className="oe-select oe-input-sm"
           >
             {PHOTO_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -117,7 +117,7 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
             onChange={(e) => setTagText(e.target.value)}
             placeholder={t('photoArchive.bulk.tags_placeholder')}
             aria-label={t('photos.upload_type_tags')}
-            className="w-44 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs"
+            className="w-44 oe-input oe-input-sm"
           />
           <span className="w-full text-2xs text-content-tertiary">{t('photos.batch_meta_hint')}</span>
         </div>

@@ -94,7 +94,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
       role="dialog"
       aria-modal="true"
       aria-label={photo.caption || photo.filename}
-      className="fixed inset-0 z-50 flex flex-col bg-black/90 lg:flex-row"
+      className="fixed inset-0 z-modal flex flex-col bg-black/90 lg:flex-row"
       data-testid="photo-lightbox"
     >
       <div className="relative flex min-h-0 flex-1 items-center justify-center p-4">
@@ -147,7 +147,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="photo-caption" className="text-xs font-medium text-content-secondary">
+          <label htmlFor="photo-caption" className="oe-label">
             {t('photoArchive.caption')}
           </label>
           <div className="flex gap-2">
@@ -155,7 +155,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
               id="photo-caption"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              className="min-w-0 flex-1 rounded border border-border-light bg-surface-primary px-2 py-1 text-sm"
+              className="min-w-0 flex-1 oe-input"
             />
             <button
               type="button"
@@ -229,7 +229,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
         </dl>
 
         <section className="space-y-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <h3 className="oe-overline">
             {t('photoArchive.links.title')}
           </h3>
           {photo.links.length === 0 ? (
@@ -258,7 +258,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
 
         {(pins.data ?? []).length > 0 && (
           <section className="space-y-1">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <h3 className="oe-overline">
               {t('photoArchive.pins.title')}
             </h3>
             <ul className="space-y-1 text-xs">
@@ -275,7 +275,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
         )}
 
         <section className="space-y-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">{t('photoArchive.ai.title')}</h3>
+          <h3 className="oe-overline">{t('photoArchive.ai.title')}</h3>
           <AISuggestionList photoId={photo.id} />
         </section>
 

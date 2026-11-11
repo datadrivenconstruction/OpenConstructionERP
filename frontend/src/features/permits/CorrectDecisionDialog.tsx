@@ -124,7 +124,7 @@ export function CorrectDecisionDialog({ open, onClose, projectId, decision }: Co
         {(id) => <input id={id} className={fieldClass} value={draft.reference} onChange={(e) => set({ reference: e.target.value })} />}
       </Field>
       <Field label={t('permits.ui.decision.scope', { defaultValue: 'What the permit covers' })}>
-        {(id) => <textarea id={id} rows={2} className={fieldClass} value={draft.scope_note} onChange={(e) => set({ scope_note: e.target.value })} />}
+        {(id) => <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={draft.scope_note} onChange={(e) => set({ scope_note: e.target.value })} />}
       </Field>
       <Field label={t('permits.ui.decision.document', { defaultValue: 'The notice as a document' })}>
         {(id) => (
@@ -139,7 +139,7 @@ export function CorrectDecisionDialog({ open, onClose, projectId, decision }: Co
       </Field>
       <Field label={t('permits.ui.correct.reason', { defaultValue: 'Why it is corrected' })} required>
         {(id) => (
-          <textarea id={id} rows={2} className={fieldClass} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="correct-reason" />
+          <textarea id={id} rows={2} className={`${fieldClass} oe-textarea`} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="correct-reason" />
         )}
       </Field>
     </FormDialog>

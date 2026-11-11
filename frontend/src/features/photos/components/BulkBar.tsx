@@ -84,7 +84,7 @@ export function BulkBar({ photos, selected, allIds, onSelect, children }: BulkBa
         disabled={busy}
         aria-label={t('photoArchive.bulk.set_category')}
         onChange={(e) => e.target.value && void apply({ kind: 'category', category: e.target.value })}
-        className={control}
+        className="oe-select oe-input-sm w-auto"
       >
         <option value="">{t('photoArchive.bulk.set_category')}</option>
         {PHOTO_CATEGORIES.map((c) => (
@@ -108,7 +108,7 @@ export function BulkBar({ photos, selected, allIds, onSelect, children }: BulkBa
           onChange={(e) => setTagText(e.target.value)}
           placeholder={t('photoArchive.bulk.tags_placeholder')}
           aria-label={t('photoArchive.bulk.add_tags')}
-          className={`${control} w-36`}
+          className="oe-input oe-input-sm w-36"
         />
         <button type="submit" disabled={busy || !parseTags(tagText).length} className={`${control} inline-flex items-center gap-1`}>
           <Tag className="h-3 w-3" aria-hidden />

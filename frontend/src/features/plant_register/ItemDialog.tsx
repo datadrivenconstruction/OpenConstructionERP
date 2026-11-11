@@ -144,7 +144,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.component_class_code}
                 onChange={(e) => set('component_class_code', e.target.value)}
               >
@@ -204,7 +204,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
               <textarea
                 id={id}
                 rows={2}
-                className={fieldClass}
+                className={`${fieldClass} oe-textarea`}
                 value={draft.description}
                 onChange={(e) => set('description', e.target.value)}
               />
@@ -223,7 +223,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.redundancy_scheme}
                 onChange={(e) => set('redundancy_scheme', e.target.value)}
               >
@@ -240,7 +240,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.vendor_policy}
                 onChange={(e) => set('vendor_policy', e.target.value as ItemDraft['vendor_policy'])}
               >
@@ -257,7 +257,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
               {(id) => (
                 <select
                   id={id}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-select`}
                   value={draft.vendor_bound_reason}
                   onChange={(e) => set('vendor_bound_reason', e.target.value)}
                 >
@@ -275,7 +275,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.maintenance_strategy}
                 onChange={(e) => set('maintenance_strategy', e.target.value)}
               >
@@ -292,7 +292,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('plant.field.performance', { defaultValue: 'Performance requirements' })}
             </h3>
             <Button
@@ -374,7 +374,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.critical}
                 disabled={overrideLock !== null}
                 data-testid="item-critical-override"
@@ -392,7 +392,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
             {(id) => (
               <select
                 id={id}
-                className={fieldClass}
+                className={`${fieldClass} oe-select`}
                 value={draft.long_lead}
                 disabled={overrideLock !== null}
                 data-testid="item-long-lead-override"
@@ -416,7 +416,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
                 <textarea
                   id={id}
                   rows={2}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-textarea`}
                   value={draft.critical_reason}
                   disabled={overrideLock !== null}
                   onChange={(e) => set('critical_reason', e.target.value)}
@@ -434,7 +434,7 @@ export function ItemDialog({ open, onClose, projectId, item, catalogue, labels, 
                 <textarea
                   id={id}
                   rows={2}
-                  className={fieldClass}
+                  className={`${fieldClass} oe-textarea`}
                   value={draft.long_lead_override_reason}
                   disabled={overrideLock !== null}
                   onChange={(e) => set('long_lead_override_reason', e.target.value)}

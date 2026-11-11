@@ -535,7 +535,7 @@ function NewClockForm({
         <select
           value={regimeCode}
           onChange={(e) => onRegimeChange(e.target.value)}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-select"
           required
         >
           <option value="">
@@ -555,7 +555,7 @@ function NewClockForm({
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           maxLength={64}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-input"
         />
       </label>
 
@@ -565,7 +565,7 @@ function NewClockForm({
           type="date"
           value={applicationDate}
           onChange={(e) => setApplicationDate(e.target.value)}
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-input"
           required
         />
       </label>
@@ -577,7 +577,7 @@ function NewClockForm({
             inputMode="decimal"
             value={appliedAmount}
             onChange={(e) => setAppliedAmount(e.target.value)}
-            className="rounded border border-border-light bg-surface-primary p-2"
+            className="oe-input"
             required
           />
         </label>
@@ -587,7 +587,7 @@ function NewClockForm({
             value={currency}
             onChange={(e) => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
             maxLength={3}
-            className="rounded border border-border-light bg-surface-primary p-2 uppercase"
+            className="oe-input uppercase"
             required
           />
         </label>

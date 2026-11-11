@@ -39,8 +39,8 @@ export function LayerPanel({ visibility, counts, onToggle }: Props) {
 
   return (
     <div className="rounded-xl border border-border-light bg-surface-primary p-3">
-      <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-        <Layers size={13} />
+      <h4 className="oe-overline mb-2 flex items-center gap-1.5">
+        <Layers size={14} />
         {t('plan_room.layers', { defaultValue: 'Layers' })}
       </h4>
       <ul className="space-y-0.5">

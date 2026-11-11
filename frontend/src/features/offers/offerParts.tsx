@@ -97,14 +97,14 @@ export function CustomerEmpty({
       }}
     >
       <input
-        className="h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm"
+        className="oe-input w-full"
         value={name}
         onChange={(e) => setName(e.target.value)}
         aria-label={t('offers.customer_name', { defaultValue: 'Customer name' })}
         placeholder={t('offers.customer_name', { defaultValue: 'Customer name' })}
       />
       <input
-        className="h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm"
+        className="oe-input w-full"
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -144,12 +144,12 @@ export function AcceptDialog({
   const toggle = (ordinal: string) => setTicked((cur) => (cur.includes(ordinal) ? cur.filter((o) => o !== ordinal) : [...cur, ordinal]));
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('offers.mark_accepted', { defaultValue: 'Mark accepted' })} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div role="dialog" aria-modal="true" aria-label={t('offers.mark_accepted', { defaultValue: 'Mark accepted' })} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md space-y-3 rounded-lg bg-surface-primary p-5 shadow-xl">
         <h2 className="text-base font-semibold">{t('offers.mark_accepted', { defaultValue: 'Mark accepted' })}</h2>
         <label className="block text-sm">
           {t('offers.accepted_on', { defaultValue: 'Accepted on' })}
-          <input type="date" className="mt-1 h-9 w-full rounded-md border border-border-light bg-surface-primary px-2.5 text-sm" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="date" className="mt-1 oe-input w-full" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         {offer.totals.not_included.length > 0 && (
           <fieldset>

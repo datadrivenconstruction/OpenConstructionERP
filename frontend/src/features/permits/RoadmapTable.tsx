@@ -128,15 +128,15 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
         </p>
       )}
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[760px] text-sm">
-          <thead className="bg-surface-secondary text-left text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table min-w-[760px]">
+          <thead className="text-left">
             <tr>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_permit', { defaultValue: 'Permit' })}</th>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_applicant', { defaultValue: 'Applicant' })}</th>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_state', { defaultValue: 'Status' })}</th>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_submit', { defaultValue: 'Submit by' })}</th>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_forecast', { defaultValue: 'Decision expected' })}</th>
-              <th className="px-3 py-2 font-medium">{t('permits.ui.roadmap.col_needed', { defaultValue: 'Needed by' })}</th>
+              <th>{t('permits.ui.roadmap.col_permit', { defaultValue: 'Permit' })}</th>
+              <th>{t('permits.ui.roadmap.col_applicant', { defaultValue: 'Applicant' })}</th>
+              <th>{t('permits.ui.roadmap.col_state', { defaultValue: 'Status' })}</th>
+              <th>{t('permits.ui.roadmap.col_submit', { defaultValue: 'Submit by' })}</th>
+              <th>{t('permits.ui.roadmap.col_forecast', { defaultValue: 'Decision expected' })}</th>
+              <th>{t('permits.ui.roadmap.col_needed', { defaultValue: 'Needed by' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -149,7 +149,7 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
                   data-testid="roadmap-row"
                   className={clsx('border-t border-border-light', !r.applicable && 'text-content-tertiary')}
                 >
-                  <td className="px-3 py-2">
+                  <td>
                     <button
                       type="button"
                       className="text-left font-medium text-oe-blue-text hover:underline"
@@ -159,18 +159,18 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
                     </button>
                     {r.title && <span className="block text-xs text-content-tertiary">{type}</span>}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {vocab(t, APPLICANT_ROLE, r.applicant_role)}
                     {r.applicant_party && <span className="block text-xs text-content-tertiary">{r.applicant_party}</span>}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {r.state && <ToneBadge tone={REQUIREMENT_TONE[r.state]}>{vocab(t, REQUIREMENT_STATE, r.state)}</ToneBadge>}
                     {application && r.state === 'in_progress' && (
                       <span className="mt-0.5 block text-xs text-content-tertiary">{vocab(t, APPLICATION_STATE, application.state)}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">{dateText(tl?.latest_submit)}</td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">{dateText(tl?.latest_submit)}</td>
+                  <td className="text-content-secondary">
                     {dateText(tl?.forecast_decision)}
                     {tl?.estimate && tl.forecast_decision && (
                       <span className="block text-xs text-content-tertiary">
