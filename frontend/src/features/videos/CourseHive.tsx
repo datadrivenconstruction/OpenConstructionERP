@@ -30,7 +30,7 @@ import {
 const RING: Record<CourseStatus, string> = {
   done: 'bg-semantic-success',
   next: 'bg-oe-blue',
-  ahead: 'bg-border',
+  ahead: 'bg-content-quaternary',
 };
 
 function useStatusLabel() {
@@ -80,7 +80,7 @@ function HexFace({
             onError={() => setFailed(true)}
             className={clsx(
               'h-full w-full object-cover transition-[filter,opacity] duration-200 motion-reduce:transition-none',
-              status === 'ahead' && !active && 'opacity-55 grayscale',
+              status === 'ahead' && !active && 'opacity-70 grayscale',
             )}
           />
         )}
