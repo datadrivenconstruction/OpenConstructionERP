@@ -2603,7 +2603,7 @@ export function FloatingChatPanel() {
             <div
               className={clsx(
                 'relative rounded-2xl border bg-[color:var(--chat-bg)] shadow-sm transition-[border-color,box-shadow]',
-                'focus-within:border-oe-blue focus-within:ring-2 focus-within:ring-oe-blue/20',
+                'focus-within:border-[color:var(--chat-text-secondary)]',
                 overHard
                   ? 'border-semantic-error'
                   : overSoft
@@ -2627,7 +2627,7 @@ export function FloatingChatPanel() {
                 })}
                 rows={2}
                 className={clsx(
-                  'block max-h-40 w-full min-w-0 resize-none overflow-auto border-0 bg-transparent px-3 pb-1 pt-2 text-sm text-[color:var(--chat-text-primary)] outline-none',
+                  'block max-h-40 w-full min-w-0 resize-none overflow-auto border-0 bg-transparent px-3 pb-1 pt-2 text-sm text-[color:var(--chat-text-primary)] outline-none focus-visible:outline-none',
                   'placeholder:text-[color:var(--chat-text-secondary)]',
                   'disabled:cursor-not-allowed disabled:opacity-70',
                 )}
