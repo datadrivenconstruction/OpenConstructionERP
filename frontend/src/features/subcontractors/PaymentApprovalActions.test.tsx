@@ -148,7 +148,8 @@ describe('PaymentApprovalActions', () => {
     const input = await openApproval();
     // Nothing goes out until the person confirms in the dialog.
     expect(financeMock).not.toHaveBeenCalled();
-    expect(input.value).toBe('2000.00');
+    // The line amounts load after the dialog opens; wait instead of racing slow runners.
+    await waitFor(() => expect(input.value).toBe('2000.00'));
     fireEvent.click(screen.getByTestId('pay-app-approve-confirm'));
     await waitFor(() =>
       expect(financeMock).toHaveBeenCalledWith('pa-1', [{ line_id: 'pal-1', approved_amount: '2000.00' }]),
