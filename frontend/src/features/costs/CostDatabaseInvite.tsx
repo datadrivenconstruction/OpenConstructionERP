@@ -60,7 +60,7 @@ export function CostDatabaseInvite({
             <Database size={20} strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+            <h3 className="oe-card-title">{title}</h3>
             <p className="mt-1 text-xs leading-relaxed text-content-secondary">
               {t('costs.empty_state.compact_subtitle', {
                 defaultValue:
@@ -71,7 +71,7 @@ export function CostDatabaseInvite({
           <Button
             variant="primary"
             size="md"
-            icon={<Download size={15} />}
+            icon={<Download size={16} />}
             onClick={onImport}
             className="shrink-0 self-start sm:self-auto"
           >
@@ -92,7 +92,7 @@ export function CostDatabaseInvite({
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),inset_0_-1px_0_rgba(255,255,255,0.6)]">
           <Database size={28} strokeWidth={1.5} />
         </div>
-        <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+        <h2 className="oe-section-title">{title}</h2>
         <p className="mt-1.5 max-w-md text-sm text-content-secondary">
           {t('costs.empty_state.subtitle', {
             defaultValue:
@@ -108,10 +108,10 @@ export function CostDatabaseInvite({
         <div className="rounded-xl border border-oe-blue/20 bg-oe-blue-subtle/30 p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-oe-blue text-content-inverse">
-              <Download size={18} />
+              <Download size={20} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-semibold text-content-primary">
+              <h3 className="oe-section-title">
                 {t('costs.empty_state.import_title', { defaultValue: 'Import a ready-made base' })}
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-content-secondary">
@@ -146,10 +146,10 @@ export function CostDatabaseInvite({
         <div className="p-4 sm:p-6">
           <div className="flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary/30 p-5 sm:flex-row sm:items-center sm:gap-5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
-              <Plus size={18} />
+              <Plus size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('costs.empty_state.create_title', { defaultValue: 'Create your own' })}
               </h3>
               <p className="mt-1 text-xs leading-relaxed text-content-secondary">

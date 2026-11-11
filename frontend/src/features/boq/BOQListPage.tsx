@@ -269,7 +269,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
   const totalB = boqB ? Number(boqB.grand_total) : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose}>
       <div
         className="relative mx-4 max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-surface-primary border border-border-light shadow-2xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -278,16 +278,16 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
-              <GitCompareArrows size={18} />
+              <GitCompareArrows size={20} />
             </div>
-            <h2 className="text-lg font-semibold text-content-primary">{t('boq.compare_title', { defaultValue: 'BOQ Comparison' })}</h2>
+            <h2 className="oe-section-title">{t('boq.compare_title', { defaultValue: 'BOQ Comparison' })}</h2>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -306,7 +306,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
               <div className="grid grid-cols-2 gap-4">
                 {/* BOQ A summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
-                  <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">A</div>
+                  <div className="oe-overline mb-1">A</div>
                   <div className="text-sm font-semibold text-content-primary truncate">{boqA.name}</div>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalA)}</span>
@@ -317,7 +317,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
 
                 {/* BOQ B summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
-                  <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">B</div>
+                  <div className="oe-overline mb-1">B</div>
                   <div className="text-sm font-semibold text-content-primary truncate">{boqB.name}</div>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalB)}</span>
@@ -331,8 +331,8 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                   Across currencies there is no cross-project FX rate, so we
                   never blend them into one diff (money rule b). */}
               {currencyMismatch ? (
-                <div className="rounded-xl border border-amber-500/30 bg-semantic-warning-bg dark:bg-amber-950/30 p-4 text-center">
-                  <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">
+                <div className="rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-center">
+                  <div className="oe-overline mb-1">
                     {t('boq.compare_difference', { defaultValue: 'Difference (B vs A)' })}
                   </div>
                   <div className="text-sm font-medium text-semantic-warning">
@@ -350,7 +350,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                   const currency = currencyA || currencyB || 'EUR';
                   return (
                     <div className={`rounded-xl border p-4 text-center ${diff > 0 ? 'border-semantic-error/30 bg-semantic-error-bg' : diff < 0 ? 'border-semantic-success/30 bg-semantic-success-bg' : 'border-border-light bg-surface-secondary'}`}>
-                      <div className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-1">
+                      <div className="oe-overline mb-1">
                         {t('boq.compare_difference', { defaultValue: 'Difference (B vs A)' })}
                       </div>
                       <div className={`text-lg font-semibold tabular-nums ${diffColor(diff)}`}>
@@ -364,7 +364,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
               {/* Section-by-section breakdown */}
               {comparison.paired.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-content-primary mb-3">
+                  <h3 className="oe-card-title mb-3">
                     {t('boq.compare_by_section', { defaultValue: 'By Section' })}
                   </h3>
                   <div className="rounded-xl border border-border-light overflow-hidden">
@@ -1024,20 +1024,20 @@ export function BOQListPage() {
           Canon KPI tile: shared Card, top-aligned label+value, text-lg value. */}
       {stats && allBoqs && allBoqs.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+            <div className="oe-overline">
               {isFiltered
                 ? t('boq.matching_estimates', { defaultValue: 'Matching Estimates' })
                 : t('boq.total_estimates', { defaultValue: 'Total Estimates' })}
             </div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.count}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_positions', { defaultValue: 'Total Positions' })}</div>
+          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+            <div className="oe-overline">{t('boq.total_positions', { defaultValue: 'Total Positions' })}</div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.totalPositions.toLocaleString(getNumberLocale())}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_value', { defaultValue: 'Total Value' })}</div>
+          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+            <div className="oe-overline">{t('boq.total_value', { defaultValue: 'Total Value' })}</div>
             {/* Money rule: never blend currencies into one scalar. One
                 labelled total when all share a currency; the dominant
                 currency plus a "+N more" affordance otherwise, so the tile
@@ -1069,8 +1069,8 @@ export function BOQListPage() {
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.status', { defaultValue: 'Status' })}</div>
+          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+            <div className="oe-overline">{t('boq.status', { defaultValue: 'Status' })}</div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {statusEntries.map(([status, n]) => (
                 <Badge key={status} variant={statusVariant(status)} size="sm" dot>
@@ -1096,7 +1096,7 @@ export function BOQListPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boq.search_placeholder', { defaultValue: 'Search estimates...' })}
-                className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-input-lg w-full ps-10 pe-3"
               />
             </div>
 
@@ -1109,7 +1109,7 @@ export function BOQListPage() {
                   aria-label={t('a11y.boq.project_filter', {
                     defaultValue: 'Filter estimates by project',
                   })}
-                  className="h-10 max-w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:min-w-44 sm:max-w-80"
+                  className="oe-select-lg max-w-full ps-3 sm:min-w-44 sm:max-w-80"
                 >
                   <option value="">{t('boq.all_projects', { defaultValue: 'All projects' })}</option>
                   {uniqueProjects.map((p) => (
@@ -1131,7 +1131,7 @@ export function BOQListPage() {
                   aria-label={t('a11y.boq.status_filter', {
                     defaultValue: 'Filter estimates by status',
                   })}
-                  className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-32"
+                  className="oe-select-lg ps-3 sm:w-32"
                 >
                   <option value="">{t('boq.all_statuses', { defaultValue: 'All statuses' })}</option>
                   {uniqueStatuses.map((s) => (
@@ -1261,7 +1261,7 @@ export function BOQListPage() {
           /* ── Compact table view ──────────────────────────────────── */
           <div className="rounded-xl border border-border-light bg-surface-primary overflow-hidden">
             {/* Header row */}
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary border-b border-border-light bg-surface-secondary/50">
+            <div className="oe-overline hidden sm:flex items-center gap-2 px-4 py-2.5 border-b border-border-light bg-surface-secondary/50">
               <span className="w-5 shrink-0" />
               <span className="flex-1 min-w-0">{t('boq.name', { defaultValue: 'Name' })}</span>
               <span className="w-36 shrink-0 hidden md:block">{t('boq.project', { defaultValue: 'Project' })}</span>
@@ -1346,7 +1346,7 @@ export function BOQListPage() {
                     }`}
                     title={t('boq.compare', { defaultValue: 'Compare' })}
                   >
-                    <GitCompareArrows size={13} />
+                    <GitCompareArrows size={14} />
                   </button>
                   <button
                     onClick={() => setRenameTarget({ id: boq.id, name: boq.name })}
@@ -1354,7 +1354,7 @@ export function BOQListPage() {
                     title={t('boq.rename', { defaultValue: 'Rename estimate' })}
                     aria-label={t('boq.rename', { defaultValue: 'Rename estimate' })}
                   >
-                    <Pencil size={13} />
+                    <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => duplicateMutation.mutate(boq.id)}
@@ -1362,7 +1362,7 @@ export function BOQListPage() {
                     className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
                     title={t('boq.duplicate', { defaultValue: 'Duplicate' })}
                   >
-                    <Copy size={13} />
+                    <Copy size={14} />
                   </button>
                   {canDeleteBoq(userRole, userId, boq) && (
                     <button
@@ -1370,11 +1370,11 @@ export function BOQListPage() {
                       className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
                       title={t('common.delete')}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                   <span className="inline-flex items-center text-2xs font-semibold text-oe-blue-text opacity-0 transition-opacity group-hover:opacity-100">
-                    <ArrowRight size={13} />
+                    <ArrowRight size={14} />
                   </span>
                 </div>
               </div>
@@ -1403,17 +1403,17 @@ export function BOQListPage() {
                   anchored to the bottom just above the actions, so every card
                   in a row lines its total and controls up on one baseline no
                   matter how many lines each name wraps to. */}
-              <div className="flex flex-col gap-2.5 p-4 pb-2">
+              <div className="flex flex-col gap-2 p-4 pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
-                    <Table2 size={18} strokeWidth={1.75} />
+                    <Table2 size={20} strokeWidth={1.75} />
                   </div>
                   <Badge variant={statusVariant(boq.status)} size="sm" dot>{statusLabel(boq.status)}</Badge>
                 </div>
 
                 <div>
                   <h3
-                    className="text-sm font-semibold leading-snug text-content-primary line-clamp-2"
+                    className="oe-card-title line-clamp-2"
                     title={boq.name}
                   >
                     {boq.name}
@@ -1443,7 +1443,7 @@ export function BOQListPage() {
                   </span>
                   <span aria-hidden>·</span>
                   <span className="inline-flex items-center gap-1">
-                    <CalendarDays size={11} />
+                    <CalendarDays size={12} />
                     {/* All-numeric so a de-DE reader sees 14.03.2026, matching
                         the tendering cards (PLAN fixes the numeric form). */}
                     <DateDisplay value={boq.created_at} format="numeric" />
@@ -1488,7 +1488,7 @@ export function BOQListPage() {
                             : t('boq.compare', { defaultValue: 'Compare' })
                         }
                       >
-                        <GitCompareArrows size={13} />
+                        <GitCompareArrows size={14} />
                       </button>
 
                       {/* CONN-34: build a 4D schedule straight from this BOQ. */}
@@ -1502,7 +1502,7 @@ export function BOQListPage() {
                         className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
                         title={t('boq.build_schedule', { defaultValue: 'Build schedule from this BOQ' })}
                       >
-                        <CalendarDays size={13} />
+                        <CalendarDays size={14} />
                       </button>
 
                       <button
@@ -1511,7 +1511,7 @@ export function BOQListPage() {
                         title={t('boq.rename', { defaultValue: 'Rename estimate' })}
                         aria-label={t('boq.rename', { defaultValue: 'Rename estimate' })}
                       >
-                        <Pencil size={13} />
+                        <Pencil size={14} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(boq.id); }}
@@ -1519,7 +1519,7 @@ export function BOQListPage() {
                         className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
                         title={t('boq.duplicate', { defaultValue: 'Duplicate' })}
                       >
-                        <Copy size={13} />
+                        <Copy size={14} />
                       </button>
 
                       {canDeleteBoq(userRole, userId, boq) && (
@@ -1528,7 +1528,7 @@ export function BOQListPage() {
                           className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
                           title={t('common.delete')}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -1537,7 +1537,7 @@ export function BOQListPage() {
                         clickable without adding permanent clutter. */}
                     <span className="inline-flex items-center gap-1 pr-1 text-2xs font-semibold text-oe-blue-text opacity-0 transition-opacity group-hover:opacity-100">
                       {t('boq.open', { defaultValue: 'Open' })}
-                      <ArrowRight size={13} />
+                      <ArrowRight size={14} />
                     </span>
                   </>
                 )}

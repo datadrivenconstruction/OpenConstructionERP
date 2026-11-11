@@ -148,7 +148,7 @@ export default function BIMRequirementsImport() {
 
   if (!projectId) {
     return (
-      <div className="text-sm text-zinc-500 dark:text-zinc-400 p-4">
+      <div className="text-sm text-content-tertiary p-4">
         {t('bim.requirements.noProject', { defaultValue: 'Select a project first' })}
       </div>
     );
@@ -158,7 +158,7 @@ export default function BIMRequirementsImport() {
     <div className="space-y-6">
       {/* ── Upload zone ──────────────────────────────────────────── */}
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-zinc-700 dark:text-zinc-200">
+        <h3 className="oe-card-title mb-2 text-content-secondary">
           {t('bim.requirements.importTitle', { defaultValue: 'Import BIM Requirements' })}
         </h3>
 
@@ -171,25 +171,25 @@ export default function BIMRequirementsImport() {
             'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
             isDragging
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-              : 'border-zinc-300 dark:border-zinc-600 hover:border-blue-400',
+              : 'border-border hover:border-blue-400',
           )}
         >
           {importMutation.isPending ? (
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-              <span className="text-sm text-zinc-500">
+              <span className="text-sm text-content-tertiary">
                 {t('bim.requirements.importing', { defaultValue: 'Importing...' })}
               </span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <Upload className="w-8 h-8 text-zinc-400" />
-              <span className="text-sm text-zinc-600 dark:text-zinc-300">
+              <Upload className="w-8 h-8 text-content-quaternary" />
+              <span className="text-sm text-content-secondary">
                 {t('bim.requirements.dropzone', {
                   defaultValue: 'Drop a file here or click to browse',
                 })}
               </span>
-              <span className="text-xs text-zinc-400">
+              <span className="text-xs text-content-quaternary">
                 {t('bim.requirements.formats', {
                   defaultValue: 'IDS XML, COBie Excel, Excel/CSV, RVT shared-parameter (.txt), BIMQ JSON',
                 })}
@@ -234,24 +234,24 @@ export default function BIMRequirementsImport() {
 
       {/* ── Imported sets ────────────────────────────────────────── */}
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-zinc-700 dark:text-zinc-200">
+        <h3 className="oe-card-title mb-2 text-content-secondary">
           {t('bim.requirements.importedSets', { defaultValue: 'Imported Requirement Sets' })}
           {sets.length > 0 && (
-            <span className="ml-1 text-zinc-400 font-normal">({sets.length})</span>
+            <span className="ml-1 text-content-quaternary font-normal">({sets.length})</span>
           )}
         </h3>
 
         {setsLoading ? (
-          <div className="text-sm text-zinc-400 flex items-center gap-1">
+          <div className="text-sm text-content-quaternary flex items-center gap-1">
             <Loader2 className="w-4 h-4 animate-spin" />
             {t('common.loading', { defaultValue: 'Loading...' })}
           </div>
         ) : sets.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 p-4 text-center">
-            <p className="text-sm text-zinc-400">
+          <div className="rounded-lg border border-dashed border-border p-4 text-center">
+            <p className="text-sm text-content-quaternary">
               {t('bim.requirements.noSets', { defaultValue: 'No requirement sets imported yet.' })}
             </p>
-            <p className="mt-1 text-xs text-zinc-400">
+            <p className="mt-1 text-xs text-content-quaternary">
               {t('bim_requirements.noSetsHint', {
                 defaultValue:
                   'Import an IDS, COBie, Excel/CSV, RVT shared-parameter or BIMQ file above, then export it or validate a BIM model against it here.',
@@ -289,27 +289,27 @@ function ImportResultBanner({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4">
+    <div className="rounded-lg border border-semantic-success/30 bg-semantic-success-bg p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 text-green-600" />
-          <span className="text-sm font-medium text-green-800 dark:text-green-200">
+          <CheckCircle2 className="w-5 h-5 text-semantic-success" />
+          <span className="text-sm font-medium text-semantic-success">
             {t('bim.requirements.importedCount', {
               defaultValue: 'Imported {{count}} requirements',
               count: result.total_requirements,
             })}
           </span>
-          <span className="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-800 px-1.5 py-0.5 rounded">
+          <span className="text-xs text-semantic-success bg-semantic-success-bg px-1.5 py-0.5 rounded">
             {result.source_format}
           </span>
         </div>
-        <button onClick={onDismiss} className="text-zinc-400 hover:text-zinc-600 text-sm">
+        <button onClick={onDismiss} className="text-content-quaternary hover:text-content-secondary text-sm">
           x
         </button>
       </div>
 
       {result.warnings.length > 0 && (
-        <div className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+        <div className="mt-2 text-xs text-semantic-warning">
           <div className="flex items-center gap-1 font-medium">
             <AlertTriangle className="w-3.5 h-3.5" />
             {t('bim.requirements.warnings_count', {
@@ -327,7 +327,7 @@ function ImportResultBanner({
       )}
 
       {result.errors.length > 0 && (
-        <div className="mt-2 text-xs text-red-700 dark:text-red-300">
+        <div className="mt-2 text-xs text-semantic-error">
           <div className="flex items-center gap-1 font-medium">
             <AlertCircle className="w-3.5 h-3.5" />
             {result.errors.length} {t('bim.requirements.errors', { defaultValue: 'error(s)' })}
@@ -380,20 +380,20 @@ function RequirementSetCard({
   });
 
   return (
-    <div className="border rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+    <div className="border rounded-lg border-border bg-white dark:bg-zinc-800">
       {/* Header */}
       <div
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700/50"
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-surface-secondary"
         onClick={onToggle}
       >
         <div className="flex items-center gap-2">
           {isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-zinc-400" />
+            <ChevronDown className="w-4 h-4 text-content-quaternary" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-zinc-400" />
+            <ChevronRight className="w-4 h-4 text-content-quaternary" />
           )}
-          <span className="text-sm font-medium text-zinc-800 dark:text-zinc-100">{set.name}</span>
-          <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded">
+          <span className="text-sm font-medium text-content-primary">{set.name}</span>
+          <span className="text-xs text-content-quaternary bg-surface-secondary px-1.5 py-0.5 rounded">
             {set.source_format}
           </span>
         </div>
@@ -401,7 +401,7 @@ function RequirementSetCard({
           <button
             type="button"
             onClick={() => setValidateOpen(true)}
-            className="p-1.5 text-zinc-400 hover:text-indigo-600 rounded"
+            className="p-1.5 text-content-quaternary hover:text-indigo-600 rounded"
             title={t('bim_requirements.validateAgainstModel', {
               defaultValue: 'Validate a BIM model against this requirement set',
             })}
@@ -412,7 +412,7 @@ function RequirementSetCard({
             type="button"
             onClick={() => exportExcelMutation.mutate()}
             disabled={exportExcelMutation.isPending}
-            className="p-1.5 text-zinc-400 hover:text-green-600 rounded disabled:opacity-50"
+            className="p-1.5 text-content-quaternary hover:text-semantic-success rounded disabled:opacity-50"
             title={t('bim.requirements.exportExcel', { defaultValue: 'Export as Excel' })}
           >
             {exportExcelMutation.isPending ? (
@@ -425,7 +425,7 @@ function RequirementSetCard({
             type="button"
             onClick={() => exportIdsMutation.mutate()}
             disabled={exportIdsMutation.isPending}
-            className="p-1.5 text-zinc-400 hover:text-blue-600 rounded disabled:opacity-50"
+            className="p-1.5 text-content-quaternary hover:text-blue-600 rounded disabled:opacity-50"
             title={t('bim.requirements.exportIDS', { defaultValue: 'Export as IDS XML' })}
           >
             {exportIdsMutation.isPending ? (
@@ -436,7 +436,7 @@ function RequirementSetCard({
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-zinc-400 hover:text-red-600 rounded"
+            className="p-1.5 text-content-quaternary hover:text-semantic-error rounded"
             title={t('common.delete', { defaultValue: 'Delete' })}
           >
             <Trash2 className="w-4 h-4" />
@@ -492,17 +492,17 @@ function ValidateAgainstModelModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
         className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-lg bg-white dark:bg-zinc-800 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-700 p-4">
+        <div className="flex items-center justify-between border-b border-border-light p-4">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-indigo-600" />
-            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+            <h3 className="oe-card-title text-content-primary">
               {t('bim_requirements.validateModalTitle', {
                 defaultValue: 'Validate model against "{{name}}"',
                 name: set.name,
@@ -511,7 +511,7 @@ function ValidateAgainstModelModal({
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 text-sm"
+            className="text-content-quaternary hover:text-content-secondary text-sm"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             x
@@ -519,7 +519,7 @@ function ValidateAgainstModelModal({
         </div>
 
         <div className="p-4 space-y-4">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-content-tertiary">
             {t('bim_requirements.validateHint', {
               defaultValue:
                 'Pick an imported BIM model. Each requirement is checked against the matching elements and you get a pass / fail / not-applicable report.',
@@ -527,7 +527,7 @@ function ValidateAgainstModelModal({
           </p>
 
           <div className="flex items-end gap-2">
-            <label className="flex-1 text-xs text-zinc-600 dark:text-zinc-300">
+            <label className="flex-1 text-xs text-content-secondary">
               <span className="block mb-1 font-medium">
                 {t('bim_requirements.validateModelPicker', { defaultValue: 'BIM model' })}
               </span>
@@ -538,7 +538,7 @@ function ValidateAgainstModelModal({
                   setReport(null);
                 }}
                 disabled={modelsLoading || models.length === 0}
-                className="w-full rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-2 py-1.5 text-sm disabled:opacity-50"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('bim_requirements.validateSelectModel', { defaultValue: 'Select a model…' })}
@@ -566,7 +566,7 @@ function ValidateAgainstModelModal({
           </div>
 
           {!modelsLoading && models.length === 0 && (
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-content-quaternary">
               {t('bim_requirements.noModels', {
                 defaultValue: 'No BIM models in this project yet. Upload a model first.',
               })}
@@ -609,7 +609,7 @@ function ValidationReportView({ report }: { report: BIMRequirementValidationResu
           value={report.not_applicable}
         />
       </div>
-      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="text-xs text-content-tertiary">
         {t('bim_requirements.complianceRatio', {
           defaultValue: 'Compliance: {{pct}}%',
           pct: compliancePct,
@@ -617,38 +617,38 @@ function ValidationReportView({ report }: { report: BIMRequirementValidationResu
       </div>
 
       {report.results.length === 0 ? (
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-content-quaternary">
           {t('bim_requirements.noResults', {
             defaultValue: 'No active requirements to evaluate in this set.',
           })}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-md border border-zinc-100 dark:border-zinc-700">
-          <table className="w-full text-xs">
-            <thead className="bg-zinc-50 dark:bg-zinc-700/50">
+        <div className="overflow-x-auto rounded-md border border-border-light">
+          <table className="oe-table-compact w-full">
+            <thead className="bg-surface-secondary">
               <tr>
-                <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+                <th className="text-content-tertiary">
                   {t('bim_requirements.colStatus', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+                <th className="text-content-tertiary">
                   {t('bim.requirements.col.property', { defaultValue: 'Property' })}
                 </th>
-                <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+                <th className="text-content-tertiary">
                   {t('bim_requirements.colDetails', { defaultValue: 'Details' })}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
+            <tbody>
               {report.results.map((r) => (
-                <tr key={r.requirement_id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700/30">
-                  <td className="px-3 py-1.5 whitespace-nowrap">
+                <tr key={r.requirement_id} className="hover:bg-surface-secondary">
+                  <td className="whitespace-nowrap">
                     <StatusBadge status={r.status} />
                   </td>
-                  <td className="px-3 py-1.5 text-zinc-800 dark:text-zinc-200 font-medium">
+                  <td className="text-content-primary font-medium">
                     {r.property_group ? `${r.property_group} · ` : ''}
                     {r.property_name}
                   </td>
-                  <td className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400">{r.details}</td>
+                  <td className="text-content-tertiary">{r.details}</td>
                 </tr>
               ))}
             </tbody>
@@ -669,10 +669,10 @@ function SummaryChip({
   value: number;
 }) {
   const toneClass = {
-    zinc: 'bg-zinc-50 dark:bg-zinc-700/40 text-zinc-700 dark:text-zinc-200',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300',
-    red: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300',
-    amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
+    zinc: 'bg-surface-secondary text-content-secondary',
+    green: 'bg-semantic-success-bg text-semantic-success',
+    red: 'bg-semantic-error-bg text-semantic-error',
+    amber: 'bg-semantic-warning-bg text-semantic-warning',
   }[tone];
   return (
     <div className={clsx('rounded-md p-2 text-center', toneClass)}>
@@ -686,7 +686,7 @@ function StatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();
   if (status === 'pass') {
     return (
-      <span className="inline-flex items-center gap-1 text-green-700 dark:text-green-300">
+      <span className="inline-flex items-center gap-1 text-semantic-success">
         <CheckCircle2 className="w-3.5 h-3.5" />
         {t('bim_requirements.statusPass', { defaultValue: 'Pass' })}
       </span>
@@ -694,14 +694,14 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (status === 'fail') {
     return (
-      <span className="inline-flex items-center gap-1 text-red-700 dark:text-red-300">
+      <span className="inline-flex items-center gap-1 text-semantic-error">
         <XCircle className="w-3.5 h-3.5" />
         {t('bim_requirements.statusFail', { defaultValue: 'Fail' })}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
+    <span className="inline-flex items-center gap-1 text-semantic-warning">
       <MinusCircle className="w-3.5 h-3.5" />
       {t('bim_requirements.statusNA', { defaultValue: 'N/A' })}
     </span>
@@ -720,7 +720,7 @@ function RequirementSetDetail({ setId }: { setId: string }) {
 
   if (isLoading) {
     return (
-      <div className="p-3 border-t border-zinc-100 dark:border-zinc-700 text-sm text-zinc-400 flex items-center gap-1">
+      <div className="p-3 border-t border-border-light text-sm text-content-quaternary flex items-center gap-1">
         <Loader2 className="w-4 h-4 animate-spin" />
         {t('common.loading', { defaultValue: 'Loading...' })}
       </div>
@@ -729,44 +729,44 @@ function RequirementSetDetail({ setId }: { setId: string }) {
 
   if (!data || data.requirements.length === 0) {
     return (
-      <div className="p-3 border-t border-zinc-100 dark:border-zinc-700 text-sm text-zinc-400">
+      <div className="p-3 border-t border-border-light text-sm text-content-quaternary">
         {t('bim.requirements.empty', { defaultValue: 'No requirements in this set.' })}
       </div>
     );
   }
 
   return (
-    <div className="border-t border-zinc-100 dark:border-zinc-700 overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead className="bg-zinc-50 dark:bg-zinc-700/50">
+    <div className="border-t border-border-light overflow-x-auto">
+      <table className="oe-table-compact w-full">
+        <thead className="bg-surface-secondary">
           <tr>
-            <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+            <th className="text-content-tertiary">
               {t('bim.requirements.col.element', { defaultValue: 'Element' })}
             </th>
-            <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+            <th className="text-content-tertiary">
               {t('bim.requirements.col.pset', { defaultValue: 'Property Set' })}
             </th>
-            <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+            <th className="text-content-tertiary">
               {t('bim.requirements.col.property', { defaultValue: 'Property' })}
             </th>
-            <th className="px-3 py-1.5 text-left font-medium text-zinc-500">
+            <th className="text-content-tertiary">
               {t('bim.requirements.col.constraint', { defaultValue: 'Constraint' })}
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
+        <tbody>
           {data.requirements.slice(0, 50).map((req) => (
-            <tr key={req.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700/30">
-              <td className="px-3 py-1.5 text-zinc-700 dark:text-zinc-300">
+            <tr key={req.id} className="hover:bg-surface-secondary">
+              <td className="text-content-secondary">
                 {(req.element_filter as Record<string, string>).ifc_class || '-'}
               </td>
-              <td className="px-3 py-1.5 text-zinc-600 dark:text-zinc-400">
+              <td className="text-content-secondary">
                 {req.property_group || '-'}
               </td>
-              <td className="px-3 py-1.5 text-zinc-800 dark:text-zinc-200 font-medium">
+              <td className="text-content-primary font-medium">
                 {req.property_name}
               </td>
-              <td className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400">
+              <td className="text-content-tertiary">
                 {formatConstraint(req.constraint_def as Record<string, unknown>)}
               </td>
             </tr>
@@ -774,7 +774,7 @@ function RequirementSetDetail({ setId }: { setId: string }) {
         </tbody>
       </table>
       {data.requirements.length > 50 && (
-        <div className="p-2 text-xs text-zinc-400 text-center">
+        <div className="p-2 text-xs text-content-quaternary text-center">
           {t('bim.requirements.showingFirst', {
             defaultValue: 'Showing first 50 of {{total}} requirements',
             total: data.requirements.length,

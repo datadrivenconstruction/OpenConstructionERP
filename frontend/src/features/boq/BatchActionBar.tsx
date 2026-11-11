@@ -364,7 +364,7 @@ export function BatchActionBar({
 
       {/* Inline confirmation dialog for batch delete */}
       {confirmDeleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-modal flex items-center justify-center">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
@@ -384,7 +384,7 @@ export function BatchActionBar({
               <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-semantic-error/10 text-semantic-error mb-4">
                 <Trash2 size={20} />
               </div>
-              <h2 className="text-base font-semibold text-content-primary text-center">
+              <h2 className="oe-section-title text-center">
                 {t('boq.batch_delete_confirm_title', { defaultValue: 'Delete positions' })}
               </h2>
               <p className="mt-2 text-sm text-content-secondary text-center leading-relaxed">
@@ -440,7 +440,7 @@ export function BatchActionBar({
 
       {/* v3.12.0 — Factor prompt dialog (rate or quantity) */}
       {factorDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-modal flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
             onClick={() => setFactorDialog(null)}
@@ -459,7 +459,7 @@ export function BatchActionBar({
             className="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
           >
             <div className="px-6 pt-6 pb-4">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {factorDialog.kind === 'rate'
                   ? t('boq.batch_rate_factor_title', { defaultValue: 'Multiply rate by factor' })
                   : t('boq.batch_qty_factor_title', { defaultValue: 'Multiply quantity by factor' })}
@@ -485,7 +485,7 @@ export function BatchActionBar({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleConfirmFactor();
                   }}
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm font-mono text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input mt-1 w-full font-mono"
                   aria-label={t('boq.batch_factor_label', { defaultValue: 'Factor (> 0)' })}
                 />
               </label>
@@ -512,7 +512,7 @@ export function BatchActionBar({
 
       {/* v3.12.0 — Classification dialog */}
       {classDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-modal flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
             onClick={() => setClassDialog(null)}
@@ -527,7 +527,7 @@ export function BatchActionBar({
             className="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
           >
             <div className="px-6 pt-6 pb-4">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('boq.batch_set_classification', { defaultValue: 'Set classification' })}
               </h2>
               <p className="mt-1 text-xs text-content-secondary">
@@ -548,7 +548,7 @@ export function BatchActionBar({
                       standard: e.target.value as BatchClassificationStandard,
                     })
                   }
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-select mt-1 w-full"
                 >
                   <option value="din276">DIN 276</option>
                   <option value="nrm">NRM</option>
@@ -576,7 +576,7 @@ export function BatchActionBar({
                         ? '2.6.1'
                         : '03 30 00'
                   }
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm font-mono text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input mt-1 w-full font-mono"
                   aria-label={t('boq.batch_class_code', { defaultValue: 'Code' })}
                 />
               </label>
@@ -604,7 +604,7 @@ export function BatchActionBar({
 
       {/* Find & replace dialog (description text) */}
       {findReplaceDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-modal flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
             onClick={() => setFindReplaceDialog(null)}
@@ -619,7 +619,7 @@ export function BatchActionBar({
             className="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
           >
             <div className="px-6 pt-6 pb-4">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('boq.batch_find_replace', { defaultValue: 'Find and replace' })}
               </h2>
               <p className="mt-1 text-xs text-content-secondary">
@@ -640,7 +640,7 @@ export function BatchActionBar({
                   onChange={(e) =>
                     setFindReplaceDialog({ ...findReplaceDialog, find: e.target.value })
                   }
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input mt-1 w-full"
                   aria-label={t('boq.batch_find_label', { defaultValue: 'Find' })}
                 />
               </label>
@@ -657,7 +657,7 @@ export function BatchActionBar({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleConfirmFindReplace();
                   }}
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input mt-1 w-full"
                   aria-label={t('boq.batch_replace_label', { defaultValue: 'Replace with' })}
                 />
               </label>
@@ -696,7 +696,7 @@ export function BatchActionBar({
 
       {/* Set an exact value (rate / quantity) on the selected rows */}
       {setValueDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-modal flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
             onClick={() => setSetValueDialog(null)}
@@ -711,7 +711,7 @@ export function BatchActionBar({
             className="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
           >
             <div className="px-6 pt-6 pb-4">
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('boq.batch_set_value', { defaultValue: 'Set value' })}
               </h2>
               <p className="mt-1 text-xs text-content-secondary">
@@ -733,7 +733,7 @@ export function BatchActionBar({
                       field: e.target.value as 'unit_rate' | 'quantity',
                     })
                   }
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-select mt-1 w-full"
                 >
                   <option value="unit_rate">
                     {t('boq.batch_set_value_rate', { defaultValue: 'Unit rate' })}
@@ -756,7 +756,7 @@ export function BatchActionBar({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleConfirmSetValue();
                   }}
-                  className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm font-mono text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input mt-1 w-full font-mono"
                   aria-label={t('boq.batch_set_value_value', { defaultValue: 'Value' })}
                 />
               </label>

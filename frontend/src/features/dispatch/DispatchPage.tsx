@@ -250,7 +250,7 @@ export function DispatchPage() {
           value={day}
           onChange={(e) => e.target.value && setDay(e.target.value)}
           aria-label={t('dispatch.pick_day', { defaultValue: 'Day' })}
-          className="rounded border border-border bg-surface-primary px-2 py-1 text-sm"
+          className="oe-input-sm"
         />
         <Button variant="ghost" size="sm" aria-label={t('dispatch.next_day', { defaultValue: 'Next day' })} onClick={() => setDay(addDays(day, view === 'day' ? 1 : 7))}>
           <ChevronRight size={16} />
@@ -393,7 +393,7 @@ function SelectionBar({
       <span>{t('dispatch.selected_count', { defaultValue: '{{count}} selected', count: selected.length })}</span>
       <label className="flex items-center gap-1">
         {t('dispatch.move_selected_to', { defaultValue: 'Move selected to' })}
-        <select value={to} onChange={(e) => setTo(e.target.value)} className="rounded border border-border bg-surface-primary px-2 py-1">
+        <select value={to} onChange={(e) => setTo(e.target.value)} className="oe-select-sm">
           <option value="">-</option>
           {locations.map((l) => (
             <option key={l.id} value={l.id}>
@@ -461,7 +461,7 @@ function Palette({
           setOffset(0);
         }}
         placeholder={t('dispatch.search', { defaultValue: 'Search by name or code' })}
-        className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-sm"
+        className="oe-input-sm w-full"
       />
       {kind === 'crew' && <NewCrew />}
       <ul className="max-h-[55vh] space-y-1 overflow-y-auto">
@@ -489,7 +489,7 @@ function Palette({
         <div className="space-y-1 rounded border border-border p-2 text-xs">
           <label className="block">
             {t('dispatch.place_selected_on', { defaultValue: 'Place {{count}} on', count: picked.size })}
-            <select value={to} onChange={(e) => setTo(e.target.value)} className="mt-1 w-full rounded border border-border bg-surface-primary px-2 py-1">
+            <select value={to} onChange={(e) => setTo(e.target.value)} className="oe-select-sm mt-1 w-full">
               <option value="">-</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -588,7 +588,7 @@ function Column({
     >
       <header className="mb-2 flex items-start justify-between gap-1">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold" title={location.name}>
+          <h3 className="oe-card-title truncate" title={location.name}>
             {location.name}
           </h3>
           <p className="text-xs text-content-tertiary">
@@ -710,22 +710,22 @@ function PlacementCard({
         <div className="mt-2 space-y-1.5 border-t border-border pt-1.5">
           <label className="flex items-center gap-1">
             {t('dispatch.start_time', { defaultValue: 'Start' })}
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded border border-border bg-surface-primary px-1" />
+            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="oe-input" />
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder={t('dispatch.notes', { defaultValue: 'Notes for the foreman' })}
-            className="w-full rounded border border-border bg-surface-primary px-1"
+            className="oe-textarea w-full"
           />
           <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
             {t('common.save', { defaultValue: 'Save' })}
           </Button>
           <fieldset className="space-y-1 border-t border-border pt-1.5">
             <legend className="text-content-secondary">{t('dispatch.book_move', { defaultValue: 'Book a move for later' })}</legend>
-            <input type="date" value={moveDate} min={isoDay(new Date())} onChange={(e) => setMoveDate(e.target.value)} className="rounded border border-border bg-surface-primary px-1" aria-label={t('dispatch.move_date', { defaultValue: 'Move on' })} />
-            <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className="w-full rounded border border-border bg-surface-primary px-1" aria-label={t('dispatch.move_to', { defaultValue: 'Move to' })}>
+            <input type="date" value={moveDate} min={isoDay(new Date())} onChange={(e) => setMoveDate(e.target.value)} className="oe-input" aria-label={t('dispatch.move_date', { defaultValue: 'Move on' })} />
+            <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className="oe-select w-full" aria-label={t('dispatch.move_to', { defaultValue: 'Move to' })}>
               <option value="">-</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -789,7 +789,7 @@ function AddColumn() {
   }
   return (
     <div className="w-64 shrink-0 space-y-2 rounded-lg border border-border p-2 text-sm">
-      <select value={kind} onChange={(e) => setKind(e.target.value as LocationKind)} className="w-full rounded border border-border bg-surface-primary px-2 py-1">
+      <select value={kind} onChange={(e) => setKind(e.target.value as LocationKind)} className="oe-select-sm w-full">
         {(Object.keys(labels.location) as LocationKind[]).map((k) => (
           <option key={k} value={k}>
             {labels.location[k]}
@@ -797,7 +797,7 @@ function AddColumn() {
         ))}
       </select>
       {kind === 'project' && (
-        <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="w-full rounded border border-border bg-surface-primary px-2 py-1" aria-label={t('dispatch.project', { defaultValue: 'Project' })}>
+        <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="oe-select-sm w-full" aria-label={t('dispatch.project', { defaultValue: 'Project' })}>
           <option value="">{t('dispatch.pick_project', { defaultValue: 'Pick a project' })}</option>
           {(projects.data ?? []).map((p) => (
             <option key={p.id} value={p.id}>
@@ -806,7 +806,7 @@ function AddColumn() {
           ))}
         </select>
       )}
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('dispatch.column_name', { defaultValue: 'Name (optional)' })} className="w-full rounded border border-border bg-surface-primary px-2 py-1" />
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('dispatch.column_name', { defaultValue: 'Name (optional)' })} className="oe-input-sm w-full" />
       <div className="flex gap-2">
         <Button size="sm" disabled={(kind === 'project' && !projectId) || mut.isPending} onClick={() => mut.mutate()}>
           {t('dispatch.add', { defaultValue: 'Add' })}
@@ -848,10 +848,10 @@ function NewCrew() {
   }
   return (
     <div className="space-y-1 rounded border border-border p-2 text-xs">
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('dispatch.crew_name', { defaultValue: 'Crew name' })} className="w-full rounded border border-border bg-surface-primary px-2 py-1" />
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('dispatch.crew_name', { defaultValue: 'Crew name' })} className="oe-input-sm w-full" />
       <label className="flex items-center gap-1">
         {t('dispatch.crew_min', { defaultValue: 'Needs at least' })}
-        <input type="number" min={0} value={minSize} onChange={(e) => setMinSize(Number(e.target.value) || 0)} className="w-14 rounded border border-border bg-surface-primary px-1" />
+        <input type="number" min={0} value={minSize} onChange={(e) => setMinSize(Number(e.target.value) || 0)} className="oe-input w-14" />
       </label>
       <ul className="max-h-32 overflow-y-auto">
         {(people.data?.items ?? []).map((w) => (
@@ -889,7 +889,7 @@ function PlanPanel({ day, onClose }: { day: string; onClose: () => void }) {
   return (
     <Card className="p-3">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h2 className="text-sm font-semibold">{t('dispatch.plan_for', { defaultValue: 'Daily plan for {{day}}', day })}</h2>
+        <h2 className="oe-card-title">{t('dispatch.plan_for', { defaultValue: 'Daily plan for {{day}}', day })}</h2>
         <Button size="sm" variant="secondary" onClick={() => void downloadPlanPdf(day)}>
           <FileDown size={14} className="mr-1" />
           {t('dispatch.print_pdf', { defaultValue: 'Print (PDF)' })}
@@ -908,9 +908,9 @@ function PlanPanel({ day, onClose }: { day: string; onClose: () => void }) {
       <div className="grid gap-3 md:grid-cols-2">
         {(plan.data?.plans ?? []).map((f, i) => (
           <div key={`${f.foreman}-${i}`} className="rounded border border-border p-2">
-            <h3 className="mb-1 text-sm font-medium">{f.foreman || t('dispatch.no_foreman', { defaultValue: 'No foreman set' })}</h3>
-            <table className="w-full text-xs">
-              <thead className="text-left text-content-tertiary">
+            <h3 className="oe-card-title mb-1">{f.foreman || t('dispatch.no_foreman', { defaultValue: 'No foreman set' })}</h3>
+            <table className="oe-table-compact w-full">
+              <thead className="text-left">
                 <tr>
                   <th>{t('dispatch.start_time', { defaultValue: 'Start' })}</th>
                   <th>{t('dispatch.where', { defaultValue: 'Where' })}</th>
@@ -920,7 +920,7 @@ function PlanPanel({ day, onClose }: { day: string; onClose: () => void }) {
               </thead>
               <tbody>
                 {f.lines.map((ln, j) => (
-                  <tr key={j} className="border-t border-border align-top">
+                  <tr key={j} className="align-top">
                     <td className="pr-2">{ln.start_time}</td>
                     <td className="pr-2">{ln.location}</td>
                     <td className="pr-2">
@@ -946,12 +946,12 @@ function WeekView({ start, onPickDay }: { start: string; onPickDay: (day: string
   const days = week.data?.days ?? [];
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] border-collapse text-xs">
+      <table className="oe-table-compact w-full min-w-[720px]">
         <thead>
           <tr>
-            <th className="p-1 text-left">{t('dispatch.where', { defaultValue: 'Where' })}</th>
+            <th>{t('dispatch.where', { defaultValue: 'Where' })}</th>
             {days.map((d) => (
-              <th key={d.day} className="p-1 text-left">
+              <th key={d.day}>
                 <button type="button" className="underline-offset-2 hover:underline" onClick={() => onPickDay(d.day)}>
                   {d.day.slice(5)}
                 </button>
@@ -966,10 +966,10 @@ function WeekView({ start, onPickDay }: { start: string; onPickDay: (day: string
         </thead>
         <tbody>
           {locations.map((loc) => (
-            <tr key={loc.id} className="border-t border-border align-top">
-              <td className="p-1 font-medium">{loc.name}</td>
+            <tr key={loc.id} className="align-top">
+              <td className="font-medium">{loc.name}</td>
               {days.map((d) => (
-                <td key={d.day} className="p-1">
+                <td key={d.day}>
                   {d.placements
                     .filter((p) => p.location_id === loc.id)
                     .map((p) => (
@@ -999,7 +999,7 @@ function UtilisationView({ day }: { day: string }) {
         <span className="text-content-secondary">
           {t('dispatch.util_hint', { defaultValue: 'Working days on a site against idle days. Idle rentals are money to save.' })}
         </span>
-        <select value={range} onChange={(e) => setRange(e.target.value as 'week' | 'month')} className="ml-auto rounded border border-border bg-surface-primary px-2 py-1">
+        <select value={range} onChange={(e) => setRange(e.target.value as 'week' | 'month')} className="oe-select-sm ml-auto">
           <option value="week">{t('dispatch.this_week', { defaultValue: 'This week' })}</option>
           <option value="month">{t('dispatch.this_month', { defaultValue: 'This month' })}</option>
         </select>

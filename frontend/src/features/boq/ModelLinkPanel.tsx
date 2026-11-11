@@ -202,7 +202,7 @@ export function ModelLinkPanel({
     >
       {/* Existing links */}
       <div className="mb-5">
-        <h4 className="text-xs font-semibold text-content-secondary mb-2">
+        <h4 className="oe-card-title mb-2">
           {t('boq.model_link_existing', { defaultValue: 'Existing links' })}
         </h4>
         {linksLoading ? (
@@ -266,7 +266,7 @@ export function ModelLinkPanel({
 
       {/* New link builder */}
       <div className="space-y-4">
-        <h4 className="text-xs font-semibold text-content-secondary">
+        <h4 className="oe-card-title">
           {t('boq.model_link_new', { defaultValue: 'New link' })}
         </h4>
 
@@ -294,7 +294,7 @@ export function ModelLinkPanel({
                 setSelectedElementIds(new Set());
                 setQuantityField('');
               }}
-              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select w-full"
             >
               <option value="">
                 {t('boq.model_link_pick_model', { defaultValue: '- Select a model -' })}
@@ -341,7 +341,7 @@ export function ModelLinkPanel({
                         onChange={() => toggleElement(sid)}
                         className="accent-oe-blue"
                       />
-                      <Cuboid size={13} className="text-content-tertiary shrink-0" />
+                      <Cuboid size={14} className="text-content-tertiary shrink-0" />
                       <span className="text-xs text-content-primary truncate">
                         {el.name || el.element_type || sid}
                       </span>
@@ -368,7 +368,7 @@ export function ModelLinkPanel({
                 onChange={(e) =>
                   setAggregation(e.target.value as QuantityAggregation)
                 }
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select w-full"
               >
                 {AGGREGATIONS.map((a) => (
                   <option key={a} value={a}>
@@ -387,7 +387,7 @@ export function ModelLinkPanel({
                 <select
                   value={quantityField}
                   onChange={(e) => setQuantityField(e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-select w-full"
                 >
                   <option value="">
                     {t('boq.model_link_pick_field', {

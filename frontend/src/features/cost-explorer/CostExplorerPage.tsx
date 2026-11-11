@@ -172,7 +172,7 @@ function HowCostExplorerWorks() {
   return (
     <CollapsibleSection
       storageKey="costExplorer.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('costExplorer.flow_title', { defaultValue: 'How Cost Explorer fits together' })}
     >
       <p className="text-xs text-content-tertiary">

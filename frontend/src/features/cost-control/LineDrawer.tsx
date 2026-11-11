@@ -172,7 +172,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
           <section className="rounded-xl border border-border-light p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <div className="oe-overline">
                   {t('cost_control.col_forecast', { defaultValue: 'Forecast' })}
                 </div>
                 <div className="text-2xl font-semibold tabular-nums text-content-primary">
@@ -247,7 +247,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                       {t('cost_control.override_amount', { defaultValue: 'Expected final cost' })}
                     </span>
                     <input
-                      className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-right tabular-nums"
+                      className="oe-input mt-1 w-full text-right tabular-nums"
                       inputMode="decimal"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
@@ -260,7 +260,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                       {t('cost_control.override_reason', { defaultValue: 'Why (required)' })}
                     </span>
                     <textarea
-                      className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2"
+                      className="oe-textarea mt-1 w-full"
                       rows={2}
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
@@ -274,7 +274,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                       {t('cost_control.override_document', { defaultValue: 'Document (optional)' })}
                     </span>
                     <input
-                      className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-3"
+                      className="oe-input mt-1 w-full"
                       value={documentRef}
                       onChange={(e) => setDocumentRef(e.target.value)}
                       placeholder={t('cost_control.override_document_placeholder', {
@@ -302,7 +302,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
           )}
 
           <section>
-            <h3 className="mb-3 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-3">
               {t('cost_control.history_title', { defaultValue: 'History' })}
             </h3>
             {isLoading ? (

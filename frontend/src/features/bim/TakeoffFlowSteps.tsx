@@ -33,7 +33,7 @@ export function TakeoffFlowSteps() {
       className="mb-4 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3"
       data-testid="bim-rules-flow-steps"
     >
-      <h2 className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+      <h2 className="oe-overline">
         {t('bim_rules.flow_title', { defaultValue: 'How automatic takeoff works' })}
       </h2>
       <ol className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

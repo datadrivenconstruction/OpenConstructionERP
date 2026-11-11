@@ -392,7 +392,7 @@ export function ProposeDialog({ open, onClose, projectId, comparison, packages, 
 
         {impacted.length > 0 && (
           <div className="space-y-2" data-testid="propose-dispositions">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('delivery_model.ui.propose.impacted_heading', { defaultValue: 'Packages this change affects' })}
             </h3>
             <p className="text-xs text-content-secondary">

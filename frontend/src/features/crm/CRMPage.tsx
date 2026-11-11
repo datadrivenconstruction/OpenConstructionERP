@@ -214,7 +214,7 @@ const CURRENCY_CODES = [
 ];
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 function toNum(v: number | string | null | undefined): number {
   if (v === null || v === undefined) return 0;
@@ -297,7 +297,7 @@ function HowCrmWorks() {
   return (
     <CollapsibleSection
       storageKey="crm.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('crm.flow_title', { defaultValue: 'How the CRM fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -606,7 +606,7 @@ export function CRMPage() {
               placeholder={t('common.search', { defaultValue: 'Search…' })}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={clsx(inputCls, 'pl-8')}
+              className={clsx('oe-input', inputCls, 'pl-8')}
             />
           </div>
         )}
@@ -959,7 +959,7 @@ function DealCard({
     <div
       ref={setNodeRef}
       className={clsx(
-        'group rounded-lg border border-border-light bg-surface-primary p-2.5 shadow-sm',
+        'group rounded-lg border border-border-light bg-surface-primary p-3 shadow-sm',
         (isDragging || dragging) && 'opacity-60',
         dragging && 'ring-2 ring-oe-blue/40 cursor-grabbing',
       )}
@@ -972,7 +972,7 @@ function DealCard({
           {...attributes}
           {...listeners}
         >
-          <GripVertical size={13} />
+          <GripVertical size={14} />
         </button>
         <button
           type="button"
@@ -1038,25 +1038,25 @@ function DealsTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.title_col', { defaultValue: 'Deal' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.account', { defaultValue: 'Account' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.stage', { defaultValue: 'Stage' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('crm.value', { defaultValue: 'Value' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('crm.weighted', { defaultValue: 'Weighted' })}
             </th>
           </tr>
@@ -1068,15 +1068,15 @@ function DealsTable({
               <tr
                 key={r.id}
                 onClick={() => onSelect(r.id)}
-                className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+                className="cursor-pointer"
               >
-                <td className="px-4 py-2 font-medium text-content-primary truncate max-w-[260px]">
+                <td className="font-medium truncate max-w-[260px]">
                   {r.title}
                 </td>
-                <td className="px-4 py-2 text-content-secondary">
+                <td className="text-content-secondary">
                   {accountsById[r.account_id]?.name || '—'}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   {stage ? (
                     <span
                       className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ring-border-light"
@@ -1093,18 +1093,18 @@ function DealsTable({
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant={OPP_STATUS_VARIANT[r.status]} dot>
                     {oppStatusLabel(r.status, t)}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="text-right">
                   <MoneyDisplay
                     amount={toNum(r.estimated_value)}
                     currency={r.currency || undefined}
                   />
                 </td>
-                <td className="px-4 py-2 text-right text-content-secondary">
+                <td className="text-right text-content-secondary">
                   <MoneyDisplay
                     amount={toNum(r.weighted_value)}
                     currency={r.currency || undefined}
@@ -1151,22 +1151,22 @@ function LeadsTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.contact', { defaultValue: 'Contact' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.account', { defaultValue: 'Account' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.source', { defaultValue: 'Source' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.created', { defaultValue: 'Created' })}
             </th>
           </tr>
@@ -1176,26 +1176,26 @@ function LeadsTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2">
+              <td>
                 <div className="font-medium">{r.contact_name}</div>
                 <div className="text-xs text-content-tertiary">
                   {r.contact_email || r.contact_phone || ''}
                 </div>
               </td>
-              <td className="px-4 py-2 text-content-secondary">
+              <td className="text-content-secondary">
                 {r.account_id ? accountsById[r.account_id]?.name || '—' : '—'}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary capitalize">
+              <td className="text-content-secondary capitalize">
                 {r.source.replace(/_/g, ' ')}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={LEAD_STATUS_VARIANT[r.status]} dot>
                   {leadStatusLabel(r.status, t)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 <DateDisplay value={r.created_at} />
               </td>
             </tr>
@@ -1234,19 +1234,19 @@ function ActivitiesTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table-compact w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.kind', { defaultValue: 'Kind' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.subject', { defaultValue: 'Subject' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.due', { defaultValue: 'Due' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('crm.outcome', { defaultValue: 'Outcome' })}
             </th>
           </tr>
@@ -1255,18 +1255,17 @@ function ActivitiesTable({
           {rows.map((r) => (
             <tr
               key={r.id}
-              className="border-t border-border-light hover:bg-surface-secondary"
             >
-              <td className="px-4 py-2 text-xs text-content-secondary capitalize">
+              <td className="text-content-secondary capitalize">
                 {r.kind}
               </td>
-              <td className="px-4 py-2 font-medium truncate max-w-[360px]">
+              <td className="font-medium truncate max-w-[360px]">
                 {r.subject || '—'}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.due_at ? <DateDisplay value={r.due_at} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 {r.outcome || '—'}
               </td>
             </tr>
@@ -1432,7 +1431,7 @@ function DealDrawer({
   const currentIdx = stages.findIndex((s) => s.id === opp.stage_id);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -1446,7 +1445,7 @@ function DealDrawer({
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-base font-semibold">{opp.title}</h2>
+            <h2 className="oe-section-title truncate">{opp.title}</h2>
             <div className="mt-1 flex items-center gap-2">
               <Badge variant={OPP_STATUS_VARIANT[opp.status]} dot>
                 {oppStatusLabel(opp.status, t)}
@@ -1496,7 +1495,7 @@ function DealDrawer({
           {/* Pipeline stepper — one click moves stage */}
           <Card padding="sm">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline">
                 {t('crm.pipeline', { defaultValue: 'Pipeline' })}
               </p>
               <span
@@ -1562,13 +1561,13 @@ function DealDrawer({
 
           {/* Linked Contact (from Contacts module) + Project */}
           <Card padding="sm">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {t('crm.linked', { defaultValue: 'Linked records' })}
             </p>
             <div className="space-y-2">
               {/* Contact */}
-              <div className="flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
-                <User size={15} className="mt-0.5 text-content-tertiary" />
+              <div className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
+                <User size={16} className="mt-0.5 text-content-tertiary" />
                 <div className="min-w-0 flex-1">
                   <p className="text-2xs uppercase tracking-wide text-content-tertiary">
                     {t('crm.contact', { defaultValue: 'Contact' })}
@@ -1584,13 +1583,13 @@ function DealDrawer({
                         <div className="mt-0.5 flex flex-wrap gap-3 text-xs text-content-secondary">
                           {contactQ.data.primary_email && (
                             <span className="inline-flex items-center gap-1">
-                              <Mail size={11} />
+                              <Mail size={12} />
                               {contactQ.data.primary_email}
                             </span>
                           )}
                           {contactQ.data.primary_phone && (
                             <span className="inline-flex items-center gap-1">
-                              <Phone size={11} />
+                              <Phone size={12} />
                               {contactQ.data.primary_phone}
                             </span>
                           )}
@@ -1602,7 +1601,7 @@ function DealDrawer({
                           {t('crm.open_in_contacts', {
                             defaultValue: 'Open in Contacts',
                           })}
-                          <ArrowRight size={11} />
+                          <ArrowRight size={12} />
                         </Link>
                       </>
                     ) : (
@@ -1627,9 +1626,9 @@ function DealDrawer({
               </div>
 
               {/* Project */}
-              <div className="flex items-start gap-2.5 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
+              <div className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-3 py-2">
                 <FolderKanban
-                  size={15}
+                  size={16}
                   className="mt-0.5 text-content-tertiary"
                 />
                 <div className="min-w-0 flex-1">
@@ -1645,7 +1644,7 @@ function DealDrawer({
                         className="inline-flex items-center gap-1 text-sm font-medium text-oe-blue hover:underline"
                       >
                         {projectQ.data.name}
-                        <ArrowRight size={11} />
+                        <ArrowRight size={12} />
                       </Link>
                     ) : (
                       <p className="text-sm text-content-tertiary">
@@ -1687,7 +1686,7 @@ function DealDrawer({
           {/* Close the deal */}
           {opp.status === 'open' && (
             <Card padding="sm">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-2">
                 {t('crm.close_deal', { defaultValue: 'Close the deal' })}
               </p>
               <div className="flex flex-wrap items-end gap-2">
@@ -1700,7 +1699,7 @@ function DealDrawer({
                   <select
                     value={winReason}
                     onChange={(e) => setWinReason(e.target.value)}
-                    className={inputCls}
+                    className={`oe-select ${inputCls}`}
                   >
                     <option value="">
                       {t('crm.no_reason', { defaultValue: '- none -' })}
@@ -1727,7 +1726,7 @@ function DealDrawer({
                     aria-label={t('crm.lose_reason', {
                       defaultValue: 'Loss reason code',
                     })}
-                    className={inputCls}
+                    className={`oe-select ${inputCls}`}
                   >
                     <option value="">
                       {t('crm.lose_reason', { defaultValue: 'Loss reason code' })}
@@ -1754,7 +1753,7 @@ function DealDrawer({
 
           {opp.status === 'won' && (
             <Card padding="sm">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-1">
                 {t('crm.next_step', { defaultValue: 'Next step' })}
               </p>
               <p className="mb-2 text-sm text-content-secondary">
@@ -1780,7 +1779,7 @@ function DealDrawer({
 
           {(opp.description || opp.notes) && (
             <Card padding="sm">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-1">
                 {t('crm.description', { defaultValue: 'Description' })}
               </p>
               <p className="whitespace-pre-wrap text-sm">
@@ -1791,7 +1790,7 @@ function DealDrawer({
 
           {/* Quick activity / notes */}
           <Card padding="sm">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <p className="oe-overline mb-2">
               {t('crm.activities', { defaultValue: 'Activity' })}
               <span className="ml-2 normal-case text-content-tertiary">
                 ({(activitiesQ.data ?? []).length})
@@ -1813,7 +1812,7 @@ function DealDrawer({
                 placeholder={t('crm.add_note_ph', {
                   defaultValue: 'Log a quick note, then press Enter…',
                 })}
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
               <Button
                 variant="primary"
@@ -1867,7 +1866,7 @@ function DealDrawer({
           <Card padding="sm">
             <div className="mb-2 flex items-center gap-2">
               <History size={14} className="text-content-tertiary" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline">
                 {t('crm.stage_history', { defaultValue: 'Stage history' })}
               </p>
             </div>
@@ -1894,7 +1893,7 @@ function DealDrawer({
                       className="flex items-start gap-2 border-b border-border-light pb-2 text-sm last:border-0"
                     >
                       <ArrowRight
-                        size={13}
+                        size={14}
                         className="mt-0.5 shrink-0 text-content-tertiary"
                       />
                       <div className="flex-1">
@@ -1903,7 +1902,7 @@ function DealDrawer({
                             <span className="text-content-secondary">
                               {from}{' '}
                               <ArrowRight
-                                size={11}
+                                size={12}
                                 className="inline align-middle text-content-tertiary"
                               />{' '}
                             </span>
@@ -2003,7 +2002,7 @@ function LinkRecordsForm({
         <select
           value={contactId}
           onChange={(e) => setContactId(e.target.value)}
-          className={inputCls}
+          className={`oe-select ${inputCls}`}
         >
           <option value="">
             {t('crm.no_contact', { defaultValue: '- No contact -' })}
@@ -2023,7 +2022,7 @@ function LinkRecordsForm({
         <select
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          className={inputCls}
+          className={`oe-select ${inputCls}`}
         >
           <option value="">
             {t('crm.no_project', { defaultValue: '- No project -' })}
@@ -2202,7 +2201,7 @@ function LeadDrawer({
     !convForm.title.trim() || !convForm.account_id || !convForm.stage_id;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
         role="dialog"
@@ -2216,7 +2215,7 @@ function LeadDrawer({
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
           <div>
-            <h2 className="text-base font-semibold">{lead.contact_name}</h2>
+            <h2 className="oe-section-title">{lead.contact_name}</h2>
             <Badge variant={LEAD_STATUS_VARIANT[lead.status]} dot>
               {leadStatusLabel(lead.status, t)}
             </Badge>
@@ -2261,7 +2260,7 @@ function LeadDrawer({
 
           {(lead.status === 'new' || lead.status === 'qualifying') && (
             <Card padding="sm">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-2">
                 {t('crm.qualify_lead', { defaultValue: 'Qualify lead' })}
               </p>
               <textarea
@@ -2272,7 +2271,7 @@ function LeadDrawer({
                   defaultValue:
                     'Notes - budget, authority, need, timeline, fit, …',
                 })}
-                className={clsx(inputCls, 'h-auto py-2')}
+                className={clsx('oe-textarea', inputCls, 'h-auto')}
               />
               <div className="mt-2 flex gap-2">
                 <Button
@@ -2299,7 +2298,7 @@ function LeadDrawer({
             <Card padding="sm">
               <div className="mb-1 flex items-center gap-2">
                 <ArrowRight size={14} className="text-oe-blue" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                <p className="oe-overline">
                   {t('crm.convert_to_deal', { defaultValue: 'Convert to deal' })}
                 </p>
               </div>
@@ -2328,7 +2327,7 @@ function LeadDrawer({
                       onChange={(e) =>
                         setConvForm({ ...convForm, title: e.target.value })
                       }
-                      className={inputCls}
+                      className={`oe-input ${inputCls}`}
                     />
                   </div>
                   <div>
@@ -2340,7 +2339,7 @@ function LeadDrawer({
                       onChange={(e) =>
                         setConvForm({ ...convForm, account_id: e.target.value })
                       }
-                      className={inputCls}
+                      className={`oe-select ${inputCls}`}
                     >
                       <option value="">
                         {t('crm.select_account', {
@@ -2368,7 +2367,7 @@ function LeadDrawer({
                             estimated_value: e.target.value,
                           })
                         }
-                        className={inputCls}
+                        className={`oe-input ${inputCls}`}
                       />
                     </div>
                     <div>
@@ -2380,7 +2379,7 @@ function LeadDrawer({
                         onChange={(e) =>
                           setConvForm({ ...convForm, currency: e.target.value })
                         }
-                        className={inputCls}
+                        className={`oe-select ${inputCls}`}
                       >
                         {CURRENCY_CODES.map((c) => (
                           <option key={c} value={c}>
@@ -2400,7 +2399,7 @@ function LeadDrawer({
                         onChange={(e) =>
                           setConvForm({ ...convForm, stage_id: e.target.value })
                         }
-                        className={inputCls}
+                        className={`oe-select ${inputCls}`}
                       >
                         <option value="">—</option>
                         {stages
@@ -2427,7 +2426,7 @@ function LeadDrawer({
                             probability_percent: e.target.value,
                           })
                         }
-                        className={inputCls}
+                        className={`oe-input ${inputCls}`}
                       />
                     </div>
                   </div>
@@ -2456,7 +2455,7 @@ function LeadDrawer({
 
           {lead.qualification_notes && (
             <Card padding="sm">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-1">
                 {t('crm.notes', { defaultValue: 'Notes' })}
               </p>
               <p className="whitespace-pre-wrap text-sm">
@@ -2473,7 +2472,7 @@ function LeadDrawer({
               no point offering a button whose only outcome is a refusal. */}
           {canDelete && (
             <Card padding="sm">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline mb-1">
                 {t('crm.remove_lead_heading', { defaultValue: 'Remove lead' })}
               </p>
               {lead.converted_opportunity_id ? (
@@ -2784,7 +2783,7 @@ function InsightsPanel({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card padding="md">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <p className="oe-overline mb-3">
             {t('crm.by_stage', { defaultValue: 'Open value by stage' })}
           </p>
           {stageRows.length === 0 ? (
@@ -2821,7 +2820,7 @@ function InsightsPanel({
         </Card>
 
         <Card padding="md">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <p className="oe-overline mb-3">
             {t('crm.lost_reasons', { defaultValue: 'Why deals are lost' })}
           </p>
           {lostReasons.length === 0 ? (
@@ -2846,7 +2845,7 @@ function InsightsPanel({
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
                       <div
-                        className="h-full rounded-full bg-rose-400"
+                        className="h-full rounded-full bg-semantic-error"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -3041,7 +3040,7 @@ function CreateModal({
                 onChange={(e) =>
                   setDealForm({ ...dealForm, title: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
             <WideModalField
@@ -3052,7 +3051,7 @@ function CreateModal({
                 onChange={(e) =>
                   setDealForm({ ...dealForm, account_id: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="">
                   {t('crm.account_new', {
@@ -3080,7 +3079,7 @@ function CreateModal({
                   })
                 }
                 disabled={Boolean(dealForm.account_id)}
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
           </WideModalSection>
@@ -3101,7 +3100,7 @@ function CreateModal({
                     estimated_value: e.target.value,
                   })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
             <WideModalField
@@ -3112,7 +3111,7 @@ function CreateModal({
                 onChange={(e) =>
                   setDealForm({ ...dealForm, currency: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 {CURRENCY_CODES.map((c) => (
                   <option key={c} value={c}>
@@ -3127,7 +3126,7 @@ function CreateModal({
                 onChange={(e) =>
                   setDealForm({ ...dealForm, stage_id: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="">—</option>
                 {stages.map((s) => (
@@ -3151,7 +3150,7 @@ function CreateModal({
                     probability_percent: e.target.value,
                   })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
             <WideModalField
@@ -3169,7 +3168,7 @@ function CreateModal({
                     expected_close_date: e.target.value,
                   })
                 }
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
           </WideModalSection>
@@ -3191,7 +3190,7 @@ function CreateModal({
                     primary_contact_id: e.target.value,
                   })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="">
                   {t('crm.no_contact', { defaultValue: '- No contact -' })}
@@ -3212,7 +3211,7 @@ function CreateModal({
                 onChange={(e) =>
                   setDealForm({ ...dealForm, project_id: e.target.value })
                 }
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="">
                   {t('crm.no_project', { defaultValue: '- No project -' })}
@@ -3240,7 +3239,7 @@ function CreateModal({
               onChange={(e) =>
                 setLeadForm({ ...leadForm, contact_name: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField label={t('crm.email', { defaultValue: 'Email' })}>
@@ -3250,7 +3249,7 @@ function CreateModal({
               onChange={(e) =>
                 setLeadForm({ ...leadForm, contact_email: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField label={t('crm.phone', { defaultValue: 'Phone' })}>
@@ -3259,7 +3258,7 @@ function CreateModal({
               onChange={(e) =>
                 setLeadForm({ ...leadForm, contact_phone: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField
@@ -3270,7 +3269,7 @@ function CreateModal({
               onChange={(e) =>
                 setLeadForm({ ...leadForm, account_id: e.target.value })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="">—</option>
               {accounts.map((a) => (
@@ -3291,7 +3290,7 @@ function CreateModal({
                   source: e.target.value as LeadSource,
                 })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               {LEAD_SOURCES.map((s) => (
                 <option key={s} value={s}>
@@ -3307,7 +3306,7 @@ function CreateModal({
         <WideModalSection columns={2}>
           <WideModalField span={2}>
             <p className="flex items-start gap-1.5 text-xs text-content-tertiary">
-              <Info size={13} className="mt-0.5 shrink-0" />
+              <Info size={14} className="mt-0.5 shrink-0" />
               {t('crm.activity_link_hint', {
                 defaultValue:
                   'Link this activity to an account so it shows up on that account. To attach an activity to a specific deal, open the deal and log it from there.',
@@ -3323,7 +3322,7 @@ function CreateModal({
                   kind: e.target.value as ActivityKind,
                 })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               {ACTIVITY_KINDS.map((k) => (
                 <option key={k} value={k}>
@@ -3339,7 +3338,7 @@ function CreateModal({
               onChange={(e) =>
                 setActForm({ ...actForm, due_at: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField
@@ -3353,7 +3352,7 @@ function CreateModal({
               onChange={(e) =>
                 setActForm({ ...actForm, account_id: e.target.value })
               }
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="">
                 {t('crm.no_account_link', {
@@ -3376,7 +3375,7 @@ function CreateModal({
               onChange={(e) =>
                 setActForm({ ...actForm, subject: e.target.value })
               }
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField
@@ -3389,7 +3388,7 @@ function CreateModal({
                 setActForm({ ...actForm, body: e.target.value })
               }
               rows={4}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className={clsx('oe-textarea', inputCls, 'h-auto')}
             />
           </WideModalField>
         </WideModalSection>

@@ -557,7 +557,7 @@ export function VariantPicker({
        */}
       {stats.common_start && (
         <div className="px-4 py-2.5 border-b border-border-light bg-oe-blue-subtle/20 shrink-0">
-          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+          <div className="oe-overline mb-0.5">
             {t('costs.variant_common_base', { defaultValue: 'Material / Resource' })}
           </div>
           <div className="text-sm font-semibold text-content-primary leading-snug break-words">

@@ -104,7 +104,7 @@ export function MarketPackPanel({ region, className = '' }: MarketPackPanelProps
         aria-label={headline}
         className={['rounded-xl border border-border bg-surface-secondary p-3', className].join(' ')}
       >
-        <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <p className="oe-overline">
           {headline}
         </p>
 
@@ -168,7 +168,7 @@ export function MarketPackPanel({ region, className = '' }: MarketPackPanelProps
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <p className="oe-overline">
               {t('cases.regional_pack_for_market', {
                 defaultValue: 'Regional pack: {{names}}',
                 names: name,
@@ -210,7 +210,7 @@ export function MarketPackPanel({ region, className = '' }: MarketPackPanelProps
               <>
                 <span className="text-border">·</span>
                 <span className="inline-flex items-center gap-1" style={{ color: accent }}>
-                  <ShieldCheck size={11} />
+                  <ShieldCheck size={12} />
                   {t('modules.partner_pack_standards', { defaultValue: 'Reference standards' })}
                 </span>
               </>

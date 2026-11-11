@@ -78,36 +78,36 @@ export function CostFramePanel({
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+          <table className="oe-table w-full">
+            <thead className="text-left">
               <tr>
-                <th className="px-3 py-2">{t('economics.frame.col_code', { defaultValue: 'Code' })}</th>
-                <th className="px-3 py-2">{t('economics.frame.col_title', { defaultValue: 'Cost group' })}</th>
-                <th className="px-3 py-2 text-right">{t('economics.frame.col_budget', { defaultValue: 'Budget' })}</th>
-                <th className="px-3 py-2 text-right">{t('economics.frame.col_estimate', { defaultValue: 'Estimate' })}</th>
-                <th className="px-3 py-2 text-right">{t('economics.frame.col_committed', { defaultValue: 'Committed' })}</th>
-                <th className="px-3 py-2 text-right">{t('economics.frame.col_headroom', { defaultValue: 'Headroom' })}</th>
-                <th className="px-3 py-2" />
+                <th>{t('economics.frame.col_code', { defaultValue: 'Code' })}</th>
+                <th>{t('economics.frame.col_title', { defaultValue: 'Cost group' })}</th>
+                <th className="text-right">{t('economics.frame.col_budget', { defaultValue: 'Budget' })}</th>
+                <th className="text-right">{t('economics.frame.col_estimate', { defaultValue: 'Estimate' })}</th>
+                <th className="text-right">{t('economics.frame.col_committed', { defaultValue: 'Committed' })}</th>
+                <th className="text-right">{t('economics.frame.col_headroom', { defaultValue: 'Headroom' })}</th>
+                <th />
               </tr>
             </thead>
             <tbody>
               {frame.lines.map((row) => (
-                <tr key={row.id} className="border-t border-border">
-                  <td className="px-3 py-2 font-mono text-xs">{row.code}</td>
-                  <td className="px-3 py-2">{groupName(row.title, row.code)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{money(row.amount)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{money(row.estimate)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{orDash(money(row.committed))}</td>
+                <tr key={row.id}>
+                  <td className="font-mono">{row.code}</td>
+                  <td>{groupName(row.title, row.code)}</td>
+                  <td className="text-right tabular-nums">{money(row.amount)}</td>
+                  <td className="text-right tabular-nums">{money(row.estimate)}</td>
+                  <td className="text-right tabular-nums">{orDash(money(row.committed))}</td>
                   <td
                     className={
                       isNegative(row.headroom)
-                        ? 'px-3 py-2 text-right tabular-nums text-semantic-error'
-                        : 'px-3 py-2 text-right tabular-nums'
+                        ? 'text-right tabular-nums text-semantic-error'
+                        : 'text-right tabular-nums'
                     }
                   >
                     {money(row.headroom)}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     {editable && (
                       <ConfirmDelete
                         label={t('economics.frame.delete', { defaultValue: 'Delete the line' })}
@@ -125,22 +125,22 @@ export function CostFramePanel({
             </tbody>
             <tfoot className="border-t border-border bg-surface-secondary text-sm">
               <tr>
-                <td className="px-3 py-2" colSpan={2}>
+                <td colSpan={2}>
                   {t('economics.frame.markup_allowance', { defaultValue: 'Allowance for markups' })}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(totals.markup_allowance)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(totals.markups)}</td>
+                <td className="text-right tabular-nums">{money(totals.markup_allowance)}</td>
+                <td className="text-right tabular-nums">{money(totals.markups)}</td>
                 <td colSpan={3} />
               </tr>
-              <tr className="font-semibold">
-                <td className="px-3 py-2" colSpan={2}>
+              <tr>
+                <td colSpan={2}>
                   {t('economics.frame.total', { defaultValue: 'Total' })}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums" data-testid="economics-frame-total">
+                <td className="text-right tabular-nums" data-testid="economics-frame-total">
                   {money(totals.frame)}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">{money(totals.estimate)}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{orDash(money(totals.committed))}</td>
+                <td className="text-right tabular-nums">{money(totals.estimate)}</td>
+                <td className="text-right tabular-nums">{orDash(money(totals.committed))}</td>
                 <td colSpan={2} />
               </tr>
             </tfoot>

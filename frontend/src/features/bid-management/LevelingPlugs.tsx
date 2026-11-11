@@ -66,7 +66,7 @@ export function PlugCell({
               if (e.key === 'Enter') commit();
               if (e.key === 'Escape') setEditing(false);
             }}
-            className="h-7 w-24 rounded border border-border bg-surface-primary px-1.5 text-right text-xs"
+            className="oe-input-sm w-24 text-right"
           />
           <button
             type="button"
@@ -119,7 +119,7 @@ export function PlugCell({
             onClick={() => onSave(null)}
             className="text-content-tertiary hover:text-semantic-error"
           >
-            <X size={11} />
+            <X size={12} />
           </button>
         )}
       </div>
@@ -228,7 +228,7 @@ export function PackageTypeField({
   const label = t('bid_management.package_type', { defaultValue: 'Package type' });
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-content-secondary">{label}</label>
+      <label className="oe-label">{label}</label>
       <select
         aria-label={label}
         value={value}

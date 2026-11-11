@@ -105,7 +105,7 @@ export function LinkedFormulaPanel({
           }}
           placeholder="volume + type_bp_volume"
           spellCheck={false}
-          className="mt-0.5 w-full rounded border border-border-light bg-surface-primary px-2 py-1 font-mono text-xs"
+          className="oe-input-sm mt-0.5 w-full font-mono"
           data-testid="formula-input"
         />
       </label>
@@ -135,7 +135,7 @@ export function LinkedFormulaPanel({
             setAgg(e.target.value as QuantityAggregation);
             setPending(null);
           }}
-          className="rounded border border-border-light bg-surface-primary px-1 py-0.5"
+          className="oe-select-sm"
           data-testid="formula-agg"
         >
           {AGGREGATIONS.map((a) => (

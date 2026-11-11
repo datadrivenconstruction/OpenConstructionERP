@@ -18,7 +18,7 @@ const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low'] as const;
 const SEVERITY_COLOR: Record<string, string> = {
   critical: 'bg-semantic-error',
   high: 'bg-orange-500',
-  medium: 'bg-amber-400',
+  medium: 'bg-semantic-warning',
   low: 'bg-semantic-success',
 };
 
@@ -199,17 +199,17 @@ export function ClashKpiPanel({ projectId, runId }: ClashKpiPanelProps) {
         {data.top_clashing_pairs.length === 0 ? (
           <div className="text-content-tertiary text-sm">—</div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="oe-table-compact w-full">
             <thead>
-              <tr className="text-left text-content-tertiary text-xs uppercase">
-                <th className="py-1.5">{t('clash.kpi.pair', { defaultValue: 'Pair' })}</th>
-                <th className="py-1.5 w-20 text-right">
+              <tr className="text-left">
+                <th>{t('clash.kpi.pair', { defaultValue: 'Pair' })}</th>
+                <th className="w-20 text-right">
                   {t('clash.kpi.count', { defaultValue: 'Count' })}
                 </th>
-                <th className="py-1.5 w-20 text-right">
+                <th className="w-20 text-right">
                   {t('clash.kpi.open_short', { defaultValue: 'Open' })}
                 </th>
-                <th className="py-1.5 w-24 text-right">
+                <th className="w-24 text-right">
                   {t('clash.kpi.open_share', { defaultValue: 'Open %' })}
                 </th>
               </tr>
@@ -217,12 +217,12 @@ export function ClashKpiPanel({ projectId, runId }: ClashKpiPanelProps) {
             <tbody>
               {data.top_clashing_pairs.map((p) => (
                 <tr key={`${p.a}|${p.b}`} className="border-t border-border">
-                  <td className="py-1.5">
+                  <td>
                     {p.a} × {p.b}
                   </td>
-                  <td className="py-1.5 text-right font-medium">{p.count}</td>
-                  <td className="py-1.5 text-right">{p.open_count}</td>
-                  <td className="py-1.5 text-right">
+                  <td className="text-right font-medium">{p.count}</td>
+                  <td className="text-right">{p.open_count}</td>
+                  <td className="text-right">
                     {fmtPercent(p.open_share * 100, 0)}
                   </td>
                 </tr>

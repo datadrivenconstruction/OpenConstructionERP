@@ -492,7 +492,7 @@ export default function CloseoutPage() {
           <div className="flex flex-col items-center gap-4 text-center">
             <PackageCheck className="h-10 w-10 text-oe-blue" />
             <div>
-              <h3 className="text-base font-semibold text-content-primary">
+              <h3 className="oe-section-title">
                 {t('closeout.create_title', { defaultValue: 'Start a closeout package' })}
               </h3>
               <p className="mt-1 text-sm text-content-tertiary">
@@ -535,7 +535,7 @@ export default function CloseoutPage() {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-semantic-success" />
                 <div>
-                  <h4 className="text-sm font-semibold text-semantic-success">
+                  <h4 className="oe-card-title text-semantic-success">
                     {t('closeout.issued_title', { defaultValue: 'Issued to the client' })}
                   </h4>
                   {pkg.issued_at ? (
@@ -652,7 +652,7 @@ export default function CloseoutPage() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-error" />
                 <div>
-                  <h4 className="text-sm font-semibold text-semantic-error">
+                  <h4 className="oe-card-title text-semantic-error">
                     {t('closeout.gaps_title', { defaultValue: 'Outstanding required items' })}
                   </h4>
                   <ul className="mt-1 list-disc pl-5 text-sm text-content-secondary">
@@ -670,7 +670,7 @@ export default function CloseoutPage() {
             <Card className="border-oe-blue/30 bg-oe-blue/5 p-4">
               <div className="mb-2 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-oe-blue" />
-                <h4 className="text-sm font-semibold text-content-primary">
+                <h4 className="oe-card-title">
                   {t('closeout.suggestions_title', { defaultValue: 'Suggested evidence (confirm each)' })}
                 </h4>
               </div>
@@ -770,7 +770,7 @@ export default function CloseoutPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              icon={<Link2 size={13} />}
+                              icon={<Link2 size={14} />}
                               onClick={() => setBindSlotTarget(slot)}
                             >
                               {slot.binding
@@ -781,7 +781,7 @@ export default function CloseoutPage() {
                               <Button
                                 size="sm"
                                 variant={slot.status === 'verified' ? 'secondary' : 'ghost'}
-                                icon={<ShieldCheck size={13} />}
+                                icon={<ShieldCheck size={14} />}
                                 onClick={() =>
                                   verifyMutation.mutate({
                                     slotId: slot.id,
@@ -798,7 +798,7 @@ export default function CloseoutPage() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                icon={<Trash2 size={13} />}
+                                icon={<Trash2 size={14} />}
                                 onClick={() => unbindMutation.mutate(slot.id)}
                                 aria-label={t('closeout.action.unbind', { defaultValue: 'Unbind' })}
                               />

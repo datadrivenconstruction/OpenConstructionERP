@@ -77,7 +77,7 @@ const TILE_GRID = 'grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2';
 function PackTile({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: ReactNode }) {
   return (
     <li
-      className="flex min-w-0 items-center gap-2.5 rounded-lg bg-surface-secondary/60 px-2.5 py-2"
+      className="flex min-w-0 items-center gap-2 rounded-lg bg-surface-secondary/60 px-2.5 py-2"
       data-testid="regional-pack-tile"
     >
       <Icon size={15} strokeWidth={1.75} className="shrink-0 text-oe-blue" aria-hidden="true" data-decorative-icon />
@@ -151,7 +151,7 @@ export function RegionalPackCard() {
     return (
       <div className={SHELL} role="alert" data-testid="regional-pack-error">
         <div className="flex items-center gap-3">
-          <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0 text-semantic-warning" aria-hidden="true" />
+          <AlertTriangle size={20} strokeWidth={1.75} className="shrink-0 text-semantic-warning" aria-hidden="true" />
           <p className="min-w-0 flex-1 text-xs text-content-secondary">
             {t('dashboard.regional_pack_error', { defaultValue: 'Could not load your regional pack' })}
           </p>
@@ -160,7 +160,7 @@ export function RegionalPackCard() {
             onClick={() => void refetch()}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-md text-xs font-semibold text-oe-blue transition-colors hover:text-oe-blue-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
           >
-            <RotateCw size={13} aria-hidden="true" />
+            <RotateCw size={14} aria-hidden="true" />
             {t('common.retry', { defaultValue: 'Retry' })}
           </button>
         </div>
@@ -181,10 +181,10 @@ export function RegionalPackCard() {
       <div className={SHELL} data-testid="regional-pack-none">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
-            <Globe2 size={18} strokeWidth={1.75} aria-hidden="true" data-decorative-icon />
+            <Globe2 size={20} strokeWidth={1.75} aria-hidden="true" data-decorative-icon />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboard.regional_pack_none', { defaultValue: 'No regional pack is active' })}
             </h3>
             <p className="mt-0.5 text-xs leading-relaxed text-content-tertiary">
@@ -212,7 +212,7 @@ export function RegionalPackCard() {
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-oe-blue/90"
         >
           {t('dashboard.regional_pack_choose', { defaultValue: 'Install a country pack' })}
-          <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
+          <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
         </button>
       </div>
     );
@@ -284,10 +284,10 @@ export function RegionalPackCard() {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <p className="oe-overline truncate">
             {t('dashboard.regional_pack_title', { defaultValue: 'Your regional pack' })}
           </p>
-          <h3 className="truncate text-sm font-semibold text-content-primary" title={name}>
+          <h3 className="oe-card-title truncate" title={name}>
             {name}
           </h3>
         </div>
@@ -307,7 +307,7 @@ export function RegionalPackCard() {
           {t('dashboard.regional_pack_manage', {
             defaultValue: 'Change or add a country pack',
           })}
-          <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
+          <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
         </button>
       </div>
 

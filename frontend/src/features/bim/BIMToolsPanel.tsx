@@ -273,7 +273,7 @@ export default function BIMToolsPanel({
     <div className="flex flex-col gap-4 p-3">
       {/* Measure */}
       <section className="flex flex-col gap-2">
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.tools_measure_title', { defaultValue: 'Measure' })}
         </h3>
         <button
@@ -311,7 +311,7 @@ export default function BIMToolsPanel({
             <button
               type="button"
               onClick={handleClearMeasurements}
-              className="text-2xs text-rose-600 hover:underline"
+              className="text-2xs text-semantic-error hover:underline"
               data-testid="measure-clear-all"
             >
               {t('bim.tools_measure_clear_all', {
@@ -346,7 +346,7 @@ export default function BIMToolsPanel({
                         if (e.key === 'Escape') setEditingMeasureId(null);
                       }}
                       autoFocus
-                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
+                      className="oe-input-sm flex-1 min-w-0"
                     />
                     <button
                       type="button"
@@ -354,10 +354,10 @@ export default function BIMToolsPanel({
                         renameMeasurement(m.id, editingMeasureDraft);
                         setEditingMeasureId(null);
                       }}
-                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-emerald-600 shrink-0"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-semantic-success shrink-0"
                       aria-label={t('common.confirm', { defaultValue: 'Confirm' })}
                     >
-                      <Check size={11} />
+                      <Check size={12} />
                     </button>
                     <button
                       type="button"
@@ -365,7 +365,7 @@ export default function BIMToolsPanel({
                       className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary shrink-0"
                       aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
                     >
-                      <X size={11} />
+                      <X size={12} />
                     </button>
                   </>
                 ) : (
@@ -396,7 +396,7 @@ export default function BIMToolsPanel({
                         defaultValue: 'Rename measurement',
                       })}
                     >
-                      <Pencil size={11} />
+                      <Pencil size={12} />
                     </button>
                     <button
                       type="button"
@@ -408,18 +408,18 @@ export default function BIMToolsPanel({
                           : t('bim.tools_measure_show', { defaultValue: 'Show' })
                       }
                     >
-                      {m.visible ? <Eye size={11} /> : <EyeOff size={11} />}
+                      {m.visible ? <Eye size={12} /> : <EyeOff size={12} />}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteMeasurement(m.id)}
-                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-rose-600 shrink-0"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-semantic-error shrink-0"
                       aria-label={t('bim.tools_measure_delete', {
                         defaultValue: 'Delete measurement',
                       })}
                       data-testid="measurement-delete"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={12} />
                     </button>
                   </>
                 )}
@@ -431,7 +431,7 @@ export default function BIMToolsPanel({
 
       {/* Saved views */}
       <section className="flex flex-col gap-2">
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.tools_views_title', { defaultValue: 'Saved views' })}
         </h3>
         {/* Tightened layout (RFC 19 §UX-5):
@@ -447,7 +447,7 @@ export default function BIMToolsPanel({
             placeholder={t('bim.tools_view_name_placeholder', {
               defaultValue: 'View name…',
             })}
-            className="min-w-0 flex-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input-sm min-w-0 flex-1"
             data-testid="save-view-name"
           />
           <button
@@ -478,7 +478,7 @@ export default function BIMToolsPanel({
         {quotaWarning && (
           <div
             role="alert"
-            className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-2 py-1 text-2xs text-amber-700 dark:text-amber-200"
+            className="rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-2 py-1 text-2xs text-semantic-warning"
           >
             {t('bim.tools_views_quota', {
               defaultValue:
@@ -513,16 +513,16 @@ export default function BIMToolsPanel({
                         if (e.key === 'Escape') handleCancelRename();
                       }}
                       autoFocus
-                      className="flex-1 min-w-0 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-2xs"
+                      className="oe-input-sm flex-1 min-w-0"
                       data-testid="rename-view-input"
                     />
                     <button
                       type="button"
                       onClick={handleConfirmRename}
-                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-emerald-600 shrink-0"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-semantic-success shrink-0"
                       aria-label={t('common.confirm', { defaultValue: 'Confirm' })}
                     >
-                      <Check size={11} />
+                      <Check size={12} />
                     </button>
                     <button
                       type="button"
@@ -530,7 +530,7 @@ export default function BIMToolsPanel({
                       className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary shrink-0"
                       aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
                     >
-                      <X size={11} />
+                      <X size={12} />
                     </button>
                   </>
                 ) : (
@@ -592,7 +592,7 @@ export default function BIMToolsPanel({
                       className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-oe-blue shrink-0"
                       data-testid="rename-view-button"
                     >
-                      <Pencil size={11} />
+                      <Pencil size={12} />
                     </button>
                     <button
                       type="button"
@@ -601,9 +601,9 @@ export default function BIMToolsPanel({
                         defaultValue: 'Delete view {{name}}',
                         name: v.name,
                       })}
-                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-rose-600 shrink-0"
+                      className="inline-flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-tertiary hover:text-semantic-error shrink-0"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={12} />
                     </button>
                   </>
                 )}
@@ -615,7 +615,7 @@ export default function BIMToolsPanel({
 
       {/* Export - IFC/RVT quantities to a single Excel Bill of Quantities */}
       <section className="flex flex-col gap-2">
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.tools_export_title', { defaultValue: 'Export' })}
         </h3>
         <p className="text-2xs text-content-tertiary">
@@ -630,7 +630,7 @@ export default function BIMToolsPanel({
             value={exportScope}
             onChange={(e) => setExportScope(e.target.value as BoqExportScope)}
             data-testid="boq-export-scope"
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary"
+            className="oe-select-sm"
           >
             <option value="all">{t('bim.boq_export_scope_all', { defaultValue: 'Whole model' })}</option>
             <option value="filter">
@@ -647,7 +647,7 @@ export default function BIMToolsPanel({
             value={exportGroupBy}
             onChange={(e) => setExportGroupBy(e.target.value as BoqGroupBy)}
             data-testid="boq-export-group-by"
-            className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-primary"
+            className="oe-select-sm"
           >
             <option value="element_type">
               {t('bim.boq_export_by_type', { defaultValue: 'Element type' })}
@@ -666,7 +666,7 @@ export default function BIMToolsPanel({
           onClick={handleExportBoq}
           disabled={exporting}
           data-testid="boq-export-button"
-          className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-md text-2xs font-medium bg-semantic-success text-white hover:bg-semantic-success disabled:opacity-60"
         >
           <FileSpreadsheet size={12} />
           {exporting

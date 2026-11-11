@@ -430,7 +430,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
       <Card>
         <div className="space-y-3">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('analytics.perf.title', { defaultValue: 'Historical performance' })}
             </h2>
             <p className="mt-1 text-sm text-content-secondary">
@@ -622,7 +622,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                   setIndexSeriesId(e.target.value);
                   setIndexPeriod('');
                 }}
-                className={inputClass}
+                className="oe-select"
                 data-testid="analytics-performance-index-series"
               >
                 <option value="">{t('analytics.perf.index_series_none', { defaultValue: 'Do not adjust' })}</option>
@@ -639,7 +639,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                 <select
                   value={indexPeriod}
                   onChange={(e) => setIndexPeriod(e.target.value)}
-                  className={inputClass}
+                  className="oe-select"
                   data-testid="analytics-performance-index-period"
                 >
                   <option value="">
@@ -667,7 +667,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
               <select
                 value={indexRegion}
                 onChange={(e) => setIndexRegion(e.target.value)}
-                className={inputClass}
+                className="oe-select"
                 data-testid="analytics-performance-index-region"
               >
                 <option value="">{t('analytics.perf.index_region_none', { defaultValue: 'No regional adjustment' })}</option>
@@ -683,7 +683,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
               <select
                 value={statistic}
                 onChange={(e) => setStatistic(e.target.value as BenchmarkStatistic)}
-                className={inputClass}
+                className="oe-select"
                 data-testid="analytics-performance-statistic"
               >
                 {STATISTICS.map((s) => (
@@ -817,7 +817,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                     value={periodStart}
                     onChange={(e) => setPeriodStart(e.target.value)}
                     aria-label={t('analytics.perf.filter_period_from', { defaultValue: 'From' })}
-                    className={inputClass}
+                    className="oe-input"
                   />
                   <span>-</span>
                   <input
@@ -825,7 +825,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                     value={periodEnd}
                     onChange={(e) => setPeriodEnd(e.target.value)}
                     aria-label={t('analytics.perf.filter_period_to', { defaultValue: 'To' })}
-                    className={inputClass}
+                    className="oe-input"
                   />
                 </div>
               </div>
@@ -867,7 +867,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                   onChange={(e) => setFilter(e.target.value)}
                   placeholder={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
                   aria-label={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
-                  className="h-7 w-44 rounded-lg border border-border-light bg-surface-primary ps-6 pe-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  className="oe-input-sm w-44 ps-6 pe-2"
                 />
               </span>
             </div>
@@ -1047,7 +1047,7 @@ function PerformanceGroupCard({
     <Card padding="none">
       <div className="border-b border-border-light px-6 py-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-base font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           {unit && (
             <Badge variant="neutral" size="sm" data-testid="analytics-performance-value-unit">
               {unit}
@@ -1152,11 +1152,11 @@ function PerformanceGroupCard({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table w-full">
           <thead>
-            <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-              <th className="px-6 py-2 font-medium">{t('analytics.perf.col_project', { defaultValue: 'Project' })}</th>
-              <th className="px-3 py-2 text-right font-medium">
+            <tr className="text-left">
+              <th>{t('analytics.perf.col_project', { defaultValue: 'Project' })}</th>
+              <th className="text-right">
                 <button
                   type="button"
                   onClick={() => setSort(nextSort[sort])}
@@ -1167,12 +1167,12 @@ function PerformanceGroupCard({
                   {sort === 'value_desc' ? <ArrowDown size={12} /> : sort === 'value_asc' ? <ArrowUp size={12} /> : <ArrowUpDown size={12} />}
                 </button>
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('analytics.perf.col_variance', { defaultValue: 'vs benchmark' })}
               </th>
-              <th className="px-3 py-2 font-medium">{t('analytics.perf.col_range', { defaultValue: 'Against the range' })}</th>
-              <th className="px-3 py-2 text-right font-medium">{t('analytics.perf.col_records', { defaultValue: 'Records' })}</th>
-              <th className="px-3 py-2 font-medium">
+              <th>{t('analytics.perf.col_range', { defaultValue: 'Against the range' })}</th>
+              <th className="text-right">{t('analytics.perf.col_records', { defaultValue: 'Records' })}</th>
+              <th>
                 <span className="sr-only">{t('analytics.perf.drill_open', { defaultValue: 'Show records' })}</span>
               </th>
             </tr>
@@ -1186,13 +1186,13 @@ function PerformanceGroupCard({
               const from = row?.converted_from ?? [];
               const variance = fmtVariance(row?.variance);
               return (
-                <tr key={projectId} className="border-b border-border-light last:border-0">
-                  <td className="max-w-[18rem] truncate px-6 py-2">
+                <tr key={projectId} className="last:border-0">
+                  <td className="max-w-[18rem] truncate">
                     <Link to={`/projects/${projectId}`} className="text-content-primary hover:text-oe-blue hover:underline">
                       {name}
                     </Link>
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {value ?? (
                       <span className="text-content-tertiary" title={reasonLabel(row?.unavailable_reason ?? null)}>
                         {unavailable}
@@ -1254,8 +1254,8 @@ function PerformanceGroupCard({
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{variance ?? '-'}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-right tabular-nums text-content-secondary">{variance ?? '-'}</td>
+                  <td>
                     {band ? (
                       <div className="flex items-center gap-2">
                         <div className="relative h-1.5 w-24 rounded-full bg-surface-tertiary" aria-hidden="true">
@@ -1274,8 +1274,8 @@ function PerformanceGroupCard({
                       <span className="text-content-tertiary">-</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{row?.records ?? 0}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-right tabular-nums text-content-secondary">{row?.records ?? 0}</td>
+                  <td>
                     {row && row.records > 0 && (
                       <Button
                         variant="ghost"

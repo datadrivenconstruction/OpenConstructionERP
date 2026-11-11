@@ -256,11 +256,11 @@ export function SmartValueAutocomplete({
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded border border-border-light bg-surface-primary shadow-lg"
+          className="absolute z-dropdown mt-1 max-h-64 w-full overflow-auto rounded border border-border-light bg-surface-primary shadow-lg"
           data-testid="smart-value-listbox"
         >
           {error && (
-            <li className="px-3 py-2 text-xs text-rose-300">{error}</li>
+            <li className="px-3 py-2 text-xs text-semantic-error">{error}</li>
           )}
           {!error && items.length === 0 && !isLoading && (
             <li className="px-3 py-2 text-xs text-content-tertiary">

@@ -119,7 +119,7 @@ export function ActivityPanel({
         aria-label={t('boq.recent_activity', { defaultValue: 'Recent Activity' })}
         className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Activity size={16} className="text-content-tertiary" strokeWidth={1.75} />
           <span className="text-sm font-semibold text-content-primary">
             {t('boq.recent_activity', { defaultValue: 'Recent Activity' })}
@@ -140,7 +140,7 @@ export function ActivityPanel({
         <div className="px-5 pb-5 pt-1">
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
-              <Inbox size={18} className="text-content-tertiary" />
+              <Inbox size={20} className="text-content-tertiary" />
             </div>
             <p className="text-xs text-content-tertiary">
               {t('boq.no_activity', { defaultValue: 'No activity yet. Changes will appear here.' })}

@@ -92,7 +92,7 @@ export function RegionalAdjustPanel({
     <Card className={clsx('p-4', className)}>
       <div className="flex items-center gap-2 mb-3">
         <MapPin size={16} className="text-oe-blue" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('costs.regional_adjust.title', { defaultValue: 'Regional Adjust' })}
         </h3>
         <span className="text-2xs text-content-tertiary">
@@ -110,7 +110,7 @@ export function RegionalAdjustPanel({
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select w-full"
           >
             {SEED_REGIONS.map((r) => (
               <option key={r.code} value={r.code}>
@@ -127,7 +127,7 @@ export function RegionalAdjustPanel({
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select w-full"
           >
             {CATEGORIES.map((c) => (
               <option key={c.key} value={c.key}>
@@ -147,7 +147,7 @@ export function RegionalAdjustPanel({
             step={0.01}
             value={baseRate}
             onChange={(e) => setBaseRate(e.target.value)}
-            className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-input w-full tabular-nums"
           />
         </label>
       </div>
@@ -195,7 +195,7 @@ export function RegionalAdjustPanel({
 
       {data && (
         <div className="mt-2 flex items-center gap-1.5 text-2xs text-content-tertiary">
-          <Info size={11} />
+          <Info size={12} />
           <span>
             {data.source === 'baseline'
               ? t('costs.regional_adjust.no_index', {

@@ -168,7 +168,7 @@ export function RuleConditionRow({
               aria-invalid={problem ? true : undefined}
               placeholder={placeholder}
               className={`min-w-0 flex-1 rounded-lg border bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none ${
-                problem ? 'border-red-500' : 'border-border-light'
+                problem ? 'border-semantic-error' : 'border-border-light'
               }`}
             />
             {wantsValues && (
@@ -183,10 +183,10 @@ export function RuleConditionRow({
         <button
           type="button"
           onClick={onRemove}
-          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-red-600"
+          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
           aria-label={t('common.remove', { defaultValue: 'Remove' })}
         >
-          <Trash2 size={13} />
+          <Trash2 size={14} />
         </button>
       </div>
       {wantsValues && values.items.length > 0 && values.items.length < values.total && (
@@ -201,7 +201,7 @@ export function RuleConditionRow({
         </button>
       )}
       {problem && (
-        <p data-testid={`rule-prop-problem-${index}`} role="alert" className="mt-1 text-2xs text-red-600">
+        <p data-testid={`rule-prop-problem-${index}`} role="alert" className="mt-1 text-2xs text-semantic-error">
           {problem}
         </p>
       )}
@@ -213,7 +213,7 @@ export function RuleConditionRow({
       {wantsValues && isWildcardSample(row.value, valueChoices) && (
         <p
           data-testid={`rule-prop-wildcard-hint-${index}`}
-          className="mt-1 text-2xs text-amber-700 dark:text-amber-400"
+          className="mt-1 text-2xs text-semantic-warning"
         >
           {t('bim_rules.value_has_wildcard', {
             defaultValue:

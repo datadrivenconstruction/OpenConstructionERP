@@ -282,19 +282,19 @@ function OptionSources({
       : t('designOptions.source.notSet', { defaultValue: 'Not set' });
 
   return (
-    <div className="space-y-2.5 rounded-lg border border-border-light bg-surface-secondary/30 p-3">
-      <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+    <div className="space-y-2 rounded-lg border border-border-light bg-surface-secondary/30 p-3">
+      <p className="oe-overline">
         {t('designOptions.source.title', { defaultValue: 'What this option is made of' })}
       </p>
 
       <SourceRow
-        icon={<Boxes size={13} />}
+        icon={<Boxes size={14} />}
         label={t('designOptions.source.model', { defaultValue: 'Model' })}
         value={modelValue}
         linked={Boolean(option.bim_model_id || option.source_document_id)}
       />
       <SourceRow
-        icon={<FileStack size={13} />}
+        icon={<FileStack size={14} />}
         label={t('designOptions.source.estimate', { defaultValue: 'Estimate' })}
         value={
           option.boq_id
@@ -307,7 +307,7 @@ function OptionSources({
         linked={Boolean(option.boq_id)}
       />
       <SourceRow
-        icon={<CalendarClock size={13} />}
+        icon={<CalendarClock size={14} />}
         label={t('designOptions.source.programme', { defaultValue: 'Programme' })}
         value={
           option.schedule_id
@@ -321,7 +321,7 @@ function OptionSources({
         linked={Boolean(option.schedule_id)}
       />
       <SourceRow
-        icon={<Leaf size={13} />}
+        icon={<Leaf size={14} />}
         label={t('designOptions.source.carbon', { defaultValue: 'Carbon' })}
         value={
           option.carbon_inventory_id
@@ -338,7 +338,7 @@ function OptionSources({
         <Button
           variant="secondary"
           size="sm"
-          icon={<FolderOpen size={13} />}
+          icon={<FolderOpen size={14} />}
           onClick={() => setShowFilePicker(true)}
           disabled={!projectId}
         >
@@ -347,7 +347,7 @@ function OptionSources({
         <Button
           variant="ghost"
           size="sm"
-          icon={<Link2 size={13} />}
+          icon={<Link2 size={14} />}
           onClick={() => setShowLinkModal(true)}
           disabled={!projectId}
         >
@@ -460,7 +460,7 @@ function LinkProjectDataModal({
   });
 
   const selectCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-select-lg w-full';
   const notLinked = t('designOptions.source.notLinked', { defaultValue: 'Not linked' });
 
   return (
@@ -633,7 +633,7 @@ function GeneratePreviewModal({
     >
       {dryRun.isPending ? (
         <div className="flex items-center justify-center gap-2 py-10 text-sm text-content-secondary">
-          <Loader2 size={18} className="animate-spin text-oe-blue" />
+          <Loader2 size={20} className="animate-spin text-oe-blue" />
           {t('designOptions.previewLoading', {
             defaultValue: 'Matching model elements to cost items...',
           })}
@@ -767,9 +767,9 @@ function OptionCard({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <h3 className="truncate text-sm font-semibold text-content-primary">{option.name}</h3>
+              <h3 className="oe-card-title truncate">{option.name}</h3>
               {isBaseline && (
-                <Crown size={13} className="shrink-0 text-oe-blue" aria-label={t('designOptions.baseline', { defaultValue: 'Baseline' })} />
+                <Crown size={14} className="shrink-0 text-oe-blue" aria-label={t('designOptions.baseline', { defaultValue: 'Baseline' })} />
               )}
             </div>
             <div className="mt-1">
@@ -794,7 +794,7 @@ function OptionCard({
               if (ok) removeMutation.mutate();
             }}
           >
-            <Trash2 size={15} />
+            <Trash2 size={16} />
           </button>
         </div>
 
@@ -903,7 +903,7 @@ function OptionCard({
               <Button
                 variant="ghost"
                 size="sm"
-                icon={<RefreshCw size={13} />}
+                icon={<RefreshCw size={14} />}
                 disabled={!option.bim_model_id}
                 onClick={() => setShowPreview(true)}
               >
@@ -917,7 +917,7 @@ function OptionCard({
         <div className="mt-1 border-t border-border-light pt-3">
           {isBaseline ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-oe-blue-text">
-              <Crown size={13} /> {t('designOptions.isBaseline', { defaultValue: 'Comparison baseline' })}
+              <Crown size={14} /> {t('designOptions.isBaseline', { defaultValue: 'Comparison baseline' })}
             </span>
           ) : (
             <button
@@ -926,7 +926,7 @@ function OptionCard({
               onClick={() => baselineMutation.mutate()}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-content-secondary transition-colors hover:text-oe-blue disabled:opacity-50"
             >
-              <Crown size={13} /> {t('designOptions.setBaseline', { defaultValue: 'Set as baseline' })}
+              <Crown size={14} /> {t('designOptions.setBaseline', { defaultValue: 'Set as baseline' })}
             </button>
           )}
         </div>
@@ -972,7 +972,7 @@ function CreateSetModal({
   });
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input-lg w-full';
 
   return (
     <WideModal
@@ -1046,7 +1046,7 @@ function AddOptionModal({
   });
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input-lg w-full';
 
   return (
     <WideModal
@@ -1167,7 +1167,7 @@ function OptionSetDetail({ setId }: { setId: string }) {
       {/* Options grid */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('designOptions.options', { defaultValue: 'Options' })}
           </h2>
           <Button
@@ -1210,7 +1210,7 @@ function OptionSetDetail({ setId }: { setId: string }) {
       {/* Comparison */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title flex items-center gap-2">
             <GitCompareArrows size={16} className="text-oe-blue" />
             {t('designOptions.comparison', { defaultValue: 'Comparison' })}
             <InfoHint
@@ -1420,7 +1420,7 @@ export function DesignOptionsPage() {
                         : 'border-border bg-surface-primary text-content-secondary hover:border-content-tertiary'
                     }`}
                   >
-                    <Layers size={13} />
+                    <Layers size={14} />
                     {s.name}
                   </button>
                   {active && (

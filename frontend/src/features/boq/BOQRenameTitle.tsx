@@ -70,7 +70,7 @@ export function BOQRenameTitle({ boqId, name, locked }: BOQRenameTitleProps) {
             setEditing(false);
           }
         }}
-        className="min-w-0 flex-1 rounded-md border border-oe-blue bg-surface-primary px-2 py-0.5 text-xl font-semibold text-content-primary focus:outline-none"
+        className="oe-input-sm min-w-0 flex-1"
       />
     );
   }

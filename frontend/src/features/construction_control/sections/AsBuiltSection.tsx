@@ -363,25 +363,25 @@ export function AsBuiltSection({ projectId }: SectionProps) {
       ) : (
         <Card>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                  <th className="px-4 py-2.5 font-medium">
+                <tr className="text-left">
+                  <th>
                     {t('construction_control.col.number', { defaultValue: 'Number' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.title', { defaultValue: 'Title' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.capture', { defaultValue: 'Capture' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.tolerance_result', { defaultValue: 'Tolerance' })}
                   </th>
-                  <th className="px-4 py-2.5 font-medium">
+                  <th>
                     {t('construction_control.col.status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-4 py-2.5 text-right font-medium">
+                  <th className="text-right">
                     {t('construction_control.col.actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -397,10 +397,10 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                       className="border-b border-border-light/60 last:border-b-0 align-top"
                       data-testid={`cc-asbuilt-row-${r.id}`}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                      <td className="font-mono text-content-secondary whitespace-nowrap">
                         {r.record_number}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="font-medium text-content-primary">{r.title}</div>
                         {r.discipline && (
                           <div className="text-xs text-content-tertiary">{r.discipline}</div>
@@ -414,7 +414,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                           <ElementLinks elements={r.elements} />
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-content-secondary">
+                      <td className="whitespace-nowrap text-content-secondary">
                         {r.capture_method.replace(/_/g, ' ')}
                         {r.measured_value && (
                           <div className="text-2xs text-content-tertiary">
@@ -425,14 +425,14 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         {r.tolerance_result ? (
                           <StatusBadge status={r.tolerance_result} variants={TOLERANCE_VARIANTS} />
                         ) : (
                           <span className="text-content-tertiary">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="flex items-center gap-1.5">
                           <StatusBadge status={r.status} variants={ASBUILT_STATUS_VARIANTS} />
                           {r.valid_for_legal_record && (
@@ -447,7 +447,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="flex items-center justify-end gap-2">
                           {r.raised_ncr_id && (
                             <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-2 py-0.5 text-2xs font-medium text-semantic-error">
@@ -1458,7 +1458,7 @@ function ModalShell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -1466,7 +1466,7 @@ function ModalShell({
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           <button
             type="button"
             onClick={onClose}

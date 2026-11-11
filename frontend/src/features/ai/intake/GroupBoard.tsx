@@ -68,7 +68,7 @@ export function GroupBoard({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-        <Layers size={15} className="text-oe-blue" />
+        <Layers size={16} className="text-oe-blue" />
         {t('aiest.board.title', { defaultValue: 'Work packages' })}
       </div>
 
@@ -86,7 +86,7 @@ export function GroupBoard({
             const stageLabel = STAGE_LABELS[sg.stage] ?? { key: '', fb: sg.stage };
             return (
               <section key={sg.stage}>
-                <h4 className="mb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h4 className="oe-overline mb-1.5">
                   {t(stageLabel.key, { defaultValue: stageLabel.fb })}
                 </h4>
                 <ul className="space-y-1.5">
@@ -112,7 +112,7 @@ export function GroupBoard({
       <div className="rounded-xl border border-dashed border-border p-3">
         <label
           htmlFor="aiest-add-custom"
-          className="mb-1.5 block text-xs font-medium text-content-secondary"
+          className="oe-label"
         >
           {t('aiest.board.add_custom_label', { defaultValue: 'Add custom work' })}
         </label>
@@ -131,7 +131,7 @@ export function GroupBoard({
               defaultValue: 'e.g. install skirting boards',
             })}
             disabled={busy}
-            className="h-9 flex-1 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-input flex-1"
           />
           <Button
             variant="secondary"

@@ -343,7 +343,7 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
         <div className="sm:col-span-2">
           <label
             htmlFor="delegation-user"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.delegation_delegate', {
               defaultValue: 'Delegate to',
@@ -371,7 +371,7 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
         <div className="sm:col-span-2">
           <label
             htmlFor="delegation-project"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.delegation_project', {
               defaultValue: 'Scope (optional)',
@@ -399,7 +399,7 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
         <div>
           <label
             htmlFor="delegation-start"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.delegation_starts', {
               defaultValue: 'Starts (optional)',
@@ -410,14 +410,14 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
             type="datetime-local"
             value={startsAt}
             onChange={(e) => setStartsAt(e.target.value)}
-            className={inputCls}
+            className="oe-input w-full"
           />
         </div>
 
         <div>
           <label
             htmlFor="delegation-end"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.delegation_ends', {
               defaultValue: 'Ends (optional)',
@@ -428,14 +428,14 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
             type="datetime-local"
             value={endsAt}
             onChange={(e) => setEndsAt(e.target.value)}
-            className={inputCls}
+            className="oe-input w-full"
           />
         </div>
 
         <div className="sm:col-span-2">
           <label
             htmlFor="delegation-reason"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.delegation_reason', {
               defaultValue: 'Reason (optional)',
@@ -450,7 +450,7 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
             placeholder={t('approvalRoutes.delegation_reason_placeholder', {
               defaultValue: 'e.g. Annual leave - back on the 8th.',
             })}
-            className="w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-textarea w-full"
           />
         </div>
 

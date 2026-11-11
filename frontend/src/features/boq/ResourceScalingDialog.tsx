@@ -196,7 +196,7 @@ export function ResourceScalingDialog({
   const factorPct = plan ? (Number(plan.factor) - 1) * 100 : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -205,7 +205,7 @@ export function ResourceScalingDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h3 id="boq-scaling-title" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 id="boq-scaling-title" className="oe-card-title flex items-center gap-2">
             <Scale size={16} />
             {t('boq.scaling.title', { defaultValue: 'Scale to a target total' })}
             <span className="font-normal text-content-secondary">· {scope.label}</span>
@@ -233,7 +233,7 @@ export function ResourceScalingDialog({
               <select
                 value={metric}
                 onChange={(e) => setMetric(e.target.value as ScaleMetric)}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+                className="oe-select-sm"
               >
                 <option value="hours">{t('boq.scaling.metric_hours', { defaultValue: 'Labour hours' })}</option>
                 <option value="cost">{t('boq.scaling.metric_cost', { defaultValue: 'Total cost' })}</option>
@@ -256,7 +256,7 @@ export function ResourceScalingDialog({
                   setPlan(null);
                 }}
                 aria-invalid={!targetValid}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+                className="oe-input-sm"
               />
             </label>
             <div className="flex gap-2">
@@ -268,7 +268,7 @@ export function ResourceScalingDialog({
                     setDecimals(Number(e.target.value));
                     setPlan(null);
                   }}
-                  className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+                  className="oe-select-sm"
                 >
                   {[0, 1, 2, 3, 4, 5, 6].map((d) => (
                     <option key={d} value={d}>
@@ -285,7 +285,7 @@ export function ResourceScalingDialog({
                     setMode(e.target.value as RoundingMode);
                     setPlan(null);
                   }}
-                  className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
+                  className="oe-select-sm"
                 >
                   <option value="half_up">{t('boq.scaling.rounding_half_up', { defaultValue: 'Nearest' })}</option>
                   <option value="up">{t('boq.scaling.rounding_up', { defaultValue: 'Up' })}</option>
@@ -339,20 +339,20 @@ export function ResourceScalingDialog({
                 </div>
               ))}
               <div className="max-h-[40vh] overflow-auto rounded-lg border border-border-light">
-                <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-surface-secondary text-left text-content-secondary">
+                <table className="oe-table-compact w-full">
+                  <thead className="sticky top-0 text-left">
                     <tr>
-                      <th className="w-8 px-2 py-1.5" />
-                      <th className="px-2 py-1.5 font-medium">{t('boq.fidelity.col_position', { defaultValue: 'Position' })}</th>
-                      <th className="px-2 py-1.5 font-medium">{t('boq.scaling.col_norms', { defaultValue: 'Norms' })}</th>
-                      <th className="px-2 py-1.5 text-right font-medium">{t('boq.scaling.col_before', { defaultValue: 'Before' })}</th>
-                      <th className="px-2 py-1.5 text-right font-medium">{t('boq.scaling.col_after', { defaultValue: 'After' })}</th>
+                      <th className="w-8" />
+                      <th>{t('boq.fidelity.col_position', { defaultValue: 'Position' })}</th>
+                      <th>{t('boq.scaling.col_norms', { defaultValue: 'Norms' })}</th>
+                      <th className="text-right">{t('boq.scaling.col_before', { defaultValue: 'Before' })}</th>
+                      <th className="text-right">{t('boq.scaling.col_after', { defaultValue: 'After' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {plan.lines.map((line) => (
-                      <tr key={line.id} className="border-t border-border-light align-top">
-                        <td className="px-2 py-1.5">
+                      <tr key={line.id} className="align-top">
+                        <td>
                           {line.status === 'locked' ? (
                             <Lock size={12} className="text-content-tertiary" aria-label={t('boq.scaling.locked_line', { defaultValue: 'Locked line' })} />
                           ) : (
@@ -364,18 +364,18 @@ export function ResourceScalingDialog({
                             />
                           )}
                         </td>
-                        <td className="px-2 py-1.5">
+                        <td>
                           <span className="font-mono">{line.ordinal}</span> {line.description}
                         </td>
-                        <td className="px-2 py-1.5">
+                        <td>
                           {line.changes.map((c) => (
                             <div key={c.index}>
                               {c.name}: {num(c.old_quantity, 4)} → <strong>{num(c.new_quantity, 4)}</strong> {c.unit}
                             </div>
                           ))}
                         </td>
-                        <td className="px-2 py-1.5 text-right">{num(line.old_value)}</td>
-                        <td className="px-2 py-1.5 text-right">{num(line.new_value)}</td>
+                        <td className="text-right">{num(line.old_value)}</td>
+                        <td className="text-right">{num(line.new_value)}</td>
                       </tr>
                     ))}
                   </tbody>

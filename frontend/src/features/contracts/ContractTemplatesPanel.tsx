@@ -61,7 +61,7 @@ import {
 import { retentionEventLabel } from './RetentionReleasePanel';
 
 const inputCls =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue';
+  'w-full';
 
 const RISK_LEVELS: ClauseRiskLevel[] = ['none', 'low', 'medium', 'high'];
 
@@ -141,14 +141,14 @@ export function ContractTemplatesPanel({ search }: { search: string }) {
       {/* Catalogue */}
       <div className="lg:w-[380px] lg:shrink-0 lg:border-r lg:border-border-light">
         <div className="flex items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
-          <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-            <BookOpen size={13} />
+          <span className="oe-overline flex items-center gap-1.5">
+            <BookOpen size={14} />
             {t('contracts.tpl_catalogue', { defaultValue: 'Clause templates' })}
           </span>
           <Button
             size="sm"
             variant="secondary"
-            icon={<Plus size={13} />}
+            icon={<Plus size={14} />}
             onClick={() => setCreateOpen(true)}
           >
             {t('contracts.tpl_new', { defaultValue: 'New template' })}
@@ -180,7 +180,7 @@ export function ContractTemplatesPanel({ search }: { search: string }) {
                       {row.name}
                     </span>
                     {row.source === 'builtin' ? (
-                      <Lock size={11} className="shrink-0 text-content-quaternary" />
+                      <Lock size={12} className="shrink-0 text-content-quaternary" />
                     ) : (
                       <Badge size="sm" variant={STATUS_VARIANT[row.status]}>
                         {statusLabel(t, row.status)}
@@ -385,7 +385,7 @@ function TemplateDetail({
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-light px-5 py-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title truncate">
               {detail.name}
             </h3>
             {builtin ? (
@@ -423,7 +423,7 @@ function TemplateDetail({
             <Button
               size="sm"
               variant="secondary"
-              icon={<GitFork size={13} />}
+              icon={<GitFork size={14} />}
               onClick={() => onFork(detail)}
             >
               {t('contracts.tpl_fork', { defaultValue: 'Fork into my paper' })}
@@ -434,7 +434,7 @@ function TemplateDetail({
               <Button
                 size="sm"
                 variant="secondary"
-                icon={run.isPending ? <Loader2 size={13} /> : <Save size={13} />}
+                icon={run.isPending ? <Loader2 size={14} /> : <Save size={14} />}
                 disabled={!dirty || run.isPending}
                 onClick={() => run.mutate('save')}
               >
@@ -443,7 +443,7 @@ function TemplateDetail({
               <Button
                 size="sm"
                 variant="primary"
-                icon={<CheckCircle2 size={13} />}
+                icon={<CheckCircle2 size={14} />}
                 disabled={dirty || run.isPending || clauses.length === 0}
                 onClick={() => run.mutate('publish')}
               >
@@ -456,7 +456,7 @@ function TemplateDetail({
               <Button
                 size="sm"
                 variant="secondary"
-                icon={<PenLine size={13} />}
+                icon={<PenLine size={14} />}
                 disabled={run.isPending}
                 onClick={() => run.mutate('next')}
               >
@@ -468,7 +468,7 @@ function TemplateDetail({
               <Button
                 size="sm"
                 variant="ghost"
-                icon={<Archive size={13} />}
+                icon={<Archive size={14} />}
                 disabled={run.isPending}
                 onClick={() => run.mutate('archive')}
               >
@@ -527,19 +527,19 @@ function TemplateDetail({
 
       {/* Clauses */}
       <div className="min-w-0 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table w-full">
+          <thead className="text-2xs">
             <tr>
-              <th className="w-24 px-3 py-2 text-left">
+              <th className="w-24">
                 {t('contracts.tpl_col_number', { defaultValue: 'No.' })}
               </th>
-              <th className="px-3 py-2 text-left">
+              <th>
                 {t('contracts.tpl_col_title', { defaultValue: 'Clause' })}
               </th>
-              <th className="w-32 px-3 py-2 text-left">
+              <th className="w-32">
                 {t('contracts.tpl_col_risk', { defaultValue: 'Risk' })}
               </th>
-              {editable && <th className="w-24 px-3 py-2" />}
+              {editable && <th className="w-24" />}
             </tr>
           </thead>
           <tbody>
@@ -547,7 +547,7 @@ function TemplateDetail({
               <tr>
                 <td
                   colSpan={editable ? 4 : 3}
-                  className="px-3 py-6 text-center text-xs text-content-tertiary"
+                  className="text-center text-content-tertiary"
                 >
                   {t('contracts.tpl_no_clauses', {
                     defaultValue: 'No clauses yet. A version with no clauses cannot be published.',
@@ -557,12 +557,12 @@ function TemplateDetail({
             )}
             {clauses.map((clause, index) => (
               <tr key={clause.id ?? `row-${index}`} className="border-t border-border-light align-top">
-                <td className="px-3 py-2">
+                <td>
                   {editable ? (
                     <input
                       value={clause.number}
                       onChange={(e) => update(index, { number: e.target.value })}
-                      className={clsx(inputCls, 'px-2 py-1 font-mono text-xs')}
+                      className={clsx('oe-input', inputCls, 'font-mono')}
                       placeholder="14.3"
                       aria-label={t('contracts.tpl_col_number', { defaultValue: 'No.' })}
                     />
@@ -572,13 +572,13 @@ function TemplateDetail({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   {editable ? (
                     <div className="flex flex-col gap-1.5">
                       <input
                         value={clause.title}
                         onChange={(e) => update(index, { title: e.target.value })}
-                        className={clsx(inputCls, 'px-2 py-1 text-xs font-medium')}
+                        className={clsx('oe-input', inputCls, '')}
                         placeholder={t('contracts.tpl_col_title', { defaultValue: 'Clause' })}
                         aria-label={t('contracts.tpl_col_title', { defaultValue: 'Clause' })}
                       />
@@ -586,7 +586,7 @@ function TemplateDetail({
                         value={clause.body}
                         onChange={(e) => update(index, { body: e.target.value })}
                         rows={2}
-                        className={clsx(inputCls, 'px-2 py-1 text-xs')}
+                        className={clsx('oe-textarea', inputCls, '')}
                         placeholder={t('contracts.tpl_body_placeholder', {
                           defaultValue: 'Clause wording',
                         })}
@@ -621,14 +621,14 @@ function TemplateDetail({
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   {editable ? (
                     <select
                       value={clause.risk_level}
                       onChange={(e) =>
                         update(index, { risk_level: e.target.value as ClauseRiskLevel })
                       }
-                      className={clsx(inputCls, 'px-2 py-1 text-xs')}
+                      className={clsx('oe-select', inputCls, '')}
                       aria-label={t('contracts.tpl_col_risk', { defaultValue: 'Risk' })}
                     >
                       {RISK_LEVELS.map((level) => (
@@ -644,27 +644,27 @@ function TemplateDetail({
                   )}
                 </td>
                 {editable && (
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex items-center gap-0.5">
                       <IconAction
                         label={t('common.move_up', { defaultValue: 'Move up' })}
                         onClick={() => move(index, -1)}
                         disabled={index === 0}
                       >
-                        <ArrowUp size={13} />
+                        <ArrowUp size={14} />
                       </IconAction>
                       <IconAction
                         label={t('common.move_down', { defaultValue: 'Move down' })}
                         onClick={() => move(index, 1)}
                         disabled={index === clauses.length - 1}
                       >
-                        <ArrowDown size={13} />
+                        <ArrowDown size={14} />
                       </IconAction>
                       <IconAction
                         label={t('common.delete', { defaultValue: 'Delete' })}
                         onClick={() => remove(index)}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </IconAction>
                     </div>
                   </td>
@@ -677,7 +677,7 @@ function TemplateDetail({
 
       {editable && (
         <div className="flex items-center justify-between gap-2 border-t border-border-light px-5 py-2.5">
-          <Button size="sm" variant="ghost" icon={<Plus size={13} />} onClick={add}>
+          <Button size="sm" variant="ghost" icon={<Plus size={14} />} onClick={add}>
             {t('contracts.tpl_add_clause', { defaultValue: 'Add clause' })}
           </Button>
           {dirty && (
@@ -804,7 +804,7 @@ function NewTemplateModal({
           <input
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder="own_subcontract_2026"
           />
         </WideModalField>
@@ -812,7 +812,7 @@ function NewTemplateModal({
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -824,7 +824,7 @@ function NewTemplateModal({
           <input
             value={form.family}
             onChange={(e) => setForm({ ...form, family: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -838,7 +838,7 @@ function NewTemplateModal({
                 retention_release_event: e.target.value as RetentionReleaseEvent,
               })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {RETENTION_EVENTS.map((event) => (
               <option key={event} value={event}>
@@ -855,7 +855,7 @@ function NewTemplateModal({
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={3}
-            className={inputCls}
+            className={`oe-textarea ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>
@@ -935,7 +935,7 @@ function ForkTemplateModal({
           <input
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -947,7 +947,7 @@ function ForkTemplateModal({
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder={source.name}
           />
         </WideModalField>

@@ -119,7 +119,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
         type="button"
         onClick={() => onPick(item.to, label(item))}
         className={clsx(
-          'group flex items-start gap-2.5 rounded-lg border p-2.5 text-left transition',
+          'group flex items-start gap-2 rounded-lg border p-3 text-left transition',
           chosen
             ? 'border-oe-blue bg-oe-blue/5 ring-1 ring-oe-blue/40'
             : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
@@ -153,7 +153,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 backdrop-blur-sm sm:p-8"
+      className="fixed inset-0 z-modal flex items-start justify-center bg-black/40 p-4 backdrop-blur-sm sm:p-8"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -166,7 +166,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
       >
         <div className="flex items-start gap-3 border-b border-border-light p-4">
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('cases.editor.pick_title', {
                 defaultValue: 'Which screen does this step open?',
               })}
@@ -222,7 +222,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
             <div className="space-y-6">
               {popular.length > 0 && (
                 <section>
-                  <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <h3 className="oe-overline mb-2 flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" />
                     {t('cases.editor.pick_popular', {
                       defaultValue: 'Screens our own cases walk most',
@@ -240,7 +240,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
                 if (items.length === 0) return null;
                 return (
                   <section key={group.id}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                    <h3 className="oe-overline mb-2">
                       {t(group.labelKey, { defaultValue: group.defaultLabel ?? group.labelKey })}
                     </h3>
                     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

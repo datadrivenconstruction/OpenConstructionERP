@@ -192,17 +192,17 @@ export function ComparisonPanel({ projectId, model, comparison, catalogue, packa
       {!readOnly && <ProblemList problems={ready} testId="comparison-open-points" />}
 
       <div className="overflow-x-auto rounded-xl border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[640px] text-sm" data-testid="comparison-table">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full min-w-[640px]" data-testid="comparison-table">
+          <thead className="text-left">
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('delivery_model.ui.comparison.criterion', { defaultValue: 'Criterion' })}
               </th>
-              <th scope="col" className="w-24 px-3 py-2 font-medium">
+              <th scope="col" className="w-24">
                 {t('delivery_model.ui.comparison.weight', { defaultValue: 'Weight' })}
               </th>
               {comparison.options.map((o) => (
-                <th key={o.id} scope="col" className="px-3 py-2 font-medium" data-testid="option-column">
+                <th key={o.id} scope="col" data-testid="option-column">
                   <span className="flex items-start justify-between gap-2">
                     <span>
                       <span className="block text-sm text-content-primary">{formName(labels, o.form, o.form_code)}</span>
@@ -245,12 +245,12 @@ export function ComparisonPanel({ projectId, model, comparison, catalogue, packa
               const scale = catalogueSentence(labels, c.rationale_key);
               const name = catalogueText(labels, { key: c.name_key, code: c.code });
               return (
-                <tr key={c.id} className="border-t border-border-light align-top" data-testid="criterion-row">
-                  <th scope="row" className="px-3 py-2 text-left font-normal">
+                <tr key={c.id} className="align-top" data-testid="criterion-row">
+                  <th scope="row">
                     <span className="block font-medium text-content-primary">{name}</span>
                     {scale && <span className="block text-xs text-content-tertiary">{scale}</span>}
                   </th>
-                  <td className="px-3 py-2">
+                  <td>
                     <input
                       className={clsx(INPUT_CLASS, 'tabular-nums')}
                       inputMode="decimal"
@@ -263,9 +263,9 @@ export function ComparisonPanel({ projectId, model, comparison, catalogue, packa
                   {comparison.options.map((o) => {
                     const value = scoreOf(scores, o.id, c.code);
                     return (
-                      <td key={o.id} className="px-3 py-2">
+                      <td key={o.id}>
                         <select
-                          className={clsx(INPUT_CLASS, 'tabular-nums', value === null && 'border-semantic-warning')}
+                          className={clsx(INPUT_CLASS, 'tabular-nums', value === null && '')}
                           disabled={readOnly || score.isPending}
                           value={value ?? ''}
                           data-testid="score-cell"
@@ -295,18 +295,18 @@ export function ComparisonPanel({ projectId, model, comparison, catalogue, packa
           </tbody>
           <tfoot className="border-t border-border bg-surface-secondary text-sm font-semibold">
             <tr>
-              <th scope="row" className="px-3 py-2 text-left">
+              <th scope="row">
                 {t('delivery_model.ui.comparison.total', { defaultValue: 'Weighted total (1 to 5)' })}
               </th>
               <td
-                className={clsx('px-3 py-2 tabular-nums', draftTotal !== 10000 && 'text-semantic-error')}
+                className={clsx('tabular-nums', draftTotal !== 10000 && 'text-semantic-error')}
                 data-testid="weights-total"
                 title={t('delivery_model.ui.comparison.weights_hint', { defaultValue: 'The weights must add up to 100.' })}
               >
                 {draftTotal === null ? t('delivery_model.ui.comparison.weights_invalid', { defaultValue: 'Not a number' }) : fromHundredths(draftTotal)}
               </td>
               {comparison.options.map((o) => (
-                <td key={o.id} className="px-3 py-2 tabular-nums" data-testid="option-total">
+                <td key={o.id} className="tabular-nums" data-testid="option-total">
                   {o.weighted_total === null ? (
                     <span className="font-normal text-content-tertiary">
                       {t('delivery_model.ui.comparison.no_total', { defaultValue: 'Not fully scored' })}
@@ -334,13 +334,13 @@ export function ComparisonPanel({ projectId, model, comparison, catalogue, packa
       )}
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('delivery_model.ui.comparison.forms_heading', { defaultValue: 'What each form means' })}
         </h2>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {comparison.options.map((o) => (
             <article key={o.id} className="space-y-1.5 rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="form-card">
-              <h3 className="flex flex-wrap items-center gap-2 text-sm font-medium text-content-primary">
+              <h3 className="oe-card-title flex flex-wrap items-center gap-2">
                 {formName(labels, o.form, o.form_code)}
                 <ReviewMark status={o.form?.review_status} sourceUrl={o.form?.source_url} />
               </h3>

@@ -50,7 +50,7 @@ interface ConverterInstallProgressBarProps {
   /** Optional className applied to the outer wrapper for layout fit. */
   className?: string;
   /** Visual variant.
-   *   * ``light`` — default; bar uses ``bg-slate-200`` track suitable
+   *   * ``light`` — default; bar uses ``bg-surface-tertiary`` track suitable
    *     for the light-on-light banner row backgrounds.
    *   * ``dark``  — for the DWG-takeoff hint popover and the install
    *     prompt modal, both of which sit on darker surfaces. */
@@ -122,8 +122,8 @@ export function ConverterInstallProgressBar({
   const trackBg =
     variant === 'dark'
       ? 'bg-white/10'
-      : 'bg-slate-200 dark:bg-slate-700';
-  const fillBg = 'bg-sky-500 dark:bg-sky-400';
+      : 'bg-surface-tertiary';
+  const fillBg = 'bg-semantic-info';
   const microTone =
     variant === 'dark'
       ? 'text-white/70'

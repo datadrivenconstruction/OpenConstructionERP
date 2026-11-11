@@ -59,7 +59,7 @@ export function ReasonedButton({
           data-reason={verdict ?? undefined}
           className="inline-flex max-w-xs items-start gap-1 text-2xs text-content-tertiary"
         >
-          <Info size={11} className="mt-px shrink-0" aria-hidden />
+          <Info size={12} className="mt-px shrink-0" aria-hidden />
           {reason}
         </span>
       )}
@@ -169,7 +169,7 @@ export function Field({
   const { t } = useTranslation();
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-primary">
+      <label htmlFor={id} className="oe-label">
         {label}
         {required && (
           <span className="ml-1 text-xs font-normal text-semantic-error">

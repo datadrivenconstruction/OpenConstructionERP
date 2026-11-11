@@ -68,7 +68,7 @@ function SectionCard({ icon, title, children }: { icon: ReactNode; title: string
     <Card className="p-4">
       <div className="mb-1 flex items-center gap-2">
         <span className="text-oe-blue">{icon}</span>
-        <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+        <h3 className="oe-card-title">{title}</h3>
       </div>
       <div className="divide-y divide-border-light">{children}</div>
     </Card>

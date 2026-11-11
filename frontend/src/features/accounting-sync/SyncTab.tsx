@@ -117,7 +117,7 @@ export function SyncTab({
       )}
 
       <Card padding="md">
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">{t('accountingSync.findings.title', { defaultValue: 'Checks before sending' })}</h3>
+        <h3 className="oe-card-title mb-2">{t('accountingSync.findings.title', { defaultValue: 'Checks before sending' })}</h3>
         {findingsQ.isLoading ? (
           <p className="text-sm text-content-tertiary">{t('accountingSync.loading', { defaultValue: 'Loading...' })}</p>
         ) : findings.length === 0 ? (
@@ -142,7 +142,7 @@ export function SyncTab({
 
       <Card padding="md">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-          <h3 className="text-sm font-semibold text-content-primary">{t('accountingSync.docs.title', { defaultValue: 'Documents in the period' })}</h3>
+          <h3 className="oe-card-title">{t('accountingSync.docs.title', { defaultValue: 'Documents in the period' })}</h3>
           <PeriodPicker range={range} onChange={onRange} />
         </div>
         {docsQ.isLoading ? (
@@ -151,11 +151,11 @@ export function SyncTab({
           <p className="text-sm text-content-tertiary">{t('accountingSync.docs.empty', { defaultValue: 'No documents in this period.' })}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[44rem] text-sm" data-testid="accounting-sync-docs">
+            <table className="oe-table-compact w-full min-w-[44rem]" data-testid="accounting-sync-docs">
               <thead>
-                <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                <tr className="text-left text-2xs">
                   {live && (
-                    <th className="pb-2 pr-3 font-medium">
+                    <th className="pb-2 pr-3">
                       <input
                         type="checkbox"
                         aria-label={t('accountingSync.docs.review_all', { defaultValue: 'Mark all as reviewed' })}
@@ -165,20 +165,20 @@ export function SyncTab({
                       />
                     </th>
                   )}
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.number', { defaultValue: 'Number' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.type', { defaultValue: 'Type' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.date', { defaultValue: 'Date' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.counterparty', { defaultValue: 'Counterparty' })}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t('accountingSync.docs.net', { defaultValue: 'Net' })}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t('accountingSync.docs.tax', { defaultValue: 'Tax' })}</th>
-                  <th className="pb-2 text-right font-medium">{t('accountingSync.docs.gross', { defaultValue: 'Gross' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.docs.number', { defaultValue: 'Number' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.docs.type', { defaultValue: 'Type' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.docs.date', { defaultValue: 'Date' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.docs.counterparty', { defaultValue: 'Counterparty' })}</th>
+                  <th className="pb-2 pr-3 text-right">{t('accountingSync.docs.net', { defaultValue: 'Net' })}</th>
+                  <th className="pb-2 pr-3 text-right">{t('accountingSync.docs.tax', { defaultValue: 'Tax' })}</th>
+                  <th className="pb-2 text-right">{t('accountingSync.docs.gross', { defaultValue: 'Gross' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {docs.map((d) => (
                   <tr key={`${d.record_type}-${d.record_id}`} className="border-t border-border-light">
                     {live && (
-                      <td className="py-1.5 pr-3">
+                      <td className="pr-3">
                         <input
                           type="checkbox"
                           aria-label={t('accountingSync.docs.review_one', { defaultValue: 'Reviewed {{number}}', number: d.number })}
@@ -195,16 +195,16 @@ export function SyncTab({
                         />
                       </td>
                     )}
-                    <td className="py-1.5 pr-3 font-medium text-content-primary">{d.number}</td>
-                    <td className="py-1.5 pr-3 text-content-secondary">
+                    <td className="pr-3 font-medium">{d.number}</td>
+                    <td className="pr-3 text-content-secondary">
                       {recordTypeLabel(t, d.record_type)}
                       <span className="block text-2xs text-content-tertiary">{sourceLabel(t, d.source)}</span>
                     </td>
-                    <td className="py-1.5 pr-3 text-content-secondary"><DateDisplay value={d.doc_date} /></td>
-                    <td className="py-1.5 pr-3 text-content-secondary">{d.counterparty || '—'}</td>
-                    <td className="py-1.5 pr-3 text-right"><Money value={d.net_total} currency={d.currency} /></td>
-                    <td className="py-1.5 pr-3 text-right"><Money value={d.tax_total} currency={d.currency} /></td>
-                    <td className="py-1.5 text-right font-medium"><Money value={d.gross_total} currency={d.currency} /></td>
+                    <td className="pr-3 text-content-secondary"><DateDisplay value={d.doc_date} /></td>
+                    <td className="pr-3 text-content-secondary">{d.counterparty || '—'}</td>
+                    <td className="pr-3 text-right"><Money value={d.net_total} currency={d.currency} /></td>
+                    <td className="pr-3 text-right"><Money value={d.tax_total} currency={d.currency} /></td>
+                    <td className="text-right font-medium"><Money value={d.gross_total} currency={d.currency} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -215,7 +215,7 @@ export function SyncTab({
 
       <Card padding="md">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold text-content-primary">{t('accountingSync.log.title', { defaultValue: 'Sync log' })}</h3>
+          <h3 className="oe-card-title">{t('accountingSync.log.title', { defaultValue: 'Sync log' })}</h3>
           <label className="flex items-center gap-2 text-sm text-content-secondary">
             <input
               type="checkbox"
@@ -238,36 +238,36 @@ export function SyncTab({
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[44rem] text-sm" data-testid="accounting-sync-log">
+            <table className="oe-table-compact w-full min-w-[44rem]" data-testid="accounting-sync-log">
               <thead>
-                <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.log.time', { defaultValue: 'Time' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.log.action', { defaultValue: 'Action' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.log.record', { defaultValue: 'Record' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.log.status', { defaultValue: 'Status' })}</th>
-                  <th className="pb-2 pr-3 font-medium">{t('accountingSync.log.reason', { defaultValue: 'Reason' })}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t('accountingSync.log.attempt', { defaultValue: 'Attempt' })}</th>
+                <tr className="text-left text-2xs">
+                  <th className="pb-2 pr-3">{t('accountingSync.log.time', { defaultValue: 'Time' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.log.action', { defaultValue: 'Action' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.log.record', { defaultValue: 'Record' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.log.status', { defaultValue: 'Status' })}</th>
+                  <th className="pb-2 pr-3">{t('accountingSync.log.reason', { defaultValue: 'Reason' })}</th>
+                  <th className="pb-2 pr-3 text-right">{t('accountingSync.log.attempt', { defaultValue: 'Attempt' })}</th>
                   <th className="pb-2" />
                 </tr>
               </thead>
               <tbody>
                 {log.items.map((e) => (
                   <tr key={e.id} className="border-t border-border-light align-top" data-testid={`log-row-${e.id}`}>
-                    <td className="py-1.5 pr-3 text-content-secondary"><DateDisplay value={e.created_at} /></td>
-                    <td className="py-1.5 pr-3 text-content-secondary">{actionLabel(t, e.action)}</td>
-                    <td className="py-1.5 pr-3 text-content-primary">
+                    <td className="pr-3 text-content-secondary"><DateDisplay value={e.created_at} /></td>
+                    <td className="pr-3 text-content-secondary">{actionLabel(t, e.action)}</td>
+                    <td className="pr-3">
                       {e.record_label || '—'}
                       {e.amount && <span className="block text-2xs text-content-tertiary"><Money value={e.amount} currency={connection.base_currency} /></span>}
                     </td>
-                    <td className="py-1.5 pr-3"><StatusChip status={e.status} /></td>
-                    <td className="max-w-[18rem] py-1.5 pr-3 text-content-secondary">{e.error_reason || '—'}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">{e.attempt}</td>
-                    <td className="py-1.5 text-right">
+                    <td className="pr-3"><StatusChip status={e.status} /></td>
+                    <td className="max-w-[18rem] pr-3 text-content-secondary">{e.error_reason || '—'}</td>
+                    <td className="pr-3 text-right tabular-nums text-content-secondary">{e.attempt}</td>
+                    <td className="text-right">
                       {canRetry(e) && canEdit && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          icon={<RotateCcw size={13} />}
+                          icon={<RotateCcw size={14} />}
                           loading={retryMut.isPending && retryMut.variables === e.id}
                           onClick={() => retryMut.mutate(e.id, { onError })}
                         >
@@ -302,7 +302,7 @@ export function SyncTab({
           </div>
         )}
         <div className="mt-2 flex justify-end">
-          <Button variant="ghost" size="sm" icon={<RefreshCw size={13} />} onClick={() => void logQ.refetch()}>
+          <Button variant="ghost" size="sm" icon={<RefreshCw size={14} />} onClick={() => void logQ.refetch()}>
             {t('accountingSync.log.refresh', { defaultValue: 'Refresh' })}
           </Button>
         </div>

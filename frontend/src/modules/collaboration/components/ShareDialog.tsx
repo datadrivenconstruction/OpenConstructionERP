@@ -38,10 +38,10 @@ export function ShareDialog({ roomName, isOpen, onClose }: ShareDialogProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="w-96 rounded-xl border border-border bg-surface-elevated p-5 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
+          <h3 className="oe-card-title flex items-center gap-2">
             <Link2 size={16} className="text-oe-blue" />
             {t('collab.share_title', { defaultValue: 'Share Collaboration Link' })}
           </h3>
@@ -65,7 +65,7 @@ export function ShareDialog({ roomName, isOpen, onClose }: ShareDialogProps) {
             type="text"
             readOnly
             value={shareUrl}
-            className="flex-1 rounded-lg border border-border bg-surface-secondary px-3 py-2 text-xs text-content-primary truncate"
+            className="oe-input flex-1 truncate"
           />
           <button
             onClick={handleCopy}

@@ -279,7 +279,7 @@ export function AISmartPanel({
   const offTranslate = isRTL ? '-translate-x-full' : 'translate-x-full';
   return (
     <div
-      className={`fixed right-0 top-[52px] z-50 h-[calc(100%-52px)] w-[400px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-[52px] z-dropdown h-[calc(100%-52px)] w-[400px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : offTranslate
       }`}
     >
@@ -296,7 +296,7 @@ export function AISmartPanel({
           className="p-1.5 rounded-md hover:bg-semantic-error-bg text-content-tertiary hover:text-semantic-error transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
-          <X size={18} />
+          <X size={20} />
         </button>
       </div>
 
@@ -346,7 +346,7 @@ export function AISmartPanel({
                 to="/settings"
                 className="inline-flex items-center gap-1 mt-1.5 text-2xs font-medium text-semantic-warning hover:underline"
               >
-                <Settings size={11} />
+                <Settings size={12} />
                 {t('boq.go_to_settings', { defaultValue: 'Configure AI' })}
               </Link>
             </div>
@@ -372,13 +372,13 @@ export function AISmartPanel({
       {/* Actions */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {/* ── Per-position actions ─────────────────────────────────────── */}
-        <div className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+        <div className="oe-overline">
           {t('boq.ai_position_actions', { defaultValue: 'Position Actions' })}
         </div>
 
         {/* Enhance Description */}
         <ActionCard
-          icon={<FileText size={15} />}
+          icon={<FileText size={16} />}
           title={t('boq.ai_enhance_title', { defaultValue: 'Enhance Description' })}
           subtitle={t('boq.ai_enhance_subtitle', { defaultValue: 'Add technical specs, standards, material grades' })}
           loading={enhanceLoading}
@@ -414,7 +414,7 @@ export function AISmartPanel({
                   ))}
                 </div>
               )}
-              <Button size="sm" variant="primary" icon={<Zap size={13} />} onClick={applyEnhancedDescription}>
+              <Button size="sm" variant="primary" icon={<Zap size={14} />} onClick={applyEnhancedDescription}>
                 {t('boq.ai_apply_description', { defaultValue: 'Apply Enhanced Description' })}
               </Button>
             </div>
@@ -423,7 +423,7 @@ export function AISmartPanel({
 
         {/* Suggest Prerequisites */}
         <ActionCard
-          icon={<Layers size={15} />}
+          icon={<Layers size={16} />}
           title={t('boq.ai_prereqs_title', { defaultValue: 'Suggest Related Items' })}
           subtitle={t('boq.ai_prereqs_subtitle', { defaultValue: 'Find missing prerequisites, companions, successors' })}
           loading={prereqLoading}
@@ -475,7 +475,7 @@ export function AISmartPanel({
 
         {/* Escalate Rate */}
         <ActionCard
-          icon={<TrendingUp size={15} />}
+          icon={<TrendingUp size={16} />}
           title={t('boq.ai_escalate_title', { defaultValue: 'Escalate Rate' })}
           subtitle={t('boq.ai_escalate_subtitle', { defaultValue: 'Adjust rate for inflation and market changes' })}
           loading={escalateLoading}
@@ -512,7 +512,7 @@ export function AISmartPanel({
               <p className="text-2xs text-content-tertiary italic">{escalateResult.reasoning}</p>
               <div className="flex items-center gap-2">
                 <ConfidenceBadge level={escalateResult.confidence} />
-                <Button size="sm" variant="primary" icon={<Zap size={13} />} onClick={applyEscalatedRate}>
+                <Button size="sm" variant="primary" icon={<Zap size={14} />} onClick={applyEscalatedRate}>
                   {t('boq.ai_apply_rate', { defaultValue: 'Apply Escalated Rate' })}
                 </Button>
               </div>
@@ -522,14 +522,14 @@ export function AISmartPanel({
 
         {/* Divider */}
         <div className="border-t border-border-light pt-3">
-          <div className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+          <div className="oe-overline">
             {t('boq.ai_global_actions', { defaultValue: 'BOQ-level Actions' })}
           </div>
         </div>
 
         {/* Check Scope */}
         <ActionCard
-          icon={<AlertTriangle size={15} />}
+          icon={<AlertTriangle size={16} />}
           title={t('boq.ai_scope_title', { defaultValue: 'Check Scope Completeness' })}
           subtitle={t('boq.ai_scope_subtitle', { defaultValue: 'Find missing trades, work packages, critical items' })}
           loading={scopeLoading}

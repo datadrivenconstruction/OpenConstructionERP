@@ -145,7 +145,7 @@ function HowBenchmarksWork() {
   return (
     <CollapsibleSection
       storageKey="cost_benchmarks.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('cost_benchmarks.flow_title', { defaultValue: 'How this fits the workflow' })}
     >
       <ol className="list-decimal space-y-1 pl-5 text-xs text-content-tertiary">
@@ -236,22 +236,22 @@ function RecordsTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="oe-table w-full">
         <thead>
-          <tr className="border-b border-border-light text-left text-2xs uppercase text-content-tertiary">
-            <th className="py-2 pr-3">{t('cost_benchmarks.col_name', { defaultValue: 'Name' })}</th>
-            <th className="py-2 pr-3">{t('cost_benchmarks.col_type', { defaultValue: 'Type' })}</th>
-            <th className="py-2 pr-3">{t('cost_benchmarks.col_country', { defaultValue: 'Country' })}</th>
-            <th className="py-2 pr-3">{t('cost_benchmarks.col_year', { defaultValue: 'Year' })}</th>
-            <th className="py-2 pr-3 text-right">{t('cost_benchmarks.col_gfa', { defaultValue: 'GFA (m2)' })}</th>
-            <th className="py-2 pr-3 text-right">{t('cost_benchmarks.col_per_m2', { defaultValue: 'Cost per m2' })}</th>
-            {deletable && <th className="py-2" />}
+          <tr className="text-left text-2xs">
+            <th className="pr-3">{t('cost_benchmarks.col_name', { defaultValue: 'Name' })}</th>
+            <th className="pr-3">{t('cost_benchmarks.col_type', { defaultValue: 'Type' })}</th>
+            <th className="pr-3">{t('cost_benchmarks.col_country', { defaultValue: 'Country' })}</th>
+            <th className="pr-3">{t('cost_benchmarks.col_year', { defaultValue: 'Year' })}</th>
+            <th className="pr-3 text-right">{t('cost_benchmarks.col_gfa', { defaultValue: 'GFA (m2)' })}</th>
+            <th className="pr-3 text-right">{t('cost_benchmarks.col_per_m2', { defaultValue: 'Cost per m2' })}</th>
+            {deletable && <th />}
           </tr>
         </thead>
         <tbody>
           {records.map((r) => (
-            <tr key={r.id} className="border-b border-border-light/60" data-testid="record-row">
-              <td className="py-2 pr-3 font-medium text-content-primary">
+            <tr key={r.id} data-testid="record-row">
+              <td className="pr-3 font-medium">
                 {r.name}
                 {r.is_synthetic && (
                   <Badge variant="neutral" size="sm" className="ml-2">
@@ -259,15 +259,15 @@ function RecordsTable({
                   </Badge>
                 )}
               </td>
-              <td className="py-2 pr-3">{r.project_type}</td>
-              <td className="py-2 pr-3">{r.country}</td>
-              <td className="py-2 pr-3">{yearOf(r.cost_date)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{fmt(r.gfa_m2, 0)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">
+              <td className="pr-3">{r.project_type}</td>
+              <td className="pr-3">{r.country}</td>
+              <td className="pr-3">{yearOf(r.cost_date)}</td>
+              <td className="pr-3 text-right tabular-nums">{fmt(r.gfa_m2, 0)}</td>
+              <td className="pr-3 text-right tabular-nums">
                 {fmt(costPerM2(r))} {r.currency}
               </td>
               {deletable && (
-                <td className="py-2 text-right">
+                <td className="text-right">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -299,7 +299,7 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
   return (
     <Card className="space-y-4 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('cost_benchmarks.result_title', { defaultValue: 'Result for {{name}}', name: result.estimate.name })}
         </h2>
         {cohort.low_confidence && (
@@ -387,13 +387,13 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
       </p>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="oe-table w-full">
           <thead>
-            <tr className="border-b border-border-light text-left text-2xs uppercase text-content-tertiary">
-              <th className="py-2 pr-3">{t('cost_benchmarks.col_element', { defaultValue: 'Element' })}</th>
-              <th className="py-2 pr-3 text-right">{t('cost_benchmarks.col_estimate', { defaultValue: 'Estimate' })}</th>
-              <th className="py-2 pr-3">{t('cost_benchmarks.col_band', { defaultValue: 'P10 - P50 - P90' })}</th>
-              <th className="py-2 pr-3">{t('cost_benchmarks.col_position', { defaultValue: 'Position' })}</th>
+            <tr className="text-left text-2xs">
+              <th className="pr-3">{t('cost_benchmarks.col_element', { defaultValue: 'Element' })}</th>
+              <th className="pr-3 text-right">{t('cost_benchmarks.col_estimate', { defaultValue: 'Estimate' })}</th>
+              <th className="pr-3">{t('cost_benchmarks.col_band', { defaultValue: 'P10 - P50 - P90' })}</th>
+              <th className="pr-3">{t('cost_benchmarks.col_position', { defaultValue: 'Position' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -409,12 +409,12 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
                     outlier && 'bg-semantic-error-bg/40',
                   )}
                 >
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     <span className="font-mono text-2xs text-content-tertiary">{el.code}</span>{' '}
                     <span className="font-medium text-content-primary">{el.label}</span>
                   </td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{fmt(el.estimate_per_unit)}</td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3 text-right tabular-nums">{fmt(el.estimate_per_unit)}</td>
+                  <td className="pr-3">
                     <BandBar band={el.band} value={el.estimate_per_unit} position={el.position} />
                     <div className="mt-0.5 flex items-center gap-2 text-2xs text-content-quaternary tabular-nums">
                       <span>
@@ -427,7 +427,7 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
                       </span>
                     </div>
                   </td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3">
                     <Badge variant={outlier ? 'error' : el.position === 'within' ? 'success' : 'neutral'} size="sm">
                       {positionLabel(el.position, t)}
                     </Badge>
@@ -441,7 +441,7 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
 
       {result.findings.length > 0 && (
         <div>
-          <h3 className="mb-1 text-xs font-semibold text-content-primary">
+          <h3 className="oe-card-title mb-1">
             {t('cost_benchmarks.findings', { defaultValue: 'Findings' })}
           </h3>
           <ul className="space-y-1" data-testid="findings">
@@ -603,7 +603,7 @@ export default function CostBenchmarksPage() {
       <HowBenchmarksWork />
 
       <Card className="space-y-3 p-4">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title flex items-center gap-2">
           <BarChart3 size={16} className="text-oe-blue" />
           {t('cost_benchmarks.compare_title', { defaultValue: 'Compare an estimate' })}
         </h2>
@@ -708,7 +708,7 @@ export default function CostBenchmarksPage() {
       {result && <CompareResultView result={result} onExport={(f) => void handleExport(f)} />}
 
       <Card className="space-y-2 p-4">
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('cost_benchmarks.completed_title', { defaultValue: 'Completed projects' })}
           <span className="ml-2 text-xs font-normal text-content-tertiary">
             {t('cost_benchmarks.record_count', {
@@ -732,7 +732,7 @@ export default function CostBenchmarksPage() {
 
       {estimates.length > 0 && (
         <Card className="space-y-2 p-4">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('cost_benchmarks.estimates_title', { defaultValue: 'Estimates' })}
           </h2>
           <RecordsTable records={estimates} busy={false} deletable={false} />

@@ -287,7 +287,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
     <div className="rounded-lg border border-border bg-surface-primary p-4 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-medium text-content-primary">
+          <h3 className="oe-card-title">
             {t('cost_match.composer_title', { defaultValue: 'Match a bill' })}
           </h3>
           <p className="mt-0.5 text-xs text-content-tertiary">
@@ -308,7 +308,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             {t('cost_match.field_name', { defaultValue: 'Name this run' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-input mt-1 w-full"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t('cost_match.field_name_placeholder', {
@@ -321,7 +321,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             {t('cost_match.field_source_label', { defaultValue: 'Where the bill came from' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-input mt-1 w-full"
             value={sourceLabel}
             onChange={(e) => setSourceLabel(e.target.value)}
             placeholder={t('cost_match.field_source_label_placeholder', {
@@ -334,7 +334,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             {t('cost_match.field_cost_source', { defaultValue: 'Which cost base' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-input mt-1 w-full"
             value={costSource}
             onChange={(e) => setCostSource(e.target.value)}
             placeholder={t('cost_match.field_cost_source_placeholder', {
@@ -353,7 +353,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             {t('cost_match.field_region', { defaultValue: 'Cost base region' })}
           </span>
           <select
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-select mt-1 w-full"
             value={region}
             onChange={(e) => setRegion(e.target.value)}
           >
@@ -372,7 +372,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
             {t('cost_match.field_source_locale', { defaultValue: 'Language of the bill' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-input mt-1 w-full"
             value={sourceLocale}
             onChange={(e) => setSourceLocale(e.target.value)}
           />
@@ -390,7 +390,7 @@ function BillComposer({ projectId, onClose, onCreated }: ComposerProps) {
           {t('cost_match.field_lines', { defaultValue: 'The bill' })}
         </span>
         <textarea
-          className="mt-1 h-40 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 font-mono text-xs"
+          className="oe-textarea-sm mt-1 w-full font-mono"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t('cost_match.field_lines_placeholder', {
@@ -533,7 +533,7 @@ function OverridePicker({ run, result, onCancel, onPick, pending }: OverrideProp
         }}
       >
         <input
-          className="flex-1 rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-input flex-1"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('cost_match.override_search_placeholder', {
@@ -550,7 +550,7 @@ function OverridePicker({ run, result, onCancel, onPick, pending }: OverrideProp
           {t('cost_match.override_note', { defaultValue: 'Why (kept with the ruling)' })}
         </span>
         <input
-          className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+          className="oe-input mt-1 w-full"
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
@@ -737,7 +737,7 @@ function ResultRow({ run, result, onDecide, pendingId, locked }: ResultRowProps)
               variant="secondary"
               size="sm"
               disabled={busy}
-              icon={<Check size={13} />}
+              icon={<Check size={14} />}
               onClick={() => onDecide(result, 'confirmed', null, '')}
             >
               {t('cost_match.action_confirm', { defaultValue: 'Confirm' })}
@@ -747,7 +747,7 @@ function ResultRow({ run, result, onDecide, pendingId, locked }: ResultRowProps)
             variant="secondary"
             size="sm"
             disabled={busy}
-            icon={<Replace size={13} />}
+            icon={<Replace size={14} />}
             onClick={() => setOverriding((open) => !open)}
           >
             {t('cost_match.action_override', { defaultValue: 'Price against something else' })}
@@ -756,7 +756,7 @@ function ResultRow({ run, result, onDecide, pendingId, locked }: ResultRowProps)
             variant="ghost"
             size="sm"
             disabled={busy}
-            icon={<X size={13} />}
+            icon={<X size={14} />}
             onClick={() => onDecide(result, 'rejected', null, '')}
           >
             {t('cost_match.action_reject', { defaultValue: 'Nothing here fits' })}
@@ -953,7 +953,7 @@ export function CostMatchPanel() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-medium text-content-primary">
+        <h2 className="oe-section-title">
           {t('cost_match.runs_title', { defaultValue: 'Matched bills' })}
         </h2>
         {!composing && (
@@ -1035,7 +1035,7 @@ export function CostMatchPanel() {
         <div className="space-y-3 rounded-lg border border-border bg-surface-primary p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-medium text-content-primary">{selectedRun.name}</h3>
+              <h3 className="oe-card-title">{selectedRun.name}</h3>
               <p className="mt-0.5 text-xs text-content-tertiary">
                 {t('cost_match.run_base', {
                   defaultValue: 'Matched against {{source}}{{region}} in {{locale}}',
@@ -1052,7 +1052,7 @@ export function CostMatchPanel() {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<ShieldCheck size={13} />}
+                icon={<ShieldCheck size={14} />}
                 loading={validateMutation.isPending}
                 onClick={() => validateMutation.mutate()}
               >
@@ -1061,7 +1061,7 @@ export function CostMatchPanel() {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={locked ? <Unlock size={13} /> : <Lock size={13} />}
+                icon={locked ? <Unlock size={14} /> : <Lock size={14} />}
                 loading={lockMutation.isPending}
                 onClick={() => lockMutation.mutate(locked ? 'matched' : 'closed')}
               >
@@ -1072,7 +1072,7 @@ export function CostMatchPanel() {
               <Button
                 variant="ghost"
                 size="sm"
-                icon={<Trash2 size={13} />}
+                icon={<Trash2 size={14} />}
                 onClick={() => setConfirmDelete(true)}
               >
                 {t('common.delete', { defaultValue: 'Delete' })}
@@ -1097,7 +1097,7 @@ export function CostMatchPanel() {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<ListChecks size={13} />}
+                icon={<ListChecks size={14} />}
                 loading={batchConfirm.isPending}
                 onClick={() => batchConfirm.mutate()}
               >
@@ -1119,7 +1119,7 @@ export function CostMatchPanel() {
             <div className="rounded-md border border-border bg-surface-secondary p-3">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-medium text-content-primary">
-                  <ShieldCheck size={13} />
+                  <ShieldCheck size={14} />
                   {t('cost_match.report_title', { defaultValue: 'What the check found' })}
                 </span>
                 <Button variant="ghost" size="sm" onClick={() => setReport(null)}>
@@ -1174,7 +1174,7 @@ export function CostMatchPanel() {
                   : 'text-content-secondary hover:text-content-primary')
               }
             >
-              <ListChecks size={13} />
+              <ListChecks size={14} />
               {t('cost_match.tab_queue', { defaultValue: 'Waiting for a person' })}
               <span className="tabular-nums">({selectedRun.counts.queue_length})</span>
             </button>
@@ -1188,7 +1188,7 @@ export function CostMatchPanel() {
                   : 'text-content-secondary hover:text-content-primary')
               }
             >
-              <FileSearch size={13} />
+              <FileSearch size={14} />
               {t('cost_match.tab_all', { defaultValue: 'Every line' })}
               <span className="tabular-nums">({selectedRun.counts.total})</span>
             </button>
@@ -1197,7 +1197,7 @@ export function CostMatchPanel() {
           {tab === 'all' && (
             <div className="flex flex-wrap gap-2">
               <select
-                className="rounded-md border border-border bg-surface-primary px-2 py-1 text-xs"
+                className="oe-select-sm"
                 value={tierFilter}
                 onChange={(e) => setTierFilter(e.target.value as TierFilter | '')}
               >
@@ -1211,7 +1211,7 @@ export function CostMatchPanel() {
                 ))}
               </select>
               <select
-                className="rounded-md border border-border bg-surface-primary px-2 py-1 text-xs"
+                className="oe-select-sm"
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value as DecisionStateFilter | '')}
               >
@@ -1232,7 +1232,7 @@ export function CostMatchPanel() {
               <Button
                 variant="ghost"
                 size="sm"
-                icon={<ClipboardCopy size={13} />}
+                icon={<ClipboardCopy size={14} />}
                 onClick={() => {
                   const header = ['Line', 'Description', 'Qty', 'Unit', 'Ref', 'Tier', 'Status', 'Matched code', 'Matched rate', 'Currency'].join('\t');
                   const rows = results.map((r) => {

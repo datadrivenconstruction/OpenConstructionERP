@@ -75,7 +75,7 @@ import {
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
 /** How long a proposal preview list can get before it is capped. */
@@ -154,7 +154,7 @@ export function WholeLifePanel({ projectId, currency }: { projectId: string; cur
             id="wl-inventory"
             value={effectiveId}
             onChange={(e) => setInventoryId(e.target.value)}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {inventories.map((inv) => (
               <option key={inv.id} value={inv.id}>
@@ -230,7 +230,7 @@ function WholeLifeDashboard({
         <Button
           variant="secondary"
           size="sm"
-          icon={<Sparkles size={13} />}
+          icon={<Sparkles size={14} />}
           onClick={() => setComputeModal('operational')}
         >
           {t('carbon.sixd.wl_compute_operational', {
@@ -240,7 +240,7 @@ function WholeLifeDashboard({
         <Button
           variant="secondary"
           size="sm"
-          icon={<Sparkles size={13} />}
+          icon={<Sparkles size={14} />}
           onClick={() => setComputeModal('lcc')}
         >
           {t('carbon.sixd.wl_compute_lcc', {
@@ -357,8 +357,8 @@ function CarbonBreakdownCard({ carbon }: { carbon: WholeLifeCarbonBreakdown }) {
 
   return (
     <Card>
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <Leaf size={13} />
+      <div className="oe-overline mb-3 flex items-center gap-1.5">
+        <Leaf size={14} />
         {t('carbon.sixd.wl_carbon_title', {
           defaultValue: 'Whole-life carbon (EN 15978)',
         })}
@@ -465,8 +465,8 @@ function CostBreakdownCard({ cost }: { cost: WholeLifeCostBreakdown }) {
 
   return (
     <Card>
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <Coins size={13} />
+      <div className="oe-overline mb-3 flex items-center gap-1.5">
+        <Coins size={14} />
         {t('carbon.sixd.wl_cost_title', {
           defaultValue: 'Whole-life cost (ISO 15686-5)',
         })}
@@ -587,8 +587,8 @@ function CoverageCard({ coverage }: { coverage: WholeLifeCoverage }) {
   const total = coverage.bim_element_count ?? 0;
   return (
     <Card>
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <Gauge size={13} />
+      <div className="oe-overline mb-3 flex items-center gap-1.5">
+        <Gauge size={14} />
         {t('carbon.sixd.wl_coverage_title', { defaultValue: 'Model coverage' })}
       </div>
       {total === 0 ? (
@@ -606,7 +606,7 @@ function CoverageCard({ coverage }: { coverage: WholeLifeCoverage }) {
               total,
             })}
           </p>
-          <ul className="space-y-2.5">
+          <ul className="space-y-2">
             <CoverageRow
               label={t('carbon.sixd.wl_coverage_embodied', {
                 defaultValue: 'Embodied carbon',
@@ -656,8 +656,8 @@ function CarbonPriceCard({
   const hasPrice = monetised !== null && monetised !== undefined;
   return (
     <Card>
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <Coins size={13} />
+      <div className="oe-overline mb-3 flex items-center gap-1.5">
+        <Coins size={14} />
         {t('carbon.sixd.wl_price_title', {
           defaultValue: 'Cost of carbon (optional)',
         })}
@@ -674,7 +674,7 @@ function CarbonPriceCard({
         step="1"
         value={priceInput}
         onChange={(e) => onPriceChange(e.target.value)}
-        className={inputCls}
+        className={`oe-input ${inputCls}`}
         placeholder={t('carbon.sixd.wl_price_placeholder', {
           defaultValue: 'e.g. 50',
         })}
@@ -736,7 +736,7 @@ function ProvenanceLine({
             name: elementRef,
           })}
         >
-          <Box size={11} className="shrink-0" />
+          <Box size={12} className="shrink-0" />
           <span className="truncate">{elementRef}</span>
         </span>
       )}
@@ -781,7 +781,7 @@ function AcceptReject({
       <Button
         variant="secondary"
         size="sm"
-        icon={<Check size={13} />}
+        icon={<Check size={14} />}
         loading={busy}
         disabled={busy}
         onClick={onAccept}
@@ -868,8 +868,8 @@ function DraftReviewSection({
 
   return (
     <Card>
-      <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-        <Check size={13} />
+      <div className="oe-overline mb-1 flex items-center gap-1.5">
+        <Check size={14} />
         {t('carbon.sixd.wl_review_title', {
           defaultValue: 'Review draft lines',
         })}
@@ -893,7 +893,7 @@ function DraftReviewSection({
 
       <div className="mt-3 space-y-4">
         <div>
-          <h4 className="mb-2 text-xs font-semibold text-content-secondary">
+          <h4 className="oe-card-title mb-2">
             {t('carbon.sixd.wl_review_operational', {
               defaultValue: 'Operational carbon (B6)',
             })}
@@ -941,7 +941,7 @@ function DraftReviewSection({
         </div>
 
         <div>
-          <h4 className="mb-2 text-xs font-semibold text-content-secondary">
+          <h4 className="oe-card-title mb-2">
             {t('carbon.sixd.wl_review_lcc', {
               defaultValue: 'Whole-life cost',
             })}
@@ -1171,7 +1171,7 @@ function OperationalComputeModal({
               onChange={(e) => update('grid_country', e.target.value)}
               placeholder="DE, GB, US..."
               maxLength={8}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1183,7 +1183,7 @@ function OperationalComputeModal({
               type="number"
               value={form.grid_year}
               onChange={(e) => update('grid_year', Number(e.target.value) || 2023)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1198,7 +1198,7 @@ function OperationalComputeModal({
               value={form.grid_factor}
               onChange={(e) => update('grid_factor', e.target.value)}
               placeholder={t('carbon.sixd.wl_auto', { defaultValue: 'auto' })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1211,14 +1211,14 @@ function OperationalComputeModal({
               min="1"
               value={form.study_period_years}
               onChange={(e) => update('study_period_years', Number(e.target.value) || 60)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field label={t('carbon.sixd.wl_op_end_use', { defaultValue: 'End use' })}>
             <select
               value={form.end_use}
               onChange={(e) => update('end_use', e.target.value)}
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="regulated">
                 {t('carbon.sixd.wl_end_use_regulated', {
@@ -1245,7 +1245,7 @@ function OperationalComputeModal({
               min="0"
               value={form.gross_floor_area_m2}
               onChange={(e) => update('gross_floor_area_m2', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1261,7 +1261,7 @@ function OperationalComputeModal({
               min="0"
               value={form.modelled_intensity}
               onChange={(e) => update('modelled_intensity', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
         </div>
@@ -1558,7 +1558,7 @@ function LccComputeModal({
               max="1"
               value={form.discount_rate}
               onChange={(e) => update('discount_rate', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1571,7 +1571,7 @@ function LccComputeModal({
               min="1"
               value={form.study_period_years}
               onChange={(e) => update('study_period_years', Number(e.target.value) || 60)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1583,7 +1583,7 @@ function LccComputeModal({
               value={form.currency}
               onChange={(e) => update('currency', e.target.value.toUpperCase())}
               maxLength={8}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1597,7 +1597,7 @@ function LccComputeModal({
               min="0"
               value={form.opex_rate_pct}
               onChange={(e) => update('opex_rate_pct', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1611,7 +1611,7 @@ function LccComputeModal({
               min="0"
               value={form.eol_rate_pct}
               onChange={(e) => update('eol_rate_pct', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1624,7 +1624,7 @@ function LccComputeModal({
               min="1"
               value={form.default_service_life_years}
               onChange={(e) => update('default_service_life_years', Number(e.target.value) || 30)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
           <Field
@@ -1637,7 +1637,7 @@ function LccComputeModal({
               min="0"
               value={form.default_capex}
               onChange={(e) => update('default_capex', e.target.value)}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Field>
         </div>
@@ -1645,12 +1645,12 @@ function LccComputeModal({
         {/* Manual cost lines (optional) */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <h4 className="oe-overline">
               {t('carbon.sixd.wl_lcc_lines_title', {
                 defaultValue: 'Manual cost lines (optional)',
               })}
             </h4>
-            <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={addLine}>
+            <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addLine}>
               {t('carbon.sixd.wl_lcc_add_line', {
                 defaultValue: 'Add cost line',
               })}
@@ -1673,7 +1673,7 @@ function LccComputeModal({
                     placeholder={t('carbon.sixd.wl_lcc_line_desc', {
                       defaultValue: 'Description',
                     })}
-                    className={clsx(inputCls, 'sm:col-span-5')}
+                    className={clsx('oe-input', inputCls, 'sm:col-span-5')}
                   />
                   <input
                     value={l.category}
@@ -1681,7 +1681,7 @@ function LccComputeModal({
                     placeholder={t('carbon.sixd.wl_lcc_line_category', {
                       defaultValue: 'Category',
                     })}
-                    className={clsx(inputCls, 'sm:col-span-3')}
+                    className={clsx('oe-input', inputCls, 'sm:col-span-3')}
                   />
                   <input
                     type="number"
@@ -1691,7 +1691,7 @@ function LccComputeModal({
                     placeholder={t('carbon.sixd.wl_lcc_line_capex', {
                       defaultValue: 'Capex',
                     })}
-                    className={clsx(inputCls, 'sm:col-span-2')}
+                    className={clsx('oe-input', inputCls, 'sm:col-span-2')}
                   />
                   <input
                     type="number"
@@ -1701,7 +1701,7 @@ function LccComputeModal({
                     placeholder={t('carbon.sixd.wl_lcc_line_life', {
                       defaultValue: 'Life (yr)',
                     })}
-                    className={clsx(inputCls, 'sm:col-span-1')}
+                    className={clsx('oe-input', inputCls, 'sm:col-span-1')}
                   />
                   <button
                     type="button"

@@ -288,7 +288,7 @@ function ReviewRow({
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-semibold text-content-primary">{topic.title}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-2xs text-content-tertiary">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-content-tertiary">
             <Badge variant={statusVariant(topic.topic_status)} size="sm">
               {topic.topic_status}
             </Badge>
@@ -408,7 +408,7 @@ function ReviewIssueDetail({
           onClick={onBack}
           className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary"
         >
-          <ArrowLeft size={13} />
+          <ArrowLeft size={14} />
           {t('bim.review_back_to_list', { defaultValue: 'All issues' })}
         </button>
         <span className="ms-auto text-2xs tabular-nums text-content-tertiary">
@@ -430,7 +430,7 @@ function ReviewIssueDetail({
           title={t('bcf.coordination_prev', { defaultValue: 'Previous issue' })}
           aria-label={t('bcf.coordination_prev', { defaultValue: 'Previous issue' })}
         >
-          <ChevronLeft size={15} />
+          <ChevronLeft size={16} />
         </button>
         <button
           type="button"
@@ -440,14 +440,14 @@ function ReviewIssueDetail({
           title={t('bcf.coordination_next', { defaultValue: 'Next issue' })}
           aria-label={t('bcf.coordination_next', { defaultValue: 'Next issue' })}
         >
-          <ChevronRight size={15} />
+          <ChevronRight size={16} />
         </button>
       </div>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
         {/* Title + badges */}
         <div>
-          <h4 className="text-sm font-semibold leading-snug text-content-primary">{topic.title}</h4>
+          <h4 className="oe-card-title">{topic.title}</h4>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <Badge variant={statusVariant(topic.topic_status)} size="sm">
               {topic.topic_status}
@@ -459,7 +459,7 @@ function ReviewIssueDetail({
             )}
             {overdue && (
               <span className="inline-flex items-center gap-1 text-2xs font-medium text-semantic-error">
-                <AlertTriangle size={11} />
+                <AlertTriangle size={12} />
                 {t('bcf.overdue', { defaultValue: 'Overdue' })}
               </span>
             )}
@@ -502,7 +502,7 @@ function ReviewIssueDetail({
         {/* The four fields a review settles */}
         <div className="grid grid-cols-2 gap-2">
           <label className="col-span-1 block">
-            <span className="mb-0.5 block text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+            <span className="oe-overline mb-0.5 block">
               {t('bcf.field_status', { defaultValue: 'Status' })}
             </span>
             <select
@@ -521,7 +521,7 @@ function ReviewIssueDetail({
           </label>
 
           <label className="col-span-1 block">
-            <span className="mb-0.5 block text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+            <span className="oe-overline mb-0.5 block">
               {t('bcf.field_priority', { defaultValue: 'Priority' })}
             </span>
             <select
@@ -539,7 +539,7 @@ function ReviewIssueDetail({
           </label>
 
           <label className="col-span-1 block">
-            <span className="mb-0.5 block text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+            <span className="oe-overline mb-0.5 block">
               {t('bcf.field_assigned_to', { defaultValue: 'Assigned to' })}
             </span>
             {members.length > 0 ? (
@@ -575,7 +575,7 @@ function ReviewIssueDetail({
           </label>
 
           <label className="col-span-1 block">
-            <span className="mb-0.5 block text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
+            <span className="oe-overline mb-0.5 block">
               {t('bcf.field_due_date', { defaultValue: 'Due date' })}
             </span>
             <input
@@ -586,8 +586,7 @@ function ReviewIssueDetail({
               className={clsx(
                 controlCls,
                 'w-full',
-                overdue && 'border-semantic-error text-semantic-error',
-              )}
+              )} aria-invalid={!!(overdue)}
             />
           </label>
         </div>
@@ -600,7 +599,7 @@ function ReviewIssueDetail({
 
         {topic.labels.length > 0 && (
           <div className="flex flex-wrap items-center gap-1">
-            <Tag size={11} className="text-content-quaternary" />
+            <Tag size={12} className="text-content-quaternary" />
             {topic.labels.map((label) => (
               <Badge key={label} variant="neutral" size="sm">
                 {label}
@@ -611,7 +610,7 @@ function ReviewIssueDetail({
 
         {vp && vp.element_stable_ids.length > 0 && (
           <p className="flex items-center gap-1.5 text-2xs text-content-tertiary">
-            <Boxes size={11} className="shrink-0" />
+            <Boxes size={12} className="shrink-0" />
             {t('bcf.selection_count', {
               defaultValue: '{{count}} element(s) selected',
               count: vp.element_stable_ids.length,
@@ -623,7 +622,7 @@ function ReviewIssueDetail({
         <div className="border-t border-border-light pt-2.5">
           <div className="mb-1.5 flex items-center gap-1.5">
             <MessageSquare size={12} className="text-content-tertiary" />
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="oe-overline">
               {t('bcf.comments', { defaultValue: 'Comments' })}
             </span>
             {topic.comments.length > 0 && (
@@ -659,7 +658,7 @@ function ReviewIssueDetail({
               title={t('bcf.post_comment', { defaultValue: 'Post comment' })}
               aria-label={t('bcf.post_comment', { defaultValue: 'Post comment' })}
             >
-              <Send size={13} />
+              <Send size={14} />
             </button>
           </div>
           {sortedComments.length === 0 ? (
@@ -856,8 +855,8 @@ export function ReviewIssuesDock({
     <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
       <div className="flex items-center gap-1.5 border-b border-border-light px-3 py-2">
-        <Boxes size={15} className="shrink-0 text-oe-blue" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <Boxes size={16} className="shrink-0 text-oe-blue" />
+        <h3 className="oe-card-title">
           {t('bim.issues', { defaultValue: 'Issues' })}
         </h3>
         <span className="rounded-full bg-surface-secondary px-1.5 text-2xs font-medium tabular-nums text-content-secondary">
@@ -879,7 +878,7 @@ export function ReviewIssuesDock({
             defaultValue: 'Export these issues as .bcfzip',
           })}
         >
-          <Download size={13} />
+          <Download size={14} />
         </button>
         <button
           type="button"
@@ -889,7 +888,7 @@ export function ReviewIssuesDock({
           title={t('bcf.print_report', { defaultValue: 'Print report' })}
           aria-label={t('bcf.print_report', { defaultValue: 'Print report' })}
         >
-          <Printer size={13} />
+          <Printer size={14} />
         </button>
         <button
           type="button"
@@ -898,7 +897,7 @@ export function ReviewIssuesDock({
           title={t('bim.review_open_register', { defaultValue: 'Open the full issue register' })}
           aria-label={t('bim.review_open_register', { defaultValue: 'Open the full issue register' })}
         >
-          <ExternalLink size={13} />
+          <ExternalLink size={14} />
         </button>
       </div>
 
@@ -927,7 +926,7 @@ export function ReviewIssuesDock({
           <div className="space-y-2 border-b border-border-light px-3 py-2">
             <div className="relative">
               <Search
-                size={13}
+                size={14}
                 className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
               />
               <input

@@ -53,16 +53,16 @@ export interface CoordinationTradeMatrixProps {
 
 /** Background-color ramp by clash count. Pure Tailwind so it tree-shakes. */
 function tintForCount(open: number, maxOpen: number): string {
-  if (open <= 0) return 'bg-slate-50';
+  if (open <= 0) return 'bg-surface-secondary';
   // Map (open / maxOpen) into one of five tints. Avoid a continuous
   // gradient because Tailwind purges unused classes — we need explicit
   // class strings.
   const ratio = maxOpen > 0 ? open / maxOpen : 0;
   if (ratio < 0.2) return 'bg-semantic-warning-bg';
   if (ratio < 0.4) return 'bg-semantic-warning-bg';
-  if (ratio < 0.6) return 'bg-amber-200';
-  if (ratio < 0.8) return 'bg-red-200';
-  return 'bg-red-300';
+  if (ratio < 0.6) return 'bg-semantic-warning-bg';
+  if (ratio < 0.8) return 'bg-semantic-error-bg';
+  return 'bg-semantic-error';
 }
 
 /** Foreground colour by tint — keeps the count readable on dark cells. */
@@ -127,12 +127,12 @@ export function CoordinationTradeMatrix({
             : 'animate-pulse rounded-xl border border-border bg-surface p-4 shadow-sm'
         }
       >
-        {!embedded ? <div className="h-4 w-1/3 rounded bg-slate-200" /> : null}
+        {!embedded ? <div className="h-4 w-1/3 rounded bg-surface-tertiary" /> : null}
         <div
           className={
             embedded
-              ? 'h-64 w-full rounded bg-slate-100'
-              : 'mt-4 h-64 w-full rounded bg-slate-100'
+              ? 'h-64 w-full rounded bg-surface-secondary'
+              : 'mt-4 h-64 w-full rounded bg-surface-secondary'
           }
         />
       </div>
@@ -328,7 +328,7 @@ export function CoordinationTradeMatrix({
     >
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('coordination.trade_matrix_title', {
               defaultValue: 'Trade Matrix',
             })}
@@ -386,7 +386,7 @@ function RowFragment({
   const [hovered, setHovered] = useState<string | null>(null);
   return (
     <>
-      <div className="text-right text-xs font-medium uppercase tracking-wide text-content-secondary">
+      <div className="oe-overline text-right">
         {disciplineLabel(t, row)}
       </div>
       {trades.map((col) => {

@@ -366,7 +366,7 @@ export function BuyerPortalPage() {
             strokeWidth={1.5}
             className="mx-auto text-semantic-error"
           />
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('buyer_portal.invalid.title', {
               defaultValue: 'Your access link has expired',
             })}
@@ -394,7 +394,7 @@ export function BuyerPortalPage() {
             strokeWidth={1.5}
             className="mx-auto text-semantic-warning"
           />
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('buyer_portal.error.title', {
               defaultValue: 'Something went wrong',
             })}
@@ -478,7 +478,7 @@ export function BuyerPortalPage() {
           >
             <h2
               id="reservation-heading"
-              className="text-sm font-semibold text-content-primary flex items-center gap-2"
+              className="oe-card-title flex items-center gap-2"
             >
               <Building2 size={16} aria-hidden />
               {t('buyer_portal.reservation.title', {
@@ -564,7 +564,7 @@ export function BuyerPortalPage() {
           >
             <h2
               id="contract-heading"
-              className="text-sm font-semibold text-content-primary flex items-center gap-2"
+              className="oe-card-title flex items-center gap-2"
             >
               <FileText size={16} aria-hidden />
               {t('buyer_portal.contract.title', {
@@ -641,7 +641,7 @@ export function BuyerPortalPage() {
         >
           <h2
             id="contact-heading"
-            className="text-sm font-semibold text-content-primary flex items-center gap-2"
+            className="oe-card-title flex items-center gap-2"
           >
             <Mail size={16} aria-hidden />
             {t('buyer_portal.contact.title', {
@@ -679,7 +679,7 @@ export function BuyerPortalPage() {
                   rows={4}
                   value={contactMessage}
                   onChange={(e) => setContactMessage(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-base sm:text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/50"
+                  className="oe-textarea mt-1 w-full"
                   placeholder={t('buyer_portal.contact.message_placeholder', {
                     defaultValue: 'Ask a question, request an update…',
                   })}
@@ -698,7 +698,7 @@ export function BuyerPortalPage() {
                   maxLength={40}
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  className="mt-1 w-full min-h-11 rounded-lg border border-border-light bg-surface-primary px-3 text-base sm:text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/50"
+                  className="oe-input mt-1 w-full min-h-11"
                   placeholder="+49 30 12345678"
                   data-testid="contact-phone"
                 />
@@ -861,7 +861,7 @@ function QuickLinkTile({
     variant === 'primary'
       ? 'bg-oe-blue text-white hover:bg-oe-blue-hover border-oe-blue'
       : variant === 'accent'
-        ? 'bg-semantic-warning-bg text-semantic-warning hover:bg-amber-200 border-semantic-warning/30 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-900/40'
+        ? 'bg-semantic-warning-bg text-semantic-warning hover:bg-semantic-warning-bg border-semantic-warning/30'
         : 'bg-surface-primary text-content-primary hover:bg-surface-secondary border-border-light';
   return (
     <a
@@ -916,7 +916,7 @@ function PaymentScheduleSection({
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <h2
           id="payments-heading"
-          className="text-sm font-semibold text-content-primary"
+          className="oe-card-title"
         >
           {t('buyer_portal.payments.title', {
             defaultValue: 'Payment schedule',
@@ -1025,29 +1025,29 @@ function PaymentScheduleSection({
 
           {/* Tablet+ (>=sm): traditional table */}
           <div className="mt-3 hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                  <th className="py-2 pr-3">#</th>
-                  <th className="py-2 pr-3">
+                <tr className="text-left text-2xs">
+                  <th className="pr-3">#</th>
+                  <th className="pr-3">
                     {t('buyer_portal.payments.milestone', {
                       defaultValue: 'Milestone',
                     })}
                   </th>
-                  <th className="py-2 pr-3">
+                  <th className="pr-3">
                     {t('buyer_portal.payments.due', { defaultValue: 'Due' })}
                   </th>
-                  <th className="py-2 pr-3 text-right">
+                  <th className="pr-3 text-right">
                     {t('buyer_portal.payments.amount', {
                       defaultValue: 'Amount',
                     })}
                   </th>
-                  <th className="py-2 pr-3 text-right">
+                  <th className="pr-3 text-right">
                     {t('buyer_portal.payments.paid', {
                       defaultValue: 'Paid',
                     })}
                   </th>
-                  <th className="py-2 pr-1">
+                  <th className="pr-1">
                     {t('buyer_portal.payments.status', {
                       defaultValue: 'Status',
                     })}
@@ -1059,26 +1059,26 @@ function PaymentScheduleSection({
                   <tr
                     key={row.id}
                     onClick={() => setSelected(row)}
-                    className="border-t border-border-light/50 cursor-pointer hover:bg-surface-secondary/50"
+                    className="cursor-pointer"
                   >
-                    <td className="py-2 pr-3 tabular-nums text-content-tertiary">
+                    <td className="pr-3 tabular-nums text-content-tertiary">
                       {row.sequence}
                     </td>
-                    <td className="py-2 pr-3 text-content-primary">
+                    <td className="pr-3">
                       {row.milestone_label || '—'}
                     </td>
-                    <td className="py-2 pr-3 text-content-secondary">
+                    <td className="pr-3 text-content-secondary">
                       {row.due_date
                         ? formatDate(row.due_date)
                         : '—'}
                     </td>
-                    <td className="py-2 pr-3 text-right tabular-nums text-content-primary">
+                    <td className="pr-3 text-right tabular-nums">
                       {formatMoney(row.amount, row.currency, locale)}
                     </td>
-                    <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                    <td className="pr-3 text-right tabular-nums text-content-secondary">
                       {formatMoney(row.amount_paid, row.currency, locale)}
                     </td>
-                    <td className="py-2 pr-1">
+                    <td className="pr-1">
                       <InstalmentStatusPill status={row.status} />
                     </td>
                   </tr>
@@ -1141,7 +1141,7 @@ function InstalmentDetailDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center"
+      className="fixed inset-0 z-modal flex items-end sm:items-center sm:justify-center"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/40" />
@@ -1163,7 +1163,7 @@ function InstalmentDetailDrawer({
                 n: row.sequence,
               })}
             </p>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title">
               {row.milestone_label ||
                 t('buyer_portal.na', { defaultValue: '—' })}
             </h3>
@@ -1174,7 +1174,7 @@ function InstalmentDetailDrawer({
             className="min-h-11 min-w-11 grid place-items-center rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -1279,7 +1279,7 @@ function DocumentsSection({
     >
       <h2
         id="documents-heading"
-        className="text-sm font-semibold text-content-primary"
+        className="oe-card-title"
       >
         {t('buyer_portal.documents.title', {
           defaultValue: 'Documents',
@@ -1296,7 +1296,7 @@ function DocumentsSection({
         <div className="mt-3 space-y-4">
           {grouped.map(([category, docs]) => (
             <div key={category}>
-              <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary mb-1.5">
+              <h3 className="oe-overline mb-1.5">
                 {t(`buyer_portal.documents.cat.${category}`, {
                   defaultValue: DOCUMENTS_CAT_LABELS[category] ?? prettifyDocType(category),
                 })}{' '}
@@ -1411,7 +1411,7 @@ function KycSection({
     >
       <h2
         id="kyc-heading"
-        className="text-sm font-semibold text-content-primary"
+        className="oe-card-title"
       >
         {t('buyer_portal.kyc.title', {
           defaultValue: 'Documents we need from you',
@@ -1803,7 +1803,7 @@ function MobileCtaBar({
   }
   return (
     <div
-      className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border-light bg-surface-elevated/95 backdrop-blur supports-[backdrop-filter]:bg-surface-elevated/80 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+      className="sm:hidden fixed bottom-0 inset-x-0 z-header border-t border-border-light bg-surface-elevated/95 backdrop-blur supports-[backdrop-filter]:bg-surface-elevated/80 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
       data-testid="mobile-cta-bar"
     >
       <a
@@ -1886,7 +1886,7 @@ function ShellWrapper({
               id="buyer-portal-locale"
               value={currentLang}
               onChange={(e) => i18n.changeLanguage(e.target.value)}
-              className="min-h-11 text-xs font-medium px-2 py-1 rounded border border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-select-sm min-h-11"
               data-testid="locale-select"
             >
               {sortLanguagesByName(SUPPORTED_LANGUAGES).map((loc) => (

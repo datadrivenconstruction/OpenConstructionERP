@@ -42,11 +42,11 @@ type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 /* -- Styling + vocab metadata --------------------------------------------- */
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input-lg w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 const selectCls =
-  'h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-select-lg w-full pl-3';
 
 const WARRANTY_STATUS_VARIANT: Record<WarrantyStatus, BadgeVariant> = {
   in_dlp: 'blue', expiring: 'warning', expired: 'error', closed: 'success', on_hold: 'neutral',
@@ -122,13 +122,13 @@ function ModalShell({ title, onClose, children, footer, wide }: {
     return () => document.removeEventListener('keydown', h);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div role="dialog" aria-modal="true" className={clsx('mx-4 max-h-[90vh] w-full overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in', wide ? 'max-w-2xl' : 'max-w-xl')}>
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 className="oe-section-title">{title}</h2>
           <button onClick={onClose} aria-label={t('defects_liability.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary">
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
         <div className="space-y-4 px-6 py-5">{children}</div>
@@ -239,7 +239,7 @@ function WarrantyModal({ editing, isPending, onClose, onSubmit }: {
         <Field label={t('defects_liability.field_reference', { defaultValue: 'Reference' })} required>
           <input value={form.reference} onChange={(e) => set('reference', e.target.value)} autoFocus
             placeholder={t('defects_liability.field_reference_ph', { defaultValue: 'e.g. W-001' })}
-            className={clsx(inputCls, refError && 'border-semantic-error')} />
+            className={clsx(inputCls,)} aria-invalid={!!(refError)} />
           {refError && <span className="mt-1 block text-xs text-semantic-error">{t('defects_liability.reference_required', { defaultValue: 'Reference is required' })}</span>}
         </Field>
         <Field label={t('defects_liability.field_status', { defaultValue: 'Status' })}>
@@ -254,7 +254,7 @@ function WarrantyModal({ editing, isPending, onClose, onSubmit }: {
       <Field label={t('defects_liability.field_item', { defaultValue: 'Item / element' })} required>
         <input value={form.title} onChange={(e) => set('title', e.target.value)}
           placeholder={t('defects_liability.field_item_ph', { defaultValue: 'e.g. Curtain wall, Level 3 to 8' })}
-          className={clsx(inputCls, titleError && 'border-semantic-error')} />
+          className={clsx(inputCls,)} aria-invalid={!!(titleError)} />
         {titleError && <span className="mt-1 block text-xs text-semantic-error">{t('defects_liability.item_required', { defaultValue: 'Item is required' })}</span>}
       </Field>
 
@@ -379,7 +379,7 @@ function DefectModal({ warranties, preselectWarrantyId, isPending, onClose, onSu
     >
       <Field label={t('defects_liability.field_warranty', { defaultValue: 'Against warranty' })} required>
         <SelectShell>
-          <select value={form.warranty_id} onChange={(e) => set('warranty_id', e.target.value)} className={clsx(selectCls, warrantyError && 'border-semantic-error')}>
+          <select value={form.warranty_id} onChange={(e) => set('warranty_id', e.target.value)} className={clsx(selectCls,)} aria-invalid={!!(warrantyError)}>
             <option value="" disabled>{t('defects_liability.field_warranty_ph', { defaultValue: 'Select a warranty' })}</option>
             {warranties.map((w) => <option key={w.id} value={w.id}>{w.reference} - {w.title}</option>)}
           </select>
@@ -390,7 +390,7 @@ function DefectModal({ warranties, preselectWarrantyId, isPending, onClose, onSu
         <Field label={t('defects_liability.field_defect_ref', { defaultValue: 'Reference' })} required>
           <input value={form.reference} onChange={(e) => set('reference', e.target.value)}
             placeholder={t('defects_liability.field_defect_ref_ph', { defaultValue: 'e.g. D-001' })}
-            className={clsx(inputCls, refError && 'border-semantic-error')} />
+            className={clsx(inputCls,)} aria-invalid={!!(refError)} />
         </Field>
         <Field label={t('defects_liability.col_severity', { defaultValue: 'Severity' })}>
           <SelectShell>
@@ -405,7 +405,7 @@ function DefectModal({ warranties, preselectWarrantyId, isPending, onClose, onSu
       <Field label={t('defects_liability.field_defect_description', { defaultValue: 'Description' })} required>
         <textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={4}
           placeholder={t('defects_liability.field_defect_description_ph', { defaultValue: 'What is defective, where, and what needs rectifying' })}
-          className={clsx(textareaCls, descError && 'border-semantic-error')} />
+          className={clsx(textareaCls,)} aria-invalid={!!(descError)} />
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -480,8 +480,8 @@ function RetentionReadinessBanner({ register, readiness }: { register: DlpRegist
         <Icon size={22} className={clsx('mt-0.5 shrink-0', iconColor)} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <CircleDollarSign size={15} className="text-content-tertiary" />
-            <h2 className="text-sm font-semibold text-content-primary">{t('defects_liability.banner_heading', { defaultValue: 'Retention release readiness' })}</h2>
+            <CircleDollarSign size={16} className="text-content-tertiary" />
+            <h2 className="oe-card-title">{t('defects_liability.banner_heading', { defaultValue: 'Retention release readiness' })}</h2>
           </div>
           <p className="mt-1 text-base font-semibold text-content-primary">{title}</p>
           <p className="mt-0.5 text-sm text-content-secondary">{subtitle}</p>
@@ -527,12 +527,12 @@ function SubcontractorHealthCard({ register }: { register: DlpRegister }) {
   if (register.subcontractors.length === 0) return null;
   return (
     <Card padding="none" className="overflow-x-auto">
-      <h3 className="flex items-center gap-1.5 border-b border-border-light px-4 py-2.5 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title flex items-center gap-1.5 border-b border-border-light px-4 py-2.5">
         <Building2 size={14} className="text-content-tertiary" />
         {t('defects_liability.health_title', { defaultValue: 'Subcontractor DLP health' })}
       </h3>
       <div className="min-w-[560px]">
-        <div className="flex items-center gap-3 border-b border-border-light bg-surface-secondary/30 px-4 py-2 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+        <div className="oe-overline flex items-center gap-3 border-b border-border-light bg-surface-secondary/30 px-4 py-2">
           <span className="flex-1">{t('defects_liability.health_col_subcontractor', { defaultValue: 'Subcontractor' })}</span>
           <span className="w-20 text-right">{t('defects_liability.health_col_total', { defaultValue: 'Entries' })}</span>
           <span className="w-24 text-right">{t('defects_liability.health_col_open', { defaultValue: 'Open defects' })}</span>
@@ -598,7 +598,7 @@ function LimitationReviewCard({ review }: { review: LimitationReview }) {
   if (review.findings.length === 0) return null;
   return (
     <Card padding="none">
-      <h3 className="flex items-center gap-1.5 border-b border-border-light px-4 py-2.5 text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title flex items-center gap-1.5 border-b border-border-light px-4 py-2.5">
         <Scale size={14} className="text-content-tertiary" />
         {t('defects_liability.limitation_review_title', { defaultValue: 'Periods that disagree with the regime they name' })}
       </h3>
@@ -672,9 +672,9 @@ function WarrantyRow({ warranty, flag, openDefectCount, showRegime, onEdit, onDe
         <Badge variant={warrantyStatusVariant(warranty.status)} size="sm">{t(`defects_liability.warranty_status_${warranty.status}`, { defaultValue: humanize(warranty.status) })}</Badge>
       </div>
       <div className="flex shrink-0 items-center gap-0.5">
-        <IconBtn label={t('defects_liability.action_add_defect', { defaultValue: 'Add defect' })} onClick={() => onAddDefect(warranty)}><FileWarning size={15} /></IconBtn>
-        <IconBtn label={t('defects_liability.action_edit', { defaultValue: 'Edit' })} onClick={() => onEdit(warranty)}><Pencil size={15} /></IconBtn>
-        <IconBtn label={t('defects_liability.action_delete', { defaultValue: 'Delete' })} danger onClick={() => onDelete(warranty)}><Trash2 size={15} /></IconBtn>
+        <IconBtn label={t('defects_liability.action_add_defect', { defaultValue: 'Add defect' })} onClick={() => onAddDefect(warranty)}><FileWarning size={16} /></IconBtn>
+        <IconBtn label={t('defects_liability.action_edit', { defaultValue: 'Edit' })} onClick={() => onEdit(warranty)}><Pencil size={16} /></IconBtn>
+        <IconBtn label={t('defects_liability.action_delete', { defaultValue: 'Delete' })} danger onClick={() => onDelete(warranty)}><Trash2 size={16} /></IconBtn>
       </div>
     </div>
   );
@@ -713,13 +713,13 @@ function DefectRow({ defect, warrantyReference, overdue, onStatusChange, photosO
         className={clsx('inline-flex h-8 shrink-0 items-center gap-1 rounded-md border px-2 text-xs', photosOpen ? 'border-oe-blue text-oe-blue' : 'border-border-light text-content-secondary hover:text-content-primary')}
         title={t('defects_liability.photos_toggle', { defaultValue: 'Photo evidence' })}
         data-testid={`defect-photos-toggle-${defect.id}`}>
-        <Camera size={13} />
+        <Camera size={14} />
         <span className="tabular-nums">{photoCount}</span>
       </button>
       <div className="w-36 shrink-0">
         <SelectShell>
           <select value={defect.status} onChange={(e) => onStatusChange(defect, e.target.value as DefectStatus)}
-            aria-label={t('defects_liability.col_status', { defaultValue: 'Status' })} className={clsx(selectCls, 'h-8 text-xs')}>
+            aria-label={t('defects_liability.col_status', { defaultValue: 'Status' })} className={clsx(selectCls, '')}>
             {DEFECT_STATUSES.map((s) => <option key={s} value={s}>{t(`defects_liability.defect_status_${s}`, { defaultValue: humanize(s) })}</option>)}
           </select>
         </SelectShell>

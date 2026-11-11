@@ -170,7 +170,7 @@ export function CaseCompanyHive({
         )}
       >
         <div className={clsx('min-w-0 sm:w-36 sm:shrink-0', aside && 'lg:w-auto lg:shrink')}>
-          <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <p className="oe-overline">
             {heading}
           </p>
           {/* The denominator is real here, unlike the module comb's: the

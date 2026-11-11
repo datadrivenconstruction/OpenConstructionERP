@@ -1494,7 +1494,7 @@ export function CostsPage() {
           {semanticSearch && data?.semanticUnavailable && !semanticOff && (
             <div
               role="status"
-              className="flex items-start gap-2 rounded-lg border border-amber-400/40 bg-semantic-warning/10 px-3 py-2 text-xs text-semantic-warning dark:text-amber-400"
+              className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning/10 px-3 py-2 text-xs text-semantic-warning"
             >
               <Info size={14} className="mt-0.5 shrink-0" />
               <span>
@@ -1511,7 +1511,7 @@ export function CostsPage() {
             <select
               value={unit}
               onChange={(e) => handleUnitChange(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-32"
+              className="oe-select-lg w-full ps-3 sm:w-32"
             >
               <option value="">{t('costs.all_units', 'All units')}</option>
               {unitOptions.map((u) => (
@@ -1530,7 +1530,7 @@ export function CostsPage() {
             <select
               value={source}
               onChange={(e) => handleSourceChange(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-36"
+              className="oe-select-lg w-full ps-3 sm:w-36"
             >
               <option value="">{t('costs.all_sources', 'All sources')}</option>
               {SOURCES.filter(Boolean).map((s) => (
@@ -1550,7 +1550,7 @@ export function CostsPage() {
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-48"
+                className="oe-select-lg w-full ps-3 sm:w-48"
               >
                 <option value="">
                   {t('costs.all_categories', 'All categories')}
@@ -1636,10 +1636,10 @@ export function CostsPage() {
         <>
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-tertiary text-left">
-                    <th className="px-2 py-3 w-16">
+                  <tr className="bg-surface-tertiary text-left">
+                    <th className="w-16">
                       <div className="flex items-center gap-0.5">
                         <Star size={14} className="text-content-quaternary ml-1" />
                         <button
@@ -1655,34 +1655,34 @@ export function CostsPage() {
                         </button>
                       </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-28 cursor-pointer select-none" onClick={() => toggleSort('code')}>
+                    <th className="w-28 cursor-pointer select-none" onClick={() => toggleSort('code')}>
                       <div className="flex items-center gap-1">
                         {t('costs.code', 'Code')}
                         {sortField === 'code' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
                       </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary cursor-pointer select-none" onClick={() => toggleSort('description')}>
+                    <th className="cursor-pointer select-none" onClick={() => toggleSort('description')}>
                       <div className="flex items-center gap-1">
                         {t('boq.description')}
                         {sortField === 'description' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
                       </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
+                    <th className="w-20 text-center">
                       {t('boq.unit')}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right cursor-pointer select-none" onClick={() => toggleSort('rate')}>
+                    <th className="w-32 text-right cursor-pointer select-none" onClick={() => toggleSort('rate')}>
                       <div className="flex items-center justify-end gap-1">
                         {t('costs.rate', 'Rate')}
                         {sortField === 'rate' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
                       </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-28 text-center">
+                    <th className="w-28 text-center">
                       {t('costs.classification', 'Class.')}
                     </th>
-                    <th className="px-3 py-3 w-32" />
+                    <th className="w-32" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {sortedItems.map((item) => {
                     const isExpanded = expandedId === item.id;
                     // Backend trims `components` from the list payload but
@@ -1749,7 +1749,7 @@ export function CostsPage() {
                     <select
                       value={pageSize}
                       onChange={(e) => { setPageSize(Number(e.target.value)); setOffset(0); }}
-                      className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                      className="oe-select-sm"
                     >
                       {PAGE_SIZE_OPTIONS.map((n) => (
                         <option key={n} value={n}>{n}</option>
@@ -2202,7 +2202,7 @@ function AddToBOQModal({
     : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -2214,10 +2214,10 @@ function AddToBOQModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-              <Table2 size={18} />
+              <Table2 size={20} />
             </div>
             <div>
-              <h2 id="add-to-boq-modal-title" className="text-base font-semibold text-content-primary">{t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}</h2>
+              <h2 id="add-to-boq-modal-title" className="oe-section-title">{t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}</h2>
               <p className="text-xs text-content-tertiary">
                 {t('costs.n_items_selected', { defaultValue: '{{count}} items selected', count: items.length })}
               </p>
@@ -2244,7 +2244,7 @@ function AddToBOQModal({
               <select
                 value={projectId}
                 onChange={(e) => { setProjectId(e.target.value); setBoqId(''); setSectionId(''); }}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select-lg w-full"
               >
                 <option value="">{t('projects.select_project', { defaultValue: 'Select project...' })}</option>
                 {projects.map((p) => (
@@ -2272,7 +2272,7 @@ function AddToBOQModal({
                 <select
                   value={boqId}
                   onChange={(e) => { setBoqId(e.target.value); setSectionId(''); }}
-                  className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                  className="oe-select-lg w-full"
                 >
                   <option value="">{t('boq.select_boq', { defaultValue: 'Select BOQ...' })}</option>
                   {boqs.map((b) => (
@@ -2293,13 +2293,13 @@ function AddToBOQModal({
           {/* Section selector (optional) */}
           {boqId && sections && sections.length > 0 && (
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+              <label className="oe-label">
                 {t('boq.section_optional', { defaultValue: 'Section (optional)' })}
               </label>
               <select
                 value={sectionId}
                 onChange={(e) => setSectionId(e.target.value)}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select-lg w-full"
               >
                 <option value="">{t('boq.no_section', 'No section (top level)')}</option>
                 {sections.map((s) => (
@@ -2312,25 +2312,25 @@ function AddToBOQModal({
           {/* Preview */}
           {items.length > 0 && (
             <div className="rounded-lg border border-border-light bg-surface-secondary/50 overflow-hidden max-h-40 overflow-y-auto">
-              <table className="w-full text-xs">
+              <table className="oe-table-compact w-full">
                 <thead>
-                  <tr className="bg-surface-tertiary text-content-secondary">
-                    <th className="px-3 py-1.5 text-left font-medium">{t('boq.description')}</th>
-                    <th className="px-3 py-1.5 text-center font-medium w-14">{t('boq.unit')}</th>
-                    <th className="px-3 py-1.5 text-right font-medium w-20">{t('costs.rate', 'Rate')}</th>
+                  <tr className="bg-surface-tertiary">
+                    <th>{t('boq.description')}</th>
+                    <th className="text-center w-14">{t('boq.unit')}</th>
+                    <th className="text-right w-20">{t('costs.rate', 'Rate')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {items.slice(0, 10).map((item) => (
                     <tr key={item.id}>
-                      <td className="px-3 py-1.5 text-content-primary truncate max-w-[250px]">{item.description}</td>
-                      <td className="px-3 py-1.5 text-center text-content-tertiary">{item.unit}</td>
-                      <td className="px-3 py-1.5 text-right tabular-nums font-medium text-content-primary">{fmtMoney(item.rate, itemCurrencyOf(item))}</td>
+                      <td className="truncate max-w-[250px]">{item.description}</td>
+                      <td className="text-center text-content-tertiary">{item.unit}</td>
+                      <td className="text-right tabular-nums font-medium">{fmtMoney(item.rate, itemCurrencyOf(item))}</td>
                     </tr>
                   ))}
                   {items.length > 10 && (
                     <tr>
-                      <td colSpan={3} className="px-3 py-1.5 text-center text-content-quaternary">
+                      <td colSpan={3} className="text-center text-content-quaternary">
                         {t('costs.and_n_more', { defaultValue: '...and {{count}} more', count: items.length - 10 })}
                       </td>
                     </tr>
@@ -2538,7 +2538,7 @@ function CreateAssemblyFromCostsModal({
   }, [name, unit, items, assemblyCurrency, hasMixedCurrencies, distinctCurrencies, addToast, t, onSuccess, navigate]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -2549,10 +2549,10 @@ function CreateAssemblyFromCostsModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30">
-              <Layers size={18} />
+              <Layers size={20} />
             </div>
             <div>
-              <h2 id="create-assembly-modal-title" className="text-base font-semibold text-content-primary">{t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}</h2>
+              <h2 id="create-assembly-modal-title" className="oe-section-title">{t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}</h2>
               <p className="text-xs text-content-tertiary">
                 {t('costs.n_cost_items_to_recipe', { defaultValue: '{{count}} cost items → reusable recipe', count: items.length })}
               </p>
@@ -2569,22 +2569,22 @@ function CreateAssemblyFromCostsModal({
 
         <div className="px-6 py-4 space-y-4">
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('assemblies.assembly_name', { defaultValue: 'Assembly Name' })}</label>
+            <label className="oe-label">{t('assemblies.assembly_name', { defaultValue: 'Assembly Name' })}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('assemblies.assembly_name_placeholder', { defaultValue: 'e.g. Reinforced Concrete Wall C30/37 24cm' })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
+              className="oe-input-lg w-full"
               autoFocus
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('boq.unit')}</label>
+            <label className="oe-label">{t('boq.unit')}</label>
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+              className="oe-select-lg w-full"
             >
               {unitOptions.map((u) => (
                 <option key={u} value={u}>{u}</option>
@@ -2594,7 +2594,7 @@ function CreateAssemblyFromCostsModal({
 
           {/* Preview components */}
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('assemblies.components_count', { defaultValue: 'Components ({{count}})', count: items.length })}</label>
+            <label className="oe-label">{t('assemblies.components_count', { defaultValue: 'Components ({{count}})', count: items.length })}</label>
             <div className="rounded-lg border border-border-light overflow-hidden max-h-40 overflow-y-auto">
               {items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between px-3 py-2 text-xs border-b border-border-light/50 last:border-0">
@@ -2706,13 +2706,13 @@ function MassPricingFields({
     <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-medium text-content-secondary mb-1 block">
+          <label className="oe-label">
             {t('costs.mass_basis_label', { defaultValue: 'Rate is' })}
           </label>
           <select
             value={massBasis}
             onChange={(e) => onChange({ massBasis: e.target.value as '' | 't' | 'kg' })}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+            className="oe-select w-full"
           >
             <option value="">{t('costs.mass_basis_none', { defaultValue: 'Not by mass' })}</option>
             <option value="t">{t('costs.mass_basis_t', { defaultValue: 'per tonne' })}</option>
@@ -2720,7 +2720,7 @@ function MassPricingFields({
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-content-secondary mb-1 block">
+          <label className="oe-label">
             {t('costs.mass_per_unit_label', { defaultValue: 'Mass per {{unit}}', unit })}
           </label>
           <div className="relative">
@@ -2732,7 +2732,7 @@ function MassPricingFields({
               value={massPerUnit}
               onChange={(e) => onChange({ massPerUnit: e.target.value })}
               placeholder={t('costs.mass_per_unit_placeholder', { defaultValue: 'e.g. 44.7' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-3 pe-14 text-sm text-end focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:opacity-60 disabled:cursor-not-allowed"
+              className="oe-input w-full ps-3 pe-14 text-end"
             />
             <span className="pointer-events-none absolute inset-y-0 end-2 flex items-center text-2xs text-content-tertiary">
               {t('costs.mass_per_unit_suffix', { defaultValue: 'kg/{{unit}}', unit })}
@@ -2861,7 +2861,7 @@ function CreateCostItemModal({
   }, [form, itemCatalogId, addToast, t, onCreated]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -2871,7 +2871,7 @@ function CreateCostItemModal({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 id="create-cost-item-modal-title" className="text-base font-semibold text-content-primary">
+            <h2 id="create-cost-item-modal-title" className="oe-section-title">
               {t('costs.create_item', { defaultValue: 'Add Custom Cost Item' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -2889,7 +2889,7 @@ function CreateCostItemModal({
 
         <div className="px-6 py-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs.code', 'Code')}
               <span className="text-content-quaternary ml-1">({t('costs.optional', 'optional')})</span>
             </label>
@@ -2898,12 +2898,12 @@ function CreateCostItemModal({
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
               placeholder={t('costs.code_placeholder', { defaultValue: 'e.g. WALL-001' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('boq.description')} *
             </label>
             <input
@@ -2912,12 +2912,12 @@ function CreateCostItemModal({
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder={t('costs.description_placeholder', { defaultValue: 'e.g. Reinforced concrete wall C30/37, 25cm' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs.category_field_label', { defaultValue: 'Category' })}
               <span className="text-content-quaternary ml-1">({t('costs.optional', 'optional')})</span>
             </label>
@@ -2926,7 +2926,7 @@ function CreateCostItemModal({
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               placeholder={t('costs.category_field_placeholder', { defaultValue: 'e.g. Structural Steel' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
             <p className="text-2xs text-content-tertiary mt-1">
               {t('costs.category_field_hint', {
@@ -2937,32 +2937,32 @@ function CreateCostItemModal({
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('boq.unit')}</label>
+              <label className="oe-label">{t('boq.unit')}</label>
               <select
                 value={form.unit}
                 onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.rate', 'Rate')}</label>
+              <label className="oe-label">{t('costs.rate', 'Rate')}</label>
               <input
                 type="number"
                 step="0.01"
                 value={form.rate}
                 onChange={(e) => setForm({ ...form, rate: e.target.value })}
                 placeholder="0.00"
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-full text-right"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.currency', 'Currency')}</label>
+              <label className="oe-label">{t('costs.currency', 'Currency')}</label>
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">{t('costs_catalogs.currency_not_set', { defaultValue: 'Not set' })}</option>
                 {['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'AED', 'RUB', 'CNY', 'INR', 'BRL'].map((c) => (
@@ -2988,14 +2988,14 @@ function CreateCostItemModal({
               catalog; with an empty currency the catalog currency applies. */}
           {catalogs && catalogs.length > 0 && (
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">
+              <label className="oe-label">
                 {t('costs_catalogs.catalog_label', { defaultValue: 'Catalog' })}
                 <span className="text-content-quaternary ml-1">({t('costs.optional', 'optional')})</span>
               </label>
               <select
                 value={itemCatalogId}
                 onChange={(e) => setItemCatalogId(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">{t('costs_catalogs.no_catalog_option', { defaultValue: 'No catalog' })}</option>
                 {catalogs.map((c) => (
@@ -3124,7 +3124,7 @@ function EditCostItemModal({
   }, [form, item.id, item.code, addToast, t, onSaved]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -3134,7 +3134,7 @@ function EditCostItemModal({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 id="edit-cost-item-modal-title" className="text-base font-semibold text-content-primary">
+            <h2 id="edit-cost-item-modal-title" className="oe-section-title">
               {t('costs_catalogs.edit_item_title', { defaultValue: 'Edit cost item' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -3152,19 +3152,19 @@ function EditCostItemModal({
 
         <div className="px-6 py-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs.code', 'Code')}
             </label>
             <input
               type="text"
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('boq.description')} *
             </label>
             <input
@@ -3172,12 +3172,12 @@ function EditCostItemModal({
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('costs.category_field_label', { defaultValue: 'Category' })}
               <span className="text-content-quaternary ml-1">({t('costs.optional', 'optional')})</span>
             </label>
@@ -3186,17 +3186,17 @@ function EditCostItemModal({
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               placeholder={t('costs.category_field_placeholder', { defaultValue: 'e.g. Structural Steel' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('boq.unit')}</label>
+              <label className="oe-label">{t('boq.unit')}</label>
               <select
                 value={form.unit}
                 onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 {(unitOptions.includes(form.unit) ? unitOptions : [form.unit, ...unitOptions]).map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -3204,22 +3204,22 @@ function EditCostItemModal({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.rate', 'Rate')}</label>
+              <label className="oe-label">{t('costs.rate', 'Rate')}</label>
               <input
                 type="number"
                 step="0.01"
                 value={form.rate}
                 onChange={(e) => setForm({ ...form, rate: e.target.value })}
                 placeholder="0.00"
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-full text-right"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.currency', 'Currency')}</label>
+              <label className="oe-label">{t('costs.currency', 'Currency')}</label>
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">{t('costs_catalogs.currency_not_set', { defaultValue: 'Not set' })}</option>
                 {currencyOptions.map((c) => (
@@ -3332,7 +3332,7 @@ function CostVariantDetail({
   return (
     <div className="mb-4 rounded-lg border border-oe-blue-subtle bg-oe-blue-subtle/10 p-2 animate-fade-in">
       <div className="mb-1.5 flex items-center gap-2">
-        <Layers size={13} className="text-oe-blue shrink-0" />
+        <Layers size={14} className="text-oe-blue shrink-0" />
         <span className="text-xs font-semibold text-content-primary">
           {t('costs.variant_count', { defaultValue: 'Variants' })}
           <span className="ml-1.5 rounded bg-oe-blue-subtle/40 px-1.5 py-0.5 text-2xs font-normal text-oe-blue-text">
@@ -3385,22 +3385,22 @@ function CostVariantDetail({
 
       {/* Variants table — clamped to top 8 unless expanded */}
       <div className="overflow-hidden rounded border border-border-light">
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
             <tr className="bg-surface-tertiary text-left">
-              <th className="px-2 py-1 w-10 text-center text-2xs font-medium text-content-secondary">#</th>
-              <th className="px-2 py-1 text-2xs font-medium text-content-secondary">
+              <th className="w-10 text-center">#</th>
+              <th>
                 {t('costs.variant_label', { defaultValue: 'Variant' })}
               </th>
-              <th className="px-2 py-1 text-right text-2xs font-medium text-content-secondary">
+              <th className="text-right">
                 {t('costs.rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="px-2 py-1 text-right text-2xs font-medium text-content-secondary">
+              <th className="text-right">
                 {t('costs.variant_per_unit', { defaultValue: 'Per unit' })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {visible.map(({ v, i }) => {
               const isMedian = i === medianIdx;
               return (
@@ -3408,8 +3408,8 @@ function CostVariantDetail({
                   key={`${v.index}-${v.label}`}
                   className={isMedian ? 'bg-oe-blue-subtle/15' : 'hover:bg-surface-secondary/30'}
                 >
-                  <td className="px-2 py-1 text-center font-mono text-2xs text-content-tertiary">{v.index + 1}</td>
-                  <td className="px-2 py-1 text-content-primary">
+                  <td className="text-center font-mono text-content-tertiary">{v.index + 1}</td>
+                  <td>
                     <div className="flex items-center gap-1.5">
                       <span className="truncate" title={v.label}>{v.label}</span>
                       {isMedian && (
@@ -3419,10 +3419,10 @@ function CostVariantDetail({
                       )}
                     </div>
                   </td>
-                  <td className="px-2 py-1 text-right tabular-nums font-semibold text-content-primary">
+                  <td className="text-right tabular-nums font-semibold">
                     {fmt(v.price)}
                   </td>
-                  <td className="px-2 py-1 text-right tabular-nums text-content-secondary">
+                  <td className="text-right tabular-nums text-content-secondary">
                     {v.price_per_unit != null ? fmt(v.price_per_unit) : '—'}
                   </td>
                 </tr>
@@ -3595,7 +3595,7 @@ function CostItemRow({
             >
               <Star
                 size={14}
-                className={isFavourite ? 'fill-yellow-400 text-yellow-400' : 'text-content-tertiary'}
+                className={isFavourite ? 'fill-yellow-400 text-semantic-warning' : 'text-content-tertiary'}
               />
             </button>
             <button
@@ -3685,9 +3685,9 @@ function CostItemRow({
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary transition-all hover:bg-surface-tertiary hover:text-content-primary"
             >
               {copiedId === item.id ? (
-                <Check size={13} className="text-semantic-success" />
+                <Check size={14} className="text-semantic-success" />
               ) : (
-                <Copy size={13} />
+                <Copy size={14} />
               )}
             </button>
             {/* CONN-83 — Benchmark this rate against the AI Cost Advisor. */}
@@ -3696,7 +3696,7 @@ function CostItemRow({
               title={t('costs.benchmark_rate', { defaultValue: 'Benchmark this rate with the AI Cost Advisor' })}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary transition-all hover:bg-violet-500/10 hover:text-violet-500"
             >
-              <Sparkles size={13} />
+              <Sparkles size={14} />
             </button>
             {EDITABLE_SOURCES.has(item.source) && (
               <>
@@ -3705,7 +3705,7 @@ function CostItemRow({
                   title={t('common.edit', { defaultValue: 'Edit' })}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-colors"
                 >
-                  <Pencil size={13} />
+                  <Pencil size={14} />
                 </button>
                 <button
                   onClick={async (e) => {
@@ -3719,7 +3719,7 @@ function CostItemRow({
                   title={t('common.delete', { defaultValue: 'Delete' })}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
                 >
-                  <Trash2 size={13} />
+                  <Trash2 size={14} />
                 </button>
               </>
             )}
@@ -3763,7 +3763,7 @@ function CostItemRow({
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <HardHat size={12} className="text-semantic-warning" />
-                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
+                    <span className="oe-overline">
                       {t('costs.component_labor', { defaultValue: 'Labor' })}
                     </span>
                   </div>
@@ -3784,7 +3784,7 @@ function CostItemRow({
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Hammer size={12} className="text-blue-500" />
-                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
+                    <span className="oe-overline">
                       {t('costs.component_equipment', { defaultValue: 'Equipment' })}
                     </span>
                   </div>
@@ -3800,7 +3800,7 @@ function CostItemRow({
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Package size={12} className="text-semantic-success" />
-                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
+                    <span className="oe-overline">
                       {t('costs.component_material', { defaultValue: 'Materials' })}
                     </span>
                   </div>
@@ -3815,7 +3815,7 @@ function CostItemRow({
                 </div>
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">
+                    <span className="oe-overline">
                       {t('costs.total', { defaultValue: 'Total' })}
                     </span>
                   </div>
@@ -3832,7 +3832,7 @@ function CostItemRow({
                   <div className="h-2 w-full rounded-full overflow-hidden flex bg-surface-tertiary">
                     {laborCost > 0 && (
                       <div
-                        className="h-full bg-amber-400"
+                        className="h-full bg-semantic-warning"
                         style={{ width: `${pct(laborCost)}%` }}
                         title={`${t('costs.component_labor', { defaultValue: 'Labor' })}: ${money(laborCost)}`}
                       />
@@ -3846,7 +3846,7 @@ function CostItemRow({
                     )}
                     {materialCost > 0 && (
                       <div
-                        className="h-full bg-green-400"
+                        className="h-full bg-semantic-success"
                         style={{ width: `${pct(materialCost)}%` }}
                         title={`${t('costs.component_material', { defaultValue: 'Materials' })}: ${money(materialCost)}`}
                       />
@@ -3855,7 +3855,7 @@ function CostItemRow({
                   <div className="flex gap-4 mt-1.5 text-2xs text-content-tertiary">
                     {laborCost > 0 && (
                       <span className="flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        <span className="h-2 w-2 rounded-full bg-semantic-warning" />
                         {t('costs.component_labor', { defaultValue: 'Labor' })} {fmtPercent(pct(laborCost), 0)}
                       </span>
                     )}
@@ -3867,7 +3867,7 @@ function CostItemRow({
                     )}
                     {materialCost > 0 && (
                       <span className="flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full bg-green-400" />
+                        <span className="h-2 w-2 rounded-full bg-semantic-success" />
                         {t('costs.component_material', { defaultValue: 'Materials' })} {fmtPercent(pct(materialCost), 0)}
                       </span>
                     )}
@@ -3877,30 +3877,30 @@ function CostItemRow({
 
               {/* Resource table */}
               <div className="rounded-lg border border-border-light overflow-hidden">
-                <table className="w-full text-xs table-fixed">
+                <table className="oe-table-compact w-full table-fixed">
                   <thead>
                     <tr className="bg-surface-tertiary">
-                      <th className="px-3 py-2 text-left font-medium text-content-secondary truncate">
+                      <th className="truncate">
                         {t('costs.resource', { defaultValue: 'Resource' })}
                       </th>
-                      <th className="px-3 py-2 text-left font-medium text-content-secondary w-16">
+                      <th className="w-16">
                         {t('costs.type', { defaultValue: 'Type' })}
                       </th>
-                      <th className="px-3 py-2 text-left font-medium text-content-secondary w-16">
+                      <th className="w-16">
                         {t('boq.unit', { defaultValue: 'Unit' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-20">
+                      <th className="text-right w-20">
                         {t('costs.qty', { defaultValue: 'Qty' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-24">
+                      <th className="text-right w-24">
                         {t('costs.unit_rate', { defaultValue: 'Unit Rate' })}
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-24">
+                      <th className="text-right w-24">
                         {t('costs.cost', { defaultValue: 'Cost' })}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {detail.components.map((comp, i) => {
                       const TYPE_COLOR_MAP: Record<string, string> = {
                         labor: 'text-semantic-warning bg-semantic-warning-bg',
@@ -3908,7 +3908,7 @@ function CostItemRow({
                         equipment: 'text-blue-600 bg-blue-50',
                         operator: 'text-violet-600 bg-violet-50',
                         electricity: 'text-cyan-600 bg-cyan-50',
-                        other: 'text-gray-600 bg-gray-50',
+                        other: 'text-content-secondary bg-surface-secondary',
                       };
                       // Component numbers arrive as Decimal-strings and `cost`
                       // is often absent; coerce + derive so `.toFixed` never
@@ -3916,26 +3916,26 @@ function CostItemRow({
                       // the Cost column shows a real figure, not a dash.
                       const { qty, unitRate, lineCost } = componentDisplayNumbers(comp);
                       const compType = comp.type || 'other';
-                      const typeColor = TYPE_COLOR_MAP[compType] || 'text-gray-600 bg-gray-50';
+                      const typeColor = TYPE_COLOR_MAP[compType] || 'text-content-secondary bg-surface-secondary';
                       const typeLabel = t(`costs.component_${compType}`, { defaultValue: compType.charAt(0).toUpperCase() + compType.slice(1) });
                       return (
                         <tr key={`${comp.name}-${compType}-${i}`} className="hover:bg-surface-secondary/30">
-                          <td className="px-3 py-2 text-content-primary truncate" title={comp.name}>{comp.name}</td>
-                          <td className="px-3 py-2">
+                          <td className="truncate" title={comp.name}>{comp.name}</td>
+                          <td>
                             <span className={`inline-block text-2xs font-medium px-1.5 py-0.5 rounded ${typeColor}`}>
                               {typeLabel}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-content-tertiary">
+                          <td className="text-content-tertiary">
                             {comp.unit_localized || comp.unit || '—'}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                          <td className="text-right tabular-nums text-content-secondary">
                             {qty > 0 ? fmtFixed(qty, 2) : '—'}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                          <td className="text-right tabular-nums text-content-secondary">
                             {unitRate > 0 ? money(unitRate) : '—'}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                          <td className="text-right tabular-nums font-medium">
                             {lineCost > 0 ? money(lineCost) : '—'}
                           </td>
                         </tr>
@@ -4057,13 +4057,13 @@ function ComparePanel({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div className="relative w-full max-w-5xl max-h-[85vh] overflow-auto rounded-2xl border border-border bg-surface-primary shadow-2xl m-4" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface-primary px-6 py-4">
           <div className="flex items-center gap-2">
-            <Columns3 size={18} className="text-oe-blue" />
-            <h2 className="text-lg font-semibold text-content-primary">
+            <Columns3 size={20} className="text-oe-blue" />
+            <h2 className="oe-section-title">
               {t('costs.compare_items', { defaultValue: 'Compare cost items' })}
             </h2>
             <Badge variant="neutral" size="sm">{items.length}</Badge>
@@ -4075,43 +4075,43 @@ function ComparePanel({
 
         {/* Comparison table */}
         <div className="p-6">
-          <table className="w-full text-sm">
+          <table className="oe-table-compact w-full">
             <thead>
-              <tr className="border-b border-border-light">
-                <th className="py-2 pr-4 text-left text-xs font-medium text-content-tertiary w-36">
+              <tr>
+                <th className="pr-4 w-36">
                   {t('costs.property', { defaultValue: 'Property' })}
                 </th>
                 {items.map((item) => (
-                  <th key={item.id} className="py-2 px-3 text-left text-xs font-medium text-content-secondary">
+                  <th key={item.id}>
                     <div className="truncate max-w-[200px]" title={item.code}>{item.code}</div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {/* Description */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('boq.description')}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('boq.description')}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3 text-xs text-content-primary">
+                  <td key={item.id}>
                     <span className="line-clamp-3">{item.description}</span>
                   </td>
                 ))}
               </tr>
               {/* Unit */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('boq.unit')}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('boq.unit')}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3">
+                  <td key={item.id}>
                     <Badge variant="neutral" size="sm">{item.unit}</Badge>
                   </td>
                 ))}
               </tr>
               {/* Rate */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.rate', 'Rate')}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.rate', 'Rate')}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3">
+                  <td key={item.id}>
                     <div className="flex items-center gap-2">
                       <span className={`font-semibold tabular-nums ${item.rate === minRate ? 'text-semantic-success' : item.rate === maxRate ? 'text-semantic-error' : 'text-content-primary'}`}>
                         {money(item.rate, item.currency)}
@@ -4127,12 +4127,12 @@ function ComparePanel({
               </tr>
               {/* Rate bar */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.rate_comparison', { defaultValue: 'Rate spread' })}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.rate_comparison', { defaultValue: 'Rate spread' })}</td>
                 {items.map((item) => {
                   const range = maxRate - minRate;
                   const pct = range > 0 ? ((item.rate - minRate) / range) * 100 : 50;
                   return (
-                    <td key={item.id} className="py-3 px-3">
+                    <td key={item.id}>
                       <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden">
                         <div
                           className="h-full rounded-full bg-oe-blue transition-all"
@@ -4145,29 +4145,29 @@ function ComparePanel({
               </tr>
               {/* Currency */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.currency', { defaultValue: 'Currency' })}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.currency', { defaultValue: 'Currency' })}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3 text-xs text-content-secondary">
+                  <td key={item.id} className="text-content-secondary">
                     {(item.currency || regionCurrency || '—').toUpperCase()}
                   </td>
                 ))}
               </tr>
               {/* Region */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.region', { defaultValue: 'Region' })}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.region', { defaultValue: 'Region' })}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3 text-xs text-content-secondary">
+                  <td key={item.id} className="text-content-secondary">
                     {item.region || '—'}
                   </td>
                 ))}
               </tr>
               {/* Classification */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.classification', 'Class.')}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.classification', 'Class.')}</td>
                 {items.map((item) => {
                   const cls = item.classification ?? {};
                   return (
-                    <td key={item.id} className="py-3 px-3 text-xs text-content-secondary">
+                    <td key={item.id} className="text-content-secondary">
                       {cls.collection || cls.code || cls.din276 || '—'}
                     </td>
                   );
@@ -4177,48 +4177,48 @@ function ComparePanel({
               {allLoaded && (
                 <>
                   <tr>
-                    <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">
+                    <td className="pr-4 text-content-tertiary font-medium">
                       <div className="flex items-center gap-1">
                         <HardHat size={12} className="text-semantic-warning" />
                         {t('costs.labor', { defaultValue: 'Labor' })}
                       </div>
                     </td>
                     {items.map((item, i) => (
-                      <td key={item.id} className="py-3 px-3 text-xs tabular-nums text-content-secondary">
+                      <td key={item.id} className="tabular-nums text-content-secondary">
                         {breakdowns[i] && breakdowns[i].labor > 0 ? money(breakdowns[i].labor, item.currency) : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">
+                    <td className="pr-4 text-content-tertiary font-medium">
                       <div className="flex items-center gap-1">
                         <Package size={12} className="text-semantic-success" />
                         {t('costs.material', { defaultValue: 'Material' })}
                       </div>
                     </td>
                     {items.map((item, i) => (
-                      <td key={item.id} className="py-3 px-3 text-xs tabular-nums text-content-secondary">
+                      <td key={item.id} className="tabular-nums text-content-secondary">
                         {breakdowns[i] && breakdowns[i].material > 0 ? money(breakdowns[i].material, item.currency) : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">
+                    <td className="pr-4 text-content-tertiary font-medium">
                       <div className="flex items-center gap-1">
                         <Hammer size={12} className="text-blue-500" />
                         {t('costs.equipment', { defaultValue: 'Equipment' })}
                       </div>
                     </td>
                     {items.map((item, i) => (
-                      <td key={item.id} className="py-3 px-3 text-xs tabular-nums text-content-secondary">
+                      <td key={item.id} className="tabular-nums text-content-secondary">
                         {breakdowns[i] && breakdowns[i].equipment > 0 ? money(breakdowns[i].equipment, item.currency) : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.components_label', { defaultValue: 'Components' })}</td>
+                    <td className="pr-4 text-content-tertiary font-medium">{t('costs.components_label', { defaultValue: 'Components' })}</td>
                     {items.map((item, i) => (
-                      <td key={item.id} className="py-3 px-3 text-xs text-content-secondary">
+                      <td key={item.id} className="text-content-secondary">
                         {breakdowns[i] && breakdowns[i].components > 0 ? t('costs.n_resources', { defaultValue: '{{count}} resources', count: breakdowns[i].components }) : '—'}
                       </td>
                     ))}
@@ -4227,9 +4227,9 @@ function ComparePanel({
               )}
               {/* Source */}
               <tr>
-                <td className="py-3 pr-4 text-xs text-content-tertiary font-medium">{t('costs.source', { defaultValue: 'Source' })}</td>
+                <td className="pr-4 text-content-tertiary font-medium">{t('costs.source', { defaultValue: 'Source' })}</td>
                 {items.map((item) => (
-                  <td key={item.id} className="py-3 px-3 text-xs text-content-secondary">
+                  <td key={item.id} className="text-content-secondary">
                     <Badge variant={item.source === 'cwicr' ? 'blue' : 'neutral'} size="sm">
                       {item.source === 'cwicr' ? 'CWICR' : item.source}
                     </Badge>

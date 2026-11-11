@@ -305,7 +305,7 @@ export function BIMQuantityPicker({
               {totalFetched} elements loaded, {totalMatched} matched, {cadElementIds.length} linked
             </span>
             {fetchError && (
-              <span className="text-2xs text-red-400 mt-1 px-3 text-center">
+              <span className="text-2xs text-semantic-error mt-1 px-3 text-center">
                 {String(fetchError instanceof Error ? fetchError.message : fetchError)}
               </span>
             )}
@@ -439,8 +439,8 @@ function QuantityRow({
             onUse();
           }}
           className="shrink-0 h-4 flex items-center gap-0.5 px-1.5 rounded text-[9px] font-medium
-                     text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30
-                     hover:bg-emerald-200 dark:hover:bg-emerald-900/50
+                     text-semantic-success bg-semantic-success-bg
+                     hover:bg-semantic-success-bg
                      opacity-0 group-hover/row:opacity-100 transition-all"
         >
           Use <ArrowRight size={8} />

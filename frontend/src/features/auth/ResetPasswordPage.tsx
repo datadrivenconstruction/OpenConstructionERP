@@ -189,7 +189,7 @@ export function ResetPasswordPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-success-bg text-semantic-success">
                 <CheckCircle2 size={28} />
               </div>
-              <h2 className="text-lg font-semibold text-content-primary mb-2">
+              <h2 className="oe-section-title mb-2">
                 {t('auth.reset_success_title', { defaultValue: 'Password changed' })}
               </h2>
               <p className="text-sm text-content-secondary mb-6">
@@ -212,7 +212,7 @@ export function ResetPasswordPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-error-bg text-semantic-error">
                 <AlertTriangle size={28} />
               </div>
-              <h2 className="text-lg font-semibold text-content-primary mb-2">
+              <h2 className="oe-section-title mb-2">
                 {t('auth.reset_link_invalid_title', { defaultValue: 'This link no longer works' })}
               </h2>
               <p className="text-sm text-content-secondary mb-6">
@@ -241,7 +241,7 @@ export function ResetPasswordPage() {
                   {t('auth.back_to_login', { defaultValue: 'Back to sign in' })}
                 </Link>
 
-                <h2 className="text-lg font-semibold text-content-primary mb-1">
+                <h2 className="oe-section-title mb-1">
                   {t('auth.reset_title', { defaultValue: 'Set a new password' })}
                 </h2>
                 <p className="text-sm text-content-secondary mb-6">
@@ -265,7 +265,7 @@ export function ResetPasswordPage() {
                     autoComplete="new-password"
                     required aria-required="true"
                     autoFocus
-                    icon={<Lock size={15} />}
+                    icon={<Lock size={16} />}
                     suffix={
                       <button
                         type="button"
@@ -276,7 +276,7 @@ export function ResetPasswordPage() {
                         className="flex items-center text-content-tertiary hover:text-content-secondary transition-colors"
                         tabIndex={-1}
                       >
-                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     }
                   />
@@ -296,7 +296,7 @@ export function ResetPasswordPage() {
                     error={confirmPassword && !passwordsMatch
                       ? t('auth.passwords_mismatch', { defaultValue: 'Passwords do not match' })
                       : undefined}
-                    icon={<Lock size={15} />}
+                    icon={<Lock size={16} />}
                   />
                 </div>
 

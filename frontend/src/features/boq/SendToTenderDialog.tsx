@@ -157,7 +157,7 @@ export function SendToTenderDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onClose}
@@ -174,9 +174,9 @@ export function SendToTenderDialog({
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-              <Send size={15} />
+              <Send size={16} />
             </span>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('boq.tender_title', { defaultValue: 'Send to tender' })}
             </h2>
           </div>
@@ -261,7 +261,7 @@ export function SendToTenderDialog({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input mt-1 w-full"
               aria-label={t('boq.tender_name_label', { defaultValue: 'Package name' })}
             />
           </label>
@@ -274,7 +274,7 @@ export function SendToTenderDialog({
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input mt-1 w-full"
               aria-label={t('boq.tender_deadline_label', { defaultValue: 'Bid deadline (optional)' })}
             />
           </label>

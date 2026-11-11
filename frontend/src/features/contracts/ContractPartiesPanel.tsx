@@ -117,8 +117,8 @@ export function ContractPartiesPanel({ contractId }: ContractPartiesPanelProps) 
     <div className="rounded-lg border border-border-light">
       <header className="flex items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <Users size={15} className="text-content-tertiary" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <Users size={16} className="text-content-tertiary" />
+          <span className="oe-overline">
             {t('contracts.parties.title', { defaultValue: 'Parties' })}
           </span>
         </div>
@@ -196,7 +196,7 @@ export function ContractPartiesPanel({ contractId }: ContractPartiesPanelProps) 
                 {t('contracts.parties.role', { defaultValue: 'Role' })}
               </span>
               <select
-                className="rounded-md border border-border-light bg-surface-elevated px-2 py-1.5 text-sm"
+                className="oe-select"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
@@ -212,7 +212,7 @@ export function ContractPartiesPanel({ contractId }: ContractPartiesPanelProps) 
                 {t('contracts.parties.name', { defaultValue: 'Name' })}
               </span>
               <input
-                className="rounded-md border border-border-light bg-surface-elevated px-2 py-1.5 text-sm"
+                className="oe-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {

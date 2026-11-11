@@ -284,27 +284,27 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
         ) : (
           <Card>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th className="px-4 py-2.5 font-medium">
+                  <tr className="text-left">
+                    <th>
                       {t('construction_control.col.number', { defaultValue: 'Number' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.material', { defaultValue: 'Material' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.certificate', { defaultValue: 'Certificate' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.traceability', {
                         defaultValue: 'Traceability',
                       })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-2.5 text-right font-medium">
+                    <th className="text-right">
                       {t('construction_control.col.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -318,10 +318,10 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                         className="border-b border-border-light/60 last:border-b-0 align-top"
                         data-testid={`cc-material-row-${m.id}`}
                       >
-                        <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                        <td className="font-mono text-content-secondary whitespace-nowrap">
                           {m.record_number}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="font-medium text-content-primary">{m.name}</div>
                           {m.spec_grade && (
                             <div className="text-xs text-content-tertiary">{m.spec_grade}</div>
@@ -335,7 +335,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             <ElementLinks elements={m.elements} />
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-content-secondary">
+                        <td className="text-content-secondary">
                           {m.cert_type ? (
                             <div>
                               <span className="font-medium text-content-primary">
@@ -363,14 +363,14 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-xs text-content-secondary">
+                        <td className="text-content-secondary">
                           {formatTraceability(m, t) || (
                             <span className="text-content-tertiary">
                               {t('construction_control.none', { defaultValue: '-' })}
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center gap-1.5">
                             <StatusBadge status={m.status} variants={MATERIAL_STATUS_VARIANTS} />
                             {m.is_expired && (
@@ -382,7 +382,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center justify-end gap-2">
                             {m.raised_ncr_id && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-2 py-0.5 text-2xs font-medium text-semantic-error">
@@ -486,25 +486,25 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
         ) : (
           <Card>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th className="px-4 py-2.5 font-medium">
+                  <tr className="text-left">
+                    <th>
                       {t('construction_control.col.number', { defaultValue: 'Number' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.title', { defaultValue: 'Title' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.method', { defaultValue: 'Method' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.measured', { defaultValue: 'Measured' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-2.5 text-right font-medium">
+                    <th className="text-right">
                       {t('construction_control.col.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -521,10 +521,10 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                         className="border-b border-border-light/60 last:border-b-0 align-top"
                         data-testid={`cc-test-row-${x.id}`}
                       >
-                        <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                        <td className="font-mono text-content-secondary whitespace-nowrap">
                           {x.result_number}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="font-medium text-content-primary">{x.title}</div>
                           {x.lab_name && (
                             <div className="text-xs text-content-tertiary">
@@ -546,14 +546,14 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             <ElementLinks elements={x.elements} />
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-content-secondary">
+                        <td className="text-content-secondary">
                           {x.test_method || (
                             <span className="text-content-tertiary">
                               {t('construction_control.none', { defaultValue: '-' })}
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-content-secondary whitespace-nowrap">
+                        <td className="text-content-secondary whitespace-nowrap">
                           {x.measured_value ? (
                             <span>
                               {x.measured_value}
@@ -565,7 +565,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center gap-1.5">
                             <StatusBadge status={x.status} variants={TEST_STATUS_VARIANTS} />
                             {x.result && (
@@ -577,7 +577,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center justify-end gap-2">
                             {x.raised_ncr_id && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-2 py-0.5 text-2xs font-medium text-semantic-error">
@@ -1022,7 +1022,7 @@ function CreateMaterialModal({
 const DECISION_OPTIONS: { value: ResultDecision; icon: typeof CheckCircle2; tone: string }[] = [
   { value: 'pass', icon: CheckCircle2, tone: 'text-semantic-success border-semantic-success/40' },
   { value: 'fail', icon: XCircle, tone: 'text-semantic-error border-semantic-error/40' },
-  { value: 'conditional', icon: AlertCircle, tone: 'text-[#b45309] border-amber-400/50' },
+  { value: 'conditional', icon: AlertCircle, tone: 'text-[#b45309] border-semantic-warning/50' },
 ];
 
 const DECISION_LABEL: Record<ResultDecision, string> = {
@@ -1544,7 +1544,7 @@ function ModalShell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -1552,7 +1552,7 @@ function ModalShell({
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           <button
             type="button"
             onClick={onClose}

@@ -72,7 +72,7 @@ function OutcomeBlock({
   return (
     <div className="rounded-lg border border-border-light bg-surface-primary p-3">
       <div className="flex items-center justify-between gap-2">
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline">
           {title}
         </h4>
         <Badge variant={outcomeVariant(outcome.outcome)} size="sm">
@@ -113,7 +113,7 @@ function StepRow({ step }: { step: SimulatedStep }) {
     <div className="rounded-lg border border-border-light bg-surface-primary p-3">
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-sm font-medium text-content-primary">
-          <ShieldCheck size={13} className="text-content-tertiary" />
+          <ShieldCheck size={14} className="text-content-tertiary" />
           {t('approvalRoutes.sim_step_n', {
             defaultValue: 'Step {{n}}',
             n: step.ordinal,
@@ -152,8 +152,8 @@ function SimulationBody({ sim }: { sim: RouteSimulation }) {
     <div className="space-y-4">
       {sim.warnings.length > 0 && (
         <div className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg/40 p-3">
-          <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[#b45309]">
-            <AlertTriangle size={13} />
+          <h4 className="oe-card-title flex items-center gap-1.5 text-[#b45309]">
+            <AlertTriangle size={14} />
             {t('approvalRoutes.sim_warnings_title', {
               defaultValue: 'Design warnings',
             })}
@@ -185,7 +185,7 @@ function SimulationBody({ sim }: { sim: RouteSimulation }) {
       )}
 
       <div>
-        <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline mb-1.5">
           {t('approvalRoutes.sim_per_step', {
             defaultValue: 'Per-step analysis ({{n}})',
             n: sim.step_count,

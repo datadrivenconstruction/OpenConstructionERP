@@ -254,7 +254,7 @@ function FairnessBanner({
   };
   return (
     <div className={`rounded-xl border p-3 ${style.palette}`}>
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         <Icon size={18} className="mt-0.5 shrink-0" />
         <div className="min-w-0">
           <p className="text-sm font-semibold">{heading[status]}</p>
@@ -344,8 +344,8 @@ function RecommendationBanner({
 
   return (
     <div className={`rounded-xl border p-3 ${palette}`}>
-      <div className="flex items-start gap-2.5">
-        <Award size={18} className="mt-0.5 shrink-0" />
+      <div className="flex items-start gap-2">
+        <Award size={20} className="mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold">
@@ -464,9 +464,9 @@ export function DesignOptionComparisonTable({
       <RecommendationBanner comparison={comparison} />
 
       <div className="overflow-x-auto relative rounded-lg border border-border-light">
-        <table className="w-full text-sm">
+        <table className="oe-table w-full">
           <thead className="sticky top-0 z-10 bg-surface-primary">
-            <tr className="border-b border-border-light">
+            <tr>
               <th
                 className={`whitespace-nowrap px-3 py-2.5 text-left font-semibold text-content-primary ${stickyCol} z-20`}
               >
@@ -477,7 +477,7 @@ export function DesignOptionComparisonTable({
                 return (
                   <th
                     key={o.option_id}
-                    className="whitespace-nowrap px-3 py-2.5 text-right align-bottom font-semibold text-content-primary"
+                    className="text-right align-bottom"
                   >
                     <div className="flex flex-col items-end gap-1">
                       <span className="flex items-center gap-1.5">
@@ -501,7 +501,7 @@ export function DesignOptionComparisonTable({
               <tr>
                 <td
                   colSpan={options.length + 1}
-                  className="px-3 py-6 text-center text-sm text-content-tertiary"
+                  className="text-center text-content-tertiary"
                 >
                   {t('designOptions.compare.noTradeRows', {
                     defaultValue:
@@ -517,7 +517,7 @@ export function DesignOptionComparisonTable({
                 return (
                   <tr
                     key={row.key}
-                    className="group border-b border-border-light/50 transition-colors hover:bg-surface-secondary/30"
+                    className="group"
                   >
                     <td
                       className={`px-3 py-2.5 ${stickyCol} z-20 group-hover:bg-surface-secondary/30`}
@@ -587,37 +587,37 @@ export function DesignOptionComparisonTable({
 
           <tfoot>
             {/* Direct cost */}
-            <tr className="border-t border-border-light bg-surface-secondary/20">
+            <tr>
               <td className={`px-3 py-2 text-content-secondary ${stickyCol} z-20 bg-surface-secondary`}>
                 {t('designOptions.directCost', { defaultValue: 'Direct cost' })}
               </td>
               {options.map((o) => (
                 <td
                   key={o.option_id}
-                  className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-secondary"
+                  className="whitespace-nowrap text-right tabular-nums text-content-secondary"
                 >
                   {formatMoney(o.direct_cost, o.currency)}
                 </td>
               ))}
             </tr>
             {/* Markups */}
-            <tr className="bg-surface-secondary/20">
+            <tr>
               <td className={`px-3 py-2 text-content-secondary ${stickyCol} z-20 bg-surface-secondary`}>
                 {t('designOptions.markups', { defaultValue: 'Markups' })}
               </td>
               {options.map((o) => (
                 <td
                   key={o.option_id}
-                  className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-secondary"
+                  className="whitespace-nowrap text-right tabular-nums text-content-secondary"
                 >
                   {formatMoney(o.markups_total, o.currency)}
                 </td>
               ))}
             </tr>
             {/* Grand total */}
-            <tr className="border-t-2 border-border bg-surface-secondary/40">
+            <tr>
               <td
-                className={`px-3 py-3 font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
+                className={`font-semibold sticky left-0 z-20 shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
               >
                 {t('designOptions.total', { defaultValue: 'TOTAL' })}
               </td>
@@ -626,7 +626,7 @@ export function DesignOptionComparisonTable({
                 return (
                   <td
                     key={o.option_id}
-                    className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
+                    className="whitespace-nowrap text-right tabular-nums"
                   >
                     <span className="font-semibold text-content-primary">
                       {formatMoney(o.grand_total, o.currency)}
@@ -641,14 +641,14 @@ export function DesignOptionComparisonTable({
               })}
             </tr>
             {/* Cost per m2 */}
-            <tr className="bg-surface-secondary/20">
+            <tr>
               <td className={`px-3 py-2 text-content-tertiary ${stickyCol} z-20 bg-surface-secondary`}>
                 {t('designOptions.costPerM2', { defaultValue: 'Cost per m2' })}
               </td>
               {options.map((o) => (
                 <td
                   key={o.option_id}
-                  className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-tertiary"
+                  className="whitespace-nowrap text-right tabular-nums text-content-tertiary"
                 >
                   {num(o.cost_per_m2) > 0 ? formatMoney(o.cost_per_m2, o.currency) : '-'}
                 </td>
@@ -662,14 +662,14 @@ export function DesignOptionComparisonTable({
                 never be rendered as one. */}
             {anyProgramme && (
               <>
-                <tr className="border-t border-border-light bg-surface-secondary/20">
+                <tr>
                   <td className={`px-3 py-2 text-content-tertiary ${stickyCol} z-20 bg-surface-secondary`}>
                     {t('designOptions.durationDays', { defaultValue: 'Duration (days)' })}
                   </td>
                   {options.map((o) => (
                     <td
                       key={o.option_id}
-                      className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-tertiary"
+                      className="whitespace-nowrap text-right tabular-nums text-content-tertiary"
                     >
                       {o.has_programme ? (
                         <>
@@ -688,14 +688,14 @@ export function DesignOptionComparisonTable({
                     </td>
                   ))}
                 </tr>
-                <tr className="bg-surface-secondary/20">
+                <tr>
                   <td className={`px-3 py-2 text-content-tertiary ${stickyCol} z-20 bg-surface-secondary`}>
                     {t('designOptions.finishDate', { defaultValue: 'Finish date' })}
                   </td>
                   {options.map((o) => (
                     <td
                       key={o.option_id}
-                      className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-tertiary"
+                      className="whitespace-nowrap text-right tabular-nums text-content-tertiary"
                     >
                       {o.has_programme && o.finish_date ? o.finish_date : '-'}
                     </td>
@@ -704,14 +704,14 @@ export function DesignOptionComparisonTable({
               </>
             )}
             {anyCarbon && (
-              <tr className="border-t border-border-light bg-surface-secondary/20">
+              <tr>
                 <td className={`px-3 py-2 text-content-tertiary ${stickyCol} z-20 bg-surface-secondary`}>
                   {t('designOptions.embodiedCarbon', { defaultValue: 'Embodied carbon A1-A5' })}
                 </td>
                 {options.map((o) => (
                   <td
                     key={o.option_id}
-                    className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-content-tertiary"
+                    className="whitespace-nowrap text-right tabular-nums text-content-tertiary"
                   >
                     {o.has_carbon ? formatQty(o.embodied_carbon_kg, o.carbon_unit || 'kgCO2e') : '-'}
                   </td>

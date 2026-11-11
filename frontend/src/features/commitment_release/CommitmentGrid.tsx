@@ -123,25 +123,25 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[60rem] text-sm">
+        <table className="oe-table w-full min-w-[60rem]">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary text-left text-xs text-content-tertiary">
-              <th scope="col" className="px-3 py-2 font-medium">{t('commitment.grid.item', { defaultValue: 'Item' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.grid.planned', { defaultValue: 'Planned' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.grid.released', { defaultValue: 'Released' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.grid.committed', { defaultValue: 'Committed' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('commitment.grid.required_tier', { defaultValue: 'Required tier' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('commitment.grid.latest_decision_date', { defaultValue: 'Latest decision date' })}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t('commitment.grid.residual_loss', { defaultValue: 'Residual loss' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('commitment.export.col_status', { defaultValue: 'Status' })}</th>
+            <tr className="text-left">
+              <th scope="col">{t('commitment.grid.item', { defaultValue: 'Item' })}</th>
+              <th scope="col" className="text-right">{t('commitment.grid.planned', { defaultValue: 'Planned' })}</th>
+              <th scope="col" className="text-right">{t('commitment.grid.released', { defaultValue: 'Released' })}</th>
+              <th scope="col" className="text-right">{t('commitment.grid.committed', { defaultValue: 'Committed' })}</th>
+              <th scope="col">{t('commitment.grid.required_tier', { defaultValue: 'Required tier' })}</th>
+              <th scope="col">{t('commitment.grid.latest_decision_date', { defaultValue: 'Latest decision date' })}</th>
+              <th scope="col" className="text-right">{t('commitment.grid.residual_loss', { defaultValue: 'Residual loss' })}</th>
+              <th scope="col">{t('commitment.export.col_status', { defaultValue: 'Status' })}</th>
             </tr>
           </thead>
           <tbody>
             {groups.map((group) => (
               <Fragment key={group.key || 'all'}>
                 {groupBy !== 'none' && (
-                  <tr className="border-b border-border-light bg-surface-secondary/60" data-testid="grid-group">
-                    <th scope="colgroup" colSpan={8} className="px-3 py-1.5 text-left text-xs font-semibold text-content-secondary">
+                  <tr data-testid="grid-group">
+                    <th scope="colgroup" colSpan={8}>
                       {groupTitle(group.key)}
                     </th>
                   </tr>
@@ -150,10 +150,10 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                   <tr
                     key={item.id}
                     data-testid="grid-row"
-                    className="cursor-pointer border-b border-border-light/60 align-top hover:bg-surface-secondary/60"
+                    className="cursor-pointer align-top"
                     onClick={() => onOpenItem(item.id)}
                   >
-                    <td className="px-3 py-2">
+                    <td>
                       <button
                         type="button"
                         className="text-left font-medium text-content-primary hover:text-oe-blue focus:outline-none focus-visible:underline"
@@ -178,10 +178,10 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                         )}
                       </p>
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       <Amount value={item.planned.amount} currency={item.planned.currency} />
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
+                    <td className="text-right tabular-nums">
                       <Amount value={releasedInForce(item)} currency={item.schedule_currency} />
                       {releasedLapsed(item) && (
                         <p className="text-xs font-normal text-content-tertiary" data-testid="grid-released-lapsed">
@@ -194,11 +194,11 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                         </p>
                       )}
                     </td>
-                    <td className={clsx('px-3 py-2 text-right tabular-nums', item.over_release && 'font-semibold text-semantic-error')}>
+                    <td className={clsx('text-right tabular-nums', item.over_release && 'font-semibold text-semantic-error')}>
                       <Amount value={item.committed} currency={item.schedule_currency} />
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">{tierName(item.required_tier_for_planned)}</td>
-                    <td className="px-3 py-2">
+                    <td className="text-content-secondary">{tierName(item.required_tier_for_planned)}</td>
+                    <td>
                       {item.latest_decision_date ? (
                         <span className={clsx(item.decision_overdue ? 'font-medium text-semantic-error' : 'text-content-secondary')}>
                           {fmtDate(item.latest_decision_date)}
@@ -212,7 +212,7 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                         </p>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums" data-testid="grid-residual">
+                    <td className="text-right tabular-nums" data-testid="grid-residual">
                       {item.exposure && nothingCommitted(item.exposure) ? (
                         <span className="text-content-tertiary">
                           {t('commitment.grid.nothing_committed', { defaultValue: 'Nothing committed' })}
@@ -229,7 +229,7 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                         />
                       )}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <ToneBadge tone={ITEM_STATUS_TONE[item.status] ?? 'neutral'} testId="grid-status">
                         {vocab(t, ITEM_STATUS, item.status)}
                       </ToneBadge>
@@ -240,8 +240,8 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-surface-secondary font-semibold text-content-primary" data-testid="grid-totals">
-              <th scope="row" className="px-3 py-2 text-left">
+            <tr data-testid="grid-totals">
+              <th scope="row">
                 {t('commitment.grid.totals', { defaultValue: 'Totals in {{currency}}', currency: totals.currency })}
                 {totals.mixed_currency && (
                   <p className="text-xs font-normal text-content-tertiary" data-testid="grid-mixed-currency">
@@ -249,10 +249,10 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                   </p>
                 )}
               </th>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 <Amount value={totals.planned} currency={totals.currency} />
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 <Amount value={releasedInForce(totals)} currency={totals.currency} />
                 {releasedLapsed(totals) && (
                   <p className="text-xs font-normal text-content-tertiary" data-testid="grid-totals-lapsed">
@@ -260,10 +260,10 @@ export function CommitmentGrid({ items, totals, matrix, labels, onOpenItem }: Co
                   </p>
                 )}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums">
+              <td className="text-right tabular-nums">
                 <Amount value={totals.committed} currency={totals.currency} />
               </td>
-              <td colSpan={4} className="px-3 py-2 text-xs font-normal text-content-tertiary">
+              <td colSpan={4} className="font-normal text-content-tertiary">
                 {incomplete.length > 0 && (
                   <ul data-testid="grid-totals-incomplete">
                     {incomplete.map((k) => (

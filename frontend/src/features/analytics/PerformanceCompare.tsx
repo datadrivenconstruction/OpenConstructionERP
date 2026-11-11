@@ -121,7 +121,7 @@ export function PerformanceCompare({
       <div className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h3 className="flex items-center gap-2 text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title flex items-center gap-2">
               <Columns3 size={16} />
               {t('analytics.perf.compare_title', { defaultValue: 'Compare KPIs' })}
             </h3>
@@ -190,10 +190,10 @@ export function PerformanceCompare({
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="oe-table-compact w-full">
               <thead>
-                <tr className="border-b border-border-light text-left text-content-tertiary">
-                  <th className="py-2 pe-3 font-medium">{t('analytics.perf.col_project', { defaultValue: 'Project' })}</th>
+                <tr className="text-left">
+                  <th className="pe-3">{t('analytics.perf.col_project', { defaultValue: 'Project' })}</th>
                   {data.columns.map((c) => (
                     <th key={`${c.kpi}|${c.group.key}`} className="px-3 py-2 text-right font-medium">
                       {columnLabel(c)}
@@ -203,8 +203,8 @@ export function PerformanceCompare({
               </thead>
               <tbody>
                 {projects.map((p) => (
-                  <tr key={p.project_id} className="border-b border-border-light">
-                    <td className="max-w-[16rem] truncate py-1.5 pe-3">
+                  <tr key={p.project_id}>
+                    <td className="max-w-[16rem] truncate pe-3">
                       <Link to={`/projects/${p.project_id}`} className="text-content-primary hover:text-oe-blue hover:underline">
                         {p.name}
                       </Link>
@@ -226,8 +226,8 @@ export function PerformanceCompare({
                     })}
                   </tr>
                 ))}
-                <tr className="bg-surface-secondary font-semibold">
-                  <td className="py-1.5 pe-3">{t('analytics.perf.compare_benchmark_row', { defaultValue: 'Benchmark' })}</td>
+                <tr>
+                  <td className="pe-3">{t('analytics.perf.compare_benchmark_row', { defaultValue: 'Benchmark' })}</td>
                   {data.columns.map((c) => (
                     <td key={`${c.kpi}|${c.group.key}`} className="px-3 py-1.5 text-right tabular-nums">
                       {fmtValue(c.group.headline ?? c.group.benchmark.weighted) ?? '-'}

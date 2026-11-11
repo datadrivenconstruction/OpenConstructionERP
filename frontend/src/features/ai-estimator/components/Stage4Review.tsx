@@ -79,7 +79,7 @@ function ValidationPanel({ report }: { report: ValidationReport | null }) {
         onClick={() => hasDetail && setOpen((o) => !o)}
         aria-expanded={hasDetail ? open : undefined}
         disabled={!hasDetail}
-        className="flex w-full items-center gap-2.5 text-left disabled:cursor-default"
+        className="flex w-full items-center gap-2 text-left disabled:cursor-default"
       >
         <span className={clsx('flex h-8 w-8 items-center justify-center rounded-full', tone.dot)}>
           <Icon className="h-4 w-4 text-white" />
@@ -172,7 +172,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
 
   if (loading || !preview) {
     return (
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
@@ -276,20 +276,20 @@ export function Stage4Review(props: Stage4ReviewProps) {
 
       {/* Position table with expandable resources */}
       <div className="overflow-hidden rounded-lg border border-border-light">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-secondary">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
-              <th className="w-8 px-3 py-2" />
-              <th className="px-3 py-2 text-left font-medium">
+              <th className="w-8" />
+              <th>
                 {t('aiest.review.description', { defaultValue: 'Description' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('aiest.review.qty', { defaultValue: 'Qty' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('aiest.review.rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium">
+              <th className="text-right">
                 {t('aiest.review.total', { defaultValue: 'Total' })}
               </th>
             </tr>
@@ -301,8 +301,8 @@ export function Stage4Review(props: Stage4ReviewProps) {
               const hasRes = p.resources.length > 0;
               return (
                 <Fragment key={rowKey}>
-                  <tr className="border-t border-border-light/60">
-                    <td className="px-3 py-2 text-center">
+                  <tr>
+                    <td className="text-center">
                       {hasRes && (
                         <button
                           type="button"
@@ -320,7 +320,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
                         </button>
                       )}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-content-primary">{p.description}</span>
                         {p.confidence != null && (
@@ -340,20 +340,20 @@ export function Stage4Review(props: Stage4ReviewProps) {
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                    <td className="text-right tabular-nums text-content-secondary">
                       {toNum(p.quantity)} {p.unit}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                    <td className="text-right tabular-nums text-content-secondary">
                       {fmtMoneyStr(p.unit_rate, p.currency, locale)}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                    <td className="text-right tabular-nums font-medium">
                       {fmtMoneyStr(p.line_total, p.currency, locale)}
                     </td>
                   </tr>
                   {expanded && hasRes && (
                     <tr>
                       <td />
-                      <td colSpan={4} className="px-3 pb-3">
+                      <td colSpan={4} className="pb-3">
                         <ResourceBreakdown
                           resources={p.resources}
                           currency={p.currency}
@@ -402,7 +402,7 @@ export function Stage4Review(props: Stage4ReviewProps) {
         </div>
       ) : (
         <div className="space-y-3 rounded-lg border border-border-light bg-surface-secondary p-4">
-          <label className="flex cursor-pointer items-start gap-2.5 text-sm">
+          <label className="flex cursor-pointer items-start gap-2 text-sm">
             <input
               type="checkbox"
               checked={reviewed}

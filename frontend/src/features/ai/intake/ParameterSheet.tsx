@@ -61,7 +61,7 @@ export function ParameterSheet({
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-content-primary">
-        <ListChecks size={15} className="text-oe-blue" />
+        <ListChecks size={16} className="text-oe-blue" />
         {t('aiest.sheet.title', { defaultValue: 'Parameter sheet' })}
       </div>
 
@@ -87,7 +87,7 @@ export function ParameterSheet({
                       aria-label={label}
                       value={value === null || value === undefined ? '' : String(value)}
                       onChange={(e) => onChangeParam?.(key, e.target.value)}
-                      className="h-7 w-24 rounded-md border border-border bg-surface-primary px-2 text-right text-sm focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+                      className="oe-input-sm w-24 text-right"
                     />
                   ) : (
                     displayValue(value, yesLabel, noLabel)

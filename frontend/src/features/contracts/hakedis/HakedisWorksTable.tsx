@@ -59,17 +59,17 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border-light" data-testid="hakedis-works">
-      <table className="w-full min-w-[56rem] text-xs">
+      <table className="oe-table-compact w-full min-w-[56rem]">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-surface-secondary text-2xs uppercase tracking-wide text-content-tertiary">
+        <thead className="text-2xs">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 scope="col"
                 className={clsx(
-                  'px-2 py-2 align-bottom font-medium',
-                  isNumeric(column) ? 'text-right' : 'text-left',
+                  'align-bottom',
+                  isNumeric(column) ? 'text-right' : '',
                   column.key === 'description' && 'min-w-[12rem]',
                 )}
               >
@@ -81,7 +81,7 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border-light">
+        <tbody>
           {/* Rows have no id of their own; their position is their identity. */}
           {rows.map((row, rowIndex) => {
             if (row.kind === 'section') {
@@ -90,7 +90,7 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
                   <th
                     scope="colgroup"
                     colSpan={columns.length}
-                    className="break-words px-2 py-1.5 text-left font-semibold text-content-primary"
+                    className="break-words"
                   >
                     {row.title}
                   </th>
@@ -112,10 +112,10 @@ export function HakedisWorksTable({ works, currency, numberLocale, caption }: Ha
                   <td
                     key={column.key}
                     className={clsx(
-                      'px-2 py-1.5 align-top',
+                      'align-top',
                       isNumeric(column)
-                        ? 'whitespace-nowrap text-right tabular-nums text-content-primary'
-                        : 'break-words text-left text-content-secondary',
+                        ? 'whitespace-nowrap text-right tabular-nums'
+                        : 'break-words text-content-secondary',
                     )}
                   >
                     {total && index === titleIndex ? (

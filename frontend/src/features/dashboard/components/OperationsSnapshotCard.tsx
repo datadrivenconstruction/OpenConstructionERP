@@ -233,7 +233,7 @@ export function OperationsSnapshotCard({ projects }: { projects?: ProjectRef[] }
     <div className="animate-card-in" style={{ animationDelay: '160ms' }}>
       <Card className="!bg-surface-elevated/70">
         <div className="px-4 pt-3 pb-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('dashboard.snapshot_title', { defaultValue: 'Operations snapshot' })}
           </h3>
           <p className="text-2xs text-content-tertiary">
@@ -257,7 +257,7 @@ export function OperationsSnapshotCard({ projects }: { projects?: ProjectRef[] }
                   <button
                     type="button"
                     onClick={() => navigate(tile.href)}
-                    className="group flex w-full items-center gap-2.5 rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2 text-left transition-colors hover:bg-surface-secondary hover:border-border-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                    className="group flex w-full items-center gap-2 rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2 text-left transition-colors hover:bg-surface-secondary hover:border-border-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-elevated">
                       {tile.icon}

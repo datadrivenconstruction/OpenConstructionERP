@@ -416,7 +416,7 @@ export function RulePackPreviewModal({
             className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-2xs leading-relaxed text-content-secondary"
             data-testid={`${testId}-explainer`}
           >
-            <Info size={13} className="mt-0.5 flex-shrink-0 text-oe-blue" />
+            <Info size={14} className="mt-0.5 flex-shrink-0 text-oe-blue" />
             <span>
               {t('rulePacks.modal_explainer', {
                 defaultValue:
@@ -575,7 +575,7 @@ export function RulePackPreviewModal({
               className="rounded-lg border border-border-light bg-surface-primary p-3"
             >
               <header className="mb-2 flex items-center justify-between">
-                <h3 className="text-xs font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('rulePacks.test_mode_title', {
                     defaultValue: 'Test against current model',
                   })}

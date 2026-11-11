@@ -83,7 +83,7 @@ export function RulePackCard({ pack, onSelect, testId }: RulePackCardProps) {
       className="group flex h-full cursor-pointer flex-col gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="line-clamp-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title line-clamp-2">
           {pack.name}
         </h3>
         <div className="flex flex-shrink-0 items-center gap-1">

@@ -92,7 +92,7 @@ export function RaiseBackCharge({
 
   return (
     <div className="space-y-2 rounded-lg border border-border-light p-3" data-testid="raise-back-charge">
-      <label className="block text-xs font-medium text-content-secondary">
+      <label className="oe-label">
         {t('cost_recovery.raise.subcontractor', { defaultValue: 'Subcontractor responsible' })}
         <select
           className={FIELD_CLS + ' mt-1'}
@@ -108,7 +108,7 @@ export function RaiseBackCharge({
         </select>
       </label>
       {!subcontractorId && (
-        <label className="block text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('cost_recovery.raise.party', { defaultValue: 'Responsible party' })}
           <input
             className={FIELD_CLS + ' mt-1'}

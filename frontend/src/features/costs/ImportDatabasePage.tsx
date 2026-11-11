@@ -911,7 +911,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-content-primary">
+                    <h3 className="oe-card-title">
                       {result ? t('costs.db_installed', { defaultValue: 'Database installed successfully' }) : t('costs.db_installing', { defaultValue: 'Installing {{name}}...', name: loadingDb?.market ?? 'database' })}
                     </h3>
                     {!result && (
@@ -1004,13 +1004,13 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                   <Database size={10} /> {t('costs.cost_items_count', { defaultValue: '55,000+ cost items' })}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {t('costs.labor_rates', { defaultValue: 'Labor rates' })}
+                  <span className="h-1.5 w-1.5 rounded-full bg-semantic-warning" /> {t('costs.labor_rates', { defaultValue: 'Labor rates' })}
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> {t('costs.equipment', { defaultValue: 'Equipment' })}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> {t('costs.materials', { defaultValue: 'Materials' })}
+                  <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('costs.materials', { defaultValue: 'Materials' })}
                 </span>
                 <span className="ml-auto font-medium text-content-secondary">
                   {result ? t('costs.available_offline', { defaultValue: 'Available offline' }) : t('costs.one_time_download', { defaultValue: 'One-time download' })}
@@ -1173,7 +1173,7 @@ export function LoadedDatabasesSection() {
         {/* Header — always rendered so users always have a way to manage installed DBs */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('costs.loaded_databases', { defaultValue: 'Installed Databases' })}
             </h3>
             <p className="text-xs text-content-tertiary mt-0.5">
@@ -1255,17 +1255,17 @@ export function LoadedDatabasesSection() {
         {/* Per-region table — only when at least one region is installed */}
         {hasData && (
         <div className="rounded-lg border border-border-light overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="oe-table w-full">
             <thead>
               <tr className="bg-surface-tertiary text-left">
-                <th className="px-3 py-2 text-xs font-medium text-content-secondary">{t('costs.col_region', { defaultValue: 'Region' })}</th>
-                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-right">{t('costs.col_items', { defaultValue: 'Items' })}</th>
-                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-center">{t('costs.col_status', { defaultValue: 'Status' })}</th>
-                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-center">{t('costs.col_vector', { defaultValue: 'Vector' })}</th>
-                <th className="px-3 py-2 w-10" />
+                <th>{t('costs.col_region', { defaultValue: 'Region' })}</th>
+                <th className="text-right">{t('costs.col_items', { defaultValue: 'Items' })}</th>
+                <th className="text-center">{t('costs.col_status', { defaultValue: 'Status' })}</th>
+                <th className="text-center">{t('costs.col_vector', { defaultValue: 'Vector' })}</th>
+                <th className="w-10" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {regionStats!.map((rs) => {
                 const db = CWICR_DATABASES.find((d) => d.id === rs.region);
                 const isActive = activeDbId === rs.region;
@@ -1286,8 +1286,8 @@ export function LoadedDatabasesSection() {
                 // catch up on.
                 const deleteLabel = t('common.delete', { defaultValue: 'Delete' });
                 return (
-                  <tr key={rs.region} className="hover:bg-surface-secondary/50 transition-colors">
-                    <td className="px-3 py-2.5">
+                  <tr key={rs.region}>
+                    <td>
                       <div className="flex items-center gap-2">
                         <span className="inline-flex h-5 w-8 items-center justify-center">
                           <CountryFlag code={flagCode} size={32} className="shadow-xs border border-black/5" />
@@ -1314,10 +1314,10 @@ export function LoadedDatabasesSection() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-sm font-semibold text-content-primary">
+                    <td className="text-right tabular-nums font-semibold">
                       {rs.count.toLocaleString(getNumberLocale())}
                     </td>
-                    <td className="px-3 py-2.5 text-center">
+                    <td className="text-center">
                       {isActive ? (
                         <Badge variant="blue" size="sm">
                           <Star size={10} className="fill-current mr-0.5" /> Active
@@ -1328,10 +1328,10 @@ export function LoadedDatabasesSection() {
                         </Badge>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-center">
+                    <td className="text-center">
                       <span className="text-2xs text-content-quaternary">--</span>
                     </td>
-                    <td className="px-2 py-2.5">
+                    <td>
                       {/* Both branches sit in the same 28px box so starting a
                           delete does not shrink the cell and jump the row. */}
                       {isDeleting ? (
@@ -1361,7 +1361,7 @@ export function LoadedDatabasesSection() {
                           aria-label={deleteLabel}
                           className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary transition-all duration-fast ease-oe hover:text-semantic-error hover:bg-semantic-error-bg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue mx-auto"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </td>
@@ -1846,11 +1846,11 @@ export function VectorDatabaseSection() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 text-white">
-            <Sparkles size={18} />
+            <Sparkles size={20} />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 CWICR Vector Database - AI Semantic Search
               </h3>
               {isConnected ? (
@@ -1910,7 +1910,7 @@ export function VectorDatabaseSection() {
         ) : (
           <>
             {/* Region grid — same style as CWICR */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 mb-5">
               {CWICR_DATABASES.map((db) => {
                 const isLoadingThis = loadingRegion === db.id;
                 const isVectorized = vectorizedRegions.has(db.id);
@@ -2105,7 +2105,7 @@ export function VectorDatabaseSection() {
               return (
                 <div className="mb-4 rounded-xl border border-purple-300/40 bg-purple-50/30 dark:bg-purple-500/5 overflow-hidden">
                   <div className="px-4 pt-3 pb-3">
-                    <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="flex items-center gap-2 mb-2.5">
                       <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 text-white">
                         <Sparkles size={16} />
                         <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-purple-400 animate-ping" />
@@ -2113,7 +2113,7 @@ export function VectorDatabaseSection() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-semibold text-content-primary truncate">
+                          <h4 className="oe-card-title truncate">
                             {isIndexingAll
                               ? t('costs.vec_indexing_all', {
                                   defaultValue: 'Generating vectors for all regions...',
@@ -2353,7 +2353,7 @@ function ColumnMappingPanel({
   const selectedExisting = catalogs.find((c) => c.id === existingCatalogId);
 
   const modeOptionClass = (active: boolean) =>
-    `flex items-start gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
+    `flex items-start gap-2 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
       active
         ? 'border-oe-blue/50 bg-oe-blue-subtle/15'
         : 'border-border-light hover:bg-surface-secondary/50'
@@ -2386,10 +2386,10 @@ function ColumnMappingPanel({
       <div className="px-6 pt-5 pb-4">
         <div className="flex items-start gap-3 mb-1">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
-            <FileSpreadsheet size={18} className="text-oe-blue" />
+            <FileSpreadsheet size={20} className="text-oe-blue" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('costs_import.map_columns_title', { defaultValue: 'Map your columns' })}
             </h3>
             <p className="text-xs text-content-tertiary mt-0.5">
@@ -2478,11 +2478,11 @@ function ColumnMappingPanel({
       {/* Sample preview table */}
       {sampleRows.length > 0 && (
         <div className="px-6 pt-3 pb-2">
-          <p className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
+          <p className="oe-overline mb-2">
             {t('costs_import.sample_preview', { defaultValue: 'Sample from your file' })}
           </p>
           <div className="rounded-xl border border-border-light overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="oe-table-compact w-full">
               <thead>
                 <tr className="bg-surface-tertiary text-left">
                   {data.headers.map((header, ci) => (
@@ -2495,7 +2495,7 @@ function ColumnMappingPanel({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {sampleRows.map((row, ri) => (
                   <tr key={`sample-${ri}`} className="hover:bg-surface-secondary/40">
                     {data.headers.map((header, ci) => (
@@ -2551,7 +2551,7 @@ function ColumnMappingPanel({
                       defaultValue: 'e.g. My price book 2026',
                     })}
                     aria-label={t('costs_import.catalog_name', { defaultValue: 'Catalog name' })}
-                    className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:border-oe-blue/50 transition-colors"
+                    className="oe-input w-full"
                   />
                   <select
                     value={catalogCurrency}
@@ -2621,7 +2621,7 @@ function ColumnMappingPanel({
                         value={existingCatalogId}
                         onChange={(e) => onExistingCatalogChange(e.target.value)}
                         aria-label={t('costs_catalogs.import_existing_catalog', { defaultValue: 'Add to an existing catalog' })}
-                        className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-oe-blue/50 transition-colors"
+                        className="oe-select w-full"
                       >
                         <option value="">
                           {t('costs_catalogs.import_existing_select', { defaultValue: 'Select a catalog...' })}
@@ -2656,7 +2656,7 @@ function ColumnMappingPanel({
             instead of leaving a dead button. */}
         {unmappedRequired.length > 0 && (
           <span className="mr-auto inline-flex items-center gap-1.5 text-xs text-semantic-error">
-            <AlertTriangle size={13} className="shrink-0" />
+            <AlertTriangle size={14} className="shrink-0" />
             {t('costs_catalogs.import_required_missing', {
               defaultValue: 'Map the required columns before importing: {{fields}}.',
               fields: fmtList(unmappedRequired.map((f) => fieldMeta(f).label)),
@@ -2991,10 +2991,10 @@ export function ImportDatabasePage() {
         <div className="px-6 pt-5 pb-2">
           <div className="flex items-center gap-3 mb-1">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue text-white">
-              <Database size={18} />
+              <Database size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('costs_import.cwicr_title', { defaultValue: 'CWICR Construction Cost Database' })}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -3038,7 +3038,7 @@ export function ImportDatabasePage() {
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border-light" />
-        <span className="text-xs font-medium text-content-tertiary uppercase tracking-wider">
+        <span className="oe-overline">
           {t('costs.or_upload_own', { defaultValue: 'or upload your own file' })}
         </span>
         <div className="h-px flex-1 bg-border-light" />
@@ -3063,7 +3063,7 @@ export function ImportDatabasePage() {
                 </div>
               )}
               <div>
-                <h3 className="text-base font-semibold text-content-primary">
+                <h3 className="oe-section-title">
                   {t('costs.import_complete', { defaultValue: 'Import Complete' })}
                 </h3>
                 <p className="text-sm text-content-secondary">
@@ -3181,7 +3181,7 @@ export function ImportDatabasePage() {
                 <Database size={20} className="text-oe-blue" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('costs.import_formats_title', { defaultValue: 'Supported formats' })}
                 </h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-content-secondary">

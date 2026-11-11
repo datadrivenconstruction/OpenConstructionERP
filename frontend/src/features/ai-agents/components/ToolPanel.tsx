@@ -100,7 +100,7 @@ export function ToolPanel({ tools, selected, onChange, loading }: ToolPanelProps
             <li key={tool.name}>
               <label
                 className={clsx(
-                  'flex items-start gap-2.5 rounded-lg border p-2.5 transition-colors',
+                  'flex items-start gap-2 rounded-lg border p-3 transition-colors',
                   allowed
                     ? 'cursor-pointer border-border-light bg-surface-secondary/40 hover:border-oe-blue/40'
                     : 'cursor-not-allowed border-border-light bg-surface-secondary/20 opacity-70',

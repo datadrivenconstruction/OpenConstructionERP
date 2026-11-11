@@ -239,7 +239,7 @@ export function AssemblyPickerModal({
     new Intl.NumberFormat(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose} role="presentation">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose} role="presentation">
       <div
         role="dialog"
         aria-modal="true"
@@ -251,10 +251,10 @@ export function AssemblyPickerModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30">
-              <Layers size={18} />
+              <Layers size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">{t('assemblies.apply_assembly_to_boq', { defaultValue: 'Apply Assembly to BOQ' })}</h2>
+              <h2 className="oe-section-title">{t('assemblies.apply_assembly_to_boq', { defaultValue: 'Apply Assembly to BOQ' })}</h2>
               <p className="text-xs text-content-tertiary">{t('assemblies.select_recipe_desc', { defaultValue: 'Select a pre-built recipe to add as a position' })}</p>
             </div>
           </div>
@@ -276,7 +276,7 @@ export function AssemblyPickerModal({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('assemblies.search_placeholder', { defaultValue: 'Search assemblies...' })}
               aria-label={t('assemblies.search_placeholder', { defaultValue: 'Search assemblies...' })}
-              className="w-full h-9 ps-9 pe-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
+              className="oe-input w-full ps-9 pe-3"
               autoFocus
             />
           </div>
@@ -344,7 +344,7 @@ export function AssemblyPickerModal({
                             value={quantity[asm.id] ?? ''}
                             placeholder="1"
                             onChange={(e) => setQuantity((prev) => ({ ...prev, [asm.id]: e.target.value }))}
-                            className="w-16 h-7 rounded border border-border-light bg-surface-elevated px-1.5 text-xs text-content-primary text-right tabular-nums focus:outline-none focus:ring-1 focus:ring-purple-400"
+                            className="oe-input-sm w-16 text-right tabular-nums"
                           />
                         </div>
                         <Button
@@ -1657,7 +1657,7 @@ export function CostDatabaseSearchModal({
   }, [selected, items, rowQuantity]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} role="presentation">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={onClose} role="presentation">
       <div
         role="dialog"
         aria-modal="true"
@@ -1670,10 +1670,10 @@ export function CostDatabaseSearchModal({
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-            <Database size={18} />
+            <Database size={20} />
           </div>
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {onSelectForResources
                 ? t('boq.add_resource_from_database', { defaultValue: 'Add Resources from Database' })
                 : t('boq.add_from_database', { defaultValue: 'Add from Cost Database' })}
@@ -1761,7 +1761,7 @@ export function CostDatabaseSearchModal({
             className="hidden md:flex w-72 shrink-0 flex-col border-r border-border-light bg-surface-secondary/30"
             data-testid="cost-modal-sidebar"
           >
-            <div className="px-3 pt-3 pb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <div className="oe-overline px-3 pt-3 pb-1">
               {t('boq.cost_tree_title', { defaultValue: 'Categories' })}
             </div>
             {treeLoading ? (
@@ -1823,7 +1823,7 @@ export function CostDatabaseSearchModal({
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
                   aria-label={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
-                  className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                  className="oe-input-lg w-full ps-10 pe-3"
                 />
               </div>
             </div>
@@ -1947,7 +1947,7 @@ export function CostDatabaseSearchModal({
                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-oe-blue-subtle/40">
                       <Database size={22} className="text-oe-blue" />
                     </div>
-                    <h3 className="mb-1 text-sm font-semibold text-content-primary">
+                    <h3 className="oe-card-title mb-1">
                       {t('boq.no_databases_title', {
                         defaultValue: 'No cost database installed yet',
                       })}
@@ -1979,22 +1979,22 @@ export function CostDatabaseSearchModal({
                   </div>
                 )
               ) : (
-                <table className="w-full text-sm">
+                <table className="oe-table w-full">
                   <thead className="bg-surface-tertiary sticky top-0 z-10">
                     <tr>
-                      <th className="px-3 py-2 w-8" />
-                      <th className="px-3 py-2 text-start text-xs font-medium text-content-secondary">{t('boq.description')}</th>
-                      <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-16">{t('boq.unit')}</th>
-                      <th className="px-3 py-2 text-end text-xs font-medium text-content-secondary w-20">
+                      <th className="w-8" />
+                      <th>{t('boq.description')}</th>
+                      <th className="text-center w-16">{t('boq.unit')}</th>
+                      <th className="text-end w-20">
                         {t('boq.quantity_short', { defaultValue: 'Qty' })}
                       </th>
-                      <th className="px-3 py-2 text-end text-xs font-medium text-content-secondary w-24">{t('costs.rate', 'Rate')}</th>
-                      <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-20">
+                      <th className="text-end w-24">{t('costs.rate', 'Rate')}</th>
+                      <th className="text-center w-20">
                         {t('boq.region', { defaultValue: 'Database' })}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {items.map((item, idx) => {
                       const isSel = selected.has(item.id);
                       const isCursor = cursorIndex === idx;
@@ -2007,19 +2007,19 @@ export function CostDatabaseSearchModal({
                             toggleSelect(item.id);
                           }}
                           className={
-                            'cursor-pointer transition-colors ' +
-                            (isSel ? 'bg-oe-blue-subtle/20 ' : 'hover:bg-surface-secondary/50 ') +
+                            'cursor-pointer ' +
+                            (isSel ? 'bg-oe-blue-subtle/20 ' : '') +
                             (isCursor
                               ? 'outline outline-1 outline-oe-blue/60 -outline-offset-1'
                               : '')
                           }
                         >
-                          <td className="px-3 py-2.5">
+                          <td>
                             <div className={`h-4 w-4 rounded border-2 flex items-center justify-center ${isSel ? 'border-oe-blue bg-oe-blue' : 'border-content-quaternary'}`}>
                               {isSel && <Check size={10} className="text-white" />}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 max-w-[420px]">
+                          <td className="max-w-[420px]">
                             {(() => {
                               // Variant resources (CWICR ``price_abstract_resource_*``)
                               // carry an abstract base name in
@@ -2074,13 +2074,13 @@ export function CostDatabaseSearchModal({
                               );
                             })()}
                           </td>
-                          <td className="px-3 py-2.5 text-center">
+                          <td className="text-center">
                             {/* Superscript glyphs (m² / m³) to match the LV
                                 grid, plus locale trade codes (de: psch). */}
                             <Badge variant="neutral" size="sm">{localizedUnitCode(item.unit, i18n.language)}</Badge>
                           </td>
                           <td
-                            className="px-3 py-2.5 text-end"
+                            className="text-end"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <input
@@ -2122,7 +2122,7 @@ export function CostDatabaseSearchModal({
                               data-testid={`cost-row-qty-${item.id}`}
                             />
                           </td>
-                          <td className="px-3 py-2.5 text-end font-semibold tabular-nums text-content-primary">
+                          <td className="text-end font-semibold tabular-nums">
                             <div className="inline-flex items-center gap-1.5">
                               {(() => {
                                 // The rate the line lands at comes first. When
@@ -2213,7 +2213,7 @@ export function CostDatabaseSearchModal({
                               })()}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 text-center">
+                          <td className="text-center">
                             {(() => {
                               const info = item.region ? REGION_MAP[item.region] : null;
                               if (!info) return <span className="text-2xs text-content-quaternary">&mdash;</span>;

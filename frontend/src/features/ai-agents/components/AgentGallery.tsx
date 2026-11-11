@@ -79,7 +79,7 @@ export function AgentGallery({
                 >
                   <SectionIcon className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t(`agents.category.${group.key}`, { defaultValue: meta.label })}
                 </h3>
                 <span className="text-xs text-content-tertiary">{group.agents.length}</span>

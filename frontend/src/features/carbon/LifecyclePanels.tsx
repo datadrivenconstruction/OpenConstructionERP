@@ -32,7 +32,7 @@ import {
 } from './lifecycleApi';
 import { budgetTone, failingChecks, kgToTonnes, qualityTone } from './lifecycle';
 
-const inputCls = 'h-9 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary';
+const inputCls = '';
 
 export function LifecyclePanel({ projectId }: { projectId: string }) {
   const { t, i18n } = useTranslation();
@@ -104,7 +104,7 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
       )}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('carbon.lc.budget_title', { defaultValue: 'Carbon budget' })}
           </h3>
           {b && Number(b.budget_kg) > 0 ? (
@@ -137,7 +137,7 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
           )}
         </Card>
         <Card>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('carbon.lc.checks_title', { defaultValue: 'Carbon checks' })}
           </h3>
           {failing.length === 0 ? (
@@ -160,12 +160,12 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('carbon.lc.hotspots_title', { defaultValue: 'Hotspots by cost group' })}
           </h3>
           <select
             aria-label={t('carbon.lc.classification', { defaultValue: 'Classification' })}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
             value={system}
             onChange={(e) => setSystem(e.target.value as ClassificationSystem)}
           >
@@ -179,24 +179,24 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
             title={t('carbon.lc.hotspots_empty', { defaultValue: 'No carbon lines linked to BOQ positions yet' })}
           />
         ) : (
-          <table className="mt-3 w-full text-sm">
+          <table className="oe-table-compact mt-3 w-full">
             <thead>
-              <tr className="text-left text-content-tertiary">
-                <th className="py-1">{t('carbon.lc.group', { defaultValue: 'Group' })}</th>
-                <th className="py-1 text-right">tCO2e</th>
-                <th className="py-1 text-right">%</th>
+              <tr className="text-left">
+                <th>{t('carbon.lc.group', { defaultValue: 'Group' })}</th>
+                <th className="text-right">tCO2e</th>
+                <th className="text-right">%</th>
               </tr>
             </thead>
             <tbody>
               {(hotQ.data ?? []).map((h) => (
-                <tr key={h.group} className="border-t border-border-light">
-                  <td className="py-1">
+                <tr key={h.group}>
+                  <td>
                     {h.group === 'unclassified'
                       ? t('carbon.lc.unclassified', { defaultValue: 'Unclassified' })
                       : h.group}
                   </td>
-                  <td className="py-1 text-right tabular-nums">{kgToTonnes(h.carbon_kg, i18n.language)}</td>
-                  <td className="py-1 text-right tabular-nums">{fmtNumber(h.share_pct, 1)}</td>
+                  <td className="text-right tabular-nums">{kgToTonnes(h.carbon_kg, i18n.language)}</td>
+                  <td className="text-right tabular-nums">{fmtNumber(h.share_pct, 1)}</td>
                 </tr>
               ))}
             </tbody>
@@ -206,26 +206,26 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <Truck className="h-4 w-4" aria-hidden />
             {t('carbon.lc.a4_title', { defaultValue: 'Transport to site (A4)' })}
           </h3>
           <div className="mt-2 flex flex-col gap-2">
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               inputMode="decimal"
               placeholder={t('carbon.lc.mass_kg', { defaultValue: 'Mass, kg' })}
               value={a4.mass_kg}
               onChange={(e) => setA4({ ...a4, mass_kg: e.target.value })}
             />
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               inputMode="decimal"
               placeholder={t('carbon.lc.distance_km', { defaultValue: 'Supplier distance, km' })}
               value={a4.distance_km}
               onChange={(e) => setA4({ ...a4, distance_km: e.target.value })}
             />
-            <select className={inputCls} value={a4.mode} onChange={(e) => setA4({ ...a4, mode: e.target.value })}>
+            <select className={`oe-select ${inputCls}`} value={a4.mode} onChange={(e) => setA4({ ...a4, mode: e.target.value })}>
               {['road_truck', 'road_van', 'rail', 'inland_barge', 'sea_container', 'air'].map((m) => (
                 <option key={m} value={m}>
                   {t(`carbon.lc.mode_${m}`, { defaultValue: m })}
@@ -243,20 +243,20 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
           </div>
         </Card>
         <Card>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <Flame className="h-4 w-4" aria-hidden />
             {t('carbon.lc.a5_title', { defaultValue: 'Site energy and fuel (A5)' })}
           </h3>
           <div className="mt-2 flex flex-col gap-2">
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               inputMode="decimal"
               placeholder={t('carbon.lc.diesel_l', { defaultValue: 'Diesel, litres' })}
               value={a5.diesel}
               onChange={(e) => setA5({ ...a5, diesel: e.target.value })}
             />
             <input
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
               inputMode="decimal"
               placeholder={t('carbon.lc.meter_kwh', { defaultValue: 'Electricity meter, kWh' })}
               value={a5.kwh}
@@ -273,7 +273,7 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
           </div>
         </Card>
         <Card>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <FileUp className="h-4 w-4" aria-hidden />
             {t('carbon.lc.epd_import_title', { defaultValue: 'Import EPD' })}
           </h3>
@@ -335,7 +335,7 @@ export function CompanyReportPanel() {
   return (
     <div className="space-y-4">
       <Card>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('carbon.lc.company_title', { defaultValue: 'Company climate report' })}
         </h3>
         <p className="mt-1 text-xs text-content-tertiary">
@@ -346,14 +346,14 @@ export function CompanyReportPanel() {
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <input
-            className={clsx(inputCls, 'w-24')}
+            className={clsx('oe-input', inputCls, 'w-24')}
             type="number"
             aria-label={t('carbon.lc.year', { defaultValue: 'Year' })}
             value={form.reporting_year}
             onChange={(e) => setForm({ ...form, reporting_year: Number(e.target.value) })}
           />
           <select
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
             aria-label={t('carbon.lc.template', { defaultValue: 'Template' })}
             value={form.template}
             onChange={(e) => setForm({ ...form, template: e.target.value as ReportTemplate })}
@@ -365,20 +365,20 @@ export function CompanyReportPanel() {
             ))}
           </select>
           <input
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder={t('carbon.lc.company_name', { defaultValue: 'Company name' })}
             value={form.company_name}
             onChange={(e) => setForm({ ...form, company_name: e.target.value })}
           />
           <input
-            className={clsx(inputCls, 'w-36')}
+            className={clsx('oe-input', inputCls, 'w-36')}
             inputMode="decimal"
             placeholder={t('carbon.lc.net_revenue', { defaultValue: 'Net revenue' })}
             value={form.net_revenue}
             onChange={(e) => setForm({ ...form, net_revenue: e.target.value })}
           />
           <input
-            className={clsx(inputCls, 'w-20')}
+            className={clsx('oe-input', inputCls, 'w-20')}
             maxLength={3}
             aria-label={t('carbon.lc.currency', { defaultValue: 'Currency' })}
             value={form.currency}
@@ -396,7 +396,7 @@ export function CompanyReportPanel() {
       ) : (
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {current.company_name || templateLabel[current.template]} · {current.reporting_year}
             </h3>
             <div className="flex gap-2">
@@ -413,31 +413,31 @@ export function CompanyReportPanel() {
               ))}
             </div>
           </div>
-          <table className="mt-3 w-full text-sm">
+          <table className="oe-table-compact mt-3 w-full">
             <thead>
-              <tr className="text-left text-content-tertiary">
-                <th className="py-1">{t('carbon.lc.datapoint', { defaultValue: 'Data point' })}</th>
-                <th className="py-1 text-right">{t('carbon.lc.value', { defaultValue: 'Value' })}</th>
-                <th className="py-1">{t('carbon.lc.unit', { defaultValue: 'Unit' })}</th>
-                <th className="py-1">{t('carbon.lc.quality', { defaultValue: 'Data quality' })}</th>
-                <th className="py-1 text-right">{t('carbon.lc.sources', { defaultValue: 'Sources' })}</th>
+              <tr className="text-left">
+                <th>{t('carbon.lc.datapoint', { defaultValue: 'Data point' })}</th>
+                <th className="text-right">{t('carbon.lc.value', { defaultValue: 'Value' })}</th>
+                <th>{t('carbon.lc.unit', { defaultValue: 'Unit' })}</th>
+                <th>{t('carbon.lc.quality', { defaultValue: 'Data quality' })}</th>
+                <th className="text-right">{t('carbon.lc.sources', { defaultValue: 'Sources' })}</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(current.datapoints).map(([id, d]) => (
-                <tr key={id} className="border-t border-border-light">
-                  <td className="py-1">
+                <tr key={id}>
+                  <td>
                     <span className="font-mono text-xs text-content-tertiary">{id}</span>{' '}
                     {t(`carbon.lc.dp_${id.replace(/-/g, '_')}`, { defaultValue: d.label })}
                   </td>
-                  <td className="py-1 text-right tabular-nums">{d.value}</td>
-                  <td className="py-1">{d.unit}</td>
-                  <td className="py-1">
+                  <td className="text-right tabular-nums">{d.value}</td>
+                  <td>{d.unit}</td>
+                  <td>
                     <Badge size="sm" variant={qualityTone(d.data_quality) === 'neutral' ? 'blue' : qualityTone(d.data_quality) as 'success' | 'warning'}>
                       {qualityLabel[d.data_quality]}
                     </Badge>
                   </td>
-                  <td className="py-1 text-right tabular-nums">{d.source_count}</td>
+                  <td className="text-right tabular-nums">{d.source_count}</td>
                 </tr>
               ))}
             </tbody>

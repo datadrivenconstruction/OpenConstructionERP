@@ -240,7 +240,7 @@ export function EacBlockPalette({
       aria-label={t('eac.block_palette', { defaultValue: 'Block palette' })}
     >
       <header className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+        <span className="oe-overline">
           Blocks
         </span>
         <button
@@ -267,9 +267,9 @@ export function EacBlockPalette({
             placeholder={t('eac.block_palette.search', { defaultValue: 'Search…' })}
             data-testid="eac-palette-search"
             className={clsx(
-              'h-8 w-full rounded-md border border-border bg-surface-primary pl-7 pr-2 text-sm',
-              'placeholder:text-content-tertiary',
-              'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
+              'oe-input w-full pl-7 pr-2',
+              '',
+              '',
             )}
           />
         </label>
@@ -292,7 +292,7 @@ export function EacBlockPalette({
                 data-testid={`eac-palette-category-${category}`}
                 className="mt-2 first:mt-0"
               >
-                <h3 className="mb-1 px-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                <h3 className="oe-overline mb-1 px-1">
                   {CATEGORY_TITLES[category]}
                 </h3>
                 <div className="flex flex-col gap-1">

@@ -216,7 +216,7 @@ export function BulkRoomAddModal({
               type="text"
               value={prefix}
               onChange={(e) => setPrefix(e.target.value)}
-              className={inputCls}
+              className="oe-input-lg w-full"
               data-testid="bulk-add-prefix"
             />
           </WideModalField>
@@ -227,7 +227,7 @@ export function BulkRoomAddModal({
               type="text"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className={inputCls}
+              className="oe-input-lg w-full"
               data-testid="bulk-add-start"
             />
           </WideModalField>
@@ -240,7 +240,7 @@ export function BulkRoomAddModal({
               max={2000}
               value={count}
               onChange={(e) => setCount(e.target.value)}
-              className={inputCls}
+              className="oe-input-lg w-full"
               data-testid="bulk-add-count"
             />
           </WideModalField>
@@ -259,7 +259,7 @@ export function BulkRoomAddModal({
               rows={5}
               value={pasted}
               onChange={(e) => setPasted(e.target.value)}
-              className="w-full rounded-lg border border-border bg-surface-primary p-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-textarea w-full font-mono"
               data-testid="bulk-add-paste"
             />
           </WideModalField>
@@ -282,7 +282,7 @@ export function BulkRoomAddModal({
             min={1}
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
           />
         </WideModalField>
         <WideModalField
@@ -298,7 +298,7 @@ export function BulkRoomAddModal({
             inputMode="decimal"
             value={baseRate}
             onChange={(e) => setBaseRate(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
             data-testid="bulk-add-base-rate"
           />
         </WideModalField>

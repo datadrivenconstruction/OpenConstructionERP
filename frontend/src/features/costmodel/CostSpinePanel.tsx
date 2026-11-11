@@ -164,7 +164,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
     return (
       <Card>
         <div className="flex items-start gap-3 rounded-lg border border-semantic-error/30 bg-semantic-error-bg/30 p-3">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-error" />
+          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-error" />
           <div>
             <p className="text-sm font-medium text-content-primary">
               {t('costmodel.spine.load_failed', { defaultValue: 'Could not load the cost spine' })}
@@ -185,7 +185,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
             <Network size={16} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title">
               {t('costmodel.spine.title', { defaultValue: 'Cost Spine' })}
             </h3>
             <p className="text-xs text-content-tertiary">
@@ -205,7 +205,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
           role="alert"
           className="flex items-start gap-2 border-b border-semantic-warning/30 bg-semantic-warning/10 px-5 py-2.5"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
           <p className="text-xs text-semantic-warning">
             {t('costmodel.spine.mixed_currency', {
               defaultValue:
@@ -240,14 +240,14 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
 
           {/* Grid */}
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="oe-table w-full min-w-[720px]">
               <thead>
-                <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                  <th scope="col" className="px-4 py-2 font-medium">
+                <tr className="text-left">
+                  <th scope="col">
                     {t('costmodel.spine.col_line', { defaultValue: 'Cost line' })}
                   </th>
                   {columns.map((col) => (
-                    <th key={col.key} scope="col" className="px-4 py-2 text-right font-medium">
+                    <th key={col.key} scope="col" className="text-right">
                       {col.label}
                     </th>
                   ))}
@@ -259,10 +259,9 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
                   return (
                     <Fragment key={headerKey}>
                       {/* Account group header row with subtotals */}
-                      <tr className="bg-surface-secondary/50">
+                      <tr>
                         <th
                           scope="colgroup"
-                          className="px-4 py-1.5 text-left text-xs font-semibold text-content-primary"
                         >
                           {group.account ? (
                             <span className="inline-flex items-center gap-2">
@@ -304,9 +303,9 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
                               setDrawerLine(line);
                             }
                           }}
-                          className="cursor-pointer border-b border-border-light/60 last:border-0 hover:bg-surface-secondary/40 focus-visible:outline-none focus-visible:bg-surface-secondary/60"
+                          className="cursor-pointer last:border-0 focus-visible:outline-none focus-visible:bg-surface-secondary/60"
                         >
-                          <td className="px-4 py-2">
+                          <td>
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-2xs text-content-tertiary">
                                 {line.code}
@@ -338,8 +337,8 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
               {/* Project totals (suppressed when currencies are mixed) */}
               {totals && !data?.mixed_currency && (
                 <tfoot>
-                  <tr className="border-t-2 border-border bg-surface-secondary/60">
-                    <th scope="row" className="px-4 py-2 text-left text-xs font-semibold text-content-primary">
+                  <tr>
+                    <th scope="row">
                       {t('costmodel.spine.total', { defaultValue: 'Project total' })}
                     </th>
                     {columns.map((col) => (

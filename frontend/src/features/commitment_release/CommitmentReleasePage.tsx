@@ -52,7 +52,7 @@ export function FindingsList({ findings }: { findings: Finding[] }) {
   if (findings.length === 0) return null;
   return (
     <section className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg p-3" data-testid="findings">
-      <h3 className="text-sm font-semibold text-content-primary">
+      <h3 className="oe-card-title">
         {t('commitment.findings.title', { defaultValue: 'To look at' })}
       </h3>
       <ul className="mt-1 space-y-1 text-sm">

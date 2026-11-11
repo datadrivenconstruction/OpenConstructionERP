@@ -63,13 +63,13 @@ export function RecurringLinesPanel({ open, boqId, positions, readOnly, onClose,
 
   return (
     <aside
-      className="fixed right-0 top-0 z-40 h-full w-[420px] max-w-full bg-surface-primary border-l border-border-light shadow-2xl flex flex-col"
+      className="fixed right-0 top-0 z-drawer h-full w-[420px] max-w-full bg-surface-primary border-l border-border-light shadow-2xl flex flex-col"
       aria-label={t('boq.recurring_title', { defaultValue: 'Recurring lines' })}
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
         <div className="flex items-center gap-2">
           <Repeat size={16} className="text-oe-blue" />
-          <h2 className="text-sm font-semibold">{t('boq.recurring_title', { defaultValue: 'Recurring lines' })}</h2>
+          <h2 className="oe-card-title">{t('boq.recurring_title', { defaultValue: 'Recurring lines' })}</h2>
         </div>
         <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="p-1.5 rounded-lg hover:bg-surface-secondary">
           <X size={16} className="text-content-tertiary" />
@@ -100,7 +100,7 @@ export function RecurringLinesPanel({ open, boqId, positions, readOnly, onClose,
               <span className="flex items-center gap-1 text-xs text-content-secondary whitespace-nowrap">
                 {line.drifting && (
                   <AlertTriangle
-                    size={13}
+                    size={14}
                     className="text-semantic-warning"
                     aria-label={t('boq.recurring_drifting', { defaultValue: 'Priced differently' })}
                   />
@@ -125,7 +125,7 @@ export function RecurringLinesPanel({ open, boqId, positions, readOnly, onClose,
                       inputMode="decimal"
                       placeholder={t('boq.unit_rate', { defaultValue: 'Rate' })}
                       aria-label={t('boq.unit_rate', { defaultValue: 'Rate' })}
-                      className="w-32 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs tabular-nums"
+                      className="oe-input-sm w-32 tabular-nums"
                     />
                     <Button variant="primary" size="sm" onClick={() => apply(line)} disabled={!rate.trim() || saving} loading={saving}>
                       {t('boq.recurring_apply', { defaultValue: 'Apply to all' })}

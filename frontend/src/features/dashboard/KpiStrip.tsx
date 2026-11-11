@@ -14,7 +14,7 @@
  * Colours come from theme tokens / semantic palette classes only (no
  * hardcoded hex), so light and dark both render correctly. Pass a
  * Tailwind text-colour class in ``tone`` to emphasise a value (e.g.
- * ``text-rose-600`` for an overdue count).
+ * ``text-semantic-error`` for an overdue count).
  */
 import type { ReactNode } from 'react';
 import clsx from 'clsx';
@@ -39,7 +39,7 @@ export function KpiStrip({ stats, className }: { stats: KpiStat[]; className?: s
     >
       {stats.map((stat, i) => (
         <div key={`${stat.label}-${i}`} className="min-w-0 px-3 py-2.5">
-          <p className="truncate text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+          <p className="oe-overline truncate">
             {stat.label}
           </p>
           <p

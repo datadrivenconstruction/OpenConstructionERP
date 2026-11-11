@@ -134,7 +134,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
     return (
       <Card>
         <div className="flex items-start gap-3 rounded-lg border border-semantic-error/30 bg-semantic-error-bg/30 p-3">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-semantic-error" />
+          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-semantic-error" />
           <div>
             <p className="text-sm font-medium text-content-primary">
               {t('costmodel.exposure_load_failed', { defaultValue: 'Could not load contract exposure' })}
@@ -161,7 +161,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
             <Wallet size={16} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-section-title">
               {t('costmodel.exposure_title', { defaultValue: 'Contract Exposure' })}
             </h3>
             <p className="text-xs text-content-tertiary">
@@ -184,7 +184,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
           role="alert"
           className="flex items-start gap-2 border-b border-semantic-warning/30 bg-semantic-warning/10 px-5 py-2.5"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
           <p className="text-xs text-semantic-warning">
             {t('costmodel.exposure_mixed_currency', {
               defaultValue:
@@ -210,7 +210,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
           {/* Headline KPIs */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs">
-              <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+              <div className="oe-overline mb-1">
                 {t('costmodel.exposure_total_budgeted', { defaultValue: 'Budgeted' })}
               </div>
               <div className="text-xl font-semibold tabular-nums text-content-primary">
@@ -218,7 +218,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
               </div>
             </div>
             <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs">
-              <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+              <div className="oe-overline mb-1">
                 {t('costmodel.exposure_total_committed', { defaultValue: 'Committed' })}
               </div>
               <div className="text-xl font-semibold tabular-nums text-content-primary">
@@ -234,7 +234,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
               )}
             </div>
             <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs">
-              <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+              <div className="oe-overline mb-1">
                 {t('costmodel.exposure_remaining_to_commit', { defaultValue: 'Remaining to commit' })}
               </div>
               <div
@@ -271,7 +271,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
               role="alert"
               className="flex items-start gap-2 rounded-xl border border-semantic-error/30 bg-semantic-error-bg/40 p-3"
             >
-              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-error" />
+              <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-error" />
               <p className="text-xs text-content-secondary">
                 {t('costmodel.exposure_overcommitted_hint', {
                   defaultValue:
@@ -285,45 +285,45 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
 
           {/* Per-group breakdown */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b-2 border-border text-xs uppercase tracking-wider text-content-secondary">
-                  <th scope="col" className="py-3 pr-4 text-left font-semibold">
+                <tr>
+                  <th scope="col" className="pr-4">
                     {t('costmodel.exposure_col_group', { defaultValue: 'Cost group' })}
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                  <th scope="col" className="text-right">
                     {t('costmodel.exposure_col_budgeted', { defaultValue: 'Budgeted' })}
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                  <th scope="col" className="text-right">
                     {t('costmodel.exposure_col_committed', { defaultValue: 'Committed' })}
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">
+                  <th scope="col" className="text-right">
                     {t('costmodel.exposure_col_remaining', { defaultValue: 'Remaining' })}
                   </th>
-                  <th scope="col" className="px-2 py-3 text-center font-semibold" style={{ minWidth: 96 }}>
+                  <th scope="col" className="text-center" style={{ minWidth: 96 }}>
                     {t('costmodel.exposure_col_ratio', { defaultValue: 'Committed %' })}
                   </th>
-                  <th scope="col" className="py-3 pl-4 text-right font-semibold">
+                  <th scope="col" className="pl-4 text-right">
                     {t('costmodel.exposure_col_status', { defaultValue: 'Status' })}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {groups.map((g) => {
                   const pct = ratioToPct(g.commitment_ratio);
                   const remNeg = Number(g.remaining_to_commit) < 0;
                   return (
-                    <tr key={g.group} className="transition-colors hover:bg-surface-secondary/50">
-                      <td className="py-3.5 pr-4 font-medium text-content-primary">
+                    <tr key={g.group}>
+                      <td className="pr-4 font-medium">
                         <span>{labelFor(g.group)}</span>
                         {g.group && categoryLabels[g.group] && g.group !== categoryLabels[g.group] && (
                           <span className="block text-2xs font-normal text-content-tertiary">{g.group}</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                      <td className="text-right tabular-nums text-content-secondary">
                         {fmtCurrency(g.budgeted, resolvedCurrency)}
                       </td>
-                      <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                      <td className="text-right tabular-nums text-content-secondary">
                         {fmtCurrency(g.committed, resolvedCurrency)}
                       </td>
                       <td
@@ -331,7 +331,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                       >
                         {fmtCurrency(g.remaining_to_commit, resolvedCurrency)}
                       </td>
-                      <td className="py-3.5 px-2">
+                      <td>
                         <div className="flex flex-col items-center gap-0.5">
                           <span className={`text-2xs font-semibold tabular-nums ${ratioColor(pct)}`}>
                             {pct == null
@@ -346,20 +346,20 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 pl-4 text-right">{renderStatus(g, pct)}</td>
+                      <td className="pl-4 text-right">{renderStatus(g, pct)}</td>
                     </tr>
                   );
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-border font-semibold">
-                  <td className="py-3.5 pr-4 text-content-primary">
+                <tr>
+                  <td className="pr-4">
                     {t('costmodel.exposure_total', { defaultValue: 'Project total' })}
                   </td>
-                  <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     {fmtCurrency(data?.total_budgeted, resolvedCurrency)}
                   </td>
-                  <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     {fmtCurrency(data?.total_committed, resolvedCurrency)}
                   </td>
                   <td
@@ -367,12 +367,12 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                   >
                     {fmtCurrency(data?.total_remaining_to_commit, resolvedCurrency)}
                   </td>
-                  <td className="py-3.5 px-2 text-center">
+                  <td className="text-center">
                     <span className={`text-2xs font-semibold tabular-nums ${ratioColor(totalPct)}`}>
                       {totalPct == null ? '-' : fmtPercent(totalPct, 0)}
                     </span>
                   </td>
-                  <td className="py-3.5 pl-4" />
+                  <td className="pl-4" />
                 </tr>
               </tfoot>
             </table>

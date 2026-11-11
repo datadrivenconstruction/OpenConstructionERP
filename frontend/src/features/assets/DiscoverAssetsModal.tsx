@@ -33,9 +33,9 @@ interface DiscoverAssetsModalProps {
 }
 
 function scoreTone(score: number): string {
-  if (score >= 70) return 'bg-semantic-success/15 text-emerald-300 border-emerald-500/30';
-  if (score >= 50) return 'bg-semantic-info/15 text-sky-300 border-sky-500/30';
-  return 'bg-semantic-warning/15 text-amber-300 border-amber-500/30';
+  if (score >= 70) return 'bg-semantic-success/15 text-semantic-success border-semantic-success/30';
+  if (score >= 50) return 'bg-semantic-info/15 text-semantic-info border-semantic-info/30';
+  return 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30';
 }
 
 export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: DiscoverAssetsModalProps) {
@@ -127,7 +127,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div
@@ -140,7 +140,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
       >
         <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-oe-blue" />
+            <Sparkles size={20} className="text-oe-blue" />
             <h2 id="discover-assets-title" className="font-medium text-content-primary">
               {t('assets.discover.title', { defaultValue: 'Discover assets from BIM' })}
             </h2>
@@ -151,7 +151,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
             className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -180,7 +180,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
               {t('assets.discover.scanning', { defaultValue: 'Scanning BIM models…' })}
             </div>
           ) : query.isError ? (
-            <p className="p-6 text-sm text-rose-400">
+            <p className="p-6 text-sm text-semantic-error">
               {t('assets.discover.error', {
                 defaultValue: 'Could not scan for assets. The Asset Operations module may be off.',
               })}
@@ -193,10 +193,10 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
               })}
             </p>
           ) : (
-            <table className="w-full text-sm" data-testid="discover-table">
-              <thead className="sticky top-0 z-10 bg-surface-primary text-xs uppercase tracking-wider text-content-tertiary">
+            <table className="oe-table w-full" data-testid="discover-table">
+              <thead className="sticky top-0 z-10 bg-surface-primary">
                 <tr>
-                  <th className="w-10 px-3 py-2 text-left">
+                  <th className="w-10">
                     <input
                       type="checkbox"
                       checked={allSelected}
@@ -205,9 +205,9 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                       data-testid="discover-select-all"
                     />
                   </th>
-                  <th className="px-3 py-2 text-left">{t('assets.col.element', { defaultValue: 'Element' })}</th>
-                  <th className="px-3 py-2 text-left">{t('assets.discover.col_why', { defaultValue: 'Why' })}</th>
-                  <th className="px-3 py-2 text-right">{t('assets.discover.col_score', { defaultValue: 'Score' })}</th>
+                  <th>{t('assets.col.element', { defaultValue: 'Element' })}</th>
+                  <th>{t('assets.discover.col_why', { defaultValue: 'Why' })}</th>
+                  <th className="text-right">{t('assets.discover.col_score', { defaultValue: 'Score' })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -218,7 +218,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                     onClick={() => toggle(c.id)}
                     data-testid={`discover-row-${c.stable_id}`}
                   >
-                    <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={selected.has(c.id)}
@@ -226,7 +226,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                         aria-label={c.name || c.stable_id}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <div className="font-medium text-content-primary">{c.name || c.element_type}</div>
                       <div className="text-xs text-content-tertiary">
                         {c.stable_id}
@@ -240,7 +240,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <div className="flex flex-wrap gap-1">
                         {c.reasons.slice(0, 3).map((r) => (
                           <span
@@ -252,7 +252,7 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
                         ))}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <span className={`inline-block rounded-md border px-2 py-0.5 text-xs ${scoreTone(c.score)}`}>
                         {c.score}
                       </span>

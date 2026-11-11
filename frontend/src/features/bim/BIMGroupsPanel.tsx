@@ -305,7 +305,7 @@ export default function BIMGroupsPanel({
       >
         <div className="flex items-center gap-1.5">
           <Bookmark size={12} className="text-oe-blue" />
-          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <span className="oe-overline">
             {t('bim.saved_groups', { defaultValue: 'Saved groups' })}
           </span>
           <span className="text-2xs text-content-quaternary tabular-nums">
@@ -313,9 +313,9 @@ export default function BIMGroupsPanel({
           </span>
         </div>
         {panelExpanded ? (
-          <ChevronDown size={11} className="text-content-tertiary" />
+          <ChevronDown size={12} className="text-content-tertiary" />
         ) : (
-          <ChevronRight size={11} className="text-content-tertiary" />
+          <ChevronRight size={12} className="text-content-tertiary" />
         )}
       </button>
 
@@ -367,7 +367,7 @@ export default function BIMGroupsPanel({
                         if (e.key === 'Enter') handleConfirmRename(group.id);
                         if (e.key === 'Escape') setRenamingGroupId(null);
                       }}
-                      className="flex-1 min-w-0 text-2xs px-1 py-0.5 rounded border border-oe-blue bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                      className="oe-input-sm flex-1 min-w-0"
                     />
                   ) : (
                     <button
@@ -394,7 +394,7 @@ export default function BIMGroupsPanel({
                     className="shrink-0 p-0.5 rounded text-content-quaternary hover:text-content-secondary opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{ opacity: contextMenu?.groupId === group.id ? 1 : undefined }}
                   >
-                    <MoreVertical size={11} />
+                    <MoreVertical size={12} />
                   </button>
                 </div>
 
@@ -526,7 +526,7 @@ export default function BIMGroupsPanel({
       {contextMenu && (
         <div
           ref={contextMenuRef}
-          className="fixed z-50 min-w-[140px] rounded-md border border-border-light bg-surface-primary shadow-lg py-1"
+          className="fixed z-dropdown min-w-[140px] rounded-md border border-border-light bg-surface-primary shadow-lg py-1"
           style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           {(() => {
@@ -539,7 +539,7 @@ export default function BIMGroupsPanel({
                   onClick={() => handleStartRename(group)}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-content-primary hover:bg-surface-secondary"
                 >
-                  <Pencil size={11} />
+                  <Pencil size={12} />
                   {t('bim.groups_rename', { defaultValue: 'Rename' })}
                 </button>
                 <button
@@ -555,7 +555,7 @@ export default function BIMGroupsPanel({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-content-primary hover:bg-surface-secondary"
                 >
-                  <Palette size={11} />
+                  <Palette size={12} />
                   {t('bim.groups_change_color', { defaultValue: 'Change color' })}
                 </button>
                 <button
@@ -563,7 +563,7 @@ export default function BIMGroupsPanel({
                   onClick={() => handleExportCSV(group)}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-content-primary hover:bg-surface-secondary"
                 >
-                  <Download size={11} />
+                  <Download size={12} />
                   {t('bim.groups_export_csv', { defaultValue: 'Export CSV' })}
                 </button>
                 {onUseAsQuantitySource && (
@@ -576,7 +576,7 @@ export default function BIMGroupsPanel({
                     }}
                     className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-content-primary hover:bg-surface-secondary"
                   >
-                    <Calculator size={11} />
+                    <Calculator size={12} />
                     {t('bim.groups_use_as_quantity', { defaultValue: 'Quantity source for a BOQ position' })}
                   </button>
                 )}
@@ -587,9 +587,9 @@ export default function BIMGroupsPanel({
                     setContextMenu(null);
                     onDeleteGroup(group);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-rose-600 hover:bg-rose-50"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-semantic-error hover:bg-semantic-error-bg"
                 >
-                  <Trash2 size={11} />
+                  <Trash2 size={12} />
                   {t('bim.groups_delete', { defaultValue: 'Delete' })}
                 </button>
               </>

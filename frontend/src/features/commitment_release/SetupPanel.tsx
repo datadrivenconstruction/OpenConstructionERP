@@ -98,7 +98,7 @@ export function MatrixSettings({ projectId, matrix, can, labels, onSaved }: Matr
   return (
     <section className="space-y-4 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="matrix-settings">
       <div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('commitment.schedule.title', { defaultValue: 'Authority schedule' })}
         </h3>
         <p className="text-sm text-content-secondary">
@@ -343,7 +343,7 @@ export function ApproverSetup({ projectId, matrix, can, labels, personName, onSa
   return (
     <section className="space-y-4 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="approver-setup">
       <div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('commitment.setup.approvers_title', { defaultValue: 'Who approves at each tier' })}
         </h3>
         <p className="text-sm text-content-secondary">
@@ -592,7 +592,7 @@ export function TierCalculator({ matrix, labels }: { matrix: CommitmentMatrix; l
   return (
     <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="tier-calculator">
       <div>
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('commitment.schedule.calculator', { defaultValue: 'Who approves?' })}
         </h3>
         <p className="text-sm text-content-secondary">

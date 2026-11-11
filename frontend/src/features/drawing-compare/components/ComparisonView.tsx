@@ -86,7 +86,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
     <div className="flex flex-col gap-3" data-testid="drawing-compare-view">
       <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border bg-surface-primary p-3">
         <div className="min-w-0 space-y-0.5 text-sm">
-          <h2 className="truncate text-base font-semibold">{comparison.name}</h2>
+          <h2 className="oe-section-title truncate">{comparison.name}</h2>
           <p className="truncate">
             <span className="font-medium text-semantic-error">{t('drawing_compare.old_revision', { defaultValue: 'Older revision' })}:</span>{' '}
             {side(comparison.old_label, comparison.old_revision, comparison.old_page)}
@@ -108,7 +108,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2 text-xs" title={failing.map((r) => r.message).join('\n')}>
-            <span className={clsx('h-2.5 w-2.5 rounded-full', LIGHT[status] ?? 'bg-slate-300')} />
+            <span className={clsx('h-2.5 w-2.5 rounded-full', LIGHT[status] ?? 'bg-border')} />
             {validation.isLoading
               ? t('drawing_compare.validating', { defaultValue: 'Checking...' })
               : failing.length === 0
@@ -119,7 +119,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
             <Button
               size="sm"
               variant="secondary"
-              icon={<Download size={13} />}
+              icon={<Download size={14} />}
               onClick={() =>
                 drawingCompareApi
                   .downloadReport(comparison.id, `revision_compare_${comparison.id.slice(0, 8)}.pdf`)
@@ -129,7 +129,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
               {t('drawing_compare.export_report', { defaultValue: 'Change report (PDF)' })}
             </Button>
             {canDelete && (
-              <Button size="sm" variant="ghost" icon={<Trash2 size={13} />} onClick={() => setConfirmDelete(true)}>
+              <Button size="sm" variant="ghost" icon={<Trash2 size={14} />} onClick={() => setConfirmDelete(true)}>
                 {t('common.delete', { defaultValue: 'Delete' })}
               </Button>
             )}
@@ -222,10 +222,10 @@ function DwgLayerTable({ comparison }: { comparison: Comparison }) {
       {rows.length === 0 ? (
         <p className="text-content-secondary">{t('drawing_compare.no_changes_title', { defaultValue: 'No changes found' })}</p>
       ) : (
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
-            <tr className="text-left text-content-tertiary">
-              <th className="py-1">{t('drawing_compare.col_layer', { defaultValue: 'Layer' })}</th>
+            <tr className="text-left">
+              <th>{t('drawing_compare.col_layer', { defaultValue: 'Layer' })}</th>
               <th>{t('drawing_compare.col_type', { defaultValue: 'Entity type' })}</th>
               <th className="text-right">{t('drawing_compare.kind_added', { defaultValue: 'Added' })}</th>
               <th className="text-right">{t('drawing_compare.kind_removed', { defaultValue: 'Removed' })}</th>
@@ -235,7 +235,7 @@ function DwgLayerTable({ comparison }: { comparison: Comparison }) {
           <tbody>
             {rows.map((r) => (
               <tr key={`${r.layer}-${r.entity_type}`} className="border-t border-border">
-                <td className="py-1 font-mono">{r.layer}</td>
+                <td className="font-mono">{r.layer}</td>
                 <td>{r.entity_type}</td>
                 <td className="text-right text-blue-600">{r.added}</td>
                 <td className="text-right text-semantic-error">{r.removed}</td>

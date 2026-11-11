@@ -67,7 +67,7 @@ export function ExportsTab({
   return (
     <div className="space-y-4" data-testid="accounting-sync-exports">
       <Card padding="md">
-        <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('accountingSync.exports.period', { defaultValue: 'Period' })}</h3>
+        <h3 className="oe-card-title mb-3">{t('accountingSync.exports.period', { defaultValue: 'Period' })}</h3>
         <PeriodPicker range={range} onChange={onRange} />
         <p className="mt-2 text-xs text-content-tertiary">
           {t('accountingSync.exports.period_hint', { defaultValue: 'Leave a date empty to start or end at the first or last document.' })}
@@ -75,7 +75,7 @@ export function ExportsTab({
       </Card>
 
       <Card padding="md">
-        <h3 className="mb-3 text-sm font-semibold text-content-primary">{t('accountingSync.exports.files', { defaultValue: 'Files' })}</h3>
+        <h3 className="oe-card-title mb-3">{t('accountingSync.exports.files', { defaultValue: 'Files' })}</h3>
         {catalogQ.isLoading ? (
           <p className="text-sm text-content-tertiary">{t('accountingSync.loading', { defaultValue: 'Loading...' })}</p>
         ) : kinds.length === 0 ? (

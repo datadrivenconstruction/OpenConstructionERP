@@ -261,7 +261,7 @@ export function ApprovalTimeline({
             placeholder={t('changeorders.approval_comment_placeholder', {
               defaultValue: 'Add a note for the audit trail…',
             })}
-            className="mt-1 w-full rounded-lg border border-border bg-surface-primary p-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-textarea mt-1 w-full"
           />
           <div className="mt-3 flex justify-end gap-2">
             <Button

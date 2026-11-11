@@ -148,7 +148,7 @@ export function ApprovalInstancesList({
           <select
             value={kindFilter}
             onChange={(e) => setKindFilter(e.target.value)}
-            className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+            className="oe-select cursor-pointer"
             aria-label={t('approvalRoutes.filter_kind', {
               defaultValue: 'Filter by kind',
             })}
@@ -166,7 +166,7 @@ export function ApprovalInstancesList({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as InstanceStatus | '')}
-          className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+          className="oe-select cursor-pointer"
           aria-label={t('approvalRoutes.filter_status', {
             defaultValue: 'Filter by status',
           })}
@@ -184,7 +184,7 @@ export function ApprovalInstancesList({
         </select>
         <div className="relative flex-1 min-w-[180px] max-w-xs ml-auto">
           <Search
-            size={13}
+            size={14}
             className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
           />
           <input
@@ -196,7 +196,7 @@ export function ApprovalInstancesList({
             aria-label={t('approvalRoutes.search_instances_placeholder', {
               defaultValue: 'Search by route or kind…',
             })}
-            className="h-8 w-full pl-7 rounded-md border border-border bg-surface-primary text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-input w-full pl-7"
           />
         </div>
         <button
@@ -208,7 +208,7 @@ export function ApprovalInstancesList({
           aria-label={t('common.refresh', { defaultValue: 'Refresh' })}
         >
           <RefreshCw
-            size={13}
+            size={14}
             className={isFetching ? 'animate-spin' : undefined}
           />
         </button>
@@ -233,28 +233,28 @@ export function ApprovalInstancesList({
         </div>
       ) : (
         <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[720px]">
+        <table className="oe-table w-full min-w-[720px]">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/30">
-              <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <tr>
+              <th>
                 {t('approvalRoutes.col_route', { defaultValue: 'Route' })}
               </th>
-              <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <th>
                 {t('approvalRoutes.col_target', { defaultValue: 'Target' })}
               </th>
-              <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <th>
                 {t('approvalRoutes.col_status', { defaultValue: 'Status' })}
               </th>
-              <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <th>
                 {t('approvalRoutes.col_step', { defaultValue: 'Step' })}
               </th>
-              <th className="px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <th>
                 {t('approvalRoutes.col_started', { defaultValue: 'Started' })}
               </th>
-              <th className="px-3 py-2 w-8" aria-hidden="true" />
+              <th className="w-8" aria-hidden="true" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {filtered.map((i) => (
               <InstanceRow
                 key={i.id}

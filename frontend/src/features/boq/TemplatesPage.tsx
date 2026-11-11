@@ -348,7 +348,7 @@ export function TemplatesPage() {
                   {ICON_MAP[selected.icon] ?? <Building2 size={22} strokeWidth={1.5} />}
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-content-primary">{tplName(selected)}</h2>
+                  <h2 className="oe-section-title">{tplName(selected)}</h2>
                   <p className="text-sm text-content-secondary">{tplDescription(selected)}</p>
                 </div>
               </div>
@@ -358,13 +358,13 @@ export function TemplatesPage() {
             <div className="px-6 py-6 space-y-5">
               {/* Project selector */}
               <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                <label className="oe-label">
                   {t('boq.project', { defaultValue: 'Project' })}
                 </label>
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-elevated px-3.5 py-2.5 text-sm text-content-primary outline-none transition-colors focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20 appearance-none cursor-pointer"
+                  className="oe-select-lg w-full cursor-pointer"
                 >
                   <option value="">
                     {t('boq.select_project', { defaultValue: 'Select a project...' })}
@@ -381,7 +381,7 @@ export function TemplatesPage() {
               <div>
                 {/* Editable metric input (sent as area_m2) \u2014 label stays
                     canonical m\u00B2 so the user types the value that is stored. */}
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                <label className="oe-label">
                   {t('boq.area_m2', { defaultValue: 'Area (m\u00B2)' })}
                 </label>
                 <input
@@ -389,13 +389,13 @@ export function TemplatesPage() {
                   inputMode="decimal"
                   value={area}
                   onChange={(e) => handleAreaChange(e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-elevated px-3.5 py-2.5 text-sm text-content-primary outline-none transition-colors focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20 tabular-nums"
+                  className="oe-input-lg w-full tabular-nums"
                 />
               </div>
 
               {/* BOQ Name */}
               <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                <label className="oe-label">
                   {t('boq.boq_name', { defaultValue: 'BOQ Name' })}
                 </label>
                 <input
@@ -403,14 +403,14 @@ export function TemplatesPage() {
                   value={boqName}
                   onChange={(e) => setBoqName(e.target.value)}
                   placeholder={generatedName}
-                  className="w-full rounded-lg border border-border-light bg-surface-elevated px-3.5 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary outline-none transition-colors focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+                  className="oe-input-lg w-full"
                 />
               </div>
 
               {/* Preview stats */}
               <div className="flex items-center gap-6 rounded-xl bg-surface-secondary px-5 py-4">
                 <div>
-                  <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                  <p className="oe-overline">
                     {t('boq.preview', { defaultValue: 'Preview' })}
                   </p>
                   <p className="mt-0.5 text-sm text-content-primary">
@@ -420,7 +420,7 @@ export function TemplatesPage() {
                 </div>
                 <div className="h-8 w-px bg-border-light" />
                 <div>
-                  <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                  <p className="oe-overline">
                     {t('boq.estimated_total', { defaultValue: 'Estimated total' })}
                   </p>
                   <p className="mt-0.5 text-lg font-semibold text-content-primary tabular-nums">

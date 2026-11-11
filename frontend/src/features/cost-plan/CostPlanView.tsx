@@ -214,17 +214,17 @@ function PlanTable({ plan, showEmpty, t }: { plan: Nrm1CostPlan; showEmpty: bool
   const buildingRange = firstBuilding && lastBuilding ? `${firstBuilding.code}-${lastBuilding.code}` : undefined;
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full text-sm" data-testid="cost-plan-table">
-        <thead className="bg-surface-secondary text-xs text-content-secondary">
+      <table className="oe-table w-full" data-testid="cost-plan-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-start font-medium">{t('cost_plan.col_code', { defaultValue: 'Code' })}</th>
-            <th className="px-3 py-2 text-start font-medium">{t('cost_plan.col_element', { defaultValue: 'Element' })}</th>
-            <th className="px-3 py-2 text-end font-medium">{t('cost_plan.col_positions', { defaultValue: 'Positions' })}</th>
-            <th className="px-3 py-2 text-end font-medium">{t('cost_plan.col_total', { defaultValue: 'Total' })}</th>
-            <th className="px-3 py-2 text-end font-medium">
+            <th>{t('cost_plan.col_code', { defaultValue: 'Code' })}</th>
+            <th>{t('cost_plan.col_element', { defaultValue: 'Element' })}</th>
+            <th className="text-end">{t('cost_plan.col_positions', { defaultValue: 'Positions' })}</th>
+            <th className="text-end">{t('cost_plan.col_total', { defaultValue: 'Total' })}</th>
+            <th className="text-end">
               {t('cost_plan.col_per_m2', { defaultValue: 'Cost per m2 GIFA' })}
             </th>
-            <th className="px-3 py-2 text-end font-medium">{t('cost_plan.col_share', { defaultValue: '% of total' })}</th>
+            <th className="text-end">{t('cost_plan.col_share', { defaultValue: '% of total' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -341,32 +341,32 @@ function UnallocatedList({ plan, t }: { plan: Nrm1CostPlan; t: TFn }) {
           n: block.position_count,
         })}
       </summary>
-      <table className="mt-2 w-full text-xs" data-testid="cost-plan-unallocated-list">
-        <thead className="text-content-secondary">
+      <table className="oe-table-compact mt-2 w-full" data-testid="cost-plan-unallocated-list">
+        <thead>
           <tr>
-            <th className="px-2 py-1 text-start font-medium">{t('cost_plan.col_ordinal', { defaultValue: 'Ordinal' })}</th>
-            <th className="px-2 py-1 text-start font-medium">
+            <th>{t('cost_plan.col_ordinal', { defaultValue: 'Ordinal' })}</th>
+            <th>
               {t('cost_plan.col_description', { defaultValue: 'Description' })}
             </th>
-            <th className="px-2 py-1 text-start font-medium">
+            <th>
               {t('cost_plan.col_written_code', { defaultValue: 'Code as written' })}
             </th>
-            <th className="px-2 py-1 text-start font-medium">{t('cost_plan.col_reason', { defaultValue: 'Reason' })}</th>
-            <th className="px-2 py-1 text-end font-medium">{t('cost_plan.col_total', { defaultValue: 'Total' })}</th>
+            <th>{t('cost_plan.col_reason', { defaultValue: 'Reason' })}</th>
+            <th className="text-end">{t('cost_plan.col_total', { defaultValue: 'Total' })}</th>
           </tr>
         </thead>
         <tbody>
           {block.positions.map((position) => (
-            <tr key={position.id} className="border-t border-semantic-warning/30">
-              <td className="px-2 py-1 font-mono">{position.ordinal}</td>
-              <td className="px-2 py-1">{position.description}</td>
-              <td className="px-2 py-1 font-mono">{position.code ?? ''}</td>
-              <td className="px-2 py-1">
+            <tr key={position.id}>
+              <td className="font-mono">{position.ordinal}</td>
+              <td>{position.description}</td>
+              <td className="font-mono">{position.code ?? ''}</td>
+              <td>
                 {t(`cost_plan.reason_${position.reason}`, {
                   defaultValue: REASON_DEFAULTS[position.reason] ?? position.reason,
                 })}
               </td>
-              <td className="px-2 py-1 text-end tabular-nums">{money(position.total, plan.currency)}</td>
+              <td className="text-end tabular-nums">{money(position.total, plan.currency)}</td>
             </tr>
           ))}
         </tbody>
@@ -479,7 +479,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
     <div className="space-y-4" data-testid="cost-plan-view">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="cost-plan-gifa" className="text-xs font-medium text-content-secondary">
+          <label htmlFor="cost-plan-gifa" className="oe-label">
             {t('cost_plan.gifa_label', { defaultValue: 'GIFA (m2)' })}
           </label>
           <div className="flex items-center gap-2">
@@ -497,7 +497,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
                   : t('cost_plan.gifa_placeholder', { defaultValue: 'e.g. 2400' })
               }
               aria-invalid={gifaError !== null}
-              className="h-9 w-36 rounded-lg border border-border bg-surface-primary px-3 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input w-36 tabular-nums"
             />
             <Button variant="secondary" size="sm" onClick={applyGifa} disabled={!gifaDraft.trim()}>
               {t('cost_plan.gifa_apply', { defaultValue: 'Apply' })}

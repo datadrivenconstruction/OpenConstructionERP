@@ -292,7 +292,7 @@ export function ChainPanel({ projectId, currency, canEdit }: ChainPanelProps) {
     <div className="space-y-4" data-testid="chain-panel">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('cost_control.chain.title', { defaultValue: 'From the bill to the invoice' })}
           </h2>
           <p className="text-xs text-content-tertiary">

@@ -135,7 +135,7 @@ export function CompactProjectCard({
       style={style}
       onClick={() => navigate(`/projects/${id}`)}
     >
-      <div className="p-3.5">
+      <div className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(region)}`}
@@ -149,7 +149,7 @@ export function CompactProjectCard({
           )}
         </div>
 
-        <h3 className="mt-2.5 text-sm font-semibold tracking-tight text-content-primary truncate">
+        <h3 className="oe-card-title mt-2.5 truncate">
           {name}
         </h3>
         {description && (
@@ -184,14 +184,14 @@ export function CompactProjectCard({
       {hasValue && (
         <div className="px-3.5 pb-2">
           <div className="rounded-lg border border-border-light bg-gradient-to-br from-oe-blue-subtle/60 via-surface-elevated to-surface-elevated px-3 py-1.5">
-            <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline">
               {t('projects.card_total_value', { defaultValue: 'Total value' })}
             </div>
             <div className="mt-0.5 flex items-baseline gap-1.5">
               <span className="text-base font-semibold tabular-nums text-content-primary">
                 {formatCompactValue(numericValue)}
               </span>
-              <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <span className="oe-overline">
                 {currency}
               </span>
             </div>

@@ -29,7 +29,7 @@ export function BaseCatalogError({ error, onRetry }: BaseCatalogErrorProps) {
         <AlertTriangle size={20} className="text-semantic-error" />
       </div>
       <div className="max-w-md">
-        <h3 className="text-base font-semibold text-content-primary">
+        <h3 className="oe-section-title">
           {t('costs.base_catalog_failed', { defaultValue: 'Cost bases could not be loaded' })}
         </h3>
         {reason && <p className="mt-1 text-sm text-content-secondary">{reason}</p>}

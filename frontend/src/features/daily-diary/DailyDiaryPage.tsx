@@ -200,7 +200,7 @@ function signerRoleLabel(t: TFn, role: SignerRole): string {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -675,7 +675,7 @@ export function DailyDiaryPage() {
         onClick={() => openCreate()}
         disabled={!projectId}
         aria-label={t('daily_diary.new_diary', { defaultValue: 'New Diary' })}
-        className="fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-oe-blue text-white shadow-lg ring-1 ring-black/5 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 sm:hidden"
+        className="fixed bottom-5 right-5 z-dropdown inline-flex h-14 w-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-oe-blue text-white shadow-lg ring-1 ring-black/5 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 sm:hidden"
       >
         <Plus size={22} />
       </button>
@@ -826,7 +826,7 @@ function DiariesCalendar({
         >
           <ChevronLeft size={16} />
         </button>
-        <h3 className="text-base font-semibold" aria-live="polite">
+        <h3 className="oe-section-title" aria-live="polite">
           {fmtMonth(year, month, locale)}
         </h3>
         <div className="flex items-center gap-1">
@@ -867,7 +867,7 @@ function DiariesCalendar({
             {weekdays.map((w) => (
               <div
                 key={w}
-                className="px-1 py-1 text-center text-2xs font-medium uppercase tracking-wide text-content-tertiary"
+                className="oe-overline px-1 py-1 text-center"
               >
                 {t(`daily_diary.weekday_${w.toLowerCase()}`, { defaultValue: w })}
               </div>
@@ -1272,7 +1272,7 @@ function TodayTab({
       {/* Header bar with sealed status */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold">
+          <h2 className="oe-section-title">
             <DateDisplay value={diary.diary_date} />
           </h2>
           <Badge variant={STATUS_VARIANT[diary.status]} dot>
@@ -1434,7 +1434,7 @@ function TodayTab({
       {sealed && latestSignature && (
         <Card padding="md" className="border-semantic-success/30 bg-semantic-success-bg/30">
           <div className="flex items-start gap-3">
-            <Lock size={18} className="text-semantic-success mt-0.5" />
+            <Lock size={20} className="text-semantic-success mt-0.5" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">
                 {t('daily_diary.signed_at', { defaultValue: 'Signed' })}{' '}
@@ -1476,7 +1476,7 @@ function TodayTab({
                 })}
                 data-testid="daily-diary-workforce-payroll"
               >
-                <Wallet size={11} />
+                <Wallet size={12} />
                 {t('daily_diary.view_in_payroll', { defaultValue: 'Payroll' })}
               </button>
             </div>
@@ -1703,7 +1703,7 @@ function EditDiaryModal({
             min={0}
             value={labour}
             onChange={(e) => setLabour(Number(e.target.value) || 0)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.equipment', { defaultValue: 'Equipment' })}>
@@ -1712,7 +1712,7 @@ function EditDiaryModal({
             min={0}
             value={equipment}
             onChange={(e) => setEquipment(Number(e.target.value) || 0)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('common.notes')} span={2}>
@@ -1720,7 +1720,7 @@ function EditDiaryModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
         </WideModalField>
       </WideModalSection>
@@ -1804,7 +1804,7 @@ function WeatherCard({
             <Button
               variant="ghost"
               size="sm"
-              icon={<CloudDownload size={13} />}
+              icon={<CloudDownload size={14} />}
               onClick={onFetch}
               loading={fetching}
               data-testid="daily-diary-fetch-weather"
@@ -1818,7 +1818,7 @@ function WeatherCard({
             <Button
               variant="ghost"
               size="sm"
-              icon={<Plus size={13} />}
+              icon={<Plus size={14} />}
               onClick={onAddManual}
               data-testid="daily-diary-add-weather"
               title={t('daily_diary.add_weather_hint', {
@@ -2107,7 +2107,7 @@ function EntriesTimeline({
                 // we never persist an inspection id under an incident entry.
                 setSourceRef('');
               }}
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               {(
                 [
@@ -2131,7 +2131,7 @@ function EntriesTimeline({
               placeholder={t('daily_diary.entry_title', { defaultValue: 'Title' })}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={clsx(inputCls, 'sm:col-span-2')}
+              className={clsx('oe-input', inputCls, 'sm:col-span-2')}
             />
             <Button
               variant="primary"
@@ -2149,11 +2149,11 @@ function EntriesTimeline({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
           {sourceModule && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {sourceModule === 'safety'
                   ? t('daily_diary.link_incident', { defaultValue: 'Link a safety incident (optional)' })
                   : t('daily_diary.link_inspection', { defaultValue: 'Link a quality inspection (optional)' })}
@@ -2161,7 +2161,7 @@ function EntriesTimeline({
               <select
                 value={sourceRef}
                 onChange={(e) => setSourceRef(e.target.value)}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
                 data-testid="daily-diary-entry-source"
               >
                 <option value="">
@@ -2201,7 +2201,7 @@ function EntriesTimeline({
           {entries.map((e) => (
             <li
               key={e.id}
-              className="rounded-md border border-border-light bg-surface-secondary/40 p-2.5 text-sm"
+              className="rounded-md border border-border-light bg-surface-secondary/40 p-3 text-sm"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -2224,7 +2224,7 @@ function EntriesTimeline({
                       className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10"
                       data-testid="daily-diary-entry-view-source"
                     >
-                      <ExternalLink size={11} />
+                      <ExternalLink size={12} />
                       {e.source_module === 'inspections'
                         ? t('daily_diary.view_inspection', { defaultValue: 'View inspection' })
                         : e.source_module === 'safety' || e.source_module === 'hse'
@@ -2331,7 +2331,7 @@ function PhotoGrid({
           <Button
             variant="ghost"
             size="sm"
-            icon={<Upload size={13} />}
+            icon={<Upload size={14} />}
             onClick={onUpload}
             data-testid="daily-diary-upload-photo"
           >
@@ -2441,7 +2441,7 @@ function DroneSection({
           <Button
             variant="ghost"
             size="sm"
-            icon={<Plus size={13} />}
+            icon={<Plus size={14} />}
             onClick={onAttach}
             data-testid="daily-diary-attach-drone"
           >
@@ -2522,7 +2522,7 @@ function RealitySection({
           <Button
             variant="ghost"
             size="sm"
-            icon={<Plus size={13} />}
+            icon={<Plus size={14} />}
             onClick={onAttach}
             data-testid="daily-diary-attach-reality"
           >
@@ -2597,30 +2597,30 @@ function ArchiveTab({
   return (
     <Card padding="none">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+        <table className="oe-table w-full">
+          <thead>
             <tr>
-              <th className="px-4 py-2.5 text-left">{t('daily_diary.date', { defaultValue: 'Date' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('common.status')}</th>
-              <th className="px-4 py-2.5 text-left">{t('daily_diary.signed_at', { defaultValue: 'Signed' })}</th>
-              <th className="px-4 py-2.5 text-left">{t('daily_diary.signature_ref', { defaultValue: 'Fingerprint' })}</th>
+              <th>{t('daily_diary.date', { defaultValue: 'Date' })}</th>
+              <th>{t('common.status')}</th>
+              <th>{t('daily_diary.signed_at', { defaultValue: 'Signed' })}</th>
+              <th>{t('daily_diary.signature_ref', { defaultValue: 'Fingerprint' })}</th>
             </tr>
           </thead>
           <tbody>
             {diaries.map((d) => (
-              <tr key={d.id} className="border-t border-border-light hover:bg-surface-secondary">
-                <td className="px-4 py-2 font-medium">
+              <tr key={d.id}>
+                <td className="font-medium">
                   <DateDisplay value={d.diary_date} />
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <Badge variant={STATUS_VARIANT[d.status]} dot>
                     {statusLabel(t, d.status)}
                   </Badge>
                 </td>
-                <td className="px-4 py-2 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {d.closed_at ? <DateDisplay value={d.closed_at} /> : '—'}
                 </td>
-                <td className="px-4 py-2">
+                <td>
                   <span className="font-mono text-xs text-content-secondary">
                     {d.owner_signature_ref || d.supervisor_signature_ref
                       ? formatSha(d.owner_signature_ref || d.supervisor_signature_ref || '')
@@ -2753,7 +2753,7 @@ function CreateDiaryModal({
             value={diaryDate}
             max={maxIso}
             onChange={(e) => setDiaryDate(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.labour', { defaultValue: 'Labour' })}>
@@ -2762,7 +2762,7 @@ function CreateDiaryModal({
             min={0}
             value={labour}
             onChange={(e) => setLabour(Number(e.target.value) || 0)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.equipment', { defaultValue: 'Equipment' })}>
@@ -2771,7 +2771,7 @@ function CreateDiaryModal({
             min={0}
             value={equipment}
             onChange={(e) => setEquipment(Number(e.target.value) || 0)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('common.notes')} span={2}>
@@ -2779,7 +2779,7 @@ function CreateDiaryModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
         </WideModalField>
       </WideModalSection>
@@ -2869,7 +2869,7 @@ function SignDiaryModal({
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as SignerRole)}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {(['owner', 'supervisor', 'inspector', 'client'] as SignerRole[]).map((r) => (
               <option key={r} value={r}>
@@ -2884,7 +2884,7 @@ function SignDiaryModal({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>
@@ -3108,7 +3108,7 @@ function PhotoUploadModal({
               placeholder={t('daily_diary.photo_location_ph', {
                 defaultValue: 'e.g. East elevation, Level 3',
               })}
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
           <WideModalField label={t('common.notes')}>
@@ -3116,7 +3116,7 @@ function PhotoUploadModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className={clsx(inputCls, 'h-auto py-2')}
+              className={clsx('oe-textarea', inputCls, 'h-auto')}
             />
           </WideModalField>
         </WideModalSection>
@@ -3185,7 +3185,7 @@ function PhotoUploadModal({
               value={fileUrl}
               onChange={(e) => setFileUrl(e.target.value)}
               placeholder="/files/site/2026-06-04/east-elevation.jpg"
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </WideModalField>
         </WideModalSection>
@@ -3314,7 +3314,7 @@ function ExistingFilePicker({
           placeholder={t('daily_diary.photo_search_files', {
             defaultValue: 'Search uploaded files...',
           })}
-          className={clsx(inputCls, 'pl-9')}
+          className={clsx('oe-input', inputCls, 'pl-9')}
         />
       </div>
 
@@ -3466,7 +3466,7 @@ function ManualWeatherModal({
             value={temperature}
             onChange={(e) => setTemperature(e.target.value)}
             placeholder={isImperial ? '°F' : '°C'}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.humidity', { defaultValue: 'Humidity' })}>
@@ -3477,7 +3477,7 @@ function ManualWeatherModal({
             value={humidity}
             onChange={(e) => setHumidity(e.target.value)}
             placeholder="%"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.wind', { defaultValue: 'Wind' })}>
@@ -3488,7 +3488,7 @@ function ManualWeatherModal({
             value={wind}
             onChange={(e) => setWind(e.target.value)}
             placeholder={isImperial ? 'mph' : 'km/h'}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.precip', { defaultValue: 'Precipitation' })}>
@@ -3499,7 +3499,7 @@ function ManualWeatherModal({
             value={precip}
             onChange={(e) => setPrecip(e.target.value)}
             placeholder={isImperial ? 'in' : 'mm'}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.conditions', { defaultValue: 'Conditions' })} span={2}>
@@ -3510,7 +3510,7 @@ function ManualWeatherModal({
             placeholder={t('daily_diary.conditions_ph', {
               defaultValue: 'e.g. Overcast with light rain',
             })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>
@@ -3588,7 +3588,7 @@ function DroneSurveyModal({
             value={droneModel}
             onChange={(e) => setDroneModel(e.target.value)}
             placeholder="e.g. DJI Mavic 3 Enterprise"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.pilot_name', { defaultValue: 'Pilot' })}>
@@ -3596,7 +3596,7 @@ function DroneSurveyModal({
             type="text"
             value={pilotName}
             onChange={(e) => setPilotName(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.area_m2', { defaultValue: 'Covered area (m²)' })}>
@@ -3606,7 +3606,7 @@ function DroneSurveyModal({
             step="0.1"
             value={areaM2}
             onChange={(e) => setAreaM2(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -3619,7 +3619,7 @@ function DroneSurveyModal({
             type="text"
             value={orthoUrl}
             onChange={(e) => setOrthoUrl(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('common.notes')} span={2}>
@@ -3627,7 +3627,7 @@ function DroneSurveyModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
         </WideModalField>
       </WideModalSection>
@@ -3715,7 +3715,7 @@ function RealityCaptureModal({
           <select
             value={captureType}
             onChange={(e) => setCaptureType(e.target.value as CaptureType)}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {(['laser_scan', 'photogrammetry', 'mobile_scan'] as CaptureType[]).map((ct) => (
               <option key={ct} value={ct}>
@@ -3736,7 +3736,7 @@ function RealityCaptureModal({
             value={fileUrl}
             onChange={(e) => setFileUrl(e.target.value)}
             placeholder="/files/scans/2026-06-04/level-3.e57"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -3747,7 +3747,7 @@ function RealityCaptureModal({
             min={0}
             value={pointCount}
             onChange={(e) => setPointCount(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('common.notes')}>
@@ -3755,7 +3755,7 @@ function RealityCaptureModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className={clsx(inputCls, 'h-auto py-2')}
+            className={clsx('oe-textarea', inputCls, 'h-auto')}
           />
         </WideModalField>
       </WideModalSection>
@@ -3845,7 +3845,7 @@ function SclBundleModal({
             value={dateFrom}
             max={dateTo}
             onChange={(e) => setDateFrom(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('daily_diary.scl_to', { defaultValue: 'To' })} required>
@@ -3854,7 +3854,7 @@ function SclBundleModal({
             value={dateTo}
             min={dateFrom}
             onChange={(e) => setDateTo(e.target.value)}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>

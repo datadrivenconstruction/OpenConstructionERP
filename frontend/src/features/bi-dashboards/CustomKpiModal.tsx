@@ -36,7 +36,7 @@ import {
 import { defaultLabelField } from './breakdownLabel';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 /** The trend roll-up vocabulary, which is not the spec's aggregation. */
 const TREND_AGGREGATIONS = ['last', 'sum', 'avg', 'min', 'max', 'derive'] as const;
@@ -432,7 +432,7 @@ export function CustomKpiModal({
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
                 placeholder={t('bi.kpi_name_placeholder', {
                   defaultValue: 'Amount-weighted bid confidence',
                 })}
@@ -453,12 +453,12 @@ export function CustomKpiModal({
                   setCodeTouched(true);
                   setCode(e.target.value);
                 }}
-                className={clsx(inputCls, 'font-mono')}
+                className={clsx('oe-input', inputCls, 'font-mono')}
                 placeholder="bid_confidence"
               />
             </WideModalField>
             <WideModalField label={t('bi.kpi_unit', { defaultValue: 'Unit' })}>
-              <select value={unit} onChange={(e) => setUnit(e.target.value)} className={inputCls}>
+              <select value={unit} onChange={(e) => setUnit(e.target.value)} className={`oe-select ${inputCls}`}>
                 {UNITS.map((u) => (
                   <option key={u} value={u}>
                     {unitLabels[u] ?? humanizeToken(u)}
@@ -470,7 +470,7 @@ export function CustomKpiModal({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as KpiCategory)}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -486,7 +486,7 @@ export function CustomKpiModal({
                   'How saved readings of this KPI roll up over a period on a chart. It is not what the KPI measures.',
               })}
             >
-              <select value={trend} onChange={(e) => setTrend(e.target.value)} className={inputCls}>
+              <select value={trend} onChange={(e) => setTrend(e.target.value)} className={`oe-select ${inputCls}`}>
                 {TREND_AGGREGATIONS.map((a) => (
                   <option key={a} value={a}>
                     {trendLabels[a] ?? humanizeToken(a)}
@@ -504,7 +504,7 @@ export function CustomKpiModal({
                 type="number"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
-                className={inputCls}
+                className={`oe-input ${inputCls}`}
               />
             </WideModalField>
             <WideModalField label={t('bi.description', { defaultValue: 'Description' })} span={2}>
@@ -512,7 +512,7 @@ export function CustomKpiModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                className={clsx(inputCls, 'h-auto py-2 resize-y')}
+                className={clsx('oe-textarea', inputCls, 'h-auto resize-y')}
                 placeholder={t('bi.kpi_description_placeholder', {
                   defaultValue: 'What this number tells the reader, in one line.',
                 })}
@@ -542,7 +542,7 @@ export function CustomKpiModal({
                   setLabelField('');
                   setFilters([]);
                 }}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
                 disabled={catalogQ.isLoading}
               >
                 {entities.map((e) => (
@@ -569,7 +569,7 @@ export function CustomKpiModal({
               <select
                 value={effectiveScope}
                 onChange={(e) => setScope(e.target.value as KpiScope)}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
                 disabled={!canScopeToEstimate}
               >
                 <option value="project">
@@ -584,7 +584,7 @@ export function CustomKpiModal({
               <select
                 value={effectiveAggregation}
                 onChange={(e) => setAggregation(e.target.value)}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
                 disabled={catalogQ.isLoading}
               >
                 {aggregations.map((a) => (
@@ -605,7 +605,7 @@ export function CustomKpiModal({
                 <select
                   value={effectiveField}
                   onChange={(e) => setFieldName(e.target.value)}
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   {numericFields.map((f) => (
                     <option key={f} value={f}>
@@ -626,7 +626,7 @@ export function CustomKpiModal({
                 <select
                   value={effectiveWeight}
                   onChange={(e) => setWeightField(e.target.value)}
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   {numericFields.map((f) => (
                     <option key={f} value={f}>
@@ -648,7 +648,7 @@ export function CustomKpiModal({
                 <select
                   value={effectiveDenominator}
                   onChange={(e) => setDenominatorField(e.target.value)}
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   {denominatorChoices.map((f) => (
                     <option key={f} value={f}>
@@ -670,7 +670,7 @@ export function CustomKpiModal({
               <select
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value)}
-                className={inputCls}
+                className={`oe-select ${inputCls}`}
               >
                 <option value="">{t('bi.kpi_group_by_none', { defaultValue: 'No breakdown' })}</option>
                 {groupableFields.map((f) => (
@@ -700,7 +700,7 @@ export function CustomKpiModal({
                 <select
                   value={effectiveLabel}
                   onChange={(e) => setLabelField(e.target.value)}
-                  className={inputCls}
+                  className={`oe-select ${inputCls}`}
                 >
                   {defaultLabel === '' && (
                     <option value="">
@@ -742,7 +742,7 @@ export function CustomKpiModal({
                         onChange={(e) =>
                           update({ field: e.target.value, value: initialFilterValue(e.target.value) })
                         }
-                        className={clsx(inputCls, 'w-auto min-w-[9rem] flex-1')}
+                        className={clsx('oe-select', inputCls, 'w-auto min-w-[9rem] flex-1')}
                         aria-label={t('bi.kpi_filter_field', { defaultValue: 'Filter field' })}
                       >
                         {allFields.map((f) => (
@@ -756,7 +756,7 @@ export function CustomKpiModal({
                         onChange={(e) =>
                           update({ op: e.target.value, value: initialFilterValue(draft.field) })
                         }
-                        className={clsx(inputCls, 'w-auto min-w-[8rem]')}
+                        className={clsx('oe-select', inputCls, 'w-auto min-w-[8rem]')}
                         aria-label={t('bi.kpi_filter_op', { defaultValue: 'Filter operator' })}
                       >
                         {operators.map((op) => (
@@ -770,7 +770,7 @@ export function CustomKpiModal({
                           <select
                             value={draft.value || 'true'}
                             onChange={(e) => update({ value: e.target.value })}
-                            className={clsx(inputCls, 'w-auto min-w-[7rem]')}
+                            className={clsx('oe-select', inputCls, 'w-auto min-w-[7rem]')}
                             aria-label={t('bi.kpi_filter_value', { defaultValue: 'Filter value' })}
                           >
                             <option value="true">{t('common.yes', { defaultValue: 'Yes' })}</option>
@@ -780,7 +780,7 @@ export function CustomKpiModal({
                           <input
                             value={draft.value}
                             onChange={(e) => update({ value: e.target.value })}
-                            className={clsx(inputCls, 'w-auto min-w-[9rem] flex-1')}
+                            className={clsx('oe-input', inputCls, 'w-auto min-w-[9rem] flex-1')}
                             inputMode={kind === 'numeric' && draft.op !== 'in' ? 'decimal' : 'text'}
                             aria-label={t('bi.kpi_filter_value', { defaultValue: 'Filter value' })}
                             placeholder={

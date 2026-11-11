@@ -56,9 +56,9 @@ export interface BcfIssueModalProps {
 const PRIORITY_OPTIONS = ['', 'Low', 'Normal', 'High', 'Critical'] as const;
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+  'oe-textarea w-full resize-none';
 
 interface FormState {
   title: string;
@@ -226,7 +226,7 @@ export function BcfIssueModal({
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
           <div className="space-y-1.5 text-xs text-content-secondary">
             <div className="flex items-center gap-1.5">
-              <Box size={13} className="shrink-0 text-content-tertiary" />
+              <Box size={14} className="shrink-0 text-content-tertiary" />
               <span>
                 {t('bcf.selection_count', {
                   defaultValue: '{{count}} element(s) selected',
@@ -235,7 +235,7 @@ export function BcfIssueModal({
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Camera size={13} className="shrink-0 text-content-tertiary" />
+              <Camera size={14} className="shrink-0 text-content-tertiary" />
               <span>
                 {hasCamera
                   ? t('bcf.camera_captured', { defaultValue: 'Camera position captured' })
@@ -274,10 +274,9 @@ export function BcfIssueModal({
             placeholder={t('bcf.title_placeholder', {
               defaultValue: 'e.g. Duct clashes with beam at grid C-4',
             })}
-            className={clsx(
+            className={clsx('oe-input-lg', 
               inputCls,
-              titleError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-            )}
+            )} aria-invalid={!!(titleError)}
             autoFocus
           />
         </WideModalField>
@@ -307,7 +306,7 @@ export function BcfIssueModal({
             id="bcf-priority"
             value={form.priority}
             onChange={(e) => set('priority', e.target.value)}
-            className={inputCls}
+            className={`oe-select-lg ${inputCls}`}
           >
             {PRIORITY_OPTIONS.map((p) => (
               <option key={p || 'none'} value={p}>
@@ -328,7 +327,7 @@ export function BcfIssueModal({
               id="bcf-assignee"
               value={form.assignedTo}
               onChange={(e) => set('assignedTo', e.target.value)}
-              className={inputCls}
+              className={`oe-select-lg ${inputCls}`}
             >
               <option value="">{t('bcf.unassigned', { defaultValue: 'Unassigned' })}</option>
               {assignees.map((m) => (
@@ -343,7 +342,7 @@ export function BcfIssueModal({
               value={form.assignedTo}
               onChange={(e) => set('assignedTo', e.target.value)}
               placeholder={t('bcf.assignee_placeholder', { defaultValue: 'Name or email' })}
-              className={inputCls}
+              className={`oe-input-lg ${inputCls}`}
             />
           )}
         </WideModalField>
@@ -357,7 +356,7 @@ export function BcfIssueModal({
             type="date"
             value={form.dueDate}
             onChange={(e) => set('dueDate', e.target.value)}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
           />
         </WideModalField>
 
@@ -371,7 +370,7 @@ export function BcfIssueModal({
             value={form.labels}
             onChange={(e) => set('labels', e.target.value)}
             placeholder={t('bcf.labels_placeholder', { defaultValue: 'MEP, clash, level-3' })}
-            className={inputCls}
+            className={`oe-input-lg ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>

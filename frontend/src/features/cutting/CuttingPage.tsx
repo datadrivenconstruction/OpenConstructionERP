@@ -247,7 +247,7 @@ function Explainer({ t }: { t: TFn }) {
   return (
     <CollapsibleSection
       storageKey="cutting.how"
-      icon={<Scissors size={15} className="text-oe-blue" />}
+      icon={<Scissors size={16} className="text-oe-blue" />}
       title={t('cutting.flow_title', { defaultValue: 'How cutting optimisation works' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -335,9 +335,9 @@ function JobList({
 
   return (
     <Card className="space-y-3 p-4">
-      <h2 className="text-sm font-semibold text-content-primary">{t('cutting.jobs', { defaultValue: 'Cutting jobs' })}</h2>
+      <h2 className="oe-card-title">{t('cutting.jobs', { defaultValue: 'Cutting jobs' })}</h2>
       {loading ? (
-        <Loader2 className="animate-spin text-content-tertiary" size={18} />
+        <Loader2 className="animate-spin text-content-tertiary" size={20} />
       ) : (
         <ul className="space-y-1" aria-label={t('cutting.jobs', { defaultValue: 'Cutting jobs' })}>
           {jobs.map((job) => (
@@ -381,7 +381,7 @@ function JobList({
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as JobKind)}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+            className="oe-select w-full"
             aria-label={t('cutting.job_kind', { defaultValue: 'Kind' })}
           >
             <option value="linear">{kindLabel('linear', t)}</option>
@@ -511,7 +511,7 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
       <Card className="space-y-4 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-content-primary">{job.name}</h2>
+            <h2 className="oe-section-title">{job.name}</h2>
             <div className="flex flex-wrap gap-2 text-xs text-content-tertiary">
               <Badge variant="neutral">{kindLabel(job.kind, t)}</Badge>
               <Badge variant={job.status === 'applied' ? 'success' : job.status === 'optimised' ? 'blue' : 'neutral'}>
@@ -541,7 +541,7 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
 
       <Card className="space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">
+          <h3 className="oe-card-title">
             {t('cutting.pieces_title', { defaultValue: 'Cut list, pieces: {{n}}', n: pieceCount(pieces) })}
           </h3>
           {canEdit && <ImportBar job={job} projectId={projectId} onImported={onImported} onError={onError} />}
@@ -558,7 +558,7 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
         />
         {oversize.length > 0 && (
           <p className="flex items-center gap-1 text-xs text-semantic-error">
-            <AlertTriangle size={13} />
+            <AlertTriangle size={14} />
             {t('cutting.oversize_hint', {
               defaultValue: 'These pieces fit no stock entry: {{refs}}',
               refs: fmtList(oversize),
@@ -569,7 +569,7 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
 
       <Card className="space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">{t('cutting.stock_title', { defaultValue: 'Stock on offer' })}</h3>
+          <h3 className="oe-card-title">{t('cutting.stock_title', { defaultValue: 'Stock on offer' })}</h3>
           {canEdit && <InventoryPicker job={job} projectId={projectId} onAdded={refresh} onError={onError} />}
         </div>
         <StocksTable
@@ -694,7 +694,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
               <BOQPicker projectId={job.project_id} selectedBoqId={boqId} onSelectBoq={setBoqId} showProjectSelector={false} />
               {positionsQuery.data && (
                 <select
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-select min-w-0 flex-1"
                   value={form.boq_position_id ?? ''}
                   onChange={(e) => setForm({ ...form, boq_position_id: e.target.value || null })}
                   aria-label={t('cutting.link_boq', { defaultValue: 'BOQ line to update' })}
@@ -722,7 +722,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
           {canEdit && (
             <div className="flex flex-wrap gap-2">
               <select
-                className="rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                className="oe-select"
                 value={reqId}
                 onChange={(e) => setReqId(e.target.value)}
                 aria-label={t('cutting.requisition', { defaultValue: 'Requisition' })}
@@ -736,7 +736,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
               </select>
               {reqQuery.data && (
                 <select
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-select min-w-0 flex-1"
                   value={form.procurement_req_item_id ?? ''}
                   onChange={(e) => setForm({ ...form, procurement_req_item_id: e.target.value || null })}
                   aria-label={t('cutting.link_requisition', { defaultValue: 'Requisition line to update (draft)' })}
@@ -819,35 +819,35 @@ function PiecesTable({
   return (
     <div className="space-y-2">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] text-sm">
-          <thead className="text-left text-2xs uppercase text-content-tertiary">
+        <table className="oe-table-compact w-full min-w-[36rem]">
+          <thead className="text-left text-2xs">
             <tr>
-              <th className="px-1 py-1">{t('cutting.col_ref', { defaultValue: 'Mark' })}</th>
-              <th className="px-1 py-1">{t('cutting.col_length', { defaultValue: 'Length (mm)' })}</th>
-              {kind === 'sheet' && <th className="px-1 py-1">{t('cutting.col_width', { defaultValue: 'Width (mm)' })}</th>}
-              <th className="px-1 py-1">{t('cutting.col_qty', { defaultValue: 'Qty' })}</th>
-              {kind === 'sheet' && <th className="px-1 py-1">{t('cutting.col_rotatable', { defaultValue: 'May rotate' })}</th>}
-              <th className="px-1 py-1">{t('cutting.col_label', { defaultValue: 'Description' })}</th>
+              <th>{t('cutting.col_ref', { defaultValue: 'Mark' })}</th>
+              <th>{t('cutting.col_length', { defaultValue: 'Length (mm)' })}</th>
+              {kind === 'sheet' && <th>{t('cutting.col_width', { defaultValue: 'Width (mm)' })}</th>}
+              <th>{t('cutting.col_qty', { defaultValue: 'Qty' })}</th>
+              {kind === 'sheet' && <th>{t('cutting.col_rotatable', { defaultValue: 'May rotate' })}</th>}
+              <th>{t('cutting.col_label', { defaultValue: 'Description' })}</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {pieces.map((p, i) => (
               <tr key={i}>
-                <td className="w-24 px-1 py-0.5">{cellInput(p.ref, (v) => set(i, { ref: v }), t('cutting.col_ref', { defaultValue: 'Mark' }), !canEdit, oversize.includes(p.ref))}</td>
-                <td className="w-28 px-1 py-0.5">
+                <td className="w-24">{cellInput(p.ref, (v) => set(i, { ref: v }), t('cutting.col_ref', { defaultValue: 'Mark' }), !canEdit, oversize.includes(p.ref))}</td>
+                <td className="w-28">
                   {cellInput(p.length_mm, (v) => set(i, { length_mm: v }), t('cutting.col_length', { defaultValue: 'Length (mm)' }), !canEdit, !positiveDecimal(p.length_mm))}
                 </td>
                 {kind === 'sheet' && (
-                  <td className="w-28 px-1 py-0.5">
+                  <td className="w-28">
                     {cellInput(p.width_mm ?? '', (v) => set(i, { width_mm: v }), t('cutting.col_width', { defaultValue: 'Width (mm)' }), !canEdit, !positiveDecimal(p.width_mm ?? ''))}
                   </td>
                 )}
-                <td className="w-20 px-1 py-0.5">
+                <td className="w-20">
                   {cellInput(String(p.quantity), (v) => set(i, { quantity: Math.max(1, Math.floor(Number(v) || 1)) }), t('cutting.col_qty', { defaultValue: 'Qty' }), !canEdit)}
                 </td>
                 {kind === 'sheet' && (
-                  <td className="px-1 py-0.5 text-center">
+                  <td className="text-center">
                     <input
                       type="checkbox"
                       checked={p.rotatable}
@@ -857,8 +857,8 @@ function PiecesTable({
                     />
                   </td>
                 )}
-                <td className="px-1 py-0.5">{cellInput(p.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
-                <td className="w-8 px-1 py-0.5">
+                <td>{cellInput(p.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
+                <td className="w-8">
                   {canEdit && (
                     <button
                       type="button"
@@ -901,7 +901,7 @@ function PiecesTable({
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
             rows={5}
-            className="w-full rounded-lg border border-border bg-surface-primary p-2 font-mono text-xs"
+            className="oe-textarea w-full font-mono"
             placeholder={
               kind === 'sheet'
                 ? t('cutting.paste_hint_sheet', { defaultValue: 'Mark, length, width, quantity, description - one piece per line' })
@@ -944,41 +944,41 @@ function StocksTable({
   return (
     <div className="space-y-2">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] text-sm">
-          <thead className="text-left text-2xs uppercase text-content-tertiary">
+        <table className="oe-table-compact w-full min-w-[36rem]">
+          <thead className="text-left text-2xs">
             <tr>
-              <th className="px-1 py-1">{t('cutting.col_ref', { defaultValue: 'Mark' })}</th>
-              <th className="px-1 py-1">{t('cutting.col_length', { defaultValue: 'Length (mm)' })}</th>
-              {kind === 'sheet' && <th className="px-1 py-1">{t('cutting.col_width', { defaultValue: 'Width (mm)' })}</th>}
-              <th className="px-1 py-1">
+              <th>{t('cutting.col_ref', { defaultValue: 'Mark' })}</th>
+              <th>{t('cutting.col_length', { defaultValue: 'Length (mm)' })}</th>
+              {kind === 'sheet' && <th>{t('cutting.col_width', { defaultValue: 'Width (mm)' })}</th>}
+              <th>
                 {t('cutting.col_unit_cost', { defaultValue: 'Cost per piece' })}
                 {currency ? ` (${currency})` : ''}
               </th>
-              <th className="px-1 py-1">{t('cutting.col_available', { defaultValue: 'Available (empty = unlimited)' })}</th>
-              <th className="px-1 py-1">{t('cutting.col_label', { defaultValue: 'Description' })}</th>
+              <th>{t('cutting.col_available', { defaultValue: 'Available (empty = unlimited)' })}</th>
+              <th>{t('cutting.col_label', { defaultValue: 'Description' })}</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {stocks.map((s, i) => (
               <tr key={i} className={s.is_offcut ? 'bg-semantic-success/5' : undefined}>
-                <td className="w-24 px-1 py-0.5">{cellInput(s.ref, (v) => set(i, { ref: v }), t('cutting.col_ref', { defaultValue: 'Mark' }), !canEdit)}</td>
-                <td className="w-28 px-1 py-0.5">
+                <td className="w-24">{cellInput(s.ref, (v) => set(i, { ref: v }), t('cutting.col_ref', { defaultValue: 'Mark' }), !canEdit)}</td>
+                <td className="w-28">
                   {cellInput(s.length_mm, (v) => set(i, { length_mm: v }), t('cutting.col_length', { defaultValue: 'Length (mm)' }), !canEdit || s.is_offcut, !positiveDecimal(s.length_mm))}
                 </td>
                 {kind === 'sheet' && (
-                  <td className="w-28 px-1 py-0.5">
+                  <td className="w-28">
                     {cellInput(s.width_mm ?? '', (v) => set(i, { width_mm: v }), t('cutting.col_width', { defaultValue: 'Width (mm)' }), !canEdit || s.is_offcut, !positiveDecimal(s.width_mm ?? ''))}
                   </td>
                 )}
-                <td className="w-28 px-1 py-0.5">
+                <td className="w-28">
                   {s.is_offcut ? (
                     <span className="text-2xs text-semantic-success">{t('cutting.from_inventory', { defaultValue: 'From inventory' })}</span>
                   ) : (
                     cellInput(s.unit_cost, (v) => set(i, { unit_cost: v }), t('cutting.col_unit_cost', { defaultValue: 'Cost per piece' }), !canEdit)
                   )}
                 </td>
-                <td className="w-28 px-1 py-0.5">
+                <td className="w-28">
                   {cellInput(
                     s.available === null ? '' : String(s.available),
                     (v) => set(i, { available: v.trim() === '' ? null : Math.max(0, Math.floor(Number(v) || 0)) }),
@@ -986,8 +986,8 @@ function StocksTable({
                     !canEdit,
                   )}
                 </td>
-                <td className="px-1 py-0.5">{cellInput(s.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
-                <td className="w-8 px-1 py-0.5">
+                <td>{cellInput(s.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
+                <td className="w-8">
                   {canEdit && (
                     <button
                       type="button"
@@ -1107,7 +1107,7 @@ function ImportBar({
           }
           setMode(next);
         }}
-        className="rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+        className="oe-select"
         aria-label={t('cutting.import_from', { defaultValue: 'Import cut list from' })}
       >
         <option value="">{t('cutting.import_from', { defaultValue: 'Import cut list from' })}</option>
@@ -1133,7 +1133,7 @@ function ImportBar({
           <select
             value={rebarImportId}
             onChange={(e) => setRebarImportId(e.target.value)}
-            className="rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-select"
             aria-label={t('cutting.import_rebar', { defaultValue: 'Bending schedule' })}
           >
             <option value="">{t('cutting.choose_schedule', { defaultValue: 'Choose a schedule' })}</option>
@@ -1146,7 +1146,7 @@ function ImportBar({
           <select
             value={diameter}
             onChange={(e) => setDiameter(e.target.value)}
-            className="rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="oe-select"
             aria-label={t('cutting.diameter', { defaultValue: 'Bar diameter' })}
           >
             <option value="">{t('cutting.diameter', { defaultValue: 'Bar diameter' })}</option>
@@ -1176,7 +1176,7 @@ function ImportBar({
             <select
               value={positionId}
               onChange={(e) => setPositionId(e.target.value)}
-              className="max-w-[16rem] rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm"
+              className="oe-select max-w-[16rem]"
               aria-label={t('cutting.import_boq', { defaultValue: 'BOQ line' })}
             >
               <option value="">{t('cutting.choose_position', { defaultValue: 'Choose a line' })}</option>
@@ -1298,7 +1298,7 @@ function ValidationPanel({ report }: { report: ValidationReport }) {
   return (
     <Card className="space-y-2 p-4" data-testid="cutting-validation">
       <h3 className={`flex items-center gap-2 text-sm font-semibold ${tone}`}>
-        {failed.length === 0 ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
+        {failed.length === 0 ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
         {t('cutting.validation_title', {
           defaultValue: 'Validation: {{errors}} errors, {{warnings}} warnings',
           errors: report.errors,
@@ -1384,7 +1384,7 @@ function PlanPanel({
   return (
     <Card className="space-y-4 p-4" data-testid="cutting-plan">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">
+        <h3 className="oe-card-title">
           {t('cutting.plan_title', { defaultValue: 'Cutting plan' })}
           {plan.proven_optimal && (
             <Badge variant="success" className="ml-2">
@@ -1436,7 +1436,7 @@ function PlanPanel({
 
       {plan.pieces_unplaced > 0 && (
         <p className="flex items-center gap-1 text-xs text-semantic-error">
-          <AlertTriangle size={13} />
+          <AlertTriangle size={14} />
           {t('cutting.unplaced_hint', {
             defaultValue: 'Pieces not placed ({{n}}): {{refs}}',
             n: plan.pieces_unplaced,
@@ -1461,24 +1461,24 @@ function PlanPanel({
                 </span>
                 <ConfidenceBadge score={proposalQuery.data.confidence} showScore />
               </div>
-              <table className="w-full text-xs">
-                <thead className="text-left text-content-tertiary">
+              <table className="oe-table-compact w-full">
+                <thead className="text-left">
                   <tr>
-                    <th className="py-1">{t('cutting.proposal_line', { defaultValue: 'Line' })}</th>
-                    <th className="py-1">{t('cutting.proposal_current', { defaultValue: 'Current' })}</th>
-                    <th className="py-1">{t('cutting.proposal_new', { defaultValue: 'Proposed' })}</th>
+                    <th>{t('cutting.proposal_line', { defaultValue: 'Line' })}</th>
+                    <th>{t('cutting.proposal_current', { defaultValue: 'Current' })}</th>
+                    <th>{t('cutting.proposal_new', { defaultValue: 'Proposed' })}</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
                   {proposalQuery.data.lines.map((line) => (
                     <tr key={line.target_id}>
-                      <td className="py-1">{line.label || line.target_id}</td>
-                      <td className="py-1 tabular-nums">{`${fmtNumber(line.current_quantity, 2)} ${line.unit}`}</td>
-                      <td className="py-1 font-medium tabular-nums">
+                      <td>{line.label || line.target_id}</td>
+                      <td className="tabular-nums">{`${fmtNumber(line.current_quantity, 2)} ${line.unit}`}</td>
+                      <td className="font-medium tabular-nums">
                         {line.appliable ? `${fmtNumber(line.proposed_quantity, 2)} ${line.unit}` : '-'}
                       </td>
-                      <td className="py-1 text-content-tertiary">
+                      <td className="text-content-tertiary">
                         {line.reason ? reasonLabel(line.reason, t) : ''}
                       </td>
                     </tr>

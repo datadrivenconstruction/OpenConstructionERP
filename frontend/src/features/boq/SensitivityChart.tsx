@@ -72,7 +72,7 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
         aria-label={t('boq.sensitivity_title', { defaultValue: 'Sensitivity Analysis' })}
         className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <BarChart3 size={16} className="text-content-tertiary" strokeWidth={1.75} />
           <span className="text-sm font-semibold text-content-primary">
             {t('boq.sensitivity_title', { defaultValue: 'Sensitivity Analysis' })}
@@ -99,7 +99,7 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
           ) : isError ? (
             <div className="px-5 py-8 text-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error/10 mx-auto mb-2">
-                <Inbox size={18} className="text-semantic-error" />
+                <Inbox size={20} className="text-semantic-error" />
               </div>
               <p className="text-xs text-content-secondary">
                 {t('boq.sensitivity_error', { defaultValue: 'Failed to load sensitivity analysis. Please try again.' })}
@@ -109,7 +109,7 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
             <div className="px-5 pb-5 pt-1">
               <div className="flex flex-col items-center gap-2 py-6 text-center">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
-                  <Inbox size={18} className="text-content-tertiary" />
+                  <Inbox size={20} className="text-content-tertiary" />
                 </div>
                 <p className="text-xs text-content-tertiary">
                   {t('boq.sensitivity_empty', {
@@ -251,33 +251,33 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
 
               {/* Detail table */}
               <div className="border-t border-border-light overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="oe-table-compact w-full">
                   <thead>
                     <tr className="bg-surface-tertiary/50">
-                      <th className="px-4 py-2 text-left font-medium text-content-secondary">
+                      <th>
                         {t('boq.ordinal')}
                       </th>
-                      <th className="px-4 py-2 text-left font-medium text-content-secondary">
+                      <th>
                         {t('boq.description')}
                       </th>
-                      <th className="px-4 py-2 text-right font-medium text-content-secondary">
+                      <th className="text-right">
                         {t('boq.total')}
                       </th>
-                      <th className="px-4 py-2 text-right font-medium text-content-secondary">
+                      <th className="text-right">
                         {t('boq.sensitivity_share', { defaultValue: 'Share' })}
                       </th>
-                      <th className="px-4 py-2 text-right font-medium text-content-secondary">
+                      <th className="text-right">
                         {t('boq.cost_risk_variance_share', { defaultValue: 'Variance Share' })}
                       </th>
-                      <th className="px-4 py-2 text-right font-medium text-content-secondary">
+                      <th className="text-right">
                         {t('boq.sensitivity_impact_low', { defaultValue: 'Impact (-)' })}
                       </th>
-                      <th className="px-4 py-2 text-right font-medium text-content-secondary">
+                      <th className="text-right">
                         {t('boq.sensitivity_impact_high', { defaultValue: 'Impact (+)' })}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light">
+                  <tbody>
                     {items.map((item, idx) => (
                       <tr
                         key={`${item.ordinal}-${idx}`}
@@ -285,27 +285,27 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
                           idx % 2 === 0 ? 'bg-surface-primary/50' : ''
                         }`}
                       >
-                        <td className="px-4 py-2 font-mono text-content-tertiary">
+                        <td className="font-mono text-content-tertiary">
                           {item.ordinal}
                         </td>
-                        <td className="px-4 py-2 text-content-primary max-w-[240px] truncate" title={item.description}>
+                        <td className="max-w-[240px] truncate" title={item.description}>
                           {item.description || '-'}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-content-primary font-medium">
+                        <td className="text-right tabular-nums font-medium">
                           {fmtCompact(item.total, fmt)}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {fmt.format(item.share_pct)}%
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {item.variance_contribution_pct != null
                             ? `${fmt.format(item.variance_contribution_pct)}%`
                             : '-'}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-semantic-success font-medium">
+                        <td className="text-right tabular-nums text-semantic-success font-medium">
                           {fmtCompact(item.impact_low, fmt)}
                         </td>
-                        <td className="px-4 py-2 text-right tabular-nums text-semantic-error font-medium">
+                        <td className="text-right tabular-nums text-semantic-error font-medium">
                           +{fmtCompact(item.impact_high, fmt)}
                         </td>
                       </tr>

@@ -116,7 +116,7 @@ export function ThirdPartyLicenses({ className }: { className?: string }) {
 
   return (
     <div className={clsx('pt-3 border-t border-border-light', className)}>
-      <h3 className="text-sm font-semibold text-content-primary mb-1">
+      <h3 className="oe-card-title mb-1">
         {t('about.third_party_title', { defaultValue: 'Third-party components' })}
       </h3>
       <p className="text-xs text-content-secondary leading-relaxed mb-2">

@@ -119,7 +119,7 @@ import { AccommodationCalendar } from './AccommodationCalendar';
 const BOOKING_STATUS_BADGE: Record<BookingStatus, string> = {
   reserved: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
   checked_in: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
-  checked_out: 'bg-slate-200 text-slate-700 border-slate-300',
+  checked_out: 'bg-surface-tertiary text-content-secondary border-border',
   cancelled: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 
@@ -127,7 +127,7 @@ const CHARGE_STATUS_BADGE: Record<ChargeStatus, string> = {
   pending: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
   invoiced: 'bg-semantic-info-bg text-semantic-info border-semantic-info/30',
   paid: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
-  waived: 'bg-slate-200 text-slate-700 border-slate-300',
+  waived: 'bg-surface-tertiary text-content-secondary border-border',
 };
 
 /** Status filter pill keys in display order (incl. `all`). */
@@ -151,7 +151,7 @@ const OCCUPANCY_TAB_IDS: readonly OccupancyTab[] = ['bookings', 'calendar'];
 const ROOM_STATUS_STYLES: Record<RoomStatus, string> = {
   available: 'bg-semantic-success-bg text-semantic-success border-semantic-success/30',
   occupied: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30',
-  maintenance: 'bg-slate-200 text-slate-700 border-slate-300',
+  maintenance: 'bg-surface-tertiary text-content-secondary border-border',
   blocked: 'bg-semantic-error-bg text-semantic-error border-semantic-error/30',
 };
 
@@ -243,7 +243,7 @@ export function AccommodationDetailPage() {
                   className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary hover:text-oe-blue"
                   data-testid="accommodation-bim-link"
                 >
-                  <Box size={11} aria-hidden="true" />
+                  <Box size={12} aria-hidden="true" />
                   {t('accommodation.bim_link.label', { defaultValue: 'BIM' })}
                 </Link>
               )}
@@ -439,7 +439,7 @@ interface HeaderKpiProps {
 
 function HeaderKpi({ icon, label, value, accent }: HeaderKpiProps) {
   return (
-    <div className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2">
+    <div className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2">
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-secondary">
         {icon}
       </span>
@@ -504,7 +504,7 @@ function OccupantRef({
       data-testid="occupant-contact-link"
     >
       <span className="truncate">{label}</span>
-      <ExternalLink size={11} aria-hidden="true" className="shrink-0" />
+      <ExternalLink size={12} aria-hidden="true" className="shrink-0" />
     </Link>
   );
 }
@@ -667,7 +667,7 @@ function RoomsTab({ data }: { data: AccommodationDetail }) {
                 }),
               })}
               className={clsx(
-                'flex min-h-[68px] flex-col items-start rounded-lg border p-2.5 text-left text-xs transition hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
+                'flex min-h-[68px] flex-col items-start rounded-lg border p-3 text-left text-xs transition hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                 ROOM_STATUS_STYLES[r.status],
               )}
             >
@@ -784,7 +784,7 @@ function AssignOccupantModal({
   });
 
   const inputCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'oe-input-lg w-full';
 
   const disabled = room.status === 'maintenance' || room.status === 'blocked';
 
@@ -1219,65 +1219,65 @@ function BookingsList({
         data-testid="bookings-table-wrapper"
         className="hidden sm:block overflow-x-auto rounded-xl border border-border-light"
       >
-        <table className="min-w-full text-sm">
-          <thead className="bg-surface-secondary/60 text-left text-xs uppercase tracking-wide text-content-tertiary">
+        <table className="oe-table min-w-full">
+          <thead className="text-left">
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.room', { defaultValue: 'Room' })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.occupant', {
                   defaultValue: 'Occupant',
                 })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.check_in', {
                   defaultValue: 'Check-in',
                 })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.check_out', {
                   defaultValue: 'Check-out',
                 })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.status', {
                   defaultValue: 'Status',
                 })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium">
+              <th scope="col">
                 {t('accommodation.bookings.col.source', {
                   defaultValue: 'Source',
                 })}
               </th>
-              <th scope="col" className="px-3 py-2 font-medium text-right">
+              <th scope="col" className="text-right">
                 <span className="sr-only">
                   {t('common.actions')}
                 </span>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {items.map((b) => (
               <tr
                 key={b.id}
                 data-testid={`booking-row-${b.id}`}
                 className="hover:bg-surface-secondary/30"
               >
-                <td className="px-3 py-2 font-mono text-xs">
+                <td className="font-mono">
                   {b.room_label ?? '—'}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <OccupantRef
                     contactId={b.occupant_contact_id}
                     name={b.occupant_name}
                   />
                 </td>
-                <td className="px-3 py-2 tabular-nums">{b.check_in}</td>
-                <td className="px-3 py-2 tabular-nums">
+                <td className="tabular-nums">{b.check_in}</td>
+                <td className="tabular-nums">
                   {b.check_out ?? '—'}
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <span
                     className={clsx(
                       'inline-flex items-center rounded-md border px-1.5 py-0.5 text-2xs font-semibold',
@@ -1290,12 +1290,12 @@ function BookingsList({
                     })}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs text-content-tertiary">
+                <td className="text-content-tertiary">
                   {t(`accommodation.booking.source.${b.source}`, {
                     defaultValue: b.source,
                   })}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <BookingActionMenu booking={b} onAction={handleAction} />
                 </td>
               </tr>
@@ -1582,7 +1582,7 @@ function ChargesTab({ data }: { data: AccommodationDetail }) {
       {/* Booking picker rail */}
       <Card padding="none">
         <div className="p-3 border-b border-border-light">
-          <div className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <div className="oe-overline">
             {t('accommodation.charges.picker_title', {
               defaultValue: 'Pick a booking',
             })}
@@ -1834,52 +1834,52 @@ function BookingChargesPanel({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm" data-testid="charges-table">
-            <thead className="bg-surface-secondary/60 text-left text-xs uppercase tracking-wide text-content-tertiary">
+          <table className="oe-table-compact min-w-full" data-testid="charges-table">
+            <thead className="text-left">
               <tr>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('accommodation.charges.kind', { defaultValue: 'Kind' })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('accommodation.charges.description', {
                     defaultValue: 'Description',
                   })}
                 </th>
-                <th className="px-3 py-2 font-medium text-right">
+                <th className="text-right">
                   {t('accommodation.charges.amount', {
                     defaultValue: 'Amount',
                   })}
                 </th>
-                <th className="px-3 py-2 font-medium">
+                <th>
                   {t('accommodation.charges.status_col', {
                     defaultValue: 'Status',
                   })}
                 </th>
-                <th className="px-3 py-2 font-medium text-right">
+                <th className="text-right">
                   <span className="sr-only">{t('common.actions')}</span>
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {charges.map((c) => (
                 <tr
                   key={c.id}
                   data-testid={`charge-row-${c.id}`}
                   className="hover:bg-surface-secondary/30"
                 >
-                  <td className="px-3 py-2 text-xs">
+                  <td>
                     {t(`accommodation.charge.kind.${c.kind}`, {
                       defaultValue: c.kind,
                     })}
                   </td>
-                  <td className="px-3 py-2 text-xs text-content-secondary">
+                  <td className="text-content-secondary">
                     {c.description || '—'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums font-mono text-xs">
+                  <td className="text-right tabular-nums font-mono">
                     {c.amount}{' '}
                     <span className="text-content-tertiary">{c.currency}</span>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <span
                       className={clsx(
                         'inline-flex items-center rounded-md border px-1.5 py-0.5 text-2xs font-semibold',
@@ -1891,7 +1891,7 @@ function BookingChargesPanel({
                       })}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <ChargeRowActions
                       charge={c}
                       busy={
@@ -2033,7 +2033,7 @@ function ChargeRowActions({
           defaultValue: 'Open the Finance invoices register.',
         })}
       >
-        <FileText size={11} aria-hidden="true" />
+        <FileText size={12} aria-hidden="true" />
         {t('accommodation.charges.view_invoice', {
           defaultValue: 'View in Finance',
         })}
@@ -2056,7 +2056,7 @@ function ChargeRowActions({
             defaultValue: 'Raise this charge as an invoice in Finance.',
           })}
         >
-          <Wallet size={11} aria-hidden="true" />
+          <Wallet size={12} aria-hidden="true" />
           {t('accommodation.charges.invoice_in_finance', {
             defaultValue: 'Invoice in Finance',
           })}
@@ -2071,7 +2071,7 @@ function ChargeRowActions({
             defaultValue: 'Open the Finance invoices register.',
           })}
         >
-          <FileText size={11} aria-hidden="true" />
+          <FileText size={12} aria-hidden="true" />
           {t('accommodation.charges.view_invoice', {
             defaultValue: 'View in Finance',
           })}
@@ -2245,7 +2245,7 @@ function AddChargeModal({
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as ChargeKind)}
-            className={inputCls}
+            className="oe-select-lg w-full"
             data-testid="charge-kind"
           >
             {(['base_rent', 'extra', 'deposit', 'refund'] as const).map((k) => (
@@ -2274,7 +2274,7 @@ function AddChargeModal({
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
             data-testid="charge-amount"
           />
         </WideModalField>
@@ -2306,7 +2306,7 @@ function AddChargeModal({
             type="date"
             value={periodStart}
             onChange={(e) => setPeriodStart(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
           />
         </WideModalField>
         <WideModalField
@@ -2318,7 +2318,7 @@ function AddChargeModal({
             type="date"
             value={periodEnd}
             onChange={(e) => setPeriodEnd(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
           />
         </WideModalField>
         <WideModalField
@@ -2331,7 +2331,7 @@ function AddChargeModal({
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
             data-testid="charge-description"
           />
         </WideModalField>
@@ -2432,7 +2432,7 @@ function EditChargeModal({
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as ChargeKind)}
-            className={inputCls}
+            className="oe-select-lg w-full"
             data-testid="charge-edit-kind"
           >
             {(['base_rent', 'extra', 'deposit', 'refund'] as const).map((k) => (
@@ -2461,7 +2461,7 @@ function EditChargeModal({
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
             data-testid="charge-edit-amount"
           />
         </WideModalField>
@@ -2493,7 +2493,7 @@ function EditChargeModal({
             type="date"
             value={periodStart}
             onChange={(e) => setPeriodStart(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
           />
         </WideModalField>
         <WideModalField
@@ -2505,7 +2505,7 @@ function EditChargeModal({
             type="date"
             value={periodEnd}
             onChange={(e) => setPeriodEnd(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
           />
         </WideModalField>
         <WideModalField
@@ -2518,7 +2518,7 @@ function EditChargeModal({
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className={inputCls}
+            className="oe-input-lg w-full"
             data-testid="charge-edit-description"
           />
         </WideModalField>
@@ -2582,7 +2582,7 @@ function BimModelPicker({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={PICKER_INPUT_CLS}
+      className="oe-select-lg w-full"
       data-testid="accommodation-bim-model-select"
       disabled={modelsQuery.isLoading}
     >
@@ -2679,7 +2679,7 @@ function PropDevBlockPicker({
             setPhaseId('');
             onChange('');
           }}
-          className={PICKER_INPUT_CLS}
+          className="oe-select-lg w-full"
           data-testid="accommodation-block-dev-select"
           disabled={developmentsQuery.isLoading}
           aria-label={t('propdev.developments', {
@@ -2703,7 +2703,7 @@ function PropDevBlockPicker({
             setPhaseId(e.target.value);
             onChange('');
           }}
-          className={PICKER_INPUT_CLS}
+          className="oe-select-lg w-full"
           data-testid="accommodation-block-phase-select"
           disabled={!devId || phasesQuery.isLoading}
           aria-label={t('propdev.phases', { defaultValue: 'Phases' })}
@@ -2722,7 +2722,7 @@ function PropDevBlockPicker({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={PICKER_INPUT_CLS}
+          className="oe-select-lg w-full"
           data-testid="accommodation-block-block-select"
           disabled={!phaseId || blocksQuery.isLoading}
           aria-label={t('propdev.blocks', { defaultValue: 'Blocks' })}
@@ -2871,7 +2871,7 @@ function SettingsTab({
       <Card>
         <div className="space-y-4">
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('accommodation.settings.general', { defaultValue: 'General' })}
             </h2>
             <p className="mt-0.5 text-xs text-content-tertiary">
@@ -2882,7 +2882,7 @@ function SettingsTab({
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="text-xs font-medium text-content-primary">
+            <label className="oe-label">
               {t('accommodation.field.name', { defaultValue: 'Name' })}
               <input
                 type="text"
@@ -2891,7 +2891,7 @@ function SettingsTab({
                 className={`${inputCls} mt-1`}
               />
             </label>
-            <label className="text-xs font-medium text-content-primary">
+            <label className="oe-label">
               {t('accommodation.field.address', { defaultValue: 'Address' })}
               <input
                 type="text"
@@ -2900,7 +2900,7 @@ function SettingsTab({
                 className={`${inputCls} mt-1`}
               />
             </label>
-            <label className="text-xs font-medium text-content-primary">
+            <label className="oe-label">
               {t('accommodation.field.geo_lat', {
                 defaultValue: 'Latitude (decimal)',
               })}
@@ -2913,7 +2913,7 @@ function SettingsTab({
                 placeholder="-90 to 90"
               />
             </label>
-            <label className="text-xs font-medium text-content-primary">
+            <label className="oe-label">
               {t('accommodation.field.geo_lon', {
                 defaultValue: 'Longitude (decimal)',
               })}
@@ -2946,7 +2946,7 @@ function SettingsTab({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-border bg-surface-primary p-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-textarea mt-1 w-full"
               />
             </label>
           </div>
@@ -2967,7 +2967,7 @@ function SettingsTab({
       <Card>
         <div className="space-y-3">
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('accommodation.bootstrap.from_propdev', {
                 defaultValue: 'Bootstrap from PropDev block',
               })}
@@ -3007,7 +3007,7 @@ function SettingsTab({
       <Card className="border-semantic-error/30">
         <div className="space-y-3">
           <div>
-            <h2 className="text-sm font-semibold text-semantic-error">
+            <h2 className="oe-card-title text-semantic-error">
               {t('accommodation.settings.danger_zone', {
                 defaultValue: 'Danger zone',
               })}
@@ -3026,7 +3026,7 @@ function SettingsTab({
               onClick={() => setConfirmDeleteOpen(true)}
               data-testid="accommodation-delete-button"
             >
-              <Trash2 size={13} className="mr-1.5" aria-hidden="true" />
+              <Trash2 size={14} className="mr-1.5" aria-hidden="true" />
               {t('accommodation.delete.cta', {
                 defaultValue: 'Delete accommodation',
               })}

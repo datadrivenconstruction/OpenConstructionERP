@@ -142,7 +142,7 @@ export function LineMethodSection({ projectId, history, currency, canEdit }: Lin
               {t('cost_control.line_method_pick', { defaultValue: 'Read this line with' })}
             </span>
             <select
-              className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2"
+              className="oe-select mt-1 w-full"
               value={picked}
               onChange={(e) => setPicked(e.target.value as LineForecastMethod | typeof PROJECT)}
             >
@@ -167,7 +167,7 @@ export function LineMethodSection({ projectId, history, currency, canEdit }: Lin
                   : t('cost_control.line_method_comment', { defaultValue: 'Comment (optional)' })}
               </span>
               <textarea
-                className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2"
+                className="oe-textarea mt-1 w-full"
                 rows={2}
                 maxLength={2000}
                 value={comment}

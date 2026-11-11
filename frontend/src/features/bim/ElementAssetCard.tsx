@@ -132,14 +132,14 @@ export default function ElementAssetCard({
   return (
     <>
       <div
-        className="absolute z-30 select-none rounded-lg border border-border-light bg-surface-primary shadow-lg px-3 py-2 min-w-[220px] max-w-[280px] transition-[inset-inline-end] duration-200"
+        className="absolute z-dropdown select-none rounded-lg border border-border-light bg-surface-primary shadow-lg px-3 py-2 min-w-[220px] max-w-[280px] transition-[inset-inline-end] duration-200"
         style={{ insetInlineEnd: rightPx, bottom: bottomPx, backgroundColor: 'var(--oe-bg)' }}
         data-testid="bim-asset-card"
       >
         <div className="flex items-center justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-1.5">
             <Package size={12} className="text-oe-blue shrink-0" />
-            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('assets.card_title', { defaultValue: 'Asset info' })}
             </span>
           </div>
@@ -167,7 +167,7 @@ export default function ElementAssetCard({
                 title={t('assets.hide_card', { defaultValue: 'Hide asset card' })}
                 data-testid="bim-asset-dismiss"
               >
-                <X size={11} />
+                <X size={12} />
               </button>
             )}
           </div>

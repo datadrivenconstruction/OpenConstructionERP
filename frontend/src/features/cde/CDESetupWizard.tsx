@@ -372,7 +372,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                 value={draft.naming_convention}
                 onChange={(e) => patchDraft({ naming_convention: e.target.value })}
                 placeholder="Project-Originator-Functional-Spatial-Form-Discipline-Number"
-                className="w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-input w-full"
                 aria-label={t('cde.wizard_step_naming', {
                   defaultValue: 'Naming convention',
                 })}
@@ -397,7 +397,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
               <select
                 value={draft.suitability_set}
                 onChange={(e) => patchDraft({ suitability_set: e.target.value })}
-                className="h-9 rounded-md border border-border bg-surface-primary px-2 text-sm"
+                className="oe-select"
                 aria-label={t('cde.wizard_step_suitability', {
                   defaultValue: 'Suitability codes',
                 })}
@@ -425,7 +425,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                 {roles.map((role) => (
                   <div
                     key={role.key}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border-light bg-surface-primary p-2.5"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border-light bg-surface-primary p-3"
                   >
                     <div className="min-w-0">
                       <span className="text-sm font-medium text-content-primary">
@@ -447,7 +447,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                           },
                         })
                       }
-                      className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs shrink-0"
+                      className="oe-select shrink-0"
                       aria-label={role.name}
                     >
                       <option value="">
@@ -490,7 +490,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                 })}
               </p>
               <div className="space-y-2">
-                <label className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary p-2.5 cursor-pointer">
+                <label className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary p-3 cursor-pointer">
                   <input
                     type="radio"
                     name="review-preset"
@@ -506,7 +506,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                 {presets.map((p) => (
                   <label
                     key={p.system_key}
-                    className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary p-2.5 cursor-pointer"
+                    className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary p-3 cursor-pointer"
                   >
                     <input
                       type="radio"
@@ -517,7 +517,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                       }
                     />
                     <span className="inline-flex items-center gap-2 text-sm text-content-primary">
-                      <ShieldCheck size={13} className="text-oe-blue" />
+                      <ShieldCheck size={14} className="text-oe-blue" />
                       {t(`cde.preset_name_${p.system_key}`, { defaultValue: p.name })}
                     </span>
                   </label>
@@ -544,7 +544,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
               {gateQuery.data && (
                 <div className="mb-3 rounded-lg border border-border-light bg-surface-primary p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                    <span className="oe-overline">
                       {t('cde.wizard_current_readiness', {
                         defaultValue: 'Current readiness',
                       })}
@@ -602,7 +602,7 @@ export function CDESetupWizard({ open, onClose, projectId }: CDESetupWizardProps
                       min_readiness_level: e.target.value as CDEReadinessLevel,
                     })
                   }
-                  className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs disabled:opacity-50"
+                  className="oe-select"
                   aria-label={t('cde.wizard_min_level', {
                     defaultValue: 'Minimum level to go live',
                   })}

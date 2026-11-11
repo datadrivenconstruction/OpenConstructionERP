@@ -329,10 +329,10 @@ function RegionImportGrid({
       <div className="p-5 border-b border-border-light">
         <div className="flex items-center gap-3 mb-1">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-            <Database size={18} />
+            <Database size={20} />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('catalog.import_regions_title', { defaultValue: 'Import Resource Catalog' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -352,7 +352,7 @@ function RegionImportGrid({
           return (
             <div
               key={region.id}
-              className={`relative flex items-center gap-3 rounded-xl border p-3.5 transition-all ${
+              className={`relative flex items-center gap-3 rounded-xl border p-3 transition-all ${
                 isLoaded
                   ? 'border-semantic-success/30 bg-semantic-success/10'
                   : 'border-border hover:border-oe-blue/40 hover:bg-surface-secondary/50'
@@ -666,7 +666,7 @@ function HoverTooltip({
         ? createPortal(
             <div
               role="tooltip"
-              className="pointer-events-none fixed z-[200] max-w-[640px] whitespace-normal rounded-md border border-border-light bg-surface-elevated px-3 py-2 text-xs font-normal text-content-primary shadow-xl"
+              className="pointer-events-none fixed z-tooltip max-w-[640px] whitespace-normal rounded-md border border-border-light bg-surface-elevated px-3 py-2 text-xs font-normal text-content-primary shadow-xl"
               style={{ top: pos.top, left: pos.left }}
             >
               {text}
@@ -958,7 +958,7 @@ function ResourceDetailPanel({
             so users can read disambiguating prefixes/suffixes without
             relying on the row's hover-tooltip. */}
         <div className="mb-3">
-          <h3 className="text-sm font-semibold text-content-primary leading-snug break-words">
+          <h3 className="oe-card-title break-words">
             {resource.name}
           </h3>
           <div className="mt-0.5 flex items-center gap-2 text-2xs text-content-tertiary">
@@ -1006,14 +1006,14 @@ function ResourceDetailPanel({
         {/* Info grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {/* Type + Category */}
-          <div className="rounded-lg bg-surface-primary border border-border-light p-2.5">
+          <div className="rounded-lg bg-surface-primary border border-border-light p-3">
             <div className="text-2xs text-content-quaternary uppercase tracking-wider mb-1">{t('catalog.type_label', { defaultValue: 'Type' })}</div>
             <div className="text-xs font-medium text-content-primary">{getResourceTypeLabel(resource.resource_type, t)}</div>
             <div className="text-2xs text-content-tertiary mt-0.5">{categoryLabel}</div>
           </div>
 
           {/* Usage */}
-          <div className="rounded-lg bg-surface-primary border border-border-light p-2.5">
+          <div className="rounded-lg bg-surface-primary border border-border-light p-3">
             <div className="text-2xs text-content-quaternary uppercase tracking-wider mb-1">{t('catalog.usage', { defaultValue: 'Usage' })}</div>
             <div className="text-xs font-medium text-content-primary">{resource.usage_count.toLocaleString(getNumberLocale())} {t('catalog.references', { defaultValue: 'references' })}</div>
             {specs.used_in_work_items ? (
@@ -1022,7 +1022,7 @@ function ResourceDetailPanel({
           </div>
 
           {/* Region */}
-          <div className="rounded-lg bg-surface-primary border border-border-light p-2.5">
+          <div className="rounded-lg bg-surface-primary border border-border-light p-3">
             <div className="text-2xs text-content-quaternary uppercase tracking-wider mb-1">{t('catalog.region_label', { defaultValue: 'Region' })}</div>
             <div className="flex items-center gap-1.5">
               {regionInfo && <MiniFlag code={regionInfo.flag} size={12} />}
@@ -1231,7 +1231,7 @@ function BuildAssemblyModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -1245,10 +1245,10 @@ function BuildAssemblyModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-              <Layers size={18} />
+              <Layers size={20} />
             </div>
             <div>
-              <h2 id="catalog-build-assembly-title" className="text-base font-semibold text-content-primary">
+              <h2 id="catalog-build-assembly-title" className="oe-section-title">
                 {t('catalog.build_assembly', { defaultValue: 'Build Assembly' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -1274,7 +1274,7 @@ function BuildAssemblyModal({
           {/* Assembly name */}
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+              <label className="oe-label">
                 {t('catalog.assembly_name', { defaultValue: 'Assembly Name' })} *
               </label>
               <input
@@ -1286,18 +1286,18 @@ function BuildAssemblyModal({
                 placeholder={t('catalog.assembly_name_placeholder', {
                   defaultValue: 'e.g. Reinforced Concrete Wall C30/37',
                 })}
-                className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-input-lg w-full"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+              <label className="oe-label">
                 {t('boq.unit', { defaultValue: 'Unit' })}
               </label>
               <select
                 value={assemblyUnit}
                 onChange={(e) => setAssemblyUnit(e.target.value)}
                 aria-label={t('boq.unit', { defaultValue: 'Unit' })}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select-lg w-full"
               >
                 {unitOptions.map((u) => (
                   <option key={u} value={u}>
@@ -1309,14 +1309,14 @@ function BuildAssemblyModal({
           </div>
 
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+            <label className="oe-label">
               {t('catalog.category', { defaultValue: 'Category' })}
             </label>
             <select
               value={assemblyCategory}
               onChange={(e) => setAssemblyCategory(e.target.value)}
               aria-label={t('catalog.category', { defaultValue: 'Category' })}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent sm:w-48"
+              className="oe-select-lg w-full sm:w-48"
             >
               {['general', 'concrete', 'masonry', 'steel', 'mep', 'earthwork', 'custom'].map(
                 (c) => (
@@ -1330,40 +1330,40 @@ function BuildAssemblyModal({
 
           {/* Resource table */}
           <div className="rounded-lg border border-border-light bg-surface-secondary/50 overflow-hidden">
-            <table className="w-full text-xs">
+            <table className="oe-table-compact w-full">
               <thead>
-                <tr className="bg-surface-tertiary text-content-secondary">
-                  <th className="px-3 py-2 text-left font-medium">
+                <tr className="bg-surface-tertiary">
+                  <th>
                     {t('catalog.resource_name', { defaultValue: 'Resource' })}
                   </th>
-                  <th className="px-3 py-2 text-center font-medium w-14">
+                  <th className="text-center w-14">
                     {t('boq.unit', { defaultValue: 'Unit' })}
                   </th>
-                  <th className="px-3 py-2 text-right font-medium w-24">
+                  <th className="text-right w-24">
                     {t('catalog.unit_rate', { defaultValue: 'Unit Rate' })}
                   </th>
-                  <th className="px-3 py-2 text-center font-medium w-16">
+                  <th className="text-center w-16">
                     {t('catalog.currency', { defaultValue: 'Currency' })}
                   </th>
-                  <th className="px-3 py-2 text-center font-medium w-20">
+                  <th className="text-center w-20">
                     {t('catalog.quantity', { defaultValue: 'Qty' })}
                   </th>
-                  <th className="px-3 py-2 text-right font-medium w-24">
+                  <th className="text-right w-24">
                     {t('catalog.subtotal', { defaultValue: 'Subtotal' })}
                   </th>
-                  <th className="px-1 py-2 w-8" />
+                  <th className="w-8" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {entries.map((entry, idx) => (
                   <tr key={entry.resource.id}>
-                    <td className="px-3 py-2 text-content-primary truncate max-w-[220px]">
+                    <td className="truncate max-w-[220px]">
                       {entry.resource.name}
                     </td>
-                    <td className="px-3 py-2 text-center text-content-tertiary">
+                    <td className="text-center text-content-tertiary">
                       {entry.resource.unit}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                    <td className="text-right tabular-nums font-medium">
                       {fmt(Number(entry.resource.base_price), entry.resource.currency || 'EUR')}
                     </td>
                     <td
@@ -1375,21 +1375,21 @@ function BuildAssemblyModal({
                     >
                       {entry.resource.currency || 'EUR'}
                     </td>
-                    <td className="px-3 py-2 text-center">
+                    <td className="text-center">
                       <input
                         type="number"
                         step="0.01"
                         min="0"
                         value={entry.quantity}
                         onChange={(e) => handleQuantityChange(idx, e.target.value)}
-                        className="h-7 w-16 rounded border border-border bg-surface-primary px-1.5 text-center text-xs tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                        className="oe-input-sm w-16 text-center tabular-nums"
                         onClick={(e) => e.stopPropagation()}
                       />
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                    <td className="text-right tabular-nums font-medium">
                       {fmt(Number(entry.resource.base_price) * entry.quantity, entry.resource.currency || 'EUR')}
                     </td>
-                    <td className="px-1 py-2 text-center">
+                    <td className="text-center">
                       <button
                         onClick={() => handleRemoveEntry(idx)}
                         aria-label={t('catalog.remove_resource', { defaultValue: 'Remove resource' })}
@@ -1404,22 +1404,22 @@ function BuildAssemblyModal({
               <tfoot>
                 {isMultiCurrency ? (
                   distinctCurrencies.map((code) => (
-                    <tr key={code} className="bg-surface-tertiary font-medium">
-                      <td colSpan={5} className="px-3 py-2 text-right text-sm text-content-primary">
+                    <tr key={code} className="bg-surface-tertiary">
+                      <td colSpan={5} className="text-right">
                         {t('catalog.total', { defaultValue: 'Total' })} ({code}):
                       </td>
-                      <td className="px-3 py-2 text-right text-sm tabular-nums text-content-primary">
+                      <td className="text-right tabular-nums">
                         {fmt(totalsByCurrency[code] ?? 0, code)} {code}
                       </td>
                       <td />
                     </tr>
                   ))
                 ) : (
-                  <tr className="bg-surface-tertiary font-medium">
-                    <td colSpan={5} className="px-3 py-2 text-right text-sm text-content-primary">
+                  <tr className="bg-surface-tertiary">
+                    <td colSpan={5} className="text-right">
                       {t('catalog.total', { defaultValue: 'Total' })}:
                     </td>
-                    <td className="px-3 py-2 text-right text-sm tabular-nums text-content-primary">
+                    <td className="text-right tabular-nums">
                       {fmt(total, currency)} {currency}
                     </td>
                     <td />
@@ -1779,7 +1779,7 @@ export function CatalogPage() {
                 value={region}
                 onChange={(e) => handleRegionChange(e.target.value)}
                 aria-label={t('catalog.filter_region', { defaultValue: 'Filter by region' })}
-                className="h-7 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-8 text-sm text-content-primary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                className="oe-select-sm ps-3"
               >
                 <option value="">
                   {t('catalog.all_regions', { defaultValue: 'All regions' })}
@@ -1971,7 +1971,7 @@ export function CatalogPage() {
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 aria-label={t('catalog.filter_category', { defaultValue: 'Filter by category' })}
-                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-48"
+                className="oe-select-lg w-full ps-3 sm:w-48"
               >
                 <option value="">
                   {t('catalog.all_categories', { defaultValue: 'All categories' })}
@@ -1997,7 +1997,7 @@ export function CatalogPage() {
                 setUnit(e.target.value);
                 setOffset(0);
               }}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-32"
+              className="oe-select-lg w-full ps-3 sm:w-32"
             >
               <option value="">
                 {t('catalog.all_units', { defaultValue: 'All units' })}
@@ -2176,10 +2176,10 @@ export function CatalogPage() {
         <>
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto" data-guide="catalog-table">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light bg-surface-tertiary text-left">
-                    <th className="px-3 py-3 w-10">
+                  <tr className="bg-surface-tertiary text-left">
+                    <th className="w-10">
                       <button
                         onClick={toggleSelectAll}
                         aria-label={t('catalog.select_all', { defaultValue: 'Select all' })}
@@ -2192,31 +2192,31 @@ export function CatalogPage() {
                         )}
                       </button>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary">
+                    <th>
                       {t('catalog.name', { defaultValue: 'Name' })}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-36">
+                    <th className="w-36">
                       {t('catalog.code', { defaultValue: 'Code' })}
                     </th>
-                    <th className="px-3 py-3 font-medium text-content-secondary w-28">
+                    <th className="w-28">
                       {t('catalog.category', { defaultValue: 'Category' })}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-16 text-center">
+                    <th className="w-16 text-center">
                       {t('boq.unit', { defaultValue: 'Unit' })}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right">
+                    <th className="w-32 text-right">
                       {t('catalog.price_avg', { defaultValue: 'Price (avg)' })}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-48">
+                    <th className="w-48">
                       {t('catalog.price_range', { defaultValue: 'Price Range' })}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-16 text-center">
+                    <th className="w-16 text-center">
                       {t('catalog.usage', { defaultValue: 'Usage' })}
                     </th>
-                    <th className="px-2 py-3 w-16" />
+                    <th className="w-16" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-light">
+                <tbody>
                   {items.map((resource) => {
                     const isExpanded = expandedId === resource.id;
                     return (
@@ -2528,7 +2528,7 @@ function PriceAdjustModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -2542,10 +2542,10 @@ function PriceAdjustModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-warning-bg text-semantic-warning">
-              <TrendingUp size={18} />
+              <TrendingUp size={20} />
             </div>
             <div>
-              <h2 id="catalog-adjust-prices-title" className="text-base font-semibold text-content-primary">
+              <h2 id="catalog-adjust-prices-title" className="oe-section-title">
                 {t('catalog.adjust_prices', { defaultValue: 'Adjust Prices' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -2592,19 +2592,19 @@ function PriceAdjustModal({
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.index_country', { defaultValue: 'Country / Source' })}</label>
-                  <select value={indexRegion} onChange={(e) => setIndexRegion(e.target.value)} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                  <select value={indexRegion} onChange={(e) => setIndexRegion(e.target.value)} className="oe-select w-full">
                     {Object.entries(PRICE_INDICES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.from_year', { defaultValue: 'From year' })}</label>
-                  <select value={baseYear} onChange={(e) => setBaseYear(Number(e.target.value))} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                  <select value={baseYear} onChange={(e) => setBaseYear(Number(e.target.value))} className="oe-select w-full">
                     {[2020,2021,2022,2023,2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.to_year', { defaultValue: 'To year' })}</label>
-                  <select value={targetYear} onChange={(e) => setTargetYear(Number(e.target.value))} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                  <select value={targetYear} onChange={(e) => setTargetYear(Number(e.target.value))} className="oe-select w-full">
                     {[2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030].map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
@@ -2633,7 +2633,7 @@ function PriceAdjustModal({
 
           {/* Factor input (manual or auto-filled from index) */}
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-2 block">
+            <label className="oe-label mb-2">
               {useIndex
                 ? t('catalog.computed_factor', { defaultValue: 'Computed Factor (from index above)' })
                 : t('catalog.price_factor', { defaultValue: 'Price Factor' })}
@@ -2664,7 +2664,7 @@ function PriceAdjustModal({
                     setConfirmed(false);
                   }
                 }}
-                className="h-9 w-20 rounded-lg border border-border bg-surface-primary px-2 text-center text-sm font-mono tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-20 text-center font-mono tabular-nums"
               />
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -2692,7 +2692,7 @@ function PriceAdjustModal({
           {/* Filter selectors */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">
+              <label className="oe-label">
                 {t('catalog.type_label', { defaultValue: 'Type' })}
               </label>
               <select
@@ -2701,7 +2701,7 @@ function PriceAdjustModal({
                   setFilterType(e.target.value);
                   setConfirmed(false);
                 }}
-                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('catalog.all_types', { defaultValue: 'All types' })}
@@ -2721,7 +2721,7 @@ function PriceAdjustModal({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">
+              <label className="oe-label">
                 {t('catalog.category', { defaultValue: 'Category' })}
               </label>
               <select
@@ -2730,7 +2730,7 @@ function PriceAdjustModal({
                   setFilterCategory(e.target.value);
                   setConfirmed(false);
                 }}
-                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('catalog.all_categories', { defaultValue: 'All categories' })}
@@ -2743,7 +2743,7 @@ function PriceAdjustModal({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">
+              <label className="oe-label">
                 {t('catalog.region_label', { defaultValue: 'Region' })}
               </label>
               <select
@@ -2752,7 +2752,7 @@ function PriceAdjustModal({
                   setFilterRegion(e.target.value);
                   setConfirmed(false);
                 }}
-                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 <option value="">
                   {t('catalog.all_regions', { defaultValue: 'All regions' })}
@@ -2925,7 +2925,7 @@ function CreateResourceModal({
   }, [form, addToast, t, onCreated]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -2935,7 +2935,7 @@ function CreateResourceModal({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 id="catalog-create-resource-title" className="text-base font-semibold text-content-primary">
+            <h2 id="catalog-create-resource-title" className="oe-section-title">
               {t('catalog.create_resource', { defaultValue: 'Add Custom Resource' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -2949,22 +2949,22 @@ function CreateResourceModal({
 
         <div className="px-6 py-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-content-secondary mb-1 block">
+            <label className="oe-label">
               {t('catalog.name', { defaultValue: 'Name' })} *
             </label>
             <input
               autoFocus type="text" value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder={t('catalog.resource_name_placeholder', { defaultValue: 'e.g. Reinforced concrete C30/37' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-input w-full"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('catalog.type_label', { defaultValue: 'Type' })}</label>
+              <label className="oe-label">{t('catalog.type_label', { defaultValue: 'Type' })}</label>
               <select value={form.resource_type} onChange={(e) => setForm({ ...form, resource_type: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue">
+                className="oe-select w-full">
                 {TYPES.map((type) => (
                   <option key={type} value={type}>
                     {t(`catalog.type_${type}`, { defaultValue: type.charAt(0).toUpperCase() + type.slice(1) })}
@@ -2973,33 +2973,33 @@ function CreateResourceModal({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('catalog.category', { defaultValue: 'Category' })}</label>
+              <label className="oe-label">{t('catalog.category', { defaultValue: 'Category' })}</label>
               <input type="text" value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 placeholder={t('catalog.category_placeholder', { defaultValue: 'e.g. Concrete & Cement' })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-full"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('boq.unit', { defaultValue: 'Unit' })}</label>
+              <label className="oe-label">{t('boq.unit', { defaultValue: 'Unit' })}</label>
               <select value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue">
+                className="oe-select w-full">
                 {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('catalog.price', { defaultValue: 'Price' })}</label>
+              <label className="oe-label">{t('catalog.price', { defaultValue: 'Price' })}</label>
               <input type="number" step="0.01" value={form.base_price}
                 onChange={(e) => setForm({ ...form, base_price: e.target.value })}
                 placeholder="0.00"
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-input w-full text-right"
               />
             </div>
             <div>
-              <label htmlFor="catalog-resource-currency" className="text-xs font-medium text-content-secondary mb-1 block">{t('catalog.currency', { defaultValue: 'Currency' })}</label>
+              <label htmlFor="catalog-resource-currency" className="oe-label">{t('catalog.currency', { defaultValue: 'Currency' })}</label>
               <CurrencyPicker
                 id="catalog-resource-currency"
                 value={form.currency}

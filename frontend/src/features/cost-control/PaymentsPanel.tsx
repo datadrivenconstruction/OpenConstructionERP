@@ -46,7 +46,7 @@ import { TermsDrawer } from './TermsDrawer';
 
 type Tab = 'ledger' | 'retention' | 'checks';
 
-const INPUT = 'h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm disabled:opacity-60';
+const INPUT = 'w-full';
 
 function today(): string {
   const d = new Date();
@@ -68,7 +68,7 @@ function errorText(t: TFunction, err: unknown, currency: string): string {
 function Figure({ label, value, sub, testId }: { label: string; value: string; sub?: string; testId?: string }) {
   return (
     <div className="min-w-0" data-testid={testId}>
-      <div className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">{label}</div>
+      <div className="oe-overline">{label}</div>
       <div className="text-sm font-semibold tabular-nums text-content-primary">{value}</div>
       {sub && <div className="text-2xs text-content-tertiary">{sub}</div>}
     </div>
@@ -148,16 +148,16 @@ function ContractBlock({
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-sm">
+              <table className="oe-table w-full min-w-[720px]">
                 <thead>
-                  <tr className="border-b border-border-light text-start text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                    <th className="py-2 pe-2">{t('cost_control.pay.col_invoice', { defaultValue: 'Invoice' })}</th>
-                    <th className="px-2 py-2">{t('cost_control.pay.kind', { defaultValue: 'Invoice kind' })}</th>
-                    <th className="px-2 py-2 text-end">{t('cost_control.pay.col_gross', { defaultValue: 'Gross to assess' })}</th>
-                    <th className="px-2 py-2 text-end">{t('cost_control.pay.col_retention', { defaultValue: 'Retention' })}</th>
-                    <th className="px-2 py-2 text-end">{t('cost_control.pay.col_release', { defaultValue: 'Release' })}</th>
-                    <th className="px-2 py-2 text-end">{t('cost_control.pay.col_paid', { defaultValue: 'Paid' })}</th>
-                    <th className="px-2 py-2 text-end">{t('cost_control.pay.col_status', { defaultValue: 'Status' })}</th>
+                  <tr className="text-start text-2xs">
+                    <th className="pe-2">{t('cost_control.pay.col_invoice', { defaultValue: 'Invoice' })}</th>
+                    <th>{t('cost_control.pay.kind', { defaultValue: 'Invoice kind' })}</th>
+                    <th className="text-end">{t('cost_control.pay.col_gross', { defaultValue: 'Gross to assess' })}</th>
+                    <th className="text-end">{t('cost_control.pay.col_retention', { defaultValue: 'Retention' })}</th>
+                    <th className="text-end">{t('cost_control.pay.col_release', { defaultValue: 'Release' })}</th>
+                    <th className="text-end">{t('cost_control.pay.col_paid', { defaultValue: 'Paid' })}</th>
+                    <th className="text-end">{t('cost_control.pay.col_status', { defaultValue: 'Status' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -184,7 +184,7 @@ function ContractBlock({
                         }}
                         data-testid={`ledger-invoice-${inv.number}`}
                       >
-                        <td className="py-2 pe-2">
+                        <td className="pe-2">
                           <span className="flex items-center gap-1.5 font-medium text-content-primary">
                             {worst === 'error' && <AlertOctagon size={14} className="text-semantic-error" />}
                             {worst === 'warning' && <AlertTriangle size={14} className="text-semantic-warning" />}
@@ -192,7 +192,7 @@ function ContractBlock({
                           </span>
                           {inv.invoice_date && <span className="text-2xs text-content-tertiary">{fmtDate(inv.invoice_date)}</span>}
                         </td>
-                        <td className="px-2 py-2 text-content-secondary">
+                        <td className="text-content-secondary">
                           {kindLabel(t, inv.kind)}
                           {!inv.counted && (
                             <span className="block text-2xs text-content-tertiary">
@@ -200,11 +200,11 @@ function ContractBlock({
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.gross_after, currency)}</td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.retention, currency)}</td>
-                        <td className="px-2 py-2 text-end font-semibold tabular-nums text-content-primary">{fmtMoney(inv.figures.release, currency)}</td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.paid, currency)}</td>
-                        <td className="px-2 py-2 text-end">
+                        <td className="text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.gross_after, currency)}</td>
+                        <td className="text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.retention, currency)}</td>
+                        <td className="text-end font-semibold tabular-nums">{fmtMoney(inv.figures.release, currency)}</td>
+                        <td className="text-end tabular-nums text-content-secondary">{fmtMoney(inv.paid, currency)}</td>
+                        <td className="text-end">
                           <Badge variant={inv.release_status === 'released' ? (inv.differs ? 'warning' : 'success') : 'neutral'} size="sm">
                             {inv.release_status === 'released'
                               ? t('cost_control.pay.status_released', { defaultValue: 'Released' })
@@ -306,7 +306,7 @@ function LedgerTab({
       ))}
       {data.other_invoices.length > 0 && (
         <section className="rounded-xl border border-border-light px-4 py-3" data-testid="ledger-other-invoices">
-          <h3 className="text-sm font-medium text-content-primary">
+          <h3 className="oe-card-title">
             {t('cost_control.pay.other_title', { defaultValue: 'Supplier invoices on no contract' })}
           </h3>
           <p className="mb-2 text-xs text-content-tertiary">
@@ -324,7 +324,7 @@ function LedgerTab({
                 <span className="tabular-nums text-content-secondary">{fmtMoney(inv.gross, cur)}</span>
                 {canEdit && data.contracts.length > 0 && (
                   <select
-                    className="h-8 w-48 rounded-lg border border-border bg-surface-primary px-2 text-sm"
+                    className="oe-select w-48"
                     value=""
                     disabled={assign.isPending}
                     aria-label={t('cost_control.pay.put_on_contract', { defaultValue: 'Put on a contract' })}
@@ -421,7 +421,7 @@ function PostingForm({
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">{t('cost_control.pay.post_kind', { defaultValue: 'Which retention' })}</span>
         <select
-          className={INPUT}
+          className={`oe-select ${INPUT}`}
           value={kind}
           onChange={(e) => {
             const next = e.target.value as RetentionKind;
@@ -438,7 +438,7 @@ function PostingForm({
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">{t('cost_control.pay.post_event', { defaultValue: 'Event' })}</span>
-        <select className={INPUT} value={event} onChange={(e) => setEvent(e.target.value as ReleaseEvent)}>
+        <select className={`oe-select ${INPUT}`} value={event} onChange={(e) => setEvent(e.target.value as ReleaseEvent)}>
           {RELEASE_EVENTS.map((ev) => (
             <option key={ev} value={ev}>
               {eventLabel(t, ev)}
@@ -448,21 +448,21 @@ function PostingForm({
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">{t('cost_control.pay.post_event_on', { defaultValue: 'Event reached on' })}</span>
-        <input type="date" className={INPUT} value={eventOn} onChange={(e) => setEventOn(e.target.value)} />
+        <input type="date" className={`oe-input ${INPUT}`} value={eventOn} onChange={(e) => setEventOn(e.target.value)} />
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">
           {t('cost_control.pay.post_amount', { defaultValue: 'Amount ({{currency}})', currency })}
         </span>
-        <input className={INPUT} inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} data-testid="posting-amount" />
+        <input className={`oe-input ${INPUT}`} inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} data-testid="posting-amount" />
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">{t('cost_control.pay.post_on', { defaultValue: 'Paid on' })}</span>
-        <input type="date" className={INPUT} required value={postedOn} onChange={(e) => setPostedOn(e.target.value)} />
+        <input type="date" className={`oe-input ${INPUT}`} required value={postedOn} onChange={(e) => setPostedOn(e.target.value)} />
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-content-secondary">{t('cost_control.pay.post_ref', { defaultValue: 'Document' })}</span>
-        <input className={INPUT} maxLength={255} value={ref} onChange={(e) => setRef(e.target.value)} />
+        <input className={`oe-input ${INPUT}`} maxLength={255} value={ref} onChange={(e) => setRef(e.target.value)} />
       </label>
       <div className="col-span-full flex justify-end gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onDone}>
@@ -517,22 +517,22 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
         <Figure label={t('cost_control.pay.fig_posted', { defaultValue: 'Paid back' })} value={fmtMoney(data.posted, cur)} />
       </div>
       <div className="overflow-x-auto rounded-xl border border-border-light">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="oe-table w-full min-w-[720px]">
           <thead>
-            <tr className="border-b border-border-light bg-surface-secondary/60 text-start text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-              <th className="py-2 ps-4 pe-2">{t('cost_control.col_contract', { defaultValue: 'Contract' })}</th>
-              <th className="px-2 py-2">{t('cost_control.pay.col_terms', { defaultValue: 'Terms' })}</th>
-              <th className="px-2 py-2 text-end">{t('cost_control.pay.col_withheld', { defaultValue: 'Withheld' })}</th>
-              <th className="px-2 py-2 text-end">{t('cost_control.pay.fig_posted', { defaultValue: 'Paid back' })}</th>
-              <th className="px-2 py-2 text-end">{t('cost_control.pay.col_held', { defaultValue: 'Still held' })}</th>
-              <th className="py-2 pe-4 ps-2" />
+            <tr className="text-start text-2xs">
+              <th className="ps-4 pe-2">{t('cost_control.col_contract', { defaultValue: 'Contract' })}</th>
+              <th>{t('cost_control.pay.col_terms', { defaultValue: 'Terms' })}</th>
+              <th className="text-end">{t('cost_control.pay.col_withheld', { defaultValue: 'Withheld' })}</th>
+              <th className="text-end">{t('cost_control.pay.fig_posted', { defaultValue: 'Paid back' })}</th>
+              <th className="text-end">{t('cost_control.pay.col_held', { defaultValue: 'Still held' })}</th>
+              <th className="pe-4 ps-2" />
             </tr>
           </thead>
           <tbody>
             {data.contracts.map((c) => (
               <Fragment key={c.contract_id}>
               <tr className="border-b border-border-light align-top last:border-0" data-testid={`retention-row-${c.code}`}>
-                <td className="py-2.5 ps-4 pe-2">
+                <td className="ps-4 pe-2">
                   <span className="font-medium text-content-primary">{c.code}</span>
                   <span className="block text-xs text-content-tertiary">{c.title}</span>
                   {c.postings.length > 0 && (
@@ -558,7 +558,7 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
                     </ul>
                   )}
                 </td>
-                <td className="px-2 py-2.5 text-xs text-content-secondary">
+                <td className="text-content-secondary">
                   {num(c.retention_percent) === 0
                     ? t('cost_control.pay.terms_line_none', { defaultValue: 'No retention on interim invoices' })
                     : t('cost_control.pay.terms_line', {
@@ -576,10 +576,10 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
                     </span>
                   )}
                 </td>
-                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtMoney(c.withheld, cur)}</td>
-                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtMoney(c.posted, cur)}</td>
-                <td className="px-2 py-2.5 text-end font-semibold tabular-nums text-content-primary">{fmtMoney(c.held, cur)}</td>
-                <td className="py-2.5 pe-4 ps-2 text-end">
+                <td className="text-end tabular-nums text-content-secondary">{fmtMoney(c.withheld, cur)}</td>
+                <td className="text-end tabular-nums text-content-secondary">{fmtMoney(c.posted, cur)}</td>
+                <td className="text-end font-semibold tabular-nums">{fmtMoney(c.held, cur)}</td>
+                <td className="pe-4 ps-2 text-end">
                   {canRelease && num(c.held) > 0 && posting !== c.contract_id && (
                     <Button variant="secondary" size="sm" onClick={() => setPosting(c.contract_id)} data-testid={`posting-open-${c.code}`}>
                       {t('cost_control.pay.post_open', { defaultValue: 'Pay back' })}
@@ -588,8 +588,8 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
                 </td>
               </tr>
               {posting === c.contract_id && (
-                <tr className="border-b border-border-light">
-                  <td colSpan={6} className="px-4 py-3">
+                <tr>
+                  <td colSpan={6}>
                     <PostingForm contract={c} currency={cur} onDone={() => setPosting(null)} />
                   </td>
                 </tr>
@@ -663,7 +663,7 @@ export function PaymentsPanel({
     <div data-testid="payments-panel">
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('cost_control.pay.title', { defaultValue: 'Invoices and payments' })}
           </h2>
           <p className="text-xs text-content-tertiary">

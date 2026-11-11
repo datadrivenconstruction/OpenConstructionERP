@@ -82,10 +82,10 @@ export interface DwgDrawingCompareDrawerProps {
 }
 
 const CHANGE_DOT: Record<DwgEntityDiffRow['change_type'], string> = {
-  added: 'bg-emerald-500',
-  removed: 'bg-red-500',
-  modified: 'bg-amber-500',
-  unchanged: 'bg-slate-400',
+  added: 'bg-semantic-success',
+  removed: 'bg-semantic-error',
+  modified: 'bg-semantic-warning',
+  unchanged: 'bg-content-quaternary',
 };
 
 function ChangeBadge({ type }: { type: DwgEntityDiffRow['change_type'] }) {
@@ -429,7 +429,7 @@ export function DwgDrawingCompareDrawer({
               value={targetDrawingId}
               onChange={(e) => setTargetDrawingId(e.target.value)}
               data-testid="dwg-compare-target"
-              className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-select-sm w-full"
             >
               <option value="">
                 {t('dwg_compare.this_drawing_revisions', {
@@ -472,9 +472,9 @@ export function DwgDrawingCompareDrawer({
               className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-2.5 py-1.5 text-xs font-semibold text-oe-blue transition hover:bg-oe-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {revisionUploadMutation.isPending ? (
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
-                <FileStack size={13} />
+                <FileStack size={14} />
               )}
               <span className="truncate">
                 {t('dwg_compare.upload_new_revision', {
@@ -490,9 +490,9 @@ export function DwgDrawingCompareDrawer({
               className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary transition hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {uploadMutation.isPending ? (
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Upload size={13} />
+                <Upload size={14} />
               )}
               <span className="truncate">
                 {t('dwg_compare.upload_other_drawing', {
@@ -546,7 +546,7 @@ export function DwgDrawingCompareDrawer({
                 onChange={(e) => setFromId(e.target.value)}
                 disabled={versions.length === 0}
                 data-testid="dwg-compare-from"
-                className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select-sm w-full"
               >
                 {versions.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -565,7 +565,7 @@ export function DwgDrawingCompareDrawer({
                 onChange={(e) => setToId(e.target.value)}
                 disabled={versions.length === 0}
                 data-testid="dwg-compare-to"
-                className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="oe-select-sm w-full"
               >
                 {versions.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -586,7 +586,7 @@ export function DwgDrawingCompareDrawer({
             >
               {drawingName}
             </span>
-            <ArrowRight size={13} className="shrink-0 text-content-tertiary" />
+            <ArrowRight size={14} className="shrink-0 text-content-tertiary" />
             <span
               className="min-w-0 flex-1 truncate text-right font-medium text-content-primary"
               title={targetDrawing?.name || targetDrawing?.filename || ''}
@@ -615,7 +615,7 @@ export function DwgDrawingCompareDrawer({
         )}
 
         {mode === 'pair' && targetDrawing && !targetReady && (
-          <p className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-content-secondary">
+          <p className="rounded-md border border-semantic-warning/30 bg-semantic-warning/5 px-3 py-2 text-xs text-content-secondary">
             {targetDrawing.status === 'error' ||
             targetDrawing.status === 'empty' ||
             targetDrawing.status === 'needs_conversion'
@@ -650,7 +650,7 @@ export function DwgDrawingCompareDrawer({
               data-testid="dwg-compare-overlay"
               className="h-3.5 w-3.5 accent-oe-blue"
             />
-            <Eye size={13} />
+            <Eye size={14} />
             {t('dwg_compare.overlay', { defaultValue: 'Onion-skin overlay' })}
           </label>
           {overlay && (
@@ -706,7 +706,7 @@ export function DwgDrawingCompareDrawer({
         )}
 
         {canCompare && diffQuery.isError && (
-          <p className="rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-500">
+          <p className="rounded-md border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-xs text-semantic-error">
             {t('dwg_compare.error', {
               defaultValue: 'Could not compute the comparison. Please try again.',
             })}
@@ -816,7 +816,7 @@ function SummaryTab({
             n: summary.from_entity_count,
           })}
         </span>
-        <ArrowRight size={13} className="text-content-tertiary" />
+        <ArrowRight size={14} className="text-content-tertiary" />
         <span>
           {t('dwg_compare.entity_count_to', {
             defaultValue: 'After: {{n}} entities',
@@ -837,9 +837,9 @@ function SummaryCard({
 }) {
   const { t } = useTranslation();
   const rows: { key: 'added' | 'removed' | 'modified'; color: string; label: string }[] = [
-    { key: 'added', color: 'text-emerald-500', label: t('dwg_compare.change_added', { defaultValue: 'Added' }) },
-    { key: 'removed', color: 'text-red-500', label: t('dwg_compare.change_removed', { defaultValue: 'Removed' }) },
-    { key: 'modified', color: 'text-amber-500', label: t('dwg_compare.change_modified', { defaultValue: 'Modified' }) },
+    { key: 'added', color: 'text-semantic-success', label: t('dwg_compare.change_added', { defaultValue: 'Added' }) },
+    { key: 'removed', color: 'text-semantic-error', label: t('dwg_compare.change_removed', { defaultValue: 'Removed' }) },
+    { key: 'modified', color: 'text-semantic-warning', label: t('dwg_compare.change_modified', { defaultValue: 'Modified' }) },
   ];
   return (
     <div className="rounded-lg border border-border-light p-3">
@@ -877,30 +877,30 @@ function EntitiesTab({
   }
   return (
     <div className="overflow-hidden rounded-lg border border-border-light">
-      <table className="w-full text-xs">
-        <thead className="bg-surface-secondary text-content-tertiary">
+      <table className="oe-table-compact w-full">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left font-medium">{t('dwg_compare.col_layer', { defaultValue: 'Layer' })}</th>
-            <th className="px-3 py-2 text-left font-medium">{t('dwg_compare.col_change', { defaultValue: 'Change' })}</th>
-            <th className="px-3 py-2 text-right font-medium">{t('dwg_compare.col_before', { defaultValue: 'Before' })}</th>
-            <th className="px-3 py-2 text-right font-medium">{t('dwg_compare.col_after', { defaultValue: 'After' })}</th>
-            <th className="px-3 py-2 text-right font-medium">{t('dwg_compare.col_delta', { defaultValue: 'Δ' })}</th>
+            <th>{t('dwg_compare.col_layer', { defaultValue: 'Layer' })}</th>
+            <th>{t('dwg_compare.col_change', { defaultValue: 'Change' })}</th>
+            <th className="text-right">{t('dwg_compare.col_before', { defaultValue: 'Before' })}</th>
+            <th className="text-right">{t('dwg_compare.col_after', { defaultValue: 'After' })}</th>
+            <th className="text-right">{t('dwg_compare.col_delta', { defaultValue: 'Δ' })}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.entity_id} className="border-t border-border-light">
-              <td className="px-3 py-2 font-medium text-content-primary truncate max-w-[160px]" title={r.layer}>
+            <tr key={r.entity_id}>
+              <td className="font-medium truncate max-w-[160px]" title={r.layer}>
                 {r.layer}
               </td>
-              <td className="px-3 py-2">
+              <td>
                 <ChangeBadge type={r.change_type} />
               </td>
-              <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{r.old_count}</td>
-              <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{r.new_count}</td>
+              <td className="text-right tabular-nums text-content-secondary">{r.old_count}</td>
+              <td className="text-right tabular-nums text-content-secondary">{r.new_count}</td>
               <td
                 className={clsx(
-                  'px-3 py-2 text-right tabular-nums font-semibold',
+                  'text-right tabular-nums font-semibold',
                   r.delta > 0 ? 'text-emerald-500' : r.delta < 0 ? 'text-red-500' : 'text-content-tertiary',
                 )}
               >

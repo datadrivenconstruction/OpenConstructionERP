@@ -325,7 +325,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.version_history', { defaultValue: 'Version History' })}
             </h3>
           </div>
@@ -381,7 +381,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder={t('boq.snapshot_label', { defaultValue: 'Snapshot label (optional)...' })}
                   aria-label={t('boq.snapshot_label', { defaultValue: 'Snapshot label (optional)...' })}
-                  className="flex-1 h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-input flex-1"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCreate();
                   }}
@@ -438,7 +438,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                         ? 'bg-semantic-success'
                         : diff?.trend === 'down'
                           ? 'bg-semantic-error'
-                          : 'bg-gray-400';
+                          : 'bg-content-quaternary';
 
                     return (
                     <div
@@ -560,7 +560,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                               className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
                               title={t('boq.restore_snapshot', { defaultValue: 'Restore this version' })}
                             >
-                              <RotateCcw size={13} />
+                              <RotateCcw size={14} />
                             </button>
                             <button
                               onClick={() => deleteMutation.mutate(snap.id)}

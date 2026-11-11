@@ -170,7 +170,7 @@ export function CaseConstellation({
           }}
         >
           <span
-            className="relative block h-full w-full bg-slate-200"
+            className="relative block h-full w-full bg-surface-tertiary"
             style={{ clipPath: HEX_CELL_CLIP }}
           >
             {face ? (
@@ -268,7 +268,7 @@ export function CaseConstellation({
       </div>
 
       <figcaption className="text-center">
-        <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <p className="oe-overline">
           {heading}
         </p>
         <p className="text-xs text-content-tertiary">{count}</p>

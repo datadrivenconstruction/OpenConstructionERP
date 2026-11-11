@@ -219,7 +219,7 @@ export default function BIMPropertyFilterBar({
         >
           <div className="grid grid-cols-2 gap-1.5">
             <select
-              className={inputClass}
+              className="oe-select-sm w-full min-w-0"
               value={field}
               onChange={(e) => {
                 const f = e.target.value as FilterField;
@@ -254,7 +254,7 @@ export default function BIMPropertyFilterBar({
               )}
             </select>
             <select
-              className={inputClass}
+              className="oe-select-sm w-full min-w-0"
               value={numeric ? 'between' : op}
               disabled={numeric}
               onChange={(e) => setOp(e.target.value as ConditionOp)}
@@ -273,7 +273,7 @@ export default function BIMPropertyFilterBar({
           {op === 'between' || numeric ? (
             <div className="grid grid-cols-2 gap-1.5">
               <input
-                className={inputClass}
+                className="oe-input-sm w-full min-w-0"
                 inputMode="decimal"
                 value={min}
                 onChange={(e) => setMin(e.target.value)}
@@ -282,7 +282,7 @@ export default function BIMPropertyFilterBar({
                 data-testid="bim-pfilter-min"
               />
               <input
-                className={inputClass}
+                className="oe-input-sm w-full min-w-0"
                 inputMode="decimal"
                 value={max}
                 onChange={(e) => setMax(e.target.value)}

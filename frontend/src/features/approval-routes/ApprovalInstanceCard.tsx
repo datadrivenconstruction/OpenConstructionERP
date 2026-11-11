@@ -482,7 +482,7 @@ export function ApprovalInstanceCard({
               variant="ghost"
               onClick={() => cancelMut.mutate(activeInstance.id)}
               loading={cancelMut.isPending}
-              icon={<Ban size={13} />}
+              icon={<Ban size={14} />}
             >
               {t('approvalRoutes.cancel', { defaultValue: 'Cancel workflow' })}
             </Button>
@@ -651,7 +651,7 @@ export function StepRow({
               variant="secondary"
               onClick={() => onDecide('rejected')}
               loading={deciding}
-              icon={<XCircle size={13} />}
+              icon={<XCircle size={14} />}
               data-testid={`approval-reject-${step.id}`}
             >
               {t('approvalRoutes.rejectButton', { defaultValue: 'Reject' })}
@@ -661,7 +661,7 @@ export function StepRow({
               variant="primary"
               onClick={() => onDecide('approved')}
               loading={deciding}
-              icon={<CheckCircle2 size={13} />}
+              icon={<CheckCircle2 size={14} />}
               data-testid={`approval-approve-${step.id}`}
             >
               {t('approvalRoutes.approveButton', { defaultValue: 'Approve' })}
@@ -681,9 +681,9 @@ export function StepRow({
                 className="flex items-center gap-1.5 text-2xs text-content-tertiary"
               >
                 {s.decision === 'approved' ? (
-                  <CheckCircle2 size={11} className="text-semantic-success" />
+                  <CheckCircle2 size={12} className="text-semantic-success" />
                 ) : (
-                  <XCircle size={11} className="text-semantic-error" />
+                  <XCircle size={12} className="text-semantic-error" />
                 )}
                 <span className="truncate">
                   {s.approver_user_id ??

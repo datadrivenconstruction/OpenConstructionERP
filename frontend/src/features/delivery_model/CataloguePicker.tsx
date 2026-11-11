@@ -124,7 +124,7 @@ export function StartModel({ projectId, viewer, labels, onDone }: StartModelProp
   return (
     <section className="space-y-3 rounded-xl border border-border bg-surface-elevated shadow-sm p-4" data-testid="start-model">
       <div>
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('delivery_model.ui.start.heading', { defaultValue: 'Catalogue of delivery forms' })}
         </h2>
         <p className="text-xs text-content-secondary">
@@ -241,7 +241,7 @@ export function ChangeCatalogueDialog({ open, onClose, projectId, model, pinned,
         )}
         {unmapped.length > 0 && (
           <div className="space-y-2" data-testid="form-mapping">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('delivery_model.ui.catalogue.mapping_heading', { defaultValue: 'Forms that need a match' })}
             </h3>
             <p className="text-xs text-content-secondary">

@@ -1397,10 +1397,7 @@ function TextPinPopup({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder={t('dwg_takeoff.enter_label', 'Enter label...')}
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5
-                       text-sm text-white placeholder:text-white/30
-                       focus:outline-none focus:ring-1 focus:ring-emerald-500/60 focus:border-emerald-500/40
-                       transition-colors"
+            className="oe-input w-full bg-white/5"
           />
 
           {/* Color picker */}
@@ -1416,7 +1413,7 @@ function TextPinPopup({
                   onClick={() => setColor(c)}
                   className={`h-5 w-5 rounded-full border-2 transition-all ${
                     color === c
-                      ? 'scale-125 border-emerald-400 shadow-sm shadow-emerald-400/30'
+                      ? 'scale-125 border-semantic-success shadow-sm shadow-emerald-400/30'
                       : 'border-transparent hover:scale-110'
                   }`}
                   style={{
@@ -1436,10 +1433,7 @@ function TextPinPopup({
             <select
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
-              className="w-full rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5
-                         text-sm text-white appearance-none
-                         focus:outline-none focus:ring-1 focus:ring-emerald-500/60 focus:border-emerald-500/40
-                         transition-colors cursor-pointer"
+              className="oe-select w-full bg-white/5 cursor-pointer"
             >
               {FONT_SIZES.map((s) => (
                 <option key={s} value={s} className="bg-[#1e1e38] text-white">
@@ -1479,9 +1473,9 @@ function TextPinPopup({
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-lg bg-emerald-600 px-3 py-1.5
+              className="flex-1 rounded-lg bg-semantic-success px-3 py-1.5
                          text-xs font-semibold text-white
-                         hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed
+                         hover:bg-semantic-success disabled:opacity-40 disabled:cursor-not-allowed
                          transition-colors shadow-sm shadow-emerald-600/30"
             >
               {t('dwg_takeoff.place', 'Place')}

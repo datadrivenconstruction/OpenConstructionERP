@@ -112,7 +112,7 @@ export function ForgotPasswordPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-success-bg text-semantic-success">
                 <CheckCircle2 size={28} />
               </div>
-              <h2 className="text-lg font-semibold text-content-primary mb-2">
+              <h2 className="oe-section-title mb-2">
                 {t('auth.check_email', 'Check your email')}
               </h2>
               <p className="text-sm text-content-secondary mb-2">
@@ -146,7 +146,7 @@ export function ForgotPasswordPage() {
                   {t('auth.back_to_login', 'Back to sign in')}
                 </Link>
 
-                <h2 className="text-lg font-semibold text-content-primary mb-1">
+                <h2 className="oe-section-title mb-1">
                   {t('auth.forgot_password', 'Forgot password?')}
                 </h2>
                 <p className="text-sm text-content-secondary mb-6">

@@ -243,7 +243,7 @@ export function EstimateClassification({ boqId }: { boqId: string }) {
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('boq.aace_class', { defaultValue: 'AACE Class' })}{' '}
                 {classification.estimate_class}
               </h3>

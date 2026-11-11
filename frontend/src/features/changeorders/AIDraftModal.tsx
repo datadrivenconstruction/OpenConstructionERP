@@ -110,7 +110,7 @@ export function AIDraftModal({
   });
 
   const fieldCls =
-    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+    'w-full';
 
   return (
     <WideModal
@@ -140,7 +140,7 @@ export function AIDraftModal({
               disabled={!sourceText.trim() || draftMut.isPending}
               onClick={() => draftMut.mutate()}
             >
-              <Wand2 size={15} className="mr-1.5" />
+              <Wand2 size={16} className="mr-1.5" />
               {draftMut.isPending
                 ? t('changeorders.ai_generating', { defaultValue: 'Generating…' })
                 : t('changeorders.ai_generate', { defaultValue: 'Generate draft' })}
@@ -158,14 +158,14 @@ export function AIDraftModal({
             })}
           </p>
           <div>
-            <label htmlFor="ai-source-kind" className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label htmlFor="ai-source-kind" className="oe-label">
               {t('changeorders.ai_source', { defaultValue: 'Source' })}
             </label>
             <select
               id="ai-source-kind"
               value={sourceKind}
               onChange={(e) => setSourceKind(e.target.value as typeof sourceKind)}
-              className={fieldCls}
+              className={`oe-select-lg ${fieldCls}`}
             >
               <option value="free_text">{t('changeorders.ai_src_free', { defaultValue: 'Free text / site notes' })}</option>
               <option value="daily_log">{t('changeorders.ai_src_log', { defaultValue: 'Daily diary entry' })}</option>
@@ -173,7 +173,7 @@ export function AIDraftModal({
             </select>
           </div>
           <div>
-            <label htmlFor="ai-source-text" className="mb-1.5 block text-sm font-medium text-content-primary">
+            <label htmlFor="ai-source-text" className="oe-label">
               {t('changeorders.ai_text', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -185,7 +185,7 @@ export function AIDraftModal({
                 defaultValue:
                   'e.g. Extra rock excavation in the north footing. Roughly 3 days delay. Additional material and plant about CAD 15,000.',
               })}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-textarea w-full"
             />
           </div>
         </div>
@@ -211,7 +211,7 @@ export function AIDraftModal({
 
           <WideModalSection columns={2}>
             <WideModalField label={t('common.title', { defaultValue: 'Title' })} required span={2} htmlFor="ai-title">
-              <input id="ai-title" value={title} onChange={(e) => setTitle(e.target.value)} className={fieldCls} />
+              <input id="ai-title" value={title} onChange={(e) => setTitle(e.target.value)} className={`oe-input-lg ${fieldCls}`} />
             </WideModalField>
             <WideModalField label={t('common.description', { defaultValue: 'Description' })} span={2} htmlFor="ai-desc">
               <textarea
@@ -219,33 +219,33 @@ export function AIDraftModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                className="oe-textarea w-full"
               />
             </WideModalField>
             <WideModalField
               label={t('changeorders.cost_impact', { defaultValue: 'Cost impact' }) + (currency ? ` (${currency})` : '')}
               htmlFor="ai-cost"
             >
-              <input id="ai-cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} className={fieldCls} />
+              <input id="ai-cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} className={`oe-input-lg ${fieldCls}`} />
             </WideModalField>
             <WideModalField label={t('changeorders.schedule_days', { defaultValue: 'Schedule days' })} htmlFor="ai-days">
-              <input id="ai-days" type="number" value={days} onChange={(e) => setDays(e.target.value)} className={fieldCls} />
+              <input id="ai-days" type="number" value={days} onChange={(e) => setDays(e.target.value)} className={`oe-input-lg ${fieldCls}`} />
             </WideModalField>
           </WideModalSection>
 
           {draft.lines.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <p className="oe-overline mb-1.5">
                 {t('changeorders.ai_lines', { defaultValue: 'Suggested line items' })}
               </p>
               <div className="overflow-hidden rounded-md border border-border-light">
-                <table className="w-full text-sm">
+                <table className="oe-table w-full">
                   <tbody>
                     {draft.lines.map((l, i) => (
-                      <tr key={i} className="border-b border-border-light last:border-0">
-                        <td className="px-3 py-2 text-content-secondary">{l.description}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-content-primary">{l.cost_delta}</td>
-                        <td className="px-3 py-2 text-right">
+                      <tr key={i} className="last:border-0">
+                        <td className="text-content-secondary">{l.description}</td>
+                        <td className="text-right tabular-nums">{l.cost_delta}</td>
+                        <td className="text-right">
                           <ConfidenceMeter value={l.confidence} />
                         </td>
                       </tr>

@@ -210,30 +210,30 @@ export function HistoricalRangePanel({ positions }: { positions: HistoricalPosit
             </p>
           ) : (
             <>
-              <table className="w-full">
+              <table className="oe-table-compact w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-content-tertiary">
-                    <th className="py-1 pe-2 font-medium">{t('analytics.hist.col_position', { defaultValue: 'Position' })}</th>
-                    <th className="px-2 py-1 font-medium">
+                  <tr className="text-left">
+                    <th className="pe-2">{t('analytics.hist.col_position', { defaultValue: 'Position' })}</th>
+                    <th>
                       {t('analytics.hist.col_code', { defaultValue: 'Code ({{key}})', key: ctx.classificationKey ?? '-' })}
                     </th>
-                    <th className="px-2 py-1 text-right font-medium">{t('analytics.hist.col_planned', { defaultValue: 'Planned h/unit' })}</th>
-                    <th className="px-2 py-1 font-medium">{t('analytics.hist.col_history', { defaultValue: 'History: median (P25 - P75)' })}</th>
-                    <th className="px-2 py-1 text-right font-medium">{t('analytics.hist.col_variance', { defaultValue: 'Planned vs history' })}</th>
+                    <th className="text-right">{t('analytics.hist.col_planned', { defaultValue: 'Planned h/unit' })}</th>
+                    <th>{t('analytics.hist.col_history', { defaultValue: 'History: median (P25 - P75)' })}</th>
+                    <th className="text-right">{t('analytics.hist.col_variance', { defaultValue: 'Planned vs history' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {shown.map(({ position, item }) => (
-                    <tr key={position.id} className="border-b border-border-light last:border-0">
-                      <td className="max-w-[18rem] truncate py-1 pe-2" title={position.description}>
+                    <tr key={position.id} className="last:border-0">
+                      <td className="max-w-[18rem] truncate pe-2" title={position.description}>
                         <span className="text-content-tertiary">{position.ordinal}</span> {position.description}
                       </td>
-                      <td className="px-2 py-1 text-content-secondary">{item.classification_code}</td>
-                      <td className="px-2 py-1 text-right tabular-nums">{fmtValue(item.estimate) ?? '-'}</td>
-                      <td className="px-2 py-1">
+                      <td className="text-content-secondary">{item.classification_code}</td>
+                      <td className="text-right tabular-nums">{fmtValue(item.estimate) ?? '-'}</td>
+                      <td>
                         <HistoricalRangeCell item={item} />
                       </td>
-                      <td className="px-2 py-1 text-right tabular-nums">
+                      <td className="text-right tabular-nums">
                         {isThin(item) ? '-' : (fmtVariance(item.variance) ?? '-')}
                       </td>
                     </tr>

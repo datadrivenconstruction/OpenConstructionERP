@@ -306,7 +306,7 @@ function FilterBar({
         <div className="xl:col-span-2">
           <label
             htmlFor="audit-search"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('audit.search_label', { defaultValue: 'Search' })}
           </label>
@@ -321,14 +321,14 @@ function FilterBar({
                 defaultValue: 'Search actor, entity, IP, payload…',
               })}
               data-testid="audit-search"
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full ps-8 pe-2.5"
             />
           </div>
         </div>
 
         {/* User picker */}
         <div className="relative">
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('audit.filter_user', { defaultValue: 'User' })}
           </label>
           <div className="relative">
@@ -346,7 +346,7 @@ function FilterBar({
                 setUserQuery(e.target.value);
                 if (draft.userId) onChange({ ...draft, userId: null });
               }}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full ps-8 pe-8"
             />
             {(draft.userId || userQuery) && (
               <button
@@ -392,13 +392,13 @@ function FilterBar({
 
         {/* Module / entity-type */}
         <div>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('audit.filter_module', { defaultValue: 'Module / entity' })}
           </label>
           <select
             value={draft.entityType ?? ''}
             onChange={(e) => onChange({ ...draft, entityType: e.target.value || null })}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-select w-full"
             aria-label={t('audit.filter_module', { defaultValue: 'Module / entity' })}
           >
             <option value="">{t('audit.filter_module_all', { defaultValue: 'All entities' })}</option>
@@ -412,7 +412,7 @@ function FilterBar({
 
         {/* Action — free text with datalist hint */}
         <div>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('audit.filter_action', { defaultValue: 'Action' })}
           </label>
           <div className="relative">
@@ -423,7 +423,7 @@ function FilterBar({
               value={draft.action ?? ''}
               onChange={(e) => onChange({ ...draft, action: e.target.value || null })}
               placeholder={t('audit.filter_action_placeholder', { defaultValue: 'create, update, delete…' })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full ps-8 pe-2.5"
               aria-label={t('audit.filter_action', { defaultValue: 'Action' })}
             />
             <datalist id="audit-action-suggestions">
@@ -436,7 +436,7 @@ function FilterBar({
 
         {/* Date range — from / to as two native date inputs (visible only when "custom") */}
         <div className={preset === 'custom' ? '' : 'opacity-60'}>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('audit.filter_from', { defaultValue: 'From' })}
           </label>
           <input
@@ -452,7 +452,7 @@ function FilterBar({
         </div>
 
         <div className={preset === 'custom' ? '' : 'opacity-60'}>
-          <label className="block text-xs font-medium text-content-secondary mb-1">
+          <label className="oe-label">
             {t('audit.filter_to', { defaultValue: 'To' })}
           </label>
           <input
@@ -567,7 +567,7 @@ function TimelineRow({ entry, user, onOpen }: TimelineRowProps) {
     >
       <td className="whitespace-nowrap px-4 py-3 align-top min-h-[56px]">
         <span className="inline-flex items-center gap-1 font-mono text-xs text-content-tertiary">
-          <Clock size={11} />
+          <Clock size={12} />
           {formatTimestamp(entry.created_at)}
         </span>
       </td>
@@ -666,7 +666,7 @@ function DetailDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex"
+      className="fixed inset-0 z-dropdown flex"
       role="dialog"
       aria-modal="true"
       aria-label={t('audit.drawer_title', { defaultValue: 'Audit entry detail' })}
@@ -701,7 +701,7 @@ function DetailDrawer({
         </div>
         <div className="space-y-4 p-4">
           <section>
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <div className="oe-overline mb-1">
               {t('audit.actor', { defaultValue: 'Actor' })}
             </div>
             <div className="text-sm">
@@ -725,7 +725,7 @@ function DetailDrawer({
 
           {hasDiff ? (
             <section>
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <div className="oe-overline mb-1">
                 {t('audit.diff', { defaultValue: 'Before / after' })}
               </div>
               <div className="grid gap-3 md:grid-cols-2">
@@ -746,7 +746,7 @@ function DetailDrawer({
           ) : null}
 
           <section>
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+            <div className="oe-overline mb-1">
               {t('audit.raw_payload', { defaultValue: 'Raw payload' })}
             </div>
             <JsonBlock data={diff.raw} />
@@ -1004,7 +1004,7 @@ export function AuditLogPage() {
           <select
             value={limit}
             onChange={(e) => handleLimitChange(Number(e.target.value))}
-            className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select-sm"
             aria-label={t('audit.page_size', { defaultValue: 'Rows' })}
           >
             {LIMIT_OPTIONS.map((n) => (
@@ -1157,13 +1157,13 @@ export function AuditLogPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
+              <table className="oe-table w-full">
                 <caption className="sr-only">
                   {t('admin.audit_log_title', { defaultValue: 'Audit Log' })}
                 </caption>
-                <thead className="bg-surface-secondary/50 text-xs uppercase tracking-wide text-content-tertiary">
+                <thead>
                   <tr>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       <button
                         type="button"
                         onClick={handleSort}
@@ -1176,19 +1176,19 @@ export function AuditLogPage() {
                         {filters.sort === 'asc' ? <ArrowUpAZ size={12} /> : <ArrowDownAZ size={12} />}
                       </button>
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       {t('audit.col_severity', { defaultValue: 'Severity' })}
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       {t('audit.col_actor', { defaultValue: 'Actor' })}
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       {t('audit.col_action', { defaultValue: 'Action' })}
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       {t('audit.col_target', { defaultValue: 'Target' })}
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left font-medium">
+                    <th scope="col">
                       {t('audit.col_preview', { defaultValue: 'Preview' })}
                     </th>
                   </tr>

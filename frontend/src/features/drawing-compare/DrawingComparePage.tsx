@@ -101,7 +101,7 @@ export function DrawingComparePage() {
       <CollapsibleSection
         storageKey="drawing_compare.how"
         defaultCollapsed={comparisons.length > 0}
-        icon={<GitCompare size={15} className="text-oe-blue" />}
+        icon={<GitCompare size={16} className="text-oe-blue" />}
         title={t('drawing_compare.how_title', { defaultValue: 'How it works' })}
       >
         <p className="mb-2 text-sm text-content-secondary">
@@ -152,7 +152,7 @@ export function DrawingComparePage() {
               )}
               data-testid="drawing-compare-new-button"
             >
-              <Plus size={15} />
+              <Plus size={16} />
               {t('drawing_compare.new', { defaultValue: 'New comparison' })}
             </button>
             {listQuery.isLoading && <Skeleton className="h-16 w-full" />}

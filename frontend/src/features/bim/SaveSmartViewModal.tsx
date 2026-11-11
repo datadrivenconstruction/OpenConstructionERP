@@ -209,7 +209,7 @@ export default function SaveSmartViewModal({
             placeholder={t('bim.smartview.name_placeholder', {
               defaultValue: 'e.g. Concrete walls above level 2',
             })}
-            className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input w-full"
           />
         </WideModalField>
 
@@ -222,7 +222,7 @@ export default function SaveSmartViewModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue resize-none"
+            className="oe-textarea w-full resize-none"
           />
         </WideModalField>
 
@@ -268,7 +268,7 @@ export default function SaveSmartViewModal({
             />
             <div className="text-xs flex-1">
               <div className="font-semibold text-content-primary flex items-center gap-1.5">
-                <Share2 size={11} className="text-oe-blue" />
+                <Share2 size={12} className="text-oe-blue" />
                 {t('bim.smartview.share_label', {
                   defaultValue: 'Share with team',
                 })}
@@ -290,7 +290,7 @@ export default function SaveSmartViewModal({
             />
             <div className="text-xs flex-1">
               <div className="font-semibold text-content-primary flex items-center gap-1.5">
-                <Star size={11} className="text-amber-500" />
+                <Star size={12} className="text-semantic-warning" />
                 {t('bim.smartview.default_label', {
                   defaultValue: 'Default for BIM module',
                 })}

@@ -212,7 +212,7 @@ export function NlRuleBuilderPanel() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="nl-input"
-                className="text-sm font-semibold text-content-primary"
+                className="oe-label"
               >
                 {t('compliance.nl.title', {
                   defaultValue: 'Natural Language',
@@ -248,7 +248,7 @@ export function NlRuleBuilderPanel() {
                 defaultValue:
                   'e.g. all walls must have a fire-rating property',
               })}
-              className="w-full resize-none rounded-lg border border-border bg-surface-primary p-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-textarea w-full resize-none"
             />
             <label className="flex items-center gap-2 text-xs text-content-secondary">
               <input

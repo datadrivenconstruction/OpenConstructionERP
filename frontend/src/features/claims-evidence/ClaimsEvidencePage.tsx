@@ -182,14 +182,14 @@ export function ClaimsEvidencePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 border-t border-border-light pt-3">
-              <label htmlFor="claims-evidence-basis" className="text-xs font-medium text-content-tertiary">
+              <label htmlFor="claims-evidence-basis" className="oe-label">
                 {t('claims_evidence.basis_label', { defaultValue: 'Basis' })}
               </label>
               <select
                 id="claims-evidence-basis"
                 value={basis}
                 onChange={(e) => setBasis(e.target.value as Basis)}
-                className="rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                className="oe-select"
               >
                 {BASES.map((b) => (
                   <option key={b} value={b}>
@@ -242,7 +242,7 @@ export function ClaimsEvidencePage() {
               </div>
               {pack.sections.map((section) => (
                 <div key={section.name} className="space-y-1.5">
-                  <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  <div className="oe-overline">
                     {/* Engine section / kind tokens are stable: translate them by
                         token and let an unknown one fall back to a humanized form. */}
                     {t(`claims_evidence.section.${section.name}`, { defaultValue: humanize(section.name) })}

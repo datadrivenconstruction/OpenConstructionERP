@@ -30,7 +30,7 @@ const CATEGORY_BG_CLASSES: Record<string, string> = {
   machinery: 'bg-teal-500',
   equipment: 'bg-violet-500',
   subcontractor: 'bg-pink-500',
-  other: 'bg-gray-500',
+  other: 'bg-content-tertiary',
 };
 
 const CATEGORY_TEXT_CLASSES: Record<string, string> = {
@@ -212,7 +212,7 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
                 <div key={cat.type} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${CATEGORY_BG_CLASSES[cat.type] ?? 'bg-gray-500'}`}
+                      className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${CATEGORY_BG_CLASSES[cat.type] ?? 'bg-content-tertiary'}`}
                     />
                     <span className="text-content-secondary capitalize">
                       {t(`boq.cost_category_${cat.type}`, { defaultValue: cat.type })}
@@ -239,7 +239,7 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
 
           {/* ── Horizontal Bar Breakdown ──────────────────────────────── */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+            <h4 className="oe-overline">
               {t('boq.cost_breakdown_by_category', { defaultValue: 'By Category' })}
             </h4>
             {data.categories.map((cat) => (
@@ -250,7 +250,7 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
           {/* ── Top Resources ─────────────────────────────────────────── */}
           {data.top_resources.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+              <h4 className="oe-overline">
                 {t('boq.cost_breakdown_top_resources', { defaultValue: 'Top Resources' })}
               </h4>
               <div className="space-y-1">
@@ -322,7 +322,7 @@ function CategoryBar({
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between text-xs">
-        <span className={`font-medium capitalize ${CATEGORY_TEXT_CLASSES[category.type] ?? 'text-gray-600'}`}>
+        <span className={`font-medium capitalize ${CATEGORY_TEXT_CLASSES[category.type] ?? 'text-content-secondary'}`}>
           {t(`boq.cost_category_${category.type}`, { defaultValue: category.type })}
           <span className="text-content-tertiary ml-1.5">
             ({category.item_count} {t('boq.cost_breakdown_items', { defaultValue: 'items' })})
@@ -334,7 +334,7 @@ function CategoryBar({
       </div>
       <div className="w-full h-2 bg-surface-tertiary rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${CATEGORY_BG_CLASSES[category.type] ?? 'bg-gray-500'}`}
+          className={`h-full rounded-full transition-all duration-500 ${CATEGORY_BG_CLASSES[category.type] ?? 'bg-content-tertiary'}`}
           style={{ width: `${Math.max(widthPct, 0.5)}%` }}
         />
       </div>
@@ -354,7 +354,7 @@ function ResourceRow({
     <div className="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-surface-secondary/50">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <span
-          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${CATEGORY_BG_CLASSES[resource.type] ?? 'bg-gray-500'}`}
+          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${CATEGORY_BG_CLASSES[resource.type] ?? 'bg-content-tertiary'}`}
         />
         <span className="text-content-secondary truncate">
           {resource.name || t('boq.cost_breakdown_position', { defaultValue: 'Position' })}

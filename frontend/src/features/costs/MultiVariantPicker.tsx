@@ -290,7 +290,7 @@ export function MultiVariantPicker({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onCancel}
       data-testid="multi-variant-picker-backdrop"
     >
@@ -309,7 +309,7 @@ export function MultiVariantPicker({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 id="mvp-title" className="text-base font-semibold truncate">
+              <h3 id="mvp-title" className="oe-section-title truncate">
                 {t('boq.mvp.title', { defaultValue: 'Choose materials' })}
               </h3>
               {batchProgress && batchProgress.total > 1 && (
@@ -343,13 +343,13 @@ export function MultiVariantPicker({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             data-testid="multi-variant-picker-close"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Bulk actions */}
         <div className="px-6 py-3 border-b border-border-light bg-surface-secondary/40 flex flex-wrap items-center gap-2">
-          <span className="text-2xs uppercase tracking-wide text-content-tertiary font-medium me-1">
+          <span className="oe-overline me-1">
             <Wand2 size={12} className="inline me-1 -mt-0.5" />
             {t('boq.mvp.bulk_label', { defaultValue: 'Quick fill:' })}
           </span>
@@ -545,7 +545,7 @@ export function MultiVariantPicker({
         {/* Footer */}
         <div className="px-6 py-4 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between gap-3">
           <div>
-            <div className="text-2xs uppercase tracking-wide text-content-tertiary font-medium">
+            <div className="oe-overline">
               {t('boq.mvp.subtotal_label', { defaultValue: 'Position rate' })}
             </div>
             <div className="text-lg font-mono font-semibold tabular-nums text-content-primary">

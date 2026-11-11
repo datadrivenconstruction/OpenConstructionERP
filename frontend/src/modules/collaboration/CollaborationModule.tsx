@@ -194,7 +194,7 @@ function DiscussionCard({
     <div className="rounded-xl border border-border bg-surface-primary p-5">
       <div className="mb-1 flex items-center gap-2">
         <MessageSquare className="h-4 w-4 text-oe-blue" />
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('collab.discussion_title', { defaultValue: 'Project discussion' })}
         </h2>
       </div>
@@ -243,7 +243,7 @@ function ActiveNowCard({ projectId }: { projectId: string }) {
             (status === 'open' ? 'text-semantic-success' : 'text-content-tertiary')
           }
         />
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {t('collab.active_now_title', { defaultValue: 'Active now' })}
         </h2>
       </div>
@@ -267,7 +267,7 @@ function ActiveNowCard({ projectId }: { projectId: string }) {
       ) : (
         <ul className="space-y-2">
           {users.map((u) => (
-            <li key={u.user_id} className="flex items-center gap-2.5">
+            <li key={u.user_id} className="flex items-center gap-2">
               <span
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold text-white"
                 style={{ backgroundColor: colorFor(u.user_id) }}
@@ -395,7 +395,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
       <div className="mb-1 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Camera className="h-4 w-4 text-semantic-warning" />
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('collab.viewpoints_title', { defaultValue: 'Viewpoints' })}
           </h2>
         </div>
@@ -405,7 +405,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
           className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-2xs font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue transition-colors"
           aria-label={t('collab.add_viewpoint', { defaultValue: 'Add viewpoint' })}
         >
-          {showForm ? <X size={11} /> : <Plus size={11} />}
+          {showForm ? <X size={12} /> : <Plus size={12} />}
           {showForm
             ? t('common.cancel', { defaultValue: 'Cancel' })
             : t('collab.add_viewpoint', { defaultValue: 'Add viewpoint' })}
@@ -428,7 +428,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
               defaultValue: 'Viewpoint title',
             })}
             aria-label={t('collab.viewpoint_title_ph', { defaultValue: 'Viewpoint title' })}
-            className="w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-xs text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+            className="oe-input-sm w-full"
           />
           <textarea
             value={description}
@@ -440,7 +440,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
               defaultValue: 'What should the team look at? (optional)',
             })}
             rows={2}
-            className="w-full resize-none rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-xs text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+            className="oe-textarea-sm w-full resize-none"
           />
           <button
             type="button"
@@ -448,7 +448,7 @@ function ViewpointsCard({ projectId }: { projectId: string }) {
             disabled={!title.trim() || createMutation.isPending}
             className="flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-2xs font-medium text-white hover:bg-oe-blue-hover disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
-            {createMutation.isPending && <Loader2 size={11} className="animate-spin" />}
+            {createMutation.isPending && <Loader2 size={12} className="animate-spin" />}
             {t('collab.save_viewpoint', { defaultValue: 'Save viewpoint' })}
           </button>
         </div>
@@ -542,7 +542,7 @@ function HowItWorksCard() {
         <div className="space-y-5 border-t border-border-light px-5 py-4">
           {/* Display name (feeds Yjs awareness) */}
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-2">
               {t('collab.settings', { defaultValue: 'Collaboration Settings' })}
             </h3>
             <div className="flex max-w-sm items-end gap-3">
@@ -554,7 +554,7 @@ function HowItWorksCard() {
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+                  className="oe-input w-full"
                   placeholder={t('collab.name_placeholder', { defaultValue: 'Your name' })}
                   aria-label={t('collab.display_name', { defaultValue: 'Your display name' })}
                 />
@@ -639,7 +639,7 @@ function MiniFeature({
     <div className="rounded-lg border border-border-light bg-surface-secondary p-3">
       <div className="mb-1 flex items-center gap-1.5">
         {icon}
-        <h4 className="text-xs font-semibold text-content-primary">{title}</h4>
+        <h4 className="oe-card-title">{title}</h4>
       </div>
       <p className="text-2xs leading-relaxed text-content-tertiary">{description}</p>
     </div>

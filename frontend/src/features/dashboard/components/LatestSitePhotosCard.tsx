@@ -79,7 +79,7 @@ export function LatestSitePhotosCard() {
         <Card>
           <div className="mb-4 flex items-center gap-2">
             <Camera size={16} className="text-content-tertiary" strokeWidth={1.75} />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboard.latest_photos_title', { defaultValue: 'Latest site photos' })}
             </h3>
           </div>
@@ -102,7 +102,7 @@ export function LatestSitePhotosCard() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Camera size={16} className="text-content-tertiary" strokeWidth={1.75} />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('dashboard.latest_photos_title', { defaultValue: 'Latest site photos' })}
             </h3>
           </div>

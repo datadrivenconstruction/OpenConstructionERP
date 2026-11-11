@@ -215,7 +215,7 @@ export function ClassificationPicker({
         className,
       )}
     >
-      <Tag size={11} className="shrink-0 text-content-tertiary" />
+      <Tag size={12} className="shrink-0 text-content-tertiary" />
       {value ? (
         <span className="truncate max-w-[180px]">
           <span className="font-mono">{value}</span>
@@ -289,7 +289,7 @@ export function ClassificationPicker({
     <div
       className={clsx(
         'flex flex-col bg-surface-elevated border border-border-light shadow-lg rounded-lg overflow-hidden',
-        mode === 'dropdown' ? 'absolute start-0 top-full mt-1 z-50 w-72 max-h-80' : 'w-full h-full',
+        mode === 'dropdown' ? 'absolute start-0 top-full mt-1 z-drawer w-72 max-h-80' : 'w-full h-full',
       )}
     >
       {/* Header */}
@@ -307,7 +307,7 @@ export function ClassificationPicker({
           />
           {search && (
             <button type="button" aria-label={t('common.clear_search', { defaultValue: 'Clear search' })} onClick={() => setSearch('')} className="text-content-tertiary hover:text-content-primary">
-              <X size={11} />
+              <X size={12} />
             </button>
           )}
         </div>

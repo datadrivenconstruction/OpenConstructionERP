@@ -81,7 +81,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
@@ -96,7 +96,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               <GitBranch size={16} />
             </span>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-section-title">
               {t('boq.branch.create_title', { defaultValue: 'New branch' })}
             </h2>
           </div>
@@ -129,7 +129,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
               maxLength={255}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('boq.branch.name_placeholder', { defaultValue: 'e.g. Alternative with precast' })}
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input mt-1 w-full"
             />
           </label>
           <label className="block">
@@ -139,7 +139,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
             <select
               value={snapshotId}
               onChange={(e) => setSnapshotId(e.target.value)}
-              className="mt-1 w-full h-9 rounded-md border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select mt-1 w-full"
             >
               <option value="">{t('boq.branch.from_current', { defaultValue: 'Current state' })}</option>
               {(snapshots ?? []).map((s) => (
@@ -163,7 +163,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
               rows={2}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t('boq.branch.note_placeholder', { defaultValue: 'What does this variant test?' })}
-              className="mt-1 w-full rounded-md border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-textarea mt-1 w-full"
             />
           </label>
         </div>
@@ -182,7 +182,7 @@ export function CreateBranchDialog({ sourceBoqId, sourceName, isOpen, onClose, o
             disabled={mutation.isPending || !name.trim()}
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-oe-blue hover:bg-oe-blue-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <GitBranch size={15} />
+            <GitBranch size={16} />
             {mutation.isPending
               ? t('boq.branch.creating', { defaultValue: 'Creating...' })
               : t('boq.branch.create_button', { defaultValue: 'Create branch' })}

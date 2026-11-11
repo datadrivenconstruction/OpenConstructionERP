@@ -175,14 +175,14 @@ export function RiskMatrixPanel({ projectId, model, matrix, catalogue, labels, o
       </p>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full min-w-[720px] text-sm" data-testid="risk-matrix-table">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full min-w-[720px]" data-testid="risk-matrix-table">
+          <thead className="text-left">
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.matrix.col_risk', { defaultValue: 'Risk' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.matrix.col_carrier', { defaultValue: 'Carried by' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.matrix.col_basis', { defaultValue: 'Basis' })}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{t('delivery_model.ui.matrix.col_state', { defaultValue: 'State' })}</th>
-              <th scope="col" className="px-3 py-2" />
+              <th scope="col">{t('delivery_model.ui.matrix.col_risk', { defaultValue: 'Risk' })}</th>
+              <th scope="col">{t('delivery_model.ui.matrix.col_carrier', { defaultValue: 'Carried by' })}</th>
+              <th scope="col">{t('delivery_model.ui.matrix.col_basis', { defaultValue: 'Basis' })}</th>
+              <th scope="col">{t('delivery_model.ui.matrix.col_state', { defaultValue: 'State' })}</th>
+              <th scope="col" />
             </tr>
           </thead>
           <tbody>
@@ -194,18 +194,18 @@ export function RiskMatrixPanel({ projectId, model, matrix, catalogue, labels, o
               return (
                 <tr
                   key={item.category_code}
-                  className="border-t border-border-light align-top"
+                  className="align-top"
                   data-testid="risk-row"
                   data-state={state}
                 >
-                  <th scope="row" className="px-3 py-2 text-left font-normal">
+                  <th scope="row">
                     <span className="block font-medium text-content-primary">{categoryName(item)}</span>
                     {description && <span className="block text-xs text-content-tertiary">{description}</span>}
                     <span className="mt-1 block">
                       <FindingList findings={item.findings} testId="risk-findings" />
                     </span>
                   </th>
-                  <td className={clsx('px-3 py-2', state === 'default' && 'text-content-tertiary')}>
+                  <td className={clsx('', state === 'default' && 'text-content-tertiary')}>
                     {state === 'not_applicable' ? (
                       <span className="text-content-tertiary">{vocab(labels.t, CELL_STATE, 'not_applicable')}</span>
                     ) : (
@@ -220,10 +220,10 @@ export function RiskMatrixPanel({ projectId, model, matrix, catalogue, labels, o
                       </span>
                     )}
                   </td>
-                  <td className={clsx('px-3 py-2', state === 'default' && 'text-content-tertiary')}>
+                  <td className={clsx('', state === 'default' && 'text-content-tertiary')}>
                     {shown && state !== 'not_applicable' ? vocab(labels.t, BASIS, shown.basis) : ''}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <ToneBadge tone={CELL_TONE[state]} testId="risk-state">
                       {vocab(labels.t, CELL_STATE, state)}
                     </ToneBadge>
@@ -233,7 +233,7 @@ export function RiskMatrixPanel({ projectId, model, matrix, catalogue, labels, o
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {!editV && (
                       <span className="flex justify-end gap-1">
                         {(state === 'default' || state === 'unconfirmed') && (
@@ -250,7 +250,7 @@ export function RiskMatrixPanel({ projectId, model, matrix, catalogue, labels, o
                         <Button
                           size="sm"
                           variant="ghost"
-                          icon={<Pencil size={13} />}
+                          icon={<Pencil size={14} />}
                           onClick={() => setEditing(item)}
                           data-testid="edit-row"
                           aria-label={t('delivery_model.ui.matrix.edit_of', {

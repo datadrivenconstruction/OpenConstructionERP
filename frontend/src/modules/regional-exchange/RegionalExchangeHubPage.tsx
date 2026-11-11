@@ -144,7 +144,7 @@ function SupportChip({ level, direction }: { level: SupportLevel; direction: 'im
   return (
     <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
       {level === 'native' ? (
-        <Check size={11} aria-hidden="true" className="text-semantic-success" />
+        <Check size={12} aria-hidden="true" className="text-semantic-success" />
       ) : null}
       {label}:{' '}
       <span className={level === 'native' ? 'font-semibold text-content-secondary' : ''}>
@@ -389,12 +389,12 @@ export default function RegionalExchangeHubPage() {
       {/* ── Market strip ────────────────────────────────────────────── */}
       <section aria-label={t('exchange.markets', { defaultValue: 'Markets' })} className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-xs font-semibold text-content-secondary">
+          <h2 className="oe-card-title">
             {t('exchange.markets', { defaultValue: 'Markets' })}
           </h2>
           <label className="relative">
             <Search
-              size={13}
+              size={14}
               aria-hidden="true"
               className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary"
             />
@@ -405,7 +405,7 @@ export default function RegionalExchangeHubPage() {
               data-testid="exchange-market-search"
               placeholder={t('exchange.search_market', { defaultValue: 'Find a market' })}
               aria-label={t('exchange.search_market', { defaultValue: 'Find a market' })}
-              className="h-7 w-44 rounded-md border border-border-light bg-surface-primary pl-7 pr-2 text-2xs text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+              className="oe-input-sm w-44 pl-7 pr-2"
             />
           </label>
         </div>
@@ -475,7 +475,7 @@ export default function RegionalExchangeHubPage() {
 
       {/* ── Formats ─────────────────────────────────────────────────── */}
       <section aria-label={t('exchange.formats', { defaultValue: 'Formats' })} className="space-y-2">
-        <h2 className="text-xs font-semibold text-content-secondary">
+        <h2 className="oe-card-title">
           {market
             ? t('exchange.formats_in', {
                 defaultValue: 'Formats used in {{market}}',
@@ -535,7 +535,7 @@ export default function RegionalExchangeHubPage() {
         >
           <header className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-content-primary">{selected.name}</h2>
+              <h2 className="oe-card-title">{selected.name}</h2>
               <p className="mt-0.5 text-2xs text-content-tertiary">
                 {selected.standard ? `${selected.standard} · ` : ''}
                 {selected.extensions.join(' ')}
@@ -578,7 +578,7 @@ export default function RegionalExchangeHubPage() {
                   setBoqId('');
                 }}
                 data-testid="exchange-project"
-                className="h-8 w-full rounded-md border border-border-light bg-surface-primary px-2 text-xs text-content-primary"
+                className="oe-select w-full"
               >
                 <option value="">{t('common.select', { defaultValue: 'Select' })}</option>
                 {projects.map((p) => (
@@ -597,7 +597,7 @@ export default function RegionalExchangeHubPage() {
                 onChange={(e) => setBoqId(e.target.value)}
                 disabled={!projectId}
                 data-testid="exchange-boq"
-                className="h-8 w-full rounded-md border border-border-light bg-surface-primary px-2 text-xs text-content-primary disabled:opacity-50"
+                className="oe-select w-full"
               >
                 <option value="">{t('common.select', { defaultValue: 'Select' })}</option>
                 {boqs.map((b) => (
@@ -650,9 +650,9 @@ export default function RegionalExchangeHubPage() {
                       data-testid="exchange-import"
                     >
                       {busy ? (
-                        <Loader2 size={13} aria-hidden="true" className="animate-spin" />
+                        <Loader2 size={14} aria-hidden="true" className="animate-spin" />
                       ) : (
-                        <Upload size={13} aria-hidden="true" />
+                        <Upload size={14} aria-hidden="true" />
                       )}
                       {t('exchange.choose_file', { defaultValue: 'Choose a file' })}
                     </Button>
@@ -665,7 +665,7 @@ export default function RegionalExchangeHubPage() {
                 )}
 
                 {outcome ? (
-                  <div className="rounded-lg bg-surface-secondary p-2.5 text-2xs" data-testid="exchange-outcome">
+                  <div className="rounded-lg bg-surface-secondary p-2 text-2xs" data-testid="exchange-outcome">
                     <p className="text-content-secondary">
                       {outcome.imported === null
                         ? t('exchange.import_count_unknown', {
@@ -712,9 +712,9 @@ export default function RegionalExchangeHubPage() {
                     data-testid="exchange-export"
                   >
                     {busy ? (
-                      <Loader2 size={13} aria-hidden="true" className="animate-spin" />
+                      <Loader2 size={14} aria-hidden="true" className="animate-spin" />
                     ) : (
-                      <Download size={13} aria-hidden="true" />
+                      <Download size={14} aria-hidden="true" />
                     )}
                     {t('exchange.download_as', { defaultValue: 'Download as {{format}}', format: selected.name })}
                   </Button>

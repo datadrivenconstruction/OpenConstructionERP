@@ -91,7 +91,7 @@ export function refusalText(t: TFunction, refusal: HakedisRefusal): string {
 /** The heading over one block. */
 export function BlockTitle({ children, count }: { children: ReactNode; count?: number }) {
   return (
-    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+    <h3 className="oe-overline mb-2">
       {children}
       {count !== undefined && <span className="ml-2 normal-case text-content-tertiary">({count})</span>}
     </h3>
@@ -107,7 +107,7 @@ export function RefusalNote({ t, refusal, testId }: { t: TFunction; refusal: Hak
       className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/10 px-3 py-2 text-sm"
       data-testid={testId}
     >
-      <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
+      <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden="true" />
       <div className="min-w-0">
         <p className="break-words text-content-primary">{text}</p>
         {refusal.message && !text.includes(refusal.message) && (

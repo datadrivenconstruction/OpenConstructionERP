@@ -208,25 +208,25 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
         ) : (
           <Card>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th className="px-4 py-2.5 font-medium">
+                  <tr className="text-left">
+                    <th>
                       {t('construction_control.col.number', { defaultValue: 'Number' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.title', { defaultValue: 'Title' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.type', { defaultValue: 'Type' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.status', { defaultValue: 'Status' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.criterion', { defaultValue: 'Criterion' })}
                     </th>
-                    <th className="px-4 py-2.5 text-right font-medium">
+                    <th className="text-right">
                       {t('construction_control.col.actions', { defaultValue: 'Actions' })}
                     </th>
                   </tr>
@@ -243,10 +243,10 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                         className="border-b border-border-light/60 last:border-b-0 align-top"
                         data-testid={`cc-inspection-row-${insp.id}`}
                       >
-                        <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                        <td className="font-mono text-content-secondary whitespace-nowrap">
                           {insp.inspection_number}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="font-medium text-content-primary">{insp.title}</div>
                           {insp.location_description && (
                             <div className="text-xs text-content-tertiary">
@@ -257,7 +257,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                             <ElementLinks elements={insp.elements} />
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-content-secondary">
+                        <td className="whitespace-nowrap text-content-secondary">
                           {t(`construction_control.inspection_type.${insp.inspection_type}`, {
                             defaultValue: INSPECTION_TYPE_LABEL[insp.inspection_type],
                           })}
@@ -265,7 +265,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                             {insp.party_role}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <StatusPill status={insp.status} />
                           {insp.result && (
                             <div className="mt-1 text-2xs text-content-tertiary">
@@ -275,7 +275,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-content-secondary">
+                        <td className="text-content-secondary">
                           {criterion ? (
                             <span title={criterion.title}>
                               {criterion.code}
@@ -286,7 +286,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <div className="flex items-center justify-end gap-2">
                             {insp.raised_ncr_id && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-2 py-0.5 text-2xs font-medium text-semantic-error">
@@ -341,19 +341,19 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
         ) : (
           <Card>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-                    <th className="px-4 py-2.5 font-medium">
+                  <tr className="text-left">
+                    <th>
                       {t('construction_control.col.code', { defaultValue: 'Code' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.title', { defaultValue: 'Title' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.rule', { defaultValue: 'Rule' })}
                     </th>
-                    <th className="px-4 py-2.5 font-medium">
+                    <th>
                       {t('construction_control.col.tolerance', { defaultValue: 'Tolerance' })}
                     </th>
                   </tr>
@@ -365,17 +365,17 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                       className="border-b border-border-light/60 last:border-b-0"
                       data-testid={`cc-criterion-row-${c.id}`}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">
+                      <td className="font-mono text-content-secondary whitespace-nowrap">
                         {c.code}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="font-medium text-content-primary">{c.title}</div>
                         {c.standard_ref && (
                           <div className="text-xs text-content-tertiary">{c.standard_ref}</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-content-secondary">{c.acceptance_rule}</td>
-                      <td className="px-4 py-3 text-content-secondary">
+                      <td className="text-content-secondary">{c.acceptance_rule}</td>
+                      <td className="text-content-secondary">
                         {formatTolerance(c)}
                       </td>
                     </tr>
@@ -665,7 +665,7 @@ const RESULT_OPTIONS: { value: ResultDecision; icon: typeof CheckCircle2; tone: 
   {
     value: 'conditional',
     icon: AlertCircle,
-    tone: 'text-[#b45309] border-amber-400/50',
+    tone: 'text-[#b45309] border-semantic-warning/50',
   },
 ];
 
@@ -780,7 +780,7 @@ export function ModalShell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -788,7 +788,7 @@ export function ModalShell({
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h3 className="text-lg font-semibold text-content-primary">{title}</h3>
+          <h3 className="oe-section-title">{title}</h3>
           <button
             type="button"
             onClick={onClose}

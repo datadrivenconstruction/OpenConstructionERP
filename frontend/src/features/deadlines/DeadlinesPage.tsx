@@ -183,7 +183,7 @@ function HowDeadlinesWork() {
   return (
     <CollapsibleSection
       storageKey="deadlines.how"
-      icon={<Hourglass size={15} className="text-oe-blue" />}
+      icon={<Hourglass size={16} className="text-oe-blue" />}
       title={t('deadlines.flow_title', {
         defaultValue: 'How the Deadline register fits together',
       })}
@@ -430,22 +430,22 @@ export function DeadlinesPage() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border-light bg-surface-elevated">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="oe-table w-full min-w-[720px]">
             <thead>
-              <tr className="border-b border-border-light text-start text-xs uppercase tracking-wide text-content-tertiary">
-                <th className="px-4 py-2.5 text-start font-medium">
+              <tr className="text-start">
+                <th>
                   {t('deadlines.col.title', { defaultValue: 'Item' })}
                 </th>
-                <th className="px-4 py-2.5 text-start font-medium">
+                <th>
                   {t('deadlines.col.due', { defaultValue: 'Due' })}
                 </th>
-                <th className="px-4 py-2.5 text-start font-medium">
+                <th>
                   {t('deadlines.col.days', { defaultValue: 'Days' })}
                 </th>
-                <th className="px-4 py-2.5 text-start font-medium">
+                <th>
                   {t('deadlines.col.owner', { defaultValue: 'Owner' })}
                 </th>
-                <th className="px-4 py-2.5 text-start font-medium">
+                <th>
                   {t('deadlines.col.status', { defaultValue: 'Status' })}
                 </th>
               </tr>
@@ -455,10 +455,10 @@ export function DeadlinesPage() {
                 const label = MODULE_LABELS[moduleKey] ?? { key: `deadlines.module.${moduleKey}`, def: moduleKey };
                 return (
                   <Fragment key={`grp-${moduleKey}`}>
-                    <tr className="bg-surface-secondary/60">
+                    <tr>
                       <td
                         colSpan={5}
-                        className="px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary"
+                        className="font-semibold text-content-secondary"
                       >
                         {t(label.key, { defaultValue: label.def })}
                         <span className="ms-2 font-normal text-content-tertiary">({items.length})</span>
@@ -474,13 +474,13 @@ export function DeadlinesPage() {
                             if (e.key === 'Enter') navigate(it.action_url);
                           }}
                           tabIndex={0}
-                          className="cursor-pointer border-b border-border-light/60 last:border-0 hover:bg-surface-secondary/40 focus:bg-surface-secondary/40 focus:outline-none"
+                          className="cursor-pointer last:border-0 focus:bg-surface-secondary/40 focus:outline-none"
                         >
-                          <td className="px-4 py-2.5 text-content-primary">{it.title}</td>
-                          <td className="whitespace-nowrap px-4 py-2.5 text-content-secondary">
+                          <td>{it.title}</td>
+                          <td className="whitespace-nowrap text-content-secondary">
                             {it.due_date ? it.due_date.slice(0, 10) : '-'}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2.5">
+                          <td className="whitespace-nowrap">
                             <span
                               className={clsx(
                                 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
@@ -489,18 +489,18 @@ export function DeadlinesPage() {
                                   : 'bg-semantic-warning/10 text-semantic-warning',
                               )}
                             >
-                              <AlarmClock size={11} />
+                              <AlarmClock size={12} />
                               {chip.text}
                             </span>
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2.5 text-content-secondary">
+                          <td className="whitespace-nowrap text-content-secondary">
                             {it.owner_name ?? (
                               <span className="italic text-content-tertiary">
                                 {t('deadlines.no_owner', { defaultValue: 'Unassigned' })}
                               </span>
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2.5 text-content-secondary">
+                          <td className="whitespace-nowrap text-content-secondary">
                             {humaniseStatus(it.status)}
                           </td>
                         </tr>

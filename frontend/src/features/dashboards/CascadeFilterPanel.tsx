@@ -348,7 +348,7 @@ function CascadeFilterCard({
         data-testid={`cascade-list-${column}`}
       >
         {cascadeQuery.isError && (
-          <li className="px-3 py-2 text-xs text-rose-300">
+          <li className="px-3 py-2 text-xs text-semantic-error">
             {t('dashboards.cascade.error', {
               defaultValue: 'Could not load values',
             })}

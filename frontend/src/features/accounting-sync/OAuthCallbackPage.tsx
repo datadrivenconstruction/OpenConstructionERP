@@ -53,7 +53,7 @@ export function OAuthCallbackPage() {
       <Card padding="lg" className="space-y-3 text-center">
         {failure ? (
           <>
-            <h2 className="text-base font-semibold text-content-primary">{t('accountingSync.oauth.failed', { defaultValue: 'Authorisation failed' })}</h2>
+            <h2 className="oe-section-title">{t('accountingSync.oauth.failed', { defaultValue: 'Authorisation failed' })}</h2>
             <p className="text-sm text-content-secondary">{failure}</p>
             <Link to="/accounting-sync">
               <Button variant="secondary">{t('accountingSync.oauth.back', { defaultValue: 'Back to accounting sync' })}</Button>

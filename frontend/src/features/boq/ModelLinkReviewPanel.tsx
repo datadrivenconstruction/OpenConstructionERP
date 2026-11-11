@@ -148,7 +148,7 @@ export function ModelLinkReviewPanel({
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <RefreshCw size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('boq.model_review_title', { defaultValue: 'Model quantity review' })}
             </h3>
           </div>
@@ -239,7 +239,7 @@ export function ModelLinkReviewPanel({
                           <span className="text-content-tertiary">
                             {fmt(r.old_quantity)}
                           </span>
-                          <ArrowRight size={11} className="text-content-quaternary" />
+                          <ArrowRight size={12} className="text-content-quaternary" />
                           <span className="text-content-primary font-semibold">
                             {fmt(r.new_quantity)}
                           </span>

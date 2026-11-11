@@ -38,16 +38,16 @@ const TYPE_BADGE_STYLES: Record<string, string> = {
   machinery: 'bg-teal-500/10 text-teal-600',
   equipment: 'bg-violet-500/10 text-violet-600',
   subcontractor: 'bg-semantic-error/10 text-semantic-error',
-  other: 'bg-gray-500/10 text-gray-600',
+  other: 'bg-content-tertiary text-content-secondary',
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  material: <Package size={13} />,
-  labor: <HardHat size={13} />,
-  machinery: <Truck size={13} />,
-  equipment: <Wrench size={13} />,
-  subcontractor: <Users size={13} />,
-  other: <Layers size={13} />,
+  material: <Package size={14} />,
+  labor: <HardHat size={14} />,
+  machinery: <Truck size={14} />,
+  equipment: <Wrench size={14} />,
+  subcontractor: <Users size={14} />,
+  other: <Layers size={14} />,
 };
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -333,8 +333,8 @@ export function ResourceSummary({
         aria-label={t('boq.resource_summary', { defaultValue: 'Resource Summary' })}
         className="flex w-full items-center justify-between px-4 py-3 hover:bg-surface-secondary/50 transition-colors"
       >
-        <div className="flex items-center gap-2.5">
-          <Layers size={15} className="text-oe-blue" />
+        <div className="flex items-center gap-2">
+          <Layers size={16} className="text-oe-blue" />
           <span className="text-xs font-semibold text-content-primary">
             {t('boq.resource_summary', { defaultValue: 'Resource Summary' })}
           </span>
@@ -440,14 +440,14 @@ export function ResourceSummary({
 
             {/* Search */}
             <div className="ml-auto relative">
-              <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary" />
+              <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boq.rs_search', { defaultValue: 'Search resources...' })}
                 aria-label={t('boq.rs_search', { defaultValue: 'Search resources...' })}
-                className="w-44 pl-7 pr-2 py-1 text-2xs rounded-md border border-border-light bg-surface-primary text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
+                className="oe-input-sm w-44 pl-7 pr-2"
               />
             </div>
           </div>
@@ -483,13 +483,13 @@ export function ResourceSummary({
 
                 return (
                   <>
-                    <table className="w-full text-xs border-collapse">
+                    <table className="oe-table-compact w-full">
                       <thead>
-                        <tr className="border-t border-border-light/50 text-content-quaternary bg-surface-secondary/20">
+                        <tr className="text-content-quaternary">
                           {/* Sortable name header - clicking toggles between
                               'name' and 'cost'. Issue #106 spec: "ordenarse
                               por nombre / por precio / por porcentaje ABC". */}
-                          <th className="px-4 py-2 text-left font-medium">
+                          <th>
                             <button
                               type="button"
                               onClick={() => setSortBy(sortBy === 'name' ? 'cost' : 'name')}
@@ -500,21 +500,21 @@ export function ResourceSummary({
                               {sortBy === 'name' && <span aria-hidden="true">↑</span>}
                             </button>
                           </th>
-                          <th className="px-3 py-2 text-left font-medium w-24">
+                          <th className="w-24">
                             {t('boq.rs_col_type', { defaultValue: 'Type' })}
                           </th>
-                          <th className="px-3 py-2 text-center font-medium w-16">
+                          <th className="text-center w-16">
                             {t('boq.rs_col_unit', { defaultValue: 'Unit' })}
                           </th>
-                          <th className="px-3 py-2 text-right font-medium w-24">
+                          <th className="text-right w-24">
                             {t('boq.rs_col_total_qty', { defaultValue: 'Total Qty' })}
                           </th>
-                          <th className="px-3 py-2 text-right font-medium w-24">
+                          <th className="text-right w-24">
                             {t('boq.rs_col_avg_rate', { defaultValue: 'Avg Rate' })}
                           </th>
                           {/* Sortable cost header - toggles back to 'cost'
                               from any other mode. Default sort. */}
-                          <th className="px-3 py-2 text-right font-medium w-28">
+                          <th className="text-right w-28">
                             <button
                               type="button"
                               onClick={() => setSortBy('cost')}
@@ -530,7 +530,7 @@ export function ResourceSummary({
                               also drawing visible separator rules between
                               the A/B/C buckets so the Pareto split is
                               instantly readable. */}
-                          <th className="px-3 py-2 text-right font-medium w-20">
+                          <th className="text-right w-20">
                             <button
                               type="button"
                               onClick={() => setSortBy(sortBy === 'abc' ? 'cost' : 'abc')}
@@ -545,10 +545,10 @@ export function ResourceSummary({
                               {sortBy === 'abc' && <span aria-hidden="true">↓</span>}
                             </button>
                           </th>
-                          <th className="px-3 py-2 text-center font-medium w-16">
+                          <th className="text-center w-16">
                             {t('boq.rs_col_positions', { defaultValue: 'Pos.' })}
                           </th>
-                          <th className="px-2 py-2 text-center font-medium w-10">
+                          <th className="text-center w-10">
                             <BookmarkPlus size={12} className="inline" />
                           </th>
                         </tr>
@@ -585,8 +585,8 @@ export function ResourceSummary({
                       </tbody>
                       {expanded && (
                         <tfoot>
-                          <tr className="border-t border-border bg-surface-secondary/30">
-                            <td className="px-4 py-2 text-xs font-semibold text-content-primary">
+                          <tr>
+                            <td className="font-semibold">
                               {t('boq.rs_total', { defaultValue: 'Total' })}
                               <span className="ml-1 text-content-tertiary font-normal">
                                 ({t('boq.rs_resources_count', {
@@ -600,12 +600,12 @@ export function ResourceSummary({
                             <td />
                             <td />
                             <td />
-                            <td className="px-3 py-2 text-right text-xs font-semibold text-content-primary tabular-nums">
+                            <td className="text-right font-semibold tabular-nums">
                               {fmtMoney.format(
                                 filteredResources.reduce((sum, r) => sum + toNum(r.total_cost), 0),
                               )}
                             </td>
-                            <td className="px-3 py-2 text-right text-xs font-semibold text-content-primary tabular-nums">
+                            <td className="text-right font-semibold tabular-nums">
                               {/* Σ ABC% should be 100 when nothing is filtered;
                                   when typeFilter or search excludes rows the
                                   remaining sum is shown so the user can see how
@@ -732,7 +732,7 @@ function ResourceRow({
     pillTone === 'blue'
       ? 'bg-oe-blue-subtle/50 text-oe-blue-text ring-1 ring-oe-blue/30 hover:bg-oe-blue-subtle'
       : pillTone === 'amber'
-      ? 'bg-semantic-warning/15 text-semantic-warning dark:text-amber-300 ring-1 ring-amber-500/30 hover:bg-semantic-warning/25'
+      ? 'bg-semantic-warning/15 text-semantic-warning ring-1 ring-semantic-warning/30 hover:bg-semantic-warning/25'
       : 'bg-surface-tertiary text-content-secondary ring-1 ring-border-light hover:bg-surface-tertiary/80';
 
   const pillLabel = (() => {
@@ -760,11 +760,11 @@ function ResourceRow({
   const abcPct = resource.abc_percentage ?? 0;
   const abcBadgeClass =
     abcClass === 'A'
-      ? 'bg-semantic-error/15 text-semantic-error dark:text-rose-300 ring-1 ring-rose-500/30'
+      ? 'bg-semantic-error/15 text-semantic-error ring-1 ring-semantic-error/30'
       : abcClass === 'B'
-      ? 'bg-semantic-warning/15 text-semantic-warning dark:text-amber-300 ring-1 ring-amber-500/30'
+      ? 'bg-semantic-warning/15 text-semantic-warning ring-1 ring-semantic-warning/30'
       : abcClass === 'C'
-      ? 'bg-semantic-success/15 text-semantic-success dark:text-emerald-300 ring-1 ring-emerald-500/30'
+      ? 'bg-semantic-success/15 text-semantic-success ring-1 ring-semantic-success/30'
       : 'bg-surface-tertiary text-content-tertiary ring-1 ring-border-light';
 
   return (
@@ -890,7 +890,7 @@ function ResourceRow({
             title={t('boq.rs_save_to_catalog', { defaultValue: 'Save to My Catalog' })}
             className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-all"
           >
-            <BookmarkPlus size={13} />
+            <BookmarkPlus size={14} />
           </button>
         )}
         {onScale && (
@@ -902,7 +902,7 @@ function ResourceRow({
             className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-all"
             data-testid={`rs-scale-${resource.type}-${resource.name}`}
           >
-            <Scale size={13} />
+            <Scale size={14} />
           </button>
         )}
       </td>

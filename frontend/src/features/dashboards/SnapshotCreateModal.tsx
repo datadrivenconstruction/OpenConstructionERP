@@ -116,7 +116,7 @@ export function SnapshotCreateModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -124,7 +124,7 @@ export function SnapshotCreateModal({
     >
       <div className="w-full max-w-lg rounded-lg border border-border-light bg-surface-primary shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('dashboards.create_snapshot', { defaultValue: 'Create snapshot' })}
           </h2>
           <button
@@ -192,7 +192,7 @@ export function SnapshotCreateModal({
                       key={`${f.name}-${i}`}
                       className={`flex items-center gap-2 rounded border px-2 py-1 text-xs ${
                         bad
-                          ? 'border-rose-400/50 bg-semantic-error-bg text-semantic-error'
+                          ? 'border-semantic-error/50 bg-semantic-error-bg text-semantic-error'
                           : 'border-border-light bg-surface-secondary text-content-secondary'
                       }`}
                     >

@@ -104,7 +104,7 @@ export function SnapshotTimeline({
     <Card data-testid="snapshot-timeline">
       <div className="flex items-center justify-between border-b border-border-light px-4 py-2">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('dashboards.timeline_title', {
               defaultValue: 'Snapshot history',
             })}
@@ -140,7 +140,7 @@ export function SnapshotTimeline({
 
         {timelineQuery.isError && (
           <div
-            className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300"
+            className="rounded border border-semantic-error/30 bg-semantic-error/10 p-3 text-xs text-semantic-error"
             data-testid="snapshot-timeline-error"
           >
             {t('dashboards.timeline_error', {
@@ -218,13 +218,13 @@ function TimelineCard({
 }: TimelineCardProps) {
   const { t } = useTranslation();
   const dotClass = isActive
-    ? 'bg-emerald-400 ring-2 ring-semantic-success/30'
+    ? 'bg-semantic-success ring-2 ring-semantic-success/30'
     : 'bg-border-light';
   const cardClass = useMemo(() => {
     const base =
       'relative flex w-full cursor-pointer items-start gap-3 rounded border px-3 py-2 text-left transition hover:bg-surface-secondary';
-    if (isActive) return `${base} border-emerald-500/40 bg-semantic-success/5`;
-    if (isComparing) return `${base} border-sky-500/40 bg-semantic-info/5`;
+    if (isActive) return `${base} border-semantic-success/40 bg-semantic-success/5`;
+    if (isComparing) return `${base} border-semantic-info/40 bg-semantic-info/5`;
     return `${base} border-border-light/60`;
   }, [isActive, isComparing]);
 
@@ -311,7 +311,7 @@ function TimelineCard({
           data-testid={`snapshot-timeline-compare-toggle-${item.id}`}
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border ${
             isComparing
-              ? 'border-semantic-info/60 bg-semantic-info/30 text-sky-100'
+              ? 'border-semantic-info/60 bg-semantic-info/30 text-semantic-info'
               : 'border-border-light bg-surface-secondary text-transparent hover:text-content-tertiary'
           }`}
         >
@@ -328,10 +328,10 @@ function CompletenessChip({ score }: { score: number }) {
   const pct = Math.round(score * 100);
   const tone =
     score >= 0.95
-      ? 'bg-semantic-success/15 text-emerald-300'
+      ? 'bg-semantic-success/15 text-semantic-success'
       : score >= 0.7
-        ? 'bg-semantic-warning/15 text-amber-300'
-        : 'bg-semantic-error/15 text-rose-300';
+        ? 'bg-semantic-warning/15 text-semantic-warning'
+        : 'bg-semantic-error/15 text-semantic-error';
   return (
     <span
       data-testid={`snapshot-timeline-completeness-${pct}`}

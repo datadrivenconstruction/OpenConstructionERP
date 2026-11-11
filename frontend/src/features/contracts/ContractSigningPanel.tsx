@@ -178,8 +178,8 @@ export function ContractSigningPanel({
     <section className="rounded-lg border border-border-light">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <PenLine size={15} className="text-content-tertiary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <PenLine size={16} className="text-content-tertiary" />
+          <h3 className="oe-card-title">
             {t('contracts.esign.heading', {
               defaultValue: 'Electronic signature',
             })}
@@ -233,7 +233,7 @@ export function ContractSigningPanel({
             {staleNames.length > 0 && (
               <div className="flex items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5">
                 <AlertTriangle
-                  size={18}
+                  size={20}
                   className="mt-0.5 shrink-0 text-semantic-warning"
                 />
                 <div>

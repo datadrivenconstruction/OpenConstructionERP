@@ -320,7 +320,7 @@ function PreviewModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -334,7 +334,7 @@ function PreviewModal({
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light bg-surface-primary">
           <div className="flex items-center gap-3 min-w-0">
             {fileIcon(doc.mime_type)}
-            <h3 className="text-sm font-semibold text-content-primary truncate">{doc.name}</h3>
+            <h3 className="oe-card-title truncate">{doc.name}</h3>
             <span className="text-xs text-content-tertiary shrink-0">{formatSize(doc.file_size)}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -417,7 +417,7 @@ function PreviewModal({
             BIM viewer with the element preselected. */}
         {linkedElements && linkedElements.items.length > 0 && (
           <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
-            <h4 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h4 className="oe-overline mb-2">
               {t('documents.linked_bim_elements', {
                 defaultValue: 'Linked BIM elements',
               })}
@@ -961,12 +961,12 @@ export function DocumentsPage() {
             {!isLoading && documentPage && documentPage.items.length > 0 && (
               <div className="hidden sm:flex items-center gap-3 text-xs text-content-tertiary">
                 <span className="flex items-center gap-1.5">
-                  <FileText size={13} />
+                  <FileText size={14} />
                   {t('documents.total_count', { defaultValue: '{{count}} documents', count: stats.count })}
                 </span>
                 {!isTruncated(documentPage) && (
                   <span className="flex items-center gap-1.5">
-                    <HardDrive size={13} />
+                    <HardDrive size={14} />
                     {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
                   </span>
                 )}
@@ -1042,9 +1042,9 @@ export function DocumentsPage() {
           {t('documents.supported_types', { defaultValue: 'PDF, images, Excel, DWG, IFC - any file type' })}
         </p>
         <div className="flex items-center justify-center gap-2 mt-3">
-          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-error/10 text-semantic-error border border-red-500/15 font-semibold">.pdf</span>
-          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-emerald-500/15 font-semibold">.img</span>
-          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-green-500/15 font-semibold">.xlsx</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-error/10 text-semantic-error border border-semantic-error/15 font-semibold">.pdf</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-semantic-success/15 font-semibold">.img</span>
+          <span className="text-2xs font-mono px-2 py-1 rounded-md bg-semantic-success/10 text-semantic-success border border-semantic-success/15 font-semibold">.xlsx</span>
           <span className="text-2xs font-mono px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 border border-orange-500/15 font-semibold">.dwg</span>
           <span className="text-2xs font-mono px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/15 font-semibold">.ifc</span>
         </div>
@@ -1077,7 +1077,7 @@ export function DocumentsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('documents.search', { defaultValue: 'Search files...' })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-input-lg w-full ps-10 pe-8"
             aria-label={t('documents.search_label', { defaultValue: 'Search documents' })}
           />
           {query && (
@@ -1116,7 +1116,7 @@ export function DocumentsPage() {
               setFileTypeFilter(e.target.value as 'all' | 'pdf' | 'dwg' | 'ifc' | 'rvt' | 'other')
             }
             aria-label={t('documents.filter_file_type', { defaultValue: 'Filter by file type' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select-lg ps-3"
           >
             <option value="all">{t('documents.type_all', { defaultValue: 'All types' })}</option>
             <option value="pdf">{t('documents.type_pdf', { defaultValue: 'PDF' })}</option>
@@ -1135,7 +1135,7 @@ export function DocumentsPage() {
             value={revisionFilter}
             onChange={(e) => setRevisionFilter(e.target.value as 'all' | 'latest' | 'versioned')}
             aria-label={t('documents.filter_revision', { defaultValue: 'Filter by revision' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-select-lg ps-3"
           >
             <option value="all">{t('documents.rev_all', { defaultValue: 'All revisions' })}</option>
             <option value="latest">{t('documents.rev_latest', { defaultValue: 'Latest only' })}</option>
@@ -1154,8 +1154,8 @@ export function DocumentsPage() {
       {cadSessions.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-              <HardDrive size={13} className="text-oe-blue" />
+            <h3 className="oe-card-title flex items-center gap-1.5">
+              <HardDrive size={14} className="text-oe-blue" />
               {t('documents.cad_models', { defaultValue: 'CAD/BIM Models' })}
               <Badge variant="blue" size="sm">{cadSessions.length}</Badge>
             </h3>
@@ -1213,8 +1213,8 @@ export function DocumentsPage() {
            up where they left off. */}
       {(bimModels.length > 0 || dwgDrawings.length > 0 || takeoffDocs.length > 0) && (
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-            <File size={13} className="text-oe-blue" />
+          <h3 className="oe-card-title flex items-center gap-1.5">
+            <File size={14} className="text-oe-blue" />
             {t('documents.module_files', { defaultValue: 'Module Files' })}
             <Badge variant="blue" size="sm">{bimModels.length + dwgDrawings.length + takeoffDocs.length}</Badge>
           </h3>
@@ -1229,7 +1229,7 @@ export function DocumentsPage() {
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded bg-blue-50 dark:bg-blue-950/30 shrink-0">
-                    <File size={13} className="text-blue-500" />
+                    <File size={14} className="text-blue-500" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{m.name}</p>
@@ -1250,7 +1250,7 @@ export function DocumentsPage() {
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded bg-orange-50 dark:bg-orange-950/30 shrink-0">
-                    <File size={13} className="text-orange-500" />
+                    <File size={14} className="text-orange-500" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{d.name}</p>
@@ -1271,7 +1271,7 @@ export function DocumentsPage() {
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded bg-semantic-error-bg shrink-0">
-                    <FileText size={13} className="text-semantic-error" />
+                    <FileText size={14} className="text-semantic-error" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-content-primary truncate">{td.filename}</p>
@@ -1362,7 +1362,7 @@ export function DocumentsPage() {
                     {fileIcon(doc.mime_type, doc.name)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-medium text-content-primary truncate" title={doc.name}>{doc.name}</h3>
+                    <h3 className="oe-card-title truncate" title={doc.name}>{doc.name}</h3>
                     <p className="text-2xs text-content-tertiary mt-1">
                       {formatSize(doc.file_size)}
                       {' \u00B7 '}
@@ -1475,7 +1475,7 @@ export function DocumentsPage() {
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); setPreviewDoc(doc); }}
-                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               >
                                 <Eye size={14} className="text-content-tertiary" />
                                 {t('documents.preview', { defaultValue: 'Preview' })}
@@ -1485,7 +1485,7 @@ export function DocumentsPage() {
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); navigate(`/takeoff?doc=${doc.id}&name=${encodeURIComponent(doc.name)}`); }}
-                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               >
                                 <Ruler size={14} className="text-oe-blue" />
                                 {t('documents.open_in_takeoff', { defaultValue: 'Measure & Takeoff' })}
@@ -1495,7 +1495,7 @@ export function DocumentsPage() {
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}
-                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               >
                                 <Ruler size={14} className="text-oe-blue" />
                                 {t('documents.open_in_dwg_takeoff', { defaultValue: 'Open in DWG Takeoff' })}
@@ -1505,7 +1505,7 @@ export function DocumentsPage() {
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); navigate(`/bim?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}
-                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               >
                                 <Ruler size={14} className="text-oe-blue" />
                                 {t('documents.open_in_bim', { defaultValue: 'Open in BIM Viewer' })}
@@ -1514,7 +1514,7 @@ export function DocumentsPage() {
                             <button
                               type="button"
                               role="menuitem"
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               onClick={() => {
                                 setOpenMenuId(null);
                                 // A plain link would open without the bearer header.
@@ -1531,7 +1531,7 @@ export function DocumentsPage() {
                                 setRenameDoc({ id: doc.id, name: doc.name });
                                 setRenameValue(doc.name);
                               }}
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                             >
                               <Pencil size={14} className="text-content-tertiary" />
                               {t('documents.rename', { defaultValue: 'Rename' })}
@@ -1542,7 +1542,7 @@ export function DocumentsPage() {
                                 setOpenMenuId(null);
                                 openEditDialog(doc);
                               }}
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                             >
                               <Tag size={14} className="text-content-tertiary" />
                               {t('documents.properties', { defaultValue: 'Properties' })}
@@ -1553,7 +1553,7 @@ export function DocumentsPage() {
                                 setOpenMenuId(null);
                                 navigate('/transmittals?create=true&doc_ids=' + doc.id);
                               }}
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                             >
                               <Send size={14} className="text-content-tertiary" />
                               {t('documents.send_transmittal', { defaultValue: 'Send via Transmittal' })}
@@ -1562,7 +1562,7 @@ export function DocumentsPage() {
                             <button
                               role="menuitem"
                               onClick={() => { setOpenMenuId(null); setConfirmDeleteId(doc.id); }}
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-semantic-error hover:bg-semantic-error-bg transition-colors"
                             >
                               <Trash2 size={14} />
                               {t('common.delete', { defaultValue: 'Delete' })}
@@ -1581,14 +1581,14 @@ export function DocumentsPage() {
 
       {/* ── Properties dialog ────────────────────────────────────────── */}
       {editDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setEditDoc(null)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setEditDoc(null)}>
           <div className="relative w-full max-w-md mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
               <div className="flex items-center gap-2 min-w-0">
                 {fileIcon(editDoc.mime_type)}
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold text-content-primary truncate">{editDoc.name}</h3>
+                  <h3 className="oe-card-title truncate">{editDoc.name}</h3>
                   <p className="text-2xs text-content-tertiary">{formatSize(editDoc.file_size)} · <DateDisplay value={editDoc.created_at} /></p>
                 </div>
               </div>
@@ -1600,7 +1600,7 @@ export function DocumentsPage() {
             <div className="px-5 py-4 space-y-4">
               {/* Category */}
               <div>
-                <label className="text-xs font-medium text-content-primary block mb-1.5">
+                <label className="oe-label">
                   {t('documents.category_label', { defaultValue: 'Category' })}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -1622,7 +1622,7 @@ export function DocumentsPage() {
 
               {/* Description */}
               <div>
-                <label className="text-xs font-medium text-content-primary block mb-1.5">
+                <label className="oe-label">
                   {t('documents.description_label', { defaultValue: 'Description' })}
                 </label>
                 <textarea
@@ -1630,13 +1630,13 @@ export function DocumentsPage() {
                   onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder={t('documents.description_placeholder', { defaultValue: 'Add notes about this document...' })}
                   rows={3}
-                  className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  className="oe-textarea w-full resize-none"
                 />
               </div>
 
               {/* Tags */}
               <div>
-                <label className="text-xs font-medium text-content-primary block mb-1.5">
+                <label className="oe-label">
                   {t('documents.tags_label', { defaultValue: 'Tags' })}
                 </label>
                 <div className="flex items-center gap-2 mb-2">
@@ -1648,7 +1648,7 @@ export function DocumentsPage() {
                       if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); }
                     }}
                     placeholder={t('documents.tag_placeholder', { defaultValue: 'Type a tag and press Enter' })}
-                    className="h-8 flex-1 rounded-lg border border-border bg-surface-primary px-3 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    className="oe-input flex-1"
                   />
                   <Button variant="secondary" size="sm" onClick={handleAddTag} disabled={!editForm.tagInput.trim()}>
                     {t('common.add', { defaultValue: 'Add' })}
@@ -1708,9 +1708,9 @@ export function DocumentsPage() {
 
       {/* ── Rename dialog ──────────────────────────────────────────────── */}
       {renameDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setRenameDoc(null)}>
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setRenameDoc(null)}>
           <div className="relative w-full max-w-sm mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-content-primary mb-3">
+            <h3 className="oe-card-title mb-3">
               {t('documents.rename', { defaultValue: 'Rename' })}
             </h3>
             <input
@@ -1723,7 +1723,7 @@ export function DocumentsPage() {
                 }
                 if (e.key === 'Escape') setRenameDoc(null);
               }}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input-lg w-full"
               autoFocus
             />
             <div className="flex justify-end gap-2 mt-4">
@@ -1746,7 +1746,7 @@ export function DocumentsPage() {
 
       {/* ── Drag overlay (full-page visual feedback) ────────────────────── */}
       {dragOver && (
-        <div className="fixed inset-0 z-40 bg-oe-blue/5 border-4 border-dashed border-oe-blue/40 rounded-xl pointer-events-none flex items-center justify-center">
+        <div className="fixed inset-0 z-modal bg-oe-blue/5 border-4 border-dashed border-oe-blue/40 rounded-xl pointer-events-none flex items-center justify-center">
           <div className="bg-surface-elevated px-6 py-4 rounded-xl shadow-xl border border-border-light text-center">
             <Upload size={32} className="mx-auto text-oe-blue mb-2" />
             <p className="text-sm font-medium text-content-primary">

@@ -190,7 +190,7 @@ export function CoordinationMode({
         {/* Title row */}
         <div className="mb-2 flex items-center gap-2">
           <Presentation size={16} className="shrink-0 text-oe-blue" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-content-secondary">
+          <span className="oe-overline">
             {t('bcf.coordination_mode', { defaultValue: 'Coordination mode' })}
           </span>
           {agenda.length > 0 && (
@@ -220,11 +220,11 @@ export function CoordinationMode({
         </div>
 
         {current ? (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {/* Current issue */}
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
-                <h4 className="truncate text-sm font-semibold text-content-primary">
+                <h4 className="oe-card-title truncate">
                   {current.title}
                 </h4>
                 {current.description && (
@@ -269,7 +269,7 @@ export function CoordinationMode({
                     status: e.target.value,
                   })
                 }
-                className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="oe-select"
                 aria-label={t('bcf.field_status', { defaultValue: 'Status' })}
               >
                 {statusOptions.map((s) => (
@@ -289,7 +289,7 @@ export function CoordinationMode({
                     }
                   }}
                   placeholder={t('bcf.coordination_note', { defaultValue: 'Add a note...' })}
-                  className="h-8 flex-1 rounded-lg border border-border bg-surface-primary px-2.5 text-xs text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+                  className="oe-input flex-1"
                 />
                 <button
                   type="button"
@@ -299,7 +299,7 @@ export function CoordinationMode({
                   title={t('bcf.post_comment', { defaultValue: 'Post comment' })}
                   aria-label={t('bcf.post_comment', { defaultValue: 'Post comment' })}
                 >
-                  <Send size={13} />
+                  <Send size={14} />
                 </button>
               </div>
             </div>

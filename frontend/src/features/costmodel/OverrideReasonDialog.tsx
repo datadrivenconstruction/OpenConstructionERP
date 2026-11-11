@@ -59,7 +59,7 @@ export function OverrideReasonDialog({ open, busy = false, onCancel, onConfirm }
       <label className="block text-sm">
         <span className="text-content-secondary">{t('costmodel.override.reason', { defaultValue: 'Reason' })}</span>
         <textarea
-          className="mt-1 w-full rounded-lg border border-border bg-surface-primary px-3 py-2"
+          className="oe-textarea mt-1 w-full"
           rows={3}
           value={reason}
           maxLength={2000}

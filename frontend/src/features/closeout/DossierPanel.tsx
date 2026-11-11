@@ -57,7 +57,7 @@ const KNOWN_CATEGORIES = [
 ];
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
+  'w-full';
 
 function useDebounced<T>(value: T, ms: number): T {
   const [v, setV] = useState(value);
@@ -74,7 +74,7 @@ function CheckBanner({ check }: { check: DossierCheck }) {
     check.check_status === 'passed'
       ? 'border-semantic-success/40 bg-semantic-success/5 text-semantic-success'
       : check.check_status === 'warnings'
-        ? 'border-amber-400/50 bg-semantic-warning-bg text-semantic-warning dark:bg-amber-500/10'
+        ? 'border-semantic-warning/50 bg-semantic-warning-bg text-semantic-warning'
         : 'border-semantic-error/40 bg-semantic-error/5 text-semantic-error';
   const Icon = check.check_status === 'passed' ? CheckCircle2 : check.check_status === 'warnings' ? AlertTriangle : XCircle;
   return (
@@ -156,7 +156,7 @@ function ConfigEditor({
   return (
     <div className="grid gap-4 rounded-lg border border-border-light p-3 md:grid-cols-2" data-testid="dossier-config">
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <p className="oe-overline mb-2">
           {t('closeout.dossier.required_categories', { defaultValue: 'Required documents' })}
         </p>
         <div className="grid grid-cols-2 gap-1">
@@ -180,7 +180,7 @@ function ConfigEditor({
         </div>
       </div>
       <div className="space-y-1.5">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <p className="oe-overline mb-2">
           {t('closeout.dossier.rules', { defaultValue: 'Checks' })}
         </p>
         {toggles.map(({ key, label }) => (
@@ -201,7 +201,7 @@ function ConfigEditor({
             min={1}
             max={365}
             defaultValue={config.share_expires_in_days}
-            className={clsx(inputCls, 'h-8 w-20')}
+            className={clsx('oe-input', inputCls, 'w-20')}
             onBlur={(e) => {
               const days = Number(e.target.value);
               if (Number.isFinite(days) && days >= 1 && days <= 365 && days !== config.share_expires_in_days) {
@@ -359,8 +359,8 @@ export function DossierPanel({
     <Card className="p-5" data-testid="dossier-panel">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-base font-semibold text-content-primary">
-            <FolderArchive size={18} className="text-oe-blue" />
+          <h3 className="oe-section-title flex items-center gap-2">
+            <FolderArchive size={20} className="text-oe-blue" />
             {t('closeout.dossier.title', { defaultValue: 'Handover dossier' })}
           </h3>
           <p className="mt-1 text-sm text-content-secondary">
@@ -387,10 +387,10 @@ export function DossierPanel({
       )}
 
       <div className="grid gap-3 md:grid-cols-3">
-        <label className="text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('closeout.dossier.scope', { defaultValue: 'Scope' })}
           <select
-            className={clsx(inputCls, 'mt-1')}
+            className={clsx('oe-select', inputCls, 'mt-1')}
             value={scopeKind}
             onChange={(e) => setScopeKind(e.target.value as DossierScopeKind)}
             data-testid="dossier-scope-kind"
@@ -406,7 +406,7 @@ export function DossierPanel({
               ? t('closeout.dossier.area_label', { defaultValue: 'Area (as recorded on items, e.g. "Level 2")' })
               : t('closeout.dossier.asset_label', { defaultValue: 'Asset reference (element id, plant item id or tag)' })}
             <input
-              className={clsx(inputCls, 'mt-1')}
+              className={clsx('oe-input', inputCls, 'mt-1')}
               value={scopeValue}
               onChange={(e) => setScopeValue(e.target.value)}
               data-testid="dossier-scope-value"
@@ -427,10 +427,10 @@ export function DossierPanel({
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <label className="text-xs font-medium text-content-secondary">
+        <label className="oe-label">
           {t('closeout.dossier.deliver_via', { defaultValue: 'Deliver via' })}
           <select
-            className={clsx(inputCls, 'mt-1')}
+            className={clsx('oe-select', inputCls, 'mt-1')}
             value={channel}
             onChange={(e) => {
               setChannel(e.target.value as DossierChannel);
@@ -448,7 +448,7 @@ export function DossierPanel({
         {(channel === 'webhook' || channel === 'connector') && (
           <label className="text-xs font-medium text-content-secondary md:col-span-2">
             {t('closeout.dossier.target', { defaultValue: 'Send to' })}
-            <select className={clsx(inputCls, 'mt-1')} value={targetId} onChange={(e) => setTargetId(e.target.value)}>
+            <select className={clsx('oe-select', inputCls, 'mt-1')} value={targetId} onChange={(e) => setTargetId(e.target.value)}>
               <option value="">
                 {targets.length === 0
                   ? t('closeout.dossier.no_targets', { defaultValue: 'None configured. Add one under Integrations.' })
@@ -467,7 +467,7 @@ export function DossierPanel({
             {t('closeout.dossier.recipient', { defaultValue: 'Recipient e-mail' })}
             <input
               type="email"
-              className={clsx(inputCls, 'mt-1')}
+              className={clsx('oe-input', inputCls, 'mt-1')}
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
             />
@@ -477,14 +477,14 @@ export function DossierPanel({
           <>
             <label className="text-xs font-medium text-content-secondary md:col-span-2">
               {t('closeout.dossier.message', { defaultValue: 'Message (optional)' })}
-              <input className={clsx(inputCls, 'mt-1')} value={message} onChange={(e) => setMessage(e.target.value)} />
+              <input className={clsx('oe-input', inputCls, 'mt-1')} value={message} onChange={(e) => setMessage(e.target.value)} />
             </label>
-            <label className="text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('closeout.dossier.password', { defaultValue: 'Link password (optional)' })}
               <input
                 type="password"
                 autoComplete="new-password"
-                className={clsx(inputCls, 'mt-1')}
+                className={clsx('oe-input', inputCls, 'mt-1')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -521,7 +521,7 @@ export function DossierPanel({
 
       {(dossiersQ.data ?? []).length > 0 && (
         <div className="mt-6">
-          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <h4 className="oe-overline mb-2">
             {t('closeout.dossier.history', { defaultValue: 'Dossiers and delivery log' })}
           </h4>
           <div className="space-y-3">
@@ -553,30 +553,30 @@ export function DossierPanel({
                   )}
                   <span className="flex-1" />
                   {(d.status === 'built' || d.status === 'delivered') && (
-                    <Button variant="secondary" size="sm" icon={<Download size={13} />} onClick={() => downloadMut.mutate(d)} loading={downloadMut.isPending && downloadMut.variables?.id === d.id}>
+                    <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => downloadMut.mutate(d)} loading={downloadMut.isPending && downloadMut.variables?.id === d.id}>
                       {t('closeout.dossier.download', { defaultValue: 'Download' })}
                     </Button>
                   )}
                 </div>
                 {d.error && <p className="mt-1 text-xs text-semantic-error">{d.error}</p>}
                 {d.deliveries.length > 0 && (
-                  <table className="mt-2 w-full text-xs">
-                    <thead className="text-left text-content-tertiary">
+                  <table className="oe-table-compact mt-2 w-full">
+                    <thead className="text-left">
                       <tr>
-                        <th className="py-1 font-medium">{t('closeout.dossier.col_channel', { defaultValue: 'Channel' })}</th>
-                        <th className="py-1 font-medium">{t('closeout.dossier.col_target', { defaultValue: 'Recipient' })}</th>
-                        <th className="py-1 font-medium">{t('closeout.dossier.col_status', { defaultValue: 'Status' })}</th>
-                        <th className="py-1 font-medium">{t('closeout.dossier.col_when', { defaultValue: 'When' })}</th>
-                        <th className="py-1 font-medium">{t('closeout.dossier.col_link', { defaultValue: 'Link valid until' })}</th>
+                        <th>{t('closeout.dossier.col_channel', { defaultValue: 'Channel' })}</th>
+                        <th>{t('closeout.dossier.col_target', { defaultValue: 'Recipient' })}</th>
+                        <th>{t('closeout.dossier.col_status', { defaultValue: 'Status' })}</th>
+                        <th>{t('closeout.dossier.col_when', { defaultValue: 'When' })}</th>
+                        <th>{t('closeout.dossier.col_link', { defaultValue: 'Link valid until' })}</th>
                         <th />
                       </tr>
                     </thead>
                     <tbody>
                       {d.deliveries.map((x) => (
-                        <tr key={x.id} className="border-t border-border-light">
-                          <td className="py-1">{channelLabel(x.channel)}</td>
-                          <td className="py-1">{x.target_label ?? x.recipient ?? '-'}</td>
-                          <td className="py-1">
+                        <tr key={x.id}>
+                          <td>{channelLabel(x.channel)}</td>
+                          <td>{x.target_label ?? x.recipient ?? '-'}</td>
+                          <td>
                             <Badge variant={deliveryStatusVariant(x)} size="sm">
                               {x.status === 'sent'
                                 ? t('closeout.dossier.delivery_sent', { defaultValue: 'Sent' })
@@ -586,9 +586,9 @@ export function DossierPanel({
                             </Badge>
                             {x.detail && x.status === 'failed' && <span className="ml-1 text-content-tertiary">{x.detail}</span>}
                           </td>
-                          <td className="py-1">{x.delivered_at ? fmtDate(x.delivered_at, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
-                          <td className="py-1">{x.share_expires_at ? fmtDate(x.share_expires_at, { dateStyle: 'short' }) : '-'}</td>
-                          <td className="py-1 text-right">
+                          <td>{x.delivered_at ? fmtDate(x.delivered_at, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                          <td>{x.share_expires_at ? fmtDate(x.share_expires_at, { dateStyle: 'short' }) : '-'}</td>
+                          <td className="text-right">
                             {x.channel !== 'download' && canSignOff && (
                               <button
                                 type="button"
@@ -596,7 +596,7 @@ export function DossierPanel({
                                 onClick={() => resendMut.mutate(x.id)}
                                 disabled={resendMut.isPending}
                               >
-                                <RotateCw size={11} />
+                                <RotateCw size={12} />
                                 {t('closeout.dossier.resend', { defaultValue: 'Send again' })}
                               </button>
                             )}

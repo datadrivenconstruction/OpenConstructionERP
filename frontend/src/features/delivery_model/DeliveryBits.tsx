@@ -63,7 +63,7 @@ export function ReasonedButton({
           data-reason={verdict ?? undefined}
           className="inline-flex max-w-xs items-start gap-1 text-2xs text-content-tertiary"
         >
-          <Info size={11} className="mt-px shrink-0" aria-hidden />
+          <Info size={12} className="mt-px shrink-0" aria-hidden />
           {reason}
         </span>
       )}
@@ -181,7 +181,7 @@ export function FindingList({
             data-severity={f.severity}
             className={clsx('flex items-start gap-1.5 text-xs', isError ? 'text-semantic-error' : 'text-[#b45309]')}
           >
-            {isError ? <XCircle size={13} className="mt-px shrink-0" aria-hidden /> : <AlertTriangle size={13} className="mt-px shrink-0" aria-hidden />}
+            {isError ? <XCircle size={14} className="mt-px shrink-0" aria-hidden /> : <AlertTriangle size={14} className="mt-px shrink-0" aria-hidden />}
             <span>
               {refName && f.ref && <span className="block font-medium text-content-primary">{refName(f.ref)}</span>}
               {text}

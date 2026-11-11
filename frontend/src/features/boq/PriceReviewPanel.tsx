@@ -88,7 +88,7 @@ export function PriceReviewPanel({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <AlertTriangle size={16} className="text-semantic-warning" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('boq.price_review_title', { defaultValue: 'Price Check Results' })}
           </h3>
           <span className="rounded-full bg-semantic-warning-bg px-2 py-0.5 text-2xs font-semibold text-semantic-warning">

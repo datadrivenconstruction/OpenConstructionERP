@@ -164,7 +164,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in"
       onClick={onClose}
       aria-hidden="true"
     >
@@ -179,10 +179,10 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success">
-              <Boxes size={18} />
+              <Boxes size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('boq.pick_from_catalog', { defaultValue: 'Pick from Catalog' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -240,7 +240,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
               aria-label={t('boq.search_catalog_resources', {
                 defaultValue: 'Search resources by name, code, or category...',
               })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary ps-10 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-semantic-success/60"
+              className="oe-input-lg w-full ps-10 pe-3"
             />
             {loading && (
               <div className="absolute inset-y-0 end-0 flex items-center pr-3">

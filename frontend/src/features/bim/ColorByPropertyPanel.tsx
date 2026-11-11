@@ -149,7 +149,7 @@ export default function ColorByPropertyPanel({
     >
       <div className="flex items-center gap-2">
         <PaletteIcon size={14} className="text-content-tertiary" />
-        <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+        <h3 className="oe-overline">
           {t('bim.color_by_property_title', {
             defaultValue: 'Color by property',
           })}
@@ -165,7 +165,7 @@ export default function ColorByPropertyPanel({
           value={propertyKey}
           onChange={(e) => setPropertyKey(e.target.value)}
           data-testid="bim-color-by-property-key"
-          className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-select-sm"
         >
           {availableKeys.length === 0 ? (
             <option value="">
@@ -190,7 +190,7 @@ export default function ColorByPropertyPanel({
           value={palette}
           onChange={(e) => setPalette(e.target.value as ColorByPropertyPalette)}
           data-testid="bim-color-by-property-palette"
-          className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+          className="oe-select-sm"
         >
           {PALETTES.map((p) => (
             <option key={p.value} value={p.value}>
@@ -210,7 +210,7 @@ export default function ColorByPropertyPanel({
               value={rangeMin}
               onChange={(e) => setRangeMin(e.target.value)}
               data-testid="bim-color-by-property-min"
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+              className="oe-input-sm"
             />
           </label>
           <label className="flex flex-1 flex-col gap-1 text-2xs text-content-secondary">
@@ -220,7 +220,7 @@ export default function ColorByPropertyPanel({
               value={rangeMax}
               onChange={(e) => setRangeMax(e.target.value)}
               data-testid="bim-color-by-property-max"
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+              className="oe-input-sm"
             />
           </label>
         </div>
@@ -250,7 +250,7 @@ export default function ColorByPropertyPanel({
 
       {/* Legend */}
       <div className="flex flex-col gap-1">
-        <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <div className="oe-overline">
           {t('bim.color_legend', { defaultValue: 'Legend' })}
         </div>
         {palette === 'categorical-12' || palette === 'fire-rating' ? (

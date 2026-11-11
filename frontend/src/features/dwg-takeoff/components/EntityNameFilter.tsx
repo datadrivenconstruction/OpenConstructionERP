@@ -92,11 +92,11 @@ export function EntityNameFilter({
       >
         <div className="flex items-center gap-1.5">
           {collapsed ? (
-            <ChevronRight size={13} className="text-muted-foreground" />
+            <ChevronRight size={14} className="text-muted-foreground" />
           ) : (
-            <ChevronDown size={13} className="text-muted-foreground" />
+            <ChevronDown size={14} className="text-muted-foreground" />
           )}
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="oe-card-title text-foreground">
             {t('dwg_takeoff.entity_names', 'Entity Names')}
           </h3>
           <span className="text-2xs text-muted-foreground tabular-nums">
@@ -139,7 +139,7 @@ export function EntityNameFilter({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('dwg_takeoff.search_names', 'Filter names...')}
-              className="w-full rounded-md border border-border bg-surface-secondary py-1 pl-7 pr-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-input-sm w-full pl-7 pr-2 text-foreground"
             />
           </div>
 
@@ -159,7 +159,7 @@ export function EntityNameFilter({
                       : 'text-muted-foreground hover:bg-surface-secondary',
                   )}
                 >
-                  {visible ? <Eye size={13} /> : <EyeOff size={13} />}
+                  {visible ? <Eye size={14} /> : <EyeOff size={14} />}
                   <span className="truncate flex-1 text-left font-mono text-2xs">
                     {group.name}
                   </span>

@@ -1145,7 +1145,7 @@ export function Changelog({ maxEntries }: { maxEntries?: number } = {}) {
   return (
     <div id="changelog">
       <div className="flex items-baseline justify-between gap-3 mb-4">
-        <h2 className="text-lg font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {t('about.changelog_title', { defaultValue: 'Changelog' })}
         </h2>
         <span className="text-2xs text-content-tertiary tabular-nums">
@@ -1185,7 +1185,7 @@ export function Changelog({ maxEntries }: { maxEntries?: number } = {}) {
                 'bg-white/60 backdrop-blur-xl border-white/40',
                 '/[0.05]',
                 'transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:bg-white/80',
-                isCurrent ? 'ring-1 ring-emerald-500/50 bg-semantic-success/10 dark:bg-emerald-900/15 dark:ring-emerald-400/40' : '',
+                isCurrent ? 'ring-1 ring-semantic-success/50 bg-semantic-success/10' : '',
                 stale ? 'opacity-70' : '',
               ].join(' ')}
             >

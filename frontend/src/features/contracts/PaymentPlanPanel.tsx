@@ -496,8 +496,8 @@ export function PaymentPlanPanel({
       <header className="flex flex-wrap items-start justify-between gap-2 border-b border-border-light px-4 py-2.5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Wallet size={15} className="text-content-tertiary" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            <Wallet size={16} className="text-content-tertiary" />
+            <span className="oe-overline">
               {t('contracts.plan_title', { defaultValue: 'Payment plan' })}
             </span>
           </div>

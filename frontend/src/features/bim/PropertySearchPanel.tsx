@@ -364,7 +364,7 @@ export default function PropertySearchPanel({
 
   return (
     <div className="flex flex-col gap-2 p-3" data-testid="property-search-panel">
-      <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide">
+      <h3 className="oe-overline">
         {t('bim.property_search_title', { defaultValue: 'Property search' })}
       </h3>
       <p className="text-2xs text-content-tertiary">
@@ -388,7 +388,7 @@ export default function PropertySearchPanel({
             value={targetModelId}
             onChange={(e) => setTargetModelId(e.target.value)}
             disabled={loading}
-            className="w-full min-w-0 px-2 py-1 text-2xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue disabled:opacity-50"
+            className="oe-select-sm w-full min-w-0"
             data-testid="property-search-target"
           >
             {childModelIds!.map((id) => (
@@ -450,7 +450,7 @@ export default function PropertySearchPanel({
           onChange={(e) => setOp(e.target.value as SearchOp)}
           disabled={loading}
           aria-label={t('bim.property_search_operator', { defaultValue: 'Operator' })}
-          className="shrink-0 px-2 py-1 text-2xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          className="oe-select-sm shrink-0"
           data-testid="property-search-op"
         >
           {OPS.map((o) => (
@@ -500,7 +500,7 @@ export default function PropertySearchPanel({
           className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue px-2 py-1 text-2xs font-medium text-white hover:bg-oe-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="property-search-submit"
         >
-          {loading ? <Loader2 size={11} className="animate-spin" /> : <Search size={11} />}
+          {loading ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
           {t('bim.property_search_run', { defaultValue: 'Search & isolate' })}
         </button>
         {outcome !== null && (
@@ -510,7 +510,7 @@ export default function PropertySearchPanel({
             className="shrink-0 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs text-content-secondary hover:bg-surface-tertiary"
             data-testid="property-search-clear"
           >
-            <X size={11} />
+            <X size={12} />
             {t('common.clear', { defaultValue: 'Clear' })}
           </button>
         )}
@@ -540,7 +540,7 @@ export default function PropertySearchPanel({
             })}
           </p>
           {outcome.unmatched > 0 && (
-            <p className="text-2xs text-amber-700 dark:text-amber-400" data-testid="property-search-unmatched">
+            <p className="text-2xs text-semantic-warning" data-testid="property-search-unmatched">
               {t('bim.property_search_unmatched', {
                 defaultValue_one: '{{count}} more match has no element in the 3D view.',
                 defaultValue_other: '{{count}} more matches have no element in the 3D view.',
@@ -566,7 +566,7 @@ export default function PropertySearchPanel({
         </p>
       )}
       {outcome?.kind === 'unplaced' && !error && (
-        <p className="text-2xs text-amber-700 dark:text-amber-400" role="status" data-testid="property-search-unplaced">
+        <p className="text-2xs text-semantic-warning" role="status" data-testid="property-search-unplaced">
           {t('bim.property_search_unplaced', {
             defaultValue_one: '{{count}} element matches, but none of them is in the 3D view. The view is unchanged.',
             defaultValue_other:
@@ -577,7 +577,7 @@ export default function PropertySearchPanel({
       )}
       {showCappedNotice && (
         <p
-          className="text-2xs text-amber-700 dark:text-amber-400"
+          className="text-2xs text-semantic-warning"
           role="status"
           data-testid="property-search-capped-properties"
         >
@@ -594,7 +594,7 @@ export default function PropertySearchPanel({
       )}
       {error && (
         <p
-          className="text-2xs text-rose-600 dark:text-rose-400"
+          className="text-2xs text-semantic-error"
           role="alert"
           data-testid="property-search-error"
         >

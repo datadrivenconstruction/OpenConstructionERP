@@ -155,7 +155,7 @@ export function QuickInsightPanel({
     <Card data-testid="quick-insight-panel">
       <div className="flex items-center justify-between border-b border-border-light px-4 py-2">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('dashboards.quick_insights_title', {
               defaultValue: 'Quick insights',
             })}
@@ -193,7 +193,7 @@ export function QuickInsightPanel({
         )}
 
         {insightsQuery.isError && (
-          <div className="rounded border border-rose-400/30 bg-semantic-error/10 p-3 text-xs text-rose-300">
+          <div className="rounded border border-semantic-error/30 bg-semantic-error/10 p-3 text-xs text-semantic-error">
             {t('dashboards.quick_insights_error', {
               defaultValue: 'Could not load auto-charts for this snapshot.',
             })}
@@ -202,7 +202,7 @@ export function QuickInsightPanel({
 
         {!insightsQuery.isLoading && !insightsQuery.isError && charts.length === 0 && (
           <EmptyState
-            icon={<BarChart3 className="h-8 w-8 text-neutral-500" />}
+            icon={<BarChart3 className="h-8 w-8 text-content-tertiary" />}
             title={t('dashboards.no_insights_title', {
               defaultValue: 'No automatic insights available',
             })}

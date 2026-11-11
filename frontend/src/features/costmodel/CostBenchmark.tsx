@@ -189,11 +189,11 @@ const RangeIndicator = memo(function RangeIndicator({
         />
         {/* Range boundary markers */}
         <div
-          className="absolute top-0 h-full w-px bg-green-400"
+          className="absolute top-0 h-full w-px bg-semantic-success"
           style={{ left: `${rangeStartPct}%` }}
         />
         <div
-          className="absolute top-0 h-full w-px bg-green-400"
+          className="absolute top-0 h-full w-px bg-semantic-success"
           style={{ left: `${rangeEndPct}%` }}
         />
         {/* Current cost indicator */}
@@ -280,7 +280,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
             <div>
               <label
                 htmlFor="benchmark-area"
-                className="block text-xs font-medium text-content-secondary mb-1.5"
+                className="oe-label"
               >
                 {t('costmodel.benchmark_project_area', { defaultValue: 'Project Area (m\u00B2)' })}
               </label>
@@ -294,7 +294,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                 placeholder={t('costmodel.benchmark_area_placeholder', {
                   defaultValue: 'e.g. 1200',
                 })}
-                className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue tabular-nums"
+                className="oe-input w-full tabular-nums"
               />
             </div>
 
@@ -302,7 +302,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
             <div>
               <label
                 htmlFor="benchmark-type"
-                className="block text-xs font-medium text-content-secondary mb-1.5"
+                className="oe-label"
               >
                 {t('costmodel.benchmark_project_type', { defaultValue: 'Project Type' })}
               </label>
@@ -310,7 +310,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                 id="benchmark-type"
                 value={projectType}
                 onChange={(e) => setProjectType(e.target.value as ProjectType)}
-                className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                className="oe-select w-full"
               >
                 {PROJECT_TYPE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -330,7 +330,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                 <div
                   className={`rounded-xl p-4 ${currencyMismatch ? 'bg-surface-secondary' : getStatusColor(benchmark.status).bg}`}
                 >
-                  <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+                  <div className="oe-overline mb-1">
                     {t('costmodel.benchmark_cost_per_unit', { defaultValue: 'Cost / {{unit}}', unit: rateUnit })}
                   </div>
                   <div
@@ -354,7 +354,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                 {/* Benchmark range \u2014 only meaningful when the project currency matches the band */}
                 {!currencyMismatch && (
                   <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+                    <div className="oe-overline mb-1">
                       {t('costmodel.benchmark_range_label', { defaultValue: 'Benchmark Range' })}
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-content-primary">
@@ -373,7 +373,7 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
 
                 {/* Total budget / area summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-                  <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+                  <div className="oe-overline mb-1">
                     {t('costmodel.benchmark_total_budget', { defaultValue: 'Total Budget' })}
                   </div>
                   <div className="text-sm font-semibold tabular-nums text-content-primary">

@@ -114,8 +114,8 @@ export function QuestionControl({ question, value, onChange, disabled }: Questio
           onChange={(e) => onChange(e.target.value)}
           aria-describedby={why ? whyId : undefined}
           className={clsx(
-            'h-9 w-40 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary',
-            'focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30',
+            'oe-input w-40',
+            '',
             question.unit && 'pr-12',
             disabled && 'opacity-50',
           )}
@@ -133,13 +133,13 @@ export function QuestionControl({ question, value, onChange, disabled }: Questio
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-start gap-1.5">
-        <label id={inputId} htmlFor={question.kind === 'number' || question.kind === 'length' ? inputId : undefined} className="text-sm font-medium text-content-primary">
+        <label id={inputId} htmlFor={question.kind === 'number' || question.kind === 'length' ? inputId : undefined} className="oe-label">
           {label}
           {question.required && <span className="ml-0.5 text-semantic-error" aria-hidden>*</span>}
         </label>
         {why && (
           <span className="group relative inline-flex" tabIndex={0} aria-label={why}>
-            <Info size={13} className="mt-0.5 text-content-tertiary" />
+            <Info size={14} className="mt-0.5 text-content-tertiary" />
             <span
               id={whyId}
               role="tooltip"

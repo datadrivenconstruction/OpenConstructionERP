@@ -36,9 +36,9 @@ export function QuantityWarningBanner({ model }: QuantityWarningBannerProps) {
       <div
         role="status"
         data-testid="bim-quantity-warning"
-        className="flex items-start gap-2.5 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/95 dark:bg-amber-950/40 px-3.5 py-2.5 text-amber-800 dark:text-amber-200 shadow-md backdrop-blur-sm"
+        className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-semantic-warning shadow-md backdrop-blur-sm"
       >
-        <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-500" />
+        <AlertTriangle size={16} className="shrink-0 mt-0.5 text-semantic-warning" />
         <div className="min-w-0">
           <p className="text-xs font-semibold">
             {t('bim.quantity_warning.title', { defaultValue: 'Imported without quantities' })}
@@ -49,7 +49,7 @@ export function QuantityWarningBanner({ model }: QuantityWarningBannerProps) {
           type="button"
           onClick={() => setDismissedFor(model.id)}
           aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
-          className="shrink-0 rounded p-0.5 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+          className="shrink-0 rounded p-0.5 text-semantic-warning hover:bg-semantic-warning-bg"
         >
           <X size={14} />
         </button>

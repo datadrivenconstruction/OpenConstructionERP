@@ -253,7 +253,7 @@ export default function SaveGroupModal({
             placeholder={t('bim.group_name_placeholder', {
               defaultValue: 'e.g. Walls on Level 1',
             })}
-            className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="oe-input w-full"
           />
         </WideModalField>
 
@@ -266,7 +266,7 @@ export default function SaveGroupModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue resize-none"
+            className="oe-textarea w-full resize-none"
           />
         </WideModalField>
 
@@ -369,7 +369,7 @@ export default function SaveGroupModal({
                 defaultValue: 'Smart View - advanced rules',
               })}
               {treeDirty && (
-                <span className="text-2xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                <span className="oe-overline px-1.5 py-0.5 rounded bg-semantic-warning-bg text-semantic-warning">
                   {t('bim.smartview.edited', { defaultValue: 'edited' })}
                 </span>
               )}

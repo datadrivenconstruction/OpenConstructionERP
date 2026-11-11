@@ -96,7 +96,7 @@ export function ClashRunDiffBadge({
       title: t('clash.diff.new_hint', {
         defaultValue: 'Clashes first seen in this run',
       }),
-      icon: <PlusCircle size={13} />,
+      icon: <PlusCircle size={14} />,
       tone: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30',
     },
     {
@@ -105,7 +105,7 @@ export function ClashRunDiffBadge({
       title: t('clash.diff.reopened_hint', {
         defaultValue: 'Previously resolved clashes that came back this run',
       }),
-      icon: <RotateCcw size={13} />,
+      icon: <RotateCcw size={14} />,
       tone: 'bg-orange-50 text-orange-700 ring-orange-200',
     },
     {
@@ -114,7 +114,7 @@ export function ClashRunDiffBadge({
       title: t('clash.diff.persisted_hint', {
         defaultValue: 'Open clashes carried over from the previous run',
       }),
-      icon: <CircleDot size={13} />,
+      icon: <CircleDot size={14} />,
       tone: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30',
     },
     {
@@ -123,7 +123,7 @@ export function ClashRunDiffBadge({
       title: t('clash.diff.resolved_hint', {
         defaultValue: 'Clashes from the previous run that are gone now',
       }),
-      icon: <CheckCircle2 size={13} />,
+      icon: <CheckCircle2 size={14} />,
       tone: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30',
     },
     {
@@ -132,7 +132,7 @@ export function ClashRunDiffBadge({
       title: t('clash.diff.ignored_hint', {
         defaultValue: 'Clashes whose smart issue is suppressed',
       }),
-      icon: <EyeOff size={13} />,
+      icon: <EyeOff size={14} />,
       tone: 'bg-surface-secondary text-content-secondary ring-border',
     },
   ];

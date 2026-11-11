@@ -102,7 +102,7 @@ export function SubstitutePanel({ seed }: { seed: SubstituteSeed | null }) {
 
       {/* Resource line to re-price */}
       <div>
-        <label htmlFor="ce-sub-line" className="mb-1.5 block text-sm font-medium text-content-primary">
+        <label htmlFor="ce-sub-line" className="oe-label">
           {t('costExplorer.substitute.lineLabel', { defaultValue: 'Resource line to re-price' })}
         </label>
         {work.candidates && work.candidates.length > 0 && (
@@ -185,7 +185,7 @@ export function SubstitutePanel({ seed }: { seed: SubstituteSeed | null }) {
       {/* Replacement */}
       {resourceCode && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label className="oe-label">
             {t('costExplorer.substitute.replacementLabel', { defaultValue: 'Replacement' })}
           </label>
           <TabBar<Mode>

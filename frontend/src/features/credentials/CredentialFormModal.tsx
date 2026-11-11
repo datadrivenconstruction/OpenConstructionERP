@@ -32,7 +32,7 @@ import {
 import { holderKindLabel, statusLabel, typeLabel } from './labels';
 
 const SELECT_CLASS =
-  'h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer';
+  'oe-select w-full cursor-pointer';
 
 const HOLDER_KINDS: HolderKind[] = ['person', 'company'];
 
@@ -460,7 +460,7 @@ export function CredentialFormModal({
             maxLength={10000}
             value={form.notes}
             onChange={(e) => set('notes', e.target.value)}
-            className="w-full rounded-md border border-border bg-surface-primary px-2.5 py-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            className="oe-textarea w-full"
           />
         </WideModalField>
       </WideModalSection>

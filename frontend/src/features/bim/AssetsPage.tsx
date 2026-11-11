@@ -61,10 +61,10 @@ import {
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
 const OPERATIONAL_STATUSES: Array<{ value: string; labelKey: string; tone: string }> = [
-  { value: 'operational', labelKey: 'assets.status.operational', tone: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
-  { value: 'under_maintenance', labelKey: 'assets.status.under_maintenance', tone: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
-  { value: 'decommissioned', labelKey: 'assets.status.decommissioned', tone: 'bg-rose-500/15 text-rose-300 border-rose-500/30' },
-  { value: 'planned', labelKey: 'assets.status.planned', tone: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
+  { value: 'operational', labelKey: 'assets.status.operational', tone: 'bg-semantic-success/15 text-semantic-success border-semantic-success/30' },
+  { value: 'under_maintenance', labelKey: 'assets.status.under_maintenance', tone: 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning/30' },
+  { value: 'decommissioned', labelKey: 'assets.status.decommissioned', tone: 'bg-semantic-error/15 text-semantic-error border-semantic-error/30' },
+  { value: 'planned', labelKey: 'assets.status.planned', tone: 'bg-semantic-info/15 text-semantic-info border-semantic-info/30' },
 ];
 
 /**
@@ -93,7 +93,7 @@ const TILE_FILTER_LABELS = {
 function statusTone(status?: string | null): string {
   return (
     OPERATIONAL_STATUSES.find((s) => s.value === status)?.tone ??
-    'bg-neutral-700/40 text-neutral-300 border-neutral-600/50'
+    'bg-content-secondary text-content-quaternary border-border'
   );
 }
 
@@ -151,7 +151,7 @@ function HowAssetsWork() {
   return (
     <CollapsibleSection
       storageKey="assets.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('assets.flow_title', { defaultValue: 'How the asset register fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -567,18 +567,18 @@ export function AssetsPage() {
             }
           />
         ) : (
-          <table className="w-full text-sm" data-testid="asset-table">
-            <thead className="sticky top-0 z-10 bg-surface-primary text-xs uppercase tracking-wider text-content-tertiary shadow-sm">
+          <table className="oe-table w-full" data-testid="asset-table">
+            <thead className="sticky top-0 z-10 bg-surface-primary shadow-sm">
               <tr>
-                <th className="w-10 px-2 py-2"></th>
-                <th className="px-3 py-2 text-left">{t('assets.col.element', { defaultValue: 'Element' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.manufacturer', { defaultValue: 'Manufacturer' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.model', { defaultValue: 'Model' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.serial', { defaultValue: 'Serial' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.status', { defaultValue: 'Status' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.warranty', { defaultValue: 'Warranty until' })}</th>
-                <th className="px-3 py-2 text-left">{t('assets.col.model_file', { defaultValue: 'BIM model' })}</th>
-                <th className="px-3 py-2 text-right">{t('assets.col.actions', { defaultValue: 'Actions' })}</th>
+                <th className="w-10"></th>
+                <th>{t('assets.col.element', { defaultValue: 'Element' })}</th>
+                <th>{t('assets.col.manufacturer', { defaultValue: 'Manufacturer' })}</th>
+                <th>{t('assets.col.model', { defaultValue: 'Model' })}</th>
+                <th>{t('assets.col.serial', { defaultValue: 'Serial' })}</th>
+                <th>{t('assets.col.status', { defaultValue: 'Status' })}</th>
+                <th>{t('assets.col.warranty', { defaultValue: 'Warranty until' })}</th>
+                <th>{t('assets.col.model_file', { defaultValue: 'BIM model' })}</th>
+                <th className="text-right">{t('assets.col.actions', { defaultValue: 'Actions' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -589,7 +589,7 @@ export function AssetsPage() {
                   data-testid={`asset-row-${asset.id}`}
                   onClick={() => setDetailing(asset)}
                 >
-                  <td className="px-2 py-2">
+                  <td>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -608,22 +608,22 @@ export function AssetsPage() {
                       <Cuboid size={14} />
                     </button>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="font-medium text-content-primary">
                       {asset.name || asset.element_type}
                     </div>
                     <div className="text-xs text-content-tertiary">{asset.stable_id}</div>
                   </td>
-                  <td className="px-3 py-2 text-content-primary">
+                  <td>
                     {asset.asset_info.manufacturer ?? <span className="text-content-quaternary">—</span>}
                   </td>
-                  <td className="px-3 py-2 text-content-primary">
+                  <td>
                     {asset.asset_info.model ?? <span className="text-content-quaternary">—</span>}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-content-secondary">
+                  <td className="font-mono text-content-secondary">
                     {asset.asset_info.serial_number ?? <span className="text-content-quaternary">—</span>}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {asset.asset_info.operational_status ? (
                       <span
                         className={`inline-block rounded-md border px-2 py-0.5 text-xs ${statusTone(
@@ -639,10 +639,10 @@ export function AssetsPage() {
                       <span className="text-content-quaternary">—</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {asset.asset_info.warranty_until ?? <span className="text-content-quaternary">—</span>}
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex flex-col items-start gap-0.5">
                       <button
                         type="button"
@@ -680,11 +680,11 @@ export function AssetsPage() {
                           defaultValue: 'Download COBie (XLSX) for this model',
                         })}
                       >
-                        <Download size={11} /> COBie
+                        <Download size={12} /> COBie
                       </button>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-right" onClick={(e) => e.stopPropagation()}>
+                  <td className="text-right" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="secondary"
                       size="sm"

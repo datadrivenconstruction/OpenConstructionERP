@@ -407,7 +407,7 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Share2 size={15} />}
+            icon={<Share2 size={16} />}
             onClick={handleExportJson}
           >
             {t('assemblies.export_json', { defaultValue: 'Export JSON' })}
@@ -415,7 +415,7 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Tag size={15} />}
+            icon={<Tag size={16} />}
             onClick={() => setShowTagEditor((v) => !v)}
             className={showTagEditor ? 'ring-2 ring-violet-400/50 border-violet-400' : ''}
           >
@@ -425,7 +425,7 @@ export function AssemblyEditorPage() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Play size={15} />}
+              icon={<Play size={16} />}
               onClick={() => setPreviewOpen(true)}
               className="border-oe-blue/30 text-oe-blue hover:bg-oe-blue-subtle"
               title={t('assembly.preview.button_title', {
@@ -438,7 +438,7 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Send size={15} />}
+            icon={<Send size={16} />}
             onClick={() => setApplyModalOpen(true)}
           >
             {t('assemblies.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
@@ -446,7 +446,7 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Database size={15} />}
+            icon={<Database size={16} />}
             onClick={() => setCostDbModalOpen(true)}
             disabled={!canEditAssembly}
             className="border-purple-300/30 text-purple-600 hover:bg-purple-50"
@@ -462,7 +462,7 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Boxes size={15} />}
+            icon={<Boxes size={16} />}
             onClick={() => openCatalogPicker(null)}
             disabled={!canEditAssembly}
             className="border-semantic-success/30 text-semantic-success hover:bg-semantic-success-bg"
@@ -510,13 +510,13 @@ export function AssemblyEditorPage() {
             {addMenuOpen && (
               <>
                 <div
-                  className="fixed inset-0 z-30"
+                  className="fixed inset-0 z-dropdown"
                   onClick={() => setAddMenuOpen(false)}
                   aria-hidden
                 />
                 <div
                   role="menu"
-                  className="absolute right-0 mt-1.5 w-56 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-40 py-1 animate-fade-in"
+                  className="absolute right-0 mt-1.5 w-56 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown py-1 animate-fade-in"
                 >
                   {(
                     [
@@ -525,7 +525,7 @@ export function AssemblyEditorPage() {
                       { rt: 'equipment', icon: Wrench, color: 'text-semantic-warning' },
                       { rt: 'operator', icon: Hammer, color: 'text-orange-700' },
                       { rt: 'subcontractor', icon: Briefcase, color: 'text-violet-700' },
-                      { rt: 'overhead', icon: Plus, color: 'text-slate-700' },
+                      { rt: 'overhead', icon: Plus, color: 'text-content-secondary' },
                     ] as const
                   ).map(({ rt, icon: Icon, color }) => (
                     <button
@@ -589,7 +589,7 @@ export function AssemblyEditorPage() {
                   if (e.key === 'Escape') setShowTagEditor(false);
                 }}
                 placeholder={t('assemblies.add_tag', { defaultValue: 'Add tag...' })}
-                className="h-7 w-28 rounded-md border border-border-light bg-surface-primary px-2 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-violet-400"
+                className="oe-input-sm w-28"
                 autoFocus
               />
               <Button
@@ -623,17 +623,17 @@ export function AssemblyEditorPage() {
               cannot write; min-w-0 keeps the fieldset from widening the
               scroll container past its content. */}
           <fieldset disabled={!canEditAssembly} className="m-0 min-w-0 border-0 p-0">
-          <table className="w-full text-sm">
+          <table className="oe-table w-full">
             <thead>
-              <tr className="border-b border-border-light bg-surface-tertiary text-left">
-                <th className="w-8 px-1 py-3" />
-                <th className="px-4 py-3 font-medium text-content-secondary min-w-[240px]">
+              <tr className="bg-surface-tertiary text-left">
+                <th className="w-8" />
+                <th className="min-w-[240px]">
                   {t('boq.description')}
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
+                <th className="w-20 text-center">
                   {t('assemblies.type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-24 text-right">
+                <th className="w-24 text-right">
                   <span className="inline-flex items-center justify-end gap-1">
                     {t('assemblies.factor', { defaultValue: 'Factor' })}
                     <Info
@@ -653,22 +653,22 @@ export function AssemblyEditorPage() {
                     </Info>
                   </span>
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-24 text-right">
+                <th className="w-24 text-right">
                   {t('boq.quantity', { defaultValue: 'Qty' })}
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
+                <th className="w-20 text-center">
                   {t('boq.unit')}
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-28 text-right">
+                <th className="w-28 text-right">
                   {t('assemblies.unit_cost', { defaultValue: 'Unit Cost' })}
                 </th>
-                <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right">
+                <th className="w-32 text-right">
                   {t('boq.total', { defaultValue: 'Total' })}
                 </th>
-                <th className="px-4 py-3 w-10" />
+                <th className="w-10" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {components.map((component, idx) => (
                 <ComponentRow
                   key={component.id}
@@ -702,7 +702,7 @@ export function AssemblyEditorPage() {
               ))}
               {components.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-10 text-center text-content-tertiary">
+                  <td colSpan={9} className="text-center text-content-tertiary">
                     {t('assemblies.no_components_hint', { defaultValue: 'No components yet. Use the typed Add buttons (material / labor / equipment / …), pick a row from the cost database, or import a typed resource from the catalog.' })}
                   </td>
                 </tr>
@@ -711,29 +711,29 @@ export function AssemblyEditorPage() {
             {components.length > 0 && (
               <tfoot>
                 {assembly.bid_factor !== 1.0 && (
-                  <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={7} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                  <tr className="bg-surface-tertiary/50">
+                    <td colSpan={7} className="text-right text-content-secondary">
                       {t('assemblies.subtotal', { defaultValue: 'Subtotal' })}
                     </td>
-                    <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
+                    <td className="text-right text-content-secondary tabular-nums">
                       {fmt(computedTotal)}
                     </td>
                     <td />
                   </tr>
                 )}
                 {assembly.bid_factor !== 1.0 && (
-                  <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={7} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                  <tr className="bg-surface-tertiary/50">
+                    <td colSpan={7} className="text-right text-content-secondary">
                       {t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })} ({assembly.bid_factor})
                     </td>
-                    <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
+                    <td className="text-right text-content-secondary tabular-nums">
                       x {assembly.bid_factor}
                     </td>
                     <td />
                   </tr>
                 )}
-                <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
-                  <td colSpan={7} className="px-4 py-3 text-right text-content-primary">
+                <tr className="bg-surface-tertiary">
+                  <td colSpan={7} className="text-right">
                     {assembly.bid_factor !== 1.0
                       ? t('assemblies.total_rate_adjusted', {
                           defaultValue: 'Total Rate (\u00d7{{factor}} bid factor)',
@@ -741,7 +741,7 @@ export function AssemblyEditorPage() {
                         })
                       : t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
                   </td>
-                  <td className="px-4 py-3 text-right text-content-primary text-base tabular-nums">
+                  <td className="text-right tabular-nums">
                     {fmt(adjustedTotal)}
                     <span className="ml-1 text-xs font-normal text-content-tertiary">
                       / {unitGlyph(assembly.unit)}
@@ -912,7 +912,7 @@ function CostDbSearchForAssembly({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={handleClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 animate-fade-in" onClick={handleClose}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -921,10 +921,10 @@ function CostDbSearchForAssembly({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30">
-              <Database size={18} />
+              <Database size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">{t('assemblies.add_from_cost_db', { defaultValue: 'Add from Cost Database' })}</h2>
+              <h2 className="oe-section-title">{t('assemblies.add_from_cost_db', { defaultValue: 'Add from Cost Database' })}</h2>
               <p className="text-xs text-content-tertiary">{t('assemblies.add_from_cost_db_desc', { defaultValue: 'Search and add cost items as assembly components' })}</p>
             </div>
           </div>
@@ -951,7 +951,7 @@ function CostDbSearchForAssembly({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('assemblies.search_cost_placeholder', { defaultValue: 'Search cost items by description or code...' })}
-              className="w-full h-9 ps-9 pe-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
+              className="oe-input w-full ps-9 pe-3"
               autoFocus
             />
           </div>
@@ -1052,7 +1052,7 @@ const RESOURCE_TYPE_BAR: Record<string, string> = {
   equipment: 'bg-semantic-warning',
   operator: 'bg-orange-500',
   subcontractor: 'bg-violet-500',
-  overhead: 'bg-slate-500',
+  overhead: 'bg-content-tertiary',
 };
 
 /* -- Component Row (inline editable) --------------------------------------
@@ -1161,7 +1161,7 @@ export function ComponentRow({
             data-testid="component-move-up"
             className="flex h-5 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:pointer-events-none disabled:opacity-30"
           >
-            <ChevronUp size={13} aria-hidden="true" />
+            <ChevronUp size={14} aria-hidden="true" />
           </button>
           <div
             className="flex items-center justify-center text-content-secondary group-hover:text-content-primary transition-colors"
@@ -1177,7 +1177,7 @@ export function ComponentRow({
             data-testid="component-move-down"
             className="flex h-5 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:pointer-events-none disabled:opacity-30"
           >
-            <ChevronDown size={13} aria-hidden="true" />
+            <ChevronDown size={14} aria-hidden="true" />
           </button>
         </div>
       </td>
@@ -1507,7 +1507,7 @@ function DetailField({
   }, [value]);
   return (
     <label className={clsx('block', span)}>
-      <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+      <div className="oe-overline mb-1">
         {label}
       </div>
       <input
@@ -1526,7 +1526,7 @@ function DetailField({
             (e.target as HTMLInputElement).blur();
           }
         }}
-        className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
+        className="oe-input-sm w-full"
       />
       {hint && <div className="text-2xs text-content-tertiary mt-1">{hint}</div>}
     </label>
@@ -1667,10 +1667,10 @@ function ApplyToBOQModal({
     regionalFactors && Object.keys(regionalFactors).length > 0;
 
   const selectClass =
-    'w-full h-10 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue-light/50 focus:border-oe-blue-light';
+    'oe-select-lg w-full';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg"
@@ -1682,7 +1682,7 @@ function ApplyToBOQModal({
         <Card>
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">{t('assemblies.apply_to_boq', { defaultValue: 'Apply to BOQ' })}</h2>
+              <h2 className="oe-section-title">{t('assemblies.apply_to_boq', { defaultValue: 'Apply to BOQ' })}</h2>
               <p className="mt-0.5 text-sm text-content-secondary line-clamp-1">
                 {assemblyName}
               </p>
@@ -1699,7 +1699,7 @@ function ApplyToBOQModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Project selector */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('projects.project', { defaultValue: 'Project' })}
               </label>
               <select
@@ -1724,7 +1724,7 @@ function ApplyToBOQModal({
 
             {/* BOQ selector */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('common.boq')}
               </label>
               <select
@@ -1752,7 +1752,7 @@ function ApplyToBOQModal({
             {/* Regional factor selector */}
             {hasRegionalFactors && (
               <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                <label className="oe-label">
                   {t('assemblies.select_region', { defaultValue: 'Region (applies regional factor)' })}
                 </label>
                 <select
@@ -1804,7 +1804,7 @@ function ApplyToBOQModal({
                           setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
                         }
                         placeholder={p.value ?? '0'}
-                        className="w-full h-9 px-2.5 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary text-right tabular-nums focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
+                        className="oe-input w-full text-right tabular-nums"
                       />
                     </label>
                   ))}
@@ -1827,7 +1827,7 @@ function ApplyToBOQModal({
                 type="submit"
                 loading={applyMutation.isPending}
                 disabled={!boqId || parseApplyQuantity(quantity) === null}
-                icon={<Send size={15} />}
+                icon={<Send size={16} />}
               >
                 {t('common.apply', { defaultValue: 'Apply' })}
               </Button>
@@ -1904,7 +1904,7 @@ function BreakdownSidebar({
     <Card padding="md" className="xl:sticky xl:top-4 self-start">
       <div className="flex items-center gap-1.5 mb-3">
         <LayersIcon size={14} className="text-oe-blue" />
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+        <h3 className="oe-overline">
           {t('assemblies.breakdown_title', { defaultValue: 'Cost Drivers' })}
         </h3>
       </div>
@@ -2050,12 +2050,12 @@ function CatalogResourcePickerModal({
   const items = search.data?.items ?? [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-modal flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
       <Card className="w-full max-w-3xl mt-12">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Boxes size={16} className="text-semantic-success" />
-            <h2 className="text-base font-semibold">
+            <h2 className="oe-section-title">
               {t('assemblies.catalog_picker_title', {
                 defaultValue: 'Add resource from catalog',
               })}
@@ -2066,7 +2066,7 @@ function CatalogResourcePickerModal({
             className="text-content-tertiary hover:text-content-primary"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -2084,14 +2084,14 @@ function CatalogResourcePickerModal({
               placeholder={t('assemblies.catalog_search_ph', {
                 defaultValue: 'Search materials / labor / equipment…',
               })}
-              className="w-full ps-8 pe-3 py-1.5 text-sm rounded-lg border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-semantic-success/60"
+              className="oe-input w-full ps-8 pe-3"
               autoFocus
             />
           </div>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as ResourceType | '')}
-            className="text-xs rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 cursor-pointer"
+            className="oe-select-sm cursor-pointer"
           >
             <option value="">
               {t('assemblies.catalog_type_any', { defaultValue: 'All types' })}
@@ -2119,28 +2119,28 @@ function CatalogResourcePickerModal({
             </div>
           )}
           {items.length > 0 && (
-            <table className="w-full text-sm mt-2">
+            <table className="oe-table w-full mt-2">
               <thead>
-                <tr className="text-xs text-content-tertiary text-left">
-                  <th className="py-2 font-medium">
+                <tr className="text-left">
+                  <th>
                     {t('assemblies.catalog_col_name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="py-2 font-medium w-20 text-center">
+                  <th className="w-20 text-center">
                     {t('assemblies.type', { defaultValue: 'Type' })}
                   </th>
-                  <th className="py-2 font-medium w-16 text-center">
+                  <th className="w-16 text-center">
                     {t('boq.unit', { defaultValue: 'Unit' })}
                   </th>
-                  <th className="py-2 font-medium w-28 text-right">
+                  <th className="w-28 text-right">
                     {t('assemblies.unit_cost', { defaultValue: 'Unit Cost' })}
                   </th>
-                  <th className="py-2 w-16" />
+                  <th className="w-16" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-light">
+              <tbody>
                 {items.map((it) => (
-                  <tr key={it.id} className="hover:bg-surface-secondary/50">
-                    <td className="py-2 pr-2">
+                  <tr key={it.id}>
+                    <td className="pr-2">
                       <div className="font-medium text-content-primary truncate max-w-[260px]">
                         {it.name}
                       </div>
@@ -2148,7 +2148,7 @@ function CatalogResourcePickerModal({
                         {it.resource_code}{it.region ? ` · ${it.region}` : ''}
                       </div>
                     </td>
-                    <td className="py-2 text-center">
+                    <td className="text-center">
                       <span
                         className={`inline-block px-1.5 py-0.5 rounded text-2xs font-semibold ${
                           RESOURCE_TYPE_STYLES[it.resource_type] ?? RESOURCE_TYPE_STYLES.material
@@ -2157,15 +2157,15 @@ function CatalogResourcePickerModal({
                         {it.resource_type}
                       </span>
                     </td>
-                    <td className="py-2 text-center text-content-secondary">{it.unit}</td>
-                    <td className="py-2 text-right tabular-nums text-content-primary">
+                    <td className="text-center text-content-secondary">{it.unit}</td>
+                    <td className="text-right tabular-nums">
                       {new Intl.NumberFormat(getNumberLocale(), {
                         minimumFractionDigits: currencyFractionDigits(it.currency),
                         maximumFractionDigits: currencyFractionDigits(it.currency),
                       }).format(it.base_price || 0)}{' '}
                       <span className="text-2xs text-content-tertiary">{it.currency}</span>
                     </td>
-                    <td className="py-2 text-right">
+                    <td className="text-right">
                       <Button
                         size="sm"
                         variant="primary"

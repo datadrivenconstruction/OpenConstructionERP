@@ -160,7 +160,7 @@ function KPICard({
       />
       <div className="relative p-5">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div
               className={clsx(
                 'flex h-9 w-9 items-center justify-center rounded-xl',
@@ -170,7 +170,7 @@ function KPICard({
             >
               {icon}
             </div>
-            <span className="inline-flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="oe-overline inline-flex items-center gap-1">
               {label}
               {hint ? <InfoHint inline text={hint} /> : null}
             </span>
@@ -188,9 +188,9 @@ function KPICard({
                   'bg-surface-secondary text-content-secondary',
               )}
             >
-              {delta.direction === 'up' && <ArrowUpRight size={11} />}
-              {delta.direction === 'down' && <ArrowDownRight size={11} />}
-              {delta.direction === 'flat' && <Minus size={11} />}
+              {delta.direction === 'up' && <ArrowUpRight size={12} />}
+              {delta.direction === 'down' && <ArrowDownRight size={12} />}
+              {delta.direction === 'flat' && <Minus size={12} />}
               {Math.abs(delta.value)}
             </span>
           ) : clickable ? (
@@ -218,7 +218,7 @@ function SkeletonCard() {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-elevated/90 p-5 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800" />
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <div className="h-9 w-9 animate-pulse rounded-xl bg-surface-secondary" />
         <div className="h-3 w-24 animate-pulse rounded bg-surface-secondary" />
       </div>
@@ -247,7 +247,7 @@ function StatTile({ icon, label, value, footer, hint }: StatTileProps) {
         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-secondary text-content-secondary">
           {icon}
         </span>
-        <span className="inline-flex items-center gap-1 text-2xs font-semibold uppercase tracking-wider">
+        <span className="oe-overline inline-flex items-center gap-1">
           {label}
           {hint ? <InfoHint inline text={hint} /> : null}
         </span>
@@ -323,7 +323,7 @@ export function CoordinationKPICards({
       <KPICard
         accent="rose"
         testId="kpi-open-clashes"
-        icon={<Radar size={18} />}
+        icon={<Radar size={20} />}
         label={t('coordination.open_clashes', { defaultValue: 'Open Clashes' })}
         primary={data.clashes.open_count.toLocaleString(getNumberLocale())}
         delta={clashDelta}
@@ -353,7 +353,7 @@ export function CoordinationKPICards({
       <KPICard
         accent="amber"
         testId="kpi-cost-impact"
-        icon={<Coins size={18} />}
+        icon={<Coins size={20} />}
         label={t('coordination.cost_impact_open', {
           defaultValue: 'Open Cost Impact',
         })}
@@ -376,7 +376,7 @@ export function CoordinationKPICards({
       <KPICard
         accent="emerald"
         testId="kpi-rule-pack"
-        icon={<ClipboardCheck size={18} />}
+        icon={<ClipboardCheck size={20} />}
         label={t('coordination.rule_pack_status', { defaultValue: 'Rule Packs' })}
         primary={data.rule_packs.installed_count.toLocaleString(getNumberLocale())}
         onClick={goRules}
@@ -396,7 +396,7 @@ export function CoordinationKPICards({
       <KPICard
         accent="sky"
         testId="kpi-federations"
-        icon={<Layers size={18} />}
+        icon={<Layers size={20} />}
         label={t('coordination.federations_count', { defaultValue: 'Federations' })}
         primary={data.federations.count.toLocaleString(getNumberLocale())}
         onClick={goFederations}
@@ -421,7 +421,7 @@ export function CoordinationKPICards({
       className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
     >
       <StatTile
-        icon={<FileText size={15} />}
+        icon={<FileText size={16} />}
         label={t('coordination_hub.bcf_activity', {
           defaultValue: 'BCF activity (30d)',
         })}
@@ -451,7 +451,7 @@ export function CoordinationKPICards({
         })}
       />
       <StatTile
-        icon={<Eye size={15} />}
+        icon={<Eye size={16} />}
         label={t('coordination_hub.smart_views_project', {
           defaultValue: 'Project smart views',
         })}
@@ -461,7 +461,7 @@ export function CoordinationKPICards({
         })}
       />
       <StatTile
-        icon={<Eye size={15} />}
+        icon={<Eye size={16} />}
         label={t('coordination_hub.smart_views_personal', {
           defaultValue: 'Personal smart views',
         })}

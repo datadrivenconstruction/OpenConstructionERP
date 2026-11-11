@@ -69,7 +69,7 @@ function Ladder({
         <label className="flex items-center gap-2">
           <span className="text-content-secondary">{t('cost_control.compare_from', { defaultValue: 'From' })}</span>
           <select
-            className="h-8 rounded-lg border border-border bg-surface-primary px-2"
+            className="oe-select"
             value={start}
             onChange={(e) => {
               setStart(e.target.value);
@@ -86,7 +86,7 @@ function Ladder({
         <label className="flex items-center gap-2">
           <span className="text-content-secondary">{t('cost_control.compare_to', { defaultValue: 'to' })}</span>
           <select
-            className="h-8 rounded-lg border border-border bg-surface-primary px-2"
+            className="oe-select"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
           >
@@ -202,10 +202,10 @@ function Matrix({ projectId, currency }: { projectId: string; currency: string }
         {t('cost_control.compare_all_lines', { defaultValue: 'Show lines that did not move too' })}
       </label>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="oe-table-compact w-full min-w-[640px]">
           <thead>
-            <tr className="border-b border-border-light text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="py-1.5 text-start font-semibold">{t('cost_control.col_code', { defaultValue: 'Code' })}</th>
+            <tr className="text-2xs">
+              <th>{t('cost_control.col_code', { defaultValue: 'Code' })}</th>
               {data.columns.map((c, i) => (
                 <th key={c.id ?? `live-${i}`} className="py-1.5 ps-3 text-end font-semibold">
                   <span className="block normal-case">{columnTitle(t, c)}</span>
@@ -214,19 +214,19 @@ function Matrix({ projectId, currency }: { projectId: string; currency: string }
                   </span>
                 </th>
               ))}
-              <th className="py-1.5 ps-3 text-end font-semibold">
+              <th className="ps-3 text-end">
                 {t('cost_control.compare_change', { defaultValue: 'Change' })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {rows.map((r) => (
               <tr key={r.key}>
-                <td className="max-w-[16rem] truncate py-1.5 text-content-primary" title={r.description}>
+                <td className="max-w-[16rem] truncate" title={r.description}>
                   {rowName(t, r.kind, r.code, r.description)}
                 </td>
                 {r.values.map((v, i) => (
-                  <td key={i} className="py-1.5 ps-3 text-end tabular-nums text-content-secondary">
+                  <td key={i} className="ps-3 text-end tabular-nums text-content-secondary">
                     {v === null ? '-' : fmtCurrency(v, currency)}
                   </td>
                 ))}
@@ -246,15 +246,15 @@ function Matrix({ projectId, currency }: { projectId: string; currency: string }
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={data.columns.length + 2} className="py-3 text-content-tertiary">
+                <td colSpan={data.columns.length + 2} className="text-content-tertiary">
                   {t('cost_control.compare_none', { defaultValue: 'No line moved across these snapshots.' })}
                 </td>
               </tr>
             )}
           </tbody>
           <tfoot>
-            <tr className="border-t border-border font-semibold text-content-primary">
-              <td className="py-1.5">{t('cost_control.total', { defaultValue: 'Total' })}</td>
+            <tr>
+              <td>{t('cost_control.total', { defaultValue: 'Total' })}</td>
               {data.columns.map((c, i) => (
                 <td key={c.id ?? `live-${i}`} className="py-1.5 ps-3 text-end tabular-nums">
                   {fmtCurrency(c.total, currency)}

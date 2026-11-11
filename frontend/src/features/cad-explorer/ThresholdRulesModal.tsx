@@ -88,7 +88,7 @@ export function ThresholdRulesModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-modal flex items-center justify-center"
       data-testid="threshold-rules-modal"
     >
       <div
@@ -103,7 +103,7 @@ export function ThresholdRulesModal({
               <Palette size={20} className="text-oe-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">
+              <h2 className="oe-section-title">
                 {t('explorer.thresholds_title', {
                   defaultValue: 'Conditional Formatting',
                 })}
@@ -122,7 +122,7 @@ export function ThresholdRulesModal({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -177,14 +177,14 @@ export function ThresholdRulesModal({
                   <div
                     key={`rule-${idx}`}
                     data-testid={`threshold-rule-${idx}`}
-                    className={`rounded-lg border p-3 space-y-2.5 ${
+                    className={`rounded-lg border p-3 space-y-2 ${
                       valid
                         ? 'border-border-light bg-surface-secondary/30'
-                        : 'border-red-500/40 bg-red-500/5'
+                        : 'border-semantic-error/40 bg-semantic-error/5'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wide shrink-0">
+                      <span className="oe-overline shrink-0">
                         {t('explorer.thresholds_rule_label', {
                           defaultValue: 'Rule {{n}}',
                           n: idx + 1,
@@ -206,7 +206,7 @@ export function ThresholdRulesModal({
                       </select>
                       <button
                         onClick={() => removeRule(idx)}
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-content-tertiary hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0"
+                        className="flex h-8 w-8 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/10 transition-colors shrink-0"
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         data-testid={`threshold-rule-${idx}-delete`}
                       >
@@ -280,7 +280,7 @@ export function ThresholdRulesModal({
 
                     {!valid && (
                       <p
-                        className="text-2xs text-red-500"
+                        className="text-2xs text-semantic-error"
                         data-testid={`threshold-rule-${idx}-error`}
                       >
                         {rule.low >= rule.high
@@ -309,7 +309,7 @@ export function ThresholdRulesModal({
               className="h-8 px-2.5 rounded-md text-xs text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
               data-testid="threshold-reset"
             >
-              <RotateCcw size={13} />
+              <RotateCcw size={14} />
               {t('explorer.thresholds_reset', {
                 defaultValue: 'Reset to defaults',
               })}

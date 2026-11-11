@@ -127,7 +127,7 @@ export function DecisionRecordPanel({
           <div className="flex flex-wrap items-start gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-xs text-content-tertiary">{t('delivery_model.ui.decision.form', { defaultValue: 'Delivery form' })}</p>
-              <h2 className="text-lg font-semibold text-content-primary">{nameOf(current)}</h2>
+              <h2 className="oe-section-title">{nameOf(current)}</h2>
             </div>
             <ToneBadge tone={DECISION_TONE[current.status]} testId="decision-status">
               {vocab(labels.t, DECISION_STATUS, current.status)}
@@ -269,13 +269,13 @@ export function DecisionRecordPanel({
 
       {readinessRows.length > 0 && (
         <section className="space-y-2" data-testid="gate-readiness">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('delivery_model.ui.decision.readiness', { defaultValue: 'What the gate checks here' })}
           </h2>
           <ul className="space-y-1 text-sm">
             {readinessRows.map(([key, met]) => (
               <li key={key} className="flex items-center gap-2" data-met={met}>
-                {met ? <CheckCircle2 size={15} className="text-semantic-success" aria-hidden /> : <Circle size={15} className="text-content-tertiary" aria-hidden />}
+                {met ? <CheckCircle2 size={16} className="text-semantic-success" aria-hidden /> : <Circle size={16} className="text-content-tertiary" aria-hidden />}
                 <span className={met ? 'text-content-primary' : 'text-content-secondary'}>{vocab(labels.t, READINESS, key)}</span>
               </li>
             ))}
@@ -286,7 +286,7 @@ export function DecisionRecordPanel({
 
       {earlier.length > 0 && (
         <section className="space-y-2" data-testid="decision-history">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('delivery_model.ui.decision.history', { defaultValue: 'Earlier decisions' })}
           </h2>
           <ul className="space-y-2">

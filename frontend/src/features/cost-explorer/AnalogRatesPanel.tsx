@@ -88,7 +88,7 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-[1fr_220px]">
         <div>
-          <label htmlFor="ce-analogs-q" className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label htmlFor="ce-analogs-q" className="oe-label">
             {t('costExplorer.analogs.label', { defaultValue: 'Describe the need' })}
           </label>
           <Input
@@ -103,7 +103,7 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
           />
         </div>
         <div>
-          <label htmlFor="ce-analogs-region" className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label htmlFor="ce-analogs-region" className="oe-label">
             {t('costExplorer.region.label', { defaultValue: 'Price base region' })}
           </label>
           <BaseSelect id="ce-analogs-region" value={region} onChange={setRegion} />
@@ -176,26 +176,26 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
           )}
 
           <div className="overflow-x-auto rounded-lg border border-border-light bg-surface-primary">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="border-b border-border-light bg-surface-secondary text-left text-xs text-content-tertiary">
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.analogs.colRate', { defaultValue: 'Rate' })}</th>
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.analogs.colRegion', { defaultValue: 'Region' })}</th>
-                  <th className="px-3 py-2 font-medium">{t('costExplorer.analogs.colUnit', { defaultValue: 'Unit' })}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t('costExplorer.analogs.colPrice', { defaultValue: 'Price' })}</th>
-                  <th className="min-w-[11rem] px-3 py-2 font-medium">
+                <tr className="text-left">
+                  <th>{t('costExplorer.analogs.colRate', { defaultValue: 'Rate' })}</th>
+                  <th>{t('costExplorer.analogs.colRegion', { defaultValue: 'Region' })}</th>
+                  <th>{t('costExplorer.analogs.colUnit', { defaultValue: 'Unit' })}</th>
+                  <th className="text-right">{t('costExplorer.analogs.colPrice', { defaultValue: 'Price' })}</th>
+                  <th className="min-w-[11rem]">
                     <span className="inline-flex items-center gap-1">
                       <Layers className="h-3.5 w-3.5" aria-hidden />
                       {t('costExplorer.analogs.colComposition', { defaultValue: 'Work composition' })}
                     </span>
                   </th>
-                  <th className="min-w-[11rem] px-3 py-2 font-medium">
+                  <th className="min-w-[11rem]">
                     <span className="inline-flex items-center gap-1">
                       <ListChecks className="h-3.5 w-3.5" aria-hidden />
                       {t('costExplorer.analogs.colConditions', { defaultValue: 'Application conditions' })}
                     </span>
                   </th>
-                  <th className="px-3 py-2 font-medium">
+                  <th>
                     <span className="sr-only">{t('costExplorer.analogs.colActions', { defaultValue: 'Actions' })}</span>
                   </th>
                 </tr>
@@ -207,15 +207,15 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
                   const isLowest = i === lowestIdx;
                   return (
                     <tr key={`${item.code || 'row'}-${item.region ?? ''}-${i}`} className="border-b border-border-light align-top last:border-0">
-                      <td className="px-3 py-2.5">
+                      <td>
                         <div className="font-medium text-content-primary">{item.code || '-'}</div>
                         {item.description && (
                           <p className="mt-0.5 line-clamp-2 max-w-[18rem] text-xs text-content-secondary">{item.description}</p>
                         )}
                       </td>
-                      <td className="px-3 py-2.5">{item.region ? <Badge>{item.region}</Badge> : <span className="text-content-tertiary">-</span>}</td>
-                      <td className="px-3 py-2.5 text-content-secondary">{item.unit || '-'}</td>
-                      <td className="px-3 py-2.5 text-right">
+                      <td>{item.region ? <Badge>{item.region}</Badge> : <span className="text-content-tertiary">-</span>}</td>
+                      <td className="text-content-secondary">{item.unit || '-'}</td>
+                      <td className="text-right">
                         <div className="font-semibold tabular-nums text-content-primary">{fmtMoney(item.rate, item.currency)}</div>
                         {isLowest && (
                           <span className="mt-1 inline-block rounded bg-semantic-success/15 px-1.5 py-0.5 text-xs font-medium text-semantic-success">
@@ -223,7 +223,7 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         {comp.shown.length === 0 ? (
                           <span className="text-content-tertiary">-</span>
                         ) : (
@@ -247,7 +247,7 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
                           </ul>
                         )}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         {steps.shown.length === 0 ? (
                           <span className="text-content-tertiary">-</span>
                         ) : (
@@ -265,7 +265,7 @@ export function AnalogRatesPanel({ nav }: { nav: CrossNav }) {
                           </ul>
                         )}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td>
                         <div className="flex flex-col items-start gap-1.5">
                           <Button
                             size="sm"

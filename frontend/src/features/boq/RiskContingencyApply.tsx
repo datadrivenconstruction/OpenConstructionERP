@@ -179,7 +179,7 @@ export function RiskContingencyApply({
                 pickCustom(e.target.value);
               }}
               aria-label={t('boq.risk_contingency_custom_hint', { defaultValue: 'Custom percentile, 50 to 99' })}
-              className="w-12 rounded border border-border-light bg-surface-primary px-1 py-0.5 text-2xs tabular-nums"
+              className="oe-input-sm w-12 tabular-nums"
             />
           </label>
         </div>
@@ -331,15 +331,15 @@ export function RiskContingencyApply({
       {applied && (
         <div
           className={`rounded border px-3 py-2 text-xs space-y-1 ${
-            data?.stale ? 'border-amber-400/60 bg-semantic-warning/10 dark:bg-amber-950/20' : 'border-border-light'
+            data?.stale ? 'border-semantic-warning/60 bg-semantic-warning/10' : 'border-border-light'
           }`}
           data-testid="risk-contingency-applied"
         >
           <div className="flex flex-wrap items-center gap-2">
             {data?.stale ? (
-              <AlertTriangle size={13} className="text-semantic-warning" aria-hidden />
+              <AlertTriangle size={14} className="text-semantic-warning" aria-hidden />
             ) : (
-              <CheckCircle2 size={13} className="text-semantic-success" aria-hidden />
+              <CheckCircle2 size={14} className="text-semantic-success" aria-hidden />
             )}
             <span className="font-medium text-content-primary">
               {t('boq.risk_contingency_applied_line', {
@@ -354,7 +354,7 @@ export function RiskContingencyApply({
               disabled={undo.isPending}
               className="ml-auto inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5 text-2xs text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
             >
-              <Undo2 size={11} aria-hidden />
+              <Undo2 size={12} aria-hidden />
               {applied.can_undo_to_previous
                 ? t('boq.risk_contingency_undo_previous', { defaultValue: 'Undo to previous' })
                 : t('boq.risk_contingency_undo', { defaultValue: 'Remove' })}

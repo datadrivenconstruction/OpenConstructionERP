@@ -1006,14 +1006,14 @@ function PanelHeader({ stage }: { stage: StageDef }) {
         <Icon className="h-5 w-5" />
       </span>
       <div>
-        <div className="text-xs font-medium uppercase tracking-wide text-content-tertiary">
+        <div className="oe-overline">
           {t('aiest.wizard.step_of', {
             defaultValue: 'Step {{n}} of {{total}}',
             n: stage.index,
             total: STAGES.length,
           })}
         </div>
-        <h2 className="text-xl font-semibold text-content-primary">
+        <h2 className="oe-section-title">
           {t(stage.titleKey, { defaultValue: stage.titleFallback })}
         </h2>
         <p className="mt-0.5 text-sm text-content-secondary">

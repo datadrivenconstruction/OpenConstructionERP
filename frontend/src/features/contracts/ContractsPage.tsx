@@ -281,7 +281,7 @@ function retentionDirectionLabel(t: TFunction, direction: string): string {
 }
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 function toNum(v: number | string | null | undefined): number {
   if (v === null || v === undefined) return 0;
@@ -463,7 +463,7 @@ function HowContractsWork() {
   return (
     <CollapsibleSection
       storageKey="contracts.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('contracts.flow_title', { defaultValue: 'How contracts fit together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -853,7 +853,7 @@ export function ContractsPage() {
             placeholder={t('common.search', { defaultValue: 'Search…' })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className={clsx(inputCls, 'pl-8')}
+            className={clsx('oe-input', inputCls, 'pl-8')}
           />
         </div>
 
@@ -864,7 +864,7 @@ export function ContractsPage() {
             aria-label={t('a11y.contracts.type_filter', {
               defaultValue: 'Filter contracts by type',
             })}
-            className={clsx(inputCls, 'max-w-[200px]')}
+            className={clsx('oe-select', inputCls, 'max-w-[200px]')}
           >
             <option value="">
               {t('contracts.all_types', { defaultValue: 'All types' })}
@@ -886,7 +886,7 @@ export function ContractsPage() {
             aria-label={t('a11y.contracts.claims_contract_filter', {
               defaultValue: 'Filter by claims contract',
             })}
-            className={clsx(inputCls, 'max-w-[260px]')}
+            className={clsx('oe-select', inputCls, 'max-w-[260px]')}
           >
             {contracts.map((c) => (
               <option key={c.id} value={c.id}>
@@ -906,7 +906,7 @@ export function ContractsPage() {
             aria-label={t('a11y.contracts.status_filter', {
               defaultValue: 'Filter contracts by status',
             })}
-            className={clsx(inputCls, 'max-w-[180px]')}
+            className={clsx('oe-select', inputCls, 'max-w-[180px]')}
           >
             <option value="">
               {t('common.all_statuses', { defaultValue: 'All statuses' })}
@@ -1114,25 +1114,25 @@ function ContractTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.code', { defaultValue: 'Code' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.title_col', { defaultValue: 'Title' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.type', { defaultValue: 'Type' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.counterparty', { defaultValue: 'Counterparty' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('contracts.value', { defaultValue: 'Value' })}
             </th>
           </tr>
@@ -1142,18 +1142,18 @@ function ContractTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+              <td className="font-mono text-content-secondary">
                 {r.code}
               </td>
               <td
-                className="px-4 py-2 font-medium text-content-primary truncate max-w-[320px]"
+                className="font-medium truncate max-w-[320px]"
                 title={r.title || undefined}
               >
                 {r.title || '—'}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <ContractTypeChip type={r.contract_type} />
               </td>
               {/* The register printed `counterparty_type` here, so the column
@@ -1163,12 +1163,12 @@ function ContractTable({
                   type word when it cannot; the list uses it too rather than
                   keeping a second, worse answer. The click guard keeps the deep
                   link from also opening the row drawer underneath it. */}
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-content-secondary">
                 <span onClick={(e) => e.stopPropagation()}>
                   <CounterpartyLink type={r.counterparty_type} id={r.counterparty_id} />
                 </span>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <div className="flex items-center gap-2">
                   <Badge variant={CONTRACT_STATUS_VARIANT[r.status]} dot>
                     {contractStatusLabel(t, r.status)}
@@ -1177,7 +1177,7 @@ function ContractTable({
                   <ContractExpiryBadge endDate={r.end_date} status={r.status} />
                 </div>
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 <MoneyDisplay
                   amount={toNum(r.total_value)}
                   currency={r.currency || undefined}
@@ -1190,8 +1190,8 @@ function ContractTable({
             currencies into a single number (the previous footer would
             have done arithmetic on €+$ values without warning). */}
         <tfoot className="bg-surface-secondary/60">
-          <tr className="border-t border-border-light">
-            <td colSpan={5} className="px-4 py-2 text-xs uppercase tracking-wide text-content-tertiary">
+          <tr>
+            <td colSpan={5} className="text-content-tertiary">
               {t('contracts.register_total', { defaultValue: 'Register total' })}
               <span className="ml-2 normal-case text-content-secondary">
                 ({t('contracts.register_count', {
@@ -1201,7 +1201,7 @@ function ContractTable({
                 })})
               </span>
             </td>
-            <td className="px-4 py-2 text-right text-sm font-medium">
+            <td className="text-right font-medium">
               {/* Not compacted: the Value column above prints every figure in
                   full, and a register total written to a different precision
                   than the column it sums makes the reader do the conversion. */}
@@ -1265,25 +1265,25 @@ function ClaimsTable({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.claim_number', { defaultValue: 'Claim #' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.period', { defaultValue: 'Period' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('contracts.gross', { defaultValue: 'Gross' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('contracts.retention', { defaultValue: 'Retention' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('contracts.net_due', { defaultValue: 'Net due' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.status', { defaultValue: 'Status' })}
             </th>
           </tr>
@@ -1461,22 +1461,22 @@ function FinalAccountsView({
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.code', { defaultValue: 'Code' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.title_col', { defaultValue: 'Title' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.type', { defaultValue: 'Type' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('contracts.status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('contracts.value', { defaultValue: 'Value' })}
             </th>
           </tr>
@@ -1486,21 +1486,21 @@ function FinalAccountsView({
             <tr
               key={c.id}
               onClick={() => onSelect(c.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+              <td className="font-mono text-content-secondary">
                 {c.code}
               </td>
-              <td className="px-4 py-2 font-medium">{c.title || '—'}</td>
-              <td className="px-4 py-2">
+              <td className="font-medium">{c.title || '—'}</td>
+              <td>
                 <ContractTypeChip type={c.contract_type} />
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={CONTRACT_STATUS_VARIANT[c.status]} dot>
                   {contractStatusLabel(t, c.status)}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-right">
+              <td className="text-right">
                 <MoneyDisplay
                   amount={toNum(c.total_value)}
                   currency={c.currency || undefined}
@@ -1697,7 +1697,7 @@ function SoVLineRow({
             type="text"
             value={draft.code}
             onChange={(e) => setDraft((p) => ({ ...p, code: e.target.value }))}
-            className={lineInputCls}
+            className="oe-input-sm w-full"
             aria-label={t('contracts.code', { defaultValue: 'Code' })}
           />
         </td>
@@ -1706,7 +1706,7 @@ function SoVLineRow({
             type="text"
             value={draft.description}
             onChange={(e) => setDraft((p) => ({ ...p, description: e.target.value }))}
-            className={lineInputCls}
+            className="oe-input-sm w-full"
             aria-label={t('contracts.description', { defaultValue: 'Description' })}
             autoFocus
           />
@@ -2047,7 +2047,7 @@ export function ContractDetailDrawer({
   const someLineBilled = (linesQ.data ?? []).some((l) => l.billed === true);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-dropdown flex justify-end">
       {/* Close-on-backdrop lives on the backdrop itself, not on the wrapper.
           The wrapper is also the React parent of the modals this drawer opens,
           and a portal delivers its events to the React parent rather than to
@@ -2066,7 +2066,7 @@ export function ContractDetailDrawer({
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
           <div>
             <div className="flex items-center gap-1">
-              <h2 id="contract-drawer-title" className="text-base font-semibold">
+              <h2 id="contract-drawer-title" className="oe-section-title">
                 {contract.code} —{' '}
                 {contract.title || t('contracts.untitled', { defaultValue: 'Untitled' })}
               </h2>
@@ -2327,7 +2327,7 @@ export function ContractDetailDrawer({
 
           {/* Header fields */}
           <Card padding="sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+            <p className="oe-overline mb-2">
               {t('contracts.section_header', { defaultValue: 'Header' })}
             </p>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -2398,7 +2398,7 @@ export function ContractDetailDrawer({
           {/* The payment terms beside the rate, each marked where the
               project's country filled it in. */}
           <Card padding="sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+            <p className="oe-overline mb-2">
               {t('contracts.payment_terms.section', { defaultValue: 'Payment terms' })}
             </p>
             <ContractPaymentTermsCard contract={contract} />
@@ -2417,7 +2417,7 @@ export function ContractDetailDrawer({
               committed on it as one line, and lines that name no cost line
               of their own take it. */}
           <Card padding="sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-1">
+            <p className="oe-overline mb-1">
               {t('contracts.cost_account', { defaultValue: 'Cost line of the contract' })}
             </p>
             <p className="mb-2 text-xs text-content-tertiary">
@@ -2442,7 +2442,7 @@ export function ContractDetailDrawer({
 
           {/* SoV */}
           <Card padding="sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+            <p className="oe-overline mb-2">
               {t('contracts.sov', { defaultValue: 'Schedule of Values' })}
               <span className="ml-2 text-content-tertiary normal-case">
                 ({(linesQ.data ?? []).length}{' '}
@@ -2474,25 +2474,25 @@ export function ContractDetailDrawer({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-xs uppercase tracking-wide text-content-tertiary">
+                <table className="oe-table-compact w-full">
+                  <thead>
                     <tr>
-                      <th className="text-left py-1">
+                      <th>
                         {t('contracts.code', { defaultValue: 'Code' })}
                       </th>
-                      <th className="text-left py-1">
+                      <th>
                         {t('contracts.description', { defaultValue: 'Description' })}
                       </th>
-                      <th className="text-right py-1">
+                      <th className="text-right">
                         {t('contracts.qty', { defaultValue: 'Qty' })}
                       </th>
-                      <th className="text-right py-1">
+                      <th className="text-right">
                         {t('contracts.unit_rate', { defaultValue: 'Rate' })}
                       </th>
-                      <th className="text-right py-1">
+                      <th className="text-right">
                         {t('contracts.total', { defaultValue: 'Total' })}
                       </th>
-                      {linesEditable && <th className="py-1" />}
+                      {linesEditable && <th />}
                     </tr>
                   </thead>
                   <tbody>
@@ -2510,45 +2510,45 @@ export function ContractDetailDrawer({
                   </tbody>
                   {addingLine && (
                     <tfoot>
-                      <tr className="border-t border-border-light">
-                        <td className="py-1">
+                      <tr>
+                        <td>
                           <input
                             type="text"
                             placeholder={t('contracts.description', { defaultValue: 'Description' })}
                             value={newLine.description}
                             onChange={(e) => setNewLine((p) => ({ ...p, description: e.target.value }))}
-                            className="w-full rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm"
+                            className="oe-input-sm w-full"
                             autoFocus
                           />
                         </td>
-                        <td className="py-1" colSpan={2}>
+                        <td colSpan={2}>
                           <div className="flex gap-1">
                             <input
                               type="number"
                               placeholder={t('contracts.qty', { defaultValue: 'Qty' })}
                               value={newLine.quantity}
                               onChange={(e) => setNewLine((p) => ({ ...p, quantity: e.target.value }))}
-                              className="w-20 rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm text-right"
+                              className="oe-input-sm w-20 text-right"
                             />
                             <input
                               type="text"
                               placeholder={t('boq.unit', { defaultValue: 'Unit' })}
                               value={newLine.unit}
                               onChange={(e) => setNewLine((p) => ({ ...p, unit: e.target.value }))}
-                              className="w-16 rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm"
+                              className="oe-input-sm w-16"
                             />
                           </div>
                         </td>
-                        <td className="py-1">
+                        <td>
                           <input
                             type="number"
                             placeholder={t('contracts.unit_rate', { defaultValue: 'Rate' })}
                             value={newLine.unit_rate}
                             onChange={(e) => setNewLine((p) => ({ ...p, unit_rate: e.target.value }))}
-                            className="w-24 rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm text-right"
+                            className="oe-input-sm w-24 text-right"
                           />
                         </td>
-                        <td className="py-1 text-right" colSpan={linesEditable ? 2 : 1}>
+                        <td className="text-right" colSpan={linesEditable ? 2 : 1}>
                           <div className="flex gap-1 justify-end">
                             <Button size="sm" onClick={() => addLineMut.mutate()} loading={addLineMut.isPending}>
                               {t('common.save', { defaultValue: 'Save' })}
@@ -2590,7 +2590,7 @@ export function ContractDetailDrawer({
               retention_held scalar. */}
           <Card padding="sm">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              <p className="oe-overline">
                 {t('contracts.retention_ledger', { defaultValue: 'Retention ledger' })}
               </p>
               <span className="text-2xs text-content-tertiary">
@@ -2663,7 +2663,7 @@ export function ContractDetailDrawer({
 
           {/* Claim history */}
           <Card padding="sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+            <p className="oe-overline mb-2">
               {t('contracts.claim_history', { defaultValue: 'Claim history' })}
               {/* The count beside the heading names the whole claim
                   history rather than the rows on this page. It is read
@@ -2710,7 +2710,7 @@ export function ContractDetailDrawer({
           {/* Gainshare (only for GMP) */}
           {contract.contract_type === 'gmp' && (
             <Card padding="sm">
-              <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+              <p className="oe-overline mb-2">
                 {t('contracts.gainshare', { defaultValue: 'Gainshare config' })}
               </p>
               <p className="text-sm text-content-secondary">
@@ -3043,7 +3043,7 @@ export function CreateContractModal({
           <input
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder="C-2026-001"
           />
         </WideModalField>
@@ -3053,7 +3053,7 @@ export function CreateContractModal({
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField label={t('contracts.type', { defaultValue: 'Type' })}>
@@ -3062,7 +3062,7 @@ export function CreateContractModal({
             onChange={(e) =>
               setForm({ ...form, contract_type: e.target.value as ContractType })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             {CONTRACT_TYPES.map((tp) => (
               <option key={tp} value={tp}>
@@ -3084,7 +3084,7 @@ export function CreateContractModal({
                 counterparty_type: e.target.value as CounterpartyType,
               })
             }
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="client">
               {t('contracts.cp_client', { defaultValue: 'Client' })}
@@ -3109,7 +3109,7 @@ export function CreateContractModal({
           <select
             value={form.template_code}
             onChange={(e) => setForm({ ...form, template_code: e.target.value })}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">
               {t('contracts.tpl_none', { defaultValue: 'No template' })}
@@ -3133,7 +3133,7 @@ export function CreateContractModal({
             type="number"
             value={form.total_value}
             onChange={(e) => setForm({ ...form, total_value: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -3142,7 +3142,7 @@ export function CreateContractModal({
           <input
             value={form.currency}
             onChange={(e) => setForm({ ...form, currency: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             maxLength={3}
           />
         </WideModalField>
@@ -3161,7 +3161,7 @@ export function CreateContractModal({
             // typing 5 over a 5 used to append and read 55.
             onFocus={(e) => e.currentTarget.select()}
             data-testid="contract-retention"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
           {defaultHint('retention_percent')}
           {knownDefaults?.subdivision_missing ? (
@@ -3231,7 +3231,7 @@ export function CreateContractModal({
             onChange={(e) => setTerm('retention_cap_percent', e.target.value)}
             placeholder={t('contracts.payment_terms.no_cap', { defaultValue: 'No cap' })}
             data-testid="contract-retention-cap"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
           {defaultHint('retention_cap_percent')}
         </WideModalField>
@@ -3248,7 +3248,7 @@ export function CreateContractModal({
             value={termValue('payment_period_days')}
             onChange={(e) => setTerm('payment_period_days', e.target.value)}
             data-testid="contract-payment-days"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
           {defaultHint('payment_period_days')}
         </WideModalField>
@@ -3261,7 +3261,7 @@ export function CreateContractModal({
             value={termValue('valuation_interval')}
             onChange={(e) => setTerm('valuation_interval', e.target.value)}
             data-testid="contract-valuation-interval"
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">
               {t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}
@@ -3284,7 +3284,7 @@ export function CreateContractModal({
             value={termValue('retention_release_split')}
             onChange={(e) => setTerm('retention_release_split', e.target.value)}
             data-testid="contract-release-split"
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">
               {t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}
@@ -3335,7 +3335,7 @@ export function CreateContractModal({
             onChange={(e) => setTerm('certificate_name', e.target.value)}
             maxLength={200}
             data-testid="contract-certificate-name"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
           {defaultHint('certificate_name')}
         </WideModalField>
@@ -3352,7 +3352,7 @@ export function CreateContractModal({
             type="date"
             value={form.start_date}
             onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -3362,7 +3362,7 @@ export function CreateContractModal({
             type="date"
             value={form.end_date}
             onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>
@@ -3489,7 +3489,7 @@ export function NewClaimModal({
           <select
             value={form.contract_id}
             onChange={(e) => setForm({ ...form, contract_id: e.target.value })}
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">
               — {t('common.select', { defaultValue: 'Select' })} —
@@ -3507,7 +3507,7 @@ export function NewClaimModal({
           <input
             value={form.claim_number}
             onChange={(e) => setForm({ ...form, claim_number: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             placeholder={t('contracts.auto', { defaultValue: 'auto' })}
           />
         </WideModalField>
@@ -3517,7 +3517,7 @@ export function NewClaimModal({
           <input
             value={currency}
             onChange={(e) => setForm({ ...form, currency: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
             maxLength={3}
             data-testid="claim-currency"
           />
@@ -3529,7 +3529,7 @@ export function NewClaimModal({
             type="date"
             value={form.period_start}
             onChange={(e) => setForm({ ...form, period_start: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
         <WideModalField
@@ -3539,7 +3539,7 @@ export function NewClaimModal({
             type="date"
             value={form.period_end}
             onChange={(e) => setForm({ ...form, period_end: e.target.value })}
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </WideModalField>
       </WideModalSection>

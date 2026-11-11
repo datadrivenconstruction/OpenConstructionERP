@@ -195,36 +195,36 @@ export function ReleaseHistory({
   const unknownPerson = t('commitment.unknown_person', { defaultValue: 'Project member' });
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-      <table className="w-full text-sm" data-testid="history-table">
+      <table className="oe-table w-full" data-testid="history-table">
         <thead>
-          <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
-            <th className="py-1.5 pr-3 font-medium">{t('commitment.history.requested', { defaultValue: 'Requested' })}</th>
-            <th className="py-1.5 pr-3 font-medium">{t('commitment.history.purpose', { defaultValue: 'Asked for' })}</th>
-            <th className="py-1.5 pr-3 text-right font-medium">{t('commitment.release.amount', { defaultValue: 'Amount' })}</th>
-            <th className="py-1.5 pr-3 font-medium">{t('commitment.grid.required_tier', { defaultValue: 'Required tier' })}</th>
-            <th className="py-1.5 pr-3 font-medium">{t('commitment.history.outcome', { defaultValue: 'Decision' })}</th>
-            <th className="py-1.5 font-medium">{t('commitment.history.note', { defaultValue: 'Note' })}</th>
+          <tr className="text-left">
+            <th className="pr-3">{t('commitment.history.requested', { defaultValue: 'Requested' })}</th>
+            <th className="pr-3">{t('commitment.history.purpose', { defaultValue: 'Asked for' })}</th>
+            <th className="pr-3 text-right">{t('commitment.release.amount', { defaultValue: 'Amount' })}</th>
+            <th className="pr-3">{t('commitment.grid.required_tier', { defaultValue: 'Required tier' })}</th>
+            <th className="pr-3">{t('commitment.history.outcome', { defaultValue: 'Decision' })}</th>
+            <th>{t('commitment.history.note', { defaultValue: 'Note' })}</th>
           </tr>
         </thead>
         <tbody>
           {releases.map((r) => (
-            <tr key={r.id} className="border-b border-border-light/60 align-top" data-testid="history-row">
-              <td className="py-2 pr-3 text-content-secondary">
+            <tr key={r.id} className="align-top" data-testid="history-row">
+              <td className="pr-3 text-content-secondary">
                 <p>{fmtDate(r.created_at)}</p>
                 <p className="text-xs text-content-tertiary">{personName(r.requested_by) ?? unknownPerson}</p>
               </td>
-              <td className="py-2 pr-3 text-content-secondary" data-testid="history-purpose">
+              <td className="pr-3 text-content-secondary" data-testid="history-purpose">
                 {vocab(t, RELEASE_PURPOSE, r.purpose ?? 'release')}
               </td>
-              <td className="py-2 pr-3 text-right tabular-nums text-content-primary">
+              <td className="pr-3 text-right tabular-nums">
                 <Amount value={r.requested_amount} currency={r.currency} />
               </td>
-              <td className="py-2 pr-3 text-content-secondary">
+              <td className="pr-3 text-content-secondary">
                 {r.escalate_outside
                   ? t('commitment.schedule.escalate_outside', { defaultValue: 'Consent outside the schedule' })
                   : codeName(labels, 'tier', r.required_tier, matrix.tiers.find((x) => x.code === r.required_tier)?.name)}
               </td>
-              <td className="py-2 pr-3">
+              <td className="pr-3">
                 <ToneBadge tone={OUTCOME_TONE[r.outcome] ?? 'neutral'}>{vocab(t, RELEASE_OUTCOME, r.outcome)}</ToneBadge>
                 {r.decided_at && (
                   <p className="mt-0.5 text-xs text-content-tertiary">
@@ -236,7 +236,7 @@ export function ReleaseHistory({
                   </p>
                 )}
               </td>
-              <td className="py-2 text-content-secondary">
+              <td className="text-content-secondary">
                 {r.tranche_note && <p>{r.tranche_note}</p>}
                 {r.rationale && <p className="text-xs text-content-tertiary">{rationaleText(t, r.rationale)}</p>}
                 {/* One line per approver of a multi-step tier. */}
@@ -388,7 +388,7 @@ export function ItemPanel({
               </Badge>
             )}
           </div>
-          <h2 className="text-lg font-semibold text-content-primary">{item.title}</h2>
+          <h2 className="oe-section-title">{item.title}</h2>
           <p className="flex flex-wrap gap-x-3 text-sm text-content-secondary">
             <span>
               {codeName(labels, 'type', item.commitment_type, matrix.commitment_types.find((x) => x.code === item.commitment_type)?.name)}
@@ -656,7 +656,7 @@ export function ItemPanel({
       {action && (
         <div className="space-y-2 rounded-lg bg-surface-secondary p-3" data-testid="item-action-form">
           {run.isError && <RefusalBox message={refusalText(t, run.error)} />}
-          <label htmlFor="item-action-reason" className="block text-sm font-medium text-content-primary">
+          <label htmlFor="item-action-reason" className="oe-label">
             {actionCopy[action].label}
           </label>
           <textarea
@@ -690,7 +690,7 @@ export function ItemPanel({
       </div>
 
       <section data-testid="history">
-        <h3 className="mb-2 text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title mb-2">
           {t('commitment.drawer.history', { defaultValue: 'Release history' })}
         </h3>
         {historyQ.isLoading ? (
@@ -708,7 +708,7 @@ export function ItemPanel({
 
       <section data-testid="exposure">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('commitment.drawer.exposure', { defaultValue: 'Abort exposure' })}
           </h3>
           {/* Offered only once the stored terms are known: a form opened blank would overwrite them. */}

@@ -81,7 +81,7 @@ export function RunMonitor({
           ) : (
             <CheckCircle2 className="h-4 w-4 text-semantic-success" />
           )}
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('aiest.monitor.stages_title', { defaultValue: 'Progress' })}
           </h3>
         </div>
@@ -98,7 +98,7 @@ export function RunMonitor({
         <div className="flex items-center justify-between gap-2 border-b border-border-light pb-2.5">
           <div className="flex items-center gap-2">
             <Brain className="h-4 w-4 text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('aiest.monitor.title', { defaultValue: 'Run activity' })}
             </h3>
           </div>
@@ -133,7 +133,7 @@ export function RunMonitor({
               const meta = ROLE_META[step.role] ?? ROLE_META.answer;
               const Icon = meta.icon;
               return (
-                <div key={step.id} className="flex gap-2.5">
+                <div key={step.id} className="flex gap-2">
                   <Icon className={clsx('mt-0.5 h-3.5 w-3.5 shrink-0', meta.tone)} />
                   <div className="min-w-0 flex-1">
                     <p className="break-words text-xs leading-snug text-content-secondary">

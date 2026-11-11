@@ -1065,11 +1065,11 @@ export default function BIMFilterPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-light shrink-0">
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-content-tertiary" />
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('bim.filter_title', { defaultValue: 'Filter & Group' })}
           </h2>
           {format !== 'other' && (
-            <span className="text-2xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-secondary text-content-tertiary border border-border-light">
+            <span className="oe-overline px-1.5 py-0.5 rounded bg-surface-secondary border border-border-light">
               {format}
             </span>
           )}
@@ -1093,14 +1093,14 @@ export default function BIMFilterPanel({
           and the Link-to-BOQ button respect isolation, and the user
           can exit isolation directly from this banner. */}
       {isolatedIds && isolatedIds.length > 0 && (
-        <div className="px-4 py-2 border-b border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 shrink-0">
+        <div className="px-4 py-2 border-b border-semantic-warning/30 bg-semantic-warning-bg shrink-0">
           <div className="flex items-center gap-2">
-            <Focus size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            <Focus size={14} className="text-semantic-warning shrink-0" />
             <div className="min-w-0 flex-1">
-              <div className="text-2xs font-semibold text-amber-800 dark:text-amber-200">
+              <div className="text-2xs font-semibold text-semantic-warning">
                 {t('bim.isolation_active', { defaultValue: 'Isolation active' })}
               </div>
-              <div className="text-2xs text-amber-700/90 dark:text-amber-300/80 tabular-nums">
+              <div className="text-2xs text-semantic-warning tabular-nums">
                 {t('bim.isolation_scope', {
                   defaultValue: '{{n}} of {{total}} elements visible in viewport',
                   n: isolatedIds.length,
@@ -1112,7 +1112,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={onClearIsolation}
-                className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-semibold bg-white dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/70 transition-colors"
+                className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-semibold bg-white dark:bg-amber-900/50 text-semantic-warning border border-semantic-warning/30 hover:bg-semantic-warning-bg transition-colors"
                 title={t('bim.isolation_clear_title', {
                   defaultValue: 'Exit isolation - show all model elements again',
                 })}
@@ -1142,7 +1142,7 @@ export default function BIMFilterPanel({
             aria-label={t('bim.filter_search_placeholder', {
               defaultValue: 'Search name, type, level…',
             })}
-            className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
+            className="oe-input-sm w-full ps-8 pe-8"
           />
           {state.search && (
             <button
@@ -1241,7 +1241,7 @@ export default function BIMFilterPanel({
                   defaultValue: 'Create a BOQ position from the current filter',
                 })}
               >
-                <Link2 size={11} />
+                <Link2 size={12} />
                 {t('bim.quick_takeoff', {
                   defaultValue: 'Link {{count}} to BOQ',
                   count: visibleElements.length,
@@ -1257,7 +1257,7 @@ export default function BIMFilterPanel({
                   defaultValue: 'Save the current filter as a named group',
                 })}
               >
-                <Bookmark size={11} />
+                <Bookmark size={12} />
                 {t('bim.save_as_group', { defaultValue: 'Save as group' })}
               </button>
             )}
@@ -1302,7 +1302,7 @@ export default function BIMFilterPanel({
                 count: visibleElements.length,
               })}
             >
-              <FileText size={11} />
+              <FileText size={12} />
               CSV
             </button>
           </div>
@@ -1318,7 +1318,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('errors')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-semantic-error/30 bg-semantic-error-bg text-semantic-error hover:bg-semantic-error-bg transition-colors"
                 title={t('bim.smart_filter_errors_title', {
                   defaultValue: 'Show only elements with validation errors',
                 })}
@@ -1334,7 +1334,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('warnings')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-semantic-warning/30 bg-semantic-warning-bg text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
                 title={t('bim.smart_filter_warnings_title', {
                   defaultValue: 'Show only elements with validation warnings',
                 })}
@@ -1350,7 +1350,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('unlinked_boq')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-border bg-surface-secondary text-content-secondary hover:bg-surface-secondary transition-colors"
                 title={t('bim.smart_filter_unlinked_boq_title', {
                   defaultValue: 'Show only elements not linked to any BOQ position',
                 })}
@@ -1366,7 +1366,7 @@ export default function BIMFilterPanel({
               <button
                 type="button"
                 onClick={() => onSmartFilter('has_tasks')}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-2xs font-medium rounded border border-semantic-success/30 bg-semantic-success-bg text-semantic-success hover:bg-semantic-success-bg transition-colors"
                 title={t('bim.smart_filter_has_tasks_title', {
                   defaultValue: 'Show only elements that have linked tasks',
                 })}
@@ -1400,7 +1400,7 @@ export default function BIMFilterPanel({
         {/* Buildings-only toggle - hides annotation/analytical noise */}
         <label className="flex items-center justify-between mt-2 text-2xs text-content-secondary cursor-pointer select-none">
           <span className="flex items-center gap-1.5">
-            <Package size={11} className="text-content-tertiary" />
+            <Package size={12} className="text-content-tertiary" />
             {t('bim.filter_buildings_only', {
               defaultValue: 'Building elements only',
             })}
@@ -1440,7 +1440,7 @@ export default function BIMFilterPanel({
             >
               <div className="flex items-center gap-1.5">
                 <Bookmark size={12} className="text-oe-blue" />
-                <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                <span className="oe-overline">
                   {t('bim.saved_groups', { defaultValue: 'Saved groups' })}
                 </span>
                 <span className="text-2xs text-content-quaternary tabular-nums">
@@ -1448,9 +1448,9 @@ export default function BIMFilterPanel({
                 </span>
               </div>
               {groupsExpanded ? (
-                <ChevronDown size={11} className="text-content-tertiary" />
+                <ChevronDown size={12} className="text-content-tertiary" />
               ) : (
-                <ChevronRight size={11} className="text-content-tertiary" />
+                <ChevronRight size={12} className="text-content-tertiary" />
               )}
             </button>
             {groupsExpanded && (
@@ -1514,7 +1514,7 @@ export default function BIMFilterPanel({
                             e.stopPropagation();
                             onDeleteGroup(g);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-content-tertiary hover:text-rose-600 hover:bg-rose-50"
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg"
                           title={t('bim.group_delete', { defaultValue: 'Delete group' })}
                         >
                           <Trash2 size={10} />
@@ -1696,9 +1696,9 @@ export default function BIMFilterPanel({
                           className="flex items-center gap-1 min-w-0 flex-1 text-left"
                         >
                           {isOpen ? (
-                            <ChevronDown size={11} className="text-content-tertiary shrink-0" />
+                            <ChevronDown size={12} className="text-content-tertiary shrink-0" />
                           ) : (
-                            <ChevronRight size={11} className="text-content-tertiary shrink-0" />
+                            <ChevronRight size={12} className="text-content-tertiary shrink-0" />
                           )}
                           <span
                             className={`text-2xs font-semibold truncate ${
@@ -1726,7 +1726,7 @@ export default function BIMFilterPanel({
                               : t('bim.select_category', { defaultValue: 'Filter by this category' })
                           }
                         >
-                          {active ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2} />}
+                          {active ? <Check size={12} strokeWidth={2.5} /> : <Plus size={12} strokeWidth={2} />}
                         </button>
                       </div>
                       {isOpen && (
@@ -1788,9 +1788,9 @@ export default function BIMFilterPanel({
                           className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
                         >
                           {isOpen ? (
-                            <ChevronDown size={11} className="text-content-tertiary shrink-0" />
+                            <ChevronDown size={12} className="text-content-tertiary shrink-0" />
                           ) : (
-                            <ChevronRight size={11} className="text-content-tertiary shrink-0" />
+                            <ChevronRight size={12} className="text-content-tertiary shrink-0" />
                           )}
                           <span className={`text-2xs font-semibold ${meta.color} truncate`}>
                             {meta.label}
@@ -1811,7 +1811,7 @@ export default function BIMFilterPanel({
                                 })
                           }
                         >
-                          {allOn ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2} />}
+                          {allOn ? <Check size={12} strokeWidth={2.5} /> : <Plus size={12} strokeWidth={2} />}
                         </button>
                       </div>
                       {isOpen && (
@@ -1845,7 +1845,7 @@ export default function BIMFilterPanel({
         {/* Element explorer (grouped) */}
         <div className="border-t border-border-light">
           <div className="px-4 py-2.5 flex items-center justify-between bg-surface-secondary">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <span className="oe-overline">
               {t('bim.filter_explorer', { defaultValue: 'Element Explorer' })}
             </span>
             <select
@@ -1853,7 +1853,7 @@ export default function BIMFilterPanel({
               onChange={(e) =>
                 setState((p) => ({ ...p, groupBy: e.target.value as GroupBy }))
               }
-              className="text-2xs py-0.5 px-1.5 rounded border border-border-light bg-surface-primary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              className="oe-select-sm"
             >
               <option value="storey">
                 {t('bim.filter_group_level', { defaultValue: 'by Level' })}
@@ -2035,11 +2035,11 @@ function CategoryFlatList({
           >
             <div className="flex items-center gap-1.5">
               {otherExpanded ? (
-                <ChevronDown size={11} className="text-content-tertiary" />
+                <ChevronDown size={12} className="text-content-tertiary" />
               ) : (
-                <ChevronRight size={11} className="text-content-tertiary" />
+                <ChevronRight size={12} className="text-content-tertiary" />
               )}
-              <span className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+              <span className="oe-overline">
                 {t('bim.category_annotations_analytical', {
                   defaultValue: 'Annotations & analytical',
                 })}
@@ -2087,7 +2087,7 @@ function FilterSection({
       <div className="flex items-center justify-between gap-1.5 mb-2">
         <div className="flex items-center gap-1.5">
           <span className="text-content-tertiary">{icon}</span>
-          <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <span className="oe-overline">
             {title}
           </span>
         </div>

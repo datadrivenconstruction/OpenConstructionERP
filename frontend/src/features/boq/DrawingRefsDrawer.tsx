@@ -23,7 +23,7 @@ import {
 } from './drawingRefsApi';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
 export function DrawingRefsDrawer({
   boqId,
@@ -137,7 +137,7 @@ export function DrawingRefsDrawer({
         )}
 
         <div className="space-y-2 border-t border-border-light pt-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <h3 className="oe-overline">
             {t('boq.drawing_ref.manual_title', { defaultValue: 'Drawing noted by hand' })}
           </h3>
           <div className="grid grid-cols-[1fr_7rem] gap-2">

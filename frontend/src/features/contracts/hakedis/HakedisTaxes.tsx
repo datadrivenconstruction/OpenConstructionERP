@@ -280,7 +280,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
           className="flex flex-wrap items-start gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-2"
           data-testid="hakedis-taxes-stale"
         >
-          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           <p className="min-w-0 flex-1 break-words text-sm text-content-primary">
             {confirmed
               ? t('hakedis.taxes.stale_confirmed', {
@@ -295,7 +295,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
           {canEdit && !confirmed && (
             <Button
               size="sm"
-              icon={<RefreshCw size={13} />}
+              icon={<RefreshCw size={14} />}
               loading={saveMut.isPending}
               onClick={() => saveMut.mutate({})}
               data-testid="hakedis-taxes-recalculate"
@@ -448,7 +448,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
                 </p>
                 <Button
                   size="sm"
-                  icon={<CheckCircle2 size={13} />}
+                  icon={<CheckCircle2 size={14} />}
                   loading={confirmMut.isPending}
                   disabled={usesUnconfirmedRates && !acknowledged}
                   onClick={() => confirmMut.mutate()}
@@ -495,7 +495,7 @@ export function HakedisTaxes({ source, doc, locale, numberLocale, canEdit, onUpd
               type="submit"
               variant="secondary"
               size="sm"
-              icon={<RotateCcw size={13} />}
+              icon={<RotateCcw size={14} />}
               loading={reopenMut.isPending}
               disabled={reopenReason.trim() === ''}
               data-testid="hakedis-taxes-reopen-button"

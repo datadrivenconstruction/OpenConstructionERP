@@ -371,7 +371,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
       <div
         ref={containerRef}
         data-testid="federated-viewer"
-        className="relative h-[60vh] min-h-[400px] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+        className="relative h-[60vh] min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-surface-secondary"
       >
         <canvas
           ref={canvasRef}
@@ -386,7 +386,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
         {/* Toolbar - top-left */}
         <div
           data-testid="federated-viewer-toolbar"
-          className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-white/95 px-2 py-1.5 shadow-md backdrop-blur"
+          className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-white/95 px-2 py-1.5 shadow-md backdrop-blur"
         >
           <Button
             size="sm"
@@ -460,7 +460,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
         {measureMode ? (
           <div
             data-testid="federated-viewer-measure-readout"
-            className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs text-slate-700 shadow-md backdrop-blur"
+            className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-lg border border-border bg-white/95 px-3 py-1.5 text-xs text-content-secondary shadow-md backdrop-blur"
           >
             {measurement && measurement.pointCount === 2 ? (
               <span className="flex items-center gap-2">
@@ -479,13 +479,13 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
                 <button
                   type="button"
                   onClick={onClearMeasurement}
-                  className="text-slate-400 hover:text-slate-700"
+                  className="text-content-quaternary hover:text-content-secondary"
                   data-testid="federated-viewer-measure-clear"
                   aria-label={t('bim.federation.viewer.measure_clear', {
                     defaultValue: 'Clear measurement',
                   })}
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               </span>
             ) : (
@@ -506,10 +506,10 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
         {pick && !measureMode ? (
           <div
             data-testid="federated-viewer-pick-info"
-            className="absolute bottom-3 left-3 z-10 max-w-xs rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-md backdrop-blur"
+            className="absolute bottom-3 left-3 z-10 max-w-xs rounded-lg border border-border bg-white/95 px-3 py-2 text-xs shadow-md backdrop-blur"
           >
             <div className="mb-1 flex items-center justify-between gap-3">
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-content-primary">
                 {t('bim.federation.viewer.selected', {
                   defaultValue: 'Selected element',
                 })}
@@ -517,33 +517,33 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
               <button
                 type="button"
                 onClick={onClearPick}
-                className="text-slate-400 hover:text-slate-700"
+                className="text-content-quaternary hover:text-content-secondary"
                 data-testid="federated-viewer-pick-clear"
                 aria-label={t('bim.federation.viewer.pick_clear', {
                   defaultValue: 'Clear selection',
                 })}
               >
-                <X size={13} />
+                <X size={14} />
               </button>
             </div>
-            <dl className="space-y-0.5 text-slate-600">
+            <dl className="space-y-0.5 text-content-secondary">
               {pick.ifcClass ? (
                 <div className="flex gap-2">
-                  <dt className="text-slate-400">
+                  <dt className="text-content-quaternary">
                     {t('bim.federation.viewer.pick_class', {
                       defaultValue: 'Type',
                     })}
                   </dt>
-                  <dd className="font-medium text-slate-700">{pick.ifcClass}</dd>
+                  <dd className="font-medium text-content-secondary">{pick.ifcClass}</dd>
                 </div>
               ) : null}
               <div className="flex gap-2">
-                <dt className="text-slate-400">
+                <dt className="text-content-quaternary">
                   {t('bim.federation.viewer.pick_model', {
                     defaultValue: 'Model',
                   })}
                 </dt>
-                <dd className="font-medium text-slate-700">
+                <dd className="font-medium text-content-secondary">
                   {memberNameById[pick.modelId] ||
                     (pick.modelId
                       ? pick.modelId.slice(0, 8)
@@ -553,24 +553,24 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
                 </dd>
               </div>
               <div className="flex gap-2">
-                <dt className="text-slate-400">
+                <dt className="text-content-quaternary">
                   {t('bim.federation.viewer.pick_discipline', {
                     defaultValue: 'Discipline',
                   })}
                 </dt>
-                <dd className="font-medium capitalize text-slate-700">
+                <dd className="font-medium capitalize text-content-secondary">
                   {pick.discipline}
                 </dd>
               </div>
               {pick.objectName ? (
                 <div className="flex gap-2">
-                  <dt className="text-slate-400">
+                  <dt className="text-content-quaternary">
                     {t('bim.federation.viewer.pick_node', {
                       defaultValue: 'Node',
                     })}
                   </dt>
                   <dd
-                    className="truncate font-mono text-2xs text-slate-500"
+                    className="truncate font-mono text-2xs text-content-tertiary"
                     title={pick.objectName}
                   >
                     {pick.objectName}
@@ -585,7 +585,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
         {isLoading ? (
           <div
             data-testid="federated-viewer-loading"
-            className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-sm text-slate-600 backdrop-blur"
+            className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 text-sm text-content-secondary backdrop-blur"
           >
             {t('bim.federation.viewer.loading', {
               defaultValue: 'Loading federation geometry…',
@@ -600,14 +600,14 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           <div
             data-testid="federated-viewer-webgl-unavailable"
             role="status"
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 bg-slate-50 px-6 text-center"
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 bg-surface-secondary px-6 text-center"
           >
-            <div className="text-sm font-semibold text-slate-700">
+            <div className="text-sm font-semibold text-content-secondary">
               {t('bim.federation.viewer.webgl_unavailable_title', {
                 defaultValue: '3D viewer not available',
               })}
             </div>
-            <div className="max-w-md text-xs text-slate-500">
+            <div className="max-w-md text-xs text-content-tertiary">
               {t('bim.federation.viewer.webgl_unavailable_body', {
                 defaultValue:
                   'This browser or device does not support WebGL2, which is required to display the federated 3D model. Try a hardware-accelerated browser or update your graphics drivers.',
@@ -621,7 +621,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           <div
             data-testid="federated-viewer-detail-error"
             role="alert"
-            className="absolute inset-x-3 top-16 z-20 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            className="absolute inset-x-3 top-16 z-20 rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-semantic-error"
           >
             {t('bim.federation.viewer.detail_error', {
               defaultValue: 'Failed to load federation:',
@@ -641,7 +641,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
             className="absolute inset-x-3 bottom-3 z-20 space-y-2"
           >
             {errors.some((e) => !e.noGeometry) ? (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-xs text-semantic-warning">
                 <div className="mb-1 font-semibold">
                   {t('bim.federation.viewer.member_errors', {
                     defaultValue: 'Some models failed to load',
@@ -662,7 +662,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
               </div>
             ) : null}
             {errors.some((e) => e.noGeometry) ? (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              <div className="rounded-lg border border-border bg-surface-secondary p-3 text-xs text-content-secondary">
                 <div className="mb-1 font-semibold">
                   {t('bim.federation.viewer.member_no_geometry_title', {
                     defaultValue: 'No 3D geometry yet',

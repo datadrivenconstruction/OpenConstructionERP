@@ -78,8 +78,8 @@ export function CDEApprovalPresetsCard({ projectId }: { projectId: string }) {
 
   return (
     <Card padding="md">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <Workflow size={15} className="text-oe-blue" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <Workflow size={16} className="text-oe-blue" />
         {t('cde.presets_title', { defaultValue: 'Approval presets' })}
       </h2>
       <p className="mt-1 max-w-2xl text-xs text-content-tertiary">
@@ -89,7 +89,7 @@ export function CDEApprovalPresetsCard({ projectId }: { projectId: string }) {
         })}
       </p>
 
-      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
         {data.presets.map((preset) => {
           const active = data.active_system_key === preset.system_key;
           const busy = pendingKey === preset.system_key && applyMut.isPending;
@@ -105,7 +105,7 @@ export function CDEApprovalPresetsCard({ projectId }: { projectId: string }) {
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-content-primary">
-                  <ShieldCheck size={13} className="text-oe-blue shrink-0" />
+                  <ShieldCheck size={14} className="text-oe-blue shrink-0" />
                   {t(`cde.preset_name_${preset.system_key}`, { defaultValue: preset.name })}
                 </span>
                 <Badge variant="blue" size="sm" className="shrink-0">
@@ -138,7 +138,7 @@ export function CDEApprovalPresetsCard({ projectId }: { projectId: string }) {
                 {active ? (
                   <div className="flex items-center gap-2">
                     <Badge variant="success" size="sm">
-                      <Check size={11} className="mr-1 shrink-0" />
+                      <Check size={12} className="mr-1 shrink-0" />
                       {t('cde.preset_active', { defaultValue: 'Active' })}
                     </Badge>
                     <Button

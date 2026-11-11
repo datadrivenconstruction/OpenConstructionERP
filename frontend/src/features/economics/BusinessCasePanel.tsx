@@ -64,22 +64,22 @@ export function BusinessCasePanel({
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+        <table className="oe-table w-full">
+          <thead className="text-left">
             <tr>
-              <th className="px-3 py-2">{t('economics.case.col_kind', { defaultValue: 'Kind' })}</th>
-              <th className="px-3 py-2">{t('economics.case.col_label', { defaultValue: 'Line' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.case.col_amount', { defaultValue: 'Amount' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.case.col_years', { defaultValue: 'Years' })}</th>
-              <th className="px-3 py-2 text-right">{t('economics.case.col_escalation', { defaultValue: 'Escalation' })}</th>
-              <th className="px-3 py-2" />
+              <th>{t('economics.case.col_kind', { defaultValue: 'Kind' })}</th>
+              <th>{t('economics.case.col_label', { defaultValue: 'Line' })}</th>
+              <th className="text-right">{t('economics.case.col_amount', { defaultValue: 'Amount' })}</th>
+              <th className="text-right">{t('economics.case.col_years', { defaultValue: 'Years' })}</th>
+              <th className="text-right">{t('economics.case.col_escalation', { defaultValue: 'Escalation' })}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {data.lines.map((line) => (
-              <tr key={line.id} className="border-t border-border">
-                <td className="px-3 py-2">{t(FLOW_KIND[line.kind][0], { defaultValue: FLOW_KIND[line.kind][1] })}</td>
-                <td className="px-3 py-2">
+              <tr key={line.id}>
+                <td>{t(FLOW_KIND[line.kind][0], { defaultValue: FLOW_KIND[line.kind][1] })}</td>
+                <td>
                   {line.label}
                   {line.source === 'cost_frame' && (
                     <span className="ml-2 text-xs text-content-secondary">
@@ -87,7 +87,7 @@ export function BusinessCasePanel({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {money(line.amount)}
                   {line.mode === 'per_year' && (
                     <span className="ml-1 text-xs text-content-secondary">
@@ -95,11 +95,11 @@ export function BusinessCasePanel({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">
+                <td className="text-right tabular-nums">
                   {line.year_from} - {line.year_to}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">{plain(line.escalation_pct, 1)} %</td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right tabular-nums">{plain(line.escalation_pct, 1)} %</td>
+                <td className="text-right">
                   {editable && (
                     <ConfirmDelete
                       label={t('economics.case.delete', { defaultValue: 'Delete the line' })}

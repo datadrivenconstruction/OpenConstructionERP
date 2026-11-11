@@ -265,7 +265,7 @@ export function ApplyActionButton({ runId }: ApplyActionButtonProps): JSX.Elemen
 
       {/* Apply result summary (after a successful apply). */}
       {result && (
-        <div className="mt-3 rounded-md border border-semantic-success/30 bg-semantic-success-bg/60 p-2.5 text-xs">
+        <div className="mt-3 rounded-md border border-semantic-success/30 bg-semantic-success-bg/60 p-3 text-xs">
           <p className="flex items-center gap-1.5 font-medium text-semantic-success">
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
             {t('agents.apply.result', {
@@ -301,7 +301,7 @@ export function ApplyActionButton({ runId }: ApplyActionButtonProps): JSX.Elemen
                 id="apply-boq-select"
                 value={effectiveBoqId}
                 onChange={(e) => setSelectedBoqId(e.target.value)}
-                className="rounded-lg border border-border bg-surface-primary px-2.5 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
+                className="oe-select-sm"
               >
                 {boqs.map((b) => (
                   <option key={b.id} value={b.id}>

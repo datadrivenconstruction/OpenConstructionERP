@@ -41,7 +41,7 @@ export function FleetUtilisationCard() {
             className="inline-flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
           >
             {t('dashboard.fleet_util.open', { defaultValue: 'Open telematics' })}
-            <ArrowRight size={11} />
+            <ArrowRight size={12} />
           </button>
         }
       />

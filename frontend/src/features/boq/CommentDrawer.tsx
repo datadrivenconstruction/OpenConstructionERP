@@ -155,7 +155,7 @@ export function CommentDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
 
@@ -174,7 +174,7 @@ export function CommentDrawer({
             <MessageSquare size={17} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('comments.title', { defaultValue: 'Comments' })}
             </h2>
             <p className="text-xs text-content-tertiary truncate mt-0.5">
@@ -237,7 +237,7 @@ export function CommentDrawer({
                         aria-label={t('comments.delete', { defaultValue: 'Delete comment' })}
                         title={t('comments.delete', { defaultValue: 'Delete comment' })}
                       >
-                        <Trash2 size={11} />
+                        <Trash2 size={12} />
                       </button>
                     )}
                   </div>
@@ -262,10 +262,7 @@ export function CommentDrawer({
               rows={2}
               aria-label={t('comments.input_placeholder', { defaultValue: 'Write a comment... (Enter to send)' })}
               placeholder={t('comments.input_placeholder', { defaultValue: 'Write a comment... (Enter to send)' })}
-              className="flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-2
-                         text-xs text-content-primary placeholder:text-content-quaternary
-                         focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue
-                         resize-none"
+              className="oe-textarea flex-1 resize-none"
             />
             <button
               onClick={handleSubmit}

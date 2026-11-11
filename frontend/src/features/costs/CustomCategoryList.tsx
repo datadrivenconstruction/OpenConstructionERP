@@ -45,7 +45,7 @@ export function CustomCategoryList({
       className="border-b border-border-light px-2 py-2"
       data-testid="costs-custom-categories"
     >
-      <p className="px-1 pb-1.5 text-2xs font-semibold uppercase tracking-wide text-content-quaternary">
+      <p className="oe-overline px-1 pb-1.5">
         {t('costs.my_categories', { defaultValue: 'My categories' })}
       </p>
       <div className="flex flex-col gap-0.5">

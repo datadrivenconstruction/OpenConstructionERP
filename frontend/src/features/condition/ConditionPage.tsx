@@ -91,7 +91,7 @@ function HowItWorks() {
   return (
     <CollapsibleSection
       storageKey="condition.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('condition.flow_title', { defaultValue: 'How condition and maintenance planning fit together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -286,10 +286,10 @@ export function ConditionPage() {
       <td className="py-2 text-right">
         {a.status === 'proposed' && canApprove && (
           <span className="inline-flex gap-1">
-            <Button size="sm" variant="secondary" icon={<CheckCircle2 size={13} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'approved' } })}>
+            <Button size="sm" variant="secondary" icon={<CheckCircle2 size={14} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'approved' } })}>
               {t('condition.approve', { defaultValue: 'Approve' })}
             </Button>
-            <Button size="sm" variant="ghost" icon={<XCircle size={13} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'rejected' } })}>
+            <Button size="sm" variant="ghost" icon={<XCircle size={14} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'rejected' } })}>
               {t('condition.reject', { defaultValue: 'Reject' })}
             </Button>
           </span>
@@ -359,24 +359,24 @@ export function ConditionPage() {
               />
             ) : (
               <Card padding="none" className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-sm">
-                  <thead className="bg-surface-secondary text-left text-xs text-content-tertiary">
+                <table className="oe-table w-full min-w-[760px]">
+                  <thead className="text-left">
                     <tr>
-                      <th className="px-4 py-2 font-medium">{t('condition.element', { defaultValue: 'Asset or element' })}</th>
-                      <th className="px-2 py-2 font-medium">{t('condition.rating', { defaultValue: 'Rating' })}</th>
-                      <th className="px-2 py-2 font-medium">{t('condition.col_record', { defaultValue: 'Severity / extent / intensity' })}</th>
-                      <th className="px-2 py-2 font-medium">{t('condition.assessed_at', { defaultValue: 'Assessed on' })}</th>
+                      <th>{t('condition.element', { defaultValue: 'Asset or element' })}</th>
+                      <th>{t('condition.rating', { defaultValue: 'Rating' })}</th>
+                      <th>{t('condition.col_record', { defaultValue: 'Severity / extent / intensity' })}</th>
+                      <th>{t('condition.assessed_at', { defaultValue: 'Assessed on' })}</th>
                       <th />
                     </tr>
                   </thead>
                   <tbody>
                     {(assessmentsQ.data ?? []).map((a) => (
-                      <tr key={a.id} className="border-t border-border-light">
-                        <td className="px-4 py-2">
+                      <tr key={a.id}>
+                        <td>
                           <div className="font-medium text-content-primary">{a.element_name}</div>
                           <div className="text-2xs text-content-tertiary">{[a.area, a.asset_ref, a.defect_description].filter(Boolean).join(' · ')}</div>
                         </td>
-                        <td className="px-2 py-2">
+                        <td>
                           <RatingChip scale={scalesByKey.get(a.scale_key)} rating={a.rating} />
                           {a.suggested_rating != null && a.suggested_rating !== a.rating && (
                             <div className="text-2xs text-content-tertiary">
@@ -384,11 +384,11 @@ export function ConditionPage() {
                             </div>
                           )}
                         </td>
-                        <td className="px-2 py-2 text-xs tabular-nums text-content-secondary">
+                        <td className="tabular-nums text-content-secondary">
                           {a.severity ?? '-'} / {a.extent_pct != null ? fmtPercent(a.extent_pct, 0) : '-'} / {a.intensity ?? '-'}
                         </td>
-                        <td className="px-2 py-2 text-xs text-content-secondary">{a.assessed_at ? fmtDate(a.assessed_at) : '-'}</td>
-                        <td className="px-2 py-2 text-right">
+                        <td className="text-content-secondary">{a.assessed_at ? fmtDate(a.assessed_at) : '-'}</td>
+                        <td className="text-right">
                           {canApprove && (
                             <button
                               type="button"
@@ -410,21 +410,21 @@ export function ConditionPage() {
           {tab === 'plan' && (
             <div className="space-y-4">
               <Card className="grid gap-3 p-4 md:grid-cols-6">
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('condition.start_year', { defaultValue: 'First year' })}
-                  <input type="number" className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm" value={startYear} onChange={(e) => setStartYear(Number(e.target.value) || thisYear)} />
+                  <input type="number" className="oe-input mt-1 w-full" value={startYear} onChange={(e) => setStartYear(Number(e.target.value) || thisYear)} />
                 </label>
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('condition.horizon', { defaultValue: 'Years' })}
-                  <input type="number" min={1} max={100} className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm" value={horizon} onChange={(e) => setHorizon(Math.min(100, Math.max(1, Number(e.target.value) || 10)))} />
+                  <input type="number" min={1} max={100} className="oe-input mt-1 w-full" value={horizon} onChange={(e) => setHorizon(Math.min(100, Math.max(1, Number(e.target.value) || 10)))} />
                 </label>
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('condition.inflation_pct', { defaultValue: 'Inflation per year (%)' })}
-                  <input inputMode="decimal" className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm" value={inflationPct} onChange={(e) => setInflationPct(e.target.value)} />
+                  <input inputMode="decimal" className="oe-input mt-1 w-full" value={inflationPct} onChange={(e) => setInflationPct(e.target.value)} />
                 </label>
                 <label className="text-xs font-medium text-content-secondary md:col-span-2">
                   {t('condition.index_series', { defaultValue: 'or from price index' })}
-                  <select className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm" value={seriesId} onChange={(e) => setSeriesId(e.target.value)} disabled={inflationPct.trim() !== ''}>
+                  <select className="oe-select mt-1 w-full" value={seriesId} onChange={(e) => setSeriesId(e.target.value)} disabled={inflationPct.trim() !== ''}>
                     <option value="">-</option>
                     {(seriesQ.data ?? []).map((s) => (
                       <option key={s.id} value={s.id}>
@@ -433,9 +433,9 @@ export function ConditionPage() {
                     ))}
                   </select>
                 </label>
-                <label className="text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('condition.discount_pct', { defaultValue: 'Discount rate (%)' })}
-                  <input inputMode="decimal" className="mt-1 h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
+                  <input inputMode="decimal" className="oe-input mt-1 w-full" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} />
                 </label>
                 <div className="flex flex-wrap items-center gap-2 md:col-span-6">
                   <label className="flex items-center gap-2 text-sm text-content-secondary">
@@ -514,15 +514,15 @@ export function ConditionPage() {
               )}
 
               <Card padding="none" className="overflow-x-auto">
-                <table className="w-full min-w-[860px]">
-                  <thead className="bg-surface-secondary text-left text-xs text-content-tertiary">
+                <table className="oe-table w-full min-w-[860px]">
+                  <thead className="text-left">
                     <tr>
-                      <th className="px-4 py-2 font-medium">{t('condition.element', { defaultValue: 'Asset or element' })}</th>
-                      <th className="py-2 font-medium">{t('condition.col_action', { defaultValue: 'Action' })}</th>
-                      <th className="py-2 font-medium">{t('condition.col_year', { defaultValue: 'Year' })}</th>
-                      <th className="py-2 font-medium">{t('condition.quantity', { defaultValue: 'Quantity of the element' })}</th>
-                      <th className="py-2 font-medium">{t('condition.unit_cost', { defaultValue: 'Unit cost of the work' })}</th>
-                      <th className="py-2 font-medium">{t('condition.col_status', { defaultValue: 'Status' })}</th>
+                      <th>{t('condition.element', { defaultValue: 'Asset or element' })}</th>
+                      <th>{t('condition.col_action', { defaultValue: 'Action' })}</th>
+                      <th>{t('condition.col_year', { defaultValue: 'Year' })}</th>
+                      <th>{t('condition.quantity', { defaultValue: 'Quantity of the element' })}</th>
+                      <th>{t('condition.unit_cost', { defaultValue: 'Unit cost of the work' })}</th>
+                      <th>{t('condition.col_status', { defaultValue: 'Status' })}</th>
                       <th />
                     </tr>
                   </thead>

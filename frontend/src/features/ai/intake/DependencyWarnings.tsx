@@ -29,7 +29,7 @@ export function DependencyWarnings({ warnings }: DependencyWarningsProps) {
       className="rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3"
     >
       <div className="flex items-center gap-2 text-sm font-medium text-[#b45309] dark:text-amber-300">
-        <AlertTriangle size={15} />
+        <AlertTriangle size={16} />
         {t('aiest.dep.heading', { defaultValue: 'Sequence notes (non-blocking)' })}
       </div>
       <ul className="mt-1.5 space-y-1 pl-6 text-xs text-[#92400e] dark:text-amber-200/90">

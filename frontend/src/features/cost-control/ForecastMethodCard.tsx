@@ -180,7 +180,7 @@ export function ForecastMethodCard({ projectId, currency, canManage, onOpenLine,
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('cost_control.method_title', { defaultValue: 'How the forecast is read' })}
           </h2>
           <p className="text-xs text-content-tertiary">
@@ -248,7 +248,7 @@ export function ForecastMethodCard({ projectId, currency, canManage, onOpenLine,
                 {t('cost_control.threshold_amount', { defaultValue: 'More than (amount)' })}
               </span>
               <input
-                className="mt-1 h-9 w-40 rounded-lg border border-border bg-surface-primary px-3 text-right tabular-nums"
+                className="oe-input mt-1 w-40 text-right tabular-nums"
                 inputMode="decimal"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -260,7 +260,7 @@ export function ForecastMethodCard({ projectId, currency, canManage, onOpenLine,
                 {t('cost_control.threshold_pct', { defaultValue: 'More than (% of the last figure)' })}
               </span>
               <input
-                className="mt-1 h-9 w-40 rounded-lg border border-border bg-surface-primary px-3 text-right tabular-nums"
+                className="oe-input mt-1 w-40 text-right tabular-nums"
                 inputMode="decimal"
                 value={pct}
                 onChange={(e) => setPct(e.target.value)}
@@ -312,7 +312,7 @@ export function ForecastMethodCard({ projectId, currency, canManage, onOpenLine,
       </div>
 
       <div>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h3 className="oe-overline mb-2">
           {t('cost_control.method_findings', { defaultValue: 'Documentation checks' })}
         </h3>
         <FindingList findings={data.findings} onOpen={openFinding} />

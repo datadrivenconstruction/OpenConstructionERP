@@ -273,7 +273,7 @@ export function CwicrMatchPanel(props: CwicrMatchPanelProps) {
       )}
 
       {results.length > 0 && (
-        <table className="oe-cwicr-match-panel__table" data-testid="cwicr-match-results">
+        <table className="oe-table oe-cwicr-match-panel__table" data-testid="cwicr-match-results">
           <thead>
             <tr>
               <th>{t('costs.cwicr_match.col_code', { defaultValue: 'Code' })}</th>

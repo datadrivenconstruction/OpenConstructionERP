@@ -215,11 +215,11 @@ function CreateCDEModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
       <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('cde.new_container', { defaultValue: 'New Container' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('cde.new_container', { defaultValue: 'New Container' })}
           </h2>
           <button
@@ -227,7 +227,7 @@ function CreateCDEModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -250,7 +250,7 @@ function CreateCDEModal({
           {/* Two-column: Code + Discipline */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('cde.field_code', { defaultValue: 'Container Code' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -265,9 +265,7 @@ function CreateCDEModal({
                 })}
                 className={clsx(
                   inputCls,
-                  codeError &&
-                    'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-                )}
+                )} aria-invalid={!!(codeError)}
                 autoFocus
               />
               {codeError && (
@@ -277,14 +275,14 @@ function CreateCDEModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('cde.field_discipline', { defaultValue: 'Discipline' })}
               </label>
               <div className="relative">
                 <select
                   value={form.discipline}
                   onChange={(e) => set('discipline', e.target.value as CDEDiscipline)}
-                  className={inputCls + ' appearance-none pr-9'}
+                  className={inputCls}
                 >
                   {(Object.keys(DISCIPLINE_LABELS) as CDEDiscipline[]).map((d) => (
                     <option key={d} value={d}>
@@ -301,7 +299,7 @@ function CreateCDEModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('cde.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -316,9 +314,7 @@ function CreateCDEModal({
               })}
               className={clsx(
                 inputCls,
-                titleError &&
-                  'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              )} aria-invalid={!!(titleError)}
             />
             {titleError && (
               <p className="mt-1 text-xs text-semantic-error">
@@ -330,14 +326,14 @@ function CreateCDEModal({
           {/* Two-column: State + Suitability Code (state-aware dropdown) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label className="oe-label">
                 {t('cde.field_state', { defaultValue: 'State' })}
               </label>
               <div className="relative">
                 <select
                   value={form.cde_state}
                   onChange={(e) => set('cde_state', e.target.value as CDEState)}
-                  className={inputCls + ' appearance-none pr-9'}
+                  className={inputCls}
                   aria-label={t('cde.field_state', { defaultValue: 'State' })}
                 >
                   {STATE_ORDER.map((s) => (
@@ -354,7 +350,7 @@ function CreateCDEModal({
             <div>
               <label
                 htmlFor="cde-suitability-select"
-                className="block text-sm font-medium text-content-primary mb-1.5"
+                className="oe-label"
               >
                 {t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
               </label>
@@ -363,7 +359,7 @@ function CreateCDEModal({
                   id="cde-suitability-select"
                   value={form.suitability_code}
                   onChange={(e) => set('suitability_code', e.target.value)}
-                  className={inputCls + ' appearance-none pr-9'}
+                  className={inputCls}
                   aria-label={t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
                 >
                   <option value="">
@@ -384,7 +380,7 @@ function CreateCDEModal({
 
           {/* Classification */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label className="oe-label">
               {t('cde.field_classification', { defaultValue: 'Classification' })}
             </label>
             <input
@@ -458,13 +454,13 @@ function ApprovalSignatureModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       role="dialog"
       aria-label={t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
     >
       <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
           </h2>
           <button
@@ -472,7 +468,7 @@ function ApprovalSignatureModal({
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -487,7 +483,7 @@ function ApprovalSignatureModal({
           <div>
             <label
               htmlFor="cde-approval-sig"
-              className="block text-sm font-medium text-content-primary mb-1.5"
+              className="oe-label"
             >
               {t('cde.approval_field_signature', { defaultValue: 'Signature' })}{' '}
               <span className="text-semantic-error">*</span>
@@ -504,8 +500,7 @@ function ApprovalSignatureModal({
               })}
               className={clsx(
                 inputCls,
-                sigError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              )} aria-invalid={!!(sigError)}
               autoFocus
             />
             {sigError && (
@@ -519,7 +514,7 @@ function ApprovalSignatureModal({
           <div>
             <label
               htmlFor="cde-approval-comments"
-              className="block text-sm font-medium text-content-primary mb-1.5"
+              className="oe-label"
             >
               {t('cde.approval_field_comments', { defaultValue: 'Comments' })}
             </label>
@@ -528,7 +523,7 @@ function ApprovalSignatureModal({
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              className="oe-textarea w-full resize-none"
               placeholder={t('cde.approval_comments_placeholder', {
                 defaultValue: 'Optional notes for the audit trail...',
               })}
@@ -708,7 +703,7 @@ function LinkDocumentModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -719,8 +714,8 @@ function LinkDocumentModal({
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <Link2 size={18} className="text-oe-blue" />
-              <h3 className="text-base font-semibold">
+              <Link2 size={20} className="text-oe-blue" />
+              <h3 className="oe-section-title">
                 {t('cde.link_documents', { defaultValue: 'Link Documents' })}
               </h3>
             </div>
@@ -745,7 +740,7 @@ function LinkDocumentModal({
               className="absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary"
             />
             <input
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-9 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              className="oe-input w-full ps-9 pe-3"
               placeholder={t('cde.search_documents', {
                 defaultValue: 'Search documents...',
               })}
@@ -1036,7 +1031,7 @@ const ContainerRow = React.memo(function ContainerRow({
                 navigate(`/transmittals?create=true&container_id=${container.id}`);
               }}
             >
-              <Send size={13} className="mr-1" />
+              <Send size={14} className="mr-1" />
               {t('cde.send_transmittal', { defaultValue: 'Send via Transmittal' })}
             </Button>
             {/* Submit for approval — hands the container off into the
@@ -1053,7 +1048,7 @@ const ContainerRow = React.memo(function ContainerRow({
                 defaultValue: 'Raise a submittal for this container',
               })}
             >
-              <FileCheck size={13} className="mr-1" />
+              <FileCheck size={14} className="mr-1" />
               {t('cde.submit_for_approval', { defaultValue: 'Submit for approval' })}
             </Button>
             {/* History drawer */}
@@ -1074,7 +1069,7 @@ const ContainerRow = React.memo(function ContainerRow({
 
           {/* Revision history / Documents in container */}
           <div>
-            <p className="text-xs text-content-tertiary mb-2 font-medium uppercase tracking-wide">
+            <p className="oe-overline mb-2">
               {t('cde.label_revisions', { defaultValue: 'Revisions' })}
             </p>
             {revisionsLoading ? (
@@ -1110,7 +1105,7 @@ const ContainerRow = React.memo(function ContainerRow({
 function RevisionItem({ revision }: { revision: CDERevision }) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-surface-secondary p-2.5 text-sm">
+    <div className="flex items-center gap-3 rounded-lg bg-surface-secondary p-2 text-sm">
       <span className="font-mono font-semibold text-content-secondary w-12 shrink-0">
         {revision.revision_code}
       </span>
@@ -1191,7 +1186,7 @@ function HowCdeWorks() {
   return (
     <CollapsibleSection
       storageKey="cde.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('cde.flow_title', { defaultValue: 'How the CDE fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1282,8 +1277,8 @@ function CdeFunctionalRoles() {
 
   return (
     <Card padding="md">
-      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-        <Users size={15} className="text-oe-blue" />
+      <h2 className="oe-card-title flex items-center gap-1.5">
+        <Users size={16} className="text-oe-blue" />
         {t('cde.roles_title', { defaultValue: 'Roles and responsibilities' })}
       </h2>
       <p className="mt-1 text-xs text-content-tertiary">
@@ -1329,14 +1324,14 @@ function CdeFunctionalRoles() {
 
       {/* Responsibility matrix: what each role does in each state */}
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full min-w-[34rem] border-collapse text-2xs">
+        <table className="oe-table-compact w-full min-w-[34rem] text-2xs">
           <thead>
-            <tr className="text-content-tertiary">
-              <th className="px-2 py-1.5 text-left font-medium uppercase tracking-wide">
+            <tr>
+              <th>
                 {t('cde.roles_matrix_state', { defaultValue: 'State' })}
               </th>
               {roles.map((role) => (
-                <th key={role.key} className="px-2 py-1.5 text-left font-medium">
+                <th key={role.key}>
                   {t(`cde.role_${role.key}_name`, { defaultValue: role.name })}
                 </th>
               ))}
@@ -1346,8 +1341,8 @@ function CdeFunctionalRoles() {
             {states.map((state) => {
               const cfg = STATE_CONFIG[state] ?? STATE_CONFIG.wip;
               return (
-                <tr key={state} className="border-t border-border-light">
-                  <td className="px-2 py-1.5">
+                <tr key={state}>
+                  <td>
                     <Badge variant={cfg.variant} size="sm" className={cfg.cls}>
                       {t(`cde.state_${state}`, { defaultValue: cfg.label })}
                     </Badge>
@@ -1359,7 +1354,7 @@ function CdeFunctionalRoles() {
                       <td
                         key={role.key}
                         className={clsx(
-                          'px-2 py-1.5',
+                          '',
                           idle ? 'text-content-quaternary' : 'text-content-secondary',
                         )}
                       >
@@ -1388,8 +1383,8 @@ const READINESS_LEVEL: Record<
   ReadinessLevel,
   { variant: 'neutral' | 'blue' | 'success' | 'warning'; bar: string; label: string }
 > = {
-  not_started: { variant: 'neutral', bar: 'bg-gray-300 dark:bg-gray-600', label: 'Not started' },
-  forming: { variant: 'warning', bar: 'bg-amber-400', label: 'Forming' },
+  not_started: { variant: 'neutral', bar: 'bg-border', label: 'Not started' },
+  forming: { variant: 'warning', bar: 'bg-semantic-warning', label: 'Forming' },
   operational: { variant: 'blue', bar: 'bg-oe-blue', label: 'Operational' },
   mature: { variant: 'success', bar: 'bg-semantic-success', label: 'Mature' },
 };
@@ -1438,8 +1433,8 @@ function CdeReadiness({ projectId }: { projectId: string }) {
       {/* Header + score */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-            <Gauge size={15} className="text-oe-blue" />
+          <h2 className="oe-card-title flex items-center gap-1.5">
+            <Gauge size={16} className="text-oe-blue" />
             {t('cde.readiness_title', { defaultValue: 'Go-live readiness' })}
           </h2>
           <p className="mt-1 max-w-xl text-xs text-content-tertiary">
@@ -1523,7 +1518,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
                 )}
                 aria-hidden="true"
               >
-                {s.done && <Check size={11} strokeWidth={3} />}
+                {s.done && <Check size={12} strokeWidth={3} />}
               </span>
               <span
                 className={clsx(
@@ -1541,7 +1536,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
       {/* Next actions nudge */}
       {data.next_actions.length > 0 && (
         <div className="mt-3 flex flex-col gap-1 border-t border-border-light pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
-          <span className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+          <span className="oe-overline">
             {t('cde.readiness_next', { defaultValue: 'Next' })}
           </span>
           {data.next_actions.map((a, i) => (
@@ -1980,7 +1975,7 @@ export function CDEPage() {
       {projectId && stats && stats.total > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('cde.stat_total', { defaultValue: 'Total containers' })}
             </span>
             <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
@@ -1988,7 +1983,7 @@ export function CDEPage() {
             </span>
           </div>
           <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('cde.state_wip', { defaultValue: 'WIP' })}
             </span>
             <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
@@ -1996,7 +1991,7 @@ export function CDEPage() {
             </span>
           </div>
           <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('cde.state_shared', { defaultValue: 'Shared' })}
             </span>
             <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
@@ -2004,7 +1999,7 @@ export function CDEPage() {
             </span>
           </div>
           <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('cde.state_published', { defaultValue: 'Published' })}
             </span>
             <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
@@ -2012,7 +2007,7 @@ export function CDEPage() {
             </span>
           </div>
           <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+            <span className="oe-overline">
               {t('cde.state_archived', { defaultValue: 'Archived' })}
             </span>
             <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
@@ -2130,7 +2125,7 @@ export function CDEPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
+              <div className="oe-overline flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-36">
                   {t('cde.col_code', { defaultValue: 'Code' })}

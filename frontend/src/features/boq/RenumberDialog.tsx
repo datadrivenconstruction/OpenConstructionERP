@@ -224,7 +224,7 @@ export function RenumberDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-card-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-card-in"
       onClick={() => !isApplying && onClose()}
       role="dialog"
       aria-modal="true"
@@ -238,12 +238,12 @@ export function RenumberDialog({
         <div className="relative px-5 py-4 bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 dark:from-sky-950/50 dark:via-blue-950/40 dark:to-cyan-950/30 border-b border-border">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-blue-500/40">
-              <ListOrdered size={18} strokeWidth={2.5} />
+              <ListOrdered size={20} strokeWidth={2.5} />
             </div>
             <div className="flex-1 min-w-0">
               <h2
                 id="renumber-dialog-title"
-                className="text-base font-semibold text-content-primary"
+                className="oe-section-title"
               >
                 {t('boq.renumber_dialog_title', { defaultValue: 'Renumber positions' })}
               </h2>
@@ -267,7 +267,7 @@ export function RenumberDialog({
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {/* Scheme cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {SCHEMES.map((s) => {
               const Icon = s.icon;
               const isSelected = scheme === s.id;
@@ -283,7 +283,7 @@ export function RenumberDialog({
                       : 'border-border bg-surface-primary hover:border-semantic-info/30 hover:bg-surface-secondary/40'
                   }`}
                 >
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-2">
                     <div
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
                         isSelected
@@ -326,7 +326,7 @@ export function RenumberDialog({
                     </div>
                     {isSelected && (
                       <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-semantic-info text-white shadow-sm">
-                        <Check size={11} strokeWidth={3} />
+                        <Check size={12} strokeWidth={3} />
                       </div>
                     )}
                   </div>
@@ -337,7 +337,7 @@ export function RenumberDialog({
 
           {/* Custom start + step (only for the Custom scheme) */}
           {scheme === 'custom' && (
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               <label className="rounded-xl border border-border bg-surface-primary px-3 py-2.5 block">
                 <div className="text-2xs font-medium text-content-secondary mb-1">
                   {t('boq.renumber_custom_start', { defaultValue: 'Start number' })}
@@ -400,7 +400,7 @@ export function RenumberDialog({
           {/* Live preview */}
           <div className="rounded-xl border border-border bg-surface-primary overflow-hidden">
             <div className="px-3 py-2 border-b border-border bg-surface-secondary/40">
-              <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <div className="oe-overline">
                 {t('boq.renumber_preview', { defaultValue: 'Preview (first 5 positions)' })}
               </div>
             </div>
@@ -435,7 +435,7 @@ export function RenumberDialog({
               size={14}
               className="shrink-0 mt-0.5 text-semantic-warning"
             />
-            <p className="text-2xs leading-snug text-amber-800/90 dark:text-amber-200/90">
+            <p className="text-2xs leading-snug text-semantic-warning">
               {t('boq.renumber_warning', {
                 defaultValue:
                   'This overwrites any manually edited position numbers. The current display order is preserved - only ordinals change.',

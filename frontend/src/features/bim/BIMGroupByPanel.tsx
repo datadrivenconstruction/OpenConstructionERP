@@ -234,7 +234,7 @@ export default function BIMGroupByPanel({
   }, [tree, exportLabels, nested, fileBase, t]);
 
   const selectClass =
-    'w-full min-w-0 text-2xs py-1 px-1.5 rounded border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
+    'oe-select-sm w-full min-w-0';
 
   const keyOptions = (
     <>
@@ -322,7 +322,7 @@ export default function BIMGroupByPanel({
     >
       <div className="px-3 pt-2.5 pb-2 space-y-1.5 bg-surface-secondary">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <h3 className="oe-overline">
             {t('bim.groupby.title', { defaultValue: 'Group by' })}
           </h3>
           <span className="text-2xs text-content-tertiary tabular-nums">
@@ -388,7 +388,7 @@ export default function BIMGroupByPanel({
             }`}
             data-testid="bim-groupby-colour"
           >
-            <Palette size={11} />
+            <Palette size={12} />
             {t('bim.groupby.colour_by_group', { defaultValue: 'Colour by group' })}
           </button>
           <button
@@ -397,7 +397,7 @@ export default function BIMGroupByPanel({
             disabled={tree.length === 0}
             className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
           >
-            <Download size={11} />
+            <Download size={12} />
             CSV
           </button>
           <button
@@ -406,7 +406,7 @@ export default function BIMGroupByPanel({
             disabled={tree.length === 0}
             className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
           >
-            <FileSpreadsheet size={11} />
+            <FileSpreadsheet size={12} />
             Excel
           </button>
           {activeId && (
@@ -419,7 +419,7 @@ export default function BIMGroupByPanel({
               }}
               className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
             >
-              <Eye size={11} />
+              <Eye size={12} />
               {t('bim.groupby.show_all', { defaultValue: 'Show all' })}
             </button>
           )}

@@ -101,14 +101,14 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
           role="menu"
           aria-label={aria}
           className={clsx(
-            'absolute right-0 top-[calc(100%+6px)] z-50 w-72 max-w-[86vw]',
+            'absolute right-0 top-[calc(100%+6px)] z-dropdown w-72 max-w-[86vw]',
             'rounded-xl border border-border-light bg-surface-primary shadow-xl p-2',
             'animate-card-in',
           )}
           onMouseEnter={openNow}
           onMouseLeave={scheduleClose}
         >
-          <p className="px-2 pt-1 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+          <p className="oe-overline px-2 pt-1 pb-1.5">
             {t('cases_for_module.heading', {
               defaultValue: 'Playbooks that use this module',
             })}
@@ -135,7 +135,7 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
                     </span>
                   </span>
                   <ArrowRight
-                    size={13}
+                    size={14}
                     className="shrink-0 mt-0.5 text-content-quaternary group-hover:text-semantic-success transition-colors"
                     aria-hidden
                   />

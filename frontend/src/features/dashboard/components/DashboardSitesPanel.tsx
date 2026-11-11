@@ -92,7 +92,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
                 : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'
             }`}
           >
-            <CloudSun size={11} />
+            <CloudSun size={12} />
             {t('widget_settings.weather', { defaultValue: 'Weather' })}
           </button>
           <span className="text-2xs tabular-nums text-content-tertiary">{groups.length}</span>
@@ -113,7 +113,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
             >
               <span className="flex items-center gap-1.5">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue">
-                  <MapPin size={11} />
+                  <MapPin size={12} />
                 </span>
                 <span className="truncate text-xs font-semibold text-content-primary">{city}</span>
                 {rows.length > 1 && (

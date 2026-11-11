@@ -47,15 +47,15 @@ function SummaryTable({ summary, groupHeader }: { summary: QuantitySummary; grou
   const conv = (value: number, i: number) =>
     dq.convert(value, QUANTITY_FIELDS[i]?.unit ?? '').value;
   return (
-    <table className="w-full text-2xs border-collapse">
+    <table className="oe-table-compact w-full text-2xs">
       <thead>
-        <tr className="bg-surface-secondary">
-          <th className="border border-border-light px-2 py-1 text-left">{groupHeader}</th>
-          <th className="border border-border-light px-2 py-1 text-right">
+        <tr>
+          <th>{groupHeader}</th>
+          <th className="text-right">
             {t('bim.report.count', { defaultValue: 'Count' })}
           </th>
           {QUANTITY_FIELDS.map((f) => (
-            <th key={f.key} className="border border-border-light px-2 py-1 text-right">
+            <th key={f.key} className="text-right">
               {f.label} ({dq.unitFor(f.unit)})
             </th>
           ))}
@@ -64,10 +64,10 @@ function SummaryTable({ summary, groupHeader }: { summary: QuantitySummary; grou
       <tbody>
         {summary.rows.map((r) => (
           <tr key={r.key}>
-            <td className="border border-border-light px-2 py-1">{r.key}</td>
-            <td className="border border-border-light px-2 py-1 text-right tabular-nums">{fmt(r.count)}</td>
+            <td>{r.key}</td>
+            <td className="text-right tabular-nums">{fmt(r.count)}</td>
             {r.quantities.map((q, i) => (
-              <td key={i} className="border border-border-light px-2 py-1 text-right tabular-nums">
+              <td key={i} className="text-right tabular-nums">
                 {fmt(conv(q, i))}
               </td>
             ))}
@@ -75,15 +75,15 @@ function SummaryTable({ summary, groupHeader }: { summary: QuantitySummary; grou
         ))}
       </tbody>
       <tfoot>
-        <tr className="bg-surface-secondary font-semibold">
-          <td className="border border-border-light px-2 py-1">
+        <tr>
+          <td>
             {t('bim.report.total', { defaultValue: 'TOTAL' })}
           </td>
-          <td className="border border-border-light px-2 py-1 text-right tabular-nums">
+          <td className="text-right tabular-nums">
             {fmt(summary.totals.count)}
           </td>
           {summary.totals.quantities.map((q, i) => (
-            <td key={i} className="border border-border-light px-2 py-1 text-right tabular-nums">
+            <td key={i} className="text-right tabular-nums">
               {fmt(conv(q, i))}
             </td>
           ))}
@@ -211,7 +211,7 @@ export default function BIMFilterReportModal({
       ) : (
         <div className="flex flex-col gap-5">
           <section>
-            <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide mb-1.5">
+            <h3 className="oe-overline mb-1.5">
               {t('bim.report.by_type', { defaultValue: 'By element type' })}
             </h3>
             <SummaryTable
@@ -220,7 +220,7 @@ export default function BIMFilterReportModal({
             />
           </section>
           <section>
-            <h3 className="text-xs font-semibold text-content-primary uppercase tracking-wide mb-1.5">
+            <h3 className="oe-overline mb-1.5">
               {t('bim.report.by_storey', { defaultValue: 'By storey' })}
             </h3>
             <SummaryTable

@@ -277,7 +277,7 @@ function AddToBoqDialog({ row, onClose }: { row: EstimateRow; onClose: () => voi
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -289,7 +289,7 @@ function AddToBoqDialog({ row, onClose }: { row: EstimateRow; onClose: () => voi
       >
         <div className="flex items-start justify-between gap-3 border-b border-border-light px-5 py-4">
           <div className="min-w-0">
-            <h2 id="ce-add-boq-title" className="text-sm font-semibold text-content-primary">
+            <h2 id="ce-add-boq-title" className="oe-card-title">
               {t('costExplorer.addToBoq.title', { defaultValue: 'Add to a BOQ' })}
             </h2>
             <p className="mt-0.5 truncate text-xs text-content-tertiary">
@@ -311,7 +311,7 @@ function AddToBoqDialog({ row, onClose }: { row: EstimateRow; onClose: () => voi
           <div>
             <label
               htmlFor="ce-add-boq-project"
-              className="mb-1 block text-xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('costExplorer.addToBoq.project', { defaultValue: 'Project' })}
             </label>
@@ -340,7 +340,7 @@ function AddToBoqDialog({ row, onClose }: { row: EstimateRow; onClose: () => voi
           <div>
             <label
               htmlFor="ce-add-boq-boq"
-              className="mb-1 block text-xs font-medium text-content-secondary"
+              className="oe-label"
             >
               {t('costExplorer.addToBoq.boq', { defaultValue: 'BOQ' })}
             </label>

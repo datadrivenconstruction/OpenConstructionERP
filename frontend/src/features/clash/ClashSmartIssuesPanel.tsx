@@ -194,7 +194,7 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <ListChecks className="h-4 w-4 text-content-tertiary" />
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('clash.issues.title', { defaultValue: 'Smart issues' })}
           </h3>
           {!issuesQuery.isLoading && !issuesQuery.isError && (
@@ -278,29 +278,29 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table w-full">
               <thead>
-                <tr className="text-left text-content-tertiary text-xs uppercase tracking-wide">
-                  <th className="py-2 pr-3 font-medium">
+                <tr className="text-left">
+                  <th className="pr-3">
                     {t('clash.issues.col_issue', { defaultValue: 'Issue' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th className="pr-3">
                     {t('clash.issues.col_status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th className="pr-3">
                     {t('clash.issues.col_priority', {
                       defaultValue: 'Priority',
                     })}
                   </th>
-                  <th className="py-2 pr-3 font-medium text-right">
+                  <th className="pr-3 text-right">
                     {t('clash.issues.col_members', { defaultValue: 'Clashes' })}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
+                  <th className="pr-3">
                     {t('clash.issues.col_last_seen', {
                       defaultValue: 'Last seen',
                     })}
                   </th>
-                  <th className="py-2 font-medium text-right">
+                  <th className="text-right">
                     {t('clash.issues.col_actions', { defaultValue: 'Actions' })}
                   </th>
                 </tr>
@@ -315,7 +315,7 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
                       className="border-t border-border align-top"
                       data-testid={`clash-issue-row-${issue.id}`}
                     >
-                      <td className="py-2.5 pr-3">
+                      <td className="pr-3">
                         <div className="font-medium text-content-primary">
                           {issue.server_assigned_id ||
                             t('clash.issues.unlabelled', {
@@ -398,12 +398,12 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
                           </div>
                         )}
                       </td>
-                      <td className="py-2.5 pr-3">
+                      <td className="pr-3">
                         <Badge variant={STATUS_VARIANT[issue.status]} size="sm">
                           {statusLabel(issue.status)}
                         </Badge>
                       </td>
-                      <td className="py-2.5 pr-3">
+                      <td className="pr-3">
                         <Badge
                           variant={PRIORITY_VARIANT[issue.priority]}
                           size="sm"
@@ -411,13 +411,13 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
                           <span className="capitalize">{issue.priority}</span>
                         </Badge>
                       </td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums">
+                      <td className="pr-3 text-right tabular-nums">
                         {issue.member_count}
                       </td>
-                      <td className="py-2.5 pr-3 text-content-secondary">
+                      <td className="pr-3 text-content-secondary">
                         <DateDisplay value={issue.updated_at} format="relative" />
                       </td>
-                      <td className="py-2.5 text-right">
+                      <td className="text-right">
                         {suppressed ? (
                           <Button
                             variant="secondary"

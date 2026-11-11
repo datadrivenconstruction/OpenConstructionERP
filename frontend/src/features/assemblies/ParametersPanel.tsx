@@ -211,7 +211,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
         <div className="flex items-center gap-2 min-w-0">
           <Calculator size={16} className="text-oe-blue shrink-0" />
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('assembly.params.title', { defaultValue: 'Parameters' })}
             </h3>
             <p className="text-xs text-content-tertiary leading-snug">
@@ -249,7 +249,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
       ) : (
         <div className="space-y-2 border-t border-border-light pt-3">
           {/* Column labels (>= lg) */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.4fr)_120px_minmax(0,1.8fr)_84px_minmax(0,1.6fr)_32px] gap-2 px-0.5 text-2xs uppercase tracking-wider text-content-tertiary font-semibold">
+          <div className="oe-overline hidden lg:grid lg:grid-cols-[minmax(0,1.4fr)_120px_minmax(0,1.8fr)_84px_minmax(0,1.6fr)_32px] gap-2 px-0.5">
             <span>{t('assembly.params.col_name', { defaultValue: 'Name' })}</span>
             <span>{t('assembly.params.col_kind', { defaultValue: 'Kind' })}</span>
             <span>{t('assembly.params.col_value', { defaultValue: 'Value / formula' })}</span>
@@ -313,7 +313,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
                 value={d.unit}
                 onChange={(e) => patchDraft(d._id, { unit: e.target.value })}
                 placeholder={t('assembly.params.unit_ph', { defaultValue: 'unit' })}
-                className={fieldClass}
+                className="oe-input w-full"
                 aria-label={t('assembly.params.col_unit', { defaultValue: 'Unit' })}
               />
               <input
@@ -321,7 +321,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
                 value={d.description}
                 onChange={(e) => patchDraft(d._id, { description: e.target.value })}
                 placeholder={t('assembly.params.desc_ph', { defaultValue: 'Optional note' })}
-                className={fieldClass}
+                className="oe-input w-full"
                 aria-label={t('assembly.params.col_desc', { defaultValue: 'Description' })}
               />
               <button
@@ -343,14 +343,14 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
         <div className="mt-4 pt-3 border-t border-border-light">
           {validation.isLoading ? (
             <div className="flex items-center gap-2 text-xs text-content-tertiary">
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
               {t('assembly.params.checking', { defaultValue: 'Checking parameters…' })}
             </div>
           ) : validation.data ? (
             <div className="space-y-2">
               {validation.data.ok ? (
                 <div className="flex items-center gap-1.5 text-xs font-medium text-semantic-success">
-                  <CheckCircle2 size={13} />
+                  <CheckCircle2 size={14} />
                   {t('assembly.params.ok', { defaultValue: 'Parameters resolve cleanly' })}
                 </div>
               ) : (
@@ -365,7 +365,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
                         key={`${err.scope}-${err.name}-${err.code}-${i}`}
                         className="flex items-start gap-1.5 text-xs text-semantic-error"
                       >
-                        <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                         <span>
                           {err.name && (
                             <span className="font-mono font-semibold">{err.name}</span>
@@ -381,7 +381,7 @@ export function ParametersPanel({ assemblyId, parameters }: ParametersPanelProps
 
               {resolvedEntries.length > 0 && (
                 <div>
-                  <div className="text-2xs uppercase tracking-wider text-content-tertiary font-semibold mb-1">
+                  <div className="oe-overline mb-1">
                     {t('assembly.params.resolved_title', { defaultValue: 'Resolved defaults' })}
                   </div>
                   <div className="flex flex-wrap gap-1.5">

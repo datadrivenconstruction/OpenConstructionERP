@@ -108,14 +108,14 @@ export function AssessmentModal({
   const canSave = elementName.trim().length > 0 && rating !== null && !saveMut.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-surface-elevated shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
-          <h3 className="text-base font-semibold text-content-primary">
+          <h3 className="oe-section-title">
             {t('condition.new_rating', { defaultValue: 'Record condition' })}
           </h3>
           <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
-            <X size={18} className="text-content-tertiary" />
+            <X size={20} className="text-content-tertiary" />
           </button>
         </div>
         <div className="grid gap-3 p-5 sm:grid-cols-2">
@@ -123,7 +123,7 @@ export function AssessmentModal({
             {t('condition.element', { defaultValue: 'Asset or element' })} *
             <input className={inputCls + ' mt-1'} value={elementName} onChange={(e) => setElementName(e.target.value)} data-testid="condition-element" />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.asset_kind', { defaultValue: 'Linked to' })}
             <select className={inputCls + ' mt-1'} value={assetKind} onChange={(e) => setAssetKind(e.target.value as AssetKind)}>
               <option value="element">{t('condition.kind_element', { defaultValue: 'Building element' })}</option>
@@ -131,15 +131,15 @@ export function AssessmentModal({
               <option value="plant_item">{t('condition.kind_plant', { defaultValue: 'Plant item' })}</option>
             </select>
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.asset_ref', { defaultValue: 'Reference (id or tag)' })}
             <input className={inputCls + ' mt-1'} value={assetRef} onChange={(e) => setAssetRef(e.target.value)} />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.area', { defaultValue: 'Area' })}
             <input className={inputCls + ' mt-1'} value={area} onChange={(e) => setArea(e.target.value)} />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.scale', { defaultValue: 'Scale' })}
             <select className={inputCls + ' mt-1'} value={scaleKey} onChange={(e) => setScaleKey(e.target.value)}>
               {(scalesQ.data ?? []).map((s) => (
@@ -154,7 +154,7 @@ export function AssessmentModal({
             <legend className="px-1 text-xs font-semibold text-content-tertiary">
               {t('condition.defect_record', { defaultValue: 'Defect record' })}
             </legend>
-            <label className="text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('condition.severity', { defaultValue: 'Severity' })}
               <select className={inputCls + ' mt-1'} value={severity} onChange={(e) => setSeverity(e.target.value)} data-testid="condition-severity">
                 <option value="">-</option>
@@ -165,11 +165,11 @@ export function AssessmentModal({
                 ))}
               </select>
             </label>
-            <label className="text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('condition.extent', { defaultValue: 'Extent affected (%)' })}
               <input type="number" min={0} max={100} className={inputCls + ' mt-1'} value={extent} onChange={(e) => setExtent(e.target.value)} />
             </label>
-            <label className="text-xs font-medium text-content-secondary">
+            <label className="oe-label">
               {t('condition.intensity', { defaultValue: 'Intensity' })}
               <select className={inputCls + ' mt-1'} value={intensity} onChange={(e) => setIntensity(e.target.value)}>
                 <option value="">-</option>
@@ -182,7 +182,7 @@ export function AssessmentModal({
             </label>
             <label className="text-xs font-medium text-content-secondary sm:col-span-3">
               {t('condition.defect_description', { defaultValue: 'What was found' })}
-              <textarea className={inputCls + ' mt-1 h-16 py-2'} value={defect} onChange={(e) => setDefect(e.target.value)} />
+              <textarea className={inputCls + ' mt-1'} value={defect} onChange={(e) => setDefect(e.target.value)} />
             </label>
           </fieldset>
 
@@ -190,7 +190,7 @@ export function AssessmentModal({
             <p className="mb-1 text-xs font-medium text-content-secondary">{t('condition.rating', { defaultValue: 'Rating' })} *</p>
             {suggestion?.rating && (
               <div className="mb-2 flex items-center gap-2 rounded-lg bg-oe-blue/5 px-3 py-2 text-xs text-content-secondary" data-testid="condition-suggestion">
-                <Sparkles size={13} className="text-oe-blue" />
+                <Sparkles size={14} className="text-oe-blue" />
                 {t('condition.suggested', {
                   defaultValue: 'Suggested from the defect record: {{rating}} (confidence {{confidence}})',
                   rating: suggestion.rating,
@@ -220,20 +220,20 @@ export function AssessmentModal({
             </div>
           </div>
 
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.quantity', { defaultValue: 'Quantity of the element' })}
             <input inputMode="decimal" className={inputCls + ' mt-1'} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.unit', { defaultValue: 'Unit' })}
             <input className={inputCls + ' mt-1'} value={unit} onChange={(e) => setUnit(e.target.value)} />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.unit_cost', { defaultValue: 'Unit cost of the work' })}
             {currency ? ` (${currency})` : ''}
             <input inputMode="decimal" className={inputCls + ' mt-1'} value={unitCost} onChange={(e) => setUnitCost(e.target.value)} />
           </label>
-          <label className="text-xs font-medium text-content-secondary">
+          <label className="oe-label">
             {t('condition.assessed_at', { defaultValue: 'Assessed on' })}
             <input type="date" className={inputCls + ' mt-1'} value={assessedAt} onChange={(e) => setAssessedAt(e.target.value)} />
           </label>

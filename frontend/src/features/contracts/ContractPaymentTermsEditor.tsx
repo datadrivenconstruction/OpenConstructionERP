@@ -45,7 +45,7 @@ import {
 const CURRENT_SPLIT = '__current__';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'w-full';
 
 interface TermsForm {
   retention_percent: string;
@@ -179,7 +179,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
             onChange={(e) => set('retention_percent', e.target.value)}
             onFocus={(e) => e.currentTarget.select()}
             data-testid="edit-retention-percent"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </Labelled>
         <Labelled
@@ -196,7 +196,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
             onChange={(e) => set('retention_cap_percent', e.target.value)}
             placeholder={t('contracts.payment_terms.no_cap', { defaultValue: 'No cap' })}
             data-testid="edit-retention-cap"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </Labelled>
         <div className="col-span-2">
@@ -205,7 +205,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
               value={form.retention_release_split}
               onChange={(e) => set('retention_release_split', e.target.value)}
               data-testid="edit-release-split"
-              className={inputCls}
+              className={`oe-select ${inputCls}`}
             >
               <option value="">
                 {packSplit && packSplit.length > 0
@@ -237,7 +237,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
             value={form.payment_period_days}
             onChange={(e) => set('payment_period_days', e.target.value)}
             data-testid="edit-payment-days"
-            className={inputCls}
+            className={`oe-input ${inputCls}`}
           />
         </Labelled>
         <Labelled
@@ -247,7 +247,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
             value={form.valuation_interval}
             onChange={(e) => set('valuation_interval', e.target.value)}
             data-testid="edit-valuation-interval"
-            className={inputCls}
+            className={`oe-select ${inputCls}`}
           >
             <option value="">{t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}</option>
             {VALUATION_INTERVALS.map((interval) => (
@@ -266,7 +266,7 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
               onChange={(e) => set('certificate_name', e.target.value)}
               maxLength={200}
               data-testid="edit-certificate-name"
-              className={inputCls}
+              className={`oe-input ${inputCls}`}
             />
           </Labelled>
         </div>

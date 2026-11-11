@@ -149,7 +149,7 @@ export function AddFromBoqModal({
               setSelected(new Set());
             }}
             aria-label={t('bid_management.boq_select', { defaultValue: 'Bill of quantities' })}
-            className="w-full rounded border border-border-light px-2 py-1 text-sm"
+            className="oe-select-sm w-full"
           >
             {(boqsQ.data ?? []).map((b) => (
               <option key={b.id} value={b.id}>
@@ -168,7 +168,7 @@ export function AddFromBoqModal({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('bid_management.boq_search', { defaultValue: 'Search positions' })}
-            className="w-full rounded border border-border-light py-1 pl-8 pr-2 text-sm"
+            className="oe-input-sm w-full pl-8 pr-2"
           />
         </div>
         {boqsQ.isSuccess && (boqsQ.data?.length ?? 0) === 0 ? (

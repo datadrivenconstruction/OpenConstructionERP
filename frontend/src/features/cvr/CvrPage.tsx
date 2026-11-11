@@ -273,44 +273,44 @@ function LinesTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm">
+      <table className="oe-table w-full min-w-[720px]">
         <thead>
-          <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-            <th className="py-2 pr-3 font-medium">{t('cvr.col_code', { defaultValue: 'Code' })}</th>
-            <th className="py-2 pr-3 font-medium">{t('cvr.col_description', { defaultValue: 'Description' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_cost_to_date', { defaultValue: 'Cost to date' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_value_to_date', { defaultValue: 'Value to date' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_forecast_cost', { defaultValue: 'Forecast cost' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_forecast_value', { defaultValue: 'Forecast value' })}</th>
-            <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_margin', { defaultValue: 'Margin' })}</th>
-            {canEdit && <th className="py-2 pl-1" />}
+          <tr className="text-left text-2xs">
+            <th className="pr-3">{t('cvr.col_code', { defaultValue: 'Code' })}</th>
+            <th className="pr-3">{t('cvr.col_description', { defaultValue: 'Description' })}</th>
+            <th className="pr-3 text-right">{t('cvr.col_cost_to_date', { defaultValue: 'Cost to date' })}</th>
+            <th className="pr-3 text-right">{t('cvr.col_value_to_date', { defaultValue: 'Value to date' })}</th>
+            <th className="pr-3 text-right">{t('cvr.col_forecast_cost', { defaultValue: 'Forecast cost' })}</th>
+            <th className="pr-3 text-right">{t('cvr.col_forecast_value', { defaultValue: 'Forecast value' })}</th>
+            <th className="pr-3 text-right">{t('cvr.col_margin', { defaultValue: 'Margin' })}</th>
+            {canEdit && <th className="pl-1" />}
           </tr>
         </thead>
         <tbody>
           {lines.map((line) => {
             const marginPositive = toNum(line.margin_to_date) >= 0;
             return (
-              <tr key={line.id} className="border-b border-border-light/60 hover:bg-surface-secondary/40">
-                <td className="py-2 pr-3 font-medium text-content-primary">{line.cost_code || '-'}</td>
-                <td className="py-2 pr-3 text-content-secondary">
+              <tr key={line.id}>
+                <td className="pr-3 font-medium">{line.cost_code || '-'}</td>
+                <td className="pr-3 text-content-secondary">
                   <span className="inline-flex items-center gap-1.5">
                     {line.description || '-'}
                     {line.flags.length > 0 && (
                       <span title={fmtList(line.flags)}>
-                        <AlertTriangle size={13} className="text-semantic-warning" />
+                        <AlertTriangle size={14} className="text-semantic-warning" />
                       </span>
                     )}
                   </span>
                 </td>
-                <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.cost_to_date, currency)}</td>
-                <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.value_to_date, currency)}</td>
-                <td className="py-2 pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.forecast_cost, currency)}</td>
-                <td className="py-2 pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.forecast_value, currency)}</td>
-                <td className={'py-2 pr-3 text-right font-semibold tabular-nums ' + (marginPositive ? 'text-semantic-success' : 'text-semantic-error')}>
+                <td className="pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.cost_to_date, currency)}</td>
+                <td className="pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.value_to_date, currency)}</td>
+                <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.forecast_cost, currency)}</td>
+                <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.forecast_value, currency)}</td>
+                <td className={'pr-3 text-right font-semibold tabular-nums ' + (marginPositive ? 'text-semantic-success' : 'text-semantic-error')}>
                   {formatCurrency(line.margin_to_date, currency)}
                 </td>
                 {canEdit && (
-                  <td className="py-2 pl-1 text-right">
+                  <td className="pl-1 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
@@ -337,13 +337,13 @@ function LinesTable({
         </tbody>
         {summary && (
           <tfoot>
-            <tr className="border-t-2 border-border-light font-semibold text-content-primary">
-              <td className="py-2 pr-3" colSpan={2}>{t('cvr.totals', { defaultValue: 'Totals' })}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(summary.total_cost_to_date, currency)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(summary.total_value_to_date, currency)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(summary.total_forecast_cost, currency)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(summary.total_forecast_value, currency)}</td>
-              <td className={'py-2 pr-3 text-right tabular-nums ' + (toNum(summary.margin_to_date) >= 0 ? 'text-semantic-success' : 'text-semantic-error')}>
+            <tr>
+              <td className="pr-3" colSpan={2}>{t('cvr.totals', { defaultValue: 'Totals' })}</td>
+              <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_cost_to_date, currency)}</td>
+              <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_value_to_date, currency)}</td>
+              <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_forecast_cost, currency)}</td>
+              <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_forecast_value, currency)}</td>
+              <td className={'pr-3 text-right tabular-nums ' + (toNum(summary.margin_to_date) >= 0 ? 'text-semantic-success' : 'text-semantic-error')}>
                 {formatCurrency(summary.margin_to_date, currency)}
               </td>
               {canEdit && <td />}
@@ -710,11 +710,11 @@ export function CvrPage() {
         <Card padding="md">
           <div className="flex flex-wrap items-end gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">{t('cvr.period', { defaultValue: 'Period (YYYY-MM)' })}</label>
+              <label className="oe-label">{t('cvr.period', { defaultValue: 'Period (YYYY-MM)' })}</label>
               <input className={INPUT_CLS} value={newPeriod} onChange={(e) => setNewPeriod(e.target.value)} placeholder="2026-06" />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-content-secondary">{t('cvr.currency', { defaultValue: 'Currency' })}</label>
+              <label className="oe-label">{t('cvr.currency', { defaultValue: 'Currency' })}</label>
               <input className={INPUT_CLS} value={newCurrency} onChange={(e) => setNewCurrency(e.target.value.toUpperCase())} placeholder="USD" maxLength={3} />
             </div>
             <Button variant="primary" size="sm" disabled={createReportMut.isPending || !/^\d{4}-\d{2}$/.test(newPeriod)} onClick={() => createReportMut.mutate()}>
@@ -813,7 +813,7 @@ export function CvrPage() {
           {/* CVR table */}
           <Card padding="md">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('cvr.cost_heads', { defaultValue: 'Cost heads' })}
               </h2>
               <div className="flex flex-wrap items-center gap-1">
@@ -858,7 +858,7 @@ export function CvrPage() {
       {/* Cashflow S-curve (project-scoped) */}
       <Card padding="md">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-content-primary">{t('cvr.cashflow', { defaultValue: 'Cashflow forecast' })}</h2>
+          <h2 className="oe-card-title">{t('cvr.cashflow', { defaultValue: 'Cashflow forecast' })}</h2>
           {cashflow && (
             <div className="text-xs text-content-tertiary">
               {t('cvr.net_position', { defaultValue: 'Net position' })}:{' '}
@@ -875,7 +875,7 @@ export function CvrPage() {
 
       {/* Payment applications (project-scoped) */}
       <Card padding="md">
-        <h2 className="mb-3 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-3">
           {t('cvr.payment_applications', { defaultValue: 'Payment applications' })}
         </h2>
         <PaymentApplicationsSection
@@ -957,7 +957,7 @@ function EditLineDrawer({
 
   const field = (label: string, key: keyof typeof form, decimal = false) => (
     <div>
-      <label className="mb-1 block text-xs font-medium text-content-secondary">{label}</label>
+      <label className="oe-label">{label}</label>
       <input
         className={INPUT_CLS}
         inputMode={decimal ? 'decimal' : undefined}
@@ -1104,18 +1104,18 @@ function CashflowPointsTable({
 
   return (
     <div className="mt-4">
-      <div className="mb-2 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+      <div className="oe-overline mb-2">
         {t('cvr.cashflow_points', { defaultValue: 'Recorded points' })}
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-sm">
+        <table className="oe-table w-full min-w-[520px]">
           <thead>
-            <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-              <th className="py-2 pr-3 font-medium">{t('cvr.col_period', { defaultValue: 'Period' })}</th>
-              <th className="py-2 pr-3 text-right font-medium">{t('cvr.cash_in', { defaultValue: 'Cash in' })}</th>
-              <th className="py-2 pr-3 text-right font-medium">{t('cvr.cash_out', { defaultValue: 'Cash out' })}</th>
-              <th className="py-2 pr-3 text-right font-medium">{t('cvr.point_net', { defaultValue: 'Net' })}</th>
-              <th className="py-2 pl-1" />
+            <tr className="text-left text-2xs">
+              <th className="pr-3">{t('cvr.col_period', { defaultValue: 'Period' })}</th>
+              <th className="pr-3 text-right">{t('cvr.cash_in', { defaultValue: 'Cash in' })}</th>
+              <th className="pr-3 text-right">{t('cvr.cash_out', { defaultValue: 'Cash out' })}</th>
+              <th className="pr-3 text-right">{t('cvr.point_net', { defaultValue: 'Net' })}</th>
+              <th className="pl-1" />
             </tr>
           </thead>
           <tbody>
@@ -1125,11 +1125,11 @@ function CashflowPointsTable({
                 ? toNum(draft.cash_in) - toNum(draft.cash_out)
                 : toNum(p.net);
               return (
-                <tr key={p.id} className="border-b border-border-light/60">
-                  <td className="py-2 pr-3 text-content-secondary">{p.period}</td>
+                <tr key={p.id}>
+                  <td className="pr-3 text-content-secondary">{p.period}</td>
                   {editing ? (
                     <>
-                      <td className="py-1 pr-3">
+                      <td className="pr-3">
                         <input
                           className={INPUT_CLS + ' text-right'}
                           inputMode="decimal"
@@ -1138,7 +1138,7 @@ function CashflowPointsTable({
                           aria-label={t('cvr.cash_in', { defaultValue: 'Cash in' })}
                         />
                       </td>
-                      <td className="py-1 pr-3">
+                      <td className="pr-3">
                         <input
                           className={INPUT_CLS + ' text-right'}
                           inputMode="decimal"
@@ -1150,14 +1150,14 @@ function CashflowPointsTable({
                     </>
                   ) : (
                     <>
-                      <td className="py-2 pr-3 text-right tabular-nums text-semantic-success">{formatCurrency(p.cash_in, p.currency)}</td>
-                      <td className="py-2 pr-3 text-right tabular-nums text-semantic-error">{formatCurrency(p.cash_out, p.currency)}</td>
+                      <td className="pr-3 text-right tabular-nums text-semantic-success">{formatCurrency(p.cash_in, p.currency)}</td>
+                      <td className="pr-3 text-right tabular-nums text-semantic-error">{formatCurrency(p.cash_out, p.currency)}</td>
                     </>
                   )}
-                  <td className={'py-2 pr-3 text-right font-semibold tabular-nums ' + (netPreview >= 0 ? 'text-content-primary' : 'text-semantic-error')}>
+                  <td className={'pr-3 text-right font-semibold tabular-nums ' + (netPreview >= 0 ? '' : 'text-semantic-error')}>
                     {formatCurrency(netPreview, p.currency)}
                   </td>
-                  <td className="py-2 pl-1 text-right">
+                  <td className="pl-1 text-right">
                     {editing ? (
                       <div className="flex items-center justify-end gap-1">
                         <Button
@@ -1322,22 +1322,22 @@ function PaymentApplicationsSection({
         />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] text-sm">
+          <table className="oe-table w-full min-w-[620px]">
             <thead>
-              <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
-                <th className="py-2 pr-3 font-medium">{t('cvr.col_application', { defaultValue: 'Application' })}</th>
-                <th className="py-2 pr-3 font-medium">{t('cvr.col_period', { defaultValue: 'Period' })}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_gross', { defaultValue: 'Gross' })}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_retention', { defaultValue: 'Retention' })}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('cvr.col_net', { defaultValue: 'Net due' })}</th>
-                <th className="py-2 pr-3 font-medium">{t('cvr.col_status', { defaultValue: 'Status' })}</th>
-                <th className="py-2 pl-1" />
+              <tr className="text-left text-2xs">
+                <th className="pr-3">{t('cvr.col_application', { defaultValue: 'Application' })}</th>
+                <th className="pr-3">{t('cvr.col_period', { defaultValue: 'Period' })}</th>
+                <th className="pr-3 text-right">{t('cvr.col_gross', { defaultValue: 'Gross' })}</th>
+                <th className="pr-3 text-right">{t('cvr.col_retention', { defaultValue: 'Retention' })}</th>
+                <th className="pr-3 text-right">{t('cvr.col_net', { defaultValue: 'Net due' })}</th>
+                <th className="pr-3">{t('cvr.col_status', { defaultValue: 'Status' })}</th>
+                <th className="pl-1" />
               </tr>
             </thead>
             <tbody>
               {applications.map((app) => (
-                <tr key={app.id} className="border-b border-border-light/60">
-                  <td className="py-2 pr-3 font-medium text-content-primary">
+                <tr key={app.id}>
+                  <td className="pr-3 font-medium">
                     {app.application_number || '-'}
                     {app.progress_claim_id && claimLabelById.has(app.progress_claim_id) && (
                       <div className="text-2xs font-normal text-content-tertiary">
@@ -1348,19 +1348,18 @@ function PaymentApplicationsSection({
                       </div>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-content-secondary">{app.period}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(app.gross_value, app.currency)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(app.retention, app.currency)}</td>
-                  <td className="py-2 pr-3 text-right font-semibold tabular-nums text-content-primary">{formatCurrency(app.net_value, app.currency)}</td>
-                  <td className="py-2 pr-3">
+                  <td className="pr-3 text-content-secondary">{app.period}</td>
+                  <td className="pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(app.gross_value, app.currency)}</td>
+                  <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(app.retention, app.currency)}</td>
+                  <td className="pr-3 text-right font-semibold tabular-nums">{formatCurrency(app.net_value, app.currency)}</td>
+                  <td className="pr-3">
                     <select
                       value={app.status}
                       disabled={statusMut.isPending}
                       onChange={(e) => statusMut.mutate({ id: app.id, status: e.target.value as PaymentApplicationStatus })}
                       aria-label={t('cvr.payapp_status_label', { defaultValue: 'Payment application status' })}
                       className={
-                        'cursor-pointer rounded-full border-0 px-2 py-1 text-2xs font-semibold ' +
-                        'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 disabled:opacity-50 ' +
+                        'cursor-pointer ' +
                         PAYAPP_STATUS_TONE[app.status]
                       }
                     >
@@ -1371,7 +1370,7 @@ function PaymentApplicationsSection({
                       ))}
                     </select>
                   </td>
-                  <td className="py-2 pl-1 text-right">
+                  <td className="pl-1 text-right">
                     <button
                       type="button"
                       onClick={() => setDeleteTarget(app)}
@@ -1488,7 +1487,7 @@ function PayappRollup({ applications }: { applications: PaymentApplication[] }) 
         return (
           <div key={g.currency || 'na'} className="space-y-2">
             {groups.length > 1 && (
-              <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <div className="oe-overline">
                 {g.currency || t('cvr.currency', { defaultValue: 'Currency' })}
               </div>
             )}

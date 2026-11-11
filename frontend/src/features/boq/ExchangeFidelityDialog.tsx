@@ -89,7 +89,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -98,7 +98,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h3 id="boq-fidelity-title" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 id="boq-fidelity-title" className="oe-card-title flex items-center gap-2">
             <FileSearch size={16} />
             {t('boq.fidelity.title', { defaultValue: 'Exchange report' })}
           </h3>
@@ -125,7 +125,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
               <select
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+                className="oe-select-sm"
               >
                 {CHECK_TARGETS.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -159,7 +159,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
                   setChecked(null);
                   setSelectedId(e.target.value || null);
                 }}
-                className="rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary"
+                className="oe-select-sm"
               >
                 <option value="">{t('boq.fidelity.pick_report', { defaultValue: 'Choose a report' })}</option>
                 {register.data!.items.map((r) => (

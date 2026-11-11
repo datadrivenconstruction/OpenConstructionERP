@@ -189,7 +189,7 @@ function StepRow({ step, isLast }: { step: AgentStep; isLast: boolean }): JSX.El
         <Icon className={clsx('h-3.5 w-3.5', meta.iconClass)} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <div className="oe-overline">
           {t(`agents.step.${step.role}`, { defaultValue: meta.defaultLabel })}
         </div>
         <div className="mt-1">
@@ -217,7 +217,7 @@ function StepContent({ step }: { step: AgentStep }): JSX.Element {
     const args = isPlainObject(rawArgs) ? rawArgs : undefined;
     const friendly = toolName ? toolLabel(toolName) : undefined;
     return (
-      <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-2.5">
+      <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
         {friendly && (
           <div className="text-xs text-content-primary">
             <span className="text-content-tertiary">

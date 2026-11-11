@@ -112,7 +112,7 @@ export function FinanceSummaryCard() {
             className="inline-flex items-center gap-1 text-xs font-medium text-content-secondary hover:text-oe-blue transition-colors"
           >
             {t('dashboard.open_finance', { defaultValue: 'Open Finance' })}
-            <ArrowRight size={13} />
+            <ArrowRight size={14} />
           </button>
         }
       />
@@ -124,7 +124,7 @@ export function FinanceSummaryCard() {
             onClick={() => navigate('/changeorders')}
             className="group rounded-xl border border-border-light bg-surface-elevated/90 p-3 text-left shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30"
           >
-            <div className="flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline flex items-center gap-1.5">
               <FileEdit size={12} className="text-violet-500" />
               {t('dashboard.finance_change_orders', { defaultValue: 'Open change orders' })}
             </div>
@@ -159,7 +159,7 @@ export function FinanceSummaryCard() {
                 : 'border-border-light bg-surface-elevated/90',
             ].join(' ')}
           >
-            <div className="flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="oe-overline flex items-center gap-1.5">
               <AlertTriangle
                 size={12}
                 className={overBudgetCount > 0 ? 'text-semantic-warning' : 'text-content-quaternary'}

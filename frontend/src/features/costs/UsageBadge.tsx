@@ -62,7 +62,7 @@ interface UsageBadgeProps {
 // reserved for genuine errors, and a used rate is not an error.
 const PILL_TINTS = {
   green: 'bg-semantic-success/10 text-semantic-success ring-semantic-success/25',
-  amber: 'bg-semantic-warning/10 text-semantic-warning dark:text-amber-400 ring-amber-500/30',
+  amber: 'bg-semantic-warning/10 text-semantic-warning ring-semantic-warning/30',
 } as const;
 
 export function UsageBadge({ count, band, className }: UsageBadgeProps) {

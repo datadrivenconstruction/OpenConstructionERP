@@ -115,13 +115,13 @@ export function PerformanceDrilldown({
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="oe-table-compact w-full">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-content-tertiary">
-                    <th className="py-1 pe-2 font-medium">{t('analytics.perf.drill_record', { defaultValue: 'Record' })}</th>
-                    <th className="px-2 py-1 text-right font-medium">{t('analytics.perf.col_numerator', { defaultValue: 'Numerator' })}</th>
-                    <th className="px-2 py-1 text-right font-medium">{t('analytics.perf.col_denominator', { defaultValue: 'Denominator' })}</th>
-                    <th className="py-1 ps-2 font-medium">{t('analytics.perf.drill_unit', { defaultValue: 'Unit' })}</th>
+                  <tr className="text-left">
+                    <th className="pe-2">{t('analytics.perf.drill_record', { defaultValue: 'Record' })}</th>
+                    <th className="text-right">{t('analytics.perf.col_numerator', { defaultValue: 'Numerator' })}</th>
+                    <th className="text-right">{t('analytics.perf.col_denominator', { defaultValue: 'Denominator' })}</th>
+                    <th className="ps-2">{t('analytics.perf.drill_unit', { defaultValue: 'Unit' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -137,8 +137,8 @@ export function PerformanceDrilldown({
                       String(r.counted_numerator) !== String(r.numerator);
                     const factor = toNumber(r.index_factor ?? null);
                     return (
-                      <tr key={r.record_id} className="border-b border-border-light last:border-0">
-                        <td className="max-w-[18rem] py-1 pe-2">
+                      <tr key={r.record_id} className="last:border-0">
+                        <td className="max-w-[18rem] pe-2">
                           {r.boq_id && r.position_id ? (
                             <Link
                               to={`/boq/${r.boq_id}?highlight=${r.position_id}`}
@@ -146,7 +146,7 @@ export function PerformanceDrilldown({
                               title={label}
                             >
                               <span className="truncate">{label}</span>
-                              <ExternalLink size={11} className="shrink-0" />
+                              <ExternalLink size={12} className="shrink-0" />
                             </Link>
                           ) : (
                             <span className="block truncate" title={label}>
@@ -154,7 +154,7 @@ export function PerformanceDrilldown({
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-1 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtValue(r.numerator) ?? '-'}
                           {restated && (
                             <span className="ms-1 text-content-tertiary">({fmtValue(r.counted_numerator)})</span>
@@ -168,13 +168,13 @@ export function PerformanceDrilldown({
                             </div>
                           )}
                         </td>
-                        <td className="px-2 py-1 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtValue(r.denominator) ?? '-'}
                           {converted && (
                             <span className="ms-1 text-content-tertiary">({fmtValue(r.counted_denominator)})</span>
                           )}
                         </td>
-                        <td className="py-1 ps-2">{prettyUnit(r.dimensions.unit ?? r.dimensions.currency ?? '')}</td>
+                        <td className="ps-2">{prettyUnit(r.dimensions.unit ?? r.dimensions.currency ?? '')}</td>
                       </tr>
                     );
                   })}

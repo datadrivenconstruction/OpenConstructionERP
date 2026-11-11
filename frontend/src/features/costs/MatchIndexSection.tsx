@@ -183,7 +183,7 @@ export function MatchIndexSection() {
           <Sparkles size={20} className="text-oe-blue" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('costs.match_index.title', { defaultValue: 'Use imported catalogues in CAD-BIM Match' })}
           </h3>
           <p className="mt-1 text-sm text-content-secondary">
@@ -241,7 +241,7 @@ export function MatchIndexSection() {
                       value={language}
                       disabled={busy || unavailable}
                       onChange={(e) => setLanguages((prev) => ({ ...prev, [c.region]: e.target.value }))}
-                      className="rounded-md border border-border-light bg-surface-elevated px-2 py-1 text-xs disabled:opacity-60"
+                      className="oe-select-sm"
                     >
                       {[...new Set([language, ...CATALOGUE_LANGUAGES])].map((code) => (
                         <option key={code} value={code}>

@@ -139,7 +139,7 @@ export function DrawingsPanel({ ctx }: { ctx: DesignContext }) {
             <input
               type="search"
               autoComplete="off"
-              className="w-64 rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+              className="oe-input w-64"
               placeholder={ui(t, 'design.ui.drawings.search')}
               aria-label={ui(t, 'design.ui.drawings.search')}
               value={search}
@@ -147,7 +147,7 @@ export function DrawingsPanel({ ctx }: { ctx: DesignContext }) {
               data-testid="drawing-search"
             />
             <select
-              className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+              className="oe-select"
               aria-label={ui(t, 'design.ui.drawings.state_filter')}
               value={state}
               onChange={(e) => setState(e.target.value as CdeState | '')}

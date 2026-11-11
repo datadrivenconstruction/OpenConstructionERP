@@ -339,8 +339,8 @@ export function RetentionReleasePanel({
     <div className="rounded-lg border border-border-light">
       <header className="flex items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <Banknote size={15} className="text-content-tertiary" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          <Banknote size={16} className="text-content-tertiary" />
+          <span className="oe-overline">
             {t('contracts.retention_ledger', { defaultValue: 'Retention ledger' })}
           </span>
         </div>
@@ -353,7 +353,7 @@ export function RetentionReleasePanel({
               setPreview(null);
             }}
           >
-            <Plus size={13} className="me-1" aria-hidden />
+            <Plus size={14} className="me-1" aria-hidden />
             {t('contracts.release_retainage', {
               defaultValue: 'Release retainage',
             })}
@@ -452,7 +452,7 @@ export function RetentionReleasePanel({
                     setEvent(e.target.value as RetentionReleaseRowEvent);
                     setPreview(null);
                   }}
-                  className={inputCls}
+                  className="oe-select"
                 >
                   {RELEASE_EVENTS.map((value) => (
                     <option key={value} value={value}>
@@ -618,7 +618,7 @@ export function RetentionReleasePanel({
                             setAttached([...row.document_ids]);
                           }}
                         >
-                          <FileCheck2 size={13} className="me-1" aria-hidden />
+                          <FileCheck2 size={14} className="me-1" aria-hidden />
                           {t('contracts.approve_release', {
                             defaultValue: 'Approve',
                           })}
@@ -630,7 +630,7 @@ export function RetentionReleasePanel({
                           variant="secondary"
                           onClick={() => setBilling(row.id)}
                         >
-                          <Check size={13} className="me-1" aria-hidden />
+                          <Check size={14} className="me-1" aria-hidden />
                           {t('contracts.bill_release', {
                             defaultValue: 'Bill on a claim',
                           })}
@@ -644,7 +644,7 @@ export function RetentionReleasePanel({
                         onClick={() => voidMut.mutate(row.id)}
                         disabled={voidMut.isPending}
                       >
-                        <Undo2 size={13} className="me-1" aria-hidden />
+                        <Undo2 size={14} className="me-1" aria-hidden />
                         {t('contracts.void_release', { defaultValue: 'Void' })}
                       </Button>
                     </div>

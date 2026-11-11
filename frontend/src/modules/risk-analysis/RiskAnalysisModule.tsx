@@ -91,11 +91,11 @@ function PercentileCard({
 }) {
   const borderClass =
     variant === 'green'
-      ? 'border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20'
+      ? 'border-semantic-success/50 bg-semantic-success/10'
       : variant === 'orange'
-        ? 'border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20'
+        ? 'border-semantic-warning/50 bg-semantic-warning/10'
         : variant === 'red'
-          ? 'border-rose-400/50 bg-semantic-error/10 dark:bg-rose-950/20'
+          ? 'border-semantic-error/50 bg-semantic-error/10'
           : 'border-border-light bg-surface-secondary/30';
 
   const valueClass =
@@ -109,7 +109,7 @@ function PercentileCard({
 
   return (
     <div className={`rounded-lg border px-3 py-2.5 ${borderClass}`}>
-      <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+      <div className="oe-overline">
         {label}
       </div>
       <div className={`text-sm font-semibold tabular-nums mt-0.5 ${valueClass}`}>
@@ -144,7 +144,7 @@ function Histogram({
 
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+      <h4 className="oe-overline">
         {t('risk.distribution', { defaultValue: 'Cost Distribution (Histogram)' })}
       </h4>
       <div className="relative">
@@ -156,8 +156,8 @@ function Histogram({
             const isRightOfP80 = binMid > percentiles.p80;
 
             let barColor = 'bg-blue-400/70 hover:bg-blue-500';
-            if (isLeftOfP50) barColor = 'bg-emerald-400/60 hover:bg-semantic-success';
-            else if (isRightOfP80) barColor = 'bg-rose-400/60 hover:bg-semantic-error';
+            if (isLeftOfP50) barColor = 'bg-semantic-success/60 hover:bg-semantic-success';
+            else if (isRightOfP80) barColor = 'bg-semantic-error/60 hover:bg-semantic-error';
 
             return (
               <div
@@ -203,7 +203,7 @@ function Histogram({
 
       <div className="flex items-center justify-center gap-5 pt-1">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-5 rounded-sm bg-emerald-400/60" />
+          <div className="h-2.5 w-5 rounded-sm bg-semantic-success/60" />
           <span className="text-2xs text-content-tertiary">{'< P50'}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -211,7 +211,7 @@ function Histogram({
           <span className="text-2xs text-content-tertiary">P50 – P80</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-5 rounded-sm bg-rose-400/60" />
+          <div className="h-2.5 w-5 rounded-sm bg-semantic-error/60" />
           <span className="text-2xs text-content-tertiary">{'> P80'}</span>
         </div>
       </div>
@@ -237,41 +237,41 @@ function RiskDriversTable({
 
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+      <h4 className="oe-overline">
         {t('risk.top_drivers', { defaultValue: 'Top 10 Risk Drivers' })}
       </h4>
       <div className="border border-border-light rounded-lg overflow-hidden">
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
             <tr className="bg-surface-tertiary/50">
-              <th className="px-3 py-2 text-left font-medium text-content-secondary">
+              <th>
                 {t('boq.ordinal', { defaultValue: 'Ordinal' })}
               </th>
-              <th className="px-3 py-2 text-left font-medium text-content-secondary">
+              <th>
                 {t('boq.description', { defaultValue: 'Description' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium text-content-secondary">
+              <th className="text-right">
                 {t('risk.base_cost', { defaultValue: 'Base Cost' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium text-content-secondary">
+              <th className="text-right">
                 {t('risk.variance_share', { defaultValue: 'Variance Share' })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {top.map((driver, idx) => (
               <tr
                 key={driver.positionId}
                 className={`hover:bg-surface-secondary/30 transition-colors ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}
               >
-                <td className="px-3 py-2 font-mono text-content-tertiary">{driver.ordinal}</td>
-                <td className="px-3 py-2 text-content-primary max-w-[240px] truncate" title={driver.description}>
+                <td className="font-mono text-content-tertiary">{driver.ordinal}</td>
+                <td className="max-w-[240px] truncate" title={driver.description}>
                   {driver.description || '—'}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                <td className="text-right tabular-nums font-medium">
                   <MoneyDisplay amount={driver.baseCost} currency={currency} compact />
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-20 h-2 bg-surface-tertiary rounded-full overflow-hidden">
                       <div
@@ -611,12 +611,12 @@ export default function RiskAnalysisModule() {
         <>
           {/* Step 1: BOQ selection (project comes from the global context) */}
           <div className="rounded-xl border border-border bg-surface-primary p-5">
-            <h3 className="text-sm font-semibold text-content-primary mb-3">
+            <h3 className="oe-card-title mb-3">
               {t('risk.select_boq', { defaultValue: '1. Select BOQ' })}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-content-tertiary mb-1">
+                <label className="oe-label">
                   {t('boq.title', { defaultValue: 'Bill of Quantities' })}
                 </label>
                 <select
@@ -628,7 +628,7 @@ export default function RiskAnalysisModule() {
                     setAutoLoadedBoqId(null);
                   }}
                   disabled={boqs.length === 0}
-                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary disabled:opacity-50"
+                  className="oe-select w-full"
                 >
                   <option value="">{t('risk.select_boq_item', { defaultValue: '- Select BOQ -' })}</option>
                   {boqs.map((b) => (
@@ -666,8 +666,8 @@ export default function RiskAnalysisModule() {
                 onClick={() => setShowSettings((v) => !v)}
                 className="flex w-full items-center justify-between"
               >
-                <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-                  <Settings2 size={15} />
+                <h3 className="oe-card-title flex items-center gap-2">
+                  <Settings2 size={16} />
                   {t('risk.settings', { defaultValue: '2. Simulation Settings' })}
                 </h3>
                 {showSettings ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -676,13 +676,13 @@ export default function RiskAnalysisModule() {
               {showSettings && (
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-4">
                   <div>
-                    <label className="block text-xs font-medium text-content-tertiary mb-1">
+                    <label className="oe-label">
                       {t('risk.iterations', { defaultValue: 'Iterations' })}
                     </label>
                     <select
                       value={iterations}
                       onChange={(e) => setIterations(Number(e.target.value))}
-                      className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                      className="oe-select w-full"
                     >
                       <option value={1000}>1,000</option>
                       <option value={5000}>5,000</option>
@@ -692,7 +692,7 @@ export default function RiskAnalysisModule() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-content-tertiary mb-1">
+                    <label className="oe-label">
                       {t('risk.default_optimistic', { defaultValue: 'Default Optimistic' })}
                     </label>
                     <input
@@ -702,11 +702,11 @@ export default function RiskAnalysisModule() {
                       max="1.00"
                       value={defaultOptimistic}
                       onChange={(e) => setDefaultOptimistic(parseFloat(e.target.value) || 0.85)}
-                      className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                      className="oe-input w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-content-tertiary mb-1">
+                    <label className="oe-label">
                       {t('risk.default_pessimistic', { defaultValue: 'Default Pessimistic' })}
                     </label>
                     <input
@@ -716,17 +716,17 @@ export default function RiskAnalysisModule() {
                       max="3.00"
                       value={defaultPessimistic}
                       onChange={(e) => setDefaultPessimistic(parseFloat(e.target.value) || 1.25)}
-                      className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                      className="oe-input w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-content-tertiary mb-1">
+                    <label className="oe-label">
                       {t('risk.distribution_label', { defaultValue: 'Distribution' })}
                     </label>
                     <select
                       value={defaultDistribution}
                       onChange={(e) => setDefaultDistribution(e.target.value as DistributionType)}
-                      className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+                      className="oe-select w-full"
                     >
                       <option value="triangular">{t('risk.dist_triangular', { defaultValue: 'Triangular' })}</option>
                       <option value="pert">{t('risk.dist_pert_beta', { defaultValue: 'PERT (Beta)' })}</option>
@@ -745,7 +745,7 @@ export default function RiskAnalysisModule() {
                 onClick={() => setShowParams((v) => !v)}
                 className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
               >
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t('risk.parameters', { defaultValue: '3. Risk Parameters' })}
                   <span className="ml-2 text-xs font-normal text-content-tertiary">
                     ({params.length} {t('risk.positions_label', { defaultValue: 'positions' })})
@@ -756,18 +756,18 @@ export default function RiskAnalysisModule() {
 
               {showParams && (
                 <div className="border-t border-border-light overflow-x-auto">
-                  <table className="w-full text-xs">
+                  <table className="oe-table-compact w-full">
                     <thead>
                       <tr className="bg-surface-tertiary/50">
-                        <th className="px-3 py-2 text-left font-medium text-content-secondary">{t('boq.ordinal', { defaultValue: 'Ord.' })}</th>
-                        <th className="px-3 py-2 text-left font-medium text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
-                        <th className="px-3 py-2 text-right font-medium text-content-secondary">{t('risk.base_cost', { defaultValue: 'Base Cost' })}</th>
-                        <th className="px-3 py-2 text-center font-medium text-content-secondary">{t('risk.optimistic_x', { defaultValue: 'Opt. (x)' })}</th>
-                        <th className="px-3 py-2 text-center font-medium text-content-secondary">{t('risk.pessimistic_x', { defaultValue: 'Pess. (x)' })}</th>
-                        <th className="px-3 py-2 text-center font-medium text-content-secondary">{t('risk.distribution_label', { defaultValue: 'Distribution' })}</th>
+                        <th>{t('boq.ordinal', { defaultValue: 'Ord.' })}</th>
+                        <th>{t('boq.description', { defaultValue: 'Description' })}</th>
+                        <th className="text-right">{t('risk.base_cost', { defaultValue: 'Base Cost' })}</th>
+                        <th className="text-center">{t('risk.optimistic_x', { defaultValue: 'Opt. (x)' })}</th>
+                        <th className="text-center">{t('risk.pessimistic_x', { defaultValue: 'Pess. (x)' })}</th>
+                        <th className="text-center">{t('risk.distribution_label', { defaultValue: 'Distribution' })}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-light">
+                    <tbody>
                       {params.map((param) => (
                         <ParamRow key={param.positionId} param={param} currency={projectCurrency} onChange={handleParamChange} />
                       ))}
@@ -783,7 +783,7 @@ export default function RiskAnalysisModule() {
             <div className="flex items-center gap-3">
               <Button
                 variant="primary"
-                icon={isRunning ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
+                icon={isRunning ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
                 onClick={handleRun}
                 disabled={isRunning}
               >
@@ -793,7 +793,7 @@ export default function RiskAnalysisModule() {
                 }
               </Button>
               {result && (
-                <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={handleExportCSV}>
+                <Button variant="ghost" size="sm" icon={<Download size={16} />} onClick={handleExportCSV}>
                   {t('risk.export_csv', { defaultValue: 'Export CSV' })}
                 </Button>
               )}
@@ -842,7 +842,7 @@ export default function RiskAnalysisModule() {
                 <div className="rounded-lg border border-blue-400/50 bg-blue-50/50 dark:bg-blue-950/20 px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+                      <div className="oe-overline">
                         {t('risk.contingency', { defaultValue: 'Contingency (P80 − P50)' })}
                       </div>
                       <div className="text-lg font-semibold text-blue-700 dark:text-blue-400 tabular-nums mt-0.5">
@@ -851,7 +851,7 @@ export default function RiskAnalysisModule() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+                      <div className="oe-overline">
                         {t('risk.recommended_budget', { defaultValue: 'Recommended Budget (P80)' })}
                       </div>
                       <div className="text-lg font-semibold text-content-primary tabular-nums mt-0.5">

@@ -125,7 +125,7 @@ const ALLOWED_TRANSITIONS: Record<SubmissionStatus, SubmissionStatus[]> = {
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
-  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-y';
+  'oe-textarea w-full font-mono resize-y';
 
 /* ── Create / Edit Modal ───────────────────────────────────────────────── */
 
@@ -326,8 +326,7 @@ function CreateSubmissionModal({
               spellCheck={false}
               className={clsx(
                 textareaCls,
-                payloadError && 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error',
-              )}
+              )} aria-invalid={!!(payloadError)}
             />
           </div>
         </WideModalField>
@@ -353,9 +352,9 @@ function ValidationReportCard({ report }: { report: Submission['validation_repor
     >
       <div className="flex items-center gap-1.5 font-semibold">
         {passed ? (
-          <CheckCircle2 size={13} className="text-semantic-success" />
+          <CheckCircle2 size={14} className="text-semantic-success" />
         ) : (
-          <AlertTriangle size={13} className="text-semantic-error" />
+          <AlertTriangle size={14} className="text-semantic-error" />
         )}
         <span className={passed ? 'text-semantic-success' : 'text-semantic-error'}>
           {passed
@@ -473,7 +472,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
           <ValidationReportCard report={item.validation_report} />
 
           {item.generated_xml && (
-            <details className="rounded-lg border border-border-light bg-surface-secondary/40 p-2.5">
+            <details className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
               <summary className="cursor-pointer text-xs font-medium text-content-secondary flex items-center justify-between gap-2">
                 <span>{t('authority_submission.generated_xml', { defaultValue: 'Generated XML' })}</span>
                 <Button
@@ -498,7 +497,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             </details>
           )}
 
-          <details className="rounded-lg border border-border-light bg-surface-secondary/40 p-2.5" open>
+          <details className="rounded-lg border border-border-light bg-surface-secondary/40 p-3" open>
             <summary className="cursor-pointer text-xs font-medium text-content-secondary flex items-center justify-between gap-2">
               <span>{t('authority_submission.human_review', { defaultValue: 'Human review' })}</span>
               {rendered && (
@@ -533,7 +532,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<ShieldCheck size={13} />}
+              icon={<ShieldCheck size={14} />}
               disabled={isBusy}
               onClick={(e) => {
                 e.stopPropagation();
@@ -545,7 +544,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<FileCode2 size={13} />}
+              icon={<FileCode2 size={14} />}
               disabled={isBusy}
               onClick={(e) => {
                 e.stopPropagation();
@@ -557,7 +556,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             <Button
               variant="primary"
               size="sm"
-              icon={<Send size={13} />}
+              icon={<Send size={14} />}
               disabled={isBusy || !canSubmit}
               title={
                 !canSubmit
@@ -597,7 +596,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Pencil size={13} />}
+              icon={<Pencil size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
@@ -609,7 +608,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               variant="secondary"
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
-              icon={<Trash2 size={13} />}
+              icon={<Trash2 size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);
@@ -663,7 +662,7 @@ function HowAuthoritySubmissionWorks() {
   return (
     <CollapsibleSection
       storageKey="authority_submission.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('authority_submission.how_title', { defaultValue: 'How the submission factory fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -1015,7 +1014,7 @@ export function AuthoritySubmissionPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as SubmissionStatus | '')}
             aria-label={t('authority_submission.filter_all_status', { defaultValue: 'All Statuses' })}
-            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+            className="oe-select-lg ps-3 sm:w-44"
           >
             <option value="">
               {t('authority_submission.filter_all_status', { defaultValue: 'All Statuses' })}
@@ -1068,7 +1067,7 @@ export function AuthoritySubmissionPage() {
               })}
             </p>
             <Card padding="none" className="overflow-x-auto">
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[560px]">
+              <div className="oe-overline flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 min-w-[560px]">
                 <span className="w-5" />
                 <span className="flex-1">{t('authority_submission.col_title', { defaultValue: 'Title' })}</span>
                 <span className="w-32 hidden md:block">

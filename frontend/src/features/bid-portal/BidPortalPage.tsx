@@ -336,25 +336,25 @@ export function BidPortalPage() {
       )}
 
       <div className="mt-4 overflow-x-auto rounded-lg border border-border-light bg-surface-primary">
-        <table className="w-full min-w-[720px] text-sm" data-testid="bid-portal-table">
-          <thead className="bg-surface-secondary text-left text-xs font-medium text-content-tertiary">
+        <table className="oe-table w-full min-w-[720px]" data-testid="bid-portal-table">
+          <thead className="text-left">
             <tr>
-              <th scope="col" className="px-3 py-2 w-24">
+              <th scope="col" className="w-24">
                 {t('bid_portal.col.ordinal', { defaultValue: 'Item no.' })}
               </th>
-              <th scope="col" className="px-3 py-2">
+              <th scope="col">
                 {t('bid_portal.col.description', { defaultValue: 'Description' })}
               </th>
-              <th scope="col" className="px-3 py-2 w-16">
+              <th scope="col" className="w-16">
                 {t('bid_portal.col.unit', { defaultValue: 'Unit' })}
               </th>
-              <th scope="col" className="px-3 py-2 w-24 text-right">
+              <th scope="col" className="w-24 text-right">
                 {t('bid_portal.col.quantity', { defaultValue: 'Quantity' })}
               </th>
-              <th scope="col" className="px-3 py-2 w-36 text-right">
+              <th scope="col" className="w-36 text-right">
                 {t('bid_portal.col.unit_price', { defaultValue: 'Unit price' })}
               </th>
-              <th scope="col" className="px-3 py-2 w-32 text-right">
+              <th scope="col" className="w-32 text-right">
                 {t('bid_portal.col.line_sum', { defaultValue: 'Line sum' })}
               </th>
             </tr>
@@ -363,9 +363,9 @@ export function BidPortalPage() {
             {v.lines.map((line) => {
               if (line.kind === 'section') {
                 return (
-                  <tr key={line.id} className="border-t border-border-light bg-surface-secondary/60">
-                    <td className="px-3 py-2 font-mono text-xs text-content-secondary">{line.ordinal}</td>
-                    <td colSpan={5} className="px-3 py-2 font-semibold text-content-primary">
+                  <tr key={line.id}>
+                    <td className="font-mono text-content-secondary">{line.ordinal}</td>
+                    <td colSpan={5} className="font-semibold">
                       {line.short_text}
                     </td>
                   </tr>
@@ -377,9 +377,9 @@ export function BidPortalPage() {
               const isOpen = !!expanded[line.id];
               const inputId = `bid-price-${line.id}`;
               return (
-                <tr key={line.id} className="border-t border-border-light align-top">
-                  <td className="px-3 py-2 font-mono text-xs text-content-secondary">{line.ordinal}</td>
-                  <td className="px-3 py-2 text-content-primary">
+                <tr key={line.id} className="align-top">
+                  <td className="font-mono text-content-secondary">{line.ordinal}</td>
+                  <td>
                     <label htmlFor={inputId} className="block">
                       {line.short_text}
                     </label>
@@ -402,11 +402,11 @@ export function BidPortalPage() {
                       </>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">{localizedUnitCode(line.unit, i18n.language)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                  <td className="text-content-secondary">{localizedUnitCode(line.unit, i18n.language)}</td>
+                  <td className="text-right tabular-nums text-content-secondary">
                     {qtyFormat.format(quantityOf(line))}
                   </td>
-                  <td className="px-3 py-1.5 text-right">
+                  <td className="text-right">
                     <input
                       id={inputId}
                       type="text"
@@ -437,7 +437,7 @@ export function BidPortalPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-content-primary">
+                  <td className="text-right tabular-nums">
                     {lineSum === null ? (
                       <span className="text-content-quaternary">{t('bid_portal.not_priced', { defaultValue: 'not priced' })}</span>
                     ) : (
@@ -452,7 +452,7 @@ export function BidPortalPage() {
       </div>
 
       <div className="mt-4">
-        <label htmlFor="bid-portal-notes" className="block text-sm font-medium text-content-primary">
+        <label htmlFor="bid-portal-notes" className="oe-label">
           {t('bid_portal.notes', { defaultValue: 'Notes for the buyer (optional)' })}
         </label>
         <textarea
@@ -465,7 +465,7 @@ export function BidPortalPage() {
             setNotes(e.target.value);
             setDirty(true);
           }}
-          className="mt-1 w-full rounded border border-border-light bg-surface-primary p-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:bg-surface-secondary"
+          className="oe-textarea mt-1 w-full"
         />
       </div>
 
@@ -598,7 +598,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <select
               value={currentLang}
               onChange={(e) => void i18n.changeLanguage(e.target.value)}
-              className="min-h-11 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs font-medium text-content-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              className="oe-select-sm min-h-11"
               data-testid="bid-portal-locale"
             >
               {sortLanguagesByName(SUPPORTED_LANGUAGES).map((loc) => (

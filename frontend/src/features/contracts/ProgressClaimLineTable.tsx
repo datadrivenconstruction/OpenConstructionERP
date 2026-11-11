@@ -38,7 +38,7 @@ function toNum(v: number | string | null | undefined): number {
 }
 
 const inputCls =
-  'h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-right text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full text-right';
 
 export interface ProgressClaimLineTableProps {
   claimId: string;
@@ -122,22 +122,22 @@ export function ProgressClaimLineTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm" data-testid="claim-line-table">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table w-full" data-testid="claim-line-table">
+        <thead>
           <tr>
-            <th className="px-3 py-2 text-left">
+            <th>
               {t('contracts.line', { defaultValue: 'Line' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('contracts.qty', { defaultValue: 'Qty' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('contracts.pct_complete', { defaultValue: '% complete' })}
             </th>
-            <th className="px-3 py-2 text-right">
+            <th className="text-right">
               {t('contracts.period_value', { defaultValue: 'Period value' })}
             </th>
-            {editable && <th className="px-3 py-2 text-right" />}
+            {editable && <th className="text-right" />}
           </tr>
         </thead>
         <tbody>
@@ -232,7 +232,7 @@ function ClaimLineAddRow({
         <select
           value={lineId}
           onChange={(e) => setLineId(e.target.value)}
-          className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-sm"
+          className="oe-select w-full"
           aria-label={t('contracts.line', { defaultValue: 'Line' })}
         >
           <option value="">

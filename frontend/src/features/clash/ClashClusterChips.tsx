@@ -22,10 +22,10 @@ import { clashApi, type ClashCluster } from './api';
 import { ClashGroupActionDialog } from './ClashGroupActionDialog';
 
 const DISCIPLINE_COLOR: Record<string, string> = {
-  Structural: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30 hover:bg-rose-200',
-  Architectural: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30 hover:bg-amber-200',
-  Mechanical: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30 hover:bg-emerald-200',
-  Electrical: 'bg-semantic-info-bg text-semantic-info ring-semantic-info/30 hover:bg-sky-200',
+  Structural: 'bg-semantic-error-bg text-semantic-error ring-semantic-error/30 hover:bg-semantic-error-bg',
+  Architectural: 'bg-semantic-warning-bg text-semantic-warning ring-semantic-warning/30 hover:bg-semantic-warning-bg',
+  Mechanical: 'bg-semantic-success-bg text-semantic-success ring-semantic-success/30 hover:bg-semantic-success-bg',
+  Electrical: 'bg-semantic-info-bg text-semantic-info ring-semantic-info/30 hover:bg-semantic-info-bg',
   Plumbing: 'bg-indigo-100 text-indigo-800 ring-indigo-200 hover:bg-indigo-200',
   Civil: 'bg-stone-100 text-stone-800 ring-stone-200 hover:bg-stone-200',
 };
@@ -159,7 +159,7 @@ export function ClashClusterChips({
             defaultValue: 'Create one punch item or task for this whole clash group',
           })}
         >
-          <ClipboardList size={13} />
+          <ClipboardList size={14} />
           {t('clash.groupAction.button', { defaultValue: 'Create work item' })}
         </button>
       )}

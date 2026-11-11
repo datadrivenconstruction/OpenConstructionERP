@@ -268,7 +268,7 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
               {(approved || permit.conditions.length > 0) && (
                 <div className="space-y-2" data-testid="permit-conditions">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium text-content-primary">{ui(t, 'design.ui.permit.conditions_title')}</h4>
+                    <h4 className="oe-card-title">{ui(t, 'design.ui.permit.conditions_title')}</h4>
                     {approved && (
                       <WriteButton size="sm" variant="secondary" onClick={() => setDialog({ kind: 'condition', permit })} data-testid="condition-add">
                         {ui(t, 'design.ui.permit.condition_add')}

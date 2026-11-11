@@ -77,13 +77,13 @@ export function ByResourcesPanel({ nav }: { nav: CrossNav }) {
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-[1fr_220px]">
         <div>
-          <label htmlFor="ce-byres-resource" className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label htmlFor="ce-byres-resource" className="oe-label">
             {t('costExplorer.byResources.addLabel', { defaultValue: 'Resources you know' })}
           </label>
           <ResourceSearchInput id="ce-byres-resource" onPick={addResource} region={region || null} excludeCodes={picked.map((p) => p.code)} />
         </div>
         <div>
-          <label htmlFor="ce-byres-region" className="mb-1.5 block text-sm font-medium text-content-primary">
+          <label htmlFor="ce-byres-region" className="oe-label">
             {t('costExplorer.region.label', { defaultValue: 'Price base region' })}
           </label>
           <BaseSelect id="ce-byres-region" value={region} onChange={setRegion} />

@@ -207,7 +207,7 @@ export function AssigneePicker({
       {open && (
         <div
           role="listbox"
-          className="absolute start-0 top-full z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
+          className="absolute start-0 top-full z-dropdown mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
         >
           {options.length === 0 ? (
             <div className="px-3 py-2 text-xs text-content-tertiary">
@@ -229,9 +229,9 @@ export function AssigneePicker({
                 className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm transition-colors hover:bg-surface-secondary"
               >
                 {o.kind === 'user' ? (
-                  <User size={13} className="shrink-0 text-content-tertiary" />
+                  <User size={14} className="shrink-0 text-content-tertiary" />
                 ) : (
-                  <BookUser size={13} className="shrink-0 text-content-tertiary" />
+                  <BookUser size={14} className="shrink-0 text-content-tertiary" />
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-content-primary">{o.label}</span>

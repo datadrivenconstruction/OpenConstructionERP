@@ -56,9 +56,9 @@ function PercentileCard({
 }) {
   const borderClass =
     variant === 'green'
-      ? 'rounded-lg border border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20'
+      ? 'rounded-lg border border-semantic-success/50 bg-semantic-success/10'
       : variant === 'orange'
-        ? 'rounded-lg border border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20'
+        ? 'rounded-lg border border-semantic-warning/50 bg-semantic-warning/10'
         : 'rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm';
 
   const valueClass =
@@ -70,7 +70,7 @@ function PercentileCard({
 
   return (
     <div className={`px-2.5 py-2 ${borderClass}`}>
-      <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+      <div className="oe-overline">
         {label}
       </div>
       <div className={`text-sm font-semibold tabular-nums mt-0.5 ${valueClass}`}>
@@ -85,7 +85,7 @@ function PercentileCard({
 function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-elevated/90 px-3 py-2">
-      <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{label}</div>
+      <div className="oe-overline">{label}</div>
       <div className="text-sm font-semibold text-content-primary tabular-nums mt-0.5">{value}</div>
       {hint && <div className="text-2xs text-content-quaternary mt-0.5">{hint}</div>}
     </div>
@@ -105,17 +105,17 @@ function ConvergenceBadge({
 }) {
   const map = {
     converged: {
-      cls: 'border-emerald-400/50 bg-semantic-success/10 dark:bg-emerald-950/20 text-semantic-success dark:text-emerald-400',
+      cls: 'border-semantic-success/50 bg-semantic-success/10 text-semantic-success',
       icon: CheckCircle2,
       label: t('boq.cost_risk_converged', { defaultValue: 'Converged' }),
     },
     marginal: {
-      cls: 'border-amber-400/50 bg-semantic-warning/10 dark:bg-amber-950/20 text-semantic-warning dark:text-amber-400',
+      cls: 'border-semantic-warning/50 bg-semantic-warning/10 text-semantic-warning',
       icon: AlertTriangle,
       label: t('boq.cost_risk_marginal', { defaultValue: 'Marginal' }),
     },
     insufficient: {
-      cls: 'border-rose-400/50 bg-semantic-error/10 dark:bg-rose-950/20 text-semantic-error dark:text-rose-400',
+      cls: 'border-semantic-error/50 bg-semantic-error/10 text-semantic-error',
       icon: AlertTriangle,
       label: t('boq.cost_risk_low_confidence', { defaultValue: 'Low confidence' }),
     },
@@ -156,7 +156,7 @@ function CorrelationControl({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <span className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+        <span className="oe-overline">
           {t('boq.cost_risk_correlation', { defaultValue: 'Risk correlation' })}
         </span>
         <div className="inline-flex rounded-lg border border-border-light overflow-hidden">
@@ -208,7 +208,7 @@ function ContingencyCard({
     <div className="rounded-lg border border-blue-400/50 bg-blue-50/50 dark:bg-blue-950/20 px-4 py-3 space-y-2">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+          <div className="oe-overline">
             {t('boq.cost_risk_contingency_target', {
               defaultValue: 'Contingency to reach P{{p}}',
               p: targetConfidence,
@@ -222,7 +222,7 @@ function ContingencyCard({
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
+          <div className="oe-overline">
             {t('boq.cost_risk_recommended_budget', { defaultValue: 'Recommended Budget' })}
           </div>
           <div className="text-lg font-semibold text-content-primary tabular-nums mt-0.5">
@@ -283,7 +283,7 @@ function DistributionChart({
 
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+      <h4 className="oe-overline">
         {t('boq.cost_risk_distribution', { defaultValue: 'Cost distribution & S-curve' })}
       </h4>
       <div className="relative">
@@ -296,8 +296,8 @@ function DistributionChart({
             const isRightOfP80 = binMid > p80;
 
             let barColor = 'bg-blue-400/60 hover:bg-blue-500';
-            if (isLeftOfP50) barColor = 'bg-emerald-400/50 hover:bg-semantic-success';
-            else if (isRightOfP80) barColor = 'bg-rose-400/50 hover:bg-semantic-error';
+            if (isLeftOfP50) barColor = 'bg-semantic-success/50 hover:bg-semantic-success';
+            else if (isRightOfP80) barColor = 'bg-semantic-error/50 hover:bg-semantic-error';
 
             return (
               <div
@@ -364,7 +364,7 @@ function DistributionChart({
       {/* Legend */}
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 pt-1">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-5 rounded-sm bg-emerald-400/60" />
+          <div className="h-2.5 w-5 rounded-sm bg-semantic-success/60" />
           <span className="text-2xs text-content-tertiary">{'< P50'}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -372,7 +372,7 @@ function DistributionChart({
           <span className="text-2xs text-content-tertiary">P50 - P80</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-5 rounded-sm bg-rose-400/50" />
+          <div className="h-2.5 w-5 rounded-sm bg-semantic-error/50" />
           <span className="text-2xs text-content-tertiary">{'> P80'}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -402,34 +402,34 @@ function RiskDriversTable({
 
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+      <h4 className="oe-overline">
         {t('boq.cost_risk_drivers', { defaultValue: 'Top Risk Drivers' })}
       </h4>
       <div className="border border-border-light rounded-lg overflow-hidden overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="oe-table-compact w-full">
           <thead>
             <tr className="bg-surface-tertiary/50">
-              <th className="px-3 py-2 text-left font-medium text-content-secondary">{t('boq.ordinal')}</th>
-              <th className="px-3 py-2 text-left font-medium text-content-secondary">{t('boq.description')}</th>
-              <th className="px-3 py-2 text-right font-medium text-content-secondary">
+              <th>{t('boq.ordinal')}</th>
+              <th>{t('boq.description')}</th>
+              <th className="text-right">
                 {t('boq.cost_risk_swing', { defaultValue: 'P10 - P90 swing' })}
               </th>
-              <th className="px-3 py-2 text-right font-medium text-content-secondary">
+              <th className="text-right">
                 {t('boq.cost_risk_variance_share', { defaultValue: 'Variance Share' })}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-light">
+          <tbody>
             {drivers.map((driver, idx) => (
               <tr
                 key={`${driver.ordinal}-${idx}`}
                 className={`hover:bg-surface-secondary/30 transition-colors ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}
               >
-                <td className="px-3 py-2 font-mono text-content-tertiary">{driver.ordinal}</td>
-                <td className="px-3 py-2 text-content-primary max-w-[220px] truncate" title={driver.description}>
+                <td className="font-mono text-content-tertiary">{driver.ordinal}</td>
+                <td className="max-w-[220px] truncate" title={driver.description}>
                   {driver.description || '-'}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums text-content-secondary whitespace-nowrap">
+                <td className="text-right tabular-nums text-content-secondary whitespace-nowrap">
                   {driver.swing_low != null && driver.swing_high != null ? (
                     <>
                       <span className="text-semantic-success">{fmtCurrency(driver.swing_low, fmt)}</span>
@@ -440,7 +440,7 @@ function RiskDriversTable({
                     '-'
                   )}
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-20 h-2 bg-surface-tertiary rounded-full overflow-hidden">
                       <div
@@ -498,7 +498,7 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
         aria-label={t('boq.cost_risk_title', { defaultValue: 'Monte Carlo Cost Risk' })}
         className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Dices size={16} className="text-content-tertiary" strokeWidth={1.75} />
           <span className="text-sm font-semibold text-content-primary">
             {t('boq.cost_risk_title', { defaultValue: 'Monte Carlo Cost Risk' })}
@@ -531,7 +531,7 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
           ) : isError ? (
             <div className="px-5 py-8 text-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error/10 mx-auto mb-2">
-                <Inbox size={18} className="text-semantic-error" />
+                <Inbox size={20} className="text-semantic-error" />
               </div>
               <p className="text-xs text-content-secondary">
                 {t('boq.cost_risk_error', { defaultValue: 'Failed to load cost risk analysis. Please try again.' })}
@@ -541,7 +541,7 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
             <div className="px-5 pb-5 pt-1">
               <div className="flex flex-col items-center gap-2 py-6 text-center">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
-                  <Inbox size={18} className="text-content-tertiary" />
+                  <Inbox size={20} className="text-content-tertiary" />
                 </div>
                 <p className="text-xs text-content-tertiary">
                   {t('boq.cost_risk_empty', {

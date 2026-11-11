@@ -156,7 +156,7 @@ export function ReassignDialog({ open, onClose, instance }: ReassignDialogProps)
         <div>
           <label
             htmlFor="reassign-user"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.reassign_user', { defaultValue: 'Assign to' })}
             <span className="text-semantic-error ml-0.5">*</span>
@@ -165,7 +165,7 @@ export function ReassignDialog({ open, onClose, instance }: ReassignDialogProps)
             id="reassign-user"
             value={toUserId}
             onChange={(e) => setToUserId(e.target.value)}
-            className="h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue cursor-pointer"
+            className="oe-select w-full cursor-pointer"
             data-testid="reassign-user-select"
           >
             <option value="">
@@ -181,7 +181,7 @@ export function ReassignDialog({ open, onClose, instance }: ReassignDialogProps)
         <div>
           <label
             htmlFor="reassign-reason"
-            className="block text-xs font-medium text-content-secondary mb-1"
+            className="oe-label"
           >
             {t('approvalRoutes.reassign_reason', {
               defaultValue: 'Reason (optional)',
@@ -196,7 +196,7 @@ export function ReassignDialog({ open, onClose, instance }: ReassignDialogProps)
             placeholder={t('approvalRoutes.reassign_reason_placeholder', {
               defaultValue: 'e.g. Primary approver is on leave this week.',
             })}
-            className="w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            className="oe-textarea w-full"
           />
         </div>
       </WideModalSection>

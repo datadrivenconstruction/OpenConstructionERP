@@ -43,25 +43,25 @@ function toggled(set: ReadonlySet<string>, id: string): ReadonlySet<string> {
 function ChangeTable({ rows }: { rows: UpdatedRow[] }) {
   const { t } = useTranslation();
   return (
-    <table className="w-full text-xs">
+    <table className="oe-table-compact w-full">
       <thead>
-        <tr className="text-left text-content-tertiary">
-          <th className="py-1 pr-2 font-medium">{t('boq.excel_review.col_pos', { defaultValue: 'Pos.' })}</th>
-          <th className="py-1 pr-2 font-medium">{t('boq.excel_review.col_field', { defaultValue: 'Field' })}</th>
-          <th className="py-1 pr-2 font-medium">{t('boq.excel_review.col_old', { defaultValue: 'In the bill' })}</th>
-          <th className="py-1 font-medium">{t('boq.excel_review.col_new', { defaultValue: 'In Excel' })}</th>
+        <tr className="text-left">
+          <th className="pr-2">{t('boq.excel_review.col_pos', { defaultValue: 'Pos.' })}</th>
+          <th className="pr-2">{t('boq.excel_review.col_field', { defaultValue: 'Field' })}</th>
+          <th className="pr-2">{t('boq.excel_review.col_old', { defaultValue: 'In the bill' })}</th>
+          <th>{t('boq.excel_review.col_new', { defaultValue: 'In Excel' })}</th>
         </tr>
       </thead>
       <tbody>
         {rows.flatMap((row) =>
           row.changes.map((change, i) => (
             <tr key={`${row.position_id}-${change.field}`} className="border-t border-border-light align-top">
-              <td className="py-1 pr-2 tabular-nums text-content-secondary">{i === 0 ? row.ordinal : ''}</td>
-              <td className="py-1 pr-2">{fieldLabel(t, change.field)}</td>
-              <td className="py-1 pr-2 text-content-tertiary line-through decoration-content-quaternary">
+              <td className="pr-2 tabular-nums text-content-secondary">{i === 0 ? row.ordinal : ''}</td>
+              <td className="pr-2">{fieldLabel(t, change.field)}</td>
+              <td className="pr-2 text-content-tertiary line-through decoration-content-quaternary">
                 {valueText(change.old)}
               </td>
-              <td className="py-1 font-medium text-content-primary">{valueText(change.new)}</td>
+              <td className="font-medium">{valueText(change.new)}</td>
             </tr>
           )),
         )}
@@ -99,7 +99,7 @@ export function ExcelReviewDialog({ open, preview, applying = false, onApply, on
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       role="dialog"
       aria-modal="true"
       aria-label={t('boq.excel_review.title', { defaultValue: 'Review changes from Excel' })}
@@ -107,7 +107,7 @@ export function ExcelReviewDialog({ open, preview, applying = false, onApply, on
       <div className="relative mx-4 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-elevated shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
           <div>
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('boq.excel_review.title', { defaultValue: 'Review changes from Excel' })}
             </h2>
             <p className="text-2xs text-content-tertiary">
@@ -124,7 +124,7 @@ export function ExcelReviewDialog({ open, preview, applying = false, onApply, on
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
