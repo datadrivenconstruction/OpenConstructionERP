@@ -244,7 +244,7 @@ function ActivePackSpotlight({
         style={{ background: `linear-gradient(120deg, ${pack.branding.primary_color} 0%, ${accent} 55%, transparent 85%)` }}
       />
       <div className="relative flex flex-col gap-4 md:flex-row md:items-center">
-        <PackEmblem pack={pack} size={60} />
+        <PackEmblem pack={pack} size={60} bare glyph />
         <div className="min-w-0 flex-1">
           <p className="inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-semantic-success">
             <span className="relative flex h-2 w-2">

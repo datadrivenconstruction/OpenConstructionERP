@@ -140,7 +140,7 @@ function CountrySlot({
   return (
     <SlotShell label={label} icon={Globe2} filled testId="packs-slot-country">
       <div className="flex items-center gap-3">
-        <PackEmblem pack={entry.pack} size={48} />
+        <PackEmblem pack={entry.pack} size={48} bare glyph />
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-semibold text-content-primary">{entry.name}</p>
           <p className="truncate text-xs text-content-tertiary">

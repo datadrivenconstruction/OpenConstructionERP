@@ -31,6 +31,20 @@
  * bear, and a hand-reduced bear reads as a mistake rather than as a flag.
  */
 
+import {
+  BrickWall,
+  Boxes,
+  ClipboardList,
+  Globe2,
+  Handshake,
+  HardHat,
+  ShoppingCart,
+  Sparkles,
+  Sun,
+  Wrench,
+  type LucideIcon,
+} from 'lucide-react';
+
 import { packCountryCode } from '@/shared/lib/regionalPack';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 
@@ -59,6 +73,35 @@ interface PackEmblemProps {
   /** Top-bar form: a country pack draws just the flag as a clean rectangle,
    *  with no tinted plate or rounded box around it. */
   bare?: boolean;
+  /** A pack with no flag gets a kind icon on a tinted tile instead of a
+   *  monogram. The packs pages ask for it; the top bar keeps the monogram. */
+  glyph?: boolean;
+}
+
+/** Icon per pack kind, matched against the pack's industry metadata and slug
+ *  so a new trade pack lands on a fitting icon without a list of slugs. */
+const KEYWORD_ICONS: ReadonlyArray<readonly [RegExp, LucideIcon]> = [
+  [/formwork|concrete|masonry|brick/, BrickWall],
+  [/modular|prefab|offsite/, Boxes],
+  [/renewable|solar|wind|energy|epc|bess/, Sun],
+  [/retail|grocery|shop|store/, ShoppingCart],
+  [/owner|project_management|framework|governance/, ClipboardList],
+  [/mep|hvac|plumb|electric|install/, Wrench],
+];
+
+const TYPE_ICONS: Readonly<Record<string, LucideIcon>> = {
+  industry: HardHat,
+  partner: Handshake,
+  showcase: Sparkles,
+  country: Globe2,
+};
+
+/** The icon that stands for a pack that has no flag. */
+export function packGlyphFor(pack: Pick<PackEmblemPack, 'slug' | 'type' | 'metadata'>): LucideIcon {
+  const industry = typeof pack.metadata?.industry === 'string' ? pack.metadata.industry : '';
+  const haystack = `${industry} ${pack.slug}`.toLowerCase();
+  for (const [re, icon] of KEYWORD_ICONS) if (re.test(haystack)) return icon;
+  return TYPE_ICONS[pack.type ?? 'partner'] ?? HardHat;
 }
 
 /** Two-letter monogram from the pack's name, for a pack with no flag and no
@@ -93,7 +136,7 @@ function subdivisionCode(pack: PackEmblemPack): string | null {
   return tail || null;
 }
 
-export function PackEmblem({ pack, size, className = '', bare = false }: PackEmblemProps) {
+export function PackEmblem({ pack, size, className = '', bare = false, glyph = false }: PackEmblemProps) {
   const radius = size <= 24 ? 'rounded-sm' : 'rounded-xl';
   const country = flagCodeFor(pack);
   const subdivision = country ? subdivisionCode(pack) : null;
@@ -115,6 +158,14 @@ export function PackEmblem({ pack, size, className = '', bare = false }: PackEmb
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-xs ring-1 ring-inset ring-black/10 dark:ring-white/15"
         />
+        {showSubdivision && (
+          <span
+            className="absolute -bottom-1 end-0 rounded-xs bg-surface-primary px-1 font-mono font-semibold leading-none tracking-wide text-content-secondary shadow-sm"
+            style={{ fontSize: Math.max(8, Math.round(size * 0.2)) }}
+          >
+            {subdivision}
+          </span>
+        )}
       </span>
     );
   }
@@ -146,6 +197,20 @@ export function PackEmblem({ pack, size, className = '', bare = false }: PackEmb
             </span>
           )}
         </span>
+      </span>
+    );
+  }
+
+  if (glyph) {
+    const Icon = packGlyphFor(pack);
+    return (
+      <span
+        className={`flex shrink-0 items-center justify-center bg-oe-blue/10 text-oe-blue-text ring-1 ring-inset ring-oe-blue/20 ${radius} ${className}`}
+        style={{ width: size, height: size }}
+        data-testid={`pack-emblem-${pack.slug}`}
+        data-pack-emblem="glyph"
+      >
+        <Icon aria-hidden="true" style={{ width: Math.round(size * 0.52), height: Math.round(size * 0.52) }} strokeWidth={1.75} />
       </span>
     );
   }

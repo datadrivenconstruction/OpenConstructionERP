@@ -281,7 +281,7 @@ export function PackDetailPage() {
           style={{ background: `linear-gradient(120deg, ${pack.branding.primary_color} 0%, ${accent} 50%, transparent 80%)` }}
         />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start">
-          <PackEmblem pack={pack} size={72} />
+          <PackEmblem pack={pack} size={72} bare glyph />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex h-6 items-center gap-1 rounded-md bg-surface-secondary px-2 text-2xs font-semibold uppercase tracking-wide text-content-secondary">

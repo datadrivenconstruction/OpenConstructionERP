@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { CountryFlag } from './CountryFlag';
-import { PackEmblem, type PackEmblemPack } from './PackEmblem';
+import { PackEmblem, packGlyphFor, type PackEmblemPack } from './PackEmblem';
 
 function pack(over: Partial<PackEmblemPack> = {}): PackEmblemPack {
   return {
@@ -139,5 +139,37 @@ describe('every shipped country pack has a flag that draws', () => {
   it.each(countries)('%s flies a drawn flag for %s', (_slug, code) => {
     const { container } = render(<CountryFlag code={code} size={24} />);
     expect(container.querySelector('img')).not.toBeNull();
+  });
+});
+
+describe('PackEmblem glyph mode', () => {
+  it('draws a bare flag with no plate for a country pack', () => {
+    const { container } = render(<PackEmblem pack={pack()} size={48} bare glyph />);
+    const plate = container.querySelector('[data-pack-emblem]');
+    expect(plate?.getAttribute('data-pack-emblem')).toBe('flag');
+    expect(plate?.getAttribute('data-pack-bare')).toBe('true');
+  });
+
+  it('draws a kind icon tile instead of a monogram for a pack without a flag', () => {
+    const { container } = render(<PackEmblem pack={pack({ type: 'industry', metadata: {} })} size={48} glyph />);
+    const plate = container.querySelector('[data-pack-emblem]');
+    expect(plate?.getAttribute('data-pack-emblem')).toBe('glyph');
+    expect(plate?.querySelector('svg')).not.toBeNull();
+    expect(plate?.textContent).toBe('');
+  });
+
+  it('keeps the monogram when glyph mode is not requested', () => {
+    const { container } = render(<PackEmblem pack={pack({ type: 'industry', metadata: {} })} size={16} bare />);
+    expect(container.querySelector('[data-pack-emblem]')?.getAttribute('data-pack-emblem')).toBe('monogram');
+  });
+
+  it('maps industry keywords and types to distinct icons with a fallback', () => {
+    const base = { type: 'industry', metadata: {} as Record<string, unknown> };
+    const a = packGlyphFor({ ...base, slug: 'doker-formwork' });
+    const b = packGlyphFor({ ...base, slug: 'renewables-epc' });
+    const c = packGlyphFor({ ...base, slug: 'unknown-trade' });
+    const d = packGlyphFor({ type: 'partner', slug: 'acme', metadata: {} });
+    expect(new Set([a, b, c, d]).size).toBe(4);
+    expect(packGlyphFor({ ...base, slug: 'x', metadata: { industry: 'formwork' } })).toBe(a);
   });
 });

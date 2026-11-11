@@ -99,7 +99,7 @@ function PackCardImpl({
       />
 
       <div className="flex items-start gap-3">
-        <PackEmblem pack={pack} size={44} />
+        <PackEmblem pack={pack} size={44} bare glyph />
         <div className="min-w-0 flex-1">
           <h3 className="oe-card-title">
             {/* The whole card is the link to the pack's page; the action
