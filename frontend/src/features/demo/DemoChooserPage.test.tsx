@@ -49,8 +49,8 @@ describe('DemoChooserPage', () => {
       'demo-card-residential-berlin',
       'demo-card-office-london',
     ]);
-    expect(cards[0].getAttribute('data-featured')).toBe('true');
-    expect(cards[1].getAttribute('data-featured')).toBeNull();
+    expect(cards[0]!.getAttribute('data-featured')).toBe('true');
+    expect(cards[1]!.getAttribute('data-featured')).toBeNull();
     expect(screen.getByText('Full platform: every module')).toBeTruthy();
     expect(screen.getByText('Or start from a variant cut to one kind of company')).toBeTruthy();
   });
