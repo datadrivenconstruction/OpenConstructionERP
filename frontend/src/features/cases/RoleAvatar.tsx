@@ -16,10 +16,14 @@
 // is pure presentation. Reusable anywhere a role needs a face, not just the
 // Cases hub.
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import type { ProfessionalRole } from './types';
 import { ROLE_BY_ID, type RoleHeadgear } from './roles';
+
+/** Public folder with the circular portraits: `<role>-96.webp` and `<role>-192.webp`. */
+export const ROLE_PHOTO_BASE = '/roles';
 
 /** The head-gear overlay drawn on the persona, in the role's `currentColor`. */
 function Headgear({ kind }: { kind: RoleHeadgear }) {
@@ -67,9 +71,33 @@ export interface RoleAvatarProps {
 /** A round, colour-coded persona avatar for a professional role. */
 export function RoleAvatar({ role, className, title }: RoleAvatarProps) {
   const clipId = useId();
+  const { t } = useTranslation();
+  const [photoFailed, setPhotoFailed] = useState(false);
   const meta = ROLE_BY_ID[role];
   if (!meta) return null;
   const Badge = meta.badge;
+  if (!photoFailed) {
+    const label = t(meta.labelKey, { defaultValue: meta.labelDefault });
+    return (
+      <span
+        className={clsx('relative inline-flex shrink-0', className ?? 'h-11 w-11')}
+        title={title}
+      >
+        <img
+          src={`${ROLE_PHOTO_BASE}/${role}-96.webp`}
+          srcSet={`${ROLE_PHOTO_BASE}/${role}-96.webp 1x, ${ROLE_PHOTO_BASE}/${role}-192.webp 2x`}
+          alt={label}
+          width={96}
+          height={96}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onError={() => setPhotoFailed(true)}
+          className="h-full w-full rounded-full bg-surface-secondary object-cover ring-1 ring-black/10 dark:ring-white/25"
+        />
+      </span>
+    );
+  }
   return (
     <span
       className={clsx('relative inline-flex shrink-0', className ?? 'h-11 w-11')}
