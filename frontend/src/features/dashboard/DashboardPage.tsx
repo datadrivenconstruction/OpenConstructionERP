@@ -148,6 +148,7 @@ const SensorAlertsCard = lazy(() =>
 const PunchListQualityCard = lazy(() =>
   import('./PunchListQualityCard').then((m) => ({ default: m.PunchListQualityCard })),
 );
+const PromoVideos = lazy(() => import('@/features/videos/PromoVideos'));
 const RegionalPackCard = lazy(() =>
   import('./RegionalPackCard').then((m) => ({ default: m.RegionalPackCard })),
 );
@@ -2724,6 +2725,11 @@ function DashboardPageInner() {
     // case it most needs to speak up in, so a self-hiding version would go
     // silent exactly where it is needed.
     regional_pack: <RegionalPackCard />,
+    watch_share: (
+      <Suspense fallback={null}>
+        <PromoVideos />
+      </Suspense>
+    ),
     // Same rule: never in WIDGET_NULL_FALLBACK. It waits for the pack answer
     // so the market it leads with is decided once, and the grid's skeleton
     // stands in meanwhile rather than a card that flips.

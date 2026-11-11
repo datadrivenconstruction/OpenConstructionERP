@@ -39,6 +39,7 @@ import { isTauri, openAppInBrowser, openLink } from '@/shared/lib/desktop';
 import { SupportUsButton } from './SupportUsButton';
 import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
+import { useTopBarPrefs } from '@/shared/lib/topBarPrefs';
 import { PresenceAvatarStack } from '@/features/global_presence';
 import { getRouteIcon } from './routeIcons';
 import { useIconOverridesVersion } from './menuIcons';
@@ -382,6 +383,7 @@ interface HeaderProps {
 export function Header({ title, onMenuClick }: HeaderProps) {
   const projectStripe = useActiveProjectColor();
   const { t, i18n } = useTranslation();
+  const bar = useTopBarPrefs();
   // Header mounts at app boot, before lazy-loaded locale chunks arrive.
   // ``useTranslation`` doesn't always pick up bundle-added events under
   // React StrictMode (subscription gets churned by double-mount), so we
@@ -531,8 +533,8 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             project picker instead of truncating its name. The column keeps
             room for the globe, so the readout shrinks to its icon and tooltip
             rather than vanishing, which is the one thing it must not do. */}
-        <ActivePackChip className="min-w-0" />
-        {showCoBrand && <PartnerLogoBadge variant="nav" />}
+        {!bar.pack && <ActivePackChip className="min-w-0" />}
+        {!bar.pack && showCoBrand && <PartnerLogoBadge variant="nav" />}
       </div>
 
       {/* Right side — three zones separated by hairline dividers.
@@ -550,11 +552,13 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             Names the lifecycle phase the current screen belongs to and
             opens the whole-platform journey map. First in the cluster so it
             reads as "where am I" ahead of the action buttons. */}
-        <ProjectJourneyButton />
+        {!bar.journey && <ProjectJourneyButton />}
         <PresenceAvatarStack />
         <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
 
         {/* ── Zone 2 (Search) ──────────────────────────────────────── */}
+        {!bar.search && (
+        <>
         <button
           onClick={openCommandPalette}
           className={clsx(
@@ -591,8 +595,11 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         >
           <Search size={16} />
         </button>
+        </>
+        )}
 
         {/* The AI assistant dock, also reachable from the palette ("Ask AI"). */}
+        {!bar.askAi && (
         <button
           type="button"
           onClick={() => openAiPanel({ pathname: location.pathname, navigate })}
@@ -607,6 +614,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <Sparkles size={16} strokeWidth={1.75} />
           <span className="hidden xl:inline text-sm">{t('header.ask_ai', { defaultValue: 'Ask AI' })}</span>
         </button>
+        )}
 
         {/* Hairline divider between Zone 2 and Zone 3. */}
         <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
@@ -623,7 +631,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             width, because it is the way back to a feature that stopped. */}
         <ProcessesButton />
         <NotificationBell />
-        <HeaderNewsButton />
+        {!bar.news && <HeaderNewsButton />}
         {/* Building a module is something you do from wherever you noticed the
             platform was missing one, so it lives here rather than in the
             sidebar. Renders nothing for anyone who may not install one.
@@ -631,10 +639,10 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Shown from 2xl only: at 125% and 150% text size a 1280-1440px bar
             had no room for these three next to the project picker, and the
             right cluster ran off screen. */}
-        <div className="hidden 2xl:block"><ModuleBuilderButton /></div>
-        <div className="hidden 2xl:block"><SupportUsButton /></div>
-        <div className="hidden 2xl:block"><SubscribeButton /></div>
-        <BugReportMenu />
+        {!bar.moduleBuilder && <div className="hidden 2xl:block"><ModuleBuilderButton /></div>}
+        {!bar.supportUs && <div className="hidden 2xl:block"><SupportUsButton /></div>}
+        {!bar.subscribe && <div className="hidden 2xl:block"><SubscribeButton /></div>}
+        {!bar.bugReport && <BugReportMenu />}
         <HelpMenu />
 
         {/* Hairline divider between Zone 3 and Zone 4. */}
@@ -642,14 +650,14 @@ export function Header({ title, onMenuClick }: HeaderProps) {
 
         {/* ── Zone 4 (Account) ─────────────────────────────────────── */}
         <UploadQueueIndicator />
-        <LanguageSwitcher
+        {!bar.language && <LanguageSwitcher
           currentLang={currentLang}
           // Load the target locale's lazy chunk BEFORE switching so every
           // string flips to the new language immediately, with no English
           // flash and no reload. See ``changeLanguage`` in app/i18n.
           onSelect={(code) => void changeLanguage(code)}
-        />
-        <ThemeToggle />
+        />}
+        {!bar.theme && <ThemeToggle />}
         <UserMenu />
       </div>
     </header>

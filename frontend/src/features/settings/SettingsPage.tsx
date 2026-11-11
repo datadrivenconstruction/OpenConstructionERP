@@ -27,6 +27,7 @@ import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
 import { MenuSizeCard } from './MenuSizeCard';
 import { SidebarFooterCard } from './SidebarFooterCard';
+import { TopBarCard } from './TopBarCard';
 import { FloatingButtonsCard } from './FloatingButtonsCard';
 import { LearningTipsCard } from './LearningTipsCard';
 import { NotificationChannelsCard } from './NotificationChannelsCard';
@@ -1903,6 +1904,7 @@ export function SettingsPage() {
               <WorkspaceBrandCard />
               <WorkPrefsCard />
               <TableOptionsCard key={`tables-${modeKey}`} />
+              <TopBarCard />
               <SidebarFooterCard />
               <FloatingButtonsCard />
               <LearningTipsCard />
