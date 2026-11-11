@@ -131,7 +131,7 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--chat-text-secondary)';
             }}
           >
-            <MessageSquarePlus size={13} strokeWidth={1.85} />
+            <MessageSquarePlus size={14} strokeWidth={1.85} />
             {t('chat.new_chat', { defaultValue: 'New chat' })}
           </button>
         </div>

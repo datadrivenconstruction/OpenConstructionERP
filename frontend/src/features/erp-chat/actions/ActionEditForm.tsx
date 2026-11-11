@@ -259,11 +259,11 @@ export function ActionEditForm({ action, busy, serverFieldErrors = {}, onSubmit,
           tone="primary"
           busy={busy}
           busyLabel={String(t('erp_chat.action.busy.save', { defaultValue: 'Saving…' }))}
-          icon={<Check size={13} />}
+          icon={<Check size={14} />}
         >
           {t('erp_chat.action.form.save', { defaultValue: 'Save changes' })}
         </ActionButton>
-        <ActionButton tone="ghost" onClick={onCancel} disabled={busy} icon={<X size={13} />}>
+        <ActionButton tone="ghost" onClick={onCancel} disabled={busy} icon={<X size={14} />}>
           {t('erp_chat.action.form.cancel', { defaultValue: 'Cancel' })}
         </ActionButton>
         <span className="text-2xs text-[var(--act-text-3)]">

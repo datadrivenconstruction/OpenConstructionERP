@@ -97,7 +97,7 @@ export function ConsolidatedModal({
             type="month"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="rounded-lg border border-border-light bg-surface-primary px-3 py-2"
+            className="oe-input"
           />
         </label>
       )}

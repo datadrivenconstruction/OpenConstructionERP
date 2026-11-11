@@ -104,7 +104,7 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
               setPreset('custom');
               setRange((r) => ({ ...r, from: e.target.value }));
             }}
-            className="min-h-[40px] rounded-lg border border-border bg-surface-primary px-2"
+            className="min-h-[40px] oe-input"
           />
         </label>
         <label className="flex items-center gap-1 text-sm text-content-secondary">
@@ -117,7 +117,7 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
               setPreset('custom');
               setRange((r) => ({ ...r, to: e.target.value }));
             }}
-            className="min-h-[40px] rounded-lg border border-border bg-surface-primary px-2"
+            className="min-h-[40px] oe-input"
           />
         </label>
       </div>
@@ -145,7 +145,7 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
       {data && data.findings.length > 0 && (
         <Card>
           <CardContent>
-            <h3 className="mb-2 text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title mb-2">
               {t('field_productivity.findings', { defaultValue: 'Checks' })}
             </h3>
             <ul className="space-y-1.5">
@@ -224,20 +224,20 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
           {/* Desk: one table, expand a row for crews, weeks and forecast. */}
           <Card padding="none" className="hidden md:block">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-tertiary">
-                    <th className="w-6 px-2 py-2" />
-                    <th className="px-2 py-2">{t('field_productivity.col_position', { defaultValue: 'Position' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_installed', { defaultValue: 'Installed' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_hours', { defaultValue: 'Hours' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_plant', { defaultValue: 'Plant h' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_rate', { defaultValue: 'h / unit' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_norm', { defaultValue: 'Norm h / unit' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_units_per_mh', { defaultValue: 'Units / man-hour' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_earned', { defaultValue: 'Earned' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_factor', { defaultValue: 'vs norm' })}</th>
-                    <th className="px-2 py-2 text-right">{t('field_productivity.col_forecast', { defaultValue: 'Hours to complete' })}</th>
+                  <tr>
+                    <th className="w-6" />
+                    <th>{t('field_productivity.col_position', { defaultValue: 'Position' })}</th>
+                    <th className="text-right">{t('field_productivity.col_installed', { defaultValue: 'Installed' })}</th>
+                    <th className="text-right">{t('field_productivity.col_hours', { defaultValue: 'Hours' })}</th>
+                    <th className="text-right">{t('field_productivity.col_plant', { defaultValue: 'Plant h' })}</th>
+                    <th className="text-right">{t('field_productivity.col_rate', { defaultValue: 'h / unit' })}</th>
+                    <th className="text-right">{t('field_productivity.col_norm', { defaultValue: 'Norm h / unit' })}</th>
+                    <th className="text-right">{t('field_productivity.col_units_per_mh', { defaultValue: 'Units / man-hour' })}</th>
+                    <th className="text-right">{t('field_productivity.col_earned', { defaultValue: 'Earned' })}</th>
+                    <th className="text-right">{t('field_productivity.col_factor', { defaultValue: 'vs norm' })}</th>
+                    <th className="text-right">{t('field_productivity.col_forecast', { defaultValue: 'Hours to complete' })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,13 +247,13 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
                     return (
                       <Fragment key={key}>
                         <tr
-                          className="cursor-pointer border-b border-border-light hover:bg-surface-secondary/50"
+                          className="cursor-pointer"
                           onClick={() => setOpen(isOpen ? null : key)}
                         >
-                          <td className="px-2 py-2 text-content-tertiary">
+                          <td className="text-content-tertiary">
                             {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                           </td>
-                          <td className="max-w-[280px] px-2 py-2">
+                          <td className="max-w-[280px]">
                             <div className="flex items-center gap-2">
                               <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${LIGHT_DOT[r.light]}`} aria-hidden />
                               <span className="font-medium text-content-primary">
@@ -263,22 +263,22 @@ export function ProductivityPanel({ projectId }: { projectId: string }) {
                             </div>
                             <div className="truncate text-xs text-content-tertiary">{r.description}</div>
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums">
+                          <td className="text-right tabular-nums">
                             {fmtNum(r.installed_quantity, 2, lang)} <span className="text-content-tertiary">{r.unit}</span>
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.labour_hours, 1, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.plant_hours, 1, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.actual_hours_per_unit, 3, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.norm_labour_hours_per_unit, 3, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.units_per_man_hour, 2, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.earned_hours, 1, lang)}</td>
-                          <td className="px-2 py-2 text-right font-semibold tabular-nums">{fmtFactorPct(r.productivity_factor, lang)}</td>
-                          <td className="px-2 py-2 text-right tabular-nums">{fmtNum(r.forecast_hours_to_complete, 0, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.labour_hours, 1, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.plant_hours, 1, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.actual_hours_per_unit, 3, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.norm_labour_hours_per_unit, 3, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.units_per_man_hour, 2, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.earned_hours, 1, lang)}</td>
+                          <td className="text-right font-semibold tabular-nums">{fmtFactorPct(r.productivity_factor, lang)}</td>
+                          <td className="text-right tabular-nums">{fmtNum(r.forecast_hours_to_complete, 0, lang)}</td>
                         </tr>
                         {isOpen && (
-                          <tr className="border-b border-border-light bg-surface-secondary/30">
+                          <tr className="bg-surface-secondary/30">
                             <td />
-                            <td colSpan={10} className="px-2 py-3">
+                            <td colSpan={10}>
                               <RowDetail row={r} lang={lang} />
                             </td>
                           </tr>
@@ -341,7 +341,7 @@ function RowDetail({ row, lang }: { row: ProductivityRow; lang: string }) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div className="space-y-1 text-sm">
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline">
           {t('field_productivity.forecast', { defaultValue: 'Forecast' })}
         </h4>
         <div>
@@ -368,7 +368,7 @@ function RowDetail({ row, lang }: { row: ProductivityRow; lang: string }) {
         <div className="text-xs text-content-tertiary">{source}</div>
       </div>
       <div className="text-sm">
-        <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline mb-1">
           {t('field_productivity.crews', { defaultValue: 'Crews' })}
         </h4>
         {row.crews.length === 0 ? (
@@ -392,7 +392,7 @@ function RowDetail({ row, lang }: { row: ProductivityRow; lang: string }) {
         )}
       </div>
       <div className="text-sm">
-        <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <h4 className="oe-overline mb-1">
           {t('field_productivity.by_week', { defaultValue: 'By week' })}
         </h4>
         <ul className="space-y-1">
@@ -418,7 +418,7 @@ function WeekTrend({ weeks, lang }: { weeks: ProductivityWeek[]; lang: string })
     <Card>
       <CardContent>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('field_productivity.trend', { defaultValue: 'Trend by week' })}
           </h3>
           <div className="flex gap-3 text-xs text-content-tertiary">
@@ -427,7 +427,7 @@ function WeekTrend({ weeks, lang }: { weeks: ProductivityWeek[]; lang: string })
               {t('field_productivity.legend_spent', { defaultValue: 'Hours spent' })}
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-semantic-success" />
               {t('field_productivity.legend_earned', { defaultValue: 'Hours earned' })}
             </span>
           </div>
@@ -443,7 +443,7 @@ function WeekTrend({ weeks, lang }: { weeks: ProductivityWeek[]; lang: string })
                   title={`${fmtNum(w.labour_hours, 1, lang)} h`}
                 />
                 <div
-                  className="w-3 rounded-t bg-emerald-400"
+                  className="w-3 rounded-t bg-semantic-success"
                   style={{ height: `${barHeight(w.earned_hours, max)}%` }}
                   title={`${fmtNum(w.earned_hours, 1, lang)} h`}
                 />

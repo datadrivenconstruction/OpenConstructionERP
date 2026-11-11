@@ -105,26 +105,26 @@ export function TelematicsTab() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-sm">
+              <table className="oe-table min-w-[760px]">
                 <thead>
-                  <tr className="border-b border-border-light text-left text-xs uppercase tracking-wide text-content-tertiary">
-                    <th className="py-2 pr-3 font-medium">{t('equipment.telematics.col_machine', { defaultValue: 'Machine' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_worked', { defaultValue: 'Worked h' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_idle', { defaultValue: 'Idle h' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_off', { defaultValue: 'Off h' })}</th>
-                    <th className="px-2 py-2 font-medium">{t('equipment.telematics.col_util', { defaultValue: 'Utilisation' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_idle_pct', { defaultValue: 'Idle %' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_fuel', { defaultValue: 'Fuel L' })}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('equipment.telematics.col_co2', { defaultValue: 'CO2 kg' })}</th>
-                    <th className="py-2 pl-2 text-right font-medium">{t('equipment.telematics.col_hire', { defaultValue: 'Hire cost' })}</th>
+                  <tr>
+                    <th>{t('equipment.telematics.col_machine', { defaultValue: 'Machine' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_worked', { defaultValue: 'Worked h' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_idle', { defaultValue: 'Idle h' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_off', { defaultValue: 'Off h' })}</th>
+                    <th>{t('equipment.telematics.col_util', { defaultValue: 'Utilisation' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_idle_pct', { defaultValue: 'Idle %' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_fuel', { defaultValue: 'Fuel L' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_co2', { defaultValue: 'CO2 kg' })}</th>
+                    <th className="text-right">{t('equipment.telematics.col_hire', { defaultValue: 'Hire cost' })}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {machines.map((m) => {
                     const split = hoursShares(m);
                     return (
-                      <tr key={m.equipment_id} className="border-b border-border-light last:border-0">
-                        <td className="py-2 pr-3">
+                      <tr key={m.equipment_id} className="last:border-0">
+                        <td>
                           <div className="font-medium text-content-primary">{m.code}</div>
                           <div className="text-xs text-content-tertiary">{m.name}</div>
                           {(m.counter_reset_days ?? 0) > 0 && (
@@ -133,10 +133,10 @@ export function TelematicsTab() {
                             </Badge>
                           )}
                         </td>
-                        <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.worked_hours, 1)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.idle_hours, 1)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.off_hours, 1)}</td>
-                        <td className="px-2 py-2">
+                        <td className="text-right tabular-nums">{fmtNumber(m.worked_hours, 1)}</td>
+                        <td className="text-right tabular-nums">{fmtNumber(m.idle_hours, 1)}</td>
+                        <td className="text-right tabular-nums">{fmtNumber(m.off_hours, 1)}</td>
+                        <td>
                           <div
                             className="flex h-2 w-28 overflow-hidden rounded-full bg-surface-secondary"
                             role="img"
@@ -152,9 +152,9 @@ export function TelematicsTab() {
                         <td className={`px-2 py-2 text-right tabular-nums ${idleTone(m.idle_pct)}`}>
                           {fmtNumber(m.idle_pct, 1)}%
                         </td>
-                        <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.fuel_l, 1)}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.co2_kg, 1)}</td>
-                        <td className="py-2 pl-2 text-right tabular-nums">{fmtNumber(m.hire_cost, 2)}</td>
+                        <td className="text-right tabular-nums">{fmtNumber(m.fuel_l, 1)}</td>
+                        <td className="text-right tabular-nums">{fmtNumber(m.co2_kg, 1)}</td>
+                        <td className="text-right tabular-nums">{fmtNumber(m.hire_cost, 2)}</td>
                       </tr>
                     );
                   })}
@@ -162,17 +162,17 @@ export function TelematicsTab() {
                 {totals && (
                   <tfoot>
                     <tr className="border-t-2 border-border-light font-semibold">
-                      <td className="py-2 pr-3">
+                      <td>
                         {t('equipment.telematics.totals', { defaultValue: 'Total' })} ({totals.machines})
                       </td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.worked_hours, 1)}</td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.idle_hours, 1)}</td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.off_hours, 1)}</td>
-                      <td className="px-2 py-2 text-xs tabular-nums">{fmtNumber(totals.utilisation_pct, 1)}%</td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.idle_pct, 1)}%</td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.fuel_l, 1)}</td>
-                      <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.co2_kg, 1)}</td>
-                      <td className="py-2 pl-2 text-right tabular-nums">{fmtNumber(totals.hire_cost, 2)}</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.worked_hours, 1)}</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.idle_hours, 1)}</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.off_hours, 1)}</td>
+                      <td className="text-xs tabular-nums">{fmtNumber(totals.utilisation_pct, 1)}%</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.idle_pct, 1)}%</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.fuel_l, 1)}</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.co2_kg, 1)}</td>
+                      <td className="text-right tabular-nums">{fmtNumber(totals.hire_cost, 2)}</td>
                     </tr>
                   </tfoot>
                 )}

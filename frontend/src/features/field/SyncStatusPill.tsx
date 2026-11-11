@@ -156,7 +156,7 @@ export function SyncStatusPill({ className = '' }: SyncStatusPillProps) {
       {showProblems && status === 'error' && (
         <div
           data-testid="sync-problems"
-          className="absolute right-0 top-full z-40 mt-1 w-72 max-w-[90vw] rounded-lg border border-border bg-surface-elevated p-2 shadow-lg"
+          className="absolute right-0 top-full z-dropdown mt-1 w-72 max-w-[90vw] rounded-lg border border-border bg-surface-elevated p-2 shadow-lg"
         >
           <p className="px-1 pb-1 text-xs font-semibold text-content-primary">
             {t('offline_sync.problems_title', { defaultValue: 'The server refused these changes' })}

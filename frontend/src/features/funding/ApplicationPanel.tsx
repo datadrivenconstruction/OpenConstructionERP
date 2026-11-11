@@ -128,7 +128,7 @@ function Field({
 }) {
   const id = useId();
   const shared =
-    'w-full rounded border border-border px-2 py-1.5';
+    'oe-input w-full';
   return (
     <div className="text-sm">
       <label htmlFor={id} className="mb-1 block text-content-secondary">
@@ -651,7 +651,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                   setAllocationDraft((p) => ({ ...p, eligibility: e.target.value as Eligibility }))
                 }
                 aria-label={t('funding.field.eligibility', { defaultValue: 'Eligibility' })}
-                className="w-full rounded border border-border px-2 py-1.5 text-sm"
+                className="w-full oe-select"
               >
                 {ELIGIBILITIES.map((value) => (
                   <option key={value} value={value}>
@@ -679,24 +679,24 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             })}
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-content-tertiary">
+          <table className="oe-table oe-table-compact">
+            <thead className="text-left">
               <tr>
-                <th className="px-2 py-1">{t('funding.field.cost_group', { defaultValue: 'Cost group' })}</th>
-                <th className="px-2 py-1">{t('common.description', { defaultValue: 'Description' })}</th>
-                <th className="px-2 py-1 text-right">{t('funding.field.amount', { defaultValue: 'Amount' })}</th>
-                <th className="px-2 py-1 text-right">{t('funding.field.eligible_amount', { defaultValue: 'Of which eligible' })}</th>
-                <th className="px-2 py-1">{t('funding.field.eligibility', { defaultValue: 'Eligibility' })}</th>
+                <th>{t('funding.field.cost_group', { defaultValue: 'Cost group' })}</th>
+                <th>{t('common.description', { defaultValue: 'Description' })}</th>
+                <th className="text-right">{t('funding.field.amount', { defaultValue: 'Amount' })}</th>
+                <th className="text-right">{t('funding.field.eligible_amount', { defaultValue: 'Of which eligible' })}</th>
+                <th>{t('funding.field.eligibility', { defaultValue: 'Eligibility' })}</th>
               </tr>
             </thead>
             <tbody>
               {cost_allocations.map((row) => (
-                <tr key={row.id} className="border-t border-border-light">
-                  <td className="px-2 py-1 font-medium">{row.cost_group}</td>
-                  <td className="px-2 py-1 text-content-secondary">{row.description || '—'}</td>
-                  <td className="px-2 py-1 text-right tabular-nums">{money(row.amount)}</td>
-                  <td className="px-2 py-1 text-right tabular-nums">{money(row.eligible_amount)}</td>
-                  <td className="px-2 py-1">
+                <tr key={row.id}>
+                  <td className="font-medium">{row.cost_group}</td>
+                  <td className="text-content-secondary">{row.description || '—'}</td>
+                  <td className="text-right tabular-nums">{money(row.amount)}</td>
+                  <td className="text-right tabular-nums">{money(row.eligible_amount)}</td>
+                  <td>
                     <Badge variant={eligibilityVariant(row.eligibility)} size="sm">
                       {t(`funding.eligibility.${row.eligibility}`, { defaultValue: row.eligibility })}
                     </Badge>
@@ -705,12 +705,12 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
               ))}
             </tbody>
             <tfoot>
-              <tr className="border-t border-border-light font-medium">
-                <td className="px-2 py-1" colSpan={2}>
+              <tr className="font-medium">
+                <td colSpan={2}>
                   {t('common.total', { defaultValue: 'Total' })}
                 </td>
-                <td className="px-2 py-1 text-right tabular-nums">{money(summary.allocated_amount)}</td>
-                <td className="px-2 py-1 text-right tabular-nums">{money(summary.allocated_eligible_amount)}</td>
+                <td className="text-right tabular-nums">{money(summary.allocated_amount)}</td>
+                <td className="text-right tabular-nums">{money(summary.allocated_eligible_amount)}</td>
                 <td />
               </tr>
             </tfoot>
@@ -773,39 +773,39 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                 })}
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-content-tertiary">
+          <table className="oe-table oe-table-compact">
+            <thead className="text-left">
               <tr>
-                <th className="px-2 py-1">{t('funding.field.code', { defaultValue: 'Reference' })}</th>
+                <th>{t('funding.field.code', { defaultValue: 'Reference' })}</th>
                 {/* The draw's own spending period, which is a window inside
                     the award period and not the award period itself. */}
-                <th className="px-2 py-1">{t('funding.field.spend_period', { defaultValue: 'Spending period' })}</th>
-                <th className="px-2 py-1 text-right">{t('funding.field.requested', { defaultValue: 'Requested' })}</th>
-                <th className="px-2 py-1 text-right">{t('funding.field.received', { defaultValue: 'Received' })}</th>
-                <th className="px-2 py-1">{t('funding.field.spend_deadline', { defaultValue: 'Spend by' })}</th>
-                <th className="px-2 py-1">{t('funding.field.status', { defaultValue: 'Status' })}</th>
-                <th className="px-2 py-1" />
+                <th>{t('funding.field.spend_period', { defaultValue: 'Spending period' })}</th>
+                <th className="text-right">{t('funding.field.requested', { defaultValue: 'Requested' })}</th>
+                <th className="text-right">{t('funding.field.received', { defaultValue: 'Received' })}</th>
+                <th>{t('funding.field.spend_deadline', { defaultValue: 'Spend by' })}</th>
+                <th>{t('funding.field.status', { defaultValue: 'Status' })}</th>
+                <th />
               </tr>
             </thead>
             <tbody>
               {disbursements.map((row: FundingDisbursement) => (
-                <tr key={row.id} className="border-t border-border-light align-top">
-                  <td className="px-2 py-1 font-medium">{row.code || `#${row.sequence}`}</td>
+                <tr key={row.id} className="align-top">
+                  <td className="font-medium">{row.code || `#${row.sequence}`}</td>
                   {/* A range is two dates and a separator, and the browser
                       is free to break it anywhere. In a right-to-left page it
                       picks the middle of a date. */}
-                  <td className="whitespace-nowrap px-2 py-1 tabular-nums text-content-secondary">
+                  <td className="whitespace-nowrap tabular-nums text-content-secondary">
                     {row.period_from || row.period_to ? `${date(row.period_from)} … ${date(row.period_to)}` : '—'}
                   </td>
-                  <td className="px-2 py-1 text-right tabular-nums">{money(row.amount_requested)}</td>
-                  <td className="px-2 py-1 text-right tabular-nums">{money(row.amount_received)}</td>
-                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.spend_deadline_on)}</td>
-                  <td className="px-2 py-1">
+                  <td className="text-right tabular-nums">{money(row.amount_requested)}</td>
+                  <td className="text-right tabular-nums">{money(row.amount_received)}</td>
+                  <td className="tabular-nums text-content-secondary">{date(row.spend_deadline_on)}</td>
+                  <td>
                     <Badge variant={drawVariant(row.status)} size="sm">
                       {t(`funding.draw_status.${row.status}`, { defaultValue: row.status })}
                     </Badge>
                   </td>
-                  <td className="px-2 py-1">
+                  <td>
                     {row.received_on ? (
                       // The column header is blank because it holds a button.
                       // Once the button is gone the date underneath it has
@@ -886,7 +886,7 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
                 value={proofKind}
                 onChange={(e) => setProofKind(e.target.value as ProofKind)}
                 aria-label={t('funding.field.kind', { defaultValue: 'Kind' })}
-                className="w-full rounded border border-border px-2 py-1.5 text-sm"
+                className="w-full oe-select"
               >
                 {PROOF_KINDS.map((value) => (
                   <option key={value} value={value}>
@@ -916,32 +916,32 @@ export function ApplicationPanel({ applicationId, projectId, currency, onBack }:
             })}
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-content-tertiary">
+          <table className="oe-table oe-table-compact">
+            <thead className="text-left">
               <tr>
-                <th className="px-2 py-1">{t('funding.field.kind', { defaultValue: 'Kind' })}</th>
-                <th className="px-2 py-1">{t('funding.field.due_on', { defaultValue: 'Due on' })}</th>
-                <th className="px-2 py-1 text-right">{t('funding.field.spent', { defaultValue: 'Eligible costs spent' })}</th>
-                <th className="px-2 py-1">{t('funding.field.status', { defaultValue: 'Status' })}</th>
-                <th className="px-2 py-1">{t('funding.field.retention_until', { defaultValue: 'Keep until' })}</th>
-                <th className="px-2 py-1" />
+                <th>{t('funding.field.kind', { defaultValue: 'Kind' })}</th>
+                <th>{t('funding.field.due_on', { defaultValue: 'Due on' })}</th>
+                <th className="text-right">{t('funding.field.spent', { defaultValue: 'Eligible costs spent' })}</th>
+                <th>{t('funding.field.status', { defaultValue: 'Status' })}</th>
+                <th>{t('funding.field.retention_until', { defaultValue: 'Keep until' })}</th>
+                <th />
               </tr>
             </thead>
             <tbody>
               {proofs_of_use.map((row) => (
-                <tr key={row.id} className="border-t border-border-light">
-                  <td className="px-2 py-1 font-medium">
+                <tr key={row.id}>
+                  <td className="font-medium">
                     {t(`funding.proof_kind.${row.kind}`, { defaultValue: row.kind })}
                   </td>
-                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.due_on)}</td>
-                  <td className="px-2 py-1 text-right tabular-nums">{money(row.total_eligible_spent)}</td>
-                  <td className="px-2 py-1">
+                  <td className="tabular-nums text-content-secondary">{date(row.due_on)}</td>
+                  <td className="text-right tabular-nums">{money(row.total_eligible_spent)}</td>
+                  <td>
                     <Badge variant={proofVariant(row.status)} size="sm">
                       {t(`funding.proof_status.${row.status}`, { defaultValue: row.status })}
                     </Badge>
                   </td>
-                  <td className="px-2 py-1 tabular-nums text-content-secondary">{date(row.retention_until)}</td>
-                  <td className="px-2 py-1">
+                  <td className="tabular-nums text-content-secondary">{date(row.retention_until)}</td>
+                  <td>
                     {row.accepted_on ? (
                       // Same blank header, same problem: a bare date under a
                       // column with no name tells the reader nothing.

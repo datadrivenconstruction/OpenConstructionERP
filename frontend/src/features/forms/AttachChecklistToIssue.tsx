@@ -180,7 +180,7 @@ export function AttachChecklistToIssue({
     <div className={clsx('flex flex-col gap-3', className)}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-content-primary">
-          <Link2 size={15} className="shrink-0 text-oe-blue" />
+          <Link2 size={16} className="shrink-0 text-oe-blue" />
           <span className="truncate">{t('forms.attach_checklist', { defaultValue: 'Attach a checklist' })}</span>
         </div>
         {onClose && (
@@ -190,7 +190,7 @@ export function AttachChecklistToIssue({
             onClick={onClose}
             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         )}
       </div>
@@ -198,7 +198,7 @@ export function AttachChecklistToIssue({
       {/* Already attached */}
       {attachedLoading ? (
         <div className="flex items-center gap-2 text-xs text-content-tertiary">
-          <Loader2 size={13} className="animate-spin" />
+          <Loader2 size={14} className="animate-spin" />
           {t('forms.loading_attached', { defaultValue: 'Checking attached checklists...' })}
         </div>
       ) : attached.length > 0 ? (
@@ -221,7 +221,7 @@ export function AttachChecklistToIssue({
 
       {/* Template picker */}
       <div className="relative">
-        <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
+        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
         <input
           className={clsx(inputCls, 'pl-9')}
           value={search}
@@ -232,7 +232,7 @@ export function AttachChecklistToIssue({
 
       {templatesLoading ? (
         <div className="flex items-center justify-center py-6 text-content-tertiary">
-          <Loader2 size={18} className="animate-spin" />
+          <Loader2 size={20} className="animate-spin" />
         </div>
       ) : templates.length === 0 ? (
         <EmptyState
@@ -306,7 +306,7 @@ function AttachedRow({
         !first && 'border-t border-border-light',
       )}
     >
-      <ClipboardList size={15} className="shrink-0 text-content-tertiary" />
+      <ClipboardList size={16} className="shrink-0 text-content-tertiary" />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-content-primary">{submission.template_name}</div>
         <div className="truncate text-xs text-content-tertiary">{submission.submission_number}</div>

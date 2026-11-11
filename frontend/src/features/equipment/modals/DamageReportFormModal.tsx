@@ -21,8 +21,8 @@ import {
 } from '../api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input w-full';
+const labelCls = 'oe-label';
 
 interface DamageReportFormModalProps {
   mode: 'create' | 'edit';
@@ -176,7 +176,7 @@ export function DamageReportFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -190,7 +190,7 @@ export function DamageReportFormModal({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="damage-form-title"
-            className="text-lg font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {isEdit
               ? t('equipment.damage.edit_title', {
@@ -213,7 +213,7 @@ export function DamageReportFormModal({
 
         <div className="space-y-4">
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.damage.section_event', {
                 defaultValue: 'Event',
               })}
@@ -251,7 +251,7 @@ export function DamageReportFormModal({
                 <select
                   value={severity}
                   onChange={(e) => setSeverity(e.target.value as DamageSeverity)}
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(['minor', 'major', 'critical'] as DamageSeverity[]).map(
                     (s) => (
@@ -272,7 +272,7 @@ export function DamageReportFormModal({
                     onChange={(e) =>
                       setStatusValue(e.target.value as DamageStatus)
                     }
-                    className={inputCls}
+                    className={`${inputCls} oe-select`}
                   >
                     {(['reported', 'under_repair', 'repaired'] as DamageStatus[]).map(
                       (s) => (
@@ -306,7 +306,7 @@ export function DamageReportFormModal({
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.damage.section_cost', {
                 defaultValue: 'Estimated cost',
               })}

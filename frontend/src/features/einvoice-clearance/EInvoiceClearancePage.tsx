@@ -31,7 +31,7 @@ export function EInvoiceClearancePage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="einvoice_clearance.how"
-        icon={<Landmark size={15} className="text-oe-blue" />}
+        icon={<Landmark size={16} className="text-oe-blue" />}
         title={t('einvoice_clearance.flow_title', {
           defaultValue: 'How clearance works, and what it records',
         })}

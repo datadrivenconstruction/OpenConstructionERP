@@ -170,7 +170,7 @@ export function TransmittalLogPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="h-9 text-sm px-2 rounded-lg border border-border bg-surface-primary text-content-primary"
+              className="oe-select"
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
@@ -186,7 +186,7 @@ export function TransmittalLogPage() {
             <select
               value={reasonFilter}
               onChange={(e) => setReasonFilter(e.target.value as ReasonFilter)}
-              className="h-9 text-sm px-2 rounded-lg border border-border bg-surface-primary text-content-primary"
+              className="oe-select"
             >
               {REASON_OPTIONS.map((r) => (
                 <option key={r} value={r}>
@@ -223,36 +223,36 @@ export function TransmittalLogPage() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-xs text-content-secondary border-b border-border-light bg-surface-secondary/20 sticky top-0">
+          <table className="oe-table">
+            <thead className="sticky top-0">
               <tr>
-                <th className="text-left px-6 py-2 font-medium">
+                <th>
                   {t('files.transmittals.col_number', { defaultValue: 'Number' })}
                 </th>
-                <th className="text-left px-3 py-2 font-medium">
+                <th>
                   {t('files.transmittals.col_subject', { defaultValue: 'Subject' })}
                 </th>
-                <th className="text-left px-3 py-2 font-medium">
+                <th>
                   {t('files.transmittals.col_reason', { defaultValue: 'Reason' })}
                 </th>
-                <th className="text-right px-3 py-2 font-medium">
+                <th className="text-right">
                   {t('files.transmittals.col_items', { defaultValue: 'Items' })}
                 </th>
-                <th className="text-right px-3 py-2 font-medium">
+                <th className="text-right">
                   {t('files.transmittals.col_recipients', {
                     defaultValue: 'Recipients',
                   })}
                 </th>
-                <th className="text-left px-3 py-2 font-medium">
+                <th>
                   {t('files.transmittals.col_sent_at', { defaultValue: 'Sent' })}
                 </th>
-                <th className="text-left px-3 py-2 font-medium">
+                <th>
                   {t('files.transmittals.col_status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-3 py-2" aria-hidden />
+                <th aria-hidden />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light">
+            <tbody>
               {rows.map((row) => {
                 const StatusIcon = STATUS_ICON[row.status] ?? FileText;
                 const variant = STATUS_VARIANT[row.status] ?? 'neutral';
@@ -265,27 +265,27 @@ export function TransmittalLogPage() {
                     )}
                     onClick={() => setSelectedId(row.id)}
                   >
-                    <td className="px-6 py-2 font-mono text-xs">{row.number}</td>
-                    <td className="px-3 py-2">
+                    <td className="font-mono text-xs">{row.number}</td>
+                    <td>
                       <span className="line-clamp-1">{row.subject}</span>
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {reasonLabel(row.reason_code)}
                     </td>
-                    <td className="px-3 py-2 text-right">{row.item_count}</td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">{row.item_count}</td>
+                    <td className="text-right">
                       {row.acknowledged_count}/{row.recipient_count}
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       <DateDisplay value={row.sent_at} />
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <Badge variant={variant} dot>
                         <StatusIcon size={10} className="mr-1" />
                         {statusLabel(row.status)}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="text-right">
                       <button
                         type="button"
                         className="text-content-tertiary hover:text-oe-blue"

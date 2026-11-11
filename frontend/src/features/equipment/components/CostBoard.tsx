@@ -60,10 +60,10 @@ export function CostBoard() {
         ) : (
           <div className="space-y-4">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[980px] text-sm">
+              <table className="oe-table min-w-[980px]">
                 <thead>
-                  <tr className="border-b border-border-light text-xs uppercase tracking-wide text-content-tertiary">
-                    <th className="py-2 pr-3 text-left font-medium">
+                  <tr>
+                    <th>
                       {t('equipment.costboard.col_machine', { defaultValue: 'Machine' })}
                     </th>
                     <th className={th}>{t('equipment.costboard.col_owning', { defaultValue: 'Owning' })}</th>
@@ -75,15 +75,15 @@ export function CostBoard() {
                     <th className={th}>{t('equipment.costboard.col_per_hour', { defaultValue: 'Cost per used h' })}</th>
                     <th className={th}>{t('equipment.costboard.col_market', { defaultValue: 'Market per h' })}</th>
                     <th className={th}>{t('equipment.costboard.col_recovery', { defaultValue: 'Recovered' })}</th>
-                    <th className="py-2 pl-3 text-left font-medium">
+                    <th>
                       {t('equipment.costboard.col_suggestion', { defaultValue: 'Suggestion' })}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {machines.map((m) => (
-                    <tr key={m.equipment_id} className="border-b border-border-light last:border-0">
-                      <td className="py-2 pr-3">
+                    <tr key={m.equipment_id} className="last:border-0">
+                      <td>
                         <div className="font-medium text-content-primary">{m.code}</div>
                         <div className="text-xs text-content-tertiary">{m.name}</div>
                       </td>
@@ -98,7 +98,7 @@ export function CostBoard() {
                       <td className={num}>{m.cost_per_used_hour == null ? dash : fmtNumber(m.cost_per_used_hour, currencyFractionDigits(m.currency))}</td>
                       <td className={num}>{m.market_hour_rate == null ? dash : fmtNumber(m.market_hour_rate, currencyFractionDigits(m.currency))}</td>
                       <td className={num}>{m.recovery_pct == null ? dash : `${fmtNumber(m.recovery_pct, 0)}%`}</td>
-                      <td className="py-2 pl-3">
+                      <td>
                         <span
                           className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${suggestionTone(m.suggestion)}`}
                         >
@@ -115,7 +115,7 @@ export function CostBoard() {
                   <tfoot>
                     {totals.map(([cur, tot]) => (
                       <tr key={cur} className="border-t-2 border-border-light font-semibold">
-                        <td className="py-2 pr-3">
+                        <td>
                           {t('equipment.costboard.totals', { defaultValue: 'Total' })} {cur}
                         </td>
                         <td className={num}>{fmtNumber(tot.owning_cost, currencyFractionDigits(cur))}</td>

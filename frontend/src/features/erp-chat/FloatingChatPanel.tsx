@@ -542,7 +542,7 @@ function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
   const head = (
     <>
       <Icon
-        size={13}
+        size={14}
         aria-hidden
         className={clsx(
           'mt-px shrink-0',
@@ -563,9 +563,9 @@ function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
       {expandable && (
         <span className="ms-auto shrink-0">
           {open ? (
-            <ChevronDown size={13} aria-hidden />
+            <ChevronDown size={14} aria-hidden />
           ) : (
-            <ChevronRight size={13} aria-hidden className="rtl:rotate-180" />
+            <ChevronRight size={14} aria-hidden className="rtl:rotate-180" />
           )}
         </span>
       )}
@@ -733,7 +733,7 @@ function EmptyState({
         ))}
       </ol>
       <p className="mt-2 flex items-center gap-1.5 text-xs text-[color:var(--chat-text-secondary)]">
-        <ShieldCheck size={13} aria-hidden className="shrink-0" />
+        <ShieldCheck size={14} aria-hidden className="shrink-0" />
         {t('chat.dock.steps_note', { defaultValue: 'Every change is logged in the project history.' })}
       </p>
 
@@ -842,7 +842,7 @@ function NoAIBanner({
           }}
           aria-hidden
         >
-          <KeyRound size={15} strokeWidth={1.85} />
+          <KeyRound size={16} strokeWidth={1.85} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -1077,7 +1077,7 @@ function HistoryError({ onRetry, onNew }: { onRetry: () => void; onNew: () => vo
   return (
     <div
       role="alert"
-      className="m-1 flex items-start gap-2.5 rounded-lg border border-[color:var(--chat-border)] bg-[color:var(--chat-surface-1)] px-3 py-3"
+      className="m-1 flex items-start gap-2 rounded-lg border border-[color:var(--chat-border)] bg-[color:var(--chat-surface-1)] px-3 py-3"
       data-testid="floating-chat-history-error"
     >
       <AlertTriangle size={16} aria-hidden className="mt-px shrink-0 text-[color:var(--chat-tool-error)]" />
@@ -2356,7 +2356,7 @@ export function FloatingChatPanel() {
           aria-hidden
           data-testid="floating-chat-backdrop"
           data-state={dockState}
-          className="oe-ai-dock-backdrop fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+          className="oe-ai-dock-backdrop fixed inset-0 z-drawer bg-black/40 backdrop-blur-sm"
           onClick={presence.closing ? undefined : close}
         />
       )}
@@ -2379,7 +2379,7 @@ export function FloatingChatPanel() {
           'border-s border-border-light',
           // Push: below modals and drawers (z-50), part of the layout, a
           // faint shadow is enough. Overlay: above the page, like a drawer.
-          overlay ? 'z-50 shadow-2xl' : 'z-40 shadow-[0_0_24px_rgba(15,23,42,0.08)]',
+          overlay ? 'z-drawer shadow-2xl' : 'z-header shadow-[0_0_24px_rgba(15,23,42,0.08)]',
           presence.closing ? 'pointer-events-none' : '',
           'focus:outline-none',
         ].join(' ')}
@@ -2424,7 +2424,7 @@ export function FloatingChatPanel() {
                 'linear-gradient(135deg, var(--oe-blue, #2563eb) 0%, var(--oe-blue-dark, #1d4ed8) 100%)',
             }}
           >
-            <Sparkles size={15} strokeWidth={2} />
+            <Sparkles size={16} strokeWidth={2} />
           </span>
           <input
             value={panelTitle}
@@ -2459,7 +2459,7 @@ export function FloatingChatPanel() {
               }
               testId="floating-chat-expand"
             >
-              {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </DockHeaderButton>
           )}
           <DockHeaderButton
@@ -2676,7 +2676,7 @@ export function FloatingChatPanel() {
               </div>
             </div>
             <div className="mt-1.5 flex items-center gap-1.5 px-1 text-xs leading-4 text-[color:var(--chat-text-secondary)]">
-              <ShieldCheck size={13} aria-hidden className="shrink-0" />
+              <ShieldCheck size={14} aria-hidden className="shrink-0" />
               <span id={composerNoteId} className="min-w-0 flex-1">
                 {t('chat.dock.composer_note', {
                   defaultValue: 'Changes are only saved after you approve them.',

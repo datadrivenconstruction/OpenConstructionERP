@@ -15,8 +15,8 @@ import {
 } from '../api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input w-full';
+const labelCls = 'oe-label';
 
 interface TypeFormModalProps {
   mode: 'create' | 'edit';
@@ -142,7 +142,7 @@ export function TypeFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -156,7 +156,7 @@ export function TypeFormModal({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="type-form-title"
-            className="text-lg font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {isEdit
               ? t('equipment.type.edit_title', {

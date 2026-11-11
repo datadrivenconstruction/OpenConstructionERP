@@ -106,7 +106,7 @@ export default function ChatHistory({
             flexShrink: 0,
           }}
         >
-          <Plus size={13} strokeWidth={2} />
+          <Plus size={14} strokeWidth={2} />
         </button>
       </div>
 
@@ -114,7 +114,7 @@ export default function ChatHistory({
         <div style={{ maxHeight: 220, overflowY: 'auto', padding: '0 6px 8px' }}>
           {sessionsLoading && sessions.length === 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: 10, color: 'var(--chat-text-tertiary)', fontSize: 12 }}>
-              <Loader2 size={13} className="animate-spin" /> {label('chat.history.loading', 'Loading…')}
+              <Loader2 size={14} className="animate-spin" /> {label('chat.history.loading', 'Loading…')}
             </div>
           ) : sessions.length === 0 ? (
             <div style={{ padding: 10, color: 'var(--chat-text-tertiary)', fontSize: 12, fontFamily: 'var(--chat-font-body)' }}>

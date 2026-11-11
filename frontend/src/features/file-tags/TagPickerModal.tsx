@@ -145,7 +145,7 @@ export function TagPickerModal({
       <div className="space-y-3">
         <div className="relative">
           <Search
-            size={13}
+            size={14}
             className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary pointer-events-none"
           />
           <input
@@ -155,7 +155,7 @@ export function TagPickerModal({
             placeholder={t('files.tags.filter_placeholder', {
               defaultValue: 'Filter tags…',
             })}
-            className="w-full h-9 ps-8 pe-3 text-sm rounded-lg border border-border-light bg-surface-primary text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+            className="w-full oe-input ps-8 pe-3"
           />
         </div>
 
@@ -186,13 +186,13 @@ export function TagPickerModal({
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder={t('files.tags.new_name', { defaultValue: 'New tag name' })}
-              className="w-full h-9 px-3 text-sm rounded-md border border-border-light bg-surface-primary"
+              className="w-full oe-input"
             />
             <div className="flex items-center gap-2">
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as TagCategory)}
-                className="h-9 px-2 text-sm rounded-md border border-border-light bg-surface-primary"
+                className="oe-select"
               >
                 {CATEGORY_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -245,7 +245,7 @@ export function TagPickerModal({
             onClick={() => setCreating(true)}
             className="inline-flex items-center gap-1 text-sm text-oe-blue hover:underline"
           >
-            <Plus size={13} />
+            <Plus size={14} />
             {t('files.tags.new_tag', { defaultValue: 'New tag…' })}
           </button>
         )}
@@ -289,7 +289,7 @@ function TagSelector({ tag, selected, onToggle }: TagSelectorProps) {
         style={{ backgroundColor: tag.color }}
       />
       <span className="truncate max-w-[160px]">{tag.display_name}</span>
-      {selected && <Check size={11} />}
+      {selected && <Check size={12} />}
     </button>
   );
 }

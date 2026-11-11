@@ -75,16 +75,16 @@ export function FieldAuthPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-white px-6">
       <div className="flex w-full max-w-sm flex-col gap-5">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-xl font-semibold text-content-primary">
             {t('field.auth_title', { defaultValue: 'Field sign-in' })}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-content-tertiary">
             {t('field.auth_subtitle', { defaultValue: 'Enter the 6-digit PIN from your SMS to start.' })}
           </p>
         </div>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-600">{t('field.auth_pin', { defaultValue: 'PIN' })}</span>
+          <span className="text-sm text-content-secondary">{t('field.auth_pin', { defaultValue: 'PIN' })}</span>
           <input
             inputMode="numeric"
             autoComplete="one-time-code"
@@ -95,7 +95,7 @@ export function FieldAuthPage() {
               if (e.key === 'Enter') void submit();
             }}
             placeholder="000000"
-            className="h-14 rounded-xl border border-slate-300 px-4 text-center text-2xl tracking-wider"
+            className="h-14 oe-input text-center text-2xl tracking-wider"
             aria-label={t('field.auth_pin', { defaultValue: 'PIN' })}
           />
         </label>

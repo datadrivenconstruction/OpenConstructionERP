@@ -203,7 +203,7 @@ function HowFormworkWorks() {
   return (
     <CollapsibleSection
       storageKey="formwork.how"
-      icon={<Boxes size={15} className="text-oe-blue" />}
+      icon={<Boxes size={16} className="text-oe-blue" />}
       title={t('formwork.flow_title', { defaultValue: 'How formwork pricing fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -288,13 +288,13 @@ function FindingList({ findings, emptyLabel }: FindingListProps) {
   if (findings.length === 0) {
     return (
       <p className="text-sm text-content-secondary flex items-center gap-2">
-        <ShieldCheck size={15} className="text-semantic-success" />
+        <ShieldCheck size={16} className="text-semantic-success" />
         {emptyLabel}
       </p>
     );
   }
   return (
-    <ul className="space-y-2.5">
+    <ul className="space-y-2">
       {findings.map((finding) => (
         <li
           key={`${finding.rule_id}-${finding.element_ref ?? ''}`}
@@ -414,8 +414,8 @@ function CyclePanel({ assignment, projectId, onClose }: CyclePanelProps) {
     <Card className="p-4 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-            <CalendarClock size={15} />
+          <h3 className="oe-card-title flex items-center gap-2">
+            <CalendarClock size={16} />
             {t('formwork.cycle.title', { defaultValue: 'Pour cycle' })}
           </h3>
           <p className="mt-1 text-xs text-content-secondary max-w-2xl">
@@ -485,7 +485,7 @@ function CyclePanel({ assignment, projectId, onClose }: CyclePanelProps) {
       {cycle && cycle.conflicts.length > 0 && (
         <div className="rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-3 py-2.5">
           <p className="text-sm text-semantic-error flex items-center gap-2">
-            <AlertTriangle size={15} />
+            <AlertTriangle size={16} />
             {t('formwork.cycle.conflictTitle', {
               defaultValue:
                 'One panel set cannot serve these pours - they are closer together than the striking time',
@@ -518,34 +518,34 @@ function CyclePanel({ assignment, projectId, onClose }: CyclePanelProps) {
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="oe-table oe-table-compact">
             <thead>
-              <tr className="text-left text-xs text-content-secondary border-b border-border">
-                <th className="py-1.5 pr-3 font-medium">
+              <tr>
+                <th>
                   {t('formwork.cycle.colPour', { defaultValue: 'Pour' })}
                 </th>
-                <th className="py-1.5 pr-3 font-medium">
+                <th>
                   {t('formwork.cycle.colLevel', { defaultValue: 'Level' })}
                 </th>
-                <th className="py-1.5 pr-3 font-medium text-right">
+                <th className="text-right">
                   {t('formwork.cycle.colArea', { defaultValue: 'Area m2' })}
                 </th>
-                <th className="py-1.5 pr-3 font-medium">
+                <th>
                   {t('formwork.cycle.colDate', { defaultValue: 'Pour date' })}
                 </th>
-                <th className="py-1.5" />
+                <th />
               </tr>
             </thead>
             <tbody>
               {lines.map((line) => (
-                <tr key={line.id} className="border-b border-border-light last:border-0">
-                  <td className="py-1.5 pr-3 tabular-nums">{line.pour_no}</td>
-                  <td className="py-1.5 pr-3">{line.level_label}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums">
+                <tr key={line.id} className="last:border-0">
+                  <td className="tabular-nums">{line.pour_no}</td>
+                  <td>{line.level_label}</td>
+                  <td className="text-right tabular-nums">
                     {fmtNumber(line.area_m2, locale)}
                   </td>
-                  <td className="py-1.5 pr-3 text-content-secondary">{line.pour_date ?? '-'}</td>
-                  <td className="py-1.5 text-right">
+                  <td className="text-content-secondary">{line.pour_date ?? '-'}</td>
+                  <td className="text-right">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -591,7 +591,7 @@ function CyclePanel({ assignment, projectId, onClose }: CyclePanelProps) {
         />
         <Button
           variant="secondary"
-          icon={<Plus size={15} />}
+          icon={<Plus size={16} />}
           loading={addMutation.isPending}
           disabled={!pourArea}
           onClick={() => addMutation.mutate()}
@@ -603,7 +603,7 @@ function CyclePanel({ assignment, projectId, onClose }: CyclePanelProps) {
       <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border-light">
         <Button
           variant="primary"
-          icon={<Wand2 size={15} />}
+          icon={<Wand2 size={16} />}
           loading={deriveMutation.isPending}
           disabled={lines.length === 0}
           onClick={() => deriveMutation.mutate()}
@@ -1060,7 +1060,7 @@ export function FormworkPage() {
 
           {summary?.currency_mixed && (
             <div className="rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-3 py-2.5 text-sm text-semantic-error flex items-center gap-2">
-              <AlertTriangle size={15} />
+              <AlertTriangle size={16} />
               {t('formwork.mixedCurrency', {
                 defaultValue:
                   'This project prices formwork in more than one currency, so the totals above are a sum of unlike units.',
@@ -1070,8 +1070,8 @@ export function FormworkPage() {
 
           <Card className="p-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-                <Layers size={15} />
+              <h2 className="oe-card-title flex items-center gap-2">
+                <Layers size={16} />
                 {t('formwork.assignments.title', { defaultValue: 'Formwork on this project' })}
               </h2>
               <Button
@@ -1100,40 +1100,40 @@ export function FormworkPage() {
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table">
                   <thead>
-                    <tr className="text-left text-xs text-content-secondary border-b border-border">
-                      <th className="py-1.5 pr-3 font-medium">
+                    <tr>
+                      <th>
                         {t('formwork.col.system', { defaultValue: 'System' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.area', { defaultValue: 'Area m2' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.reuses', { defaultValue: 'Reuses' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.panelRate', { defaultValue: 'Panels /m2' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.labourRate', { defaultValue: 'Erect+strike /m2' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.unitCost', { defaultValue: 'Rate /m2' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.total', { defaultValue: 'Total' })}
                       </th>
-                      <th className="py-1.5" />
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
                     {assignments.map((assignment) => (
                       <tr
                         key={assignment.id}
-                        className="border-b border-border-light last:border-0"
+                        className="last:border-0"
                       >
-                        <td className="py-2 pr-3">
+                        <td>
                           <div className="font-medium text-content-primary">
                             {assignment.system_name}
                           </div>
@@ -1150,25 +1150,25 @@ export function FormworkPage() {
                             )}
                           </div>
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtNumber(assignment.area_m2, locale)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {assignment.reuse_count} / {assignment.reuses_max}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {fmtNumber(assignment.material_unit_cost, locale)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums text-content-secondary">
+                        <td className="text-right tabular-nums text-content-secondary">
                           {fmtNumber(assignment.labour_unit_cost, locale)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums font-medium">
+                        <td className="text-right tabular-nums font-medium">
                           {fmtNumber(assignment.computed_unit_cost, locale)}
                         </td>
-                        <td className="py-2 pr-3 text-right tabular-nums font-medium">
+                        <td className="text-right tabular-nums font-medium">
                           {fmtMoney(assignment.computed_total, locale, assignment.currency)}
                         </td>
-                        <td className="py-2 text-right whitespace-nowrap">
+                        <td className="text-right whitespace-nowrap">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1236,7 +1236,7 @@ export function FormworkPage() {
               the backend refuses a push aimed at another project's bill. */}
           {pushingAssignmentId && (
             <Card className="p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
+              <h3 className="oe-card-title flex items-center gap-2">
                 <Send size={14} />
                 {t('formwork.push.title', { defaultValue: 'Send this formwork to a bill' })}
               </h3>
@@ -1258,14 +1258,14 @@ export function FormworkPage() {
                   <div className="flex flex-wrap items-end gap-2">
                     <div className="min-w-56">
                       <label
-                        className="block text-xs font-medium text-content-secondary mb-1"
+                        className="oe-label"
                         htmlFor="formwork-push-boq"
                       >
                         {t('formwork.push.targetBoq', { defaultValue: 'Bill of quantities' })}
                       </label>
                       <select
                         id="formwork-push-boq"
-                        className="w-full h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
+                        className="w-full oe-select"
                         value={pushBoqId}
                         onChange={(e) => setPushBoqId(e.target.value)}
                       >
@@ -1300,8 +1300,8 @@ export function FormworkPage() {
 
           <Card className="p-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-                <ShieldCheck size={15} />
+              <h2 className="oe-card-title flex items-center gap-2">
+                <ShieldCheck size={16} />
                 {t('formwork.validation.title', { defaultValue: 'Formwork validation' })}
               </h2>
               <div className="flex items-center gap-2">
@@ -1340,7 +1340,7 @@ export function FormworkPage() {
             </p>
             {validation && validation.unsupported_rule_sets.length > 0 && (
               <p className="text-sm text-semantic-warning flex items-center gap-2">
-                <Info size={15} />
+                <Info size={16} />
                 {t('formwork.validation.notRun', {
                   defaultValue: 'The formwork rules did not run, so this is not a clean result.',
                 })}
@@ -1360,38 +1360,38 @@ export function FormworkPage() {
 
           {summary && summary.by_system_type.length > 0 && (
             <Card className="p-4 space-y-3">
-              <h2 className="text-sm font-semibold text-content-primary">
+              <h2 className="oe-card-title">
                 {t('formwork.breakdown.title', { defaultValue: 'Formwork cost by system type' })}
               </h2>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="oe-table oe-table-compact">
                   <thead>
-                    <tr className="text-left text-xs text-content-secondary border-b border-border">
-                      <th className="py-1.5 pr-3 font-medium">
+                    <tr>
+                      <th>
                         {t('formwork.col.type', { defaultValue: 'Type' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.area', { defaultValue: 'Area m2' })}
                       </th>
-                      <th className="py-1.5 pr-3 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.total', { defaultValue: 'Total' })}
                       </th>
-                      <th className="py-1.5 font-medium text-right">
+                      <th className="text-right">
                         {t('formwork.col.share', { defaultValue: 'Share' })}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {summary.by_system_type.map((row) => (
-                      <tr key={row.system_type} className="border-b border-border-light last:border-0">
-                        <td className="py-1.5 pr-3">{row.system_type}</td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums">
+                      <tr key={row.system_type} className="last:border-0">
+                        <td>{row.system_type}</td>
+                        <td className="text-right tabular-nums">
                           {fmtNumber(row.area_m2, locale)}
                         </td>
-                        <td className="py-1.5 pr-3 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtMoney(row.total, locale, currency)}
                         </td>
-                        <td className="py-1.5 text-right tabular-nums">
+                        <td className="text-right tabular-nums">
                           {fmtNumber(row.share_pct, locale, 1)}%
                         </td>
                       </tr>
@@ -1410,8 +1410,8 @@ export function FormworkPage() {
         <Card className="p-4 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-                <Boxes size={15} />
+              <h2 className="oe-card-title flex items-center gap-2">
+                <Boxes size={16} />
                 {t('formwork.catalogue.title', { defaultValue: 'Formwork systems' })}
               </h2>
               <p className="mt-1 text-xs text-content-secondary max-w-3xl">
@@ -1451,14 +1451,14 @@ export function FormworkPage() {
               />
               <div>
                 <label
-                  className="block text-xs font-medium text-content-secondary mb-1"
+                  className="oe-label"
                   htmlFor="formwork-new-type"
                 >
                   {t('formwork.col.type', { defaultValue: 'Type' })}
                 </label>
                 <select
                   id="formwork-new-type"
-                  className="w-full h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
+                  className="w-full oe-select"
                   value={systemForm.system_type}
                   onChange={(e) =>
                     setSystemForm({
@@ -1476,14 +1476,14 @@ export function FormworkPage() {
               </div>
               <div>
                 <label
-                  className="block text-xs font-medium text-content-secondary mb-1"
+                  className="oe-label"
                   htmlFor="formwork-new-material"
                 >
                   {t('formwork.col.material', { defaultValue: 'Material' })}
                 </label>
                 <select
                   id="formwork-new-material"
-                  className="w-full h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
+                  className="w-full oe-select"
                   value={systemForm.material}
                   onChange={(e) =>
                     setSystemForm({ ...systemForm, material: e.target.value as FormworkMaterial })
@@ -1561,14 +1561,14 @@ export function FormworkPage() {
               />
               <div>
                 <label
-                  className="block text-xs font-medium text-content-secondary mb-1"
+                  className="oe-label"
                   htmlFor="formwork-new-basis"
                 >
                   {t('formwork.col.rateBasis', { defaultValue: 'Rate basis' })}
                 </label>
                 <select
                   id="formwork-new-basis"
-                  className="w-full h-9 rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
+                  className="w-full oe-select"
                   value={systemForm.rate_basis}
                   onChange={(e) =>
                     setSystemForm({
@@ -1599,7 +1599,7 @@ export function FormworkPage() {
               />
               <Button
                 variant="primary"
-                icon={<Plus size={15} />}
+                icon={<Plus size={16} />}
                 loading={createSystemMutation.isPending}
                 disabled={!systemForm.name}
                 onClick={() => createSystemMutation.mutate()}
@@ -1622,53 +1622,53 @@ export function FormworkPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="text-left text-xs text-content-secondary border-b border-border">
-                    <th className="py-1.5 pr-3 font-medium">
+                  <tr>
+                    <th>
                       {t('formwork.col.name', { defaultValue: 'Name' })}
                     </th>
-                    <th className="py-1.5 pr-3 font-medium">
+                    <th>
                       {t('formwork.col.type', { defaultValue: 'Type' })}
                     </th>
-                    <th className="py-1.5 pr-3 font-medium text-right">
+                    <th className="text-right">
                       {t('formwork.col.reusesMax', { defaultValue: 'Reuse limit' })}
                     </th>
-                    <th className="py-1.5 pr-3 font-medium text-right">
+                    <th className="text-right">
                       {t('formwork.col.panelRate', { defaultValue: 'Panels /m2' })}
                     </th>
-                    <th className="py-1.5 pr-3 font-medium text-right">
+                    <th className="text-right">
                       {t('formwork.col.labourRate', { defaultValue: 'Erect+strike /m2' })}
                     </th>
-                    <th className="py-1.5 pr-3 font-medium text-right">
+                    <th className="text-right">
                       {t('formwork.col.stripTime', { defaultValue: 'Striking time (days)' })}
                     </th>
-                    <th className="py-1.5" />
+                    <th />
                   </tr>
                 </thead>
                 <tbody>
                   {systems.map((system) => (
-                    <tr key={system.id} className="border-b border-border-light last:border-0">
-                      <td className="py-2 pr-3">
+                    <tr key={system.id} className="last:border-0">
+                      <td>
                         <div className="font-medium text-content-primary">{system.name}</div>
                         {system.supplier && (
                           <div className="text-xs text-content-secondary">{system.supplier}</div>
                         )}
                       </td>
-                      <td className="py-2 pr-3">
+                      <td>
                         <Badge variant="neutral" size="sm">
                           {system.system_type}
                         </Badge>
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums">{system.reuses_max}</td>
-                      <td className="py-2 pr-3 text-right">
+                      <td className="text-right tabular-nums">{system.reuses_max}</td>
+                      <td className="text-right">
                         <input
                           type="number"
                           min={0}
                           step="0.01"
                           defaultValue={system.unit_rate}
                           aria-label={t('formwork.col.panelRate', { defaultValue: 'Panels /m2' })}
-                          className="w-24 h-8 rounded-md border border-border bg-surface-primary px-2 text-right text-sm tabular-nums"
+                          className="w-24 oe-input text-right tabular-nums"
                           onBlur={(e) => {
                             if (e.target.value !== system.unit_rate) {
                               rateMutation.mutate({
@@ -1680,7 +1680,7 @@ export function FormworkPage() {
                           }}
                         />
                       </td>
-                      <td className="py-2 pr-3 text-right">
+                      <td className="text-right">
                         <input
                           type="number"
                           min={0}
@@ -1689,7 +1689,7 @@ export function FormworkPage() {
                           aria-label={t('formwork.col.labourRate', {
                             defaultValue: 'Erect+strike /m2',
                           })}
-                          className="w-24 h-8 rounded-md border border-border bg-surface-primary px-2 text-right text-sm tabular-nums"
+                          className="w-24 oe-input text-right tabular-nums"
                           onBlur={(e) => {
                             if (e.target.value !== system.erect_strike_rate) {
                               rateMutation.mutate({
@@ -1701,10 +1701,10 @@ export function FormworkPage() {
                           }}
                         />
                       </td>
-                      <td className="py-2 pr-3 text-right tabular-nums">
+                      <td className="text-right tabular-nums">
                         {system.strip_time_days}
                       </td>
-                      <td className="py-2 text-right whitespace-nowrap">
+                      <td className="text-right whitespace-nowrap">
                         <Button
                           variant="ghost"
                           size="sm"

@@ -62,7 +62,7 @@ export function TodayTab({ session }: { session: FieldSession | null }) {
 
   if (!session) {
     return (
-      <p className="px-4 py-8 text-center text-slate-400">
+      <p className="px-4 py-8 text-center text-content-tertiary">
         {t('field.no_session', { defaultValue: 'Open the link from your SMS to start.' })}
       </p>
     );
@@ -71,33 +71,33 @@ export function TodayTab({ session }: { session: FieldSession | null }) {
   return (
     <div className="flex w-full flex-col gap-3 px-4 py-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">
+        <h2 className="text-base font-semibold text-content-primary">
           {t('field.today_title', { defaultValue: "Today's diary" })}
         </h2>
         <button
           type="button"
           aria-label={t('field.refresh', { defaultValue: 'Refresh' })}
           onClick={() => void refresh()}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-content-tertiary hover:bg-surface-secondary"
         >
           <RefreshCw size={20} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
         </button>
       </div>
       {entries.length === 0 ? (
-        <p className="py-6 text-center text-sm text-slate-400">
+        <p className="py-6 text-center text-sm text-content-tertiary">
           {t('field.today_empty', { defaultValue: 'No entry yet today. Use Capture to log your time.' })}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
           {entries.map((e) => (
-            <li key={e.id} className="rounded-xl border border-slate-200 p-3">
+            <li key={e.id} className="rounded-xl border border-border-light p-3">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-slate-900">{e.entry_date}</span>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                <span className="font-medium text-content-primary">{e.entry_date}</span>
+                <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-content-secondary">
                   {t(`field.status.${e.status}`, { defaultValue: e.status })}
                 </span>
               </div>
-              {e.notes_md && <p className="mt-1 text-sm text-slate-500">{e.notes_md}</p>}
+              {e.notes_md && <p className="mt-1 text-sm text-content-tertiary">{e.notes_md}</p>}
             </li>
           ))}
         </ul>
@@ -166,7 +166,7 @@ export function CaptureTab({
 
   if (!session) {
     return (
-      <p className="px-4 py-8 text-center text-slate-400">
+      <p className="px-4 py-8 text-center text-content-tertiary">
         {t('field.no_session', { defaultValue: 'Open the link from your SMS to start.' })}
       </p>
     );
@@ -176,16 +176,16 @@ export function CaptureTab({
 
   return (
     <div className="flex w-full flex-col gap-4 px-4 py-4">
-      <h2 className="text-base font-semibold text-slate-900">
+      <h2 className="text-base font-semibold text-content-primary">
         {t('field.capture_title', { defaultValue: 'Log my time' })}
       </h2>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-slate-600">{t('field.task', { defaultValue: 'Task' })}</span>
+        <span className="text-content-secondary">{t('field.task', { defaultValue: 'Task' })}</span>
         <select
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          className="h-12 rounded-xl border border-slate-300 px-3 text-base"
+          className="oe-select oe-input-lg h-12 text-base"
         >
           {TASKS.map((tk) => (
             <option key={tk} value={tk}>
@@ -197,35 +197,35 @@ export function CaptureTab({
 
       <div className="flex gap-3">
         <label className="flex flex-1 flex-col gap-1 text-sm">
-          <span className="text-slate-600">{t('field.start', { defaultValue: 'Start' })}</span>
+          <span className="text-content-secondary">{t('field.start', { defaultValue: 'Start' })}</span>
           <input
             type="time"
             value={start}
             onChange={(e) => setStart(e.target.value)}
-            className="h-12 rounded-xl border border-slate-300 px-3 text-base"
+            className="oe-input oe-input-lg h-12 text-base"
           />
         </label>
         <label className="flex flex-1 flex-col gap-1 text-sm">
-          <span className="text-slate-600">{t('field.end', { defaultValue: 'End' })}</span>
+          <span className="text-content-secondary">{t('field.end', { defaultValue: 'End' })}</span>
           <input
             type="time"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
-            className="h-12 rounded-xl border border-slate-300 px-3 text-base"
+            className="oe-input oe-input-lg h-12 text-base"
           />
         </label>
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-slate-600">{t('field.note', { defaultValue: 'Note (optional)' })}</span>
+        <span className="text-content-secondary">{t('field.note', { defaultValue: 'Note (optional)' })}</span>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="h-12 rounded-xl border border-slate-300 px-3 text-base"
+          className="oe-input oe-input-lg h-12 text-base"
         />
       </label>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-content-tertiary">
         {t('field.hours_total', { defaultValue: '{{hours}} h', hours })}
       </p>
 
@@ -397,7 +397,7 @@ export function CrewTab({
 
   if (!session) {
     return (
-      <p className="px-4 py-8 text-center text-slate-400">
+      <p className="px-4 py-8 text-center text-content-tertiary">
         {t('field.no_session', { defaultValue: 'Open the link from your SMS to start.' })}
       </p>
     );
@@ -405,7 +405,7 @@ export function CrewTab({
 
   return (
     <div className="flex w-full flex-col gap-4 px-4 py-4">
-      <h2 className="text-base font-semibold text-slate-900">
+      <h2 className="text-base font-semibold text-content-primary">
         {t('field.crew_title', { defaultValue: 'Crew time' })}
       </h2>
 
@@ -416,7 +416,7 @@ export function CrewTab({
       {roster.length > 0 && !typing ? (
         <div className="flex flex-col gap-2">
           {choices.length === 0 ? (
-            <p className="rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-500">
+            <p className="rounded-xl bg-surface-secondary px-3 py-3 text-sm text-content-tertiary">
               {t('field.crew_all_added', {
                 defaultValue: 'Everyone on the project list is already here.',
               })}
@@ -427,7 +427,7 @@ export function CrewTab({
                 value={picked}
                 onChange={(e) => setPicked(e.target.value)}
                 aria-label={t('field.crew_pick', { defaultValue: 'Pick from the project' })}
-                className="h-12 flex-1 rounded-xl border border-slate-300 px-3 text-base"
+                className="oe-select oe-input-lg flex-1 h-12 text-base"
               >
                 <option value="">
                   {t('field.crew_pick', { defaultValue: 'Pick from the project' })}
@@ -443,7 +443,7 @@ export function CrewTab({
                 onClick={addFromRoster}
                 disabled={!picked}
                 aria-label={t('field.crew_add', { defaultValue: 'Add crew member' })}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700 disabled:opacity-40"
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary disabled:opacity-40"
               >
                 <Plus size={22} aria-hidden="true" />
               </button>
@@ -464,20 +464,20 @@ export function CrewTab({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('field.crew_name', { defaultValue: 'Crew member name' })}
-              className="h-12 flex-1 rounded-xl border border-slate-300 px-3 text-base"
+              className="oe-input oe-input-lg flex-1 h-12 text-base"
             />
             <button
               type="button"
               onClick={addMember}
               aria-label={t('field.crew_add', { defaultValue: 'Add crew member' })}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700"
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary"
             >
               <Plus size={22} aria-hidden="true" />
             </button>
           </div>
           {/* Typed hours cannot be matched to the timesheet, so say so once
               here rather than leaving an approver to find it later. */}
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-content-tertiary">
             {t('field.crew_typed_hint', {
               defaultValue: 'A typed name has to be matched to a worker by hand later.',
             })}
@@ -495,16 +495,16 @@ export function CrewTab({
       )}
 
       {crew.length === 0 ? (
-        <p className="py-6 text-center text-sm text-slate-400">
+        <p className="py-6 text-center text-sm text-content-tertiary">
           {t('field.crew_empty', { defaultValue: 'Add a crew member to punch them in.' })}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
           {crew.map((m) => (
-            <li key={m.id} className="rounded-xl border border-slate-200 p-3">
+            <li key={m.id} className="rounded-xl border border-border-light p-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-slate-900">{m.name}</p>
+                  <p className="truncate font-medium text-content-primary">{m.name}</p>
                   <select
                     value={m.task}
                     onChange={(e) =>
@@ -512,7 +512,7 @@ export function CrewTab({
                         c.map((x) => (x.id === m.id ? { ...x, task: e.target.value } : x)),
                       )
                     }
-                    className="mt-1 h-10 w-full rounded-lg border border-slate-200 px-2 text-sm"
+                    className="mt-1 oe-select oe-input-lg w-full"
                   >
                     {TASKS.map((tk) => (
                       <option key={tk} value={tk}>
@@ -527,7 +527,7 @@ export function CrewTab({
                     onClick={() => void punchOut(m.id)}
                     className="flex h-12 items-center gap-1 rounded-xl bg-semantic-error px-4 font-semibold text-white"
                   >
-                    <Square size={18} aria-hidden="true" />
+                    <Square size={20} aria-hidden="true" />
                     {t('field.punch_out', { defaultValue: 'Out' })}
                   </button>
                 ) : (
@@ -536,7 +536,7 @@ export function CrewTab({
                     onClick={() => punchIn(m.id)}
                     className="flex h-12 items-center gap-1 rounded-xl bg-semantic-success px-4 font-semibold text-white"
                   >
-                    <Play size={18} aria-hidden="true" />
+                    <Play size={20} aria-hidden="true" />
                     {t('field.punch_in', { defaultValue: 'In' })}
                   </button>
                 )}

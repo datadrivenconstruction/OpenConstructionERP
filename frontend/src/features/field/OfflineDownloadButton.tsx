@@ -30,9 +30,9 @@ export function OfflineDownloadButton({ session }: { session: FieldSession | nul
         className="flex h-12 items-center justify-center gap-2 rounded-xl border border-semantic-info/30 bg-semantic-info-bg px-4 text-sm font-semibold text-semantic-info disabled:opacity-50"
       >
         {state.kind === 'busy' ? (
-          <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+          <Loader2 size={20} className="animate-spin" aria-hidden="true" />
         ) : (
-          <Download size={18} aria-hidden="true" />
+          <Download size={20} aria-hidden="true" />
         )}
         {t('field.offline.download', { defaultValue: 'Download for offline' })}
       </button>

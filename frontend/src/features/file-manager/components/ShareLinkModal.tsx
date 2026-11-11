@@ -168,7 +168,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -182,7 +182,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
           <div className="min-w-0">
             <h2
               id="share-link-modal-title"
-              className="text-sm font-semibold text-content-primary flex items-center gap-2"
+              className="oe-card-title flex items-center gap-2"
             >
               <Share2 size={14} strokeWidth={2.25} />
               {t('files.share.title', {
@@ -199,7 +199,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
@@ -209,7 +209,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
             <div>
               <label
                 htmlFor="share-link-password"
-                className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5"
+                className="oe-overline block mb-1.5"
               >
                 <Lock size={10} className="inline-block me-1 -mt-0.5" />
                 {t('files.share.password_label', {
@@ -225,7 +225,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                   defaultValue: 'Leave blank for an open link',
                 })}
                 autoComplete="off"
-                className="w-full h-9 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/50"
+                className="w-full oe-input"
               />
             </div>
 
@@ -277,7 +277,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
             </button>
 
             {createError && (
-              <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+              <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                 <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <p>{createError}</p>
               </div>
@@ -296,12 +296,12 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                   >
                     {copiedToken === justCreated.token ? (
                       <>
-                        <CheckCircle2 size={11} />
+                        <CheckCircle2 size={12} />
                         {t('files.share.copied', { defaultValue: 'Copied' })}
                       </>
                     ) : (
                       <>
-                        <Copy size={11} />
+                        <Copy size={12} />
                         {t('files.share.copy', { defaultValue: 'Copy' })}
                       </>
                     )}
@@ -328,7 +328,7 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
 
           {/* ── Existing links ────────────────────────────────────── */}
           <section className="space-y-2 border-t border-border-light pt-4">
-            <h3 className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <h3 className="oe-overline">
               {t('files.share.existing_title', { defaultValue: 'Existing links' })}
             </h3>
             {listLoading ? (
@@ -345,13 +345,13 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                   <li
                     key={link.id}
                     data-testid="existing-share-link"
-                    className="rounded-lg border border-border-light bg-surface-primary p-2.5 text-xs space-y-1.5"
+                    className="rounded-lg border border-border-light bg-surface-primary p-3 text-xs space-y-1.5"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex items-center gap-1.5">
                         {link.requires_password && (
                           <Lock
-                            size={11}
+                            size={12}
                             strokeWidth={2}
                             className="text-content-tertiary shrink-0"
                             aria-label={t('files.share.requires_password', {

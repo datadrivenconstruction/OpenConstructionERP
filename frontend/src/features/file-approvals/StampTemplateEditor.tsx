@@ -137,7 +137,7 @@ export function StampTemplateEditor({
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={128}
-            className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+            className="oe-input"
             placeholder="Project Hold"
           />
         </WideModalField>
@@ -152,7 +152,7 @@ export function StampTemplateEditor({
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={255}
-            className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+            className="oe-input"
             placeholder="HOLD"
           />
         </WideModalField>
@@ -174,7 +174,7 @@ export function StampTemplateEditor({
               value={color}
               onChange={(e) => setColor(e.target.value)}
               maxLength={7}
-              className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm font-mono flex-1"
+              className="oe-input font-mono flex-1"
             />
           </div>
         </WideModalField>
@@ -213,7 +213,7 @@ export function StampTemplateEditor({
             value={svg}
             onChange={(e) => setSvg(e.target.value)}
             rows={6}
-            className="px-3 py-2 rounded-md border border-border bg-surface-primary text-xs font-mono resize-y"
+            className="oe-textarea font-mono resize-y"
           />
         </WideModalField>
       </WideModalSection>

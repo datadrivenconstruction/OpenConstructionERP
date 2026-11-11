@@ -86,7 +86,7 @@ const SYNTAX_UBL_TR = 'ubl_tr';
 const NO_CANDIDATES: EInvoiceReturnCandidate[] = [];
 
 const selectCls =
-  'h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm ' +
+  'oe-select oe-input-lg w-full' +
   'text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue';
 
 export function EInvoiceModal({
@@ -489,7 +489,7 @@ export function EInvoiceModal({
                   heading: a number interpolated into a countable noun needs a
                   plural form per CLDR category of every language, and the ones
                   that lack it fall through to English. */}
-              <h4 className="text-sm font-semibold text-content-primary">
+              <h4 className="oe-card-title">
                 {t('finance.einvoice.blockingTitle')}
               </h4>
               <span className="rounded-full bg-semantic-error px-2 py-0.5 text-xs font-semibold text-content-inverse">
@@ -519,7 +519,7 @@ export function EInvoiceModal({
           <div className="mt-3 space-y-2">
             <div className="flex items-center gap-2">
               <Info size={16} className="shrink-0 text-semantic-warning" />
-              <h4 className="text-sm font-semibold text-content-primary">
+              <h4 className="oe-card-title">
                 {t('finance.einvoice.advisoryTitle')}
               </h4>
               <span className="rounded-full bg-semantic-warning px-2 py-0.5 text-xs font-semibold text-content-inverse">
@@ -550,7 +550,7 @@ export function EInvoiceModal({
           <div className="mt-3 space-y-2">
             <div className="flex items-center gap-2">
               <Info size={16} className="shrink-0 text-content-tertiary" />
-              <h4 className="text-sm font-semibold text-content-primary">{t('einvoice.tr.info_title')}</h4>
+              <h4 className="oe-card-title">{t('einvoice.tr.info_title')}</h4>
               <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-semibold text-content-secondary">
                 {informative.length}
               </span>

@@ -54,7 +54,7 @@ export function EstimateChecksSettingsPage() {
       />
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title mb-3">
           {tx(t, 'estimate_checks.settings.display_title')}
         </h2>
         <div className="grid gap-2 sm:grid-cols-2" role="radiogroup">
@@ -87,7 +87,7 @@ export function EstimateChecksSettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-content-primary">
+        <h2 className="oe-card-title">
           {tx(t, 'estimate_checks.settings.workspace_title')}
         </h2>
         <p className="mb-4 text-xs text-content-secondary">{tx(t, 'estimate_checks.settings.workspace_hint')}</p>
@@ -105,7 +105,7 @@ export function EstimateChecksSettingsPage() {
               <label className="flex flex-col gap-1 text-xs text-content-secondary">
                 {tx(t, 'estimate_checks.settings.comparables')}
                 <select
-                  className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm text-content-primary"
+                  className="oe-select"
                   value={draft.comparables}
                   onChange={(e) => setDraft({ ...draft, comparables: e.target.value as CheckSettings['comparables'] })}
                 >
@@ -122,7 +122,7 @@ export function EstimateChecksSettingsPage() {
                   type="number"
                   min={2}
                   max={200}
-                  className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-input"
                   value={draft.min_comparables}
                   onChange={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 0, 200, true) })}
                   onBlur={(e) => setDraft({ ...draft, min_comparables: clampInput(e.target.value, 2, 200, true) })}
@@ -133,7 +133,7 @@ export function EstimateChecksSettingsPage() {
                 <input
                   type="number"
                   min={1}
-                  className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-sm"
+                  className="oe-input"
                   value={draft.database_rate_tolerance_pct}
                   onChange={(e) =>
                     setDraft({ ...draft, database_rate_tolerance_pct: clampInput(e.target.value, 1) })
@@ -142,13 +142,13 @@ export function EstimateChecksSettingsPage() {
               </label>
             </div>
 
-            <table className="w-full text-sm">
+            <table className="oe-table oe-table-compact">
               <thead>
-                <tr className="text-left text-xs text-content-tertiary">
-                  <th className="py-1 font-medium">{tx(t, 'estimate_checks.settings.col_check')}</th>
-                  <th className="w-12 py-1 font-medium">{tx(t, 'estimate_checks.settings.col_on')}</th>
-                  <th className="w-24 py-1 font-medium">{tx(t, 'estimate_checks.settings.col_low')}</th>
-                  <th className="w-24 py-1 font-medium">{tx(t, 'estimate_checks.settings.col_high')}</th>
+                <tr>
+                  <th>{tx(t, 'estimate_checks.settings.col_check')}</th>
+                  <th className="w-12">{tx(t, 'estimate_checks.settings.col_on')}</th>
+                  <th className="w-24">{tx(t, 'estimate_checks.settings.col_low')}</th>
+                  <th className="w-24">{tx(t, 'estimate_checks.settings.col_high')}</th>
                 </tr>
               </thead>
               {GROUP_ORDER.map((g) => (
@@ -164,8 +164,8 @@ export function EstimateChecksSettingsPage() {
                       const cfg = draft.kpis[c.kpi_id] ?? { enabled: true };
                       return (
                         <tr key={c.kpi_id}>
-                          <td className="py-1 text-content-primary">{tx(t, `estimate_checks.kpi.${c.kpi_id}`)}</td>
-                          <td className="py-1">
+                          <td>{tx(t, `estimate_checks.kpi.${c.kpi_id}`)}</td>
+                          <td>
                             <input
                               type="checkbox"
                               aria-label={tx(t, `estimate_checks.kpi.${c.kpi_id}`)}
@@ -175,11 +175,11 @@ export function EstimateChecksSettingsPage() {
                           </td>
                           {c.kind === 'historical' ? (
                             (['low', 'high'] as const).map((side) => (
-                              <td key={side} className="py-1 pr-2">
+                              <td key={side}>
                                 <input
                                   type="text"
                                   inputMode="decimal"
-                                  className="w-full rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs"
+                                  className="w-full oe-input oe-input-sm"
                                   placeholder={
                                     (side === 'low' ? c.default_low : c.default_high)?.toString() ?? ''
                                   }
@@ -189,7 +189,7 @@ export function EstimateChecksSettingsPage() {
                               </td>
                             ))
                           ) : (
-                            <td colSpan={2} className="py-1 text-xs text-content-tertiary">
+                            <td colSpan={2} className="text-xs text-content-tertiary">
                               {tx(t, 'estimate_checks.expected_none')}
                             </td>
                           )}

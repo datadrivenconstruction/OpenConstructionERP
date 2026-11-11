@@ -119,7 +119,7 @@ export function ClearanceDocumentForm({
             setCountryFields({});
           }}
           required
-          className="rounded border border-border-light bg-surface-primary p-2"
+          className="oe-select"
         >
           <option value="">
             {t('einvoice_clearance.field_profile_none', {
@@ -154,7 +154,7 @@ export function ClearanceDocumentForm({
             onChange={(e) => setInvoiceNumber(e.target.value)}
             maxLength={64}
             required
-            className="rounded border border-border-light bg-surface-primary p-2 font-mono"
+            className="oe-input font-mono"
           />
         </label>
 
@@ -165,7 +165,7 @@ export function ClearanceDocumentForm({
             value={invoiceDate}
             onChange={(e) => setInvoiceDate(e.target.value)}
             required
-            className="rounded border border-border-light bg-surface-primary p-2"
+            className="oe-input"
           />
         </label>
 
@@ -177,7 +177,7 @@ export function ClearanceDocumentForm({
             maxLength={3}
             required
             placeholder="EUR"
-            className="rounded border border-border-light bg-surface-primary p-2 font-mono uppercase"
+            className="oe-input font-mono uppercase"
           />
         </label>
 
@@ -189,7 +189,7 @@ export function ClearanceDocumentForm({
             inputMode="decimal"
             required
             placeholder="0.00"
-            className="rounded border border-border-light bg-surface-primary p-2 text-right font-mono"
+            className="oe-input text-right font-mono"
           />
         </label>
       </div>
@@ -218,7 +218,7 @@ export function ClearanceDocumentForm({
                     setCountryFields((prev) => ({ ...prev, [field]: e.target.value }))
                   }
                   maxLength={255}
-                  className="rounded border border-border-light bg-surface-primary p-2 font-mono"
+                  className="oe-input font-mono"
                 />
               </label>
             ))}
@@ -271,7 +271,7 @@ export function ClearanceDocumentForm({
                       onChange={(e) =>
                         setCountryFields((prev) => ({ ...prev, [field]: e.target.value }))
                       }
-                      className="rounded border border-border-light bg-surface-primary p-2"
+                      className="oe-select"
                     >
                       <option value="">
                         {t('einvoice_clearance.option_unset', { defaultValue: 'Not set' })}
@@ -289,7 +289,7 @@ export function ClearanceDocumentForm({
                         setCountryFields((prev) => ({ ...prev, [field]: e.target.value }))
                       }
                       maxLength={255}
-                      className="rounded border border-border-light bg-surface-primary p-2"
+                      className="oe-input"
                     />
                   )}
                 </label>

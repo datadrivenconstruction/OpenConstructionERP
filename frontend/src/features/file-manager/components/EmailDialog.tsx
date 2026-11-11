@@ -113,7 +113,7 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -124,7 +124,7 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('files.email.title', { defaultValue: 'Share via email' })}
             </h2>
             <p className="text-2xs text-content-tertiary truncate" title={row.name}>
@@ -137,13 +137,13 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
-            <label className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+            <label className="oe-overline block mb-1.5">
               <Clock size={10} className="inline-block me-1 -mt-0.5" />
               {t('files.email.ttl', { defaultValue: 'Link expires after' })}
             </label>
@@ -193,12 +193,12 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
                   >
                     {copied ? (
                       <>
-                        <CheckCircle2 size={11} />
+                        <CheckCircle2 size={12} />
                         {t('files.toast.copied', { defaultValue: 'Copied' })}
                       </>
                     ) : (
                       <>
-                        <Copy size={11} />
+                        <Copy size={12} />
                         {t('files.actions.copy', { defaultValue: 'Copy' })}
                       </>
                     )}
@@ -217,14 +217,14 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
               </div>
 
               <div>
-                <label className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+                <label className="oe-overline block mb-1.5">
                   {t('files.email.paste_into_email', { defaultValue: 'Sample email body' })}
                 </label>
                 <textarea
                   readOnly
                   value={sampleBody}
                   rows={6}
-                  className="w-full text-xs font-mono p-2.5 rounded-lg border border-border-light bg-surface-primary text-content-secondary resize-none"
+                  className="w-full oe-textarea font-mono resize-none"
                 />
               </div>
 
@@ -232,14 +232,14 @@ export function EmailDialog({ open, row, onClose }: EmailDialogProps) {
                 href={mailto}
                 className="inline-flex items-center justify-center gap-2 h-9 px-4 w-full rounded-lg bg-oe-blue text-white text-xs font-medium hover:bg-oe-blue-hover"
               >
-                <Mail size={13} />
+                <Mail size={14} />
                 {t('files.email.open_mail_client', { defaultValue: 'Open email client' })}
               </a>
             </>
           )}
 
           {error && (
-            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+            <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <p>{error}</p>
             </div>

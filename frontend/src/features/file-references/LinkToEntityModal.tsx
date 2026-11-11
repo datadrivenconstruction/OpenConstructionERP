@@ -138,7 +138,7 @@ export function LinkToEntityModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="link-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
@@ -151,7 +151,7 @@ export function LinkToEntityModal({
       >
         <h2
           id="link-modal-title"
-          className="text-base font-semibold text-content-primary"
+          className="oe-card-title"
         >
           {t('files.link.title', { defaultValue: 'Link file to entity' })}
         </h2>
@@ -170,7 +170,7 @@ export function LinkToEntityModal({
             <select
               value={targetType}
               onChange={(e) => setTargetType(e.target.value as TargetType)}
-              className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-select"
               data-testid="link-target-type"
             >
               {TARGET_TYPES.map((tt) => (
@@ -192,7 +192,7 @@ export function LinkToEntityModal({
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
               placeholder="00000000-0000-0000-0000-000000000000"
-              className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input"
               data-testid="link-target-id"
             />
           </label>
@@ -208,7 +208,7 @@ export function LinkToEntityModal({
               value={targetLabel}
               onChange={(e) => setTargetLabel(e.target.value)}
               placeholder="RFI-142"
-              className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input"
               data-testid="link-target-label"
             />
           </label>
@@ -223,7 +223,7 @@ export function LinkToEntityModal({
               onChange={(e) => setRelation(e.target.value)}
               placeholder="references"
               maxLength={32}
-              className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="oe-input"
             />
           </label>
         </div>

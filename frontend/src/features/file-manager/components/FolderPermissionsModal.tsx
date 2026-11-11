@@ -239,7 +239,7 @@ export function FolderPermissionsModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="folder-permissions-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
       <div
@@ -254,7 +254,7 @@ export function FolderPermissionsModal({
             <div>
               <h2
                 id="folder-permissions-title"
-                className="text-base font-semibold text-content-primary"
+                className="oe-card-title"
               >
                 {t('files.permissions.title', { defaultValue: 'Folder access' })}
               </h2>
@@ -279,7 +279,7 @@ export function FolderPermissionsModal({
         <div className="px-6 py-5 space-y-6">
           {/* Current grants list */}
           <section data-testid="folder-permissions-list">
-            <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <h3 className="oe-overline mb-2 flex items-center gap-1.5">
               <Users size={12} />
               {t('files.permissions.list_title', { defaultValue: 'Current access' })}
             </h3>
@@ -347,18 +347,18 @@ export function FolderPermissionsModal({
 
           {/* Grant access sub-form */}
           <section data-testid="folder-permissions-grant">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+            <h3 className="oe-overline mb-2">
               {t('files.permissions.grant_title', { defaultValue: 'Grant access' })}
             </h3>
 
-            <div className="space-y-2.5">
-              <label className="block text-2xs font-medium text-content-secondary">
+            <div className="space-y-2">
+              <label className="oe-label">
                 {t('files.permissions.user_label', { defaultValue: 'Member' })}
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
                   data-testid="folder-permissions-user-picker"
-                  className="mt-1 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                  className="mt-1 w-full oe-select oe-input-sm"
                 >
                   <option value="">
                     {t('files.permissions.user_placeholder', {
@@ -373,13 +373,13 @@ export function FolderPermissionsModal({
                 </select>
               </label>
 
-              <label className="block text-2xs font-medium text-content-secondary">
+              <label className="oe-label">
                 {t('files.permissions.role_label', { defaultValue: 'Role' })}
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value as FolderRole)}
                   data-testid="folder-permissions-role-picker"
-                  className="mt-1 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                  className="mt-1 w-full oe-select oe-input-sm"
                 >
                   {ROLES.map((r) => (
                     <option key={r.value} value={r.value}>
@@ -391,7 +391,7 @@ export function FolderPermissionsModal({
 
               {grantError && (
                 <p className="flex items-start gap-1.5 rounded-md bg-semantic-error-bg px-2.5 py-1.5 text-2xs text-semantic-error">
-                  <AlertTriangle size={11} className="mt-0.5 shrink-0" />
+                  <AlertTriangle size={12} className="mt-0.5 shrink-0" />
                   {grantError}
                 </p>
               )}

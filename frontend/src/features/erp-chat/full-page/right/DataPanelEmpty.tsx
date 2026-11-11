@@ -319,7 +319,7 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
                     justifyContent: 'center',
                   }}
                 >
-                  <CatIcon size={15} strokeWidth={1.85} />
+                  <CatIcon size={16} strokeWidth={1.85} />
                 </span>
                 <span
                   style={{
@@ -463,7 +463,7 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
                     justifyContent: 'center',
                   }}
                 >
-                  <ToolIcon size={15} strokeWidth={1.85} />
+                  <ToolIcon size={16} strokeWidth={1.85} />
                 </span>
                 <span
                   style={{

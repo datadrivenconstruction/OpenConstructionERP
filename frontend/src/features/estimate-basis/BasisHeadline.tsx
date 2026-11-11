@@ -164,7 +164,7 @@ export function BasisHeadline({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <label
               htmlFor="estimate-basis-class"
-              className="text-xs font-medium uppercase tracking-wide text-content-tertiary"
+              className="oe-overline"
             >
               {t('estimateBasis.headline.classLabel', { defaultValue: 'Accuracy class' })}
               {' (AACE)'}
@@ -176,7 +176,7 @@ export function BasisHeadline({
                 const raw = e.target.value;
                 onClassChange(/^\d+$/.test(raw) ? Number(raw) : raw);
               }}
-              className="rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-primary"
+              className="oe-select"
             >
               <option value={0}>
                 {t('estimateBasis.headline.classNotStated', { defaultValue: 'Not stated' })}
@@ -202,7 +202,7 @@ export function BasisHeadline({
                   value={accuracyLowPct}
                   onChange={(e) => onBandChange('low', e.target.value)}
                   inputMode="decimal"
-                  className="w-16 rounded border border-border-light bg-surface-primary px-1.5 py-1 text-right tabular-nums text-content-primary"
+                  className="w-16 oe-input text-right tabular-nums"
                 />
                 <span aria-hidden>%</span>
                 <span aria-hidden>/</span>
@@ -211,7 +211,7 @@ export function BasisHeadline({
                   value={accuracyHighPct}
                   onChange={(e) => onBandChange('high', e.target.value)}
                   inputMode="decimal"
-                  className="w-16 rounded border border-border-light bg-surface-primary px-1.5 py-1 text-right tabular-nums text-content-primary"
+                  className="w-16 oe-input text-right tabular-nums"
                 />
                 <span aria-hidden>%</span>
               </div>

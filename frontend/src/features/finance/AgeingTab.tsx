@@ -15,7 +15,7 @@ import { AGEING_BUCKETS, getAgeing, type AgeingBucket, type AgeingRollup } from 
 import { StatementOfAccountModal } from './StatementOfAccountModal';
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 type Scope = 'project' | 'all';
 type DirectionFilter = '' | 'payable' | 'receivable';
@@ -137,7 +137,7 @@ export function AgeingTab({ projectId }: { projectId: string }) {
           <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('finance.ageing_scope', { defaultValue: 'Projects' })}
           </span>
-          <select value={scope} onChange={(e) => setScope(e.target.value as Scope)} className={inputCls}>
+          <select value={scope} onChange={(e) => setScope(e.target.value as Scope)} className={`${inputCls} oe-select`}>
             <option value="project">{t('finance.ageing_scope_project', { defaultValue: 'This project' })}</option>
             <option value="all">{t('finance.ageing_scope_all', { defaultValue: 'All my projects' })}</option>
           </select>
@@ -150,7 +150,7 @@ export function AgeingTab({ projectId }: { projectId: string }) {
             <select
               value={legalEntityId}
               onChange={(e) => setLegalEntityId(e.target.value)}
-              className={clsx(inputCls, 'max-w-[16rem]')}
+              className={clsx(inputCls, 'oe-select', 'max-w-[16rem]')}
             >
               <option value="">{t('finance.ageing_entity_all', { defaultValue: 'All entities' })}</option>
               {entities.map((entity) => (
@@ -168,7 +168,7 @@ export function AgeingTab({ projectId }: { projectId: string }) {
           <select
             value={direction}
             onChange={(e) => setDirection(e.target.value as DirectionFilter)}
-            className={inputCls}
+            className={`${inputCls} oe-select`}
           >
             <option value="">{t('finance.ageing_direction_both', { defaultValue: 'AR and AP' })}</option>
             <option value="receivable">{directionLabel(t, 'receivable')}</option>
@@ -273,21 +273,21 @@ export function AgeingTab({ projectId }: { projectId: string }) {
           {/* Per-counterparty lines */}
           <Card padding="none" className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="oe-table">
                 <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                    <th className="px-4 py-3 font-medium">
+                  <tr>
+                    <th>
                       {t('finance.ageing_col_counterparty', { defaultValue: 'Counterparty' })}
                     </th>
                     {AGEING_BUCKETS.map((bucket) => (
-                      <th key={bucket} className="whitespace-nowrap px-3 py-3 text-right font-medium">
+                      <th key={bucket} className="text-right">
                         {bucketLabel(t, bucket)}
                       </th>
                     ))}
-                    <th className="px-3 py-3 text-right font-medium">
+                    <th className="text-right">
                       {t('finance.ageing_col_total', { defaultValue: 'Total due' })}
                     </th>
-                    <th className="px-3 py-3 text-right font-medium">
+                    <th className="text-right">
                       {t('finance.ageing_col_retention', { defaultValue: 'Retention' })}
                     </th>
                   </tr>
@@ -298,8 +298,8 @@ export function AgeingTab({ projectId }: { projectId: string }) {
                     const expanded = open.has(key);
                     return (
                       <Fragment key={key}>
-                        <tr className="border-b border-border/60 hover:bg-surface-secondary/50">
-                          <td className="px-4 py-2.5">
+                        <tr>
+                          <td>
                             <div className="flex items-start justify-between gap-2">
                               <button
                                 type="button"
@@ -347,50 +347,50 @@ export function AgeingTab({ projectId }: { projectId: string }) {
                             </div>
                           </td>
                           {AGEING_BUCKETS.map((bucket) => (
-                            <td key={bucket} className="px-3 py-2.5 text-right">
+                            <td key={bucket} className="text-right">
                               <Amount value={row.buckets[bucket]} currency={row.currency_code} />
                             </td>
                           ))}
-                          <td className="px-3 py-2.5 text-right">
+                          <td className="text-right">
                             <Amount value={row.total_due} currency={row.currency_code} strong />
                           </td>
-                          <td className="px-3 py-2.5 text-right">
+                          <td className="text-right">
                             <Amount value={row.retention_held} currency={row.currency_code} />
                           </td>
                         </tr>
                         {expanded && (
-                          <tr className="border-b border-border/60 bg-surface-secondary/40">
-                            <td colSpan={AGEING_BUCKETS.length + 3} className="px-4 py-2">
+                          <tr className="bg-surface-secondary/40">
+                            <td colSpan={AGEING_BUCKETS.length + 3}>
                               <table className="w-full text-xs">
                                 <thead>
-                                  <tr className="text-left text-content-tertiary">
-                                    <th className="py-1 pr-3 font-medium">
+                                  <tr>
+                                    <th>
                                       {t('finance.ageing_col_invoice', { defaultValue: 'Invoice' })}
                                     </th>
-                                    <th className="py-1 pr-3 font-medium">
+                                    <th>
                                       {t('finance.ageing_col_due_date', { defaultValue: 'Due date' })}
                                     </th>
-                                    <th className="py-1 pr-3 text-right font-medium">
+                                    <th className="text-right">
                                       {t('finance.ageing_col_days_late', { defaultValue: 'Days late' })}
                                     </th>
-                                    <th className="py-1 pr-3 text-right font-medium">
+                                    <th className="text-right">
                                       {t('finance.ageing_col_invoiced', { defaultValue: 'Invoiced' })}
                                     </th>
-                                    <th className="py-1 pr-3 text-right font-medium">
+                                    <th className="text-right">
                                       {t('finance.ageing_col_paid', { defaultValue: 'Paid' })}
                                     </th>
-                                    <th className="py-1 text-right font-medium">
+                                    <th className="text-right">
                                       {t('finance.ageing_col_open', { defaultValue: 'Open' })}
                                     </th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {row.invoices.map((line) => (
-                                    <tr key={line.invoice_id} className="border-t border-border/40">
-                                      <td className="py-1 pr-3 font-mono text-content-primary">
+                                    <tr key={line.invoice_id}>
+                                      <td className="font-mono">
                                         {line.invoice_number}
                                       </td>
-                                      <td className="py-1 pr-3 text-content-secondary">
+                                      <td className="text-content-secondary">
                                         {line.due_date ? <DateDisplay value={line.due_date} /> : '-'}
                                       </td>
                                       <td
@@ -403,13 +403,13 @@ export function AgeingTab({ projectId }: { projectId: string }) {
                                       >
                                         {line.days_past_due}
                                       </td>
-                                      <td className="py-1 pr-3 text-right">
+                                      <td className="text-right">
                                         <Amount value={line.total} currency={row.currency_code} />
                                       </td>
-                                      <td className="py-1 pr-3 text-right">
+                                      <td className="text-right">
                                         <Amount value={line.paid} currency={row.currency_code} />
                                       </td>
-                                      <td className="py-1 text-right">
+                                      <td className="text-right">
                                         <Amount value={line.due} currency={row.currency_code} strong />
                                       </td>
                                     </tr>

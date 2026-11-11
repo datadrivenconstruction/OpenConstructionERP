@@ -208,9 +208,9 @@ function Findings({ report }: { report: ValidationReport | null }) {
   const { t } = useTranslation();
   if (!report) return null;
   return (
-    <div className="rounded-md border border-border bg-surface-secondary p-2.5">
+    <div className="rounded-md border border-border bg-surface-secondary p-2">
       <div className="flex items-center gap-1.5">
-        <ShieldCheck size={13} />
+        <ShieldCheck size={14} />
         <span className="text-xs font-medium text-content-primary">
           {t('full_evm.report_title', { defaultValue: 'What the rules found' })}
         </span>
@@ -298,7 +298,7 @@ function MeasureForm({
           </span>
           <input
             type="date"
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="mt-1 w-full oe-input"
             value={dataDate}
             onChange={(e) => setDataDate(e.target.value)}
           />
@@ -308,7 +308,7 @@ function MeasureForm({
             {t('full_evm.field_ev', { defaultValue: 'Earned value' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+            className="mt-1 w-full oe-input tabular-nums"
             value={ev}
             inputMode="decimal"
             onChange={(e) => setEv(e.target.value)}
@@ -319,7 +319,7 @@ function MeasureForm({
             {t('full_evm.field_ac', { defaultValue: 'Actual cost' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+            className="mt-1 w-full oe-input tabular-nums"
             value={ac}
             inputMode="decimal"
             onChange={(e) => setAc(e.target.value)}
@@ -330,7 +330,7 @@ function MeasureForm({
             {t('full_evm.field_pv', { defaultValue: 'Planned value' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+            className="mt-1 w-full oe-input tabular-nums"
             value={pv}
             inputMode="decimal"
             placeholder={t('full_evm.field_pv_placeholder', { defaultValue: 'from the curve' })}
@@ -344,7 +344,7 @@ function MeasureForm({
             {t('full_evm.field_eac_method', { defaultValue: 'Forecast the outturn by' })}
           </span>
           <select
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="mt-1 w-full oe-select"
             value={method}
             onChange={(e) => setMethod(e.target.value as EacMethod)}
           >
@@ -360,7 +360,7 @@ function MeasureForm({
             {t('full_evm.field_notes', { defaultValue: 'Notes' })}
           </span>
           <input
-            className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+            className="mt-1 w-full oe-input"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
@@ -734,7 +734,7 @@ export function FullEvmPanel() {
           <Button
             variant="ghost"
             size="sm"
-            icon={<ClipboardCheck size={13} />}
+            icon={<ClipboardCheck size={14} />}
             onClick={() => setGlossaryOpen((open) => !open)}
           >
             {t('full_evm.action_glossary', { defaultValue: 'What these mean' })}
@@ -791,7 +791,7 @@ export function FullEvmPanel() {
                 {t('full_evm.field_baseline_name', { defaultValue: 'Name' })}
               </span>
               <input
-                className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                className="mt-1 w-full oe-input"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
@@ -801,7 +801,7 @@ export function FullEvmPanel() {
                 {t('full_evm.field_bac', { defaultValue: 'Budget at completion' })}
               </span>
               <input
-                className="mt-1 w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm tabular-nums"
+                className="mt-1 w-full oe-input tabular-nums"
                 value={newBac}
                 inputMode="decimal"
                 onChange={(e) => setNewBac(e.target.value)}
@@ -905,7 +905,7 @@ export function FullEvmPanel() {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<ShieldCheck size={13} />}
+                icon={<ShieldCheck size={14} />}
                 loading={validateMutation.isPending}
                 onClick={() => validateMutation.mutate()}
               >
@@ -916,7 +916,7 @@ export function FullEvmPanel() {
                 size="sm"
                 disabled={!canApprove(selected)}
                 loading={approveMutation.isPending}
-                icon={<CheckCircle2 size={13} />}
+                icon={<CheckCircle2 size={14} />}
                 onClick={() => approveMutation.mutate()}
               >
                 {t('full_evm.action_approve', { defaultValue: 'Approve' })}
@@ -924,7 +924,7 @@ export function FullEvmPanel() {
               <Button
                 variant="ghost"
                 size="sm"
-                icon={<Trash2 size={13} />}
+                icon={<Trash2 size={14} />}
                 onClick={() => setConfirmDelete(true)}
               >
                 {t('common.delete', { defaultValue: 'Delete' })}
@@ -943,7 +943,7 @@ export function FullEvmPanel() {
 
           {selected.periods.length === 0 && (
             <p className="flex items-start gap-1.5 rounded-md bg-semantic-warning-bg px-2 py-1.5 text-xs text-[#b45309]">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               {t('full_evm.no_periods', {
                 defaultValue:
                   'This baseline has a budget but no spending plan, so there is no curve to measure against and planned value cannot be read at any date.',
@@ -956,9 +956,9 @@ export function FullEvmPanel() {
           <div className="flex gap-1 border-b border-border">
             {(
               [
-                ['progress', t('full_evm.tab_progress', { defaultValue: 'Progress' }), <Activity key="a" size={13} />],
-                ['curve', t('full_evm.tab_curve', { defaultValue: 'The plan' }), <LineChart key="c" size={13} />],
-                ['forecast', t('full_evm.tab_forecast', { defaultValue: 'Forecast' }), <TrendingUp key="f" size={13} />],
+                ['progress', t('full_evm.tab_progress', { defaultValue: 'Progress' }), <Activity key="a" size={14} />],
+                ['curve', t('full_evm.tab_curve', { defaultValue: 'The plan' }), <LineChart key="c" size={14} />],
+                ['forecast', t('full_evm.tab_forecast', { defaultValue: 'Forecast' }), <TrendingUp key="f" size={14} />],
               ] as Array<[Tab, string, ReactNode]>
             ).map(([key, label, icon]) => (
               <button
@@ -982,7 +982,7 @@ export function FullEvmPanel() {
             <div className="space-y-3">
               <div className="flex justify-end">
                 {!measuring && (
-                  <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={() => setMeasuring(true)}>
+                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setMeasuring(true)}>
                     {t('full_evm.action_measure', { defaultValue: 'Record a measurement' })}
                   </Button>
                 )}
@@ -1039,34 +1039,34 @@ export function FullEvmPanel() {
                     </p>
                   )}
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[32rem] text-xs">
+                    <table className="oe-table oe-table-compact min-w-[32rem] text-xs">
                       <thead>
-                        <tr className="text-content-tertiary">
-                          <th className="py-1 text-left font-normal">
+                        <tr>
+                          <th className="font-normal">
                             {t('full_evm.col_period', { defaultValue: 'Period' })}
                           </th>
-                          <th className="py-1 text-right font-normal">
+                          <th className="text-right font-normal">
                             {t('full_evm.col_planned', { defaultValue: 'Planned' })}
                           </th>
-                          <th className="py-1 text-right font-normal">
+                          <th className="text-right font-normal">
                             {t('full_evm.col_earned', { defaultValue: 'Earned' })}
                           </th>
-                          <th className="py-1 text-right font-normal">
+                          <th className="text-right font-normal">
                             {t('full_evm.col_actual', { defaultValue: 'Actual' })}
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {curveQuery.data.points.map((point) => (
-                          <tr key={point.as_of} className="border-t border-border">
-                            <td className="py-1 text-content-primary">
+                          <tr key={point.as_of}>
+                            <td>
                               {point.label || point.as_of}
                             </td>
-                            <td className="py-1 text-right tabular-nums">{point.planned_value}</td>
-                            <td className="py-1 text-right tabular-nums">
+                            <td className="text-right tabular-nums">{point.planned_value}</td>
+                            <td className="text-right tabular-nums">
                               <Figure value={point.earned_value} />
                             </td>
-                            <td className="py-1 text-right tabular-nums">
+                            <td className="text-right tabular-nums">
                               <Figure value={point.actual_cost} />
                             </td>
                           </tr>
@@ -1087,7 +1087,7 @@ export function FullEvmPanel() {
                     {t('full_evm.field_forecast_method', { defaultValue: 'Forecast by' })}
                   </span>
                   <select
-                    className="mt-1 rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm"
+                    className="mt-1 oe-select"
                     value={forecastMethod}
                     onChange={(e) => setForecastMethod(e.target.value as ForecastMethod)}
                   >
@@ -1102,7 +1102,7 @@ export function FullEvmPanel() {
                   variant="primary"
                   size="sm"
                   loading={forecastMutation.isPending}
-                  icon={<TrendingUp size={13} />}
+                  icon={<TrendingUp size={14} />}
                   onClick={() => forecastMutation.mutate()}
                 >
                   {t('full_evm.action_forecast', { defaultValue: 'Work it out' })}
@@ -1169,7 +1169,7 @@ export function FullEvmPanel() {
                     const low = parseFigure(forecast.confidence_range_low);
                     const high = parseFigure(forecast.confidence_range_high);
                     return (
-                      <li key={forecast.id} className="rounded-md border border-border bg-surface-primary p-2.5 text-xs">
+                      <li key={forecast.id} className="rounded-md border border-border bg-surface-primary p-2 text-xs">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="tabular-nums text-content-primary">
                             {forecast.forecast_date}

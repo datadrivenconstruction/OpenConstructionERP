@@ -254,13 +254,13 @@ function CandidateCard({
         </Badge>
         {isBestBuildable && (
           <Badge variant="success" size="sm">
-            <TrendingDown size={11} className="mr-1 inline" />
+            <TrendingDown size={12} className="mr-1 inline" />
             {t('formwork.chooser.bestRate', { defaultValue: 'Best rate' })}
           </Badge>
         )}
         {blocked && (
           <Badge variant="error" size="sm">
-            <AlertTriangle size={11} className="mr-1 inline" />
+            <AlertTriangle size={12} className="mr-1 inline" />
             {t('formwork.chooser.overReuseLimit', {
               defaultValue: 'Only survives {{max}} uses',
               max: candidate.reuses_max,
@@ -353,8 +353,8 @@ export function SystemChooser({
     <Card className="p-4 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-            <Layers size={15} />
+          <h2 className="oe-card-title flex items-center gap-2">
+            <Layers size={16} />
             {t('formwork.chooser.title', { defaultValue: 'Choose a formwork system' })}
           </h2>
           <p className="text-xs text-content-secondary mt-1 max-w-2xl">

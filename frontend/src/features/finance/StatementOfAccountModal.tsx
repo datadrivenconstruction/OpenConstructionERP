@@ -18,7 +18,7 @@ import {
 } from './api';
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 function kindLabel(t: TFunction, kind: string): string {
   if (kind === 'invoice') return t('finance.statement_kind_invoice', { defaultValue: 'Invoice' });
@@ -155,77 +155,77 @@ export function StatementOfAccountModal({
           <SkeletonTable rows={5} columns={6} />
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                  <th className="px-3 py-2 font-medium">{t('finance.statement_col_date', { defaultValue: 'Date' })}</th>
-                  <th className="px-3 py-2 font-medium">{t('finance.statement_col_type', { defaultValue: 'Type' })}</th>
-                  <th className="px-3 py-2 font-medium">
+                <tr>
+                  <th>{t('finance.statement_col_date', { defaultValue: 'Date' })}</th>
+                  <th>{t('finance.statement_col_type', { defaultValue: 'Type' })}</th>
+                  <th>
                     {t('finance.statement_col_reference', { defaultValue: 'Reference' })}
                   </th>
-                  <th className="px-3 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('finance.statement_col_charge', { defaultValue: 'Charge' })}
                   </th>
-                  <th className="px-3 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('finance.statement_col_credit', { defaultValue: 'Credit' })}
                   </th>
-                  <th className="px-3 py-2 text-right font-medium">
+                  <th className="text-right">
                     {t('finance.statement_col_balance', { defaultValue: 'Balance' })}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-border/60 bg-surface-secondary/40" data-testid="statement-opening">
-                  <td className="px-3 py-2 text-content-secondary">
+                <tr className="bg-surface-secondary/40" data-testid="statement-opening">
+                  <td className="text-content-secondary">
                     {st.date_from ? <DateDisplay value={st.date_from} /> : '-'}
                   </td>
-                  <td colSpan={4} className="px-3 py-2 font-medium text-content-secondary">
+                  <td colSpan={4} className="font-medium text-content-secondary">
                     {t('finance.statement_opening', { defaultValue: 'Balance brought forward' })}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <MoneyDisplay amount={st.opening_balance} currency={currency || undefined} />
                   </td>
                 </tr>
                 {st.lines.length === 0 ? (
-                  <tr className="border-b border-border/60">
-                    <td colSpan={6} className="px-3 py-4 text-center text-content-tertiary">
+                  <tr>
+                    <td colSpan={6} className="py-4 text-center text-content-tertiary">
                       {t('finance.statement_no_lines', { defaultValue: 'No invoices or payments in this period.' })}
                     </td>
                   </tr>
                 ) : (
                   st.lines.map((line, i) => (
-                    <tr key={`${line.invoice_id}-${line.kind}-${i}`} className="border-b border-border/60">
-                      <td className="px-3 py-2 text-content-secondary">
+                    <tr key={`${line.invoice_id}-${line.kind}-${i}`}>
+                      <td className="text-content-secondary">
                         <DateDisplay value={line.entry_date} />
                       </td>
-                      <td className="px-3 py-2 text-content-primary">{kindLabel(t, line.kind)}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-content-primary">{line.reference}</td>
-                      <td className="px-3 py-2 text-right">
+                      <td>{kindLabel(t, line.kind)}</td>
+                      <td className="font-mono text-xs">{line.reference}</td>
+                      <td className="text-right">
                         <Money value={line.charge} currency={currency} />
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="text-right">
                         <Money value={line.credit} currency={currency} />
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-content-primary">
+                      <td className="text-right tabular-nums">
                         <MoneyDisplay amount={line.balance} currency={currency || undefined} />
                       </td>
                     </tr>
                   ))
                 )}
                 <tr className="bg-surface-secondary/40" data-testid="statement-closing">
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     <DateDisplay value={st.date_to} />
                   </td>
-                  <td colSpan={2} className="px-3 py-2 font-semibold text-content-primary">
+                  <td colSpan={2} className="font-semibold">
                     {t('finance.statement_closing', { defaultValue: 'Balance carried' })}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Money value={st.total_charged} currency={currency} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Money value={st.total_credited} currency={currency} />
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <Money value={st.closing_balance} currency={currency} strong />
                   </td>
                 </tr>

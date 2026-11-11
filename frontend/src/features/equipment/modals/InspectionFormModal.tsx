@@ -18,8 +18,8 @@ import {
 } from '../api';
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+  'oe-input w-full';
+const labelCls = 'oe-label';
 
 interface InspectionFormModalProps {
   mode: 'create' | 'edit';
@@ -192,7 +192,7 @@ export function InspectionFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -206,7 +206,7 @@ export function InspectionFormModal({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="inspection-form-title"
-            className="text-lg font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {isEdit
               ? t('equipment.inspection.edit_title', {
@@ -229,7 +229,7 @@ export function InspectionFormModal({
 
         <div className="space-y-4">
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.inspection.section_when', {
                 defaultValue: 'When & what',
               })}
@@ -244,7 +244,7 @@ export function InspectionFormModal({
                   onChange={(e) =>
                     setInspectionType(e.target.value as InspectionType)
                   }
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(
                     ['annual', 'quarterly', 'monthly', 'weekly', 'pre_use'] as InspectionType[]
@@ -262,7 +262,7 @@ export function InspectionFormModal({
                 <select
                   value={result}
                   onChange={(e) => setResult(e.target.value as InspectionResult)}
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(['pass', 'conditional', 'fail'] as InspectionResult[]).map(
                     (s) => (
@@ -305,7 +305,7 @@ export function InspectionFormModal({
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.inspection.section_who', {
                 defaultValue: 'Who & evidence',
               })}

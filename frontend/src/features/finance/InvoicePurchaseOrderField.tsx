@@ -115,7 +115,7 @@ export function InvoicePurchaseOrderField({
   return (
     <div className="space-y-2">
       <select
-        className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+        className="oe-select oe-input-lg w-full"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={t('finance.po_link_label', { defaultValue: 'Purchase order' })}

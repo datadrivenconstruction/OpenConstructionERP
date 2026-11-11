@@ -31,7 +31,7 @@ export function FxPage() {
     <div className="space-y-5">
       <CollapsibleSection
         storageKey="fx.how"
-        icon={<Coins size={15} className="text-oe-blue" />}
+        icon={<Coins size={16} className="text-oe-blue" />}
         title={t('fx.flow_title', {
           defaultValue: 'How a converted figure stays explainable',
         })}

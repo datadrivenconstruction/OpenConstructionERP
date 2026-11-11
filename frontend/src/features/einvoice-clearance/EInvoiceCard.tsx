@@ -127,7 +127,7 @@ export function EInvoiceCard({
   return (
     <Card className="p-4 space-y-3" aria-live="polite">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-content-primary">
+        <h3 className="oe-card-title">
           {t('einvoice.card.title', { defaultValue: 'E-invoice' })} · {platform}
         </h3>
         <Badge variant={statusVariant(view.status)}>

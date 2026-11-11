@@ -101,7 +101,7 @@ export function InvoiceInboxOrderLink({
           aria-expanded={open}
           aria-controls="inbox-po-listbox"
           aria-label={t('finance.inbox.po_label', { defaultValue: 'Purchase order' })}
-          className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+          className="oe-input oe-input-lg w-full"
           value={open ? text : selectedLabel}
           placeholder={value ? selectedLabel : t('finance.inbox.po_none', { defaultValue: 'Not linked to an order' })}
           disabled={disabled}
@@ -132,7 +132,7 @@ export function InvoiceInboxOrderLink({
           id="inbox-po-listbox"
           role="listbox"
           aria-label={placeholder}
-          className="absolute z-20 max-h-60 w-full overflow-auto rounded-lg border border-border bg-surface-primary shadow-lg"
+          className="absolute z-dropdown max-h-60 w-full overflow-auto rounded-lg border border-border bg-surface-primary shadow-lg"
         >
           {orders.map((po) => (
             <li key={po.id} role="option" aria-selected={po.id === value}>

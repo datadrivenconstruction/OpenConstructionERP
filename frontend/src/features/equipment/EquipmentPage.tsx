@@ -165,9 +165,9 @@ const DAMAGE_VARIANT: Record<
 };
 
 const inputCls =
-  'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input w-full';
 
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+const labelCls = 'oe-label';
 
 function toNum(n: number | string | null | undefined): number {
   if (n === null || n === undefined) return 0;
@@ -236,7 +236,7 @@ function HowEquipmentWorks() {
   return (
     <CollapsibleSection
       storageKey="equipment.how"
-      icon={<Network size={15} className="text-oe-blue" />}
+      icon={<Network size={16} className="text-oe-blue" />}
       title={t('equipment.flow_title', { defaultValue: 'How the fleet fits together' })}
     >
       <p className="text-xs text-content-tertiary">
@@ -543,7 +543,7 @@ export function EquipmentPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[180px]')}
+          className={clsx(inputCls, 'oe-select', 'max-w-[180px]')}
         >
           <option value="">
             {t('common.all_statuses', { defaultValue: 'All statuses' })}
@@ -559,7 +559,7 @@ export function EquipmentPage() {
         <select
           value={ownershipFilter}
           onChange={(e) => setOwnershipFilter(e.target.value)}
-          className={clsx(inputCls, 'max-w-[160px]')}
+          className={clsx(inputCls, 'oe-select', 'max-w-[160px]')}
         >
           <option value="">
             {t('equipment.all_ownership', { defaultValue: 'All ownership' })}
@@ -669,25 +669,25 @@ function AssetTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+      <table className="oe-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('equipment.col_code', { defaultValue: 'Code' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('equipment.col_name', { defaultValue: 'Name' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('equipment.col_type', { defaultValue: 'Type' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('equipment.col_status', { defaultValue: 'Status' })}
             </th>
-            <th className="px-4 py-2.5 text-left">
+            <th>
               {t('equipment.col_location', { defaultValue: 'Location' })}
             </th>
-            <th className="px-4 py-2.5 text-right">
+            <th className="text-right">
               {t('equipment.col_hours', { defaultValue: 'Hours' })}
             </th>
           </tr>
@@ -697,12 +697,12 @@ function AssetTable({
             <tr
               key={r.id}
               onClick={() => onSelect(r.id)}
-              className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
+              className="cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+              <td className="font-mono text-xs text-content-secondary">
                 {r.code}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <div className="font-medium text-content-primary truncate max-w-[280px]">
                   {r.name}
                 </div>
@@ -712,28 +712,28 @@ function AssetTable({
                   </div>
                 )}
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">
+              <td className="text-content-secondary text-xs">
                 {r.type_code}
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <Badge variant={STATUS_VARIANT[r.status]} dot>
                   {r.status}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="text-xs text-content-secondary">
                 {r.location_lat !== null &&
                 r.location_lng !== null &&
                 r.location_lat !== undefined &&
                 r.location_lng !== undefined ? (
                   <span className="inline-flex items-center gap-1">
-                    <MapPin size={11} className="text-content-tertiary" />
+                    <MapPin size={12} className="text-content-tertiary" />
                     {fmtFixed(r.location_lat, 2)}, {fmtFixed(r.location_lng, 2)}
                   </span>
                 ) : (
                   '—'
                 )}
               </td>
-              <td className="px-4 py-2 text-right text-xs tabular-nums">
+              <td className="text-right text-xs tabular-nums">
                 {fmtFixed(toNum(r.hour_meter), 0)} h
               </td>
             </tr>
@@ -857,7 +857,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end"
+      className="fixed inset-0 z-modal flex justify-end"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -1201,14 +1201,14 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-1.5">
-        <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
+        <h3 className="oe-card-title">{title}</h3>
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-full p-0.5 text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10"
           title={tooltip}
           aria-label={t('common.info', { defaultValue: 'Info' })}
         >
-          <Info size={13} strokeWidth={2} />
+          <Info size={14} strokeWidth={2} />
         </button>
       </div>
       <button
@@ -1394,22 +1394,22 @@ function UtilizationTab({
       )}
       {!loading && telemetry.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+          <table className="oe-table oe-table-compact text-xs">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.recorded_at', { defaultValue: 'Recorded at' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('equipment.col_hours', { defaultValue: 'Hours' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('equipment.km', { defaultValue: 'km' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('equipment.fuel_level', { defaultValue: 'Fuel %' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.engine_status', {
                     defaultValue: 'Engine',
                   })}
@@ -1418,26 +1418,26 @@ function UtilizationTab({
             </thead>
             <tbody>
               {telemetry.map((r) => (
-                <tr key={r.id} className="border-t border-border-light">
-                  <td className="px-3 py-2 text-content-secondary">
+                <tr key={r.id}>
+                  <td className="text-content-secondary">
                     <DateDisplay value={r.recorded_at} />
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {r.hour_meter !== null && r.hour_meter !== undefined
                       ? fmtFixed(toNum(r.hour_meter), 0)
                       : '—'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {r.odometer_km !== null && r.odometer_km !== undefined
                       ? fmtFixed(toNum(r.odometer_km), 0)
                       : '—'}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {r.fuel_level !== null && r.fuel_level !== undefined
                       ? fmtPercent(toNum(r.fuel_level), 0)
                       : '—'}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {r.engine_status || '—'}
                   </td>
                 </tr>
@@ -1524,7 +1524,7 @@ function MeterReadingModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -1535,7 +1535,7 @@ function MeterReadingModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-content-primary">
+          <h2 className="oe-section-title">
             {t('equipment.telemetry.new_title', {
               defaultValue: 'Log meter reading',
             })}
@@ -1683,7 +1683,7 @@ function CostSummaryTab({
     <div className="space-y-4">
       <div className="rounded-lg border border-border-light bg-surface-primary p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('equipment.cost_breakdown', { defaultValue: 'Cost breakdown' })}
           </h3>
           <span className="text-lg font-semibold tabular-nums text-content-primary">
@@ -1803,54 +1803,54 @@ function MaintenanceTab({
       )}
       {!loading && rows.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+          <table className="oe-table oe-table-compact text-xs">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.scheduled_for', { defaultValue: 'Scheduled' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.technician', { defaultValue: 'Technician' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.summary', { defaultValue: 'Summary' })}
                 </th>
-                <th className="px-3 py-2 text-right">
+                <th className="text-right">
                   {t('equipment.cost', { defaultValue: 'Cost' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.col_status', { defaultValue: 'Status' })}
                 </th>
-                <th className="px-3 py-2 w-[88px]" />
+                <th className="w-[88px]" />
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr
                   key={r.id}
-                  className="group border-t border-border-light hover:bg-surface-secondary"
+                  className="group"
                 >
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {r.scheduled_for ? <DateDisplay value={r.scheduled_for} /> : '—'}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">
+                  <td className="text-content-secondary">
                     {r.technician_id || '—'}
                   </td>
-                  <td className="px-3 py-2 truncate max-w-[200px]">
+                  <td className="truncate max-w-[200px]">
                     {r.work_summary || '—'}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="text-right">
                     <MoneyDisplay
                       amount={toNum(r.cost)}
                       currency={r.currency || undefined}
                     />
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <Badge variant={WO_STATUS_VARIANT[r.status]} dot>
                       {r.status}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2">
+                  <td>
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       {(r.status === 'scheduled' || r.status === 'in_progress') && (
                         <button
@@ -2001,25 +2001,25 @@ function CertificationsTab({
       )}
       {!loading && rows.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+          <table className="oe-table oe-table-compact text-xs">
+            <thead>
               <tr>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.inspection_type', { defaultValue: 'Type' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.inspected_at', { defaultValue: 'Inspected' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.valid_until', { defaultValue: 'Valid until' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.inspector', { defaultValue: 'Inspector' })}
                 </th>
-                <th className="px-3 py-2 text-left">
+                <th>
                   {t('equipment.result', { defaultValue: 'Result' })}
                 </th>
-                <th className="px-3 py-2 w-[60px]" />
+                <th className="w-[60px]" />
               </tr>
             </thead>
             <tbody>
@@ -2028,10 +2028,10 @@ function CertificationsTab({
                 return (
                   <tr
                     key={r.id}
-                    className="group border-t border-border-light hover:bg-surface-secondary"
+                    className="group"
                   >
-                    <td className="px-3 py-2">{r.inspection_type}</td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td>{r.inspection_type}</td>
+                    <td className="text-content-secondary">
                       <DateDisplay value={r.inspected_at} />
                     </td>
                     <td
@@ -2049,15 +2049,15 @@ function CertificationsTab({
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {r.inspector_name || '—'}
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <Badge variant={INSPECTION_VARIANT[r.result]} dot>
                         {r.result}
                       </Badge>
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <RowActions
                         onEdit={() => setEditing(r)}
                         onDelete={() => setConfirmDeleteId(r.id)}
@@ -2305,7 +2305,7 @@ function TypesPage() {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <h2 className="text-base font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('equipment.type.page_title', {
               defaultValue: 'Equipment types',
             })}
@@ -2319,7 +2319,7 @@ function TypesPage() {
             })}
             aria-label={t('common.info', { defaultValue: 'Info' })}
           >
-            <Info size={13} strokeWidth={2} />
+            <Info size={14} strokeWidth={2} />
           </button>
         </div>
         <Button
@@ -2367,35 +2367,35 @@ function TypesPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+            <table className="oe-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('equipment.type.code', { defaultValue: 'Code' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('equipment.type.name', { defaultValue: 'Name' })}
                   </th>
-                  <th className="px-4 py-2.5 text-left">
+                  <th>
                     {t('equipment.type.category', { defaultValue: 'Category' })}
                   </th>
-                  <th className="px-4 py-2.5 w-[80px]" />
+                  <th className="w-[80px]" />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr
                     key={r.id}
-                    className="group border-t border-border-light hover:bg-surface-secondary"
+                    className="group"
                   >
-                    <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+                    <td className="font-mono text-xs text-content-secondary">
                       {r.code}
                     </td>
-                    <td className="px-4 py-2 text-content-primary">{r.name}</td>
-                    <td className="px-4 py-2 text-content-secondary text-xs">
+                    <td>{r.name}</td>
+                    <td className="text-content-secondary text-xs">
                       {r.category}
                     </td>
-                    <td className="px-4 py-2">
+                    <td>
                       <RowActions
                         onEdit={() => setEditing(r)}
                         onDelete={() => setConfirmDeleteId(r.id)}
@@ -2686,7 +2686,7 @@ function EquipmentFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
+      className="fixed inset-0 z-popover flex items-center justify-center p-3"
       onClick={() => !busy && onClose()}
       role="dialog"
       aria-modal="true"
@@ -2700,7 +2700,7 @@ function EquipmentFormModal({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="equipment-form-title"
-            className="text-lg font-semibold text-content-primary"
+            className="oe-section-title"
           >
             {isEdit
               ? t('equipment.edit_title', {
@@ -2722,7 +2722,7 @@ function EquipmentFormModal({
         <div className="space-y-4">
           {/* ── Section: Identity ─────────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.section_identity', {
                 defaultValue: 'Identity',
               })}
@@ -2830,7 +2830,7 @@ function EquipmentFormModal({
 
           {/* ── Section: Lifecycle ──────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.section_lifecycle', {
                 defaultValue: 'Lifecycle & status',
               })}
@@ -2845,7 +2845,7 @@ function EquipmentFormModal({
                   onChange={(e) =>
                     set('ownership', e.target.value as Ownership)
                   }
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(['owned', 'rented', 'leased'] as Ownership[]).map((o) => (
                     <option key={o} value={o}>
@@ -2865,7 +2865,7 @@ function EquipmentFormModal({
                   onChange={(e) =>
                     set('status', e.target.value as EquipmentStatus)
                   }
-                  className={inputCls}
+                  className={`${inputCls} oe-select`}
                 >
                   {(
                     [
@@ -2918,7 +2918,7 @@ function EquipmentFormModal({
 
           {/* ── Section: Financial ─────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.section_financial', {
                 defaultValue: 'Financial',
               })}
@@ -3002,7 +3002,7 @@ function EquipmentFormModal({
 
           {/* ── Section: Telemetry & location ───────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.section_telemetry', {
                 defaultValue: 'Telemetry & location',
               })}
@@ -3069,7 +3069,7 @@ function EquipmentFormModal({
 
           {/* ── Section: Required certificates ───────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.required_certs_title', {
                 defaultValue: 'Required operator certificates',
               })}
@@ -3083,7 +3083,7 @@ function EquipmentFormModal({
 
           {/* ── Section: Notes ───────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+            <h3 className="oe-overline mb-2">
               {t('equipment.section_notes', { defaultValue: 'Notes' })}
             </h3>
             <textarea

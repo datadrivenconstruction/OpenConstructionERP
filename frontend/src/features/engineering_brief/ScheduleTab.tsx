@@ -151,7 +151,7 @@ function MilestoneDialog({
     >
       <div className="space-y-3">
         <WideModalField label={t('engineeringBrief.schedule.kind', { defaultValue: 'Kind' })} required>
-          <select className={FIELD_CLASS} value={form.kind_code} onChange={(e) => setForm({ ...form, kind_code: e.target.value })}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.kind_code} onChange={(e) => setForm({ ...form, kind_code: e.target.value })}>
             {catalogue.milestone_kinds.map((k) => (
               <option key={k.code} value={k.code}>
                 {itemLabel(labels, k, k.code)}
@@ -183,7 +183,7 @@ function MilestoneDialog({
           </WideModalField>
         </div>
         <WideModalField label={t('engineeringBrief.schedule.successor', { defaultValue: 'Successor' })} hint={t('engineeringBrief.schedule.successor_hint', { defaultValue: 'The milestone that follows this one. The date is planned backwards from it.' })}>
-          <select className={FIELD_CLASS} value={form.successor_id ?? ''} onChange={(e) => setForm({ ...form, successor_id: e.target.value || null })}>
+          <select className={`${FIELD_CLASS} oe-select`} value={form.successor_id ?? ''} onChange={(e) => setForm({ ...form, successor_id: e.target.value || null })}>
             <option value="">{t('engineeringBrief.none', { defaultValue: 'None' })}</option>
             {milestones
               .filter((m) => m.id !== editing?.id)
@@ -196,7 +196,7 @@ function MilestoneDialog({
         </WideModalField>
         {kind?.gate ? (
           <WideModalField label={t('engineeringBrief.schedule.gate', { defaultValue: 'Gate' })}>
-            <select className={FIELD_CLASS} value={form.gate_code ?? ''} onChange={(e) => setForm({ ...form, gate_code: e.target.value || null })} data-testid="brief-milestone-gate">
+            <select className={`${FIELD_CLASS} oe-select`} value={form.gate_code ?? ''} onChange={(e) => setForm({ ...form, gate_code: e.target.value || null })} data-testid="brief-milestone-gate">
               <option value="">{t('engineeringBrief.none', { defaultValue: 'None' })}</option>
               {(gates.data ?? []).map((g) => (
                 <option key={g.code} value={g.code}>
@@ -285,22 +285,22 @@ function BackplanDialog({
       ) : (
         <div className="space-y-2">
           <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-            <table className="w-full text-sm" data-testid="brief-backplan-table">
-              <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+            <table className="oe-table" data-testid="brief-backplan-table">
+              <thead className="text-left">
                 <tr>
-                  <th className="px-3 py-2">{t('engineeringBrief.schedule.name', { defaultValue: 'Name' })}</th>
-                  <th className="px-3 py-2">{t('engineeringBrief.backplan.from', { defaultValue: 'From' })}</th>
-                  <th className="px-3 py-2">{t('engineeringBrief.backplan.to', { defaultValue: 'To' })}</th>
+                  <th>{t('engineeringBrief.schedule.name', { defaultValue: 'Name' })}</th>
+                  <th>{t('engineeringBrief.backplan.from', { defaultValue: 'From' })}</th>
+                  <th>{t('engineeringBrief.backplan.to', { defaultValue: 'To' })}</th>
                 </tr>
               </thead>
               <tbody>
                 {changes.map((c) => (
-                  <tr key={c.id} className="border-t border-border-light" data-testid="brief-backplan-row">
-                    <td className="px-3 py-2 text-content-primary">
+                  <tr key={c.id} data-testid="brief-backplan-row">
+                    <td>
                       <span className="mr-2 font-mono text-xs text-content-tertiary">{c.code}</span>
                       {name(c.id)}
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">{c.from ? fmtDate(c.from) : t('engineeringBrief.not_set', { defaultValue: 'Not set' })}</td>
+                    <td className="text-content-secondary">{c.from ? fmtDate(c.from) : t('engineeringBrief.not_set', { defaultValue: 'Not set' })}</td>
                     <td className={`px-3 py-2 ${c.changed ? 'font-medium text-content-primary' : 'text-content-secondary'}`}>{fmtDate(c.to)}</td>
                   </tr>
                 ))}
@@ -418,17 +418,17 @@ export function ScheduleTab({
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full text-sm" data-testid="brief-milestone-table">
-            <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+          <table className="oe-table" data-testid="brief-milestone-table">
+            <thead className="text-left">
               <tr>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.date', { defaultValue: 'Planned date' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.name', { defaultValue: 'Name' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.kind', { defaultValue: 'Kind' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.successor', { defaultValue: 'Successor' })}</th>
-                <th className="px-3 py-2 text-right">{t('engineeringBrief.schedule.lead_days', { defaultValue: 'Lead time (days)' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.gate', { defaultValue: 'Gate' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.schedule.sync', { defaultValue: 'Schedule' })}</th>
-                <th className="w-20 px-3 py-2" />
+                <th>{t('engineeringBrief.schedule.date', { defaultValue: 'Planned date' })}</th>
+                <th>{t('engineeringBrief.schedule.name', { defaultValue: 'Name' })}</th>
+                <th>{t('engineeringBrief.schedule.kind', { defaultValue: 'Kind' })}</th>
+                <th>{t('engineeringBrief.schedule.successor', { defaultValue: 'Successor' })}</th>
+                <th className="text-right">{t('engineeringBrief.schedule.lead_days', { defaultValue: 'Lead time (days)' })}</th>
+                <th>{t('engineeringBrief.schedule.gate', { defaultValue: 'Gate' })}</th>
+                <th>{t('engineeringBrief.schedule.sync', { defaultValue: 'Schedule' })}</th>
+                <th className="w-20" />
               </tr>
             </thead>
             <tbody>
@@ -437,9 +437,9 @@ export function ScheduleTab({
                 const successor = m.successor_id ? byId.get(m.successor_id) : undefined;
                 const blocking = m.findings.filter((f) => f.severity === 'error').length;
                 return (
-                  <tr key={m.id} className="border-t border-border-light" data-testid="brief-milestone-row">
-                    <td className="whitespace-nowrap px-3 py-2 text-content-primary">{m.planned_date ? fmtDate(m.planned_date) : t('engineeringBrief.not_set', { defaultValue: 'Not set' })}</td>
-                    <td className="px-3 py-2 text-content-primary">
+                  <tr key={m.id} data-testid="brief-milestone-row">
+                    <td className="whitespace-nowrap">{m.planned_date ? fmtDate(m.planned_date) : t('engineeringBrief.not_set', { defaultValue: 'Not set' })}</td>
+                    <td>
                       <span className="mr-2 font-mono text-xs text-content-tertiary">{m.code}</span>
                       {m.name}
                       {blocking > 0 ? (
@@ -448,18 +448,18 @@ export function ScheduleTab({
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">{itemLabel(labels, catalogue.milestone_kinds.find((k) => k.code === m.kind_code), m.kind_code)}</td>
-                    <td className="px-3 py-2 text-content-secondary">{successor ? `${successor.code} ${successor.name}` : '-'}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{m.lead_days}</td>
-                    <td className="px-3 py-2 text-content-secondary">{m.gate ? m.gate.label || m.gate.code : m.gate_code || '-'}</td>
-                    <td className="px-3 py-2">
+                    <td className="text-content-secondary">{itemLabel(labels, catalogue.milestone_kinds.find((k) => k.code === m.kind_code), m.kind_code)}</td>
+                    <td className="text-content-secondary">{successor ? `${successor.code} ${successor.name}` : '-'}</td>
+                    <td className="text-right tabular-nums text-content-secondary">{m.lead_days}</td>
+                    <td className="text-content-secondary">{m.gate ? m.gate.label || m.gate.code : m.gate_code || '-'}</td>
+                    <td>
                       <span data-testid="brief-milestone-sync" data-sync={sync}>
                         <Badge variant={SYNC_TONE[sync]} size="sm">
                           {SYNC_LABEL[sync]}
                         </Badge>
                       </span>
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       {edit.allowed ? (
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: m })} />

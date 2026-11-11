@@ -40,7 +40,7 @@ import {
 export type TemplateFieldValues = Record<string, string | number | boolean>;
 
 const inputCls =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary';
+  'oe-input w-full';
 const textareaCls = `${inputCls} resize-y`;
 
 /* ── Template picker ───────────────────────────────────────────────────── */
@@ -90,7 +90,7 @@ export function TemplatePicker({
           const tpl = templates.find((x) => x.id === id) ?? null;
           onChange(id, tpl);
         }}
-        className={inputCls}
+        className={`${inputCls} oe-select`}
         aria-label={t('fieldreports.template', { defaultValue: 'Report template' })}
       >
         <option value="">
@@ -155,7 +155,7 @@ export function TemplateFieldEditor({
               <select
                 value={String(v ?? '')}
                 onChange={(e) => onChange(f.key, e.target.value)}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
                 aria-label={f.label}
               >
                 <option value="">

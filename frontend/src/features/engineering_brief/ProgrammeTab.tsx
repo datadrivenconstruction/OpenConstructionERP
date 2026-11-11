@@ -110,7 +110,7 @@ function ProgrammeDialog({
       <div className="space-y-3">
         <WideModalField label={t('engineeringBrief.programme.kind', { defaultValue: 'Kind' })} required>
           <select
-            className={FIELD_CLASS}
+            className={`${FIELD_CLASS} oe-select`}
             value={form.kind_code}
             onChange={(e) => {
               const kind = catalogue.programme_kinds.find((k) => k.code === e.target.value);
@@ -143,7 +143,7 @@ function ProgrammeDialog({
           </WideModalField>
         </div>
         <WideModalField label={t('engineeringBrief.programme.basis', { defaultValue: 'Basis' })} hint={t('engineeringBrief.programme.basis_hint', { defaultValue: 'Where the quantity comes from.' })}>
-          <textarea className={FIELD_CLASS} rows={3} value={form.basis} maxLength={5000} onChange={(e) => setForm({ ...form, basis: e.target.value })} />
+          <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={form.basis} maxLength={5000} onChange={(e) => setForm({ ...form, basis: e.target.value })} />
         </WideModalField>
       </div>
     </WideModal>
@@ -194,28 +194,28 @@ export function ProgrammeTab({
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface-elevated shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-surface-secondary text-left text-xs text-content-secondary">
+          <table className="oe-table">
+            <thead className="text-left">
               <tr>
-                <th className="px-3 py-2">{t('engineeringBrief.programme.code', { defaultValue: 'No.' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.programme.kind', { defaultValue: 'Kind' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.programme.label', { defaultValue: 'Label' })}</th>
-                <th className="px-3 py-2 text-right">{t('engineeringBrief.programme.quantity', { defaultValue: 'Quantity' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.programme.unit', { defaultValue: 'Unit' })}</th>
-                <th className="px-3 py-2">{t('engineeringBrief.programme.basis', { defaultValue: 'Basis' })}</th>
-                <th className="w-20 px-3 py-2" />
+                <th>{t('engineeringBrief.programme.code', { defaultValue: 'No.' })}</th>
+                <th>{t('engineeringBrief.programme.kind', { defaultValue: 'Kind' })}</th>
+                <th>{t('engineeringBrief.programme.label', { defaultValue: 'Label' })}</th>
+                <th className="text-right">{t('engineeringBrief.programme.quantity', { defaultValue: 'Quantity' })}</th>
+                <th>{t('engineeringBrief.programme.unit', { defaultValue: 'Unit' })}</th>
+                <th>{t('engineeringBrief.programme.basis', { defaultValue: 'Basis' })}</th>
+                <th className="w-20" />
               </tr>
             </thead>
             <tbody>
               {lines.map((l) => (
-                <tr key={l.id} className="border-t border-border-light" data-testid="brief-programme-row">
-                  <td className="px-3 py-2 font-mono text-xs text-content-tertiary">{l.code}</td>
-                  <td className="px-3 py-2 text-content-secondary">{itemLabel(labels, catalogue.programme_kinds.find((k) => k.code === l.kind_code), l.kind_code)}</td>
-                  <td className="px-3 py-2 text-content-primary">{l.label}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-content-primary">{l.quantity}</td>
-                  <td className="px-3 py-2 text-content-secondary">{l.unit}</td>
-                  <td className="px-3 py-2 text-content-secondary">{l.basis || '-'}</td>
-                  <td className="px-3 py-2">
+                <tr key={l.id} data-testid="brief-programme-row">
+                  <td className="font-mono text-xs text-content-tertiary">{l.code}</td>
+                  <td className="text-content-secondary">{itemLabel(labels, catalogue.programme_kinds.find((k) => k.code === l.kind_code), l.kind_code)}</td>
+                  <td>{l.label}</td>
+                  <td className="text-right tabular-nums">{l.quantity}</td>
+                  <td className="text-content-secondary">{l.unit}</td>
+                  <td className="text-content-secondary">{l.basis || '-'}</td>
+                  <td>
                     {edit.allowed ? (
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: l })} />

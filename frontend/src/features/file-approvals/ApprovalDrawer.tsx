@@ -192,7 +192,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+        className="fixed inset-0 z-drawer bg-black/40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
@@ -203,14 +203,14 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
           defaultValue: 'Approval workflow',
         })}
         className={clsx(
-          'fixed inset-y-0 right-0 z-50 w-full max-w-md',
+          'fixed inset-y-0 right-0 z-drawer w-full max-w-md',
           'bg-surface-elevated border-l border-border-light shadow-2xl',
           'flex flex-col animate-slide-in-right',
         )}
       >
         <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border-light">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('files.approvals.drawer_title', {
                 defaultValue: 'Approval workflow',
               })}
@@ -236,7 +236,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="text-content-tertiary hover:text-content-primary"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </header>
 
@@ -332,7 +332,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
                                     'Optional decision note (visible on the workflow)',
                                 })}
                                 maxLength={4000}
-                                className="w-full px-2 py-1 text-xs rounded-md border border-border bg-surface-primary"
+                                className="w-full oe-textarea"
                               />
                               <div className="flex gap-2">
                                 <Button

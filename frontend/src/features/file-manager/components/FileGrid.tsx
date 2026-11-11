@@ -405,7 +405,7 @@ export function FileGrid({
                     : t('files.favorites.add', { defaultValue: 'Add to favourites' })
                 }
               >
-                <Star size={13} strokeWidth={2} fill={isFavorite ? 'currentColor' : 'none'} />
+                <Star size={14} strokeWidth={2} fill={isFavorite ? 'currentColor' : 'none'} />
               </button>
             )}
           </div>

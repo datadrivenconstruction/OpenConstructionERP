@@ -146,9 +146,9 @@ const CAPTURE_STATUS_COLORS: Record<CaptureStatus, 'neutral' | 'blue' | 'success
 };
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
-const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
+const labelCls = 'oe-label';
 
 /* ── Confidence pill ───────────────────────────────────────────────────── */
 
@@ -272,7 +272,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               {t('finance.inbox.title', { defaultValue: 'Invoice inbox' })}
             </h3>
             <p className="mt-0.5 max-w-2xl text-sm text-content-secondary">
@@ -291,11 +291,11 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
               onChange={onPickFile}
             />
             <Button variant="secondary" onClick={() => manualMut.mutate()} disabled={manualMut.isPending}>
-              <Plus size={15} />
+              <Plus size={16} />
               {t('finance.inbox.add_manual', { defaultValue: 'Add manually' })}
             </Button>
             <Button onClick={() => fileRef.current?.click()} disabled={uploadMut.isPending}>
-              {uploadMut.isPending ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+              {uploadMut.isPending ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
               {t('finance.inbox.upload', { defaultValue: 'Upload invoice' })}
             </Button>
           </div>
@@ -307,7 +307,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
           {t('finance.inbox.filter_label', { defaultValue: 'Show' })}
         </label>
         <select
-          className={`${inputCls} w-56`}
+          className={`${inputCls} oe-select w-56`}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -336,35 +336,35 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="oe-table">
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                  <th className="px-4 py-3 font-medium">
+                <tr>
+                  <th>
                     {t('finance.inbox.col_supplier', { defaultValue: 'Supplier' })}
                   </th>
-                  <th className="px-4 py-3 font-medium">
+                  <th>
                     {t('finance.inbox.col_number', { defaultValue: 'Invoice #' })}
                   </th>
-                  <th className="px-4 py-3 font-medium">
+                  <th>
                     {t('finance.inbox.col_date', { defaultValue: 'Date' })}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium">
+                  <th className="text-right">
                     {t('finance.inbox.col_gross', { defaultValue: 'Gross' })}
                   </th>
-                  <th className="px-4 py-3 font-medium">
+                  <th>
                     {t('finance.inbox.col_status', { defaultValue: 'Status' })}
                   </th>
-                  <th className="px-4 py-3 font-medium" />
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {captures.map((c) => (
                   <tr
                     key={c.id}
-                    className="cursor-pointer border-b border-border/60 last:border-0 hover:bg-surface-secondary/50"
+                    className="cursor-pointer last:border-0"
                     onClick={() => setSelectedId(c.id)}
                   >
-                    <td className="px-4 py-3">
+                    <td>
                       <div className="font-medium text-content-primary">
                         {c.supplier_name || t('finance.inbox.unknown_supplier', { defaultValue: 'Unknown supplier' })}
                       </div>
@@ -372,21 +372,21 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
                         <div className="text-xs text-content-secondary">{c.original_filename}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary">
+                    <td className="text-content-secondary">
                       {c.invoice_number || <span className="text-content-tertiary">-</span>}
                     </td>
-                    <td className="px-4 py-3 text-content-secondary">
+                    <td className="text-content-secondary">
                       {c.invoice_date ? <DateDisplay value={c.invoice_date} /> : '-'}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="text-right">
                       <MoneyDisplay amount={c.amount_gross} currency={c.currency_code || 'EUR'} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <Badge variant={CAPTURE_STATUS_COLORS[c.status] ?? 'neutral'} size="sm">
                         {t(`finance.inbox.status_${c.status}`, { defaultValue: c.status })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="text-right">
                       <Button variant="ghost" size="sm" onClick={() => setSelectedId(c.id)}>
                         {t('finance.inbox.review', { defaultValue: 'Review' })}
                       </Button>
@@ -614,13 +614,13 @@ function CaptureDetail({
             }
             className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-content-secondary hover:bg-surface-secondary"
           >
-            <Download size={15} />
+            <Download size={16} />
             {t('finance.inbox.view_original', { defaultValue: 'Original' })}
           </button>
         )}
         {status === 'posted' && (
           <Button variant="secondary" onClick={() => verifyMut.mutate()} disabled={verifyMut.isPending}>
-            {verifyMut.isPending ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />}
+            {verifyMut.isPending ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
             {t('finance.inbox.verify', { defaultValue: 'Verify archive' })}
           </Button>
         )}
@@ -642,7 +642,7 @@ function CaptureDetail({
             data-testid="inbox-approve"
             disabled={actionMut.isPending || (mismatch && !ackMatch)}
           >
-            <CheckCircle2 size={15} />
+            <CheckCircle2 size={16} />
             {t('finance.inbox.approve', { defaultValue: 'Approve' })}
           </Button>
         )}
@@ -697,7 +697,7 @@ function CaptureDetail({
             <div className="space-y-1.5">
               {errors.map((f) => (
                 <div key={f.code} className="flex items-start gap-2 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
-                  <XCircle size={15} className="mt-0.5 shrink-0" />
+                  <XCircle size={16} className="mt-0.5 shrink-0" />
                   <span>{f.message}</span>
                 </div>
               ))}
@@ -706,7 +706,7 @@ function CaptureDetail({
                   key={f.code}
                   className="flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning-strong"
                 >
-                  <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" />
                   <span>{f.message}</span>
                 </div>
               ))}
@@ -714,7 +714,7 @@ function CaptureDetail({
           )}
           {errors.length === 0 && warnings.length === 0 && status !== 'posted' && (
             <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-              <CheckCircle2 size={15} />
+              <CheckCircle2 size={16} />
               {t('finance.inbox.checks_pass', { defaultValue: 'All checks pass.' })}
             </div>
           )}
@@ -722,7 +722,7 @@ function CaptureDetail({
           {/* Extracted / reviewed fields */}
           <section>
             <div className="mb-2 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-content-primary">
+              <h4 className="oe-card-title">
                 {t('finance.inbox.fields', { defaultValue: 'Invoice fields' })}
               </h4>
               {editable && (
@@ -837,7 +837,7 @@ function CaptureDetail({
 
           {/* Purchase order and goods-receipt match */}
           <section>
-            <h4 className="mb-2 text-sm font-semibold text-content-primary">
+            <h4 className="oe-card-title mb-2">
               {t('finance.inbox.po_section', { defaultValue: 'Purchase order' })}
             </h4>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -881,7 +881,7 @@ function CaptureDetail({
           {status !== 'posted' ? (
             <section>
               <div className="mb-2 flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-content-primary">
+                <h4 className="oe-card-title">
                   {t('finance.inbox.booking', { defaultValue: 'Booking proposal' })}
                 </h4>
                 {capture.booking_proposal && (
@@ -892,7 +892,7 @@ function CaptureDetail({
                 <ul className="mb-3 space-y-1 text-xs text-content-secondary">
                   {capture.booking_proposal.rationale.map((r, i) => (
                     <li key={i} className="flex items-start gap-1.5">
-                      <Info size={13} className="mt-0.5 shrink-0 text-oe-blue" />
+                      <Info size={14} className="mt-0.5 shrink-0 text-oe-blue" />
                       {r}
                     </li>
                   ))}
@@ -951,7 +951,7 @@ function CaptureDetail({
           {/* Send-back actions for reviewers */}
           {status && ['captured', 'coded', 'queried', 'approved'].includes(status) && (
             <section className="rounded-lg border border-border p-3">
-              <h4 className="mb-2 text-sm font-semibold text-content-primary">
+              <h4 className="oe-card-title mb-2">
                 {t('finance.inbox.decision', { defaultValue: 'Reject or query' })}
               </h4>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -999,8 +999,8 @@ function CaptureDetail({
 
           {/* Audit trail */}
           <section>
-            <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
-              <History size={15} />
+            <h4 className="oe-card-title mb-2 flex items-center gap-1.5">
+              <History size={16} />
               {t('finance.inbox.audit', { defaultValue: 'Audit trail' })}
             </h4>
             <div className="space-y-1.5">
@@ -1064,7 +1064,7 @@ function Field({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <label className="text-xs font-medium text-content-secondary">{label}</label>
+        <label className="oe-label">{label}</label>
         <ConfidencePill score={conf} />
       </div>
       {children}
@@ -1087,7 +1087,7 @@ function AccountSelect({
 }) {
   const { t } = useTranslation();
   return (
-    <select className={inputCls} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
+    <select className={`${inputCls} oe-select`} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
       <option value="">
         {allowEmpty
           ? t('finance.inbox.no_account', { defaultValue: 'None' })
@@ -1114,7 +1114,7 @@ function PostedArchivePanel({
     <section className="rounded-lg border border-success/40 bg-success/5 p-4">
       <div className="mb-2 flex items-center gap-2">
         <ShieldCheck size={16} className="text-success" />
-        <h4 className="text-sm font-semibold text-content-primary">
+        <h4 className="oe-card-title">
           {t('finance.inbox.archived', { defaultValue: 'Posted and archived' })}
         </h4>
       </div>
@@ -1138,9 +1138,9 @@ function PostedArchivePanel({
           }`}
         >
           {verify.overall_intact ? (
-            <ShieldCheck size={15} className="mt-0.5 shrink-0" />
+            <ShieldCheck size={16} className="mt-0.5 shrink-0" />
           ) : (
-            <ShieldAlert size={15} className="mt-0.5 shrink-0" />
+            <ShieldAlert size={16} className="mt-0.5 shrink-0" />
           )}
           <span>{verify.message}</span>
         </div>

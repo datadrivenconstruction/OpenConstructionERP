@@ -205,7 +205,7 @@ export function SavedViewsRail({ projectId, onApply, compact = false }: SavedVie
         <div
           role="menu"
           data-testid="saved-views-context-menu"
-          className="fixed z-50 min-w-[10rem] rounded-lg border border-border bg-surface-elevated shadow-2xl"
+          className="fixed z-popover min-w-[10rem] rounded-lg border border-border bg-surface-elevated shadow-2xl"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >

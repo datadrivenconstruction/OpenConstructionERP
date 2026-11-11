@@ -18,9 +18,9 @@ type Enqueue = (input: EnqueueInput) => Promise<void>;
 type RaiseProps = Parameters<typeof FieldRaiseIssueTab>[0];
 type Level = 1 | 3 | 5;
 
-const inputCls = 'h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900';
-const areaCls = 'min-h-[88px] w-full rounded-xl border border-slate-300 bg-white p-3 text-base text-slate-900';
-const labelCls = 'flex flex-col gap-1 text-sm font-medium text-slate-700';
+const inputCls = 'oe-input oe-input-lg w-full h-12 text-base';
+const areaCls = 'oe-textarea min-h-[88px] w-full';
+const labelCls = 'flex flex-col gap-1 text-sm font-medium text-content-secondary';
 
 const LEVELS = [
   { value: 1, key: 'low', fallback: 'Low' },
@@ -69,7 +69,7 @@ function LevelPicker({ value, onChange, label }: { value: Level; onChange: (v: L
   const { t } = useTranslation();
   return (
     <fieldset className="flex flex-col gap-1">
-      <legend className="text-sm font-medium text-slate-700">{label}</legend>
+      <legend className="text-sm font-medium text-content-secondary">{label}</legend>
       <div className="flex gap-2">
         {LEVELS.map((l) => (
           <button
@@ -78,7 +78,7 @@ function LevelPicker({ value, onChange, label }: { value: Level; onChange: (v: L
             aria-pressed={value === l.value}
             onClick={() => onChange(l.value)}
             className={`h-12 flex-1 rounded-xl border text-sm font-medium ${
-              value === l.value ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-slate-300 bg-white text-slate-700'
+              value === l.value ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-border bg-surface-primary text-content-secondary'
             }`}
           >
             {t(`field.report.level_${l.key}`, { defaultValue: l.fallback })}
@@ -164,7 +164,7 @@ function SafetyForm({ enqueue }: { enqueue: Enqueue }) {
       <label className={labelCls}>
         {t('field.report.safety_type_label', { defaultValue: 'Type' })}
         <select
-          className={inputCls}
+          className={`${inputCls} oe-select`}
           value={type}
           onChange={(e) => {
             setType(e.target.value as (typeof SAFETY_TYPES)[number]);
@@ -277,7 +277,7 @@ export function FieldReportTab(props: RaiseProps) {
             data-testid={`report-kind-${k}`}
             onClick={() => setKind(k)}
             className={`min-h-[44px] rounded-xl border px-2 text-sm font-medium ${
-              kind === k ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-slate-300 bg-white text-slate-700'
+              kind === k ? 'border-semantic-info/60 bg-semantic-info text-white' : 'border-border bg-surface-primary text-content-secondary'
             }`}
           >
             {t(`field.report.kind_${k}`, { defaultValue: KIND_LABEL_FALLBACK[k] })}

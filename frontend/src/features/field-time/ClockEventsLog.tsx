@@ -83,7 +83,7 @@ export function ClockEventsLog({
       {days.map((day) => (
         <section key={day.date} className="rounded-xl border border-border-light bg-surface-primary">
           <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border-light px-4 py-3">
-            <h3 className="text-sm font-semibold text-content-primary">
+            <h3 className="oe-card-title">
               <DateDisplay value={day.date} />
             </h3>
             <button
@@ -112,7 +112,7 @@ export function ClockEventsLog({
                   <span className="text-sm font-medium text-content-primary">{w.resourceName}</span>
                   {w.missingOut && (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-semantic-warning">
-                      <AlertTriangle size={13} />
+                      <AlertTriangle size={14} />
                       {t('field_clock.missing_out', { defaultValue: 'No clock-out' })}
                     </span>
                   )}

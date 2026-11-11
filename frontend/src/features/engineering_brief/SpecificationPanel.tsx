@@ -62,7 +62,7 @@ function IssueDialog({
         label={t('engineeringBrief.spec.note', { defaultValue: 'Note' })}
         hint={t('engineeringBrief.spec.note_hint', { defaultValue: 'What changed since the last version. The requirements are rendered as a PDF into the documents module.' })}
       >
-        <textarea className={FIELD_CLASS} rows={3} value={note} maxLength={5000} onChange={(e) => setNote(e.target.value)} data-testid="brief-spec-note" />
+        <textarea className={`${FIELD_CLASS} oe-textarea`} rows={3} value={note} maxLength={5000} onChange={(e) => setNote(e.target.value)} data-testid="brief-spec-note" />
       </WideModalField>
     </WideModal>
   );
@@ -102,7 +102,7 @@ export function SpecificationPanel({
     <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="brief-spec">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="space-y-1">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title flex items-center gap-2">
             <FileText size={14} aria-hidden />
             {t('engineeringBrief.spec.title', { defaultValue: 'Requirements specification' })}
           </h3>

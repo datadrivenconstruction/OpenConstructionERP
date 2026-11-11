@@ -14,7 +14,7 @@ import { legalEntitiesApi } from '@/features/legal-entities/api';
 import { downloadPayeeTotalsCsv, getPayeeTotals, type PayeeTotalsQuery } from './api';
 
 const inputCls =
-  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg';
 
 /** The previous calendar year, the period most payee returns cover. */
 function lastYear(): { from: string; to: string } {
@@ -214,19 +214,19 @@ export function PayeeTotalsTab({ projectId }: { projectId: string }) {
               ) : (
                 <Card padding="none" className="overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="oe-table">
                       <thead>
-                        <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
-                          <th className="px-4 py-3 font-medium">
+                        <tr>
+                          <th>
                             {t('finance.payee_col_payee', { defaultValue: 'Payee' })}
                           </th>
-                          <th className="px-3 py-3 font-medium">
+                          <th>
                             {t('finance.payee_col_tax_id', { defaultValue: 'Tax or business number' })}
                           </th>
-                          <th className="px-3 py-3 text-right font-medium">
+                          <th className="text-right">
                             {t('finance.payee_col_payments', { defaultValue: 'Payments' })}
                           </th>
-                          <th className="px-3 py-3 text-right font-medium">
+                          <th className="text-right">
                             {t('finance.payee_col_total', { defaultValue: 'Paid in period' })}
                           </th>
                         </tr>
@@ -237,7 +237,7 @@ export function PayeeTotalsTab({ projectId }: { projectId: string }) {
                             key={`${row.contact_id ?? 'none'}-${row.currency_code}`}
                             className={clsx('border-b border-border/60', row.below_threshold && 'opacity-60')}
                           >
-                            <td className="px-4 py-2.5">
+                            <td>
                               <span className="text-content-primary">
                                 {row.payee_name ||
                                   t('finance.retention_unnamed', { defaultValue: 'Unspecified counterparty' })}
@@ -251,7 +251,7 @@ export function PayeeTotalsTab({ projectId }: { projectId: string }) {
                                 </span>
                               )}
                             </td>
-                            <td className="px-3 py-2.5 font-mono text-xs">
+                            <td className="font-mono text-xs">
                               {row.payee_tax_id ? (
                                 <span className="text-content-primary">{row.payee_tax_id}</span>
                               ) : (
@@ -260,10 +260,10 @@ export function PayeeTotalsTab({ projectId }: { projectId: string }) {
                                 </span>
                               )}
                             </td>
-                            <td className="px-3 py-2.5 text-right tabular-nums text-content-secondary">
+                            <td className="text-right tabular-nums text-content-secondary">
                               {row.payment_count}
                             </td>
-                            <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-content-primary">
+                            <td className="text-right font-semibold tabular-nums">
                               <MoneyDisplay amount={row.total} currency={row.currency_code || undefined} />
                             </td>
                           </tr>

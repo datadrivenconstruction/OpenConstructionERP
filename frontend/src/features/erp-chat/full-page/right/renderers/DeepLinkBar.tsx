@@ -53,7 +53,7 @@ export default function DeepLinkBar({ to, label }: { to: string; label: string }
         }}
       >
         {label}
-        <ArrowUpRight size={13} strokeWidth={2} />
+        <ArrowUpRight size={14} strokeWidth={2} />
       </button>
     </div>
   );

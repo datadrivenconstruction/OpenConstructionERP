@@ -559,9 +559,9 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
           title={t('files.bulk.favorite', { defaultValue: 'Add to favourites' })}
         >
           {favoriteMutation.isPending ? (
-            <Loader2 size={13} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" />
           ) : (
-            <Star size={13} />
+            <Star size={14} />
           )}
           {t('files.bulk.favorite', { defaultValue: 'Add to favourites' })}
         </button>
@@ -586,9 +586,9 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
             }
           >
             {cdeMutation.isPending ? (
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <ListChecks size={13} />
+              <ListChecks size={14} />
             )}
             {t('files.bulk.set_status', { defaultValue: 'Set status' })}
             {documentCount > 0 && documentCount !== selectedRows.length && (
@@ -599,7 +599,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
           {cdeMenuOpen && (
             <div
               role="listbox"
-              className="absolute end-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-20 overflow-hidden"
+              className="absolute end-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown overflow-hidden"
             >
               {CDE_STATES.map((state) => (
                 <button
@@ -639,7 +639,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
               : t('files.bulk.download', { defaultValue: 'Download' })
           }
         >
-          {downloading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+          {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
           {t('files.bulk.download', { defaultValue: 'Download' })}
           {downloadableCount > 0 && downloadableCount !== selectedRows.length && (
             <span className="tabular-nums opacity-70">{downloadableCount}</span>
@@ -652,7 +652,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
           onClick={() => setTagDrawerOpen(true)}
           className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium border border-border-light text-content-secondary hover:bg-surface-secondary"
         >
-          <Tag size={13} />
+          <Tag size={14} />
           {t('files.tags.bulk.button', { defaultValue: 'Tag selected' })}
         </button>
 
@@ -663,7 +663,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
           disabled={selectedRows.length === 0}
           className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium border border-border-light text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
         >
-          <Send size={13} />
+          <Send size={14} />
           {t('files.transmittals.send_action', { defaultValue: 'Send transmittal' })}
         </button>
 
@@ -704,7 +704,7 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
             onClick={() => setConfirming(true)}
             className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium border border-border-light text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
             {t('files.bulk.delete', { defaultValue: 'Delete' })}
           </button>
         )}

@@ -111,7 +111,7 @@ export function VersionDropdown({
             ({total})
           </span>
         )}
-        <ChevronDown size={11} className={clsx('transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={12} className={clsx('transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && versions && versions.length > 0 && (
@@ -120,7 +120,7 @@ export function VersionDropdown({
           aria-label={t('files.versions.dropdown_aria', { defaultValue: 'File version history' })}
           className={clsx(
             'absolute right-0 mt-1 w-72 max-h-80 overflow-y-auto',
-            'rounded-lg border border-border-light bg-surface-elevated shadow-lg z-20',
+            'rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown',
           )}
         >
           <ul className="divide-y divide-border-light">

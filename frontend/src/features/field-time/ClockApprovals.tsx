@@ -100,7 +100,7 @@ function ApprovalCard({ event, projectId }: { event: ClockEvent; projectId: stri
       )}
 
       <div>
-        <label htmlFor={`reason-${event.id}`} className="mb-1 block text-xs font-medium text-content-secondary">
+        <label htmlFor={`reason-${event.id}`} className="oe-label">
           {t('field_clock.reason', { defaultValue: 'Reason (required)' })}
         </label>
         <textarea
@@ -108,7 +108,7 @@ function ApprovalCard({ event, projectId }: { event: ClockEvent; projectId: stri
           rows={2}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className="w-full rounded-lg border border-border-light bg-surface-primary p-3 text-sm text-content-primary"
+          className="w-full oe-textarea"
         />
       </div>
 

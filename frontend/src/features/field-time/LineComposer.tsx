@@ -20,7 +20,7 @@ import type { PickOption } from './TimesheetLineRow';
 import type { LineCreatePayload, LineKind } from './api';
 
 const fieldCls =
-  'h-8 w-full rounded-lg border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary';
+  'oe-input w-full';
 
 export interface LineComposerProps {
   projectId: string;
@@ -102,7 +102,7 @@ export function LineComposer({ projectId, labour, plant, variations, onAdd, busy
                 : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
             )}
           >
-            <HardHat size={13} />
+            <HardHat size={14} />
             {t('field_time.kind_labour', { defaultValue: 'Labour' })}
           </button>
           <button
@@ -115,7 +115,7 @@ export function LineComposer({ projectId, labour, plant, variations, onAdd, busy
                 : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
             )}
           >
-            <Wrench size={13} />
+            <Wrench size={14} />
             {t('field_time.kind_plant', { defaultValue: 'Plant' })}
           </button>
         </div>
@@ -128,7 +128,7 @@ export function LineComposer({ projectId, labour, plant, variations, onAdd, busy
               ? t('field_time.worker', { defaultValue: 'Worker / crew' })
               : t('field_time.machine', { defaultValue: 'Machine' })}
           </span>
-          <select value={pickId} className={fieldCls} onChange={(e) => setPickId(e.target.value)}>
+          <select value={pickId} className={`${fieldCls} oe-select`} onChange={(e) => setPickId(e.target.value)}>
             <option value="">
               {kind === 'labour'
                 ? t('field_time.select_worker', { defaultValue: 'Select worker / crew' })
@@ -214,7 +214,7 @@ export function LineComposer({ projectId, labour, plant, variations, onAdd, busy
         {isDaywork && (
           <select
             value={variationId}
-            className={clsx(fieldCls, 'max-w-xs')}
+            className={clsx(fieldCls, 'oe-select', 'max-w-xs')}
             onChange={(e) => setVariationId(e.target.value)}
           >
             <option value="">

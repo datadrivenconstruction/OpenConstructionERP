@@ -86,7 +86,7 @@ export function RenameDialog({ open, row, projectId, onClose }: RenameDialogProp
       role="dialog"
       aria-modal="true"
       aria-label={t('files.rename.title', { defaultValue: 'Rename file' })}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -94,7 +94,7 @@ export function RenameDialog({ open, row, projectId, onClose }: RenameDialogProp
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h3 className="text-sm font-semibold text-content-primary">
+          <h3 className="oe-card-title">
             {t('files.rename.title', { defaultValue: 'Rename file' })}
           </h3>
           <button
@@ -110,7 +110,7 @@ export function RenameDialog({ open, row, projectId, onClose }: RenameDialogProp
         <div className="p-5">
           <label
             htmlFor="file-rename-input"
-            className="block text-xs font-medium text-content-secondary mb-1.5"
+            className="oe-label"
           >
             {t('files.rename.label', { defaultValue: 'File name' })}
           </label>
@@ -126,7 +126,7 @@ export function RenameDialog({ open, row, projectId, onClose }: RenameDialogProp
                 submit();
               }
             }}
-            className="w-full h-9 px-3 text-sm rounded-lg border border-border-light bg-surface-primary text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+            className="w-full oe-input"
           />
 
           <div className="mt-4 flex items-center justify-end gap-2">
@@ -143,7 +143,7 @@ export function RenameDialog({ open, row, projectId, onClose }: RenameDialogProp
               disabled={!canSubmit}
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {rename.isPending && <Loader2 size={13} className="animate-spin" />}
+              {rename.isPending && <Loader2 size={14} className="animate-spin" />}
               {t('files.rename.save', { defaultValue: 'Save' })}
             </button>
           </div>

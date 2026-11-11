@@ -340,7 +340,7 @@ function FeedbackBar({ messageId }: { messageId: string }) {
         aria-pressed={rating === 1}
         disabled={busy}
       >
-        <ThumbsUp size={13} />
+        <ThumbsUp size={14} />
       </button>
       <button
         type="button"
@@ -350,7 +350,7 @@ function FeedbackBar({ messageId }: { messageId: string }) {
         aria-pressed={rating === -1}
         disabled={busy}
       >
-        <ThumbsDown size={13} />
+        <ThumbsDown size={14} />
       </button>
     </span>
   );

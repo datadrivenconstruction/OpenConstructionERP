@@ -56,7 +56,7 @@ export function StorageMeter({ ops, now }: StorageMeterProps) {
   return (
     <div data-testid="storage-meter" data-level={level} className="flex flex-col gap-1">
       {backlog.count > 0 && (
-        <p className="flex items-center gap-1.5 text-xs text-slate-600">
+        <p className="flex items-center gap-1.5 text-xs text-content-secondary">
           <HardDrive size={14} aria-hidden="true" />
           {t('field.quota.summary', {
             count: backlog.count,

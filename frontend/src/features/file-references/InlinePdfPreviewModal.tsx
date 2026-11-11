@@ -99,7 +99,7 @@ export function InlinePdfPreviewModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-popover flex items-center justify-center bg-black/60 p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -153,7 +153,7 @@ export function InlinePdfPreviewModal({
               data-testid="inline-pdf-close"
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
             >
-              <X size={15} />
+              <X size={16} />
             </button>
           </div>
         </header>
@@ -178,7 +178,7 @@ export function InlinePdfPreviewModal({
                 onClick={handleDownload}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary"
               >
-                <Download size={13} />
+                <Download size={14} />
                 {t('files.actions.download', { defaultValue: 'Download' })}
               </button>
             </div>

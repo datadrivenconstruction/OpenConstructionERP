@@ -156,8 +156,8 @@ export function EquipmentHealthDashboard({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1.5">
-        <HeartPulse size={15} className="text-oe-blue" />
-        <h3 className="text-sm font-semibold text-content-primary">
+        <HeartPulse size={16} className="text-oe-blue" />
+        <h3 className="oe-card-title">
           {t('equipment.health.section_title', {
             defaultValue: 'Health & predictive analytics',
           })}
@@ -195,7 +195,7 @@ export function EquipmentHealthDashboard({
                   TREND_COLOR[h.maintenance_trend],
                 )}
               >
-                <TrendIcon size={13} />
+                <TrendIcon size={14} />
                 {trendLabel[h.maintenance_trend]}
               </span>
             </div>
@@ -225,7 +225,7 @@ export function EquipmentHealthDashboard({
       <div>
         <div className="mb-2 flex items-center gap-1.5">
           <Activity size={14} className="text-content-tertiary" />
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+          <h4 className="oe-overline">
             {t('equipment.health.anomalies_title', {
               defaultValue: 'Unusual readings',
             })}
@@ -239,18 +239,18 @@ export function EquipmentHealthDashboard({
           </p>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border-light">
-            <table className="w-full text-xs">
-              <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
+            <table className="oe-table oe-table-compact text-xs">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('equipment.recorded_at', { defaultValue: 'Recorded at' })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('equipment.health.anomaly_signal', {
                       defaultValue: 'Signal',
                     })}
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th>
                     {t('equipment.health.anomaly_reason', {
                       defaultValue: 'Why it stood out',
                     })}
@@ -259,17 +259,17 @@ export function EquipmentHealthDashboard({
               </thead>
               <tbody>
                 {h.anomalies.map((a, i) => (
-                  <tr key={i} className="border-t border-border-light">
-                    <td className="px-3 py-2 text-content-secondary whitespace-nowrap">
+                  <tr key={i}>
+                    <td className="text-content-secondary whitespace-nowrap">
                       <DateDisplay value={a.recorded_at} />
                     </td>
-                    <td className="px-3 py-2">
+                    <td>
                       <span className="inline-flex items-center gap-1.5 font-medium text-semantic-error">
-                        <AlertTriangle size={11} />
+                        <AlertTriangle size={12} />
                         {a.metric}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-content-secondary">
+                    <td className="text-content-secondary">
                       {a.reason}
                     </td>
                   </tr>

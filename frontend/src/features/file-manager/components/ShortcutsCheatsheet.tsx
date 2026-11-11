@@ -36,7 +36,7 @@ export function ShortcutsCheatsheet({ open, onClose }: ShortcutsCheatsheetProps)
       role="dialog"
       aria-modal="true"
       aria-labelledby="file-shortcuts-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-content-primary/30 dark:bg-content-primary/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-content-primary/30 dark:bg-content-primary/50 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
@@ -44,10 +44,10 @@ export function ShortcutsCheatsheet({ open, onClose }: ShortcutsCheatsheetProps)
         className="w-full max-w-md rounded-xl border border-border-light bg-surface-elevated shadow-2xl p-5"
       >
         <div className="flex items-center gap-2 mb-3">
-          <Keyboard size={18} className="text-content-tertiary" />
+          <Keyboard size={20} className="text-content-tertiary" />
           <h2
             id="file-shortcuts-title"
-            className="text-base font-semibold text-content-primary"
+            className="oe-card-title"
           >
             {t('files.shortcuts.title', { defaultValue: 'Keyboard shortcuts' })}
           </h2>

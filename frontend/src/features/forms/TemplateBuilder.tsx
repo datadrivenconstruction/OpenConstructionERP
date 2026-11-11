@@ -59,7 +59,7 @@ import { FormPreview } from './FormPreview';
 import { fmtList } from '@/shared/lib/formatters';
 
 const inputCls =
-  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'oe-input oe-input-lg w-full';
 
 type EditableField = FormFieldDef & { _id: string };
 
@@ -349,7 +349,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
               {t('forms.category', { defaultValue: 'Category' })}
             </span>
             <select
-              className={inputCls}
+              className={`${inputCls} oe-select`}
               value={category}
               onChange={(e) => setCategory(e.target.value as TemplateCategory)}
             >
@@ -407,7 +407,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t('forms.fields', { defaultValue: 'Fields' })}
               </h3>
               <button
@@ -415,7 +415,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
                 onClick={() => setShowPreview((v) => !v)}
                 className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary lg:hidden"
               >
-                {showPreview ? <EyeOff size={13} /> : <Eye size={13} />}
+                {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
                 {showPreview
                   ? t('forms.hide_preview', { defaultValue: 'Hide preview' })
                   : t('forms.show_preview', { defaultValue: 'Preview' })}
@@ -446,13 +446,13 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
             <div className="relative">
               <Button
                 variant="secondary"
-                icon={<Plus size={15} />}
+                icon={<Plus size={16} />}
                 onClick={() => setShowPalette((v) => !v)}
               >
                 {t('forms.add_field', { defaultValue: 'Add field' })}
               </Button>
               {showPalette && (
-                <div className="absolute z-10 mt-2 grid w-full max-w-2xl grid-cols-2 gap-1 rounded-xl border border-border bg-surface-elevated p-2 shadow-xl sm:grid-cols-3">
+                <div className="absolute z-dropdown mt-2 grid w-full max-w-2xl grid-cols-2 gap-1 rounded-xl border border-border bg-surface-elevated p-2 shadow-xl sm:grid-cols-3">
                   {FIELD_TYPES.map((m) => (
                     <PaletteButton key={m.type} meta={m} onClick={() => addField(m.type)} />
                   ))}
@@ -465,7 +465,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
           <div className={clsx('lg:block', showPreview ? 'block' : 'hidden')}>
             <div className="sticky top-2">
               <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-                <Eye size={13} />
+                <Eye size={14} />
                 {t('forms.live_preview', { defaultValue: 'Live preview' })}
               </div>
               <div className="max-h-[60vh] overflow-y-auto rounded-xl border border-border bg-surface-secondary p-3">
@@ -572,13 +572,13 @@ function FieldCard({ field, index, total, allFields, onPatch, onRemove, onDuplic
                   onChange={(e) => onPatch({ required: e.target.checked })}
                   className="h-3.5 w-3.5 rounded border-border text-oe-blue focus:ring-oe-blue/30"
                 />
-                <Asterisk size={11} className="text-semantic-error" />
+                <Asterisk size={12} className="text-semantic-error" />
                 {t('forms.required', { defaultValue: 'Required' })}
               </label>
             )}
             {hasLogic && (
               <Badge variant="blue" size="sm">
-                <GitBranch size={11} className="mr-1" />
+                <GitBranch size={12} className="mr-1" />
                 {t('forms.has_logic', { defaultValue: 'Logic' })}
               </Badge>
             )}
@@ -675,7 +675,7 @@ function FieldCard({ field, index, total, allFields, onPatch, onRemove, onDuplic
           )}
 
           {showLogic && (
-            <div className="space-y-2 rounded-lg border border-border-light bg-surface-secondary p-2.5">
+            <div className="space-y-2 rounded-lg border border-border-light bg-surface-secondary p-3">
               <ConditionEditor
                 title={t('forms.visible_when', { defaultValue: 'Show this field only when' })}
                 rule={field.visible_if ?? null}
@@ -723,7 +723,7 @@ interface FieldConfigProps {
 function FieldConfig({ field, onPatch }: FieldConfigProps) {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 gap-2 rounded-lg border border-border-light bg-surface-secondary p-2.5 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 rounded-lg border border-border-light bg-surface-secondary p-3 sm:grid-cols-2">
       {PLACEHOLDER_TYPES.has(field.type) && (
         <ConfigRow label={t('forms.placeholder', { defaultValue: 'Placeholder' })}>
           <input
@@ -780,7 +780,7 @@ function DefaultValueInput({ field, onPatch }: FieldConfigProps) {
   if (field.type === 'checkbox') {
     return (
       <select
-        className={cls}
+        className={`${cls} oe-select`}
         value={field.default === true ? 'true' : 'false'}
         onChange={(e) => onPatch({ default: e.target.value === 'true' })}
       >
@@ -792,7 +792,7 @@ function DefaultValueInput({ field, onPatch }: FieldConfigProps) {
   if (field.type === 'single_choice') {
     return (
       <select
-        className={cls}
+        className={`${cls} oe-select`}
         value={typeof field.default === 'string' ? field.default : ''}
         onChange={(e) => onPatch({ default: e.target.value || null })}
       >
@@ -808,7 +808,7 @@ function DefaultValueInput({ field, onPatch }: FieldConfigProps) {
   if (field.type === 'pass_fail_na') {
     return (
       <select
-        className={cls}
+        className={`${cls} oe-select`}
         value={typeof field.default === 'string' ? field.default : ''}
         onChange={(e) => onPatch({ default: e.target.value || null })}
       >
@@ -873,7 +873,7 @@ function FormulaEditor({ field, refs, onPatch }: FormulaEditorProps) {
   const badRefs = parsed?.ok ? parsed.vars.filter((v) => !known.has(v)) : [];
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-border-light bg-surface-secondary p-2.5">
+    <div className="space-y-1.5 rounded-lg border border-border-light bg-surface-secondary p-3">
       <input
         className={clsx(inputCls, 'h-9 font-mono text-xs')}
         value={expr}
@@ -973,14 +973,14 @@ function ConditionEditor({ title, rule, refs, onChange }: ConditionEditorProps) 
             onClick={() => setLeaf({ field: refs[0]!.key, op: 'not_empty' })}
             className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
           >
-            <Plus size={11} />
+            <Plus size={12} />
             {t('forms.add_condition', { defaultValue: 'Add a condition' })}
           </button>
         )
       ) : (
         <div className="flex flex-wrap items-center gap-1.5">
           <select
-            className={clsx(inputCls, 'h-8 max-w-[10rem] text-xs')}
+            className={clsx(inputCls, 'oe-select', 'h-8 max-w-[10rem] text-xs')}
             value={leaf.field ?? ''}
             onChange={(e) => setLeaf({ field: e.target.value })}
           >
@@ -991,7 +991,7 @@ function ConditionEditor({ title, rule, refs, onChange }: ConditionEditorProps) 
             ))}
           </select>
           <select
-            className={clsx(inputCls, 'h-8 max-w-[9rem] text-xs')}
+            className={clsx(inputCls, 'oe-select', 'h-8 max-w-[9rem] text-xs')}
             value={op}
             onChange={(e) => setLeaf({ op: e.target.value as ConditionOp })}
           >
@@ -1019,7 +1019,7 @@ function ConditionEditor({ title, rule, refs, onChange }: ConditionEditorProps) 
             onClick={() => onChange(null)}
             className="text-content-tertiary hover:text-semantic-error"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
       )}
@@ -1086,7 +1086,7 @@ function OptionsEditor({ options, onChange }: { options: string[]; onChange: (ne
             placeholder={t('forms.option_ph', { defaultValue: 'Option label' })}
           />
           <IconBtn label="Remove option" onClick={() => remove(i)} disabled={options.length <= 1}>
-            <X size={13} />
+            <X size={14} />
           </IconBtn>
         </div>
       ))}

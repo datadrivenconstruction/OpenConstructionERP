@@ -192,7 +192,7 @@ export function MediaLightbox({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 outline-none"
+      className="fixed inset-0 z-popover flex items-center justify-center bg-black/80 p-4 outline-none"
       role="dialog"
       aria-modal="true"
       aria-label={current.name}
@@ -224,9 +224,9 @@ export function MediaLightbox({
             className="inline-flex h-8 items-center gap-1 rounded-md border border-white/30 px-2 text-2xs font-medium text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {downloading ? (
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <Download size={13} />
+              <Download size={14} />
             )}
             {t('files.actions.download', { defaultValue: 'Download' })}
           </button>
@@ -237,7 +237,7 @@ export function MediaLightbox({
             data-testid="media-lightbox-close"
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
       </div>
@@ -328,7 +328,7 @@ function MediaError({ onDownload }: { onDownload: () => void }) {
         onClick={onDownload}
         className="inline-flex items-center gap-1.5 rounded-md border border-white/30 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10"
       >
-        <Download size={13} />
+        <Download size={14} />
         {t('files.actions.download', { defaultValue: 'Download' })}
       </button>
     </div>

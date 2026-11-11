@@ -157,7 +157,7 @@ export function FileActionsBar({
               ? t('files.search.inside', { defaultValue: 'Search inside files' })
               : t('files.search_placeholder', { defaultValue: 'Search files…' })
           }
-          className="w-full h-9 ps-8 pe-8 text-sm rounded-lg border border-border-light bg-surface-primary text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+          className="w-full oe-input ps-8 pe-8"
         />
         {draft && (
           <button
@@ -187,9 +187,9 @@ export function FileActionsBar({
           })}
         >
           {reindexing ? (
-            <Loader2 size={11} className="animate-spin" />
+            <Loader2 size={12} className="animate-spin" />
           ) : (
-            <RefreshCw size={11} />
+            <RefreshCw size={12} />
           )}
           <span className="hidden md:inline">
             {t('files.search.reindex', { defaultValue: 'Update search index' })}
@@ -238,12 +238,12 @@ export function FileActionsBar({
               {extraActive
                 ? EXTRA_PILLS.find((p) => p.ext === extension)?.label.split(' ')[0]
                 : t('files.type_pill.more', { defaultValue: 'More' })}
-              <MoreHorizontal size={11} />
+              <MoreHorizontal size={12} />
             </button>
             {moreOpen && (
               <div
                 role="listbox"
-                className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-20 overflow-hidden"
+                className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown overflow-hidden"
               >
                 {EXTRA_PILLS.map((p) => (
                   <button
@@ -284,7 +284,7 @@ export function FileActionsBar({
             )}
             title={t('files.favorites.filter', { defaultValue: 'Show favourites only' })}
           >
-            <Star size={13} strokeWidth={2} fill={favoritesOnly ? 'currentColor' : 'none'} />
+            <Star size={14} strokeWidth={2} fill={favoritesOnly ? 'currentColor' : 'none'} />
             <span>{t('files.favorites.label', { defaultValue: 'Favourites' })}</span>
             {typeof favoritesCount === 'number' && favoritesCount > 0 && (
               <span className="tabular-nums opacity-70">{favoritesCount}</span>
@@ -333,7 +333,7 @@ export function FileActionsBar({
           {sortOpen && (
             <div
               role="listbox"
-              className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-20 overflow-hidden"
+              className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown overflow-hidden"
             >
               {(['modified', 'name', 'size', 'kind'] as SortKey[]).map((k) => (
                 <button
@@ -380,7 +380,7 @@ export function FileActionsBar({
           onClick={onImport}
           className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg border border-border-light text-content-secondary hover:bg-surface-secondary"
         >
-          <Upload size={13} />
+          <Upload size={14} />
           {t('files.actions.import', { defaultValue: 'Import' })}
         </button>
         <button
@@ -388,7 +388,7 @@ export function FileActionsBar({
           onClick={onExport}
           className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue-hover"
         >
-          <Download size={13} />
+          <Download size={14} />
           {t('files.actions.export', { defaultValue: 'Export' })}
         </button>
       </div>

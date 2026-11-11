@@ -210,12 +210,12 @@ export function FormsPage() {
       {
         id: 'library' as const,
         label: t('forms.tab_library', { defaultValue: 'Library' }),
-        icon: <LibraryBig size={15} />,
+        icon: <LibraryBig size={16} />,
       },
       {
         id: 'submissions' as const,
         label: t('forms.tab_submissions', { defaultValue: 'Submissions' }),
-        icon: <ClipboardList size={15} />,
+        icon: <ClipboardList size={16} />,
       },
     ],
     [t],
@@ -231,7 +231,7 @@ export function FormsPage() {
         })}
         actions={
           tab === 'library' ? (
-            <Button icon={<Plus size={15} />} onClick={onNewTemplate}>
+            <Button icon={<Plus size={16} />} onClick={onNewTemplate}>
               {t('forms.new_template', { defaultValue: 'New template' })}
             </Button>
           ) : undefined
@@ -352,7 +352,7 @@ function LibraryTab({
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1">
           <Search
-            size={15}
+            size={16}
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
           />
           <input
@@ -388,7 +388,7 @@ function LibraryTab({
             defaultValue: 'Create your first reusable form or checklist template.',
           })}
           action={
-            <Button icon={<Plus size={15} />} onClick={onNew}>
+            <Button icon={<Plus size={16} />} onClick={onNew}>
               {t('forms.new_template', { defaultValue: 'New template' })}
             </Button>
           }
@@ -432,7 +432,7 @@ function TemplateCard({
     <Card className="flex flex-col gap-3 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-content-primary">{tpl.name}</h3>
+          <h3 className="oe-card-title truncate">{tpl.name}</h3>
           {tpl.description && (
             <p className="mt-0.5 line-clamp-2 text-xs text-content-tertiary">{tpl.description}</p>
           )}
@@ -536,7 +536,7 @@ function SubmissionsTab({
             defaultValue: 'Pick a template from the library and fill it in to get started.',
           })}
           action={
-            <Button icon={<LibraryBig size={15} />} onClick={onGoLibrary}>
+            <Button icon={<LibraryBig size={16} />} onClick={onGoLibrary}>
               {t('forms.go_to_library', { defaultValue: 'Go to library' })}
             </Button>
           }

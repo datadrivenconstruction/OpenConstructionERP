@@ -126,7 +126,7 @@ export function MergeConflictDialog({
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
       <div
         ref={ref}
@@ -140,7 +140,7 @@ export function MergeConflictDialog({
         <div className="flex items-start gap-3 px-4 pt-4 pb-2 sm:px-6">
           <GitMerge size={20} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden="true" />
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 className="oe-card-title">
               {t('offline_sync.merge_title', { defaultValue: 'Merge your changes' })}
             </h2>
             <p className="mt-1 text-sm text-content-secondary">
@@ -158,7 +158,7 @@ export function MergeConflictDialog({
             const pick = text[c.field];
             return (
               <section key={c.field} data-testid={`merge-text-${c.field}`} className="space-y-2">
-                <h3 className="text-sm font-semibold text-content-primary">
+                <h3 className="oe-card-title">
                   {t(`offline_sync.field_${c.field}`, { defaultValue: c.field.replace(/_/g, ' ') })}
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -187,7 +187,7 @@ export function MergeConflictDialog({
                     <span className="whitespace-pre-wrap break-words">{c.theirs || ' '}</span>
                   </button>
                 </div>
-                <label className="block text-xs font-medium text-content-secondary">
+                <label className="oe-label">
                   {t('offline_sync.merged_text', { defaultValue: 'Or write the merged text' })}
                   <textarea
                     data-testid={`merge-manual-${c.field}`}
@@ -207,7 +207,7 @@ export function MergeConflictDialog({
                       setText((prev) => ({ ...prev, [c.field]: { choice: 'manual', value: e.target.value } }))
                     }
                     rows={4}
-                    className="mt-1 w-full rounded-lg border border-border bg-surface-primary p-2 text-sm text-content-primary"
+                    className="mt-1 w-full oe-textarea"
                   />
                 </label>
               </section>
@@ -216,7 +216,7 @@ export function MergeConflictDialog({
 
           {listConflicts.map((c) => (
             <section key={c.field} data-testid={`merge-list-${c.field}`} className="space-y-2">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 className="oe-card-title">
                 {t(`offline_sync.field_${c.field}`, { defaultValue: c.field.replace(/_/g, ' ') })}
               </h3>
               {c.items.map((item) => {

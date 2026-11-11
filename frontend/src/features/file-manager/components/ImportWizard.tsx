@@ -143,7 +143,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -153,7 +153,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-light">
-          <h2 className="text-sm font-semibold text-content-primary">
+          <h2 className="oe-card-title">
             {t('files.import.title', { defaultValue: 'Import project bundle' })}
           </h2>
           <button
@@ -162,7 +162,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
             aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
@@ -198,7 +198,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
                 }}
               />
               {error && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>
                 </div>
@@ -245,7 +245,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               </div>
 
               {preview.warnings.length > 0 && (
-                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-2.5 text-xs text-semantic-warning space-y-1">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-xs text-semantic-warning space-y-1">
                   {preview.warnings.map((w, i) => (
                     <p key={i} className="flex items-start gap-1.5">
                       <AlertTriangle size={12} className="shrink-0 mt-0.5" />
@@ -256,7 +256,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               )}
 
               <div>
-                <h3 className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+                <h3 className="oe-overline mb-1.5">
                   {t('files.import.choose_mode', { defaultValue: 'Import mode' })}
                 </h3>
                 <div className="space-y-2">
@@ -293,27 +293,27 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
 
               {mode === 'new_project' && (
                 <div>
-                  <label className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="oe-overline block mb-1">
                     {t('files.import.rename', { defaultValue: 'New project name (optional)' })}
                   </label>
                   <input
                     type="text"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
-                    className="w-full h-9 px-3 text-sm rounded-lg border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+                    className="w-full oe-input"
                   />
                 </div>
               )}
 
               {(mode === 'merge_into_existing' || mode === 'replace_existing') && (
                 <div>
-                  <label className="block text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+                  <label className="oe-overline block mb-1">
                     {t('files.import.target_project', { defaultValue: 'Target project' })}
                   </label>
                   <select
                     value={targetProjectId}
                     onChange={(e) => setTargetProjectId(e.target.value)}
-                    className="w-full h-9 px-2 text-sm rounded-lg border border-border-light bg-surface-primary text-content-primary focus:outline-none focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20"
+                    className="w-full oe-select"
                   >
                     <option value="">
                       {t('files.import.pick_project', { defaultValue: '- pick a project -' })}
@@ -340,7 +340,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               )}
 
               {error && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>
                 </div>
@@ -350,8 +350,8 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
 
           {step === 'result' && result && (
             <>
-              <div className="flex items-center gap-2.5 text-semantic-success">
-                <CheckCircle2 size={18} />
+              <div className="flex items-center gap-2 text-semantic-success">
+                <CheckCircle2 size={20} />
                 <span className="text-sm font-semibold">
                   {t('files.import.result_done', { defaultValue: 'Import complete' })}
                 </span>
@@ -384,7 +384,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
               </div>
 
               {result.warnings.length > 0 && (
-                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-2.5 text-xs text-semantic-warning space-y-1">
+                <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-xs text-semantic-warning space-y-1">
                   {result.warnings.map((w, i) => (
                     <p key={i}>{w}</p>
                   ))}

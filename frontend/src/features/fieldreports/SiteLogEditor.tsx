@@ -37,7 +37,7 @@ import {
 } from './api';
 
 const inputCls =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary';
+  'oe-input w-full';
 
 const EQUIPMENT_TYPES = [
   'crane',
@@ -453,7 +453,7 @@ function EquipmentLogEditor({
                 value={draft.equipment_type ?? ''}
                 onChange={(e) => setDraft((d) => ({ ...d, equipment_type: e.target.value }))}
                 aria-label={t('fieldreports.equipment_type', { defaultValue: 'Equipment type' })}
-                className={inputCls}
+                className={`${inputCls} oe-select`}
               >
                 <option value="">
                   {t('fieldreports.equipment_type', { defaultValue: 'Equipment type' })}

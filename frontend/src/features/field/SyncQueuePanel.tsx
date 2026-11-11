@@ -113,13 +113,13 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
       {/* Header: title + connectivity + sync-now. */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <h2 className="truncate text-base font-semibold text-slate-900">
+          <h2 className="truncate text-base font-semibold text-content-primary">
             {t('field.sync_queue.title', { defaultValue: 'Pending sync' })}
           </h2>
           {summary.total > 0 && (
             <span
               data-testid="sync-queue-total"
-              className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700"
+              className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-semibold text-content-secondary"
             >
               {summary.total}
             </span>
@@ -145,7 +145,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
 
       {/* Status line: counts of pending vs failing. */}
       {!summary.isEmpty && (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-content-tertiary">
           {summary.failing > 0
             ? t('field.sync_queue.summary_with_failing', {
                 defaultValue: '{{pending}} waiting, {{failing}} need attention',
@@ -171,7 +171,7 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
         disabled={summary.isEmpty || syncing || !online}
         className="flex h-11 items-center justify-center gap-2 rounded-xl bg-semantic-info px-4 text-sm font-semibold text-white disabled:opacity-50"
       >
-        <RefreshCw size={18} aria-hidden="true" className={syncing ? 'animate-spin' : ''} />
+        <RefreshCw size={20} aria-hidden="true" className={syncing ? 'animate-spin' : ''} />
         {syncing
           ? t('field.syncing', { defaultValue: 'Syncing…' })
           : t('field.sync_queue.sync_now', { defaultValue: 'Sync now' })}
@@ -211,13 +211,13 @@ export function SyncQueuePanel({ state, now, className = '' }: SyncQueuePanelPro
       {summary.isEmpty ? (
         <div
           data-testid="sync-queue-empty"
-          className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-200 py-8 text-center"
+          className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border-light py-8 text-center"
         >
           <CheckCircle2 size={28} className="text-semantic-success" aria-hidden="true" />
-          <p className="text-sm font-medium text-slate-700">
+          <p className="text-sm font-medium text-content-secondary">
             {t('field.sync_queue.empty_title', { defaultValue: 'Everything is synced' })}
           </p>
-          <p className="px-6 text-xs text-slate-400">
+          <p className="px-6 text-xs text-content-tertiary">
             {t('field.sync_queue.empty_body', {
               defaultValue: 'Captures you make offline will appear here until they reach the server.',
             })}
@@ -319,7 +319,7 @@ function HeldSection({
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-3 text-sm font-semibold text-slate-700"
+              className="flex h-11 flex-1 items-center justify-center rounded-xl border border-border px-3 text-sm font-semibold text-content-secondary"
             >
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
@@ -376,29 +376,29 @@ function SyncQueueRow({
       data-testid="sync-queue-row"
       data-status={row.status}
       className={`flex items-start gap-3 rounded-xl border p-3 ${
-        failing ? 'border-semantic-error/30 bg-semantic-error/10' : 'border-slate-200'
+        failing ? 'border-semantic-error/30 bg-semantic-error/10' : 'border-border-light'
       }`}
     >
       {/* Status icon. */}
       <div className="mt-0.5 shrink-0">
         {failing ? (
-          <AlertTriangle size={18} className="text-semantic-error" aria-hidden="true" />
+          <AlertTriangle size={20} className="text-semantic-error" aria-hidden="true" />
         ) : (
-          <Clock size={18} className="text-slate-400" aria-hidden="true" />
+          <Clock size={20} className="text-content-tertiary" aria-hidden="true" />
         )}
       </div>
 
       {/* Body. */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-slate-900">
+          <p className="truncate text-sm font-medium text-content-primary">
             {t(kindLabelKey(row.kind) ?? `field.sync_queue.kind.${row.kind}`, { defaultValue: kindLabel(row.kind) })}
           </p>
-          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-slate-500">
+          <span className="shrink-0 rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
             {row.method}
           </span>
         </div>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary">
           <span>{formatRelativeTime(row.queuedAt, now)}</span>
           <span aria-hidden="true">·</span>
           {failing ? (
@@ -409,7 +409,7 @@ function SyncQueueRow({
               })}
             </span>
           ) : (
-            <span data-testid="sync-queue-row-status" className="text-slate-500">
+            <span data-testid="sync-queue-row-status" className="text-content-tertiary">
               {t('field.sync_queue.status_pending', { defaultValue: 'Waiting' })}
             </span>
           )}
@@ -425,7 +425,7 @@ function SyncQueueRow({
         disabled={dismissing}
         aria-label={t('field.sync_queue.dismiss', { defaultValue: 'Dismiss' })}
         title={t('field.sync_queue.dismiss', { defaultValue: 'Dismiss' })}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-semantic-error disabled:opacity-50"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error disabled:opacity-50"
       >
         <Trash2 size={16} aria-hidden="true" />
       </button>

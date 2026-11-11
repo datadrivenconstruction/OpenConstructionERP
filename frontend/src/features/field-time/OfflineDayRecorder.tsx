@@ -47,7 +47,7 @@ import { enqueueEntry, newEntryKey, entryKeyOf, workDateOf, OP_WITHDRAW } from '
 import { recordOfflineEntry, formatHours, type LineCreatePayload } from './api';
 
 const fieldCls =
-  'h-8 w-full rounded-lg border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary';
+  'oe-input w-full';
 
 function joinLabel(...parts: (string | null | undefined)[]): string {
   return parts.filter(Boolean).join(' · ');
@@ -182,9 +182,9 @@ export function OfflineDayRecorder({ projectId, onRecorded }: OfflineDayRecorder
       storageKey="field_time.offline"
       icon={
         online ? (
-          <Cloud size={15} className="text-oe-blue" />
+          <Cloud size={16} className="text-oe-blue" />
         ) : (
-          <CloudOff size={15} className="text-semantic-warning" />
+          <CloudOff size={16} className="text-semantic-warning" />
         )
       }
       title={t('field_time.offline.title', { defaultValue: 'Record a day on site' })}
@@ -345,10 +345,10 @@ function PendingList({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="mt-3 rounded-lg border border-amber-500/40 bg-semantic-warning/5 p-3">
+    <div className="mt-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning/5 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-content-primary">
-          <Clock size={13} className="text-semantic-warning" />
+          <Clock size={14} className="text-semantic-warning" />
           {t('field_time.offline.pending_title', {
             defaultValue: 'Still on this device: {{n}}',
             n: pending.length,
@@ -357,7 +357,7 @@ function PendingList({
         <Button
           variant="secondary"
           size="sm"
-          icon={<RefreshCw size={13} className={syncing ? 'animate-spin' : undefined} />}
+          icon={<RefreshCw size={14} className={syncing ? 'animate-spin' : undefined} />}
           loading={syncing}
           disabled={!online}
           onClick={() => void onSync()}
@@ -390,7 +390,7 @@ function PendingList({
               className="shrink-0 rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-error"
               onClick={() => void onDiscard(op.clientOpId)}
             >
-              <Trash2 size={13} />
+              <Trash2 size={14} />
             </button>
           </li>
         ))}
@@ -410,7 +410,7 @@ function SyncSummary({
     <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs">
       {summary.applied > 0 && (
         <span className="inline-flex items-center gap-1.5 text-content-secondary">
-          <CheckCircle2 size={13} className="text-success" />
+          <CheckCircle2 size={14} className="text-success" />
           {t('field_time.offline.summary_applied', {
             defaultValue: 'Reached the office: {{n}}',
             n: summary.applied,
@@ -419,7 +419,7 @@ function SyncSummary({
       )}
       {refused > 0 && (
         <span className="inline-flex items-center gap-1.5 text-content-secondary">
-          <AlertTriangle size={13} className="text-error" />
+          <AlertTriangle size={14} className="text-error" />
           {t('field_time.offline.summary_refused', {
             defaultValue: 'Refused, enter again: {{n}}',
             n: refused,
@@ -428,7 +428,7 @@ function SyncSummary({
       )}
       {summary.retry > 0 && (
         <span className="inline-flex items-center gap-1.5 text-content-secondary">
-          <Clock size={13} className="text-semantic-warning" />
+          <Clock size={14} className="text-semantic-warning" />
           {t('field_time.offline.summary_retry', {
             defaultValue: 'Not sent yet: {{n}}',
             n: summary.retry,
@@ -479,7 +479,7 @@ function StagedLines({
             className="shrink-0 rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-error"
             onClick={() => onRemove(index)}
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </button>
         </li>
       ))}

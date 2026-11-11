@@ -263,7 +263,7 @@ export function SubmitForApprovalModal({
                         defaultValue: 'Role (e.g. Architect)',
                       })}
                       maxLength={64}
-                      className="h-9 px-3 rounded-md border border-border bg-surface-primary text-sm"
+                      className="oe-input"
                     />
                   </div>
                   <button
@@ -296,7 +296,7 @@ export function SubmitForApprovalModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             maxLength={4000}
-            className="px-3 py-2 rounded-md border border-border bg-surface-primary text-sm resize-y w-full"
+            className="oe-textarea resize-y w-full"
             placeholder={t('files.approvals.notes_placeholder', {
               defaultValue: 'Optional context for approvers.',
             })}

@@ -58,7 +58,7 @@ export function CostCodeAssist({ projectId, defaultText, onApply, disabled }: Co
         type="button"
         variant="secondary"
         size="sm"
-        icon={<Sparkles size={13} />}
+        icon={<Sparkles size={14} />}
         disabled={disabled}
         onClick={() => {
           setText(defaultText ?? '');
@@ -74,13 +74,13 @@ export function CostCodeAssist({ projectId, defaultText, onApply, disabled }: Co
       {open && (
         <div
           className={clsx(
-            'absolute right-0 z-30 mt-1 w-80 max-w-[80vw] rounded-lg border border-border-light',
+            'absolute right-0 z-dropdown mt-1 w-80 max-w-[80vw] rounded-lg border border-border-light',
             'bg-surface-elevated p-3 shadow-xl',
           )}
           role="dialog"
           aria-label={t('field_time.assist_title', { defaultValue: 'Cost-code assist' })}
         >
-          <label className="mb-1.5 block text-xs font-medium text-content-primary">
+          <label className="oe-label">
             {t('field_time.assist_describe', { defaultValue: 'Describe the work' })}
           </label>
           <div className="flex gap-2">
@@ -90,7 +90,7 @@ export function CostCodeAssist({ projectId, defaultText, onApply, disabled }: Co
               placeholder={t('field_time.assist_placeholder', {
                 defaultValue: 'e.g. pour blinding to foundations',
               })}
-              className="h-8 w-full rounded-lg border border-border-light bg-surface-primary px-2.5 text-sm text-content-primary"
+              className="oe-input w-full"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && text.trim()) {
                   e.preventDefault();
@@ -106,7 +106,7 @@ export function CostCodeAssist({ projectId, defaultText, onApply, disabled }: Co
               onClick={() => suggestMut.mutate()}
             >
               {suggestMut.isPending ? (
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
                 t('field_time.assist_suggest', { defaultValue: 'Suggest' })
               )}

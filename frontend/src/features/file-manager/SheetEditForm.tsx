@@ -152,7 +152,7 @@ export function SheetEditForm({
         const fieldError = submitted || values[f.key] !== initialValues(sheet)[f.key] ? errors[f.key] : undefined;
         return (
           <div key={f.key} className="flex flex-col gap-1">
-            <label htmlFor={id} className="text-2xs uppercase tracking-wider text-content-tertiary">
+            <label htmlFor={id} className="oe-overline">
               {f.label}
             </label>
             <input

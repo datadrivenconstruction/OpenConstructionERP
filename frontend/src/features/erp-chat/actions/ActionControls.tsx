@@ -58,7 +58,7 @@ export const ActionButton = forwardRef<HTMLButtonElement, ActionButtonProps>(fun
       {...rest}
     >
       {busy ? (
-        <Loader2 size={13} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+        <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
       ) : (
         icon && (
           <span className="inline-flex shrink-0" aria-hidden="true">

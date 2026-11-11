@@ -51,14 +51,14 @@ export function SearchModeToggle({ mode, onChange, className }: SearchModeToggle
         id="filename"
         active={mode === 'filename'}
         onClick={() => onChange('filename')}
-        icon={<Type size={11} />}
+        icon={<Type size={12} />}
         label={t('files.search.mode_filename', { defaultValue: 'Filename' })}
       />
       <ModeButton
         id="content"
         active={mode === 'content'}
         onClick={() => onChange('content')}
-        icon={<FileSearch size={11} />}
+        icon={<FileSearch size={12} />}
         label={t('files.search.mode_content', { defaultValue: 'Content' })}
       />
     </div>
