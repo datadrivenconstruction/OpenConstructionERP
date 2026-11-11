@@ -71,5 +71,5 @@ const ADMIN_ROLES = new Set(['admin', 'owner', 'superuser']);
 
 export function useIsProcessAdmin(): boolean {
   const role = useAuthStore((s) => s.userRole);
-  return role != null && ADMIN_ROLES.has(role);
+  return role != null && ADMIN_ROLES.has(role.trim().toLowerCase());
 }

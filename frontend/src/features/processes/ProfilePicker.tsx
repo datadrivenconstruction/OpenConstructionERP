@@ -86,6 +86,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
   const [confirming, setConfirming] = useState<ProcessPreset | null>(null);
   const active = activePreset(processes);
   const locked = processes.filter((p) => p.env_locked).length;
+  const readonlyReason = t('processes.readonly', { defaultValue: 'Only an administrator can change these.' });
 
   const choose = (preset: ProcessPreset) => {
     if (preset === active) return;
@@ -180,21 +181,28 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
                   <Check size={12} aria-hidden />
                   {t('processes.profile_active', { defaultValue: 'Active' })}
                 </span>
-              ) : isAdmin ? (
+              ) : (
                 <button
                   type="button"
-                  disabled={pending}
+                  disabled={pending || !isAdmin}
+                  aria-describedby={isAdmin ? undefined : 'processes-profile-readonly'}
+                  title={isAdmin ? undefined : readonlyReason}
                   onClick={() => choose(preset)}
                   data-testid={`processes-profile-choose-${preset}`}
                   className="mt-2 rounded-lg border border-border-light px-2 py-1 font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-50"
                 >
                   {t('processes.profile_choose', { defaultValue: 'Use this profile' })}
                 </button>
-              ) : null}
+              )}
             </div>
           );
         })}
       </div>
+      {!isAdmin && (
+        <p id="processes-profile-readonly" className="mt-2 text-xs text-content-tertiary" data-testid="processes-profile-readonly">
+          {readonlyReason}
+        </p>
+      )}
       {active === null && (
         <p className="mt-2 text-xs text-content-secondary" data-testid="processes-profile-custom">
           <span className="font-semibold">{t('processes.profile_custom', { defaultValue: 'Custom' })}</span>

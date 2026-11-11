@@ -169,7 +169,7 @@ describe('ProcessesPanel', () => {
     expect(await screen.findByTestId('process-toggle')).toBeDisabled();
     expect(screen.queryByTestId('process-restart')).toBeNull();
     expect(screen.getByTestId('processes-readonly')).toBeInTheDocument();
-    expect(screen.queryByTestId('processes-profile-choose-minimal')).toBeNull();
+    expect(screen.getByTestId('processes-profile-choose-minimal')).toBeDisabled();
   });
 
   describe('profiles', () => {
@@ -238,8 +238,20 @@ describe('ProcessesPanel', () => {
       role = 'editor';
       await open([core(), search({ enabled: true }), heavy()]);
       expect(screen.getByTestId('processes-profile-recommended')).toHaveAttribute('data-active', 'true');
-      expect(screen.queryByTestId('processes-profile-choose-minimal')).toBeNull();
-      expect(screen.queryByTestId('processes-profile-choose-all')).toBeNull();
+      // Never a silently dead card: the button stays, disabled, with the reason inline.
+      expect(screen.getByTestId('processes-profile-choose-minimal')).toBeDisabled();
+      expect(screen.getByTestId('processes-profile-choose-all')).toBeDisabled();
+      expect(screen.getByTestId('processes-profile-readonly')).toHaveTextContent('Only an administrator');
+    });
+
+    it('lets an admin whose role arrives capitalised pick a profile', async () => {
+      role = 'Admin';
+      await open([core(), search({ enabled: true }), heavy()]);
+      const choose = screen.getByTestId('processes-profile-choose-minimal');
+      expect(choose).toBeEnabled();
+      expect(screen.queryByTestId('processes-profile-readonly')).toBeNull();
+      fireEvent.click(choose);
+      await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/v1/processes/preset', { preset: 'minimal' }));
     });
 
     it('keeps locked services as they are and says how many', async () => {
