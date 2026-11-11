@@ -131,7 +131,7 @@ export function DemoChooserPage() {
   const others = installed.filter((p) => p.slug !== FEATURED_SLUG);
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-5 px-0 sm:px-4 lg:px-8 animate-fade-in">
       <header className="text-center">
         <h1 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
