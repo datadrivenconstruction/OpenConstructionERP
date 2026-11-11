@@ -46,8 +46,8 @@ describe('DemoChooserPage', () => {
     const cards = await screen.findAllByTestId(/^demo-card-/);
     expect(cards.map((c) => c.getAttribute('data-testid'))).toEqual([
       'demo-card-full-showcase-riyadh',
-      'demo-card-office-london',
       'demo-card-residential-berlin',
+      'demo-card-office-london',
     ]);
     expect(cards[0].getAttribute('data-featured')).toBe('true');
     expect(cards[1].getAttribute('data-featured')).toBeNull();
