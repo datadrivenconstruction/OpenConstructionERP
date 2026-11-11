@@ -136,6 +136,12 @@ class FieldTimeRepository:
         await self.session.flush()
         return line
 
+    async def add_lines(self, lines: list[FieldTimesheetLine]) -> None:
+        """Insert several lines with one flush."""
+        if lines:
+            self.session.add_all(lines)
+            await self.session.flush()
+
     async def update_line_fields(self, line_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a line."""
         await apply_update(self.session, FieldTimesheetLine, line_id, **fields)
