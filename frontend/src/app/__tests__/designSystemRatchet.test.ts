@@ -14,7 +14,7 @@ const SRC = resolve(__dirname, '../..');
 const RULES: Record<string, { re: RegExp; max: number; fix: string }> = {
   arbitraryTextSize: {
     re: /(?<![\w-])text-\[\d+(?:\.\d+)?(?:px|rem)\]/g,
-    max: 60,
+    max: 58,
     fix: 'use text-2xs (11) / xs (12) / sm (13) / base (14) / lg (16) / xl (18)',
   },
   heavyWeight: {
@@ -24,17 +24,17 @@ const RULES: Record<string, { re: RegExp; max: number; fix: string }> = {
   },
   arbitraryRadius: {
     re: /(?<![\w-])rounded(?:-[trblse]{1,2})?-\[\d+(?:\.\d+)?px\]/g,
-    max: 9,
+    max: 8,
     fix: 'use rounded-sm (6) / lg (8, controls) / xl (12, cards) / full (chips)',
   },
   rawStatusHue: {
     re: /(?<![\w-])(?:text|bg|border|ring)-(?:red|rose|amber|yellow|emerald|green|sky)-\d{2,3}/g,
-    max: 2434,
+    max: 729,
     fix: 'use text-semantic-*, bg-semantic-*-bg, border-semantic-*/30',
   },
   rawGray: {
     re: /(?<![\w-])(?:text|bg|border|divide)-(?:gray|slate|zinc|neutral)-\d{2,3}/g,
-    max: 1206,
+    max: 283,
     fix: 'use text-content-*, bg-surface-*, border-border(-light)',
   },
 };
