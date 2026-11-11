@@ -20,7 +20,6 @@ from __future__ import annotations
 import asyncio
 import uuid
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
 from typing import Any
 
 import pytest
@@ -360,7 +359,6 @@ def test_create_doc_persists_not_yet_effective() -> None:
             ComplianceDocCreate(
                 project_id=uuid.uuid4(),
                 doc_type="insurance_general_liability",
-                coverage_amount=Decimal("1000000"),
                 name="Public liability - next policy year",
                 effective_date=today + timedelta(days=116),
                 expires_at=today + timedelta(days=485),
@@ -384,7 +382,6 @@ def test_update_doc_recomputes_status_when_the_start_date_moves() -> None:
             ComplianceDocCreate(
                 project_id=uuid.uuid4(),
                 doc_type="bond_performance",
-                coverage_amount=Decimal("1000000"),
                 name="Performance bond - Section 4",
                 effective_date=today - timedelta(days=10),
                 expires_at=today + timedelta(days=300),
@@ -433,7 +430,6 @@ async def test_create_doc_derives_status_and_no_premature_alert() -> None:
     data = ComplianceDocCreate(
         project_id=uuid.uuid4(),
         doc_type="insurance_general_liability",
-        coverage_amount=Decimal("1000000"),
         name="Acme GL Policy",
         effective_date=today,
         expires_at=today + timedelta(days=365),
@@ -499,7 +495,6 @@ async def test_update_doc_into_expired_emits_alert_with_previous_status() -> Non
         ComplianceDocCreate(
             project_id=uuid.uuid4(),
             doc_type="bond_performance",
-            coverage_amount=Decimal("1000000"),
             name="Performance Bond",
             effective_date=today - timedelta(days=10),
             expires_at=today + timedelta(days=365),
@@ -575,7 +570,6 @@ async def test_attach_file_records_metadata_against_doc() -> None:
         ComplianceDocCreate(
             project_id=uuid.uuid4(),
             doc_type="insurance_auto",
-            coverage_amount=Decimal("1000000"),
             name="Fleet Insurance",
             effective_date=today,
             expires_at=today + timedelta(days=365),
