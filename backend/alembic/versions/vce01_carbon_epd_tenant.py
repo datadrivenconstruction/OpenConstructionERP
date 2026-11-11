@@ -5,7 +5,8 @@
 Adds the nullable, indexed ``tenant_id`` to ``oe_carbon_epd_record`` so user-added
 (``source=custom``) records are private to their tenant. Additive: a running
 install gets it from the boot heal; a deliberate ``alembic upgrade`` applies it too.
-Existing custom rows keep NULL and are hidden until an admin assigns them.
+No backfill: EPD records carry no creator column, so existing custom rows keep
+NULL and stay hidden until an admin assigns them.
 
 Revision ID: vce01_carbon_epd_tenant
 Revises: vpf01_project_folder_url

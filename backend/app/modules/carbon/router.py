@@ -392,6 +392,7 @@ async def inventory_alternatives(
     user_id: CurrentUserId,
     session: SessionDep,
     entry_id: uuid.UUID = Query(...),
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> AlternativeComparisonResponse:
     project_id = await service.get_inventory_project_id(inventory_id)
@@ -403,7 +404,7 @@ async def inventory_alternatives(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Entry not found in this inventory",
         )
-    payload = await service.alternatives_for_entry(entry_id)
+    payload = await service.alternatives_for_entry(entry_id, tenant_id=tenant_id)
     options = [AlternativeMaterialOption(**opt) for opt in payload["options"]]
     return AlternativeComparisonResponse(
         entry_id=payload["entry_id"],
@@ -988,6 +989,7 @@ async def auto_enrich_bim(
     model_id: uuid.UUID | None = Query(default=None),
     dry_run: bool = Query(default=False),
     _perm: None = Depends(RequirePermission("carbon.create")),
+    tenant_id: CurrentTenantId = None,
     service: CarbonService = Depends(_get_service),
 ) -> dict:
     """Auto-extract embodied carbon (EN 15978 A1-A3) from the project's BIM.
@@ -1010,6 +1012,7 @@ async def auto_enrich_bim(
         inventory_id,
         model_id=model_id,
         dry_run=dry_run,
+        tenant_id=tenant_id,
     )
 
 

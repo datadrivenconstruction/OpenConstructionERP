@@ -100,3 +100,16 @@ async def test_carbon_epd_library_is_tenant_scoped(session) -> None:
             await call
         assert exc.value.status_code == 404
     assert (await svc.get_epd(secret.id, tenant_id="tenant-b", scoped=True)).product_name == "Tenant B secret mix"
+
+
+async def test_material_class_match_never_picks_another_tenants_custom_epd(session) -> None:
+    from app.modules.carbon.repository import EPDRecordRepository
+
+    repo = EPDRecordRepository(session)
+    assert await repo.find_epd_by_material_class("concrete", tenant_id="tenant-c") is None
+    own = await repo.find_epd_by_material_class("concrete", tenant_id="tenant-b")
+    assert own is not None
+    assert own.epd_id == "own-b-secret"
+    shared = await repo.find_epd_by_material_class("steel", tenant_id="tenant-c")
+    assert shared is not None
+    assert shared.epd_id == "ice-steel"

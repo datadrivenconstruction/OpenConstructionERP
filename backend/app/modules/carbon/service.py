@@ -2042,6 +2042,8 @@ class CarbonService:
     async def alternatives_for_entry(
         self,
         entry_id: uuid.UUID,
+        *,
+        tenant_id: str | None = None,
     ) -> dict[str, Any]:
         entry = await self.get_embodied_entry(entry_id)
         # Pull EPDs with the same material_class (via entry.factor_id → epd_id → class)
@@ -2053,6 +2055,8 @@ class CarbonService:
                 if current_epd is not None:
                     same_class, _ = await self.epd_repo.list_filtered(
                         material_class=current_epd.material_class,
+                        visible_to=tenant_id,
+                        scoped=True,
                     )
                     for sibling in same_class:
                         if sibling.id == current_epd.id:
@@ -2394,7 +2398,7 @@ class CarbonService:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def _bim_factor_candidates(self) -> list[dict[str, Any]]:
+    async def _bim_factor_candidates(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
         """Build the match candidate list from EPDs + material factors.
 
         Each candidate carries the material_class / region to match on, the
@@ -2403,7 +2407,7 @@ class CarbonService:
         declared in, and the linkable ``factor_id`` (NULL when no material
         factor references the EPD - the entry then stores the value only).
         """
-        epds, _ = await self.epd_repo.list_filtered(limit=100000)
+        epds, _ = await self.epd_repo.list_filtered(limit=100000, visible_to=tenant_id, scoped=True)
         factors, _ = await self.factor_repo.list_filtered(limit=100000)
         factor_by_epd: dict[uuid.UUID, MaterialCarbonFactor] = {}
         for fac in factors:
@@ -2440,6 +2444,7 @@ class CarbonService:
         *,
         model_id: uuid.UUID | None = None,
         dry_run: bool = False,
+        tenant_id: str | None = None,
     ) -> dict[str, Any]:
         """Auto-extract embodied carbon (A1-A3) from a project's BIM elements.
 
@@ -2461,7 +2466,7 @@ class CarbonService:
         """
         inv = await self.get_inventory(inventory_id)
         elements = await self._load_project_bim_elements(inv.project_id, model_id=model_id)
-        candidates = await self._bim_factor_candidates()
+        candidates = await self._bim_factor_candidates(tenant_id)
 
         created_models: list[EmbodiedCarbonEntry] = []
         suggestions: list[dict[str, Any]] = []
