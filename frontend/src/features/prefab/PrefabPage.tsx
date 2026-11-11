@@ -542,7 +542,7 @@ const UnitCard = React.memo(function UnitCard({
           <Coins size={12} className="shrink-0" />
           <span className="tabular-nums">{unit.cost_basis}</span>
           {unit.earned_value != null && (
-            <span className="text-semantic-success/70 ">
+            <span className="text-semantic-success/75 ">
               {t('prefab.earned_short', { defaultValue: 'earned {{value}}', value: unit.earned_value })}
             </span>
           )}
