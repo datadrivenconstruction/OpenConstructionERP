@@ -32,7 +32,7 @@ export function normalizeSidebarWidth(value: unknown): number {
 }
 
 function normalizeLabelMode(value: unknown): SidebarLabelMode {
-  return value === 'single' ? 'single' : 'wrap';
+  return value === 'wrap' ? 'wrap' : 'single';
 }
 
 function read(): { width: number; labelMode: SidebarLabelMode } {
@@ -45,7 +45,7 @@ function read(): { width: number; labelMode: SidebarLabelMode } {
   } catch {
     /* storage unavailable or corrupt: fall back to defaults */
   }
-  return { width: SIDEBAR_DEFAULT_WIDTH, labelMode: 'wrap' };
+  return { width: SIDEBAR_DEFAULT_WIDTH, labelMode: 'single' };
 }
 
 function persist(width: number, labelMode: SidebarLabelMode): void {

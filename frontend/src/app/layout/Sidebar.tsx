@@ -1563,7 +1563,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             onHide={hideLearn}
             onToggleGroupHidden={() => toggleGroupHidden(LEARN_GROUP_ID)}
           >
-            <ul className="space-y-0.5">{learnItems.map(renderRow)}</ul>
+            <ul className="space-y-px">{learnItems.map(renderRow)}</ul>
           </LearnSection>
         )}
         {/* Pinned section — appears at the top when the user has
@@ -1579,7 +1579,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 </span>
               </div>
             )}
-            <ul className="space-y-0.5">
+            <ul className="space-y-px">
               {pinnedItems.map((item, i) => (
                 <li
                   key={item.to}
@@ -1647,7 +1647,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 onToggle={() => toggleGroup(`user:${group.id}`)}
                 iconified={iconified}
               >
-                <ul className="space-y-0.5">{rows.map(renderRow)}</ul>
+                <ul className="space-y-px">{rows.map(renderRow)}</ul>
               </NavGroupSection>
             </div>
           ),
@@ -1660,7 +1660,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               onToggle={() => toggleGroup('mode')}
               iconified={iconified}
             >
-              <ul className="space-y-0.5">{modeRows.map(renderRow)}</ul>
+              <ul className="space-y-px">{modeRows.map(renderRow)}</ul>
             </NavGroupSection>
           </div>
         )}
@@ -1675,7 +1675,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               onToggle={() => toggleGroup(`workspace:${workspace.presetKey}`)}
               iconified={iconified}
             >
-              <ul className="space-y-0.5">
+              <ul className="space-y-px">
                 {visibleWorkspaceItems.flatMap((item, i) => {
                   // A heading above the first row of each section that is on
                   // screen. A section whose rows are all gated out gets none.
@@ -1792,7 +1792,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 label={t(group.labelKey, { defaultValue: group.defaultLabel ?? group.id })}
                 icon={<FirstIcon size={16} strokeWidth={1.75} aria-hidden />}
               >
-                <ul className="space-y-0.5">{visibleItems.map((item, i) => renderRowAs(item, i, false))}</ul>
+                <ul className="space-y-px">{visibleItems.map((item, i) => renderRowAs(item, i, false))}</ul>
               </RailFlyoutGroup>
             );
           }
@@ -1821,7 +1821,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               isGroupHidden={editingHiddenGroups.includes(group.id)}
               onToggleGroupHidden={() => toggleGroupHidden(group.id)}
             >
-              <ul className="space-y-0.5">{visibleItems.map(renderRow)}</ul>
+              <ul className="space-y-px">{visibleItems.map(renderRow)}</ul>
             </NavGroupSection>
             </Fragment>
           );
@@ -2826,7 +2826,7 @@ function SidebarItem({
             'transition-colors duration-fast ease-oe',
             compact
               ? 'gap-1.5 pl-2 pr-1.5 py-[3px] text-xs'
-              : 'gap-2 pl-[10px] pr-2.5 py-1 text-sm',
+              : 'gap-1.5 pl-2 pr-2 py-1 text-sm',
             item.highlight && !active
               ? 'font-medium bg-gradient-to-r from-[#7c3aed]/10 to-[#0ea5e9]/10 text-[#6d28d9] hover:from-[#7c3aed]/15 hover:to-[#0ea5e9]/15'
               : active
@@ -2867,7 +2867,7 @@ function SidebarItem({
             line instead of clipping mid-word. The title tooltip stays as
             the safety net for labels that exceed even two lines. */}
         <span
-          className={clsx('min-w-0 leading-snug', labelMode === 'single' ? 'truncate' : 'break-words')}
+          className={clsx('min-w-0 leading-snug', labelMode === 'single' ? 'truncate whitespace-nowrap' : 'break-words')}
           title={label}
         >
           {label}

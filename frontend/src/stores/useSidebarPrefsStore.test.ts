@@ -15,11 +15,11 @@ describe('useSidebarPrefsStore', () => {
     document.documentElement.style.removeProperty('--oe-sidebar-width');
   });
 
-  it('defaults keep today\'s menu: 248 px, wrapped names', async () => {
+  it('defaults: 248 px, single-line names', async () => {
     const { useSidebarPrefsStore, SIDEBAR_DEFAULT_WIDTH } = await freshStore();
     expect(useSidebarPrefsStore.getState().width).toBe(SIDEBAR_DEFAULT_WIDTH);
     expect(useSidebarPrefsStore.getState().width).toBe(248);
-    expect(useSidebarPrefsStore.getState().labelMode).toBe('wrap');
+    expect(useSidebarPrefsStore.getState().labelMode).toBe('single');
     expect(document.documentElement.style.getPropertyValue('--oe-sidebar-width')).toBe('');
   });
 
@@ -73,6 +73,6 @@ describe('useSidebarPrefsStore', () => {
     localStorage.setItem(KEY, JSON.stringify({ width: 9000, labelMode: 'tiny' }));
     mod = await freshStore();
     expect(mod.useSidebarPrefsStore.getState().width).toBe(360);
-    expect(mod.useSidebarPrefsStore.getState().labelMode).toBe('wrap');
+    expect(mod.useSidebarPrefsStore.getState().labelMode).toBe('single');
   });
 });
