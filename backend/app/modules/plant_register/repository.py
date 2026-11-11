@@ -41,6 +41,9 @@ class PlantRepository:
     async def get_scoped(
         self, model: type[T], project_id: uuid.UUID, row_id: uuid.UUID, *, lock: bool = False
     ) -> T | None:
+        if not lock:
+            row = await self.session.get(model, row_id)
+            return row if row is not None and row.project_id == project_id else None  # type: ignore[attr-defined]
         stmt = select(model).where(model.id == row_id, model.project_id == project_id)  # type: ignore[attr-defined]
         if lock:
             stmt = stmt.with_for_update()
