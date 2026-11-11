@@ -16,8 +16,12 @@
  * The users list needs the manager permission (``users.list``). Asking for it
  * from an editor or viewer only earns a 403, so the query is not made for
  * them, and contacts, readable by every role, are the list they pick from.
+ *
+ * The list is portalled to the body with fixed positioning: inside a
+ * scrolling table (the schedule grid) an absolute list was clipped away.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { BookUser, User, X } from 'lucide-react';
@@ -69,6 +73,7 @@ export function AssigneePicker({
   ariaLabel,
   disabled = false,
   noMatchesText,
+  onDismiss,
 }: {
   value: AssigneeValue;
   onChange: (next: AssigneeValue) => void;
@@ -81,10 +86,15 @@ export function AssigneePicker({
   disabled?: boolean;
   /** Shown when nothing matches; the default speaks of keeping typed text. */
   noMatchesText?: string;
+  /** Called when the list closes without a pick (outside click, Escape). */
+  onDismiss?: () => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [listStyle, setListStyle] = useState<CSSProperties>({});
   const role = useAuthStore((s) => s.userRole);
   const mayListUsers =
     includeUsers && ((ROLE_RANK as Readonly<Record<string, number>>)[normalizeRole(role)] ?? 0) >= ROLE_RANK.manager;
@@ -120,10 +130,38 @@ export function AssigneePicker({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (boxRef.current?.contains(target) || listRef.current?.contains(target)) return;
+      setOpen(false);
+      onDismiss?.();
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
+  }, [open, onDismiss]);
+
+  // Anchor the portalled list under the field (above it near the viewport
+  // bottom), following any scroll container the field sits in.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const r = boxRef.current?.getBoundingClientRect();
+      if (!r) return;
+      const below = window.innerHeight - r.bottom;
+      const up = below < 248 && r.top > below;
+      setListStyle({
+        position: 'fixed',
+        left: r.left,
+        width: Math.max(r.width, 240),
+        ...(up ? { bottom: window.innerHeight - r.top + 4 } : { top: r.bottom + 4 }),
+      });
+    };
+    place();
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    return () => {
+      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('resize', place);
+    };
   }, [open]);
 
   const options = useMemo<Option[]>(() => {
@@ -155,6 +193,8 @@ export function AssigneePicker({
     });
     setOpen(false);
   };
+
+  useEffect(() => setActive(0), [query, open]);
 
   const linked = value.userId ? 'user' : value.contactId ? 'contact' : null;
 
@@ -188,7 +228,19 @@ export function AssigneePicker({
           aria-label={ariaLabel}
           disabled={disabled}
           onKeyDown={(e) => {
-            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'Escape') {
+              setOpen(false);
+              onDismiss?.();
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+              e.preventDefault();
+              setOpen(true);
+              const step = e.key === 'ArrowDown' ? 1 : -1;
+              setActive((i) => (options.length ? (i + step + options.length) % options.length : 0));
+            } else if (e.key === 'Enter' && open && options[active]) {
+              // Enter takes the highlighted match, so a typed name is never left unsaved.
+              e.preventDefault();
+              pick(options[active]);
+            }
           }}
           className={`${inputClassName}${linked ? ' ps-9' : ''}${value.name ? ' pe-8' : ''}`}
           placeholder={placeholder}
@@ -204,10 +256,14 @@ export function AssigneePicker({
           </button>
         )}
       </div>
-      {open && (
+      {open &&
+        createPortal(
         <div
+          ref={listRef}
           role="listbox"
-          className="absolute start-0 top-full z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
+          data-testid={`${testIdPrefix}-listbox`}
+          style={listStyle}
+          className="z-[1000] max-h-60 overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-md"
         >
           {options.length === 0 ? (
             <div className="px-3 py-2 text-xs text-content-tertiary">
@@ -217,7 +273,7 @@ export function AssigneePicker({
                 })}
             </div>
           ) : (
-            options.map((o) => (
+            options.map((o, i) => (
               <button
                 key={`${o.kind}-${o.id}`}
                 type="button"
@@ -226,7 +282,10 @@ export function AssigneePicker({
                 data-testid={`${testIdPrefix}-option-${o.kind}-${o.id}`}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(o)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm transition-colors hover:bg-surface-secondary"
+                onMouseEnter={() => setActive(i)}
+                className={`flex w-full items-center gap-2 px-3 py-2 text-start text-sm transition-colors hover:bg-surface-secondary${
+                  i === active ? ' bg-surface-secondary' : ''
+                }`}
               >
                 {o.kind === 'user' ? (
                   <User size={13} className="shrink-0 text-content-tertiary" />
@@ -245,8 +304,9 @@ export function AssigneePicker({
               </button>
             ))
           )}
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -139,6 +139,32 @@ describe('ActivityGrid sections and assignee', () => {
     await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: null }));
   });
 
+  it('opens the contact list outside the scrolling table so it is not clipped', async () => {
+    renderHarness();
+    fireEvent.focus(screen.getByTestId('grid-assignee-o1-input'));
+    const list = await screen.findByTestId('grid-assignee-o1-listbox');
+    // The grid sits in an overflow container; an in-table list was cut off there.
+    expect(screen.getByTestId('activity-grid').contains(list)).toBe(false);
+    expect(list.style.position).toBe('fixed');
+  });
+
+  it('saves the highlighted contact on Enter and drops unmatched typed text', async () => {
+    renderHarness();
+    const input = screen.getByTestId('grid-assignee-c1-input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'Ana' } });
+    await screen.findByTestId('grid-assignee-c1-option-contact-k1');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('c1', { assignee_id: 'k1' }));
+
+    (scheduleApi.updateActivity as any).mockClear();
+    const other = screen.getByTestId('grid-assignee-o1-input') as HTMLInputElement;
+    fireEvent.change(other, { target: { value: 'Nobody here' } });
+    fireEvent.keyDown(other, { key: 'Escape' });
+    // Not saved, so the cell shows the stored assignee again instead of pretending.
+    expect(other.value).toBe('Site Crew GmbH');
+    expect(scheduleApi.updateActivity).not.toHaveBeenCalled();
+  });
+
   it('moves a row into a section, never into its own subtree', async () => {
     renderHarness();
     const own = screen.getByTestId('grid-section-s1') as HTMLSelectElement;

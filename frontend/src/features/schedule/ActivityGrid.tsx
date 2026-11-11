@@ -879,6 +879,8 @@ function GridAssigneeCell({
       noMatchesText={t('schedule.assignee_no_matches', { defaultValue: 'No matching contacts.' })}
       inputClassName={CELL_INPUT_CLS}
       disabled={disabled}
+      // Typed text that matched no contact is not an assignee: show the stored one again.
+      onDismiss={() => setDraft((d) => (d && !d.contactId && d.name ? null : d))}
       onChange={(next) => {
         setDraft(next);
         if (next.contactId) {
