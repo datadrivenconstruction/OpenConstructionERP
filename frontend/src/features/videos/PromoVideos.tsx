@@ -57,7 +57,7 @@ function PromoTile({ id, title }: { id: string; title: string }) {
               className="h-full w-full object-cover"
             />
             <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/10">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-slate-900 shadow-md">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-black/85 shadow-md">
                 <Play size={18} fill="currentColor" aria-hidden />
               </span>
             </span>

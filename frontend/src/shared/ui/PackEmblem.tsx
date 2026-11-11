@@ -113,7 +113,7 @@ export function PackEmblem({ pack, size, className = '', bare = false }: PackEmb
         <CountryFlag code={country} size={Math.round(size * 1.15)} className="block" />
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[2px] ring-1 ring-inset ring-black/10 dark:ring-white/15"
+          className="pointer-events-none absolute inset-0 rounded-xs ring-1 ring-inset ring-black/10 dark:ring-white/15"
         />
       </span>
     );
