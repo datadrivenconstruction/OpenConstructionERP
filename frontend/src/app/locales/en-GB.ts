@@ -808,6 +808,20 @@ const resource = {
     "site_sensors.readings.audit_update": "changed {{before}} to {{after}}",
     "site_sensors.readings.audit_delete": "deleted {{before}}",
     "site_sensors.kind.custom": "Own sensors",
+    "learn.hive.title": "Learning paths",
+    "learn.hive.subtitle": "One project from take-off to handover. Each cell is a course, numbered in the order the work happens.",
+    "learn.hive.choose_path": "Project",
+    "learn.hive.status_done": "Done",
+    "learn.hive.status_next": "Next",
+    "learn.hive.status_ahead": "Ahead",
+    "learn.hive.keys_hint": "Follow the numbers. Arrow keys move along the path, Enter opens a course.",
+    "learn.hive.goal": "{{project}}: take-off to handover",
+    "learn.hive.progress": "{{done}} of {{total}} courses done",
+    "learn.hive.open": "Open course",
+    "learn.hive.mark_done": "Mark as done",
+    "learn.hive.mark_undone": "Not done yet",
+    "learn.hive.local_note": "Progress is kept in this browser only.",
+    "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
   }
 } as { translation: Record<string, string> };
 
