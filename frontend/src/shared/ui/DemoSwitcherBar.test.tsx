@@ -27,8 +27,8 @@ function renderBar() {
 }
 
 const PROJECTS = [
-  { id: 'p1', name: 'Consultancy', metadata: { demo_id: 'consultancy-riyadh' } },
-  { id: 'p2', name: 'Contractor', metadata: { demo_id: 'contractor-jeddah' } },
+  { id: 'p1', name: 'Consultancy', metadata: { demo_id: 'office-london' } },
+  { id: 'p2', name: 'Contractor', metadata: { demo_id: 'medical-us' } },
   { id: 'p9', name: 'Mine', metadata: {} },
 ];
 
@@ -66,7 +66,7 @@ describe('DemoSwitcherBar', () => {
   });
 
   it('applies a ?demo= deep link once projects load', async () => {
-    captureDemoPick('?demo=contractor-jeddah');
+    captureDemoPick('?demo=medical-us');
     captureDemoPick('?demo=unknown');
     apiGet.mockResolvedValue({ demo_mode: true });
     fetchProjectList.mockResolvedValue(PROJECTS);
@@ -75,19 +75,30 @@ describe('DemoSwitcherBar', () => {
     expect(sessionStorage.getItem('oe_demo_pick')).toBeNull();
   });
 
-  it('gives the contractor demo its own look and a shorter menu', async () => {
+  it('gives the US demo its own look and a shorter menu', async () => {
     useAppearanceStore.getState().setAppearance({ accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' });
     useModuleStore.getState().setHiddenGroups([]);
-    captureDemoPick('?demo=contractor-jeddah');
+    captureDemoPick('?demo=medical-us');
     apiGet.mockResolvedValue({ demo_mode: true });
     fetchProjectList.mockResolvedValue(PROJECTS);
     renderBar();
-    await waitFor(() => expect(sessionStorage.getItem('oe_demo_chosen')).toBe('contractor-jeddah'));
+    await waitFor(() => expect(sessionStorage.getItem('oe_demo_chosen')).toBe('medical-us'));
     expect(useAppearanceStore.getState().effective.accent).toBe('amber');
     const hidden = useModuleStore.getState().hiddenGroups;
     expect(hidden).toContain('grp_real_estate');
     expect(hidden).not.toContain('grp_estimating');
     expect(hidden).not.toContain('grp_learn');
+    expect(document.documentElement.dataset.oeMenu).toBe('dark');
+  });
+
+  it('takes the menu style off again when the bar goes away', async () => {
+    captureDemoPick('?demo=medical-us');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    const { unmount } = renderBar();
+    await waitFor(() => expect(document.documentElement.dataset.oeMenu).toBe('dark'));
+    unmount();
+    expect(document.documentElement.dataset.oeMenu).toBeUndefined();
   });
 
   it('sends a visitor who has not chosen yet to the picker', async () => {

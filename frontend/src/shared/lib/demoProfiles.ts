@@ -9,34 +9,47 @@
 import type { Appearance } from './appearance';
 
 export type DemoSlug =
-  | 'consultancy-riyadh'
-  | 'contractor-jeddah'
-  | 'site-development-dammam'
   | 'full-showcase-riyadh'
-  | 'residential-riyadh-offplan';
+  | 'residential-berlin'
+  | 'office-london'
+  | 'medical-us'
+  | 'condo-toronto';
+
+/** How the sidebar looks while a demo is active (`html[data-oe-menu]`, see index.css). */
+export const MENU_STYLES = ['standard', 'tinted', 'dark', 'pill', 'outline'] as const;
+export type DemoMenuStyle = (typeof MENU_STYLES)[number];
 
 export interface DemoProfile {
   slug: DemoSlug;
   appearance: Appearance;
   /** Menu sections shown for this demo; null means every section. */
   groups: readonly string[] | null;
-  /** i18n key stem: `<stem>.title`, `.audience`, `.body`, `.point_1..3`. */
+  /** Sidebar style that sets this demo apart from the others. */
+  menuStyle: DemoMenuStyle;
+  /** i18n key stem: `<stem>.country`, `.title`, `.audience`, `.body`, `.point_1..3`. */
   stem: string;
 }
 
 // Always present so the visitor can find help, settings and the projects list.
 const BASE = ['grp_overview', 'grp_documents', 'grp_communication'] as const;
 
+/**
+ * Five demos, five countries, five kinds of company. Every group listed here
+ * has seeded data in that project (see core/demo_projects.py), so no demo
+ * opens an empty screen.
+ */
 export const DEMO_PROFILES: readonly DemoProfile[] = [
   {
-    slug: 'consultancy-riyadh',
-    appearance: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', text: 'default', look: 'standard' },
-    groups: [...BASE, 'grp_drawings', 'grp_cost_data', 'grp_estimating', 'grp_scheduling', 'grp_commercial', 'grp_controls_bi'],
-    stem: 'demo_profiles.consultancy',
+    slug: 'full-showcase-riyadh',
+    menuStyle: 'standard',
+    appearance: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
+    groups: null,
+    stem: 'demo_profiles.full_showcase',
   },
   {
-    slug: 'contractor-jeddah',
-    appearance: { accent: 'amber', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp', text: 'default', look: 'standard' },
+    slug: 'residential-berlin',
+    menuStyle: 'outline',
+    appearance: { accent: 'graphite', font: 'ibm-plex-sans', density: 'normal', radius: 'sharp', text: 'default', look: 'classic' },
     groups: [
       ...BASE,
       'grp_takeoff',
@@ -48,28 +61,66 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
       'grp_change',
       'grp_site',
       'grp_quality',
-      'grp_safety',
       'grp_finance',
     ],
-    stem: 'demo_profiles.contractor',
+    stem: 'demo_profiles.dach_contractor',
   },
   {
-    slug: 'site-development-dammam',
-    appearance: { accent: 'emerald', font: 'source-sans-3', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
-    groups: [...BASE, 'grp_takeoff', 'grp_reality', 'grp_estimating', 'grp_scheduling', 'grp_field', 'grp_site', 'grp_esg', 'grp_handover'],
-    stem: 'demo_profiles.site_development',
+    slug: 'office-london',
+    menuStyle: 'tinted',
+    appearance: { accent: 'violet', font: 'source-sans-3', density: 'comfortable', radius: 'round', text: 'default', look: 'standard' },
+    groups: [
+      ...BASE,
+      'grp_takeoff',
+      'grp_cost_data',
+      'grp_estimating',
+      'grp_estimate_detail',
+      'grp_procurement',
+      'grp_cost_control',
+      'grp_commercial',
+      'grp_change',
+      'grp_finance',
+    ],
+    stem: 'demo_profiles.uk_consultancy',
   },
   {
-    slug: 'full-showcase-riyadh',
-    appearance: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
-    groups: null,
-    stem: 'demo_profiles.full_showcase',
+    slug: 'medical-us',
+    menuStyle: 'dark',
+    appearance: { accent: 'amber', font: 'inter', density: 'compact', radius: 'sharp', text: 'default', look: 'standard' },
+    groups: [
+      ...BASE,
+      'grp_coordination',
+      'grp_estimating',
+      'grp_scheduling',
+      'grp_cost_control',
+      'grp_commercial',
+      'grp_change',
+      'grp_quality',
+      'grp_safety',
+      'grp_handover',
+      'grp_finance',
+    ],
+    stem: 'demo_profiles.us_owners_rep',
   },
   {
-    slug: 'residential-riyadh-offplan',
-    appearance: { accent: 'teal', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
-    groups: null,
-    stem: 'demo_profiles.developer',
+    slug: 'condo-toronto',
+    menuStyle: 'pill',
+    appearance: { accent: 'teal', font: 'system', density: 'normal', radius: 'round', text: 'default', look: 'classic' },
+    groups: [
+      ...BASE,
+      'grp_takeoff',
+      'grp_cost_data',
+      'grp_estimating',
+      'grp_scheduling',
+      'grp_cost_control',
+      'grp_commercial',
+      'grp_procurement',
+      'grp_change',
+      'grp_quality',
+      'grp_handover',
+      'grp_finance',
+    ],
+    stem: 'demo_profiles.ca_developer',
   },
 ];
 
@@ -82,6 +133,15 @@ export function hiddenGroupsFor(profile: DemoProfile, allGroupIds: readonly stri
   if (!profile.groups) return [];
   const keep = new Set(profile.groups);
   return allGroupIds.filter((id) => !keep.has(id) && id !== 'grp_learn' && id !== 'learn');
+}
+
+/** Set or clear the demo sidebar style on <html>; null leaves the platform menu alone. */
+export function applyDemoMenuStyle(
+  style: DemoMenuStyle | null,
+  root: HTMLElement = document.documentElement,
+): void {
+  if (style && style !== 'standard') root.dataset.oeMenu = style;
+  else delete root.dataset.oeMenu;
 }
 
 const CHOSEN_KEY = 'oe_demo_chosen';
