@@ -90,7 +90,7 @@ export function PartnerLogoBadge({ variant, className = '' }: PartnerLogoBadgePr
           className="inline-flex items-center gap-1.5 hover:text-content-primary"
           title={m.branding.powered_by_text}
         >
-          <PackEmblem pack={m} size={20} />
+          <PackEmblem pack={m} size={20} bare />
           <span className="max-w-[10rem] truncate font-medium">{packName}</span>
         </Link>
         <button

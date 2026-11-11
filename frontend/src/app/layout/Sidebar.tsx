@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { LEARN_GROUP_ID, navGroups, type NavGroup, type NavItem } from './navCatalog';
 import { LEARN_ANCHOR_ATTR, anchorRect, flyLearn } from './learnFlight';
+import { SidebarToolsCollapse } from './SidebarToolsCollapse';
 import { PRESET_WORKSPACES, resolveWorkspace, shownTab, workspaceSectionByRoute } from './workspaces';
 import { useCompanyWorkspace } from './useCompanyWorkspace';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -2038,6 +2039,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             iconified ? 'left-2 right-2' : 'left-3 right-3',
           )}
         />
+        <SidebarToolsCollapse iconified={iconified} forceOpen={editMode}>
         <AdminGrid
           items={adminGridWithEdit}
           activeRoute={activeRoute}
@@ -2204,6 +2206,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </div>
           </div>
         )}
+        </SidebarToolsCollapse>
       </div>
       {/* Mounted at the aside root so the dialog escapes any
           z-index / overflow trap imposed by the inner nav scroller.

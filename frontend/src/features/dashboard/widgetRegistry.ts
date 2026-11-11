@@ -54,6 +54,7 @@ import {
   Truck,
   Gauge,
   BookOpen,
+  Video,
 } from 'lucide-react';
 
 export interface DashboardWidgetMeta {
@@ -117,6 +118,16 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_cases_market_desc',
     descDefault: 'Worked cases for the country you work in, with every other market one click away',
     icon: MapPin,
+    defaultSpan: 6,
+  },
+  // Promo and installation videos with a copy-link button per video.
+  {
+    id: 'watch_share',
+    labelKey: 'videos.promo.title',
+    labelDefault: 'Watch and share',
+    descKey: 'dashboard.layout.w_watch_share_desc',
+    descDefault: 'Promo and installation videos you can send to a colleague',
+    icon: Video,
     defaultSpan: 6,
   },
   // ── Core (existing 12) ────────────────────────────────────────────────

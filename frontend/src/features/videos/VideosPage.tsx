@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { PromoVideos } from './PromoVideos';
 import clsx from 'clsx';
 import {
   ArrowRight,
@@ -167,6 +168,7 @@ export function VideosPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <Hero labels={labels} onPlay={openPlayer} />
+      <PromoVideos />
       <Recommended labels={labels} onOpen={openPlayer} />
       <LearningPath labels={labels} onOpen={openPlayer} />
       <SeriesShelves labels={labels} onOpen={openPlayer} />

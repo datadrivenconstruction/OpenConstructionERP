@@ -56,6 +56,9 @@ interface PackEmblemProps {
    *  and the JIT never emits it. */
   size: number;
   className?: string;
+  /** Top-bar form: a country pack draws just the flag as a clean rectangle,
+   *  with no tinted plate or rounded box around it. */
+  bare?: boolean;
 }
 
 /** Two-letter monogram from the pack's name, for a pack with no flag and no
@@ -90,13 +93,31 @@ function subdivisionCode(pack: PackEmblemPack): string | null {
   return tail || null;
 }
 
-export function PackEmblem({ pack, size, className = '' }: PackEmblemProps) {
+export function PackEmblem({ pack, size, className = '', bare = false }: PackEmblemProps) {
   const radius = size <= 24 ? 'rounded-sm' : 'rounded-xl';
   const country = flagCodeFor(pack);
   const subdivision = country ? subdivisionCode(pack) : null;
   // Below this the plate is too small to hold a legible code, and the pack's
   // name is beside it in every place that draws one this small.
   const showSubdivision = Boolean(subdivision) && size >= 36;
+
+  if (country && bare) {
+    return (
+      <span
+        className={`relative inline-flex shrink-0 items-center ${className}`}
+        data-testid={`pack-emblem-${pack.slug}`}
+        data-pack-emblem="flag"
+        data-pack-bare="true"
+        data-country={country}
+      >
+        <CountryFlag code={country} size={Math.round(size * 1.15)} className="block" />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[2px] ring-1 ring-inset ring-black/10 dark:ring-white/15"
+        />
+      </span>
+    );
+  }
 
   if (country) {
     // The flag keeps its own 10:7 proportion inside a square plate rather than

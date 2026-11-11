@@ -89,7 +89,7 @@ export function ActivePackChip({ className = '' }: ActivePackChipProps) {
         defaultValue: 'Regional pack in use. Opens the pack list.',
       })}
     >
-      <PackEmblem pack={applied} size={16} />
+      <PackEmblem pack={applied} size={16} bare />
       <span className="truncate font-medium">
         {/* The same computed key the pack picker, the dashboard card and the
             case chip read, written inline so check_i18n_computed_keys.py can
