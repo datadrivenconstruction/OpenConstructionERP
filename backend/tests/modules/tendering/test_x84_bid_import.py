@@ -150,7 +150,11 @@ async def setup(client: AsyncClient) -> dict:
             )
         )
         for i, (ordinal, desc, unit, qty) in enumerate(
-            [("01.001", "Excavate trench", "m3", "120.5"), ("01.002", "Backfill and compact", "m3", "80")]
+            [
+                ("01.001", "Excavate trench", "m3", "120.5"),
+                ("01.002", "Backfill and compact", "m3", "80"),
+                ("01.003", "Optional rock removal", "m3", "10"),
+            ]
         ):
             session.add(
                 Position(
@@ -164,7 +168,7 @@ async def setup(client: AsyncClient) -> dict:
                     unit_rate="1",
                     total=qty,
                     sort_order=i + 1,
-                    metadata_={},
+                    metadata_={"gaeb_provis": "WithoutTotal"} if ordinal == "01.003" else {},
                 )
             )
         await session.commit()
@@ -236,3 +240,12 @@ def test_gaeb_count_unit_spellings_match_the_stored_unit() -> None:
     for spelling in ("St", "Stk", "pcs"):
         checks, _prices, _missing = check_lines([_row("01.001", spelling, 4, "10")], {str(a.id): a})
         assert checks[0].issues == [], spelling
+
+
+async def test_bedarfsposition_is_priced_but_not_summed(client: AsyncClient, setup: dict) -> None:
+    url = f"/api/v1/tendering/packages/{setup['package_id']}/bids/import-x84/preview/"
+    items = [*GOOD, ("003", "10", "m3", "50.00", "Optional rock removal")]
+    r = await client.post(url, files={"file": ("bid.x84", _x84(items))}, headers=setup["headers"])
+    assert r.status_code == 200, r.text
+    assert r.json()["priced"] == 3
+    assert r.json()["total_amount"] == "3374.70"

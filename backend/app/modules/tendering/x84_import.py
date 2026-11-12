@@ -144,6 +144,7 @@ class X84BidImportService:
 
     async def check(self, package_id: uuid.UUID, filename: str, content: bytes) -> tuple[X84ImportPreview, Any, dict]:
         """Parse and match the file; nothing is stored."""
+        from app.modules.boq.gaeb_common import is_excluded_from_total
         from app.modules.boq.importers._base import ImporterParseError
         from app.modules.boq.importers.gaeb_xml import GAEBXMLImporter
 
@@ -169,8 +170,13 @@ class X84BidImportService:
 
         priceable = await self._priceable(package)
         lines, prices, missing = check_lines(imported.positions, priceable)
+        # Bedarfspositionen ohne Gesamtbetrag are priced but never enter the sum.
         total = sum(
-            (prices[pid] * (_decimal(priceable[pid].quantity) or Decimal("0")) for pid in prices),
+            (
+                prices[pid] * (_decimal(priceable[pid].quantity) or Decimal("0"))
+                for pid in prices
+                if not is_excluded_from_total(priceable[pid])
+            ),
             Decimal("0"),
         )
 

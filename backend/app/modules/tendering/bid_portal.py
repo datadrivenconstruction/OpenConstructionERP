@@ -801,6 +801,8 @@ class BidPortalService:
         ``line_items``, so leveling imputes them instead of reading a zero; the
         bid's metadata names them. A submission with nothing priced is refused.
         """
+        from app.modules.boq.gaeb_common import is_excluded_from_total
+
         invitation = await self._resolve(token, for_update=True)
         package, project_name, currency, lines, priceable = await self._context(invitation)
         is_sealed = await self._check_writable(invitation, package, currency, body)
@@ -818,7 +820,9 @@ class BidPortalService:
             unit_price = priced[pid]
             quantity = Decimal(_decimal_text(getattr(position, "quantity", "")) or "0")
             line_sum = unit_price * quantity
-            bid_sum += line_sum
+            # A Bedarfsposition ohne Gesamtbetrag is priced but never summed.
+            if not is_excluded_from_total(position):
+                bid_sum += line_sum
             line_items.append(
                 BidLineItem(
                     position_id=str(position.id),
