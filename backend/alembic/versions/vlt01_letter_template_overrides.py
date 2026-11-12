@@ -14,7 +14,7 @@ Inspector-guarded, so a re-run or a downgrade on a database without the table
 changes nothing.
 
 Revision ID: vlt01_letter_template_overrides
-Revises: vpf01_project_folder_url
+Revises: vce01_carbon_epd_tenant
 Create Date: 2026-11-12
 """
 
@@ -27,7 +27,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vlt01_letter_template_overrides"
-down_revision: Union[str, Sequence[str], None] = "vpf01_project_folder_url"
+down_revision: Union[str, Sequence[str], None] = "vce01_carbon_epd_tenant"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
