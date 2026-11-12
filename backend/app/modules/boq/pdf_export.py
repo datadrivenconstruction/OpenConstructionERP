@@ -143,12 +143,12 @@ MARGIN_BOTTOM = 20 * mm
 USABLE_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT
 
 # Column widths for the BOQ table (Pos | Description | Unit | Qty | Rate | Total)
-COL_POS = 35 * mm
-COL_DESC = USABLE_WIDTH - 35 * mm - 20 * mm - 25 * mm - 30 * mm - 30 * mm
-COL_UNIT = 20 * mm
-COL_QTY = 25 * mm
-COL_RATE = 30 * mm
-COL_TOTAL = 30 * mm
+COL_POS = 22 * mm
+COL_DESC = USABLE_WIDTH - 22 * mm - 13 * mm - 22 * mm - 24 * mm - 27 * mm
+COL_UNIT = 13 * mm
+COL_QTY = 22 * mm
+COL_RATE = 24 * mm
+COL_TOTAL = 27 * mm
 TABLE_COL_WIDTHS = [COL_POS, COL_DESC, COL_UNIT, COL_QTY, COL_RATE, COL_TOTAL]
 
 
@@ -1696,11 +1696,11 @@ def generate_boq_pdf(
     uw = pw - ml - mr
 
     # Recalculate column widths proportionally for the chosen page size
-    col_pos = 35 * mm
-    col_unit = 20 * mm
-    col_qty = 25 * mm
-    col_rate = 30 * mm
-    col_total = 30 * mm
+    col_pos = 22 * mm
+    col_unit = 13 * mm
+    col_qty = 22 * mm
+    col_rate = 24 * mm
+    col_total = 27 * mm
     col_desc = uw - col_pos - col_unit - col_qty - col_rate - col_total
     table_col_widths = [col_pos, col_desc, col_unit, col_qty, col_rate, col_total]
 
