@@ -20,6 +20,7 @@ import {
   Minus,
   Download,
   FileText,
+  PenLine,
   AlertTriangle,
   ArrowRight,
   Users,
@@ -66,6 +67,7 @@ import { RecipientImportDialog } from './RecipientImportDialog';
 import { BidIntegrityButton, SealedBidMark, SealedEmptyState, SealedTenderPanel, isSealedNotOpened } from './SealedTenderPanel';
 import type { SealedInfo, SubmissionMode } from './api';
 import { X84ImportDialog } from './X84ImportDialog';
+import { LetterEditDialog } from '@/features/letter-templates';
 import { LevelingMatrix } from './LevelingMatrix';
 import { cellRate, classifyCell, pricedRates, recommend, unpricedLineCount } from './analysis';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
@@ -1741,6 +1743,13 @@ function PackageDetail({
     }
   }, [packageId, pkg?.name, addToast, t]);
 
+  // One-off wording for a single award or rejection letter before download.
+  const [letterEdit, setLetterEdit] = useState<{
+    bidId: string;
+    kind: 'award-letter' | 'rejection-letter';
+    company: string;
+  } | null>(null);
+
   // Award / rejection decision documents — generated server-side as PDFs
   // (reportlab), fetched with the Bearer token like the tender summary PDF.
   const handleDownloadDecisionDoc = useCallback(
@@ -2258,6 +2267,16 @@ function PackageDetail({
                     {t('tendering.award_letter', { defaultValue: 'Award letter' })}
                   </Button>
                 )}
+                {bid.status === 'accepted' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<PenLine size={14} />}
+                    aria-label={t('letter_templates.edit_text', { defaultValue: 'Edit text' })}
+                    title={t('letter_templates.edit_text', { defaultValue: 'Edit text' })}
+                    onClick={() => setLetterEdit({ bidId: bid.id, kind: 'award-letter', company: bid.company_name })}
+                  />
+                )}
                 {bid.status === 'rejected' && (
                   <Button
                     variant="ghost"
@@ -2270,6 +2289,16 @@ function PackageDetail({
                   >
                     {t('tendering.rejection_letter', { defaultValue: 'Rejection notice' })}
                   </Button>
+                )}
+                {bid.status === 'rejected' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<PenLine size={14} />}
+                    aria-label={t('letter_templates.edit_text', { defaultValue: 'Edit text' })}
+                    title={t('letter_templates.edit_text', { defaultValue: 'Edit text' })}
+                    onClick={() => setLetterEdit({ bidId: bid.id, kind: 'rejection-letter', company: bid.company_name })}
+                  />
                 )}
               </div>
             </Card>
@@ -2441,6 +2470,17 @@ function PackageDetail({
         packageId={packageId}
         onImported={handleBidCreated}
       />
+      {letterEdit && pkg?.project_id && (
+        <LetterEditDialog
+          open
+          onClose={() => setLetterEdit(null)}
+          packageId={packageId}
+          projectId={pkg.project_id}
+          bidId={letterEdit.bidId}
+          kind={letterEdit.kind}
+          company={letterEdit.company}
+        />
+      )}
       <ConfirmDialog {...confirmProps} />
     </div>
   );
