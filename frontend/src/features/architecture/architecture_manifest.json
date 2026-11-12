@@ -166562,6 +166562,335 @@
       "import_dependencies": []
     },
     {
+      "module_id": "letter_templates",
+      "module_label": "Letter Templates",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_letter_templates",
+        "version": "1.0.0",
+        "display_name": "Letter Templates",
+        "description": "Editable wording of generated letters and emails (award letter, rejection notice, invitation to tender) per language, for the company and per project.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects",
+          "oe_users"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "LetterTemplateOverride",
+          "tablename": "oe_letter_templates_override",
+          "docstring": "A changed letter text for ``(template_key, language, project_id)``.",
+          "columns": [
+            {
+              "name": "template_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "language",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "subject",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "heading",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "body",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "closing",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "list_templates",
+          "response_model": "list[TemplateSummary]"
+        },
+        {
+          "method": "GET",
+          "path": "/{key}",
+          "handler": "get_template_text",
+          "response_model": "ResolvedTemplate"
+        },
+        {
+          "method": "PUT",
+          "path": "/{key}",
+          "handler": "save_template",
+          "response_model": "ResolvedTemplate",
+          "request_schema": "SaveTemplateRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{key}",
+          "handler": "reset_template"
+        },
+        {
+          "method": "POST",
+          "path": "/{key}/validate",
+          "handler": "validate_template",
+          "response_model": "list[IssueOut]",
+          "request_schema": "ValidateRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{key}/preview",
+          "handler": "preview_template",
+          "response_model": "None",
+          "request_schema": "PreviewRequest"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "LetterTextIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The four editable fields of a letter.",
+          "fields": [
+            {
+              "name": "subject",
+              "type": "str"
+            },
+            {
+              "name": "heading",
+              "type": "str"
+            },
+            {
+              "name": "body",
+              "type": "str"
+            },
+            {
+              "name": "closing",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "LetterTextOut",
+          "bases": [
+            "LetterTextIn"
+          ],
+          "docstring": "Letter text as returned to the editor.",
+          "fields": []
+        },
+        {
+          "class_name": "SaveTemplateRequest",
+          "bases": [
+            "LetterTextIn"
+          ],
+          "docstring": "Save a template override; ``project_id`` absent means the company-wide text.",
+          "fields": [
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PlaceholderOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A placeholder offered by a letter.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "sample",
+              "type": "str"
+            },
+            {
+              "name": "required",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "IssueOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A validation finding.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "Literal['error', 'warning']"
+            },
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "placeholder",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TemplateSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One letter in the list, with which languages the company changed.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "languages",
+              "type": "list[str]"
+            },
+            {
+              "name": "customised_languages",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ResolvedTemplate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The text a letter would use now, where it came from, and the default.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "Literal['project', 'company', 'default']"
+            },
+            {
+              "name": "text",
+              "type": "LetterTextOut"
+            },
+            {
+              "name": "default",
+              "type": "LetterTextOut"
+            },
+            {
+              "name": "placeholders",
+              "type": "list[PlaceholderOut]"
+            },
+            {
+              "name": "issues",
+              "type": "list[IssueOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidateRequest",
+          "bases": [
+            "LetterTextIn"
+          ],
+          "docstring": "Check a text without saving it.",
+          "fields": []
+        },
+        {
+          "class_name": "PreviewRequest",
+          "bases": [
+            "LetterTextIn"
+          ],
+          "docstring": "Render a sample letter from an unsaved text.",
+          "fields": [
+            {
+              "name": "language",
+              "type": "str"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "projects",
+        "tendering"
+      ]
+    },
+    {
       "module_id": "list_views",
       "module_label": "List Views",
       "module_category": "core",
@@ -300482,6 +300811,7 @@
         "gaeb_package.py",
         "intl.py",
         "invitation_email.py",
+        "letter_texts.py",
         "manifest.py",
         "models.py",
         "parties.py",
@@ -301262,10 +301592,22 @@
           "request_schema": "TenderingService"
         },
         {
+          "method": "POST",
+          "path": "/packages/{package_id}/bids/{bid_id}/award-letter/pdf/",
+          "handler": "export_award_letter_pdf_with_text",
+          "request_schema": "LetterTextIn"
+        },
+        {
           "method": "GET",
           "path": "/packages/{package_id}/bids/{bid_id}/rejection-letter/pdf/",
           "handler": "export_rejection_letter_pdf",
           "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/bids/{bid_id}/rejection-letter/pdf/",
+          "handler": "export_rejection_letter_pdf_with_text",
+          "request_schema": "LetterTextIn"
         },
         {
           "method": "GET",
@@ -303816,6 +304158,7 @@
         "boq",
         "contacts",
         "guarantees",
+        "letter_templates",
         "notifications",
         "projects",
         "teams",
@@ -315979,6 +316322,13 @@
       "total_files": 5
     },
     {
+      "name": "letter-templates",
+      "ts_files": 7,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 7
+    },
+    {
       "name": "market",
       "ts_files": 7,
       "css_files": 0,
@@ -317742,6 +318092,11 @@
     "lessons_learned": [
       "projects"
     ],
+    "letter_templates": [
+      "projects",
+      "tendering",
+      "users"
+    ],
     "list_views": [
       "users"
     ],
@@ -318508,6 +318863,7 @@
       "boq",
       "contacts",
       "guarantees",
+      "letter_templates",
       "notifications",
       "projects",
       "teams",
@@ -318588,17 +318944,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 244,
-    "modules_with_manifests": 244,
-    "total_models": 907,
-    "total_columns": 10651,
+    "backend_modules": 245,
+    "modules_with_manifests": 245,
+    "total_models": 908,
+    "total_columns": 10659,
     "total_relationships": 261,
-    "total_routes": 5210,
-    "total_schemas": 4725,
-    "total_python_files": 3345,
-    "frontend_features": 237,
-    "frontend_ts_files": 4174,
-    "frontend_backend_mapped": 213
+    "total_routes": 5218,
+    "total_schemas": 4734,
+    "total_python_files": 3355,
+    "frontend_features": 238,
+    "frontend_ts_files": 4181,
+    "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -318732,6 +319088,7 @@
     "leasing": "leasing",
     "legal-entities": "legal_entities",
     "lessons-learned": "lessons_learned",
+    "letter-templates": "letter_templates",
     "market": null,
     "markups": "markups",
     "match": "match",
