@@ -52,6 +52,7 @@ const resource = {
     "modules.catalog.labor_rates": "Labour & Crew Rates",
     "modules.catalog.measurement_book": "Measurement Book",
     "modules.catalog.offers": "Customer offers",
+    "modules.catalog.letter_templates": "Letter Templates",
     "dashboard.layout.customize": "Customise",
     "dashboard.layout.title": "Customise dashboard",
     "rebar_schedule.diameter": "Dia (mm)",

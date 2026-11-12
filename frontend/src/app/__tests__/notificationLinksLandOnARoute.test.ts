@@ -194,6 +194,8 @@ const REVIEWED_OPAQUE: string[] = [
   // The parameter of the module's own sender. Its three callers pass the register
   // with a stakeholder, the communication section and the commitments section.
   'backend/app/modules/stakeholders/service.py: url',
+  // The invitation preview's sample button; an external bidder link, never an app route.
+  'backend/app/modules/tendering/letter_texts.py: "https://example.com/bid/preview"',
   'backend/app/modules/tendering/service.py: action_url',
   'backend/app/modules/tendering/service.py: bid_link_url(token)',
 ];

@@ -56798,6 +56798,7 @@ const resource = {
     "modules.catalog.scim": "SCIM-provisionering",
     "modules.catalog.win_loss": "Vunna och förlorade anbud",
     "modules.catalog.offers": "Kundofferter",
+    "modules.catalog.letter_templates": "Brevmallar",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens projektstyrning i elva styrningsområden under två faser, projektutveckling och genomförande, med en gate mellan dem och ett godkänt ramdokument per område.",
     "modules.pp_name_pakistan_pk": "Byggpaket Pakistan",
     "modules.pp_name_peru_pe": "Byggpaket Peru",

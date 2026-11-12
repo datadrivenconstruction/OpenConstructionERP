@@ -57706,6 +57706,7 @@ const resource = {
     "modules.catalog.scim": "Zarządzanie kontami SCIM",
     "modules.catalog.win_loss": "Rejestr wyników przetargów",
     "modules.catalog.offers": "Oferty dla klientów",
+    "modules.catalog.letter_templates": "Szablony pism",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "modules.pp_name_peru_pe": "Pakiet budowlany Peru",

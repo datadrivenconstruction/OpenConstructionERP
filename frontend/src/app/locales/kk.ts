@@ -56144,6 +56144,7 @@ const resource = {
     "modules.catalog.scim": "SCIM пайдаланушыларын беру",
     "modules.catalog.win_loss": "Тендер нәтижелерінің тізілімі",
     "modules.catalog.offers": "Тапсырыс берушіге ұсыныстар",
+    "modules.catalog.letter_templates": "Хат үлгілері",
     "modules.pp_desc_eleven_areas_framework": "Иеленушінің жағынан жобаны басқару он бір басқару саласында, екі кезеңде: жобаны әзірлеу және құрылысты орындау. Олардың арасында бір қақпа және әр сала үшін бекітілген бір негіздеме құжаты бар.",
     "modules.pp_name_pakistan_pk": "Пәкістан құрылыс пакеті",
     "modules.pp_name_peru_pe": "Перу құрылыс пакеті",

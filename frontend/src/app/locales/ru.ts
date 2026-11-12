@@ -59188,6 +59188,7 @@ const resource = {
     "modules.catalog.scim": "Провизионинг SCIM",
     "modules.catalog.win_loss": "Журнал выигранных и проигранных тендеров",
     "modules.catalog.offers": "Коммерческие предложения",
+    "modules.catalog.letter_templates": "Шаблоны писем",
     "modules.pp_desc_eleven_areas_framework": "Управление проектом со стороны заказчика в одиннадцати областях управления в два этапа: развитие проекта и строительное исполнение. Между ними один гейт, а на каждую область один утверждённый рамочный документ.",
     "modules.pp_name_pakistan_pk": "Строительный пакет: Пакистан",
     "modules.pp_name_peru_pe": "Строительный пакет: Перу",

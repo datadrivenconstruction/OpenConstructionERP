@@ -52865,6 +52865,7 @@ const resource = {
     "modules.catalog.measurement": "Medição",
     "modules.catalog.price_breakdown": "Decomposição de preços",
     "modules.catalog.offers": "Propostas para clientes",
+    "modules.catalog.letter_templates": "Modelos de carta",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do contratante em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre elas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_peru_pe": "Pacote de construção Peru",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",

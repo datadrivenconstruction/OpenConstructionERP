@@ -50188,6 +50188,7 @@ const resource = {
     "modules.catalog.scim": "SCIM Provisioning",
     "modules.catalog.win_loss": "Bid Outcome Ledger",
     "modules.catalog.offers": "Customer offers",
+    "modules.catalog.letter_templates": "Letter Templates",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start

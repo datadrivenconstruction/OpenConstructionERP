@@ -57445,6 +57445,7 @@ const resource = {
     "modules.catalog.scim": "Provisioning přes SCIM",
     "modules.catalog.win_loss": "Evidence výsledků nabídek",
     "modules.catalog.offers": "Nabídky zákazníkům",
+    "modules.catalog.letter_templates": "Šablony dopisů",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
     "modules.pp_name_peru_pe": "Stavební balíček Peru",

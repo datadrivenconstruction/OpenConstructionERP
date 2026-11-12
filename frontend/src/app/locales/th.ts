@@ -55939,6 +55939,7 @@ const resource = {
     "modules.catalog.scim": "SCIM การจัดหาผู้ใช้",
     "modules.catalog.win_loss": "บันทึกผลการประมูล",
     "modules.catalog.offers": "ใบเสนอราคาลูกค้า",
+    "modules.catalog.letter_templates": "แม่แบบจดหมาย",
     "modules.pp_desc_eleven_areas_framework": "การบริหารโครงการจากฝั่งเจ้าของใน 11 ด้านการจัดการ แบ่งเป็นสองระยะ ได้แก่การพัฒนาโครงการและการดำเนินการก่อสร้าง มีจุดตรวจสอบหนึ่งจุดคั่นกลาง และเอกสารกรอบที่ได้รับอนุมัติหนึ่งฉบับต่อด้าน",
     "modules.pp_name_pakistan_pk": "แพ็กก่อสร้างปากีสถาน",
     "modules.pp_name_peru_pe": "แพ็กเกจก่อสร้างเปรู",

@@ -56187,6 +56187,7 @@ const resource = {
     "modules.catalog.scim": "SCIM-käyttäjähallinta",
     "modules.catalog.win_loss": "Tarjoustulosrekisteri",
     "modules.catalog.offers": "Asiakastarjoukset",
+    "modules.catalog.letter_templates": "Kirjepohjat",
     "modules.pp_desc_eleven_areas_framework": "Hankkeen ohjaus tilaajan puolelta yhdessätoista ohjausalueessa kahdessa vaiheessa, hankkeen kehittämisessä ja rakentamisen toteutuksessa, niiden välissä yksi porttivaihe ja yksi hyväksytty kehysasiakirja kullekin alueelle.",
     "modules.pp_name_pakistan_pk": "Rakennuspaketti: Pakistan",
     "modules.pp_name_peru_pe": "Perun rakennuspaketti",

@@ -55947,6 +55947,7 @@ const resource = {
     "modules.catalog.scim": "Cấp phát tài khoản SCIM",
     "modules.catalog.win_loss": "Sổ thắng thầu và trượt thầu",
     "modules.catalog.offers": "Báo giá khách hàng",
+    "modules.catalog.letter_templates": "Mẫu thư",
     "modules.pp_desc_eleven_areas_framework": "Quản lý dự án từ phía chủ đầu tư gồm mười một lĩnh vực quản lý, chia hai giai đoạn là phát triển dự án và thi công xây dựng, giữa hai giai đoạn có một cổng kiểm soát và mỗi lĩnh vực có một tài liệu khung đã được phê duyệt.",
     "modules.pp_name_pakistan_pk": "Gói Xây dựng Pakistan",
     "modules.pp_name_peru_pe": "Gói xây dựng Peru",

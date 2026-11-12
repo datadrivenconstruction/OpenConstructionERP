@@ -58253,6 +58253,7 @@ const resource = {
     "modules.catalog.scim": "Провізіонінг SCIM",
     "modules.catalog.win_loss": "Журнал виграних і програних тендерів",
     "modules.catalog.offers": "Комерційні пропозиції",
+    "modules.catalog.letter_templates": "Шаблони листів",
     "modules.pp_desc_eleven_areas_framework": "Управління проєктом із боку замовника в одинадцяти сферах управління, у два етапи: розвиток проєкту та будівельне виконання. Між ними один гейт і один затверджений рамковий документ на кожну сферу.",
     "modules.pp_name_pakistan_pk": "Будівельний пакет Пакистан",
     "modules.pp_name_peru_pe": "Будівельний пакет Перу",

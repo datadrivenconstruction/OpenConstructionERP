@@ -26,7 +26,7 @@ from pydantic import BaseModel, Field
 
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.assemblies.schemas import (
     AppliedComponent,
     ApplyTemplateRequest,
@@ -691,19 +691,13 @@ async def validate_assembly_rules(
 )
 async def recalculate_project_tax(
     user_id: CurrentUserId,
-    payload: CurrentUserPayload,
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     data: TaxRecalcRequest | None = None,
     service: AssemblyService = Depends(_get_service),
 ) -> ProjectTaxRecalcResponse:
     """Re-price every unapproved assembly of a project; approved ones are listed and left unchanged."""
-    if not (payload and payload.get("role") == "admin"):
-        from app.modules.projects.repository import ProjectRepository
-
-        project = await ProjectRepository(session).get_by_id(project_id)
-        if project is None or str(getattr(project, "owner_id", "")) != str(user_id):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    await verify_project_access(project_id, user_id, session)
     return await service.recalculate_project_tax(project_id, data.as_of if data else None)
 
 

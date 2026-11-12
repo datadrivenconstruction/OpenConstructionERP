@@ -59089,6 +59089,7 @@ const resource = {
     "modules.catalog.scim": "Gestion des comptes SCIM",
     "modules.catalog.win_loss": "Historique des résultats d'offres",
     "modules.catalog.offers": "Offres clients",
+    "modules.catalog.letter_templates": "Modèles de lettres",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
     "modules.pp_name_peru_pe": "Pack construction Pérou",

@@ -63,6 +63,15 @@ class TemplateSummary(BaseModel):
     customised_languages: list[str]
 
 
+class LetterTemplatesListResponse(BaseModel):
+    """Every registered letter; the set is fixed in code, so one page holds all of it."""
+
+    items: list[TemplateSummary]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class ResolvedTemplate(BaseModel):
     """The text a letter would use now, where it came from, and the default."""
 

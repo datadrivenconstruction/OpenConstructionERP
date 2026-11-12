@@ -56143,6 +56143,7 @@ const resource = {
     "modules.catalog.scim": "تأمین کاربر SCIM",
     "modules.catalog.win_loss": "دفتر نتایج مناقصه",
     "modules.catalog.offers": "پیشنهادهای مشتری",
+    "modules.catalog.letter_templates": "قالب‌های نامه",
     "modules.pp_desc_eleven_areas_framework": "مدیریت پروژه از سوی کارفرما در یازده حوزه مدیریتی و در دو فاز، توسعه پروژه و اجرای ساخت، با یک گیت میان آن‌ها و یک سند چارچوب تأییدشده برای هر حوزه.",
     "modules.pp_name_pakistan_pk": "بسته ساخت‌وساز پاکستان",
     "modules.pp_name_peru_pe": "بسته ساخت‌وساز پرو",

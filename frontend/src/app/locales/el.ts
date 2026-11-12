@@ -56143,6 +56143,7 @@ const resource = {
     "modules.catalog.scim": "Παροχή SCIM",
     "modules.catalog.win_loss": "Αρχείο αποτελεσμάτων προσφορών",
     "modules.catalog.offers": "Προσφορές πελατών",
+    "modules.catalog.letter_templates": "Πρότυπα επιστολών",
     "modules.pp_desc_eleven_areas_framework": "Διαχείριση του έργου από την πλευρά του κυρίου του έργου σε έντεκα τομείς διαχείρισης, σε δύο φάσεις, την ανάπτυξη του έργου και την εκτέλεση της κατασκευής, με μία πύλη μεταξύ τους και ένα εγκεκριμένο πλαίσιο εγγράφου για κάθε τομέα.",
     "modules.pp_name_pakistan_pk": "Πακέτο Κατασκευών: Πακιστάν",
     "modules.pp_name_peru_pe": "Πακέτο κατασκευών Περού",

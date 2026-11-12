@@ -26,7 +26,7 @@ export interface ResolvedLetterTemplate {
 }
 
 export function listLetterTemplates(): Promise<LetterTemplateSummary[]> {
-  return apiGet<LetterTemplateSummary[]>(`/v1/letter-templates/`);
+  return apiGet<{ items: LetterTemplateSummary[]; total: number }>(`/v1/letter-templates/`).then((r) => r.items);
 }
 
 export function getLetterTemplate(

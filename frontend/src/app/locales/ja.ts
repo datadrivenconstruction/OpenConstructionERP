@@ -57471,6 +57471,7 @@ const resource = {
     "modules.catalog.scim": "SCIM プロビジョニング",
     "modules.catalog.win_loss": "入札結果台帳",
     "modules.catalog.offers": "顧客向け見積",
+    "modules.catalog.letter_templates": "レターテンプレート",
     "modules.pp_desc_eleven_areas_framework": "発注者側によるプロジェクトマネジメントを、事業開発と施工実行の2つのフェーズにまたがる11の管理領域で行います。フェーズの間には1つのゲートを置き、各領域で承認済みの枠組み文書を1つずつ持ちます。",
     "modules.pp_name_pakistan_pk": "パキスタン建設パック",
     "modules.pp_name_peru_pe": "ペルー建設パック",

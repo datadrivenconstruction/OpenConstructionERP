@@ -59094,6 +59094,7 @@ const resource = {
     "modules.catalog.scim": "Aprovisionamiento SCIM",
     "modules.catalog.win_loss": "Registro de resultados de ofertas",
     "modules.catalog.offers": "Ofertas a clientes",
+    "modules.catalog.letter_templates": "Plantillas de cartas",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "modules.pp_name_peru_pe": "Paquete de construcción Perú",

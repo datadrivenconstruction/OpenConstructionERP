@@ -22,6 +22,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.letter_templates import service
 from app.modules.letter_templates.schemas import (
     IssueOut,
+    LetterTemplatesListResponse,
     LetterTextOut,
     PlaceholderOut,
     PreviewRequest,
@@ -59,14 +60,14 @@ def _resolved_out(resolved: service.Resolved) -> ResolvedTemplate:
 
 @router.get(
     "/",
-    response_model=list[TemplateSummary],
+    response_model=LetterTemplatesListResponse,
     dependencies=[Depends(RequirePermission("letter_templates.read"))],
 )
-async def list_templates(session: SessionDep) -> list[TemplateSummary]:
+async def list_templates(session: SessionDep) -> LetterTemplatesListResponse:
     """Every registered letter, grouped by module in the UI."""
     service.require_template("tendering.award_letter")
     customised = await service.customised_map(session)
-    return [
+    items = [
         TemplateSummary(
             key=t.key,
             module=t.module,
@@ -76,6 +77,7 @@ async def list_templates(session: SessionDep) -> list[TemplateSummary]:
         )
         for t in all_templates()
     ]
+    return LetterTemplatesListResponse(items=items, total=len(items), limit=max(len(items), 1))
 
 
 @router.get(

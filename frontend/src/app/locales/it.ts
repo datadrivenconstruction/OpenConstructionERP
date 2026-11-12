@@ -57390,6 +57390,7 @@ const resource = {
     "modules.catalog.scim": "Gestione utenti SCIM",
     "modules.catalog.win_loss": "Registro esiti offerte",
     "modules.catalog.offers": "Offerte ai clienti",
+    "modules.catalog.letter_templates": "Modelli di lettera",
     "modules.pp_desc_eleven_areas_framework": "Gestione del progetto dal lato committente in undici ambiti gestionali su due fasi, sviluppo del progetto ed esecuzione dei lavori, con un gate tra le due e un documento quadro approvato per ciascun ambito.",
     "modules.pp_name_pakistan_pk": "Pacchetto Costruzioni Pakistan",
     "modules.pp_name_peru_pe": "Pacchetto costruzioni Perù",

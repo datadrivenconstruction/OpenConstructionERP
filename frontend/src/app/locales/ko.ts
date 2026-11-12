@@ -56555,6 +56555,7 @@ const resource = {
     "modules.catalog.scim": "SCIM 사용자 프로비저닝",
     "modules.catalog.win_loss": "입찰 결과 대장",
     "modules.catalog.offers": "고객 견적",
+    "modules.catalog.letter_templates": "서신 템플릿",
     "modules.pp_desc_eleven_areas_framework": "발주자 측에서 수행하는 프로젝트 관리로, 프로젝트 개발과 시공 실행의 두 단계에 걸쳐 11개 관리 영역에서 진행됩니다. 두 단계 사이에는 게이트 하나가 있고, 영역마다 승인된 기본 문서가 하나씩 있습니다.",
     "modules.pp_name_pakistan_pk": "파키스탄 건설 팩",
     "modules.pp_name_peru_pe": "페루 건설 패키지",

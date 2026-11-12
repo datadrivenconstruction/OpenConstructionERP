@@ -56300,6 +56300,7 @@ const resource = {
     "modules.catalog.scim": "SCIM колдонуучуларын берүү",
     "modules.catalog.win_loss": "Тендер натыйжаларынын катталышы",
     "modules.catalog.offers": "Кардарларга сунуштар",
+    "modules.catalog.letter_templates": "Кат шаблондору",
     "modules.pp_desc_eleven_areas_framework": "Иеси тарабынан долбоорду башкаруу он бир башкаруу тармагында, эки этапта: долбоорду иштеп чыгуу жана курулушту аткаруу. Экөөнүн ортосунда бир дарбаза жана ар бир тармак үчүн бир бекитилген алкактык документ бар.",
     "modules.pp_name_pakistan_pk": "Пакистан курулуш пакети",
     "modules.pp_name_peru_pe": "Перу курулуш пакети",

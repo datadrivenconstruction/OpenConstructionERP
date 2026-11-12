@@ -56517,6 +56517,7 @@ const resource = {
     "modules.catalog.scim": "SCIM dodjela korisnika",
     "modules.catalog.win_loss": "Evidencija ishoda ponuda",
     "modules.catalog.offers": "Ponude kupcima",
+    "modules.catalog.letter_templates": "Predlošci dopisa",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "modules.pp_name_peru_pe": "Građevinski paket Peru",

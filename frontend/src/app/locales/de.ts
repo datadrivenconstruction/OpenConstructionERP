@@ -58633,6 +58633,7 @@ const resource = {
     "modules.catalog.scim": "SCIM-Bereitstellung",
     "modules.catalog.win_loss": "Erfolgsbilanz der Angebote",
     "modules.catalog.offers": "Kundenangebote",
+    "modules.catalog.letter_templates": "Briefvorlagen",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start

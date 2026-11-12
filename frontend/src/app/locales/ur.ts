@@ -56149,6 +56149,7 @@ const resource = {
     "modules.catalog.scim": "SCIM پروویژننگ",
     "modules.catalog.win_loss": "بولی کے نتائج کا رجسٹر",
     "modules.catalog.offers": "گاہک کی پیشکشیں",
+    "modules.catalog.letter_templates": "خط کے سانچے",
     "modules.pp_desc_eleven_areas_framework": "مالک کی جانب سے گیارہ انتظامی شعبوں میں پروجیکٹ مینجمنٹ، دو مراحل میں: پروجیکٹ کی ترقی اور تعمیراتی عمل درآمد، ان کے درمیان ایک گیٹ اور ہر شعبے کے لیے ایک منظور شدہ فریم ورک دستاویز۔",
     "modules.pp_name_pakistan_pk": "پاکستان تعمیراتی پیکج",
     "modules.pp_name_peru_pe": "پیرو تعمیراتی پیکیج",

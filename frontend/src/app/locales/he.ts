@@ -56463,6 +56463,7 @@ const resource = {
     "modules.catalog.scim": "הקצאת משתמשים SCIM",
     "modules.catalog.win_loss": "פנקס תוצאות מכרזים",
     "modules.catalog.offers": "הצעות מחיר ללקוחות",
+    "modules.catalog.letter_templates": "תבניות מכתבים",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
     "modules.pp_name_peru_pe": "חבילת בנייה פרו",

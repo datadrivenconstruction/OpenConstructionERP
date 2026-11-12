@@ -99,7 +99,7 @@ async def test_project_beats_company_beats_default(db_session) -> None:
         assert r.json()["source"] == "company"
 
         listing = (await c.get("/lt/")).json()
-        award = next(t for t in listing if t["key"] == KEY)
+        award = next(t for t in listing["items"] if t["key"] == KEY)
         assert award["customised_languages"] == ["de"]
 
 

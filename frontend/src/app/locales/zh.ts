@@ -58408,6 +58408,7 @@ const resource = {
     "modules.catalog.scim": "SCIM 用户配置",
     "modules.catalog.win_loss": "投标结果台账",
     "modules.catalog.offers": "客户报价",
+    "modules.catalog.letter_templates": "信函模板",
     "modules.pp_desc_eleven_areas_framework": "业主方在十一个管理领域开展项目管理，分为项目开发和施工实施两个阶段，两阶段之间设一个关口，每个领域有一份经批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建筑数据包",
     "modules.pp_name_peru_pe": "秘鲁建设包",
