@@ -615,3 +615,38 @@ async def test_s_curve_plots_snapshot_values_without_double_cumulation() -> None
     assert points["2026-02"].planned == 200_000.0
     assert points["2026-02"].earned == 180_000.0
     assert points["2026-02"].actual == 190_000.0
+
+
+@pytest.mark.asyncio
+async def test_calculate_evm_reads_the_data_date_not_the_wall_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """PV follows the schedule data date, and an explicit ``as_of`` wins over it."""
+    service = _make_service()
+    pid = uuid.uuid4()
+    act = uuid.uuid4()
+    service.budget_repo.set_aggregate(total_planned="100000", total_actual="0")  # type: ignore[attr-defined]
+    await service.budget_repo.create(  # type: ignore[attr-defined]
+        SimpleNamespace(project_id=pid, activity_id=act, planned_amount="100000", category="material")
+    )
+    from app.modules.schedule import repository as schedule_repo_mod
+
+    sched = SimpleNamespace(id=uuid.uuid4(), start_date="2020-01-01", end_date="2020-12-31", data_date="2020-01-01")
+
+    class _SchedRepo:
+        def __init__(self, *_a: Any, **_k: Any) -> None: ...
+
+        async def list_for_project(self, project_id: uuid.UUID, *, limit: int = 50) -> tuple[list[Any], int]:
+            return [sched], 1
+
+    class _ActivityRepo:
+        def __init__(self, *_a: Any, **_k: Any) -> None: ...
+
+        async def list_for_schedule(self, schedule_id: uuid.UUID, *, limit: int = 10000) -> tuple[list[Any], int]:
+            return [SimpleNamespace(id=act, start_date="2020-01-01", end_date="2020-12-31", progress_pct="0")], 1
+
+    monkeypatch.setattr(schedule_repo_mod, "ScheduleRepository", _SchedRepo)
+    monkeypatch.setattr(schedule_repo_mod, "ActivityRepository", _ActivityRepo)
+
+    at_data_date = await service.calculate_evm(pid)
+    assert at_data_date.pv == 1_000.0  # data date is the start day: nothing planned yet, 1 % floor
+    mid_year = await service.calculate_evm(pid, as_of=date(2020, 7, 1))
+    assert 40_000 < mid_year.pv < 60_000

@@ -993,7 +993,7 @@ class CostModelService:
             total += amount * fraction
         return total
 
-    async def calculate_evm(self, project_id: uuid.UUID) -> EVMResponse:
+    async def calculate_evm(self, project_id: uuid.UUID, as_of: date | None = None) -> EVMResponse:
         """Calculate real Earned Value Management metrics from schedule progress and budget.
 
         Reads schedule activities for progress percentage and budget lines for planned
@@ -1029,6 +1029,9 @@ class CostModelService:
 
         Args:
             project_id: Target project.
+            as_of: The report/data date. Defaults to the primary schedule's
+                ``data_date`` and only then to the system date, so a report
+                for a past status date does not drift with the wall clock.
 
         Returns:
             EVMResponse with all computed EVM metrics.
@@ -1055,7 +1058,9 @@ class CostModelService:
         schedule_repo = ScheduleRepository(self.session)
         schedules, _ = await schedule_repo.list_for_project(project_id, limit=50)
 
-        today = date.today()
+        today = (
+            as_of or (_parse_iso_date(getattr(schedules[0], "data_date", None)) if schedules else None) or date.today()
+        )
         time_elapsed_pct = 0.0
         schedule_progress_pct = 0.0
         # Tracks whether we actually have a usable schedule signal. When False,

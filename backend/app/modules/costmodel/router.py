@@ -54,6 +54,7 @@ Endpoints:
 """
 
 import uuid
+from datetime import date
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
@@ -615,6 +616,7 @@ async def get_evm(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
+    as_of: date | None = Query(default=None, description="Report/data date; defaults to the schedule data date."),
     service: CostModelService = Depends(_get_service),
 ) -> EVMResponse:
     """Calculate full EVM metrics from schedule progress and budget data.
@@ -623,7 +625,7 @@ async def get_evm(
     computed by linking budget lines to schedule activities.
     """
     await verify_project_access(project_id, user_id, session)
-    return await service.calculate_evm(project_id)
+    return await service.calculate_evm(project_id, as_of=as_of)
 
 
 # ── What-If Scenarios ──────────────────────────────────────────────────────
