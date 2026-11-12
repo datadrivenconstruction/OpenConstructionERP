@@ -9,11 +9,12 @@ The picker (GET /v1/boq/epd-materials/) merges ``source=custom`` rows of
 
 from __future__ import annotations
 
+import os
 from decimal import Decimal
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.modules.boq.router import OWN_EPD_PREFIX, _own_epd_materials
 from app.modules.carbon.models import EPDRecord
@@ -22,11 +23,12 @@ from app.modules.carbon.service import CarbonService
 
 @pytest.fixture
 async def session():
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-    async with engine.begin() as conn:
-        await conn.run_sync(EPDRecord.__table__.create)
-    maker = async_sessionmaker(engine, expire_on_commit=False)
-    async with maker() as s:
+    # PostgreSQL is the only supported database; everything is rolled back afterwards.
+    engine = create_async_engine(os.environ["DATABASE_URL"])
+    conn = await engine.connect()
+    trans = await conn.begin()
+    await conn.run_sync(lambda c: EPDRecord.__table__.create(c, checkfirst=True))
+    async with AsyncSession(bind=conn, expire_on_commit=False, join_transaction_mode="create_savepoint") as s:
         s.add_all(
             [
                 EPDRecord(
@@ -59,6 +61,8 @@ async def session():
         )
         await s.commit()
         yield s
+    await trans.rollback()
+    await conn.close()
     await engine.dispose()
 
 
