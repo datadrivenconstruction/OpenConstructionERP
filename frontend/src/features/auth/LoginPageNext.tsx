@@ -29,7 +29,7 @@ import {
   CalendarDays, ShieldCheck, BrainCircuit, Boxes,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, Wordmark, CountryFlag } from '@/shared/ui';
 import { safeNextPath } from './nextPath';
 import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
@@ -589,24 +589,14 @@ export function LoginPageNext() {
             <div className="rounded-[24px] p-7 sm:p-9">
               {/* Mobile-only logo */}
               <div className="lg:hidden mb-6 flex flex-col items-center">
-                <Logo size="md" animate />
-                <span
-                  className="mt-2.5 text-xl font-medium tracking-tight text-content-primary dark:text-white"
-                  style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-                >
-                  Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
-                </span>
+                <Logo size="lg" animate />
+                <Wordmark size="lg" className="mt-3" />
               </div>
 
               {/* Brand row (desktop) */}
-              <div className="hidden lg:flex items-center gap-2 mb-7">
-                <Logo size="sm" animate />
-                <span
-                  className="text-base font-medium tracking-tight text-content-primary dark:text-white"
-                  style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-                >
-                  Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary dark:text-white/50">ERP</span>
-                </span>
+              <div className="hidden lg:flex items-center gap-3 mb-7">
+                <Logo size="lg" animate />
+                <Wordmark size="lg" />
               </div>
 
               {/* Headline */}

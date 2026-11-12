@@ -45,9 +45,8 @@ export function PortalBrandHeader() {
       {/* Subordinate attribution stays visible (AGPL-3.0), as on the login page. */}
       <span className="mt-2 block text-2xs leading-none text-content-tertiary">
         by{' '}
-        <span className="font-semibold tracking-tight">
-          Open<span className="text-oe-blue/80">Construction</span>
-          <span className="text-content-quaternary">ERP</span>
+        <span className="whitespace-nowrap">
+          OpenConstruction<span className="font-bold"> ERP</span>
         </span>
       </span>
     </header>

@@ -15,7 +15,7 @@ import {
   MessageSquareQuote,
 } from 'lucide-react';
 import clsx from 'clsx';
-import { Card, Button, Badge, Breadcrumb, DismissibleInfo, IntroRichText } from '@/shared/ui';
+import { Card, Button, Badge, Breadcrumb, DismissibleInfo, IntroRichText, LogoWithText } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { APP_VERSION } from '@/shared/lib/version';
@@ -218,7 +218,9 @@ export function AboutPage() {
             </span>
             <span className="text-xs font-semibold uppercase tracking-widest text-semantic-success">Open Source</span>
           </div>
-          <h2 className="text-3xl font-semibold text-content-primary tracking-tight">OpenConstructionERP</h2>
+          <h2 className="flex justify-center lg:justify-start">
+            <LogoWithText size="xl" />
+          </h2>
           <p className="mt-2 text-base text-content-secondary">
             {t('about.tagline', { defaultValue: 'The #1 open-source platform for construction cost estimation, project management and resource control' })}
           </p>

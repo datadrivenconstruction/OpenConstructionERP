@@ -248,25 +248,26 @@ export default defineConfig({
       // server is HMR-driven and a stale workbox precache would mask
       // edits during development.  ``npm run build`` still emits both.
       devOptions: { enabled: false },
-      includeAssets: ['favicon.svg', 'pwa/*.svg'],
+      includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', 'brand/erp/*.svg', 'pwa/*.png'],
       manifest: {
         name: 'OpenConstructionERP',
         short_name: 'OCERP',
         description:
           'Open-source construction cost estimation, BIM takeoff, BOQ, tendering and field operations.',
-        theme_color: '#0284c7',
-        background_color: '#f7fbff',
+        theme_color: '#2987F8',
+        background_color: '#F0EEEB',
         display: 'standalone',
         orientation: 'any',
         start_url: '/',
         scope: '/',
         lang: 'en',
         icons: [
-          { src: '/pwa/icon-192.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/pwa/icon-256.svg', sizes: '256x256', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/pwa/icon-384.svg', sizes: '384x384', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/pwa/icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/pwa/icon-maskable-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: '/brand/erp/erp-appicon-512.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: '/pwa/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/pwa/icon-256.png', sizes: '256x256', type: 'image/png', purpose: 'any' },
+          { src: '/pwa/icon-384.png', sizes: '384x384', type: 'image/png', purpose: 'any' },
+          { src: '/pwa/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/pwa/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

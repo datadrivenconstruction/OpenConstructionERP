@@ -56,7 +56,7 @@ export type {
 
 export { StatusDot } from './StatusDot';
 
-export { Logo, LogoWithText } from './Logo';
+export { Logo, LogoWithText, Wordmark } from './Logo';
 
 export { ShortcutsDialog } from './ShortcutsDialog';
 
