@@ -1498,7 +1498,6 @@ async def _letter_response(
 ) -> StreamingResponse:
     """Build an award letter or rejection notice, optionally from one-off wording."""
     award = kind == "award"
-    await _verify_package_owner(service, session, package_id, user_id, payload)
     await SealedTenderService(session).ensure_open(
         package_id, user_id=user_id, what="award_letter" if award else "rejection_letter"
     )
@@ -1550,6 +1549,7 @@ async def export_award_letter_pdf(
 
     Money is rendered Decimal-correct. Tenant-scoped via project access on the package.
     """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     return await _letter_response("award", package_id, bid_id, user_id, payload, session, service)
 
 
@@ -1565,6 +1565,7 @@ async def export_award_letter_pdf_with_text(
     _perm: None = Depends(RequirePermission("tendering.distribute")),
 ) -> StreamingResponse:
     """The award letter with one-off wording for this letter only; the template is unchanged."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     return await _letter_response("award", package_id, bid_id, user_id, payload, session, service, body.to_text())
 
 
@@ -1583,6 +1584,7 @@ async def export_rejection_letter_pdf(
     The awarded sum is shown only when the package opted in and it shares the
     rejected bid's currency. Tenant-scoped via project access on the package.
     """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     return await _letter_response("rejection", package_id, bid_id, user_id, payload, session, service)
 
 
@@ -1598,6 +1600,7 @@ async def export_rejection_letter_pdf_with_text(
     _perm: None = Depends(RequirePermission("tendering.distribute")),
 ) -> StreamingResponse:
     """The rejection notice with one-off wording for this letter only."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     return await _letter_response("rejection", package_id, bid_id, user_id, payload, session, service, body.to_text())
 
 
