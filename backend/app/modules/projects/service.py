@@ -302,6 +302,16 @@ def _without_seed_tags(metadata: dict | None) -> dict:
     return {k: v for k, v in dict(metadata or {}).items() if k not in _SEED_WORKSPACE_TAGS}
 
 
+def country_from_region(region: str | None) -> str | None:
+    """ISO alpha-2 for a region label that names exactly one country, else ``None``."""
+    text = (region or "").strip()
+    if len(text) == 2 and text.isalpha() and text.isascii():
+        return "GB" if text.upper() == "UK" else text.upper()
+    from app.core.country_resolver import resolve_country_code
+
+    return resolve_country_code(text) if text else None
+
+
 def _compliance_pack_source(
     country_code: str | None,
     region: str | None,
@@ -623,6 +633,16 @@ class ProjectService:
                         pack_meta["country_from_pack"] = _pack_country
             except Exception:  # noqa: BLE001 - creation must never break on pack lookup
                 pass
+
+        # A region that names one country ("DE", "Germany") is a country: without
+        # this the project had no country_code and its VAT, markups and calendar
+        # fell to the neutral stack (0 % VAT). Coarse tags such as "DACH" or
+        # "Middle East" resolve to nothing and leave the country unset.
+        if not country_code:
+            _region_country = country_from_region(data.region)
+            if _region_country:
+                country_code = _region_country
+                pack_meta["country_from_region"] = _region_country
 
         # Compliance rule packs (Item #27). When the caller left the default
         # ``["universal"]`` we upgrade it to a jurisdiction-matched pack so a
