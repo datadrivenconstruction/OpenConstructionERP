@@ -1777,8 +1777,9 @@ export function ScheduleDetail({
       </button>
 
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
+      {/* Wraps: a long action row must drop below the title, never squeeze it to one word per line. */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-[min(100%,24rem)] flex-1">
           <h1 className="text-2xl font-semibold text-content-primary">{schedule.name}</h1>
           {schedule.description && (
             <p className="mt-1 text-sm text-content-secondary">{schedule.description}</p>
