@@ -227,3 +227,12 @@ async def test_import_writes_a_bid_the_comparison_reads(client: AsyncClient, set
     comparison = await client.get(f"/api/v1/tendering/packages/{pid}/comparison/", headers=setup["headers"])
     assert comparison.status_code == 200, comparison.text
     assert "Musterbau GmbH" in comparison.text
+
+
+def test_gaeb_count_unit_spellings_match_the_stored_unit() -> None:
+    from app.modules.tendering.x84_import import check_lines
+
+    a = _pos("01.001", "pcs", "4")
+    for spelling in ("St", "Stk", "pcs"):
+        checks, _prices, _missing = check_lines([_row("01.001", spelling, 4, "10")], {str(a.id): a})
+        assert checks[0].issues == [], spelling

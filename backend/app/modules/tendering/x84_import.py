@@ -22,6 +22,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.boq.units import to_gaeb_unit_code
 from app.modules.tendering.schemas import BidCreate, BidLineItem, X84ImportPreview, X84LineCheck
 
 #: Upper bound for one uploaded X84 file.
@@ -43,7 +44,9 @@ def normalise_ordinal(value: object) -> str:
 
 
 def _unit_key(value: object) -> str:
-    return re.sub(r"[\s.]", "", str(value or "")).lower()
+    # Same table as the exporter, so "St", "Stk" and "pcs" are one unit.
+    text = re.sub(r"[\s.]", "", str(value or ""))
+    return to_gaeb_unit_code(text).lower()
 
 
 def _decimal(value: object) -> Decimal | None:
