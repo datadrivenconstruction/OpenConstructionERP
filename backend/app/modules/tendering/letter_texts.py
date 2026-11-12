@@ -17,7 +17,7 @@ editable and live in :data:`_LABELS`.
 
 from __future__ import annotations
 
-from app.core.document_locale import translate
+from app.core.document_locale import normalize_document_locale, translate
 from app.core.letter_templates import (
     LetterTemplate,
     LetterText,
@@ -432,7 +432,7 @@ _LABELS: dict[str, dict[str, str]] = {
 
 def label(locale: str, key: str) -> str:
     """A fixed PDF label in *locale*, English when the language is missing."""
-    return translate(_LABELS, locale, key, "en")
+    return translate(_LABELS, normalize_document_locale(locale, _LABELS, "en"), key, "en")
 
 
 def _award_preview(text: LetterText, language: str) -> tuple[bytes, str]:
