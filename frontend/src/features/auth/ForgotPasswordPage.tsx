@@ -97,7 +97,7 @@ export function ForgotPasswordPage() {
         {/* Logo — glow entrance */}
         <div className="mb-8 text-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
           <div className="mx-auto mb-4 animate-logo-glow rounded-[20px] w-fit">
-            <Logo size="xl" animate className="mx-auto shadow-xl" />
+            <Logo size="xl" animate className="mx-auto" />
           </div>
         </div>
 
