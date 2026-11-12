@@ -9,7 +9,7 @@ No backfill: EPD records carry no creator column, so existing custom rows keep
 NULL and stay hidden until an admin assigns them.
 
 Revision ID: vce01_carbon_epd_tenant
-Revises: vpf01_project_folder_url
+Revises: vct01_component_tax
 Create Date: 2026-11-11
 """
 
@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vce01_carbon_epd_tenant"
-down_revision: str | Sequence[str] | None = "vpf01_project_folder_url"
+down_revision: str | Sequence[str] | None = "vct01_component_tax"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
