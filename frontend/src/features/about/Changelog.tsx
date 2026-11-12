@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.4.0',
+    date: '2026-11-12',
+    tag: 'NEW',
+    summary:
+      'Editable award, rejection and invitation letters, GAEB long texts in the bill editor, input tax on assemblies, your own EPD materials and a five-country demo chooser. X84 bids with German units import cleanly and optional positions stay out of bid totals.',
+  },
+  {
     version: '19.3.1',
     date: '2026-11-09',
     tag: 'NEW',

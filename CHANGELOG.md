@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.4.0] - 2026-11-12
+
+### Added
+
+- Letters: editable templates for award, rejection and invitation letters, set once in Settings and adjustable per letter.
+- Bill of quantities: the GAEB long text of every position shows in the editor, under the short text, in the expanded row and from an info icon.
+- Bill of quantities PDF: client, site and payment terms, optional columns and a wider description column.
+- Assemblies and catalog: optional input tax per resource and component.
+- Sustainability: add your own materials from the EPD picker, private to your organisation.
+- A five-country demo chooser, a design system for type, colour and controls, honeycomb learning paths on the courses page and an academy link in the help menu.
+- Resources and submittals: print the dispatch board, show crew phones and attach files.
+
+### Fixed
+
+- GAEB X84 bids with units such as "St" import into the bill they were exported from.
+- Optional positions (Bedarfspositionen) stay out of bid totals.
+- A project whose region names one country gets that country's VAT rate by default.
+- Earned value reads the schedule data date, and budget lines without a period spread over their activity in the cash flow curve.
+- The schedule header keeps its title readable when there are many buttons.
+- Every IANA time zone in regional settings, and access checks on tax recalculation and attachment downloads.
+
 ## [19.3.1] - 2026-11-09
 
 ### Added
