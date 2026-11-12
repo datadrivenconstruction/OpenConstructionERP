@@ -58,13 +58,15 @@ describe('moc api', () => {
     expect(apiMocks.apiDelete).toHaveBeenLastCalledWith('/v1/moc/m1');
   });
 
-  it.each<MoCTransition>(['review', 'accept', 'decline', 'implement'])(
-    'transition %s posts to the matching FSM route',
-    async (action) => {
-      await transitionMoCEntry('m1', action, 'ok');
-      expect(apiMocks.apiPost).toHaveBeenLastCalledWith(`/v1/moc/m1/${action}`, { notes: 'ok' });
-    },
-  );
+  it.each<[MoCTransition, string]>([
+    ['review', '/v1/moc/m1/review'],
+    ['accept', '/v1/moc/m1/accept'],
+    ['decline', '/v1/moc/m1/decline'],
+    ['implement', '/v1/moc/m1/implement'],
+  ])('transition %s posts to the matching FSM route', async (action, url) => {
+    await transitionMoCEntry('m1', action, 'ok');
+    expect(apiMocks.apiPost).toHaveBeenLastCalledWith(url, { notes: 'ok' });
+  });
 
   it('an empty transition note is sent as undefined, not an empty string', async () => {
     await transitionMoCEntry('m1', 'review', '');

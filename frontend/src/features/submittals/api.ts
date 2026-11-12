@@ -648,10 +648,8 @@ export interface SubmittalAttachment {
   size_bytes: number | null;
 }
 
-const attachmentsPath = (id: string) => `/v1/submittals/${encodeURIComponent(id)}/attachments/`;
-
 export function fetchSubmittalAttachments(id: string): Promise<SubmittalAttachment[]> {
-  return apiGet<SubmittalAttachment[]>(attachmentsPath(id));
+  return apiGet<SubmittalAttachment[]>(`/v1/submittals/${encodeURIComponent(id)}/attachments/`);
 }
 
 /** Upload one file (POST /{id}/attachments/upload/); the server checks the real file type. */
@@ -659,7 +657,7 @@ export async function uploadSubmittalAttachment(id: string, file: File, label?: 
   const form = new FormData();
   form.append('file', file);
   const qs = label ? `?label=${encodeURIComponent(label)}` : '';
-  const resp = await fetchWithAuth(`${API_BASE}${attachmentsPath(id)}upload/${qs}`, {
+  const resp = await fetchWithAuth(`${API_BASE}/v1/submittals/${encodeURIComponent(id)}/attachments/upload/${qs}`, {
     method: 'POST',
     headers: { Accept: 'application/json' },
     body: form,
@@ -678,12 +676,12 @@ export async function uploadSubmittalAttachment(id: string, file: File, label?: 
 }
 
 export function deleteSubmittalAttachment(id: string, documentId: string): Promise<void> {
-  return apiDelete(`${attachmentsPath(id)}${encodeURIComponent(documentId)}`);
+  return apiDelete(`/v1/submittals/${encodeURIComponent(id)}/attachments/${encodeURIComponent(documentId)}`);
 }
 
 export function downloadSubmittalAttachment(id: string, att: SubmittalAttachment): Promise<void> {
   return downloadWithAuth(
-    `${API_BASE}${attachmentsPath(id)}${encodeURIComponent(att.document_id)}/download/`,
+    `${API_BASE}/v1/submittals/${encodeURIComponent(id)}/attachments/${encodeURIComponent(att.document_id)}/download/`,
     att.label || 'attachment',
   );
 }

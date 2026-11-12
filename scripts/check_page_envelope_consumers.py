@@ -464,7 +464,8 @@ def scan(root: Path) -> tuple[dict[str, list[Path]], dict[str, list[Path]]]:
     unmigrated: dict[str, list[Path]] = {k: [] for k in MIGRATED_ENDPOINTS}
 
     for path in root.rglob("*.ts*"):
-        if "node_modules" in path.parts:
+        # Tests assert the URL a mocked client was called with; they never read the response.
+        if "node_modules" in path.parts or "__tests__" in path.parts:
             continue
         try:
             text = path.read_text(encoding="utf-8")

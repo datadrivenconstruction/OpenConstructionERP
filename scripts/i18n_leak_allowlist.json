@@ -2273,5 +2273,10 @@
     "en_value": "psi",
     "note": "unit, frequency band, file format or formula symbol of the site sensors page, written the same way in every locale we ship",
     "reason_category": "abbreviation"
+  },
+  "learn.hive.cell_label": {
+    "en_value": "{{n}}. {{title}}, {{duration}}, {{status}}",
+    "note": "screen-reader label assembled only from placeholders and punctuation; every word comes from already translated values",
+    "reason_category": "template_only"
   }
 }
