@@ -1637,7 +1637,6 @@ const resource = {
     "hse_advanced.root_cause_none": "Not categorized",
     "inspections.status_cancelled": "Canceled",
     "modules.catalog.file_favorites": "File Favorites",
-    "modules.catalog.letter_templates": "Letter Templates",
     "portfolio.link_delete_confirm": "Delete this cross-project link? The portfolio CPM will no longer honor it.",
     "project.settings.setup.subtitle": "Re-run the guided wizard to change the preset, scope and which modules are emphasized in the sidebar.",
     "project_wizard.focus_mode_hint": "Show a numbered, phase-grouped sidebar with off-scope modules grayed out. You can toggle this any time.",
