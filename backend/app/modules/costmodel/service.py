@@ -1624,6 +1624,23 @@ class CostModelService:
 
         period_outflows: dict[str, Decimal] = {}
 
+        # A line with no period of its own is spread over its linked activity,
+        # else over the primary schedule; only a line with neither is unscheduled.
+        # Without this every such line piled into one bucket and the S-curve was a dot.
+        activity_months: dict[str, tuple[str, str]] = {}
+        project_months: tuple[str, str] | None = None
+        if any(not (bl.period_start and bl.period_end) for bl in budget_lines):
+            from app.modules.schedule.repository import ActivityRepository, ScheduleRepository
+
+            schedules, _ = await ScheduleRepository(self.session).list_for_project(project_id, limit=50)
+            for idx, schedule in enumerate(schedules):
+                if idx == 0 and schedule.start_date and schedule.end_date:
+                    project_months = (str(schedule.start_date)[:10], str(schedule.end_date)[:10])
+                activities, _ = await ActivityRepository(self.session).list_for_schedule(schedule.id, limit=10000)
+                for act in activities:
+                    if act.start_date and act.end_date:
+                        activity_months[str(act.id)] = (str(act.start_date)[:10], str(act.end_date)[:10])
+
         for bl in budget_lines:
             line_ccy = (bl.currency or "").strip().upper()
             amount = _amount_in_base(bl.planned_amount, line_ccy, base_currency, fx_map)
@@ -1632,6 +1649,9 @@ class CostModelService:
 
             start = bl.period_start
             end = bl.period_end
+            if not (start and end):
+                own = activity_months.get(str(bl.activity_id)) if bl.activity_id is not None else None
+                start, end = own or project_months or (start, end)
 
             if start and end and len(start) >= 7 and len(end) >= 7:
                 # Spread evenly across months

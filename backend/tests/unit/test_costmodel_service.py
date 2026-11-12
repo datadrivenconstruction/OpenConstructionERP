@@ -650,3 +650,48 @@ async def test_calculate_evm_reads_the_data_date_not_the_wall_clock(monkeypatch:
     assert at_data_date.pv == 1_000.0  # data date is the start day: nothing planned yet, 1 % floor
     mid_year = await service.calculate_evm(pid, as_of=date(2020, 7, 1))
     assert 40_000 < mid_year.pv < 60_000
+
+
+@pytest.mark.asyncio
+async def test_cash_flow_spreads_unperioded_lines_over_their_activity(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A line without its own period follows its activity, so the S-curve is not one dot."""
+    service = _make_service()
+    pid = uuid.uuid4()
+    act = uuid.uuid4()
+    await service.budget_repo.create(  # type: ignore[attr-defined]
+        SimpleNamespace(
+            project_id=pid, activity_id=act, planned_amount="400", currency="", period_start=None, period_end=None
+        )
+    )
+
+    async def _fx(_pid: uuid.UUID) -> tuple[str, dict]:
+        return "", {}
+
+    async def _bulk(entries: list[Any]) -> list[Any]:
+        return entries
+
+    service.budget_repo._project_fx_context = _fx  # type: ignore[attr-defined]
+    service.cashflow_repo.bulk_create = _bulk  # type: ignore[attr-defined]
+    from app.modules.schedule import repository as schedule_repo_mod
+
+    sched = SimpleNamespace(id=uuid.uuid4(), start_date="2026-01-01", end_date="2026-12-31")
+
+    class _SchedRepo:
+        def __init__(self, *_a: Any, **_k: Any) -> None: ...
+
+        async def list_for_project(self, project_id: uuid.UUID, *, limit: int = 50) -> tuple[list[Any], int]:
+            return [sched], 1
+
+    class _ActivityRepo:
+        def __init__(self, *_a: Any, **_k: Any) -> None: ...
+
+        async def list_for_schedule(self, schedule_id: uuid.UUID, *, limit: int = 10000) -> tuple[list[Any], int]:
+            return [SimpleNamespace(id=act, start_date="2026-03-01", end_date="2026-06-30")], 1
+
+    monkeypatch.setattr(schedule_repo_mod, "ScheduleRepository", _SchedRepo)
+    monkeypatch.setattr(schedule_repo_mod, "ActivityRepository", _ActivityRepo)
+
+    entries = await service.generate_cash_flow_from_schedule(pid)
+
+    assert [e.period for e in entries] == ["2026-03", "2026-04", "2026-05", "2026-06"]
+    assert entries[-1].cumulative_planned == "400.0"
