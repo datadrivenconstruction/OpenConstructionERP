@@ -61034,6 +61034,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolumner i den utskrivna kalkylen",
     "boq.pdf_details_col_qty_unit": "Mängd och enhet",
     "boq.pdf_details_col_rate": "Á-pris",
+    "boq.gaeb_long_text": "Långtext",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

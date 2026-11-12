@@ -60369,6 +60369,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Prinditud hinnapakkumise veerud",
     "boq.pdf_details_col_qty_unit": "Kogus ja ühik",
     "boq.pdf_details_col_rate": "Ühikuhind",
+    "boq.gaeb_long_text": "Pikk tekst",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

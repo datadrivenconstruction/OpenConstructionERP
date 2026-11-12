@@ -62984,6 +62984,7 @@ const resource = {
     "boq.pdf_details_cols_title": "A nyomtatott költségvetés oszlopai",
     "boq.pdf_details_col_qty_unit": "Mennyiség és egység",
     "boq.pdf_details_col_rate": "Egységár",
+    "boq.gaeb_long_text": "Hosszú szöveg",
     "guide.cost_control.title": "Költségkövetés",
     "guide.cost_control.intro": "A költségkövetés egy kérdésre válaszol: mennyibe fog kerülni a projekt a végén, és miért. A költségvetést, a költségbecslést, a szerződéseket, a módosításokat, a felmért munkát és a számlákat olvassa, amelyek már a saját moduljukban vannak, így semmit nem kell kétszer beírni.",
     "guide.cost_control.methods.title": "Az előrejelzés négy olvasata",

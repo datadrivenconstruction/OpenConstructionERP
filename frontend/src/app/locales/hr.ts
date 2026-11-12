@@ -60760,6 +60760,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Stupci u ispisanom troškovniku",
     "boq.pdf_details_col_qty_unit": "Količina i jedinica",
     "boq.pdf_details_col_rate": "Jedinična cijena",
+    "boq.gaeb_long_text": "Dugi tekst",
     "guide.cost_control.title": "Kontrola troškova",
     "guide.cost_control.intro": "Kontrola troškova odgovara na jedno pitanje: koliko će projekt na kraju koštati i zašto. Čita proračun, troškovnik, ugovore, izmjene, izmjerene radove i račune koji već postoje u svojim modulima, pa se ništa ne unosi dvaput.",
     "guide.cost_control.methods.title": "Četiri načina čitanja prognoze",

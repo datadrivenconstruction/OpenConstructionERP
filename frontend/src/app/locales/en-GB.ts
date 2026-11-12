@@ -164,6 +164,7 @@ const resource = {
     "boq.recurring_bad_rate": "Enter a unit rate of 0 or more.",
     "boq.priced_from_published_rates": "Prices are published unit prices",
     "boq.priced_from_published_rates_hint": "They already contain overhead and profit. Validation warns if a markup adds them again.",
+    "boq.gaeb_long_text": "Long text",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "auth.oidc_errors.no_code": "No authorisation code received from the identity provider.",

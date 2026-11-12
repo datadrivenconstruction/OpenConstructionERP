@@ -61634,6 +61634,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Colonne del preventivo stampato",
     "boq.pdf_details_col_qty_unit": "Quantità e unità",
     "boq.pdf_details_col_rate": "Prezzo unitario",
+    "boq.gaeb_long_text": "Testo lungo",
     "guide.cost_control.title": "Controllo dei costi",
     "guide.cost_control.intro": "Il controllo dei costi risponde a una domanda: quanto costerà il progetto alla fine e perché. Legge budget, stima, contratti, varianti, lavori misurati e fatture che vivono già nei loro moduli, così nulla viene scritto due volte.",
     "guide.cost_control.methods.title": "Quattro modi di leggere la previsione",

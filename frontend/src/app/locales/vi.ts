@@ -60179,6 +60179,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Các cột trong dự toán in ra",
     "boq.pdf_details_col_qty_unit": "Khối lượng và đơn vị",
     "boq.pdf_details_col_rate": "Đơn giá",
+    "boq.gaeb_long_text": "Văn bản dài",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

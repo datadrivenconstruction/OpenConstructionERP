@@ -61957,6 +61957,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolumny w wydrukowanym kosztorysie",
     "boq.pdf_details_col_qty_unit": "Ilość i jednostka",
     "boq.pdf_details_col_rate": "Cena jednostkowa",
+    "boq.gaeb_long_text": "Opis długi",
     "guide.cost_control.title": "Kontrola kosztów",
     "guide.cost_control.intro": "Kontrola kosztów odpowiada na jedno pytanie: ile projekt będzie kosztował na koniec i dlaczego. Czyta budżet, kosztorys, umowy, zmiany, roboty obmierzone i faktury, które już są w swoich modułach, więc nic nie jest wpisywane dwa razy.",
     "guide.cost_control.methods.title": "Cztery sposoby odczytu prognozy",

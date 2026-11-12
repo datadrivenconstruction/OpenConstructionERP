@@ -60170,6 +60170,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolom pada estimasi cetak",
     "boq.pdf_details_col_qty_unit": "Kuantitas dan satuan",
     "boq.pdf_details_col_rate": "Harga satuan",
+    "boq.gaeb_long_text": "Teks panjang",
     "guide.cost_control.title": "Pengendalian biaya",
     "guide.cost_control.intro": "Pengendalian biaya menjawab satu pertanyaan: berapa biaya proyek pada akhirnya, dan mengapa. Modul ini membaca anggaran, estimasi, kontrak, perubahan, pekerjaan terukur, dan faktur yang sudah ada di modulnya masing-masing, sehingga tidak ada yang diketik dua kali.",
     "guide.cost_control.methods.title": "Empat cara membaca prakiraan",

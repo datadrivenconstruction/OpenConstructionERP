@@ -63060,6 +63060,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Spalten im gedruckten Angebot",
     "boq.pdf_details_col_qty_unit": "Menge und Einheit",
     "boq.pdf_details_col_rate": "Einheitspreis",
+    "boq.gaeb_long_text": "Langtext",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",

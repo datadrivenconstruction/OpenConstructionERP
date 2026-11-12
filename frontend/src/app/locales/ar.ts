@@ -63501,6 +63501,7 @@ const resource = {
     "boq.pdf_details_cols_title": "الأعمدة في التقدير المطبوع",
     "boq.pdf_details_col_qty_unit": "الكمية والوحدة",
     "boq.pdf_details_col_rate": "سعر الوحدة",
+    "boq.gaeb_long_text": "النص الطويل",
     "guide.cost_control.title": "ضبط التكاليف",
     "guide.cost_control.intro": "يجيب ضبط التكاليف عن سؤال واحد: كم سيكلّف المشروع في النهاية، ولماذا. يقرأ الميزانية والتقدير والعقود والتغييرات والأعمال المقاسة والفواتير الموجودة أصلًا في وحداتها، فلا يُدخل شيء مرتين.",
     "guide.cost_control.methods.title": "أربع طرق لقراءة التوقع",

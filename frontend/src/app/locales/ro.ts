@@ -60750,6 +60750,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Coloane în devizul tipărit",
     "boq.pdf_details_col_qty_unit": "Cantitate și unitate",
     "boq.pdf_details_col_rate": "Preț unitar",
+    "boq.gaeb_long_text": "Text lung",
     "guide.cost_control.title": "Controlul costurilor",
     "guide.cost_control.intro": "Controlul costurilor răspunde la o singură întrebare: cât va costa proiectul la final și de ce. Citește bugetul, devizul, contractele, modificările, lucrările măsurate și facturile care există deja în modulele lor, așa că nimic nu se introduce de două ori.",
     "guide.cost_control.methods.title": "Patru moduri de a citi prognoza",

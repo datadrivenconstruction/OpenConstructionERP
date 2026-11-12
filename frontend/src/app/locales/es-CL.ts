@@ -50733,6 +50733,7 @@ const resource = {
     "boq.provis_with_total_tip": "Partida eventual con total: se suma a los totales.",
     "boq.priced_from_published_rates": "Los precios son precios unitarios publicados",
     "boq.priced_from_published_rates_hint": "Ya incluyen gastos generales y utilidad. La validación advierte si un recargo los vuelve a agregar.",
+    "boq.gaeb_long_text": "Texto largo",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

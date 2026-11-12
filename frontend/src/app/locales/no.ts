@@ -60419,6 +60419,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolonner i den utskrevne kalkylen",
     "boq.pdf_details_col_qty_unit": "Mengde og enhet",
     "boq.pdf_details_col_rate": "Enhetspris",
+    "boq.gaeb_long_text": "Langtekst",
     "guide.cost_control.title": "Kostnadsstyring",
     "guide.cost_control.intro": "Kostnadsstyring svarer på ett spørsmål: hva kommer prosjektet til å koste til slutt, og hvorfor. Den leser budsjett, kalkyle, kontrakter, endringer, målt arbeid og fakturaer som allerede ligger i sine egne moduler, så ingenting skrives inn to ganger.",
     "guide.cost_control.methods.title": "Fire måter å lese prognosen på",

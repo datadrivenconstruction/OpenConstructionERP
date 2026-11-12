@@ -60423,6 +60423,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Tulostetun arvion sarakkeet",
     "boq.pdf_details_col_qty_unit": "Määrä ja yksikkö",
     "boq.pdf_details_col_rate": "Yksikköhinta",
+    "boq.gaeb_long_text": "Pitkä teksti",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

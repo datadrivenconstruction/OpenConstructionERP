@@ -397,7 +397,7 @@ export function resourceSplitMoneyTotals(
 /** True for a real cost line (not a section header, footer, or resource sub-row). */
 function isCostLine(d: Record<string, unknown> | undefined): boolean {
   return (
-    !!d && !d._isSection && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader
+    !!d && !d._isSection && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader && !d._isLangtext
   );
 }
 
@@ -708,7 +708,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         const d = params.data as Record<string, unknown> | undefined;
         if (
           !d || d._isSection || d._isFooter || d._isResource ||
-          d._isAddResource || d._isVariantHeader
+          d._isAddResource || d._isVariantHeader || d._isLangtext
         ) {
           return null;
         }

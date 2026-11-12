@@ -60385,6 +60385,7 @@ const resource = {
     "boq.pdf_details_cols_title": "چھپے ہوئے تخمینے کے کالم",
     "boq.pdf_details_col_qty_unit": "مقدار اور اکائی",
     "boq.pdf_details_col_rate": "فی اکائی نرخ",
+    "boq.gaeb_long_text": "طویل متن",
     "guide.cost_control.title": "لاگت کنٹرول",
     "guide.cost_control.intro": "لاگت کنٹرول ایک سوال کا جواب دیتا ہے: پروجیکٹ کی آخر میں لاگت کیا ہوگی، اور کیوں۔ یہ بجٹ، تخمینہ، کنٹریکٹس، تبدیلیاں، ناپا ہوا کام اور انوائسز پڑھتا ہے جو پہلے ہی اپنے ماڈیولز میں موجود ہیں، اس لیے کچھ دو بار نہیں لکھنا پڑتا۔",
     "guide.cost_control.methods.title": "پیش گوئی پڑھنے کے چار طریقے",

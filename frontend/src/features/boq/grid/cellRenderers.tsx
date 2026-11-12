@@ -48,6 +48,7 @@ import {
   type ResourceQuantityBasis,
   type UnitsSystem,
 } from '../boqHelpers';
+import { getGaebLongText } from './longText';
 import { RESOURCE_TYPES, getResourceTypeLabel, getResourceTypeShortCode } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
@@ -865,13 +866,16 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
 
   const t = ctx?.t ?? ((key: string, opts?: Record<string, string>) => (opts?.defaultValue as string) ?? key);
   const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
-  if (!hasResources) return null;
+  const hasLongText = getGaebLongText(data.metadata) !== null;
+  if (!hasResources && !hasLongText) return null;
 
   const resCount = Array.isArray(data.metadata?.resources)
     ? data.metadata.resources.length
     : 0;
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
-  const expandTitle = isExpanded
+  const expandTitle = !hasResources
+    ? t('boq.gaeb_long_text', { defaultValue: 'Langtext' })
+    : isExpanded
     ? t('boq.collapse_resources', { defaultValue: 'Collapse {{count}} resources', count: resCount })
     : t('boq.expand_resources', { defaultValue: 'Show {{count}} resources', count: resCount });
 
@@ -931,9 +935,12 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
  *  ``Info`` icon, ``createPortal``, and lucide ``X``. ───────────── */
 function ScopeOfWorkHint({
   steps,
+  longText,
   t,
 }: {
   steps: string[];
+  /** GAEB Langtext: when set the popover shows this text instead of the steps. */
+  longText?: string;
   t: (key: string, opts?: Record<string, string | number>) => string;
 }) {
   const [open, setOpen] = useState(false);
@@ -978,9 +985,11 @@ function ScopeOfWorkHint({
     setOpen(true);
   };
 
-  const label = t('boq.scope_of_work_label', {
-    defaultValue: 'What work is included in this rate',
-  });
+  const label = longText
+    ? t('boq.gaeb_long_text', { defaultValue: 'Langtext' })
+    : t('boq.scope_of_work_label', {
+        defaultValue: 'What work is included in this rate',
+      });
 
   return (
     <>
@@ -997,7 +1006,7 @@ function ScopeOfWorkHint({
         title={label}
         aria-label={label}
         aria-expanded={open}
-        data-testid="boq-scope-of-work-hint"
+        data-testid={longText ? 'boq-long-text-hint' : 'boq-scope-of-work-hint'}
       >
         <Info size={12} strokeWidth={2} />
       </button>
@@ -1014,13 +1023,19 @@ function ScopeOfWorkHint({
           <div className="oe-overline mb-1.5">
             {label}
           </div>
-          <ul className="list-disc pl-4 space-y-1 leading-relaxed max-h-[280px] overflow-auto">
-            {steps.map((step, i) => (
-              <li key={i} className="text-content-primary">
-                {step}
-              </li>
-            ))}
-          </ul>
+          {longText ? (
+            <div className="whitespace-pre-wrap break-words leading-relaxed max-h-[280px] overflow-auto text-content-primary">
+              {longText}
+            </div>
+          ) : (
+            <ul className="list-disc pl-4 space-y-1 leading-relaxed max-h-[280px] overflow-auto">
+              {steps.map((step, i) => (
+                <li key={i} className="text-content-primary">
+                  {step}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>,
         document.body,
       )}
@@ -1137,9 +1152,28 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   const scopeSteps: string[] = Array.isArray(scopeRaw)
     ? scopeRaw.filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
     : [];
-  const scopeHint = scopeSteps.length > 0 ? (
-    <ScopeOfWorkHint steps={scopeSteps} t={t} />
+  const gaebLongText = getGaebLongText(meta);
+  const scopeHint = scopeSteps.length > 0 || gaebLongText ? (
+    <>
+      {gaebLongText ? <ScopeOfWorkHint steps={[]} longText={gaebLongText} t={t} /> : null}
+      {scopeSteps.length > 0 ? <ScopeOfWorkHint steps={scopeSteps} t={t} /> : null}
+    </>
   ) : null;
+  // Langtext toggle on: the long text renders muted below the short text.
+  // Only built when the toggle is on and a long text exists (cheap otherwise).
+  const descBody = descMultiline && gaebLongText ? (
+    <span className={descTextCls}>
+      <span>{displayValue}</span>
+      <span
+        className="block mt-0.5 text-xs text-content-tertiary whitespace-pre-wrap break-words"
+        data-testid="boq-long-text-body"
+      >
+        {gaebLongText}
+      </span>
+    </span>
+  ) : (
+    <span className={descTextCls}>{displayValue}</span>
+  );
 
   /* ── "V" icon — surfaces when EITHER:
    *     (a) at least one resource on this position carries cached
@@ -1357,7 +1391,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     return (
       <span className={`inline-flex ${descAlignCls} gap-1.5 min-w-0 max-w-full`}>
         {variantIconButton}
-        <span className={descTextCls}>{displayValue}</span>
+        {descBody}
         {scopeHint}
         {breakdownPill}
         {provisChip}
@@ -1386,7 +1420,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     return (
       <span className={`inline-flex ${descAlignCls} gap-1.5 min-w-0 max-w-full`}>
         {variantIconButton}
-        <span className={descTextCls}>{displayValue}</span>
+        {descBody}
         {scopeHint}
         {breakdownPill}
         {provisChip}
@@ -5201,6 +5235,20 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   if (data?._isResource) {
     const row = <EditableResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
     return ctx.readOnly ? <div className="h-full w-full" {...INERT}>{row}</div> : row;
+  }
+
+  // GAEB Langtext block above the resources of an expanded position.
+  if (data?._isLangtext) {
+    return (
+      <div
+        className="h-full w-full overflow-y-auto py-1.5 pr-4 text-xs text-content-secondary"
+        style={{ paddingLeft: leftPad }}
+        data-testid="boq-long-text-block"
+      >
+        <div className="oe-overline mb-0.5">{ctx.t('boq.gaeb_long_text', { defaultValue: 'Langtext' })}</div>
+        <div className="whitespace-pre-wrap break-words leading-snug">{data._langtext as string}</div>
+      </div>
+    );
   }
 
   // Synthetic "abstract variant" header — surfaces the position-level

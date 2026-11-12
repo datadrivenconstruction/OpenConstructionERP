@@ -63326,6 +63326,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Colunas do orçamento impresso",
     "boq.pdf_details_col_qty_unit": "Quantidade e unidade",
     "boq.pdf_details_col_rate": "Preço unitário",
+    "boq.gaeb_long_text": "Texto longo",
     "guide.cost_control.title": "Controlo de custos",
     "guide.cost_control.intro": "O controlo de custos responde a uma pergunta: quanto vai custar o projeto no fim e porquê. Lê o orçamento, a estimativa, os contratos, as alterações, o trabalho medido e as faturas que já vivem nos seus módulos, por isso nada é escrito duas vezes.",
     "guide.cost_control.methods.title": "Quatro formas de ler a previsão",

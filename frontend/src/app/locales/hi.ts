@@ -60422,6 +60422,7 @@ const resource = {
     "boq.pdf_details_cols_title": "मुद्रित अनुमान के कॉलम",
     "boq.pdf_details_col_qty_unit": "मात्रा और इकाई",
     "boq.pdf_details_col_rate": "इकाई दर",
+    "boq.gaeb_long_text": "विस्तृत पाठ",
     "guide.cost_control.title": "लागत नियंत्रण",
     "guide.cost_control.intro": "लागत नियंत्रण एक सवाल का जवाब देता है: अंत में प्रोजेक्ट की लागत क्या होगी, और क्यों। यह बजट, अनुमान, अनुबंध, बदलाव, मापा गया काम और चालान पढ़ता है जो पहले से अपने-अपने मॉड्यूल में हैं, इसलिए कुछ भी दो बार नहीं भरना पड़ता।",
     "guide.cost_control.methods.title": "पूर्वानुमान पढ़ने के चार तरीके",

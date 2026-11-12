@@ -60097,6 +60097,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Хэвлэсэн тооцооны багана",
     "boq.pdf_details_col_qty_unit": "Хэмжээ ба нэгж",
     "boq.pdf_details_col_rate": "Нэгж үнэ",
+    "boq.gaeb_long_text": "Урт текст",
     "guide.cost_control.title": "Зардлын хяналт",
     "guide.cost_control.intro": "Зардлын хяналт нэг асуултад хариулна: төсөл эцэст нь хэдэд өртөх вэ, яагаад. Энэ нь төсөв, тооцоо, гэрээ, өөрчлөлт, хэмжсэн ажил, нэхэмжлэхийг өөрсдийн модуль дээрээс нь уншдаг тул юу ч хоёр удаа оруулахгүй.",
     "guide.cost_control.methods.title": "Таамаглалыг унших дөрвөн арга",

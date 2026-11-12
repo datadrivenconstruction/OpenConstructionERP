@@ -61703,6 +61703,7 @@ const resource = {
     "boq.pdf_details_cols_title": "印刷する見積の列",
     "boq.pdf_details_col_qty_unit": "数量と単位",
     "boq.pdf_details_col_rate": "単価",
+    "boq.gaeb_long_text": "詳細テキスト",
     "guide.cost_control.title": "原価管理",
     "guide.cost_control.intro": "原価管理が答えるのは一つの問いです。最終的にプロジェクトはいくらかかるのか、そしてなぜか。予算、見積、契約、変更、実測した出来高、請求書は、それぞれのモジュールにすでにあるものを読み込むので、二重に入力する必要はありません。",
     "guide.cost_control.methods.title": "予測の見方は4通り",

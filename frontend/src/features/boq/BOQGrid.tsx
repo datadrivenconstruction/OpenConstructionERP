@@ -120,6 +120,7 @@ import {
 import type { ResourceQuantityBasis, UnitsSystem } from './boqHelpers';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
+import { getGaebLongText, langtextBlockHeight } from './grid/longText';
 import { useBoqDescDensityStore, BOQ_DESC_ROW_HEIGHT } from '@/stores/useBoqDescDensityStore';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
@@ -184,7 +185,7 @@ const BOQ_ROW_SELECTION = {
   selectAll: 'filtered',
   enableClickSelection: false,
   isRowSelectable: (node: { data?: Record<string, unknown> }) =>
-    !node.data?._isFooter && !node.data?._isResource && !node.data?._isAddResource,
+    !node.data?._isFooter && !node.data?._isResource && !node.data?._isAddResource && !node.data?._isLangtext,
 } as const;
 
 /**
@@ -360,12 +361,27 @@ interface CopilotRow {
   total: number;
 }
 
+/** GAEB Langtext block shown above the resources of an expanded position. */
+interface LangtextRow {
+  _isLangtext: true;
+  _parentPositionId: string;
+  _langtext: string;
+  id: string;
+  description: string;
+  ordinal: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  total: number;
+}
+
 type GridRow =
   | (Position & Partial<SectionRow>)
   | (FooterRow & Record<string, unknown>)
   | (ResourceRow & Record<string, unknown>)
   | (AddResourceRow & Record<string, unknown>)
   | (VariantHeaderRow & Record<string, unknown>)
+  | (LangtextRow & Record<string, unknown>)
   | (CopilotRow & Record<string, unknown>);
 
 export interface ManualResource {
@@ -1728,6 +1744,23 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
     const meta = (pos.metadata ?? {}) as Record<string, unknown>;
 
+    const longText = getGaebLongText(meta);
+    if (longText) {
+      const ltRow: LangtextRow = {
+        _isLangtext: true,
+        _parentPositionId: pos.id,
+        _langtext: longText,
+        id: `${pos.id}_langtext`,
+        description: '',
+        ordinal: '',
+        unit: '',
+        quantity: 0,
+        unit_rate: 0,
+        total: 0,
+      };
+      rows.push(ltRow as GridRow);
+    }
+
     // Synthetic variant-header row — only for positions that carry
     // ``cost_item_variants`` at position level (legacy CWICR position-mode).
     // Acts as the "variant resource" the user expects to see among the
@@ -2215,11 +2248,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isFooter) {
       classes.push('bg-surface-tertiary/50', 'border-t', 'border-border');
     }
-    if (params.data?._isResource || params.data?._isAddResource || params.data?._isVariantHeader) {
+    if (params.data?._isResource || params.data?._isAddResource || params.data?._isVariantHeader || params.data?._isLangtext) {
       classes.push('oe-resource-row');
     }
     // Add 'group' to regular position rows so hover actions (save/delete) appear on hover
-    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource && !params.data?._isVariantHeader) {
+    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource && !params.data?._isVariantHeader && !params.data?._isLangtext) {
       classes.push('group');
 
       // Highlight unpriced positions (unit_rate is 0/empty) so the user can
@@ -2264,7 +2297,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const isFullWidthRow = useCallback(
     (params: IsFullWidthRowParams) => {
       const d = params.rowNode.data;
-      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource || !!d?._isVariantHeader || !!d?._isCopilot;
+      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource || !!d?._isVariantHeader || !!d?._isLangtext || !!d?._isCopilot;
     },
     [],
   );
@@ -2274,6 +2307,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isResource) return 28;
     if (params.data?._isAddResource) return 30;
     if (params.data?._isVariantHeader) return 36;
+    if (params.data?._isLangtext) return langtextBlockHeight(params.data._langtext as string);
     if (params.data?._isCopilot) return BOQ_COPILOT_ROW_HEIGHT;
     const compact = tightRowsRef.current;
     if (params.data?._isFooter) return densityRowHeight(32, compact);
@@ -3250,7 +3284,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               !data._isFooter &&
               !data._isResource &&
               !data._isAddResource &&
-              !data._isVariantHeader
+              !data._isVariantHeader &&
+              !data._isLangtext
             ) {
               onActiveRowChange?.(data.id as string);
             } else {
@@ -3286,7 +3321,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               !d._isFooter &&
               !d._isResource &&
               !d._isAddResource &&
-              !d._isVariantHeader
+              !d._isVariantHeader &&
+              !d._isLangtext
             ) {
               onActiveRowChange(d.id as string);
             }

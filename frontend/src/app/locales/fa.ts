@@ -60379,6 +60379,7 @@ const resource = {
     "boq.pdf_details_cols_title": "ستون‌های برآورد چاپی",
     "boq.pdf_details_col_qty_unit": "مقدار و واحد",
     "boq.pdf_details_col_rate": "بهای واحد",
+    "boq.gaeb_long_text": "متن کامل",
     "guide.cost_control.title": "کنترل هزینه",
     "guide.cost_control.intro": "کنترل هزینه به یک پرسش پاسخ می‌دهد: پروژه در پایان چقدر هزینه خواهد داشت و چرا. بودجه، برآورد، قراردادها، تغییرات، کار اندازه‌گیری‌شده و صورتحساب‌هایی را می‌خواند که از پیش در ماژول‌های خودشان هستند، پس چیزی دوبار وارد نمی‌شود.",
     "guide.cost_control.methods.title": "چهار روش برای خواندن پیش‌بینی",

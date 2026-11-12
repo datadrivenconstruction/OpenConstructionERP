@@ -60377,6 +60377,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Mga column sa naka-print na estimate",
     "boq.pdf_details_col_qty_unit": "Dami at yunit",
     "boq.pdf_details_col_rate": "Presyo bawat yunit",
+    "boq.gaeb_long_text": "Mahabang teksto",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Isang tanong ang sinasagot ng cost control: magkano ang aabutin ng proyekto sa huli, at bakit. Binabasa nito ang budget, estimate, mga kontrata, mga pagbabago, nasukat na trabaho at mga invoice na nasa sarili nilang module na, kaya walang tina-type nang dalawang beses.",
     "guide.cost_control.methods.title": "Apat na paraan ng pagbasa sa forecast",

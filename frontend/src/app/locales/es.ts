@@ -63338,6 +63338,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Columnas del presupuesto impreso",
     "boq.pdf_details_col_qty_unit": "Cantidad y unidad",
     "boq.pdf_details_col_rate": "Precio unitario",
+    "boq.gaeb_long_text": "Texto largo",
     "guide.cost_control.title": "Control de costes",
     "guide.cost_control.intro": "El control de costes responde a una pregunta: cuánto costará el proyecto al final y por qué. Lee el presupuesto, la estimación, los contratos, los cambios, la obra medida y las facturas que ya viven en sus propios módulos, así que nada se escribe dos veces.",
     "guide.cost_control.methods.title": "Cuatro formas de leer la previsión",

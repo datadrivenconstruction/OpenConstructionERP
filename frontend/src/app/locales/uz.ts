@@ -61351,6 +61351,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Chop etilgan smetadagi ustunlar",
     "boq.pdf_details_col_qty_unit": "Miqdor va birlik",
     "boq.pdf_details_col_rate": "Birlik narxi",
+    "boq.gaeb_long_text": "Uzun matn",
     "guide.cost_control.title": "Xarajatlarni nazorat qilish",
     "guide.cost_control.intro": "Xarajatlarni nazorat qilish bitta savolga javob beradi: loyiha oxirida qancha turadi va nima uchun. U oʻz modullarida allaqachon turgan byudjet, smeta, shartnomalar, oʻzgartirishlar, oʻlchangan ish va hisob-fakturalarni oʻqiydi, shuning uchun hech narsa ikki marta kiritilmaydi.",
     "guide.cost_control.methods.title": "Prognozni oʻqishning toʻrt usuli",

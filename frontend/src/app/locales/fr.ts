@@ -63333,6 +63333,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Colonnes du devis imprimé",
     "boq.pdf_details_col_qty_unit": "Quantité et unité",
     "boq.pdf_details_col_rate": "Prix unitaire",
+    "boq.gaeb_long_text": "Texte long",
     "guide.cost_control.title": "Contrôle des coûts",
     "guide.cost_control.intro": "Le contrôle des coûts répond à une question : combien le projet coûtera-t-il à la fin, et pourquoi. Il lit le budget, l'estimation, les contrats, les avenants, les travaux métrés et les factures qui vivent déjà dans leurs propres modules, rien n'est saisi deux fois.",
     "guide.cost_control.methods.title": "Quatre façons de lire la prévision",

@@ -61300,6 +61300,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolommen op de afgedrukte begroting",
     "boq.pdf_details_col_qty_unit": "Hoeveelheid en eenheid",
     "boq.pdf_details_col_rate": "Eenheidsprijs",
+    "boq.gaeb_long_text": "Lange tekst",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

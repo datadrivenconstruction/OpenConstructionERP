@@ -60689,6 +60689,7 @@ const resource = {
     "boq.pdf_details_cols_title": "মুদ্রিত প্রাক্কলনের কলাম",
     "boq.pdf_details_col_qty_unit": "পরিমাণ ও একক",
     "boq.pdf_details_col_rate": "একক দর",
+    "boq.gaeb_long_text": "দীর্ঘ পাঠ্য",
     "guide.cost_control.title": "খরচ নিয়ন্ত্রণ",
     "guide.cost_control.intro": "খরচ নিয়ন্ত্রণ একটি প্রশ্নের উত্তর দেয়: শেষে প্রকল্পের খরচ কত হবে, এবং কেন। এটি বাজেট, প্রাক্কলন, চুক্তি, পরিবর্তন, মাপা কাজ ও চালান পড়ে, যা আগে থেকেই নিজ নিজ মডিউলে আছে, তাই কিছু দুবার লিখতে হয় না।",
     "guide.cost_control.methods.title": "পূর্বাভাস পড়ার চারটি উপায়",

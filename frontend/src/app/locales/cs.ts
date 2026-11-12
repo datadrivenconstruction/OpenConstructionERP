@@ -61696,6 +61696,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Sloupce v tištěném rozpočtu",
     "boq.pdf_details_col_qty_unit": "Množství a jednotka",
     "boq.pdf_details_col_rate": "Jednotková cena",
+    "boq.gaeb_long_text": "Dlouhý text",
     "guide.cost_control.title": "Řízení nákladů",
     "guide.cost_control.intro": "Řízení nákladů odpovídá na jednu otázku: kolik bude projekt nakonec stát a proč. Čte rozpočet, odhad, smlouvy, změny, naměřené práce a faktury, které už jsou ve svých modulech, takže se nic nezadává dvakrát.",
     "guide.cost_control.methods.title": "Čtyři způsoby, jak číst prognózu",

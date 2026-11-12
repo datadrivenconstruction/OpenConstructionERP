@@ -61300,6 +61300,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Basılı keşifteki sütunlar",
     "boq.pdf_details_col_qty_unit": "Miktar ve birim",
     "boq.pdf_details_col_rate": "Birim fiyat",
+    "boq.gaeb_long_text": "Uzun metin",
     "guide.cost_control.title": "Maliyet kontrolü",
     "guide.cost_control.intro": "Maliyet kontrolü tek bir soruya cevap verir: proje sonunda neye mal olacak ve neden. Bütçeyi, keşfi, sözleşmeleri, değişiklikleri, ölçülen işi ve faturaları, zaten kendi modüllerinde durdukları yerden okur; böylece hiçbir şey iki kez girilmez.",
     "guide.cost_control.methods.title": "Tahmini okumanın dört yolu",

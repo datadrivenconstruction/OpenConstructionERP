@@ -60709,6 +60709,7 @@ const resource = {
     "boq.pdf_details_cols_title": "עמודות באומדן המודפס",
     "boq.pdf_details_col_qty_unit": "כמות ויחידה",
     "boq.pdf_details_col_rate": "מחיר ליחידה",
+    "boq.gaeb_long_text": "טקסט מלא",
     "guide.cost_control.title": "בקרת עלויות",
     "guide.cost_control.intro": "בקרת עלויות עונה על שאלה אחת: כמה הפרויקט יעלה בסוף, ולמה. היא קוראת את התקציב, האומדן, החוזים, השינויים, העבודה שנמדדה והחשבוניות שכבר נמצאים במודולים שלהם, כך שאין הקלדה כפולה.",
     "guide.cost_control.methods.title": "ארבע דרכים לקרוא את התחזית",

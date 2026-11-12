@@ -54624,6 +54624,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Columns on the printed estimate",
     "boq.pdf_details_col_qty_unit": "Quantity and unit",
     "boq.pdf_details_col_rate": "Unit rate",
+    "boq.gaeb_long_text": "Long text",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

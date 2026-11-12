@@ -60419,6 +60419,7 @@ const resource = {
     "boq.pdf_details_cols_title": "Kolonner i det udskrevne overslag",
     "boq.pdf_details_col_qty_unit": "Mængde og enhed",
     "boq.pdf_details_col_rate": "Enhedspris",
+    "boq.gaeb_long_text": "Langtekst",
     "guide.cost_control.title": "Omkostningsstyring",
     "guide.cost_control.intro": "Omkostningsstyring svarer på ét spørgsmål: hvad kommer projektet til at koste til sidst, og hvorfor. Den læser budget, kalkulation, kontrakter, ændringer, opmålt arbejde og fakturaer, som allerede ligger i deres egne moduler, så intet skrives ind to gange.",
     "guide.cost_control.methods.title": "Fire måder at læse prognosen på",
