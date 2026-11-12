@@ -110,9 +110,12 @@ class EPDRecordRepository(_BaseRepo):
         region: str | None = None,
         *,
         tenant_id: str | None = None,
+        scoped: bool = False,
     ) -> EPDRecord | None:
-        """First EPD of a class among shared ones and the tenant's own custom records."""
-        stmt = select(EPDRecord).where(EPDRecord.material_class == material_class, epd_visible_to(tenant_id))
+        """First EPD of a class; ``scoped`` limits it to shared EPDs plus the tenant's own custom ones."""
+        stmt = select(EPDRecord).where(EPDRecord.material_class == material_class)
+        if scoped:
+            stmt = stmt.where(epd_visible_to(tenant_id))
         if region is not None:
             stmt = stmt.where(EPDRecord.region == region)
         result = await self.session.execute(stmt.limit(1))

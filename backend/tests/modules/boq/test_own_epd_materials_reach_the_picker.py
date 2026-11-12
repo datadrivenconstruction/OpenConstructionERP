@@ -106,10 +106,10 @@ async def test_material_class_match_never_picks_another_tenants_custom_epd(sessi
     from app.modules.carbon.repository import EPDRecordRepository
 
     repo = EPDRecordRepository(session)
-    assert await repo.find_epd_by_material_class("concrete", tenant_id="tenant-c") is None
-    own = await repo.find_epd_by_material_class("concrete", tenant_id="tenant-b")
+    assert await repo.find_epd_by_material_class("concrete", tenant_id="tenant-c", scoped=True) is None
+    own = await repo.find_epd_by_material_class("concrete", tenant_id="tenant-b", scoped=True)
     assert own is not None
     assert own.epd_id == "own-b-secret"
-    shared = await repo.find_epd_by_material_class("steel", tenant_id="tenant-c")
+    shared = await repo.find_epd_by_material_class("steel", tenant_id="tenant-c", scoped=True)
     assert shared is not None
     assert shared.epd_id == "ice-steel"
