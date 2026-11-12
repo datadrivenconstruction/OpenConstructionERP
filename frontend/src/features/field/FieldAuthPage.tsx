@@ -95,7 +95,7 @@ export function FieldAuthPage() {
               if (e.key === 'Enter') void submit();
             }}
             placeholder="000000"
-            className="h-14 oe-input text-center text-2xl tracking-wider"
+            className="oe-input oe-input-lg text-center text-2xl tracking-wider"
             aria-label={t('field.auth_pin', { defaultValue: 'PIN' })}
           />
         </label>

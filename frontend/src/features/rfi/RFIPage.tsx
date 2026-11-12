@@ -993,7 +993,7 @@ export function CreateRFIModal({
             placeholder={t('rfi.subject_placeholder', {
               defaultValue: 'e.g. Clarification on foundation depth at Grid Line A-3',
             })}
-            className={clsx('oe-input', 'h-12')} aria-invalid={!!(errors.subject)}
+            className={clsx('oe-input oe-input-lg')} aria-invalid={!!(errors.subject)}
           />
         </WideModalField>
 

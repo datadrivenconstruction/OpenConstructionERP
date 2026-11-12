@@ -2779,7 +2779,7 @@ function RecordBidModal({
                             setPrices((p) => ({ ...p, [li.id]: e.target.value }))
                           }
                           placeholder="0.00"
-                          className={clsx('oe-input w-full', 'w-28 text-right')}
+                          className={clsx('oe-input', 'w-28 text-right')}
                         />
                       </td>
                       <td className="px-3 py-1.5 text-right tabular-nums">

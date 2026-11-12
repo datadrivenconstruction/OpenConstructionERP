@@ -417,7 +417,7 @@ function AddTaskModal({
               placeholder={t('tasks.title_placeholder', {
                 defaultValue: 'e.g. Review structural drawings for Level 5',
               })}
-              className={clsx('oe-input', 'h-12')} aria-invalid={!!(errors.title)}
+              className={clsx('oe-input oe-input-lg')} aria-invalid={!!(errors.title)}
               autoFocus
             />
             {errors.title && (
