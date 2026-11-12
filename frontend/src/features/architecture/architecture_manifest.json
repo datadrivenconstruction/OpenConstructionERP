@@ -79122,7 +79122,7 @@
           "path": "/projects/{project_id}/5d/evm/",
           "handler": "get_evm",
           "response_model": "EVMResponse",
-          "request_schema": "CostModelService"
+          "request_schema": "date | None"
         },
         {
           "method": "POST",
@@ -166655,7 +166655,7 @@
           "method": "GET",
           "path": "/",
           "handler": "list_templates",
-          "response_model": "list[TemplateSummary]"
+          "response_model": "LetterTemplatesListResponse"
         },
         {
           "method": "GET",
@@ -166815,6 +166815,33 @@
             {
               "name": "customised_languages",
               "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "LetterTemplatesListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every registered letter; the set is fixed in code, so one page holds all of it.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[TemplateSummary]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         },
@@ -315574,10 +315601,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 272,
+      "ts_files": 274,
       "css_files": 0,
-      "test_files": 134,
-      "total_files": 272
+      "test_files": 135,
+      "total_files": 274
     },
     {
       "name": "buyer-portal",
@@ -318950,10 +318977,10 @@
     "total_columns": 10659,
     "total_relationships": 261,
     "total_routes": 5218,
-    "total_schemas": 4734,
+    "total_schemas": 4735,
     "total_python_files": 3355,
     "frontend_features": 238,
-    "frontend_ts_files": 4181,
+    "frontend_ts_files": 4183,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
