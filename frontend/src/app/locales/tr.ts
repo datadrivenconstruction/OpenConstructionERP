@@ -54315,6 +54315,7 @@ const resource = {
     "sidebar.tools_title": "Ayarlar ve araçlar",
     "sidebar.tools_collapse": "Ayarlar ve araçları daralt",
     "sidebar.tools_expand": "Ayarlar ve araçları genişlet",
+    "sidebar.tools_short": "Sistem",
     "videos.used_in_cases": "Bu vakalarda kullanılıyor",
     "videos.more_cases": "+{{more}} daha",
     "videos.jump_to": "{{time}}’ten itibaren: {{chapter}}",

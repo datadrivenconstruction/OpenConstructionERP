@@ -54049,6 +54049,7 @@ const resource = {
     "sidebar.tools_title": "Inställningar och verktyg",
     "sidebar.tools_collapse": "Fäll ihop inställningar och verktyg",
     "sidebar.tools_expand": "Fäll ut inställningar och verktyg",
+    "sidebar.tools_short": "System",
     "videos.used_in_cases": "Används i dessa fall",
     "videos.more_cases": "+{{more}} till",
     "videos.jump_to": "Från {{time}}: {{chapter}}",

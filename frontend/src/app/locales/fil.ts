@@ -53394,6 +53394,7 @@ const resource = {
     "sidebar.tools_title": "Mga setting at tool",
     "sidebar.tools_collapse": "I-collapse ang mga setting at tool",
     "sidebar.tools_expand": "I-expand ang mga setting at tool",
+    "sidebar.tools_short": "Sistema",
     "videos.used_in_cases": "Ginamit sa mga Case na ito",
     "videos.more_cases": "+{{more}} pa",
     "videos.jump_to": "Mula sa {{time}}: {{chapter}}",

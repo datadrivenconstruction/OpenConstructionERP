@@ -53551,6 +53551,7 @@ const resource = {
     "sidebar.tools_title": "Жөндөөлөр жана куралдар",
     "sidebar.tools_collapse": "Жөндөөлөр менен куралдарды жыйуу",
     "sidebar.tools_expand": "Жөндөөлөр менен куралдарды жаюу",
+    "sidebar.tools_short": "Система",
     "videos.used_in_cases": "Ушул мисалдарда колдонулган",
     "videos.more_cases": "+{{more}} дагы",
     "videos.jump_to": "{{time}} тартып: {{chapter}}",

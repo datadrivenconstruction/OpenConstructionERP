@@ -53434,6 +53434,7 @@ const resource = {
     "sidebar.tools_title": "Indstillinger og værktøjer",
     "sidebar.tools_collapse": "Skjul indstillinger og værktøjer",
     "sidebar.tools_expand": "Vis indstillinger og værktøjer",
+    "sidebar.tools_short": "System",
     "videos.used_in_cases": "Brugt i disse cases",
     "videos.more_cases": "+{{more}} mere",
     "videos.jump_to": "Fra {{time}}: {{chapter}}",

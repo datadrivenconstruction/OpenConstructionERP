@@ -53395,6 +53395,7 @@ const resource = {
     "sidebar.tools_title": "Параметрлер мен құралдар",
     "sidebar.tools_collapse": "Параметрлер мен құралдарды жию",
     "sidebar.tools_expand": "Параметрлер мен құралдарды ашу",
+    "sidebar.tools_short": "Жүйе",
     "videos.used_in_cases": "Осы кейстерде қолданылған",
     "videos.more_cases": "+{{more}} тағы",
     "videos.jump_to": "{{time}} бастап: {{chapter}}",

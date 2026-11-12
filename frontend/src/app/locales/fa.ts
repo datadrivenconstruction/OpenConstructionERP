@@ -53396,6 +53396,7 @@ const resource = {
     "sidebar.tools_title": "تنظیمات و ابزارها",
     "sidebar.tools_collapse": "جمع کردن تنظیمات و ابزارها",
     "sidebar.tools_expand": "باز کردن تنظیمات و ابزارها",
+    "sidebar.tools_short": "سیستم",
     "videos.used_in_cases": "استفاده‌شده در این سناریوها",
     "videos.more_cases": "+{{more}} مورد دیگر",
     "videos.jump_to": "از {{time}}: {{chapter}}",

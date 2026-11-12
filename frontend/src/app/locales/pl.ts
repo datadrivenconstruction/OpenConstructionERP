@@ -54897,6 +54897,7 @@ const resource = {
     "sidebar.tools_title": "Ustawienia i narzędzia",
     "sidebar.tools_collapse": "Zwiń ustawienia i narzędzia",
     "sidebar.tools_expand": "Rozwiń ustawienia i narzędzia",
+    "sidebar.tools_short": "System",
     "videos.used_in_cases": "Wykorzystywane w tych scenariuszach",
     "videos.more_cases": "+{{more}} więcej",
     "videos.jump_to": "Od {{time}}: {{chapter}}",

@@ -53439,6 +53439,7 @@ const resource = {
     "sidebar.tools_title": "सेटिंग्स और टूल्स",
     "sidebar.tools_collapse": "सेटिंग्स और टूल्स संक्षिप्त करें",
     "sidebar.tools_expand": "सेटिंग्स और टूल्स विस्तृत करें",
+    "sidebar.tools_short": "सिस्टम",
     "videos.used_in_cases": "इन केस में उपयोग किया गया",
     "videos.more_cases": "+{{more}} और",
     "videos.jump_to": "{{time}} से: {{chapter}}",

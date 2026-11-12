@@ -53438,6 +53438,7 @@ const resource = {
     "sidebar.tools_title": "Настройки и инструменти",
     "sidebar.tools_collapse": "Свиване на настройки и инструменти",
     "sidebar.tools_expand": "Разгъване на настройки и инструменти",
+    "sidebar.tools_short": "Система",
     "videos.used_in_cases": "Използвано в тези казуси",
     "videos.more_cases": "+{{more}} още",
     "videos.jump_to": "От {{time}}: {{chapter}}",

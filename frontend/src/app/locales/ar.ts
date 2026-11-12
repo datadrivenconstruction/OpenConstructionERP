@@ -56362,6 +56362,7 @@ const resource = {
     "sidebar.tools_title": "الإعدادات والأدوات",
     "sidebar.tools_collapse": "طيّ الإعدادات والأدوات",
     "sidebar.tools_expand": "توسيع الإعدادات والأدوات",
+    "sidebar.tools_short": "النظام",
     "videos.used_in_cases": "مستخدَم في هذه الحالات العملية",
     "videos.more_cases": "+{{more}} أخرى",
     "videos.jump_to": "من {{time}}: {{chapter}}",

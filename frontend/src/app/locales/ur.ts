@@ -53402,6 +53402,7 @@ const resource = {
     "sidebar.tools_title": "ترتیبات اور ٹولز",
     "sidebar.tools_collapse": "ترتیبات اور ٹولز سمیٹیں",
     "sidebar.tools_expand": "ترتیبات اور ٹولز پھیلائیں",
+    "sidebar.tools_short": "سسٹم",
     "videos.used_in_cases": "ان کیسز میں استعمال ہوتی ہے",
     "videos.more_cases": "+مزید {{more}}",
     "videos.jump_to": "{{time}} سے: {{chapter}}",

@@ -56315,6 +56315,7 @@ const resource = {
     "sidebar.tools_title": "Ajustes y herramientas",
     "sidebar.tools_collapse": "Contraer ajustes y herramientas",
     "sidebar.tools_expand": "Expandir ajustes y herramientas",
+    "sidebar.tools_short": "Sistema",
     "videos.used_in_cases": "Usado en estos casos prácticos",
     "videos.more_cases": "+{{more}} más",
     "videos.jump_to": "Desde {{time}}: {{chapter}}",

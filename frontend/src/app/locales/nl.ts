@@ -54315,6 +54315,7 @@ const resource = {
     "sidebar.tools_title": "Instellingen en tools",
     "sidebar.tools_collapse": "Instellingen en tools inklappen",
     "sidebar.tools_expand": "Instellingen en tools uitklappen",
+    "sidebar.tools_short": "Systeem",
     "videos.used_in_cases": "Gebruikt in deze cases",
     "videos.more_cases": "+{{more}} meer",
     "videos.jump_to": "Vanaf {{time}}: {{chapter}}",

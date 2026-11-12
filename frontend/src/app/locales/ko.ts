@@ -53809,6 +53809,7 @@ const resource = {
     "sidebar.tools_title": "설정 및 도구",
     "sidebar.tools_collapse": "설정 및 도구 접기",
     "sidebar.tools_expand": "설정 및 도구 펼치기",
+    "sidebar.tools_short": "시스템",
     "videos.used_in_cases": "이 케이스에서 사용됨",
     "videos.more_cases": "+{{more}}개 더",
     "videos.jump_to": "{{time}}부터: {{chapter}}",

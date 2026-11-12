@@ -54725,6 +54725,7 @@ const resource = {
     "sidebar.tools_title": "設定とツール",
     "sidebar.tools_collapse": "設定とツールを折りたたむ",
     "sidebar.tools_expand": "設定とツールを展開",
+    "sidebar.tools_short": "システム",
     "videos.used_in_cases": "これらのケースで使用",
     "videos.more_cases": "+{{more}}件",
     "videos.jump_to": "{{time}}から: {{chapter}}",

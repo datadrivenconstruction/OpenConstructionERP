@@ -35,4 +35,22 @@ describe('SidebarToolsCollapse', () => {
     );
     expect(screen.getByTestId('sidebar-tools-toggle').getAttribute('aria-expanded')).toBe('true');
   });
+
+  it('renders a single icon plus the short word when collapsed, and expands on click', () => {
+    localStorage.setItem(SIDEBAR_TOOLS_KEY, '0');
+    render(
+      <SidebarToolsCollapse iconified={false}>
+        <span>tools</span>
+      </SidebarToolsCollapse>,
+    );
+    const btn = screen.getByTestId('sidebar-tools-toggle');
+    expect(btn.textContent).toBe('System');
+    expect(btn.querySelectorAll('svg').length).toBe(2);
+    expect(btn.getAttribute('aria-controls')).toBe(
+      screen.getByTestId('sidebar-tools-region').getAttribute('id'),
+    );
+    fireEvent.click(btn);
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByTestId('sidebar-tools-region').getAttribute('data-open')).toBe('true');
+  });
 });

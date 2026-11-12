@@ -53192,6 +53192,7 @@ const resource = {
     "sidebar.tools_title": "Pengaturan dan alat",
     "sidebar.tools_collapse": "Ciutkan pengaturan dan alat",
     "sidebar.tools_expand": "Perluas pengaturan dan alat",
+    "sidebar.tools_short": "Sistem",
     "videos.used_in_cases": "Digunakan dalam kasus-kasus ini",
     "videos.more_cases": "+{{more}} lagi",
     "videos.jump_to": "Dari {{time}}: {{chapter}}",

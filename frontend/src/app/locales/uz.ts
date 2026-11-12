@@ -54366,6 +54366,7 @@ const resource = {
     "sidebar.tools_title": "Sozlamalar va vositalar",
     "sidebar.tools_collapse": "Sozlamalar va vositalarni yigʻish",
     "sidebar.tools_expand": "Sozlamalar va vositalarni yoyish",
+    "sidebar.tools_short": "Tizim",
     "videos.used_in_cases": "Ushbu keyslarda ishlatiladi",
     "videos.more_cases": "+yana {{more}} ta",
     "videos.jump_to": "{{time}}dan: {{chapter}}",

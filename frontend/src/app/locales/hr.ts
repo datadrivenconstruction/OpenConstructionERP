@@ -53738,6 +53738,7 @@ const resource = {
     "sidebar.tools_title": "Postavke i alati",
     "sidebar.tools_collapse": "Sažmi postavke i alate",
     "sidebar.tools_expand": "Proširi postavke i alate",
+    "sidebar.tools_short": "Sustav",
     "videos.used_in_cases": "Korišteno u ovim scenarijima",
     "videos.more_cases": "+{{more}} više",
     "videos.jump_to": "Od {{time}}: {{chapter}}",

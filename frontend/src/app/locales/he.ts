@@ -53686,6 +53686,7 @@ const resource = {
     "sidebar.tools_title": "הגדרות וכלים",
     "sidebar.tools_collapse": "כווץ הגדרות וכלים",
     "sidebar.tools_expand": "הרחב הגדרות וכלים",
+    "sidebar.tools_short": "מערכת",
     "videos.used_in_cases": "בשימוש בתרחישים האלה",
     "videos.more_cases": "+{{more}} עוד",
     "videos.jump_to": "החל מ-{{time}}: {{chapter}}",

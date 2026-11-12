@@ -55999,6 +55999,7 @@ const resource = {
     "sidebar.tools_title": "Beállítások és eszközök",
     "sidebar.tools_collapse": "Beállítások és eszközök összecsukása",
     "sidebar.tools_expand": "Beállítások és eszközök kibontása",
+    "sidebar.tools_short": "Rendszer",
     "videos.used_in_cases": "Felhasználva ezekben az esettanulmányokban",
     "videos.more_cases": "+{{more}} további",
     "videos.jump_to": "Innen: {{time}}: {{chapter}}",

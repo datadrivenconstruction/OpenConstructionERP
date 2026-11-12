@@ -55662,6 +55662,7 @@ const resource = {
     "sidebar.tools_title": "设置与工具",
     "sidebar.tools_collapse": "收起设置与工具",
     "sidebar.tools_expand": "展开设置与工具",
+    "sidebar.tools_short": "系统",
     "videos.used_in_cases": "已用于以下案例",
     "videos.more_cases": "+{{more}}个",
     "videos.jump_to": "从{{time}}:{{chapter}}",

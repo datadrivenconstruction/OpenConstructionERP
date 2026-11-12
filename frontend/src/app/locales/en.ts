@@ -47440,6 +47440,7 @@ const resource = {
     "sidebar.tools_title": "Settings & tools",
     "sidebar.tools_collapse": "Collapse settings & tools",
     "sidebar.tools_expand": "Expand settings & tools",
+    "sidebar.tools_short": "System",
     "videos.used_in_cases": "Used in these cases",
     "videos.more_cases": "+{{more}} more",
     "videos.jump_to": "From {{time}}: {{chapter}}",

@@ -56303,6 +56303,7 @@ const resource = {
     "sidebar.tools_title": "Configurações e ferramentas",
     "sidebar.tools_collapse": "Recolher configurações e ferramentas",
     "sidebar.tools_expand": "Expandir configurações e ferramentas",
+    "sidebar.tools_short": "Sistema",
     "videos.used_in_cases": "Usado nestes casos",
     "videos.more_cases": "+{{more}} mais",
     "videos.jump_to": "A partir de {{time}}: {{chapter}}",

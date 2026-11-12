@@ -55883,6 +55883,7 @@ const resource = {
     "sidebar.tools_title": "Einstellungen und Werkzeuge",
     "sidebar.tools_collapse": "Einstellungen und Werkzeuge einklappen",
     "sidebar.tools_expand": "Einstellungen und Werkzeuge ausklappen",
+    "sidebar.tools_short": "System",
     "videos.used_in_cases": "Verwendet in diesen Fallbeispielen",
     "videos.more_cases": "+{{more}} weitere",
     "videos.jump_to": "Ab {{time}}: {{chapter}}",

@@ -53438,6 +53438,7 @@ const resource = {
     "sidebar.tools_title": "Asetukset ja työkalut",
     "sidebar.tools_collapse": "Tiivistä asetukset ja työkalut",
     "sidebar.tools_expand": "Laajenna asetukset ja työkalut",
+    "sidebar.tools_short": "Järjestelmä",
     "videos.used_in_cases": "Käytetty näissä tapauksissa",
     "videos.more_cases": "+{{more}} lisää",
     "videos.jump_to": "Alkaen {{time}}: {{chapter}}",

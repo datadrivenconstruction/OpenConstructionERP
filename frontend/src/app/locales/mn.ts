@@ -53114,6 +53114,7 @@ const resource = {
     "sidebar.tools_title": "Тохиргоо ба хэрэгслүүд",
     "sidebar.tools_collapse": "Тохиргоо, хэрэгслүүдийг хураах",
     "sidebar.tools_expand": "Тохиргоо, хэрэгслүүдийг дэлгэх",
+    "sidebar.tools_short": "Систем",
     "videos.used_in_cases": "Эдгээр тохиолдолд ашигласан",
     "videos.more_cases": "+{{more}} өөр",
     "videos.jump_to": "{{time}}-с эхлэн: {{chapter}}",

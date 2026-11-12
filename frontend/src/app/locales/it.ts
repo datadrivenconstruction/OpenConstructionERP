@@ -54611,6 +54611,7 @@ const resource = {
     "sidebar.tools_title": "Impostazioni e strumenti",
     "sidebar.tools_collapse": "Comprimi impostazioni e strumenti",
     "sidebar.tools_expand": "Espandi impostazioni e strumenti",
+    "sidebar.tools_short": "Sistema",
     "videos.used_in_cases": "Usato in questi casi",
     "videos.more_cases": "+{{more}} altri",
     "videos.jump_to": "Da {{time}}: {{chapter}}",

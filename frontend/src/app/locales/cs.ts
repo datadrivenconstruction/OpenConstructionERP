@@ -54636,6 +54636,7 @@ const resource = {
     "sidebar.tools_title": "Nastavení a nástroje",
     "sidebar.tools_collapse": "Sbalit nastavení a nástroje",
     "sidebar.tools_expand": "Rozbalit nastavení a nástroje",
+    "sidebar.tools_short": "Systém",
     "videos.used_in_cases": "Použito v těchto případech",
     "videos.more_cases": "+{{more}} další",
     "videos.jump_to": "Od {{time}}: {{chapter}}",

@@ -55444,6 +55444,7 @@ const resource = {
     "sidebar.tools_title": "Налаштування та інструменти",
     "sidebar.tools_collapse": "Згорнути налаштування та інструменти",
     "sidebar.tools_expand": "Розгорнути налаштування та інструменти",
+    "sidebar.tools_short": "Система",
     "videos.used_in_cases": "Використовується в цих кейсах",
     "videos.more_cases": "+ще {{more}}",
     "videos.jump_to": "З {{time}}: {{chapter}}",

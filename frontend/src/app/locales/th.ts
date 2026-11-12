@@ -53193,6 +53193,7 @@ const resource = {
     "sidebar.tools_title": "การตั้งค่าและเครื่องมือ",
     "sidebar.tools_collapse": "พับการตั้งค่าและเครื่องมือ",
     "sidebar.tools_expand": "ขยายการตั้งค่าและเครื่องมือ",
+    "sidebar.tools_short": "ระบบ",
     "videos.used_in_cases": "ใช้ในเคสเหล่านี้",
     "videos.more_cases": "+อีก {{more}}",
     "videos.jump_to": "จาก {{time}}: {{chapter}}",

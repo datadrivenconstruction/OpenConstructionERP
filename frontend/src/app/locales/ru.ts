@@ -56379,6 +56379,7 @@ const resource = {
     "sidebar.tools_title": "Настройки и инструменты",
     "sidebar.tools_collapse": "Свернуть настройки и инструменты",
     "sidebar.tools_expand": "Развернуть настройки и инструменты",
+    "sidebar.tools_short": "Система",
     "videos.used_in_cases": "Используется в этих кейсах",
     "videos.more_cases": "+ещё {{more}}",
     "videos.jump_to": "С {{time}}: {{chapter}}",

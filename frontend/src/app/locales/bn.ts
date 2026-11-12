@@ -53706,6 +53706,7 @@ const resource = {
     "sidebar.tools_title": "সেটিংস ও সরঞ্জাম",
     "sidebar.tools_collapse": "সেটিংস ও সরঞ্জাম গুটিয়ে ফেলুন",
     "sidebar.tools_expand": "সেটিংস ও সরঞ্জাম বড় করুন",
+    "sidebar.tools_short": "সিস্টেম",
     "videos.used_in_cases": "এই কেসগুলোতে ব্যবহৃত",
     "videos.more_cases": "+{{more}} আরও",
     "videos.jump_to": "{{time}} থেকে: {{chapter}}",

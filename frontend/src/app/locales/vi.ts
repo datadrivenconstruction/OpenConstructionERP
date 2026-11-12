@@ -53201,6 +53201,7 @@ const resource = {
     "sidebar.tools_title": "Cài đặt và công cụ",
     "sidebar.tools_collapse": "Thu gọn cài đặt và công cụ",
     "sidebar.tools_expand": "Mở rộng cài đặt và công cụ",
+    "sidebar.tools_short": "Hệ thống",
     "videos.used_in_cases": "Được dùng trong các tình huống này",
     "videos.more_cases": "+{{more}} nữa",
     "videos.jump_to": "Từ {{time}}: {{chapter}}",

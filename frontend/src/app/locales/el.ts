@@ -53394,6 +53394,7 @@ const resource = {
     "sidebar.tools_title": "Ρυθμίσεις και εργαλεία",
     "sidebar.tools_collapse": "Σύμπτυξη ρυθμίσεων και εργαλείων",
     "sidebar.tools_expand": "Ανάπτυξη ρυθμίσεων και εργαλείων",
+    "sidebar.tools_short": "Σύστημα",
     "videos.used_in_cases": "Χρησιμοποιείται σε αυτές τις περιπτώσεις",
     "videos.more_cases": "+{{more}} ακόμη",
     "videos.jump_to": "Από {{time}}: {{chapter}}",

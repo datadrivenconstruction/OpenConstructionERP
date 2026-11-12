@@ -5,7 +5,7 @@
  * inside.
  */
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
@@ -44,7 +44,7 @@ export function SidebarToolsCollapse({ iconified, forceOpen = false, children }:
   const [storedOpen, toggle] = useSidebarToolsOpen();
   const open = storedOpen || forceOpen;
   const regionId = useId();
-  const label = t('sidebar.tools_title', { defaultValue: 'Settings & tools' });
+  const label = t('sidebar.tools_short', { defaultValue: 'System' });
   const action = open
     ? t('sidebar.tools_collapse', { defaultValue: 'Collapse settings & tools' })
     : t('sidebar.tools_expand', { defaultValue: 'Expand settings & tools' });
@@ -61,24 +61,32 @@ export function SidebarToolsCollapse({ iconified, forceOpen = false, children }:
         title={action}
         data-testid="sidebar-tools-toggle"
         className={clsx(
-          'group mb-1 flex h-7 items-center rounded-md text-content-tertiary transition-colors duration-fast ease-oe',
+          'group mb-1 flex h-8 items-center rounded-md text-content-tertiary transition-colors duration-fast ease-oe',
           'hover:bg-surface-secondary hover:text-content-primary disabled:opacity-50',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
           iconified ? 'mx-auto w-8 justify-center' : 'w-full justify-between px-2',
         )}
       >
-        {!iconified && (
-          <span className="text-2xs font-medium uppercase tracking-wide">{label}</span>
-        )}
-        <ChevronDown
-          size={14}
-          strokeWidth={2}
+        <SlidersHorizontal
+          size={15}
+          strokeWidth={1.75}
           aria-hidden
-          className={clsx(
-            'shrink-0 transition-transform duration-normal ease-oe motion-reduce:transition-none',
-            !open && '-rotate-90',
-          )}
+          className={clsx('shrink-0', open ? 'text-content-tertiary' : 'text-oe-blue')}
         />
+        {!iconified && (
+          <>
+            <span className="ml-2 flex-1 truncate text-left text-xs font-medium">{label}</span>
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              aria-hidden
+              className={clsx(
+                'shrink-0 transition-transform duration-normal ease-oe motion-reduce:transition-none',
+                !open && '-rotate-90',
+              )}
+            />
+          </>
+        )}
       </button>
       <div
         id={regionId}

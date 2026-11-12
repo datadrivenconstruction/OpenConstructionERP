@@ -53728,6 +53728,7 @@ const resource = {
     "sidebar.tools_title": "Setări și instrumente",
     "sidebar.tools_collapse": "Restrânge setările și instrumentele",
     "sidebar.tools_expand": "Extinde setările și instrumentele",
+    "sidebar.tools_short": "Sistem",
     "videos.used_in_cases": "Folosit în aceste cazuri",
     "videos.more_cases": "+{{more}} în plus",
     "videos.jump_to": "De la {{time}}: {{chapter}}",

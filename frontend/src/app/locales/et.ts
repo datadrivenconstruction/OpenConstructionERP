@@ -53384,6 +53384,7 @@ const resource = {
     "sidebar.tools_title": "Seaded ja tööriistad",
     "sidebar.tools_collapse": "Ahenda seaded ja tööriistad",
     "sidebar.tools_expand": "Laienda seaded ja tööriistad",
+    "sidebar.tools_short": "Süsteem",
     "videos.used_in_cases": "Kasutatud nendes juhtumites",
     "videos.more_cases": "+{{more}} veel",
     "videos.jump_to": "Alates {{time}}: {{chapter}}",
