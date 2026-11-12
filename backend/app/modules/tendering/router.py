@@ -18,6 +18,7 @@ import io
 import logging
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
@@ -30,6 +31,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.letter_templates.schemas import LetterTextIn
 from app.modules.tendering import parties as tender_parties
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
 from app.modules.tendering.models import TenderBidInvitation
@@ -1484,6 +1486,56 @@ async def export_tender_pdf(
     )
 
 
+async def _letter_response(
+    kind: str,
+    package_id: uuid.UUID,
+    bid_id: uuid.UUID,
+    user_id: str,
+    payload: dict,
+    session: Any,
+    service: TenderingService,
+    text: Any = None,
+) -> StreamingResponse:
+    """Build an award letter or rejection notice, optionally from one-off wording."""
+    award = kind == "award"
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(
+        package_id, user_id=user_id, what="award_letter" if award else "rejection_letter"
+    )
+    if text is not None:
+        from app.core.letter_templates import check_text
+        from app.modules.letter_templates.service import require_template
+        from app.modules.tendering.letter_texts import AWARD_KEY, REJECTION_KEY
+
+        template = require_template(AWARD_KEY if award else REJECTION_KEY)
+        errors = [i.__dict__ for i in check_text(template, text) if i.severity == "error"]
+        if errors:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"message": "Letter text has errors", "issues": errors},
+            )
+    build = service.build_award_letter_pdf if award else service.build_rejection_letter_pdf
+    try:
+        pdf_bytes, filename = await build(package_id, bid_id, text)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to generate %s letter for package %s bid %s", kind, package_id, bid_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate award letter" if award else "Failed to generate rejection notice",
+        )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": attachment_disposition(filename),
+            # The letter is written in the project's language, and this names it.
+            "Content-Language": service.last_letter_language,
+        },
+    )
+
+
 @router.get("/packages/{package_id}/bids/{bid_id}/award-letter/pdf/")
 async def export_award_letter_pdf(
     package_id: uuid.UUID,
@@ -1494,33 +1546,26 @@ async def export_award_letter_pdf(
     service: TenderingService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("tendering.distribute")),
 ) -> StreamingResponse:
-    """Download a PDF letter of award for the winning bid.
+    """Download a PDF letter of award, worded by the resolved letter template.
 
-    Reuses the platform PDF stack (reportlab, via tendering/pdf_documents.py)
-    so the award letter matches the look of the BOQ cost estimate. Money is
-    rendered Decimal-correct. Tenant-scoped via project access on the package.
+    Money is rendered Decimal-correct. Tenant-scoped via project access on the package.
     """
-    await _verify_package_owner(service, session, package_id, user_id, payload)
-    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="award_letter")
-    try:
-        pdf_bytes, filename = await service.build_award_letter_pdf(package_id, bid_id)
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Failed to generate award letter for package %s bid %s", package_id, bid_id)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate award letter",
-        )
-    return StreamingResponse(
-        io.BytesIO(pdf_bytes),
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-            # English for the reason given on the award record above.
-            "Content-Language": "en",
-        },
-    )
+    return await _letter_response("award", package_id, bid_id, user_id, payload, session, service)
+
+
+@router.post("/packages/{package_id}/bids/{bid_id}/award-letter/pdf/")
+async def export_award_letter_pdf_with_text(
+    package_id: uuid.UUID,
+    bid_id: uuid.UUID,
+    body: LetterTextIn,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> StreamingResponse:
+    """The award letter with one-off wording for this letter only; the template is unchanged."""
+    return await _letter_response("award", package_id, bid_id, user_id, payload, session, service, body.to_text())
 
 
 @router.get("/packages/{package_id}/bids/{bid_id}/rejection-letter/pdf/")
@@ -1533,36 +1578,27 @@ async def export_rejection_letter_pdf(
     service: TenderingService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("tendering.distribute")),
 ) -> StreamingResponse:
-    """Download a PDF rejection notice for an unsuccessful bid.
+    """Download a PDF rejection notice, worded by the resolved letter template.
 
-    Reuses the platform PDF stack (reportlab). Money is Decimal-correct and the
-    awarded sum is shown for transparency only when it shares the rejected
-    bid's currency. Tenant-scoped via project access on the package.
+    The awarded sum is shown only when the package opted in and it shares the
+    rejected bid's currency. Tenant-scoped via project access on the package.
     """
-    await _verify_package_owner(service, session, package_id, user_id, payload)
-    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="rejection_letter")
-    try:
-        pdf_bytes, filename = await service.build_rejection_letter_pdf(package_id, bid_id)
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Failed to generate rejection notice for package %s bid %s", package_id, bid_id)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate rejection notice",
-        )
-    return StreamingResponse(
-        io.BytesIO(pdf_bytes),
-        media_type="application/pdf",
-        headers={
-            # A rejection is the letter a losing bidder keeps, so being able to
-            # tell that it was written in English rather than in the language
-            # they asked for matters more here than anywhere else on this
-            # router.
-            "Content-Disposition": attachment_disposition(filename),
-            "Content-Language": "en",
-        },
-    )
+    return await _letter_response("rejection", package_id, bid_id, user_id, payload, session, service)
+
+
+@router.post("/packages/{package_id}/bids/{bid_id}/rejection-letter/pdf/")
+async def export_rejection_letter_pdf_with_text(
+    package_id: uuid.UUID,
+    bid_id: uuid.UUID,
+    body: LetterTextIn,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> StreamingResponse:
+    """The rejection notice with one-off wording for this letter only."""
+    return await _letter_response("rejection", package_id, bid_id, user_id, payload, session, service, body.to_text())
 
 
 # ── Project Intelligence (RFC 25) ───────────────────────────────────────────

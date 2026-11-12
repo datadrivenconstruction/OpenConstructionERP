@@ -16,9 +16,13 @@ adds the markup around them, so a translation never carries HTML.
 from __future__ import annotations
 
 import html
+from typing import TYPE_CHECKING
 
 from app.core.document_catalogue import is_rtl, merge_missing
 from app.core.document_locale import normalize_document_locale, translate
+
+if TYPE_CHECKING:
+    from app.core.letter_templates import LetterText
 
 DEFAULT_LOCALE = "en"
 
@@ -208,9 +212,25 @@ def _t(locale: str, key: str, **params: str) -> str:
     return translate(_TABLES, email_locale(locale), key, DEFAULT_LOCALE, **params)
 
 
-def invitation_subject(locale: str, package_name: str) -> str:
+def _template_text(locale: str, text: LetterText | None) -> LetterText:
+    from app.core.letter_templates import default_text
+    from app.modules.tendering.letter_texts import INVITATION_KEY, tendering_template
+
+    return text or default_text(tendering_template(INVITATION_KEY), email_locale(locale))
+
+
+def invitation_subject(
+    locale: str,
+    package_name: str,
+    *,
+    text: LetterText | None = None,
+    values: dict[str, str] | None = None,
+) -> str:
     """The email subject line (plain text, no escaping)."""
-    return _t(locale, "subject", package=package_name)
+    from app.core.letter_templates import render
+
+    merged = {"package": package_name, **(values or {})}
+    return render(_template_text(locale, text).subject, merged) or package_name
 
 
 def invitation_html(
@@ -223,52 +243,65 @@ def invitation_html(
     deadline: str,
     custom_message: str | None,
     action_url: str,
+    text: LetterText | None = None,
+    sender_company: str = "",
 ) -> str:
-    """Render the invitation body through the shared email shell."""
+    """Render the invitation body through the shared email shell.
+
+    The wording is the resolved ``tendering.invitation_email`` template (or
+    its default in *locale*); the description, personal message and link
+    button are fixed blocks around it.
+    """
     from app.core.email import wrap
+    from app.core.letter_templates import render, split_paragraphs
 
     lang = email_locale(locale)
     rtl = is_rtl(lang)
+    letter = _template_text(locale, text)
+    values = {
+        "bidder": company_name,
+        "package": package_name,
+        "project": project_name,
+        "deadline": deadline,
+        "company": sender_company,
+    }
+    emphasised = ("package", "project", "deadline")
 
-    def strong(value: str) -> str:
-        return f"<strong>{html.escape(value)}</strong>"
+    # Render with markers, escape, then splice the escaped values back, so
+    # neither the template nor a package name can inject markup.
+    def html_text(source: str) -> list[str]:
+        marked = {k: (f"\x00{k}\x00" if (v or "").strip() and k in emphasised else v) for k, v in values.items()}
+        out = []
+        for para in split_paragraphs(render(source, marked)):
+            chunk = html.escape(para).replace("\n", "<br/>")
+            for name in emphasised:
+                chunk = chunk.replace(f"\x00{name}\x00", f"<strong>{html.escape(values[name])}</strong>")
+            out.append(chunk)
+        return out
 
-    # Escape the template text and splice the already-escaped, marked-up
-    # values in afterwards, so neither a translation nor a package name can
-    # inject markup.
-    def sentence(key: str, **values: str) -> str:
-        marks = {name: f"\x00{name}\x00" for name in values}
-        text = html.escape(_t(locale, key, **marks))
-        for name, value in values.items():
-            text = text.replace(f"\x00{name}\x00", value)
-        return text
-
-    parts: list[str] = []
-    if company_name:
-        parts.append(f"<p>{sentence('greeting', company=html.escape(company_name))}</p>")
-    else:
-        parts.append(f"<p>{sentence('greeting_generic')}</p>")
-    if project_name:
-        parts.append(f"<p>{sentence('invite_project', package=strong(package_name), project=strong(project_name))}</p>")
-    else:
-        parts.append(f"<p>{sentence('invite', package=strong(package_name))}</p>")
+    parts = [f"<p>{para}</p>" for para in html_text(letter.body)]
+    first_line = (letter.body or "").strip().split("\n", 1)[0]
+    if not company_name.strip() and "{bidder}" in first_line:
+        # The addressed greeting dropped out with the missing name; greet generically.
+        parts.insert(0, f"<p>{html.escape(_t(locale, 'greeting_generic'))}</p>")
     if description:
         parts.append(
             "<blockquote style='border-left:3px solid #0071e3; padding-left:12px; "
             f"margin:12px 0; color:#1d1d1f;'>{html.escape(description)}</blockquote>"
         )
-    if deadline:
-        parts.append(f"<p>{sentence('deadline', deadline=strong(deadline))}</p>")
     if custom_message:
         parts.append(
             "<blockquote style='border-left:3px solid #86868b; padding-left:12px; "
             f"margin:12px 0; color:#444;'>{html.escape(custom_message)}</blockquote>"
         )
-    # The shared shell interpolates title, link and label as given.
-    heading = html.escape(_t(locale, "heading"))
     if action_url:
-        parts.append(f"<p>{sentence('link_help')}</p>")
-        parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{sentence('link_personal')}</p>")
+        parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{html.escape(_t(locale, 'link_personal'))}</p>")
+    else:
+        parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{html.escape(_t(locale, 'no_link'))}</p>")
+    parts.extend(f"<p>{para}</p>" for para in html_text(letter.closing))
+    # The shared shell interpolates title, link and label as given.
+    heading = html.escape(render(letter.heading, values) or _t(locale, "heading"))
+    if action_url:
         return wrap(
             heading,
             "".join(parts),
@@ -277,5 +310,4 @@ def invitation_html(
             lang=lang,
             rtl=rtl,
         )
-    parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{sentence('no_link')}</p>")
     return wrap(heading, "".join(parts), lang=lang, rtl=rtl)

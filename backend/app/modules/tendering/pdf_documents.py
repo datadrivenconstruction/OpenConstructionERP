@@ -52,6 +52,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from app.core.letter_templates import LetterText, default_text, render, split_paragraphs, template_language
 from app.core.money import minor_units, money_quantum
 from app.core.pdf_branding import (
     DEFAULT_BRAND,
@@ -116,6 +117,30 @@ def _fmt_money(value: Decimal, currency: str = "") -> str:
     elif code == "CHF":
         raw = raw.replace(",", "'")
     return f"{raw} {code}".strip()
+
+
+_DOT_THOUSANDS = frozenset({"de", "es", "it", "nl", "pt"})
+_SPACE_THOUSANDS = frozenset({"fr", "ru", "pl", "cs"})
+
+
+def _fmt_money_for(value: Decimal, currency: str, locale: str) -> str:
+    """Money in the letter's language: ``1.234,56`` in German, ``1 234,56`` in French.
+
+    English keeps the currency-driven style of :func:`_fmt_money`.
+    """
+    if locale not in _DOT_THOUSANDS and locale not in _SPACE_THOUSANDS:
+        return _fmt_money(value, currency)
+    code = (currency or "").strip().upper()
+    quantized = value.quantize(money_quantum(code), rounding=ROUND_HALF_UP)
+    raw = f"{quantized:,.{minor_units(code)}f}"
+    thousands = "." if locale in _DOT_THOUSANDS else "\u00a0"
+    raw = raw.replace(",", "THOU").replace(".", ",").replace("THOU", thousands)
+    return f"{raw} {code}".strip()
+
+
+def _letter_flow(text: LetterText, values: dict[str, str | None], styles: dict[str, ParagraphStyle]) -> list[Any]:
+    """The editable body as escaped paragraphs."""
+    return [_safe_para(para, styles["body"]) for para in split_paragraphs(render(text.body, values))]
 
 
 def _safe_para(text: Any, style: ParagraphStyle) -> Paragraph:
@@ -316,6 +341,8 @@ def _header_block(
     ref: str,
     *,
     letterhead: Any | None = None,
+    ref_label: str = "Ref:",
+    date_label: str = "Date:",
 ) -> list[Any]:
     """Brand on the left, document label + reference + date on the right.
 
@@ -329,7 +356,8 @@ def _header_block(
     else:
         left = ""
     right = Paragraph(
-        f"<b>{html.escape(doc_label)}</b><br/>Ref: {html.escape(ref)}<br/>Date: {today}",
+        f"<b>{html.escape(doc_label)}</b><br/>{html.escape(ref_label)} {html.escape(ref)}<br/>"
+        f"{html.escape(date_label)} {today}",
         # The package reference is user data and is Chinese on a Chinese job.
         pdf_style_for_text(styles["meta"], ref),
     )
@@ -349,7 +377,9 @@ def _header_block(
 
 
 def _info_table(styles: dict[str, ParagraphStyle], rows: list[tuple[str, str]]) -> Table:
-    data = [[Paragraph(label, styles["label"]), _safe_para(value, styles["value"])] for label, value in rows]
+    data = [
+        [Paragraph(html.escape(label), styles["label"]), _safe_para(value, styles["value"])] for label, value in rows
+    ]
     table = Table(data, colWidths=[42 * mm, USABLE_WIDTH - 42 * mm])
     table.setStyle(
         TableStyle(
@@ -364,7 +394,9 @@ def _info_table(styles: dict[str, ParagraphStyle], rows: list[tuple[str, str]]) 
     return table
 
 
-def _addressee_rows(label: str, company_name: str, contact_email: str) -> list[tuple[str, str]]:
+def _addressee_rows(
+    label: str, company_name: str, contact_email: str, contact_label: str = "Contact:"
+) -> list[tuple[str, str]]:
     """Who the letter is addressed to: the firm, and its contact when there is one.
 
     The bidder's contact address used to be printed under "Yours faithfully"
@@ -375,8 +407,43 @@ def _addressee_rows(label: str, company_name: str, contact_email: str) -> list[t
     """
     rows = [(label, company_name)]
     if contact_email:
-        rows.append(("Contact:", contact_email))
+        rows.append((contact_label, contact_email))
     return rows
+
+
+def _sign_off(
+    flow: list[Any],
+    text: LetterText,
+    values: dict[str, str | None],
+    styles: Any,
+    signer: str,
+    *,
+    lang: str = "en",
+    award: bool = False,
+) -> None:
+    closing = render(text.closing, values)
+    if closing:
+        flow.append(_safe_para(closing, styles["signoff"]))
+    if award:
+        flow.extend(
+            signature_block(
+                signers_for("award_letter", branded_appearance("award_letter"), names={"client": signer}),
+                PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT,
+                locale=lang,
+                heading=False,
+            )
+        )
+        return
+    flow.append(_safe_para(signer, styles["value"]))
+
+
+def _company_name() -> str:
+    from app.core.company_profile import read_company_profile
+
+    try:
+        return read_company_profile().get("legal_name", "") or ""
+    except Exception:  # noqa: BLE001 - a letter never fails on a missing profile
+        return ""
 
 
 def generate_award_letter_pdf(
@@ -391,32 +458,63 @@ def generate_award_letter_pdf(
     awarded_at: str | None = None,
     awarded_by_name: str | None = None,
     notes: str | None = None,
+    text: LetterText | None = None,
+    locale: str = "en",
 ) -> bytes:
     """Render a letter of award for the winning bid.
 
-    All money arrives as Decimal-as-string and is formatted at the
-    presentation boundary only.
+    The wording comes from *text* (the resolved ``tendering.award_letter``
+    template) or the shipped default for *locale*. All money arrives as
+    Decimal-as-string and is formatted at the presentation boundary only.
     """
+    from app.modules.tendering.letter_texts import AWARD_KEY, label, tendering_template
+
+    template = tendering_template(AWARD_KEY)
+    lang = template_language(template, locale)
+    text = text or default_text(template, lang)
+    amount = _fmt_money_for(_to_decimal(awarded_amount), currency, lang)
+    signer = awarded_by_name or project_name or ""
+    values: dict[str, str | None] = {
+        "bidder": company_name,
+        "project": project_name,
+        "package": package_name,
+        "amount": amount,
+        "award_date": _fmt_date(awarded_at),
+        "sender": signer,
+        "company": _company_name(),
+    }
+
     buffer = io.BytesIO()
     styles = _build_styles()
     letterhead = _letterhead()
-    doc = _document(buffer, f"Letter of Award - {package_name}", letterhead_on_first_page=letterhead is not None)
+    title = render(text.subject, values) or package_name
+    doc = _document(buffer, title, letterhead_on_first_page=letterhead is not None)
 
-    amount_dec = _to_decimal(awarded_amount)
     flow: list[Any] = []
     if letterhead is not None:
         flow.append(letterhead)
-    flow.extend(_header_block(styles, "LETTER OF AWARD", package_ref, letterhead=letterhead))
-    flow.append(Paragraph("Notification of Contract Award", styles["doc_title"]))
+    flow.extend(
+        _header_block(
+            styles,
+            label(lang, "award_label"),
+            package_ref,
+            letterhead=letterhead,
+            ref_label=label(lang, "ref"),
+            date_label=label(lang, "date"),
+        )
+    )
+    heading = render(text.heading, values)
+    if heading:
+        flow.append(_safe_para(heading, styles["doc_title"]))
 
     flow.append(
         _info_table(
             styles,
-            _addressee_rows("Awarded to:", company_name, contact_email)
+            _addressee_rows(label(lang, "awarded_to"), company_name, contact_email, label(lang, "contact"))
             + [
-                ("Project:", project_name or "-"),
-                ("Tender package:", package_name),
-                ("Award date:", _fmt_date(awarded_at)),
+                (label(lang, "project"), project_name or "-"),
+                (label(lang, "package"), package_name),
+                (label(lang, "award_date"), values["award_date"] or ""),
             ],
         )
     )
@@ -426,8 +524,8 @@ def generate_award_letter_pdf(
     amount_tbl = Table(
         [
             [
-                Paragraph("Awarded contract sum", styles["label"]),
-                Paragraph(_fmt_money(amount_dec, currency), styles["value_right"]),
+                Paragraph(html.escape(label(lang, "contract_sum")), styles["label"]),
+                Paragraph(html.escape(amount), styles["value_right"]),
             ]
         ],
         colWidths=[USABLE_WIDTH * 0.6, USABLE_WIDTH * 0.4],
@@ -449,40 +547,14 @@ def generate_award_letter_pdf(
     flow.append(amount_tbl)
     flow.append(Spacer(1, 6 * mm))
 
-    greeting = f"Dear {company_name}," if company_name else "Dear Sir or Madam,"
-    flow.append(_safe_para(greeting, styles["body"]))
-    flow.append(
-        Paragraph(
-            "We are pleased to inform you that, following evaluation of the bids received for the "
-            "tender package above, your offer has been selected as the successful bid. The award is "
-            "made for the contract sum stated above, subject to the terms of the tender documents and "
-            "any agreed clarifications.",
-            styles["body"],
-        )
-    )
-    flow.append(
-        Paragraph(
-            "Please treat this letter as formal notification of our intention to enter into a contract "
-            "with you. Our team will be in touch to formalise the contract documentation and confirm "
-            "the programme.",
-            styles["body"],
-        )
-    )
+    flow.extend(_letter_flow(text, values, styles))
 
     if notes:
         flow.append(Spacer(1, 2 * mm))
-        flow.append(Paragraph("<b>Notes</b>", styles["body"]))
+        flow.append(Paragraph(f"<b>{html.escape(label(lang, 'notes'))}</b>", styles["body"]))
         flow.append(_safe_para(notes, styles["note"]))
 
-    flow.append(Paragraph("Yours faithfully,", styles["signoff"]))
-    signer = awarded_by_name or project_name or "The Project Team"
-    flow.extend(
-        signature_block(
-            signers_for("award_letter", branded_appearance("award_letter"), names={"client": signer}),
-            PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT,
-            heading=False,
-        )
-    )
+    _sign_off(flow, text, values, styles, signer, lang=lang, award=True)
 
     build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()
@@ -503,71 +575,83 @@ def generate_rejection_letter_pdf(
     rejected_at: str | None = None,
     signed_by_name: str | None = None,
     reason: str | None = None,
+    text: LetterText | None = None,
+    locale: str = "en",
 ) -> bytes:
     """Render a rejection notice for an unsuccessful bidder.
 
-    Optionally states the bidder's own submitted amount and the awarded sum
-    (both Decimal-as-string) for transparency; both are formatted at the
-    presentation boundary only.
+    The wording comes from *text* (the resolved ``tendering.rejection_letter``
+    template) or the shipped default for *locale*. Optionally states the
+    bidder's own amount and the awarded sum (both Decimal-as-string).
     """
+    from app.modules.tendering.letter_texts import REJECTION_KEY, label, tendering_template
+
+    template = tendering_template(REJECTION_KEY)
+    lang = template_language(template, locale)
+    text = text or default_text(template, lang)
+    signer = signed_by_name or project_name or ""
+    values: dict[str, str | None] = {
+        "bidder": company_name,
+        "project": project_name,
+        "package": package_name,
+        "date": _fmt_date(rejected_at),
+        "sender": signer,
+        "company": _company_name(),
+    }
+
     buffer = io.BytesIO()
     styles = _build_styles()
     letterhead = _letterhead()
-    doc = _document(buffer, f"Notice of Outcome - {package_name}", letterhead_on_first_page=letterhead is not None)
+    title = render(text.subject, values) or package_name
+    doc = _document(buffer, title, letterhead_on_first_page=letterhead is not None)
 
     flow: list[Any] = []
     if letterhead is not None:
         flow.append(letterhead)
-    flow.extend(_header_block(styles, "NOTICE OF TENDER OUTCOME", package_ref, letterhead=letterhead))
-    flow.append(Paragraph("Notification of Unsuccessful Bid", styles["doc_title"]))
+    flow.extend(
+        _header_block(
+            styles,
+            label(lang, "rejection_label"),
+            package_ref,
+            letterhead=letterhead,
+            ref_label=label(lang, "ref"),
+            date_label=label(lang, "date"),
+        )
+    )
+    heading = render(text.heading, values)
+    if heading:
+        flow.append(_safe_para(heading, styles["doc_title"]))
 
     info_rows = [
-        *_addressee_rows("Bidder:", company_name, contact_email),
-        ("Project:", project_name or "-"),
-        ("Tender package:", package_name),
-        ("Date:", _fmt_date(rejected_at)),
+        *_addressee_rows(label(lang, "bidder"), company_name, contact_email, label(lang, "contact")),
+        (label(lang, "project"), project_name or "-"),
+        (label(lang, "package"), package_name),
+        (label(lang, "date"), values["date"] or ""),
     ]
     flow.append(_info_table(styles, info_rows))
     flow.append(Spacer(1, 5 * mm))
 
-    greeting = f"Dear {company_name}," if company_name else "Dear Sir or Madam,"
-    flow.append(_safe_para(greeting, styles["body"]))
-    flow.append(
-        Paragraph(
-            "Thank you for the time and effort you invested in preparing your bid for the tender "
-            "package above. Following a careful evaluation of all submissions, we regret to inform you "
-            "that your bid has not been selected on this occasion.",
-            styles["body"],
-        )
-    )
+    paragraphs = _letter_flow(text, values, styles)
+    # Amounts and reason sit before the last paragraph (the outlook and offer to talk).
+    head, tail = (paragraphs[:-1], paragraphs[-1:]) if len(paragraphs) > 2 else (paragraphs, [])
+    flow.extend(head)
 
-    # Optional transparency block: bidder's amount and the awarded sum.
     detail_rows: list[tuple[str, str]] = []
     if bid_amount is not None and bid_amount != "":
-        detail_rows.append(("Your submitted bid:", _fmt_money(_to_decimal(bid_amount), currency)))
+        detail_rows.append((label(lang, "your_bid"), _fmt_money_for(_to_decimal(bid_amount), currency, lang)))
     if winning_amount is not None and winning_amount != "":
-        detail_rows.append(("Awarded contract sum:", _fmt_money(_to_decimal(winning_amount), currency)))
+        detail_rows.append((label(lang, "awarded_sum"), _fmt_money_for(_to_decimal(winning_amount), currency, lang)))
     if detail_rows:
         flow.append(_info_table(styles, detail_rows))
         flow.append(Spacer(1, 4 * mm))
 
     if reason:
-        flow.append(Paragraph("<b>Reason</b>", styles["body"]))
+        flow.append(Paragraph(f"<b>{html.escape(label(lang, 'reason'))}</b>", styles["body"]))
         flow.append(_safe_para(reason, styles["note"]))
         flow.append(Spacer(1, 2 * mm))
 
-    flow.append(
-        Paragraph(
-            "We value your interest in working with us and would welcome your participation in future "
-            "tender opportunities. Should you wish to discuss the outcome, please do not hesitate to "
-            "contact us.",
-            styles["body"],
-        )
-    )
-
-    flow.append(Paragraph("Yours faithfully,", styles["signoff"]))
-    signer = signed_by_name or project_name or "The Project Team"
-    flow.append(_safe_para(signer, styles["value"]))
+    flow.extend(tail)
+    _sign_off(flow, text, values, styles, signer, lang=lang)
 
     build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()

@@ -277,6 +277,9 @@ logger = logging.getLogger(__name__)
 class TenderingService:
     """Business logic for tendering operations."""
 
+    #: Language of the last letter built, for the ``Content-Language`` header.
+    last_letter_language: str = "en"
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = TenderingRepository(session)
@@ -1521,6 +1524,15 @@ class TenderingService:
         project = await ProjectRepository(self.session).get_by_id(package.project_id)
         project_name = (getattr(project, "name", "") or "") if project is not None else ""
         locale = email_locale(getattr(project, "locale", None) if project is not None else None)
+        from app.core.company_profile import read_company_profile
+        from app.modules.letter_templates.service import resolve as resolve_letter
+        from app.modules.tendering.letter_texts import INVITATION_KEY
+
+        invitation_text = (await resolve_letter(self.session, INVITATION_KEY, locale, package.project_id)).text
+        try:
+            sender_company = read_company_profile().get("legal_name", "") or ""
+        except Exception:  # noqa: BLE001 - an email never fails on a missing profile
+            sender_company = ""
 
         results: list[DistributeResultEntry] = []
         sent_count = 0
@@ -1586,7 +1598,17 @@ class TenderingService:
             # link stays valid until this email is known to have gone out, so
             # a failed send never leaves the firm with no working link.
             invitation, token = await portal.mint(package, r, actor_id=actor_id)
-            subject = invitation_subject(locale, package.name)
+            subject = invitation_subject(
+                locale,
+                package.name,
+                text=invitation_text,
+                values={
+                    "bidder": str(r.get("company_name", "") or "").strip(),
+                    "project": project_name,
+                    "deadline": package.deadline or "",
+                    "company": sender_company,
+                },
+            )
             html_body = self._build_distribution_html(
                 company_name=str(r.get("company_name", "") or "").strip(),
                 package=package,
@@ -1594,6 +1616,8 @@ class TenderingService:
                 action_url=bid_link_url(token),
                 custom_message=data.message,
                 locale=locale,
+                text=invitation_text,
+                sender_company=sender_company,
             )
 
             try:
@@ -1707,6 +1731,8 @@ class TenderingService:
         action_url: str,
         custom_message: str | None,
         locale: str = "en",
+        text: Any = None,
+        sender_company: str = "",
     ) -> str:
         """Render the invitation-to-tender email body in ``locale``.
 
@@ -1724,11 +1750,38 @@ class TenderingService:
             deadline=package.deadline or "",
             custom_message=custom_message,
             action_url=action_url,
+            text=text,
+            sender_company=sender_company,
         )
 
     # ── Decision documents (award / rejection PDFs) ─────────────────────────
 
-    async def build_award_letter_pdf(self, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[bytes, str]:
+    async def _letter_text(self, package: Any, key: str, override: Any = None) -> Any:
+        """The wording for one letter: the one-off *override*, else the resolved template.
+
+        Resolution is project, company, default in the project's language
+        (:mod:`app.modules.letter_templates.service`). The language used is
+        kept on ``self.last_letter_language`` for the response header.
+        """
+        from app.core.letter_templates import default_text, template_language
+        from app.modules.letter_templates.service import project_language, require_template, resolve
+
+        template = require_template(key)
+        session = getattr(self, "session", None)
+        project_id = getattr(package, "project_id", None)
+        if session is None:
+            self.last_letter_language = template_language(template, None)
+            return override or default_text(template, self.last_letter_language)
+        if override is not None:
+            self.last_letter_language = template_language(template, await project_language(session, project_id))
+            return override
+        resolved = await resolve(session, key, None, project_id)
+        self.last_letter_language = resolved.language
+        return resolved.text
+
+    async def build_award_letter_pdf(
+        self, package_id: uuid.UUID, bid_id: uuid.UUID, text: Any = None
+    ) -> tuple[bytes, str]:
         """Generate a PDF letter of award for a winning bid.
 
         Returns ``(pdf_bytes, filename)``. Tenant scoping is enforced at the
@@ -1751,6 +1804,9 @@ class TenderingService:
 
         project_name, _currency = await self._project_name_and_currency(package)
         meta = package.metadata_ or {}
+        from app.modules.tendering.letter_texts import AWARD_KEY
+
+        letter = await self._letter_text(package, AWARD_KEY, text)
         # The arguments are plain values read above. Laying out the PDF is pure CPU,
         # so it runs in a worker thread and the event loop keeps serving requests.
         pdf = await asyncio.to_thread(
@@ -1765,11 +1821,15 @@ class TenderingService:
             awarded_at=meta.get("awarded_at"),
             awarded_by_name=meta.get("awarded_by_name"),
             notes=bid.notes or None,
+            text=letter,
+            locale=self.last_letter_language,
         )
         filename = f"award_letter_{self._slug(package.name)}_{self._slug(bid.company_name)}.pdf"
         return pdf, filename
 
-    async def build_rejection_letter_pdf(self, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[bytes, str]:
+    async def build_rejection_letter_pdf(
+        self, package_id: uuid.UUID, bid_id: uuid.UUID, text: Any = None
+    ) -> tuple[bytes, str]:
         """Generate a PDF rejection notice for an unsuccessful bid.
 
         Returns ``(pdf_bytes, filename)``. The notice does not disclose the
@@ -1811,6 +1871,9 @@ class TenderingService:
             ):
                 winning_amount = winner.total_amount or None
 
+        from app.modules.tendering.letter_texts import REJECTION_KEY
+
+        letter = await self._letter_text(package, REJECTION_KEY, text)
         # The arguments are plain values read above. Laying out the PDF is pure CPU,
         # so it runs in a worker thread and the event loop keeps serving requests.
         pdf = await asyncio.to_thread(
@@ -1826,6 +1889,8 @@ class TenderingService:
             rejected_at=meta.get("awarded_at"),
             signed_by_name=meta.get("awarded_by_name"),
             reason=(bid.notes or None),
+            text=letter,
+            locale=self.last_letter_language,
         )
         filename = f"rejection_notice_{self._slug(package.name)}_{self._slug(bid.company_name)}.pdf"
         return pdf, filename

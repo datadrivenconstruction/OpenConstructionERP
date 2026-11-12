@@ -96,6 +96,7 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/stakeholders/router.py": {"export_organisation", "export_register"},
     "modules/subcontractors/router.py": {"export_payment_hakedis_pdf"},
     "modules/tendering/router.py": {
+        "_letter_response",
         "export_award_letter_pdf",
         "export_award_record_pdf",
         "export_rejection_letter_pdf",
@@ -111,6 +112,8 @@ RENDERING_ROUTES: dict[str, set[str]] = {
 # Routes whose headers come from a builder in the same file; the builder is read with the route.
 HEADERS_BUILT_BY: dict[str, str] = {
     "modules/boq/router.py::export_boq_excel": "_build_excel_export",
+    "modules/tendering/router.py::export_award_letter_pdf": "_letter_response",
+    "modules/tendering/router.py::export_rejection_letter_pdf": "_letter_response",
 }
 
 SERVES_STORED_ROUTES: dict[str, set[str]] = {
