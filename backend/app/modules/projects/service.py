@@ -638,6 +638,9 @@ class ProjectService:
         # this the project had no country_code and its VAT, markups and calendar
         # fell to the neutral stack (0 % VAT). Coarse tags such as "DACH" or
         # "Middle East" resolve to nothing and leave the country unset.
+        # The compliance pack keeps its own order (named country, then region) so
+        # its recorded source still says a region decided it.
+        _named_country = country_code
         if not country_code:
             _region_country = country_from_region(data.region)
             if _region_country:
@@ -669,12 +672,14 @@ class ProjectService:
         if requested_packs and requested_packs != [DEFAULT_PACK_ID]:
             pack_meta["compliance_pack_source"] = "explicit"
         else:
-            requested_packs = [resolve_pack(country_code, data.region)]
-            pack_meta["compliance_pack_source"] = _compliance_pack_source(country_code, data.region, requested_packs[0])
+            requested_packs = [resolve_pack(_named_country, data.region)]
+            pack_meta["compliance_pack_source"] = _compliance_pack_source(
+                _named_country, data.region, requested_packs[0]
+            )
             if pack_meta["compliance_pack_source"] == "country_without_pack":
                 logger.info(
                     "Project create: country %s registers no compliance pack, falling back to %s",
-                    country_code,
+                    _named_country,
                     requested_packs[0],
                 )
 

@@ -264,12 +264,17 @@ async def test_a_region_alone_still_decides_when_no_country_is_known(
     owner_id: uuid.UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The region label keeps working as the last resort it always was."""
+    """The region label keeps working as the last resort it always was.
+
+    A region that names one country also fills the country column, so VAT and
+    calendar defaults follow it; the pack source still records the region.
+    """
     _activate(monkeypatch, None)
     project = await _service(session).create_project(_wizard_payload(region="Hungary"), owner_id)
     await session.flush()
 
-    assert project.country_code is None
+    assert project.country_code == "HU"
+    assert project.metadata_.get("country_from_region") == "HU"
     assert project.compliance_rule_packs == ["hu_compliance"]
     assert project.metadata_.get("compliance_pack_source") == "region"
 
