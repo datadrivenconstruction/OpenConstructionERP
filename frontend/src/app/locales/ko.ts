@@ -14316,6 +14316,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ 교환",
     "nav.de_din": "DE DIN 276 교환",
     "nav.docs": "문서",
+    "nav.academy": "아카데미",
     "nav.es_pbc_exchange": "ES PBC 교환",
     "nav.fr_dpgf_exchange": "FR DPGF 교환",
     "nav.in_boq_exchange": "IN BOQ 교환",

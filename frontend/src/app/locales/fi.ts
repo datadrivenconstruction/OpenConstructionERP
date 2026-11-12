@@ -14252,6 +14252,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ-määräluettelon vaihto",
     "nav.de_din": "DE DIN 276 -vaihto",
     "nav.docs": "Dokumentaatio",
+    "nav.academy": "Akatemia",
     "nav.es_pbc_exchange": "ES PBC -vaihto",
     "nav.fr_dpgf_exchange": "FR DPGF -vaihto",
     "nav.in_boq_exchange": "IN-määräluettelon vaihto",

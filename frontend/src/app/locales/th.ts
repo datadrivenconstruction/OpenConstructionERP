@@ -11785,6 +11785,7 @@ const resource = {
     "nav.cz_boq_exchange": "การแลกเปลี่ยน CZ BOQ",
     "nav.de_din": "การแลกเปลี่ยน DE DIN 276",
     "nav.docs": "เอกสารประกอบ",
+    "nav.academy": "อะคาเดมี",
     "nav.es_pbc_exchange": "การแลกเปลี่ยน ES PBC",
     "nav.fr_dpgf_exchange": "การแลกเปลี่ยน FR DPGF",
     "nav.gaeb_exchange": "GAEB Exchange",

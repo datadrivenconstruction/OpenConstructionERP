@@ -14207,6 +14207,7 @@ const resource = {
     "nav.group_analytics_desc": "דוחות חוצי-מודולים, לוחות BI, ותחזיות מחסן נתונים",
     "nav.de_din": "חילופי DE DIN 276",
     "nav.docs": "תיעוד",
+    "nav.academy": "אקדמיה",
     "nav.documents": "מסמכים",
     "nav.dwg_takeoff": "כימות DWG",
     "nav.erp_chat": "צ'אט בינה מלאכותית",

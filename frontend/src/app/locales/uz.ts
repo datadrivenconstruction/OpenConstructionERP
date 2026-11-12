@@ -15605,6 +15605,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ almashinuvi",
     "nav.de_din": "DE DIN 276 almashinuvi",
     "nav.docs": "Hujjatlar",
+    "nav.academy": "Akademiya",
     "nav.es_pbc_exchange": "ES PBC almashinuvi",
     "nav.fr_dpgf_exchange": "FR DPGF almashinuvi",
     "nav.in_boq_exchange": "IN BOQ almashinuvi",

@@ -15114,6 +15114,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ Değişimi",
     "nav.de_din": "DE DIN 276 Değişimi",
     "nav.docs": "Dokümantasyon",
+    "nav.academy": "Akademi",
     "nav.es_pbc_exchange": "ES PBC Değişimi",
     "nav.fr_dpgf_exchange": "FR DPGF Değişimi",
     "nav.in_boq_exchange": "IN BOQ Değişimi",

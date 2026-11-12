@@ -3008,6 +3008,14 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
   [dir='rtl'] .oe-select {
     background-position: left 8px center;
   }
+  /* Small selects (sidebar mode switch): keep the chevron clear of the border. */
+  .oe-select.oe-input-sm {
+    padding-inline-end: 30px;
+    background-position: right 11px center;
+  }
+  [dir='rtl'] .oe-select.oe-input-sm {
+    background-position: left 11px center;
+  }
   .oe-input::placeholder,
   .oe-textarea::placeholder {
     color: var(--oe-text-quaternary);

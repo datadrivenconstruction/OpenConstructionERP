@@ -11691,6 +11691,7 @@ const resource = {
     "nav.cz_boq_exchange": "Pertukaran BOQ CZ",
     "nav.de_din": "Pertukaran DE DIN 276",
     "nav.docs": "Dokumentasi",
+    "nav.academy": "Akademi",
     "nav.es_pbc_exchange": "Pertukaran ES PBC",
     "nav.fr_dpgf_exchange": "Pertukaran FR DPGF",
     "nav.gaeb_exchange": "Pertukaran GAEB",

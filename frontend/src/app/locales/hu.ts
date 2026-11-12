@@ -13675,6 +13675,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ költségvetés-csere",
     "nav.de_din": "DE DIN 276 csere",
     "nav.docs": "Dokumentáció",
+    "nav.academy": "Akadémia",
     "nav.es_pbc_exchange": "ES PBC csere",
     "nav.fr_dpgf_exchange": "FR DPGF csere",
     "nav.in_boq_exchange": "IN költségvetés-csere",

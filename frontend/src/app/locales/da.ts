@@ -13707,6 +13707,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ-udveksling",
     "nav.de_din": "DE DIN 276-udveksling",
     "nav.docs": "Dokumentation",
+    "nav.academy": "Akademi",
     "nav.es_pbc_exchange": "ES PBC-udveksling",
     "nav.fr_dpgf_exchange": "FR DPGF-udveksling",
     "nav.gaeb_exchange": "GAEB-udveksling",

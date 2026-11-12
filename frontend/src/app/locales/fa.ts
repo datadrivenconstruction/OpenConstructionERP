@@ -14102,6 +14102,7 @@ const resource = {
     "nav.group_analytics_desc": "گزارش‌های بین‌ماژولی، داشبوردهای BI و فرافکنی‌های انبار داده",
     "nav.de_din": "DE تبادل DIN 276",
     "nav.docs": "مستندات",
+    "nav.academy": "آکادمی",
     "nav.documents": "اسناد",
     "nav.dwg_takeoff": "متره DWG",
     "nav.erp_chat": "گفتگوی هوش مصنوعی",

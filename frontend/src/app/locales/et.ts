@@ -14787,6 +14787,7 @@ const resource = {
     "nav.group_analytics_desc": "Moodulteülesed aruanded, BI-paneelid ja andmelao vaated",
     "nav.de_din": "DE DIN 276 vahetus",
     "nav.docs": "Dokumentatsioon",
+    "nav.academy": "Akadeemia",
     "nav.documents": "Dokumendid",
     "nav.dwg_takeoff": "DWG mõõdistus",
     "nav.erp_chat": "AI vestlus",

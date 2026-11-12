@@ -13835,6 +13835,7 @@ const resource = {
     "nav.group_analytics_desc": "ক্রস-মডিউল রিপোর্ট, BI ড্যাশবোর্ড, ও ওয়্যারহাউস প্রক্ষেপণ",
     "nav.de_din": "DE DIN 276 এক্সচেঞ্জ",
     "nav.docs": "ডকুমেন্টেশন",
+    "nav.academy": "একাডেমি",
     "nav.documents": "ডকুমেন্ট",
     "nav.dwg_takeoff": "DWG টেকঅফ",
     "nav.erp_chat": "AI চ্যাট",

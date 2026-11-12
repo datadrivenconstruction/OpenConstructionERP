@@ -14464,6 +14464,7 @@ const resource = {
     "nav.cz_boq_exchange": "Výměna výkazu výměr CZ",
     "nav.de_din": "Výměna DE DIN 276",
     "nav.docs": "Dokumentace",
+    "nav.academy": "Akademie",
     "nav.es_pbc_exchange": "Výměna ES PBC",
     "nav.fr_dpgf_exchange": "Výměna FR DPGF",
     "nav.in_boq_exchange": "Výměna výkazu výměr IN",

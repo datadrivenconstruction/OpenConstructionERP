@@ -13671,6 +13671,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ-utbyte",
     "nav.de_din": "DE DIN 276-utbyte",
     "nav.docs": "Dokumentation",
+    "nav.academy": "Akademi",
     "nav.es_pbc_exchange": "ES PBC-utbyte",
     "nav.fr_dpgf_exchange": "FR DPGF-utbyte",
     "nav.gaeb_exchange": "GAEB-utbyte",

@@ -9297,6 +9297,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ смета ведомосу алмашуу",
     "nav.de_din": "DE DIN 276 алмашуу",
     "nav.docs": "Документация",
+    "nav.academy": "Академия",
     "nav.es_pbc_exchange": "ES PBC алмашуу",
     "nav.fr_dpgf_exchange": "FR DPGF алмашуу",
     "nav.gaeb_exchange": "GAEB алмашуу",

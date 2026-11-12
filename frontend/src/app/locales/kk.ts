@@ -14136,6 +14136,7 @@ const resource = {
     "nav.group_analytics_desc": "Модульаралық есептер, БТ бақылау тақталары және қойма проекциясы",
     "nav.de_din": "DE DIN 276 Алмасуы",
     "nav.docs": "Құжаттама",
+    "nav.academy": "Академия",
     "nav.documents": "Құжаттар",
     "nav.dwg_takeoff": "DWG Өлшеу",
     "nav.erp_chat": "ИИ Чат",

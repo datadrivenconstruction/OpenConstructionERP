@@ -14453,6 +14453,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ BOQ एक्सचेंज",
     "nav.de_din": "DE DIN 276 एक्सचेंज",
     "nav.docs": "दस्तावेज़ीकरण",
+    "nav.academy": "अकादमी",
     "nav.es_pbc_exchange": "ES PBC एक्सचेंज",
     "nav.fr_dpgf_exchange": "FR DPGF एक्सचेंज",
     "nav.in_boq_exchange": "IN BOQ एक्सचेंज",

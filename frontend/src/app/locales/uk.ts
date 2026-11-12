@@ -15075,6 +15075,7 @@ const resource = {
     "nav.cz_boq_exchange": "Обмін CZ BOQ",
     "nav.de_din": "Обмін DE DIN 276",
     "nav.docs": "Документація",
+    "nav.academy": "Академія",
     "nav.es_pbc_exchange": "Обмін ES PBC",
     "nav.fr_dpgf_exchange": "Обмін FR DPGF",
     "nav.in_boq_exchange": "Обмін IN BOQ",

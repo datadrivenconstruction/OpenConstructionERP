@@ -14830,6 +14830,7 @@ const resource = {
     "nav.cz_boq_exchange": "Wymiana CZ BOQ",
     "nav.de_din": "Wymiana DE DIN 276",
     "nav.docs": "Dokumentacja",
+    "nav.academy": "Akademia",
     "nav.es_pbc_exchange": "Wymiana ES PBC",
     "nav.fr_dpgf_exchange": "Wymiana FR DPGF",
     "nav.in_boq_exchange": "Wymiana IN BOQ",

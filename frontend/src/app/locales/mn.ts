@@ -14830,6 +14830,7 @@ const resource = {
     "nav.dashboard": "Хяналтын самбар",
     "nav.de_din": "DE DIN 276 солилцоо",
     "nav.docs": "Баримт бичиг",
+    "nav.academy": "Академи",
     "nav.documents": "Баримт бичиг",
     "nav.dwg_takeoff": "DWG-ээс хэмжээ авах",
     "nav.equipment": "Тоног төхөөрөмж ба тээвэр",

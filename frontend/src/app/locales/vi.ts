@@ -11691,6 +11691,7 @@ const resource = {
     "nav.cz_boq_exchange": "Trao đổi BOQ CZ",
     "nav.de_din": "Trao đổi DE DIN 276",
     "nav.docs": "Tài liệu hướng dẫn",
+    "nav.academy": "Học viện",
     "nav.es_pbc_exchange": "Trao đổi ES PBC",
     "nav.fr_dpgf_exchange": "Trao đổi FR DPGF",
     "nav.gaeb_exchange": "Trao đổi GAEB",

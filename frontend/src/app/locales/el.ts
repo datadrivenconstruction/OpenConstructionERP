@@ -14185,6 +14185,7 @@ const resource = {
     "nav.group_analytics_desc": "Αναφορές μεταξύ ενοτήτων, πίνακες BI και προβολές αποθήκης δεδομένων",
     "nav.de_din": "Ανταλλαγή DE DIN 276",
     "nav.docs": "Τεκμηρίωση",
+    "nav.academy": "Ακαδημία",
     "nav.documents": "Έγγραφα",
     "nav.dwg_takeoff": "Επιμέτρηση DWG",
     "nav.erp_chat": "Συνομιλία AI",

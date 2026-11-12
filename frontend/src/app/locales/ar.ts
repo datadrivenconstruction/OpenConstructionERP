@@ -15482,6 +15482,7 @@ const resource = {
     "nav.group_analytics_desc": "تقارير متعددة الوحدات ولوحات BI وإسقاطات المستودع",
     "nav.de_din": "تبادل DIN 276 ألمانيا",
     "nav.docs": "التوثيق",
+    "nav.academy": "الأكاديمية",
     "nav.documents": "المستندات",
     "nav.dwg_takeoff": "حصر كميات DWG",
     "nav.erp_chat": "دردشة الذكاء الاصطناعي",

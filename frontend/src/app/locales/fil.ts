@@ -13793,6 +13793,7 @@ const resource = {
     "nav.group_analytics_desc": "Cross-module na report, dashboard ng BI, at mga projection ng warehouse",
     "nav.de_din": "Palitan ng DE DIN 276",
     "nav.docs": "Dokumentasyon",
+    "nav.academy": "Akademya",
     "nav.documents": "Mga Dokumento",
     "nav.dwg_takeoff": "Panukat sa DWG",
     "nav.erp_chat": "Usapang AI",

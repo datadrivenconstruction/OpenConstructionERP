@@ -1209,6 +1209,19 @@ function HelpMenu() {
           </a>
           <a
             role="menuitem"
+            href="https://openconstructionacademy.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+            data-testid="help-menu-academy"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+          >
+            <GraduationCap size={14} className="text-content-tertiary shrink-0" />
+            <span className="flex-1">{t('nav.academy', { defaultValue: 'Academy' })}</span>
+            <ExternalLink size={11} className="text-content-quaternary shrink-0" />
+          </a>
+          <a
+            role="menuitem"
             href="https://github.com/datadrivenconstruction/OpenConstructionERP"
             target="_blank"
             rel="noopener noreferrer"

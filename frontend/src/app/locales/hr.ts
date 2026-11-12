@@ -11708,6 +11708,7 @@ const resource = {
     "nav.cz_boq_exchange": "CZ razmjena Troškovnika",
     "nav.de_din": "DE DIN 276 razmjena",
     "nav.docs": "Dokumentacija",
+    "nav.academy": "Akademija",
     "nav.es_pbc_exchange": "ES PBC razmjena",
     "nav.fr_dpgf_exchange": "FR DPGF razmjena",
     "nav.gaeb_exchange": "GAEB razmjena",

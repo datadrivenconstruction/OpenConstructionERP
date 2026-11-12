@@ -154,7 +154,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
               type="button"
               onClick={openEditor}
               disabled={!canEdit}
-              className="block w-full text-left rounded-lg p-1 -m-1 hover:bg-surface-secondary/40 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+              className="block w-full text-left rounded-lg px-1 py-1 -mx-1 hover:bg-surface-secondary/40 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
               aria-label={t('branding.edit', { defaultValue: 'Customise branding' })}
               title={t('branding.edit', { defaultValue: 'Customise branding' })}
             >
@@ -163,7 +163,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   <img
                     src={logoDataUrl}
                     alt={companyName || 'Custom logo'}
-                    className="block max-h-[40px] w-auto max-w-full object-contain"
+                    className="block max-h-[28px] w-auto max-w-full object-contain"
                     draggable={false}
                   />
                   {options.showCompanyName && companyName && (
@@ -192,7 +192,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   is satisfied while the user's logo stays the dominant
                   visual; font is small + muted on purpose. */}
               <span
-                className="mt-1 block text-2xs leading-none text-content-quaternary truncate"
+                className="mt-0.5 block text-2xs leading-none text-content-quaternary truncate"
                 style={{
                   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   letterSpacing: '0.03em',

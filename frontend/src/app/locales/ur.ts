@@ -14144,6 +14144,7 @@ const resource = {
     "nav.group_analytics_desc": "Cross-module رپورٹس، BI ڈیش بورڈز، اور warehouse projections",
     "nav.de_din": "DE DIN 276 تبادلہ",
     "nav.docs": "دستاویزات",
+    "nav.academy": "اکیڈمی",
     "nav.documents": "دستاویزات",
     "nav.dwg_takeoff": "DWG پیمائش",
     "nav.erp_chat": "AI چیٹ",

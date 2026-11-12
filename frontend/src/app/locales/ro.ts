@@ -11863,6 +11863,7 @@ const resource = {
     "nav.cz_boq_exchange": "Schimb Antemăsurătoare CZ",
     "nav.de_din": "Schimb DE DIN 276",
     "nav.docs": "Documentație",
+    "nav.academy": "Academie",
     "nav.es_pbc_exchange": "Schimb ES PBC",
     "nav.fr_dpgf_exchange": "Schimb FR DPGF",
     "nav.gaeb_exchange": "Schimb GAEB",
