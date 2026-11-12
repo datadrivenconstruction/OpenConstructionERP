@@ -9496,11 +9496,13 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "component_tax.py",
         "events.py",
         "formula_engine.py",
         "fx_bridge.py",
         "intl.py",
         "manifest.py",
+        "messages/__init__.py",
         "models.py",
         "parametric.py",
         "permissions.py",
@@ -9508,6 +9510,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "tax_service.py",
         "templates_seed.py",
         "validators.py"
       ],
@@ -9717,6 +9720,36 @@
               "nullable": false
             },
             {
+              "name": "tax_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_rate",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "price_includes_tax",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "input_tax_treatment",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "sort_order",
               "annotation": "Mapped[int]",
               "sql_type": "Integer",
@@ -9889,6 +9922,27 @@
         },
         {
           "method": "POST",
+          "path": "/recalculate-tax/",
+          "handler": "recalculate_project_tax",
+          "response_model": "ProjectTaxRecalcResponse",
+          "request_schema": "TaxRecalcRequest | None"
+        },
+        {
+          "method": "POST",
+          "path": "/{assembly_id}/recalculate-tax/",
+          "handler": "recalculate_assembly_tax",
+          "response_model": "TaxRecalcResponse",
+          "request_schema": "TaxRecalcRequest | None"
+        },
+        {
+          "method": "GET",
+          "path": "/{assembly_id}/tax-findings/",
+          "handler": "assembly_tax_findings",
+          "response_model": "TaxFindingsResponse",
+          "request_schema": "AssemblyService"
+        },
+        {
+          "method": "POST",
           "path": "/{assembly_id}/validate-parameters/",
           "handler": "validate_parameters",
           "response_model": "ParameterValidationResponse",
@@ -9980,7 +10034,7 @@
         {
           "class_name": "ComponentCreate",
           "bases": [
-            "BaseModel"
+            "TaxProfile"
           ],
           "docstring": "Create a new assembly component.\n\nAccepts ``name`` as an alias for ``description`` and ``unit_rate`` as an\nalias for ``unit_cost`` so that the AI-generate preview payload can be\nforwarded directly without field remapping on the frontend.\n\n``resource_type`` is now a first-class column (v2940). Free-form\nextended fields (waste_pct for materials, crew_size/hours/burden_pct\nfor labor, fuel_cost/rental_days for equipment) live in ``metadata``\nso we don't lock the schema to one industry's vocabulary, but the\nservice layer reads them when computing the typed total.",
           "fields": [
@@ -10040,7 +10094,7 @@
         {
           "class_name": "ComponentUpdate",
           "bases": [
-            "BaseModel"
+            "TaxProfile"
           ],
           "docstring": "Partial update for an assembly component.",
           "fields": [
@@ -10137,6 +10191,31 @@
             },
             {
               "name": "quantity_formula",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_rate",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "price_includes_tax",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "input_tax_treatment",
               "type": "str | None",
               "default": "None"
             },
@@ -10452,6 +10531,119 @@
               "name": "computed_total",
               "type": "float",
               "default": "0.0"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxRecalcRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Explicit re-pricing of component tax; ``as_of`` is the day registry rates are read for.",
+          "fields": [
+            {
+              "name": "as_of",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One tax rule finding on a component.",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "component_id",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxFindingsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "All tax findings of one assembly; the set is computed whole, never paged.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[TaxFinding]"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxRecalcResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What an explicit tax recalculation did to one assembly.",
+          "fields": [
+            {
+              "name": "assembly_id",
+              "type": "UUID"
+            },
+            {
+              "name": "updated",
+              "type": "bool"
+            },
+            {
+              "name": "skipped_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_totals",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "total_rate",
+              "type": "float",
+              "default": "0.0"
+            },
+            {
+              "name": "findings",
+              "type": "list[TaxFinding]"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectTaxRecalcResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Bulk recalculation of a project's assemblies: approved ones are reported, never changed.",
+          "fields": [
+            {
+              "name": "updated",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "skipped_approved",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "skipped_other",
+              "type": "list[UUID]"
             }
           ]
         },
@@ -11032,6 +11224,7 @@
         "catalog",
         "costs",
         "fx",
+        "i18n_foundation",
         "projects"
       ]
     },
@@ -41026,6 +41219,36 @@
               "nullable": false
             },
             {
+              "name": "tax_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_rate",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "price_includes_tax",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "input_tax_treatment",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "is_active",
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
@@ -41097,6 +41320,13 @@
           "request_schema": "CatalogResourceService"
         },
         {
+          "method": "PATCH",
+          "path": "/{resource_id}/tax/",
+          "handler": "update_catalog_resource_tax",
+          "response_model": "CatalogResourceResponse",
+          "request_schema": "CatalogResourceTaxUpdate"
+        },
+        {
           "method": "POST",
           "path": "/",
           "handler": "create_catalog_resource",
@@ -41112,9 +41342,49 @@
       ],
       "schemas": [
         {
-          "class_name": "CatalogResourceCreate",
+          "class_name": "TaxProfile",
           "bases": [
             "BaseModel"
+          ],
+          "docstring": "Optional input-tax profile of a resource or an assembly component (issue #559).\n\nEvery field is optional. ``tax_rate`` is a percentage (``\"18\"``), ``tax_code`` names a row of the\ntax registry resolved for the project's country, and a missing ``input_tax_treatment`` means the\nproject default.",
+          "fields": [
+            {
+              "name": "tax_code",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_rate",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_status",
+              "type": "Literal['taxable', 'exempt', 'out_of_scope'] | None",
+              "default": "None"
+            },
+            {
+              "name": "price_includes_tax",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "input_tax_treatment",
+              "type": "Literal['recoverable', 'cost_incorporated'] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CatalogResourceTaxUpdate",
+          "bases": [
+            "TaxProfile"
+          ],
+          "docstring": "Replace the tax profile of one catalog resource; omitted fields are cleared.",
+          "fields": []
+        },
+        {
+          "class_name": "CatalogResourceCreate",
+          "bases": [
+            "TaxProfile"
           ],
           "docstring": "Create a new catalog resource.",
           "fields": [
@@ -41240,6 +41510,31 @@
             {
               "name": "specifications",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "tax_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_rate",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "price_includes_tax",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "input_tax_treatment",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "is_active",
@@ -211020,6 +211315,18 @@
               "nullable": true
             },
             {
+              "name": "component_tax_enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "component_tax_treatment",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
               "name": "legal_entity_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
@@ -212356,6 +212663,16 @@
               "name": "custom_units",
               "type": "list[str] | None",
               "default": "None"
+            },
+            {
+              "name": "component_tax_enabled",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "component_tax_treatment",
+              "type": "Literal['recoverable', 'cost_incorporated'] | None",
+              "default": "None"
             }
           ]
         },
@@ -212511,6 +212828,16 @@
               "name": "subdivision_code",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "component_tax_enabled",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "component_tax_treatment",
+              "type": "str",
+              "default": "'recoverable'"
             },
             {
               "name": "legal_entity_id",
@@ -314806,10 +315133,10 @@
     },
     {
       "name": "assemblies",
-      "ts_files": 16,
+      "ts_files": 20,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 16
+      "test_files": 6,
+      "total_files": 20
     },
     {
       "name": "assets",
@@ -315933,10 +316260,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 46,
+      "ts_files": 47,
       "css_files": 0,
       "test_files": 20,
-      "total_files": 46
+      "total_files": 47
     },
     {
       "name": "property-dev",
@@ -316463,6 +316790,7 @@
       "catalog",
       "costs",
       "fx",
+      "i18n_foundation",
       "projects"
     ],
     "assets": [
@@ -318255,13 +318583,13 @@
     "backend_modules": 244,
     "modules_with_manifests": 244,
     "total_models": 907,
-    "total_columns": 10638,
+    "total_columns": 10650,
     "total_relationships": 261,
-    "total_routes": 5206,
-    "total_schemas": 4718,
-    "total_python_files": 3342,
+    "total_routes": 5210,
+    "total_schemas": 4725,
+    "total_python_files": 3345,
     "frontend_features": 237,
-    "frontend_ts_files": 4168,
+    "frontend_ts_files": 4173,
     "frontend_backend_mapped": 213
   },
   "frontend_backend_mapping": {
