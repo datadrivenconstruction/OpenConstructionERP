@@ -1605,43 +1605,6 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
   .oce-cell { transition: none; }
 }
 
-/* ── Logo Animations ───────────────────────────────────────────────── */
-
-@keyframes oeBgScale {
-  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
-  60% { transform: scale(1.05) rotate(1deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
-@keyframes oeBarGrow {
-  0% { transform: scaleY(0) translateY(8px); opacity: 0; }
-  50% { transform: scaleY(1.12) translateY(-2px); opacity: 1; }
-  70% { transform: scaleY(0.95) translateY(0); opacity: 1; }
-  100% { transform: scaleY(1) translateY(0); opacity: 1; }
-}
-
-@keyframes oeBuildingSlide {
-  0% { transform: translateX(40px) translateY(10px) scale(0.9); opacity: 0; }
-  60% { transform: translateX(-4px) translateY(0) scale(1.02); opacity: 1; }
-  100% { transform: translateX(0) translateY(0) scale(1); opacity: 1; }
-}
-
-@keyframes oeWindowFade {
-  0% { opacity: 0; transform: scale(0.5); }
-  60% { opacity: 1; transform: scale(1.15); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes oeLogoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes oeLogoGlow {
-  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
-  50% { filter: drop-shadow(0 2px 8px rgba(0, 102, 255, 0.25)); }
-}
-
 /* ── Chat / iMessage Animations ──────────────────────────────────── */
 
 @keyframes oeMsgIn {

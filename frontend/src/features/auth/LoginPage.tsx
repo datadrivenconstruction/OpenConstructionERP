@@ -789,22 +789,13 @@ export function LoginPage() {
                     style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '0.02em' }}
                   >
                     by{' '}
-                    <span className="font-semibold tracking-tight">
-                      Open<span className="text-oe-blue/80">Construction</span>
-                      <span className="text-content-quaternary">ERP</span>
+                    <span className="whitespace-nowrap">
+                      OpenConstruction<span className="font-bold"> ERP</span>
                     </span>
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Logo size="md" animate />
-                  <span
-                    className="text-2xl font-medium text-content-primary whitespace-nowrap"
-                    style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
-                  >
-                    Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
-                  </span>
-                </div>
+                <LogoWithText size="lg" animate />
               )}
               {/* White-label trigger - same editor as the in-app sidebar
                   brand control, available pre-auth so a tenant can put
