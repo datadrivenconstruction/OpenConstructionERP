@@ -107,12 +107,12 @@ async def save(
     template = require_template(key)
     lang = template_language(template, language)
     if lang != language.strip().lower().split("-")[0]:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unsupported letter language")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Unsupported letter language")
     issues = validate(template, text)
     errors = [i for i in issues if i.severity == "error"]
     if errors:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": "Letter text has errors", "issues": [i.__dict__ for i in errors]},
         )
     await LetterTemplateRepository(session).upsert(key, lang, project_id, text.as_dict(), user_id)

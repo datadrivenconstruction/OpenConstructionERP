@@ -1510,7 +1510,7 @@ async def _letter_response(
         errors = [i.__dict__ for i in check_text(template, text) if i.severity == "error"]
         if errors:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"message": "Letter text has errors", "issues": errors},
             )
     build = service.build_award_letter_pdf if award else service.build_rejection_letter_pdf
