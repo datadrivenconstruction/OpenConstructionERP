@@ -25,10 +25,8 @@ export interface ResolvedLetterTemplate {
   issues: LetterIssue[];
 }
 
-const BASE = '/v1/letter-templates';
-
 export function listLetterTemplates(): Promise<LetterTemplateSummary[]> {
-  return apiGet<LetterTemplateSummary[]>(`${BASE}/`);
+  return apiGet<LetterTemplateSummary[]>(`/v1/letter-templates/`);
 }
 
 export function getLetterTemplate(
@@ -39,23 +37,23 @@ export function getLetterTemplate(
   if (opts.language) q.set('language', opts.language);
   if (opts.projectId) q.set('project_id', opts.projectId);
   const qs = q.toString();
-  return apiGet<ResolvedLetterTemplate>(`${BASE}/${encodeURIComponent(key)}${qs ? `?${qs}` : ''}`);
+  return apiGet<ResolvedLetterTemplate>(`/v1/letter-templates/${encodeURIComponent(key)}${qs ? `?${qs}` : ''}`);
 }
 
 export function saveLetterTemplate(
   key: string,
   body: LetterText & { language: string; project_id?: string | null },
 ): Promise<ResolvedLetterTemplate> {
-  return apiPut<ResolvedLetterTemplate>(`${BASE}/${encodeURIComponent(key)}`, body);
+  return apiPut<ResolvedLetterTemplate>(`/v1/letter-templates/${encodeURIComponent(key)}`, body);
 }
 
 export function resetLetterTemplate(key: string, language: string): Promise<void> {
-  return apiDelete(`${BASE}/${encodeURIComponent(key)}?language=${encodeURIComponent(language)}`);
+  return apiDelete(`/v1/letter-templates/${encodeURIComponent(key)}?language=${encodeURIComponent(language)}`);
 }
 
 /** Sample letter from unsaved text: a PDF, or the email as HTML. */
 export async function fetchLetterPreview(key: string, language: string, text: LetterText): Promise<Blob | null> {
-  const r = await fetchWithAuth(`${API_BASE}${BASE}/${encodeURIComponent(key)}/preview`, {
+  const r = await fetchWithAuth(`${API_BASE}/v1/letter-templates/${encodeURIComponent(key)}/preview`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...text, language }),
