@@ -173,7 +173,7 @@ function Explainer() {
       title={t('postcalc.how_title')}
     >
       <p className="text-xs text-content-tertiary">{t('postcalc.how_intro')}</p>
-      <ol className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-stretch">
+      <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:flex 2xl:flex-row 2xl:items-stretch">
         {steps.map((step, index) => (
           <li key={step.title} className="flex-1 rounded-lg border border-border-light bg-surface-primary p-3">
             <div className="flex items-center gap-2">

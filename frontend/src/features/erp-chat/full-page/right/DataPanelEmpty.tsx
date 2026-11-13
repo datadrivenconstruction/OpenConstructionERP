@@ -287,7 +287,7 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))',
             gap: 10,
             marginBottom: 20,
           }}
@@ -420,7 +420,7 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))',
             gap: 10,
           }}
         >

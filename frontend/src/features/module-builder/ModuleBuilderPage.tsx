@@ -530,7 +530,7 @@ function BuilderSteps() {
     },
   ];
   return (
-    <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5" data-testid="module-builder-steps">
+    <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5" data-testid="module-builder-steps">
       {steps.map((step, i) => (
         <li key={i} className="flex items-start gap-2">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-2xs font-semibold text-white">

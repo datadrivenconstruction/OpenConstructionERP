@@ -4070,7 +4070,7 @@ export function CadDataExplorerPage() {
               <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-widest mb-3">
                 {t('explorer.what_you_get', { defaultValue: 'What you get' })}
               </h2>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 2xl:grid-cols-4 gap-4">
                 {FEATURE_CARDS.map((f, i) => (
                   <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
                     <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
