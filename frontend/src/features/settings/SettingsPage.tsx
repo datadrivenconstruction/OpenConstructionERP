@@ -2119,13 +2119,27 @@ export function SettingsPage() {
           )}
 
           {/* ── TEAM & PLAN ──────────────────────────────────────── */}
-          {activeTab === 'team' && <SettingsTeamPanel />}
+          {/* These panels are one block each: without the span they sit in the
+              left half of the two-column grid and leave the right half empty. */}
+          {activeTab === 'team' && (
+            <div className="lg:col-span-2 min-w-0">
+              <SettingsTeamPanel />
+            </div>
+          )}
 
           {/* ── COMPANY & DOCUMENTS ──────────────────────────────── */}
-          {activeTab === 'company' && <CompanyDocumentsSettings />}
+          {activeTab === 'company' && (
+            <div className="lg:col-span-2 min-w-0">
+              <CompanyDocumentsSettings />
+            </div>
+          )}
 
           {/* ── LETTER TEMPLATES ─────────────────────────────────── */}
-          {activeTab === 'letters' && canReadLetters && <LetterTemplatesSettings />}
+          {activeTab === 'letters' && canReadLetters && (
+            <div className="lg:col-span-2 min-w-0">
+              <LetterTemplatesSettings />
+            </div>
+          )}
 
           {/* ── REGIONAL ─────────────────────────────────────────── */}
           {activeTab === 'market' && (
