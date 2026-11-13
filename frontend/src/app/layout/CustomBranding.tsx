@@ -32,7 +32,7 @@ import clsx from 'clsx';
 import { Pencil, Upload, Trash2, X, Building2, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Logo, Wordmark } from '@/shared/ui';
+import { Logo } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -131,7 +131,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
         className="hover:opacity-80 transition-opacity"
         title="OpenConstruction ERP"
       >
-        <Logo size="sm" />
+        <Logo size="md" className="!h-[32px] !w-[32px]" />
       </a>
     );
   }
@@ -209,12 +209,13 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
               href="https://openconstructionerp.com/?utm_source=app"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="ms-2 flex w-fit items-center py-2 hover:opacity-80 transition-opacity"
               title="OpenConstruction ERP"
+              aria-label="OpenConstruction ERP"
             >
-              {/* Brand kit: 32 px mark, clear space of a quarter mark (8 px). */}
-              <Logo size="md" />
-              <Wordmark size="xs" />
+              {/* Mark only (founder): 32 px kit SVG, clear space of a quarter mark (8 px),
+                  ms-2 puts its left edge on the nav icon column. */}
+              <Logo size="md" className="!h-[32px] !w-[32px]" />
             </a>
           )}
         </div>
@@ -227,7 +228,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
           type="button"
           onClick={() => setEditing(true)}
           className={clsx(
-            'shrink-0 h-8 w-8 flex items-center justify-center rounded-lg',
+            'shrink-0 h-7 w-7 flex items-center justify-center rounded-lg',
             'border border-border-light bg-surface-secondary/30',
             'text-content-tertiary hover:text-oe-blue',
             'hover:border-oe-blue/40 hover:bg-oe-blue/5',
