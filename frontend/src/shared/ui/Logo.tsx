@@ -28,7 +28,7 @@ const sizeMap: Record<LogoSize, string> = {
 const MARK_LIGHT = '/brand/erp/erp-mark-light.svg';
 const MARK_DARK = '/brand/erp/erp-mark-dark.svg';
 
-/** OpenConstruction ERP mark, rendered from the unmodified brand-kit SVGs. */
+/** OpenConstructionERP mark, rendered from the unmodified brand-kit SVGs. */
 export function Logo({ size = 'md', animate = false, tone = 'auto', className }: LogoProps) {
   const img = 'block h-full w-full select-none';
   return (
@@ -99,7 +99,7 @@ export function LogoWithText({ size = 'md', animate, tone, className }: LogoWith
     <span
       className={clsx('inline-flex items-center', gap, className)}
       role="img"
-      aria-label="OpenConstruction ERP"
+      aria-label="OpenConstructionERP"
     >
       <Logo size={size} animate={animate} tone={tone} />
       <Wordmark size={size} />
