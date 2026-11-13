@@ -380,7 +380,7 @@ function RequirementSetCard({
   });
 
   return (
-    <div className="border rounded-lg border-border bg-white dark:bg-zinc-800">
+    <div className="border rounded-lg border-border bg-surface-elevated">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 cursor-pointer hover:bg-surface-secondary"
@@ -492,11 +492,11 @@ function ValidateAgainstModelModal({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-lg bg-white dark:bg-zinc-800 shadow-xl"
+        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border-light p-4">

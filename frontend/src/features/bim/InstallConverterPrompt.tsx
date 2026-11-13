@@ -134,7 +134,7 @@ export function InstallConverterPrompt({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-lg"
+      className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="install-converter-prompt-title"

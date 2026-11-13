@@ -215,8 +215,8 @@ function CreateCDEModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('cde.new_container', { defaultValue: 'New Container' })}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('cde.new_container', { defaultValue: 'New Container' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="oe-section-title">
@@ -454,11 +454,11 @@ function ApprovalSignatureModal({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-label={t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
     >
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="oe-section-title">
             {t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
@@ -703,11 +703,11 @@ function LinkDocumentModal({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-surface-primary rounded-xl shadow-2xl border border-border w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-scale-in"
+        className="bg-surface-primary rounded-2xl shadow-xl border border-border w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

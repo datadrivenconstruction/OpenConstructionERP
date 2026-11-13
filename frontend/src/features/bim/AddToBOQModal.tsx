@@ -468,13 +468,13 @@ export default function AddToBOQModal({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="bg-surface-primary rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-border-light"
+        className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-border-light"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
