@@ -700,7 +700,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
   >
     <div
       aria-label="What's new in v0.0.0-test"
-      class="relative overflow-visible rounded-xl border ring-1 border-sky-400/50 ring-sky-500/10 dark:border-sky-500/40 dark:ring-sky-400/10 bg-gradient-to-br from-sky-50/90 via-blue-50/85 to-cyan-50/80 dark:from-sky-950/40 dark:via-blue-950/30 dark:to-cyan-950/20 backdrop-blur-md shadow-md shadow-sky-500/10 transition-all duration-300 ease-out opacity-0 -translate-y-2"
+      class="relative overflow-visible rounded-xl border border-semantic-info/30 bg-semantic-info-bg transition-all duration-300 ease-out opacity-0 -translate-y-2"
       role="region"
     >
       <div
@@ -714,7 +714,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             class="absolute inset-0 rounded-lg bg-semantic-info/30 animate-ping"
           />
           <div
-            class="relative flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-blue-500/30"
+            class="relative flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue text-white"
           >
             <svg
               class="lucide lucide-sparkles"
@@ -750,12 +750,12 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           class="flex min-w-0 items-baseline gap-2"
         >
           <h2
-            class="truncate text-sm sm:text-sm font-semibold text-blue-900 dark:text-sky-100 leading-tight"
+            class="truncate text-sm sm:text-sm font-semibold text-content-primary leading-tight"
           >
             What's new in v0.0.0-test
           </h2>
           <span
-            class="hidden md:inline truncate text-xs text-blue-700/75 dark:text-sky-300/70"
+            class="hidden md:inline truncate text-xs text-content-secondary"
           >
             Tap a chip for details.
           </span>
@@ -766,7 +766,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <button
             aria-controls="whatsnew-chip-cost-control-popover"
             aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15"
             title="Cost control per project"
             type="button"
           >
@@ -805,7 +805,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <button
             aria-controls="whatsnew-chip-forecast-source-popover"
             aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15"
             title="A forecast that says where it comes from"
             type="button"
           >
@@ -842,7 +842,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <button
             aria-controls="whatsnew-chip-assign-money-popover"
             aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15"
             title="Put money on the right cost line"
             type="button"
           >
@@ -878,7 +878,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <button
             aria-controls="whatsnew-chip-monthly-report-popover"
             aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15"
             title="Monthly cost report"
             type="button"
           >
@@ -921,7 +921,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <button
             aria-controls="whatsnew-chip-plan-room-popover"
             aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium ring-1 transition-colors bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15"
             title="The plan room explains itself"
             type="button"
           >
@@ -956,7 +956,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           class="flex shrink-0 items-center gap-1.5"
         >
           <button
-            class="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-2.5 py-1 text-2xs font-semibold text-white shadow-sm shadow-blue-500/30 ring-1 ring-blue-500/20 transition-all"
+            class="inline-flex items-center gap-1 rounded-full bg-oe-blue hover:bg-oe-blue-hover px-2.5 py-1 text-2xs font-semibold text-white transition-colors"
             type="button"
           >
             <svg
@@ -999,7 +999,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             </span>
           </button>
           <button
-            class="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-2xs font-medium text-blue-700 hover:text-blue-800 hover:bg-semantic-info/10 transition-colors"
+            class="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-2xs font-medium text-oe-blue hover:text-oe-blue-hover hover:bg-semantic-info/10 transition-colors"
             type="button"
           >
             Full release notes
@@ -1025,7 +1025,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           </button>
           <button
             aria-label="Dismiss"
-            class="flex h-7 w-7 items-center justify-center rounded-md text-sky-600/70 hover:text-blue-700 hover:bg-semantic-info/10 dark:text-sky-300/70 dark:hover:text-sky-100 dark:hover:bg-sky-400/10 transition-colors"
+            class="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue hover:bg-semantic-info/10 transition-colors"
             type="button"
           >
             <svg
@@ -3674,7 +3674,7 @@ exports[`Visual Regression - InfoHint > block mode - collapsed 1`] = `
   <div>
     <button
       aria-expanded="false"
-      class="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary/60"
+      class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary/60"
     >
       <svg
         class="lucide lucide-info shrink-0"
@@ -3722,7 +3722,7 @@ exports[`Visual Regression - InfoHint > block mode with custom label 1`] = `
   <div>
     <button
       aria-expanded="false"
-      class="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary/60"
+      class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary/60"
     >
       <svg
         class="lucide lucide-info shrink-0"
