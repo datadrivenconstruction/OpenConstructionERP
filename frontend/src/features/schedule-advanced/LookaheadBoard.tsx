@@ -23,7 +23,7 @@ function TaskCard({ task }: { task: LpsBoardTask }) {
       data-ready={task.is_ready ? 'true' : 'false'}
       title={blockers || undefined}
       className={clsx(
-        'rounded-md border bg-surface-primary p-2 text-xs',
+        'rounded-lg border bg-surface-primary p-2 text-xs',
         task.is_ready ? 'border-border-light' : 'border-semantic-error/40',
       )}
     >
@@ -77,7 +77,7 @@ export function LookaheadBoardView({ board }: { board: LpsBoard }) {
                   {t('schedule_advanced.board_week_of', { defaultValue: 'Week of {{date}}', date: week })}
                 </p>
                 {tasks.length === 0 ? (
-                  <p className="rounded-md border border-dashed border-border-light p-2 text-2xs text-content-tertiary">
+                  <p className="rounded-lg border border-dashed border-border-light p-2 text-2xs text-content-tertiary">
                     {t('schedule_advanced.board_week_empty', { defaultValue: 'No activities start this week' })}
                   </p>
                 ) : (

@@ -15,7 +15,6 @@ import {
   Download,
   Loader2,
   Plus,
-  X,
   Heart,
   AlertTriangle,
   Home,
@@ -41,6 +40,7 @@ import {
   IntroRichText,
   ModuleGuideButton,
   CollapsibleSection,
+  WideModal,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -895,12 +895,7 @@ export function SafetyPage() {
         />
       )}
 
-      <RequiresProject
-        emptyHint={t('safety.select_project', {
-          defaultValue:
-            'Select a project from the header to report incidents, record safety observations, and track compliance.',
-        })}
-      >
+      <RequiresProject>
         {/* Tab Bar */}
         <div
           ref={tabsRef}
@@ -1169,7 +1164,7 @@ function IncidentsTab({
               defaultValue: 'Search incidents...',
             })}
             aria-label={t('safety.search_incidents', { defaultValue: 'Search incidents...' })}
-            className="oe-input oe-input-lg ps-10"
+            className="oe-input ps-10"
           />
         </div>
         <Button
@@ -1379,21 +1374,35 @@ function IncidentsTab({
 
     {/* New Incident Modal */}
     {showCreate && (
-      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="oe-section-title">
-              {t('safety.new_incident', { defaultValue: 'New Incident' })}
-            </h2>
-            <button
-              onClick={() => setShowCreate(false)}
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+      <WideModal
+        open
+        onClose={() => setShowCreate(false)}
+        size="md"
+        title={t('safety.new_incident', { defaultValue: 'New Incident' })}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createMut.isPending}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (!validateIncident()) return;
+                createMut.mutate(incidentForm);
+              }}
+              disabled={createMut.isPending || !canSubmitIncident}
             >
-              <X size={20} />
-            </button>
-          </div>
-          <div className="px-6 py-4 space-y-5">
+              {createMut.isPending ? (
+                <Loader2 size={16} className="animate-spin mr-1.5" />
+              ) : (
+                <Plus size={16} className="mr-1.5" />
+              )}
+              <span>{t('safety.report_incident', { defaultValue: 'Report Incident' })}</span>
+            </Button>
+          </>
+        }
+      >
+          <div className="space-y-5">
             {/* ── Incident Type Cards ── */}
             <div>
               <label className="oe-label">
@@ -1560,28 +1569,7 @@ function IncidentsTab({
               </div>
             )}
           </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-            <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createMut.isPending}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (!validateIncident()) return;
-                createMut.mutate(incidentForm);
-              }}
-              disabled={createMut.isPending || !canSubmitIncident}
-            >
-              {createMut.isPending ? (
-                <Loader2 size={16} className="animate-spin mr-1.5" />
-              ) : (
-                <Plus size={16} className="mr-1.5" />
-              )}
-              <span>{t('safety.report_incident', { defaultValue: 'Report Incident' })}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      </WideModal>
     )}
     </>
   );
@@ -1732,7 +1720,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               defaultValue: 'Search observations...',
             })}
             aria-label={t('safety.search_observations', { defaultValue: 'Search observations...' })}
-            className="oe-input oe-input-lg ps-10"
+            className="oe-input ps-10"
           />
         </div>
         <Button
@@ -1921,21 +1909,35 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
     {/* New Observation Modal */}
     {showCreate && (
-      <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="oe-section-title">
-              {t('safety.new_observation', { defaultValue: 'New Observation' })}
-            </h2>
-            <button
-              onClick={() => setShowCreate(false)}
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+      <WideModal
+        open
+        onClose={() => setShowCreate(false)}
+        size="md"
+        title={t('safety.new_observation', { defaultValue: 'New Observation' })}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createObsMut.isPending}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (!validateObs()) return;
+                createObsMut.mutate(obsForm);
+              }}
+              disabled={createObsMut.isPending || !canSubmitObs}
             >
-              <X size={20} />
-            </button>
-          </div>
-          <div className="px-6 py-4 space-y-5">
+              {createObsMut.isPending ? (
+                <Loader2 size={16} className="animate-spin mr-1.5" />
+              ) : (
+                <Plus size={16} className="mr-1.5" />
+              )}
+              <span>{t('safety.record_observation', { defaultValue: 'Record Observation' })}</span>
+            </Button>
+          </>
+        }
+      >
+          <div className="space-y-5">
             {/* ── Observation Type Cards ── */}
             <div>
               <label className="oe-label">
@@ -2102,28 +2104,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-            <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createObsMut.isPending}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (!validateObs()) return;
-                createObsMut.mutate(obsForm);
-              }}
-              disabled={createObsMut.isPending || !canSubmitObs}
-            >
-              {createObsMut.isPending ? (
-                <Loader2 size={16} className="animate-spin mr-1.5" />
-              ) : (
-                <Plus size={16} className="mr-1.5" />
-              )}
-              <span>{t('safety.record_observation', { defaultValue: 'Record Observation' })}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      </WideModal>
     )}
     </>
   );

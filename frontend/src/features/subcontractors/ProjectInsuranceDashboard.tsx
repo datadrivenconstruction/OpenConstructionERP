@@ -72,7 +72,7 @@ export function ProjectInsuranceView({ data }: { data: DashboardData }) {
             {data.gated_payments.map((p) => (
               <li
                 key={p.payment_application_id}
-                className="flex flex-wrap items-center gap-2 rounded-md border border-border-light px-2.5 py-1.5 text-xs"
+                className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light px-2.5 py-1.5 text-xs"
                 data-testid="insurance-gated-payment"
               >
                 <span className="font-medium text-content-primary">{p.application_number}</span>

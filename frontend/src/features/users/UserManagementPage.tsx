@@ -25,7 +25,6 @@ import {
   UserPlus,
   Search,
   Check,
-  X,
   Mail,
   Clock,
   Crown,
@@ -458,38 +457,38 @@ function ModuleAccessPanel({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface-primary rounded-t-xl sm:rounded-xl shadow-2xl border border-border w-full max-w-2xl mx-0 sm:mx-4 max-h-[85vh] flex flex-col animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <div>
-            <div className="flex items-center gap-2">
-              <Settings2 size={20} className="text-oe-blue" />
-              <h3 className="text-base font-semibold">
-                {t('users.module_access', { defaultValue: 'Module Access' })}
-              </h3>
-            </div>
-            <p className="text-xs text-content-secondary mt-0.5">
-              {user.full_name} ({user.email})
-            </p>
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      busy={saveMut.isPending}
+      title={t('users.module_access', { defaultValue: 'Module Access' })}
+      subtitle={`${user.full_name} (${user.email})`}
+      footer={
+        <>
+          <div className="me-auto text-xs text-content-tertiary">
+            {Object.values(modules).filter((m) => m.visible).length} / {MODULE_GROUPS.reduce((n, g) => n + g.modules.length, 0)}{' '}
+            {t('users.modules_enabled', { defaultValue: 'modules enabled' })}
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="p-1 rounded hover:bg-surface-secondary"
+          <Button variant="ghost" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            icon={<Save size={14} />}
+            onClick={() => saveMut.mutate()}
+            disabled={!dirty}
+            loading={saveMut.isPending}
           >
-            <X size={16} />
-          </button>
-        </div>
-
+            {saveMut.isPending
+              ? t('common.saving', { defaultValue: 'Saving...' })
+              : t('common.save', { defaultValue: 'Save' })}
+          </Button>
+        </>
+      }
+    >
         {/* Custom role name + presets */}
-        <div className="px-5 py-3 border-b border-border flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-end gap-3 border-b border-border-light pb-3">
           <div className="flex-1">
             <label className="oe-label">
               {t('users.custom_role', { defaultValue: 'Custom Role Name' })}
@@ -511,19 +510,15 @@ function ModuleAccessPanel({
               {t('users.presets', { defaultValue: 'Presets' })}:
             </span>
             {PRESET_OPTIONS.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => applyPreset(p.key)}
-                className="px-2 py-1 text-2xs rounded border border-border hover:bg-surface-secondary transition-colors"
-              >
+              <Button key={p.key} variant="secondary" size="sm" onClick={() => applyPreset(p.key)}>
                 {t(`users.presets.${p.key}`)}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Module matrix */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
+        <div className="pt-3">
           {isLoading ? (
             <div className="text-center py-8 text-content-tertiary text-sm">
               {t('common.loading', { defaultValue: 'Loading...' })}
@@ -564,7 +559,7 @@ function ModuleAccessPanel({
                         </span>
 
                         {/* Access level selector */}
-                        <div className="flex items-center gap-0.5 bg-surface-primary rounded-md border border-border p-0.5">
+                        <div className="flex items-center gap-0.5 bg-surface-primary rounded-lg border border-border p-0.5">
                           {ACCESS_LEVELS.map((lvl) => (
                             <button
                               key={lvl.value}
@@ -588,31 +583,7 @@ function ModuleAccessPanel({
             ))
           )}
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-border shrink-0">
-          <div className="text-xs text-content-tertiary">
-            {Object.values(modules).filter((m) => m.visible).length} / {MODULE_GROUPS.reduce((n, g) => n + g.modules.length, 0)}{' '}
-            {t('users.modules_enabled', { defaultValue: 'modules enabled' })}
-          </div>
-          <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg hover:bg-surface-secondary">
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </button>
-            <button
-              onClick={() => saveMut.mutate()}
-              disabled={!dirty || saveMut.isPending}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-50 transition-colors"
-            >
-              <Save size={14} />
-              {saveMut.isPending
-                ? t('common.saving', { defaultValue: 'Saving...' })
-                : t('common.save', { defaultValue: 'Save' })}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -710,7 +681,7 @@ function RoleDropdown({
           <div className="fixed inset-0 z-dropdown" onClick={() => setOpen(false)} />
           <div
             role="listbox"
-            className="fixed z-dropdown w-36 bg-surface-primary rounded-lg shadow-lg border border-border py-1 animate-fade-in"
+            className="fixed z-dropdown w-36 bg-surface-primary rounded-lg shadow-md border border-border py-1 animate-fade-in"
             style={{ top: pos.top, left: pos.left }}
           >
             {ROLES.map((r) => {
@@ -1011,7 +982,7 @@ export function UserManagementPage() {
         <div className="relative flex-1 max-w-xs">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-quaternary" />
           <input
-            className={clsx(inputCls, 'pl-8')}
+            className={'oe-input pl-8'}
             placeholder={t('users.search', { defaultValue: 'Search by name or email...' })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}

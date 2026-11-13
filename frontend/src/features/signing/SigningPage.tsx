@@ -1254,7 +1254,7 @@ export function SigningPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as SigningSessionStatus | '')}
-                className={clsx('oe-select oe-input-lg', 'w-auto')}
+                className={clsx('oe-select', 'w-auto')}
               >
                 <option value="">{t('signing.all_statuses', { defaultValue: 'All statuses' })}</option>
                 {STATUS_ORDER.map((s) => (
@@ -1266,7 +1266,7 @@ export function SigningPage() {
               <select
                 value={capabilityFilter}
                 onChange={(e) => setCapabilityFilter(e.target.value as SigningCapability | '')}
-                className={clsx('oe-select oe-input-lg', 'w-auto')}
+                className={clsx('oe-select', 'w-auto')}
               >
                 <option value="">{t('signing.all_capabilities', { defaultValue: 'All capabilities' })}</option>
                 {CAPABILITIES.map((c) => (

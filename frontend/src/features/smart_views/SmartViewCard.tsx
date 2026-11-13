@@ -134,7 +134,7 @@ export function SmartViewCard({
         <div className="relative" data-smart-view-menu="1">
           <button
             type="button"
-            className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary"
+            className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary"
             onClick={(e) => {
               e.stopPropagation();
               setMenuOpen((v) => !v);

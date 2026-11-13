@@ -492,7 +492,7 @@ export function TaktSchedulePage() {
                         <li
                           key={`${v.activity_id}-${v.location_id ?? ''}`}
                           className={clsx(
-                            'rounded-md border p-2 text-xs',
+                            'rounded-lg border p-2 text-xs',
                             v.severity === 'error'
                               ? 'border-semantic-error/30 bg-semantic-error/10 text-semantic-error'
                               : 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning',
@@ -995,7 +995,7 @@ function ImportActivitiesModal({
           onChange={(e) => setText(e.target.value)}
           autoFocus
         />
-        <div className="rounded-md border border-border-light bg-surface-secondary/40 p-2 text-xs">
+        <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-2 text-xs">
           {parsed.length === 0 ? (
             <span className="text-content-tertiary">
               {t('takt.nothing_to_import', { defaultValue: 'Nothing to import.' })}

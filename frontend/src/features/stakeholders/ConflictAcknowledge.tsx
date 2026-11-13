@@ -121,7 +121,7 @@ export function ConflictAcknowledge({ screen, refusal, onAcknowledged }: Conflic
   return (
     <div
       role="alert"
-      className="space-y-2 rounded-md border border-semantic-warning/40 bg-surface-secondary p-3 text-sm"
+      className="space-y-2 rounded-lg border border-semantic-warning/40 bg-surface-secondary p-3 text-sm"
       data-testid="conflict-acknowledge"
     >
       <p className="flex items-start gap-1.5 font-medium text-content-primary">

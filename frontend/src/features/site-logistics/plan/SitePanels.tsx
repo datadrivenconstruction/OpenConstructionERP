@@ -186,7 +186,7 @@ export function AreasPanel({ projectId, catalogue }: PanelProps) {
                   ) : (
                     <ul className="mt-2 flex flex-wrap gap-2" aria-label={tx(t, 'area.allocations')}>
                       {a.allocations.map((x) => (
-                        <li key={x.id} className="rounded-md bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
+                        <li key={x.id} className="rounded-lg bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
                           <span className="font-medium text-content-primary">{stageOf(x.stage_id)}</span>{' '}
                           {m2(t, x.allocated_m2)}
                           {x.area_kind !== a.area_kind && <> · {codeLabel(words, 'area_kinds', x.area_kind, catalogue)}</>}

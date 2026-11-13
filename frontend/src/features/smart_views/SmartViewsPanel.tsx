@@ -295,7 +295,7 @@ export function SmartViewsPanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary"
+          className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary"
           aria-label={t('common.close', { defaultValue: 'Close' })}
           data-testid="smart-views-panel-close"
         >
@@ -428,7 +428,7 @@ export function SmartViewsPanel({
                     type="button"
                     onClick={() => toggleFolder(group.folder as string)}
                     aria-expanded={!collapsedFolders.has(group.folder)}
-                    className="flex w-full items-center gap-1.5 rounded-md px-1 py-1 text-xs font-semibold text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
+                    className="flex w-full items-center gap-1.5 rounded-lg px-1 py-1 text-xs font-semibold text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
                     data-testid={`smart-views-folder-toggle-${group.folder}`}
                   >
                     {collapsedFolders.has(group.folder) ? (

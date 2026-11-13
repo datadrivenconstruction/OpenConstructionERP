@@ -261,7 +261,7 @@ function ScheduleRow({
             disabled={busy}
             onClick={onRun}
             title={t('service.recurring.run_now', { defaultValue: 'Run now' })}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-light text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:opacity-50"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:opacity-50"
           >
             {busy ? <Loader2 size={12} className="animate-spin" /> : <PlayCircle size={14} />}
           </button>
@@ -274,7 +274,7 @@ function ScheduleRow({
                 ? t('service.recurring.disable', { defaultValue: 'Disable' })
                 : t('service.recurring.enable', { defaultValue: 'Enable' })
             }
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-light text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:opacity-50"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:opacity-50"
           >
             <Power size={14} />
           </button>
@@ -283,7 +283,7 @@ function ScheduleRow({
             disabled={busy}
             onClick={onDelete}
             title={t('common.delete', { defaultValue: 'Delete' })}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-light text-semantic-error transition-colors hover:border-semantic-error disabled:opacity-50"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light text-semantic-error transition-colors hover:border-semantic-error disabled:opacity-50"
           >
             <Trash2 size={14} />
           </button>

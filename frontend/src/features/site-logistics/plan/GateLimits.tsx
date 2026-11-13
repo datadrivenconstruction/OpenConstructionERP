@@ -61,7 +61,7 @@ export function GateLimits({ gate, canEdit }: { gate: Gate; canEdit: boolean }) 
         <p className="mt-1 text-xs text-content-secondary">{codeLabel(words, 'access_kinds', gate.access_kind, catalogue)}</p>
       )}
       {known.length === 0 ? (
-        <div className="mt-1 rounded-md border border-dashed border-border-light px-2 py-2 text-center" data-testid="gate-limits-none">
+        <div className="mt-1 rounded-lg border border-dashed border-border-light px-2 py-2 text-center" data-testid="gate-limits-none">
           <p className="text-xs font-medium text-content-primary">{tx(t, 'gate.no_limits_title')}</p>
           <p className="mt-0.5 text-2xs text-content-tertiary">{tx(t, 'gate.no_limits')}</p>
         </div>
