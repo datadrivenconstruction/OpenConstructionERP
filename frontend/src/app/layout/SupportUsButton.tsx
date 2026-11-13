@@ -326,10 +326,10 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
         ref={dialogRef}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[640px] max-h-[92vh] overflow-y-auto rounded-xl bg-surface-primary shadow-2xl border border-border-light animate-card-in"
+        className="relative w-full max-w-[640px] lg:max-w-[1040px] max-h-[92vh] overflow-y-auto rounded-2xl bg-surface-primary shadow-2xl border border-border-light animate-card-in"
       >
         {/* Hero band */}
-        <div className="relative overflow-hidden rounded-t-xl">
+        <div className="relative overflow-hidden rounded-t-2xl">
           <div
             aria-hidden
             className="absolute inset-0 bg-gradient-to-br from-amber-200/40 via-orange-100/30 to-yellow-100/40 dark:from-amber-900/30 dark:via-orange-900/20 dark:to-yellow-900/30"
@@ -346,19 +346,19 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           >
             <X size={20} />
           </button>
-          <div className="relative px-6 sm:px-8 py-7 text-center">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg mb-4">
-              <Heart size={26} strokeWidth={2} />
-            </div>
+          <div className="relative px-6 sm:px-8 pt-4 pb-3 text-center">
             <h2
               id="support-us-title"
-              className="text-xl sm:text-2xl font-semibold text-content-primary leading-tight"
+              className="inline-flex items-center gap-3 text-xl sm:text-2xl font-semibold text-content-primary leading-tight"
             >
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md">
+                <Heart size={20} strokeWidth={2} />
+              </span>
               {t('support.modal_title', {
                 defaultValue: 'Help OpenConstructionERP grow',
               })}
             </h2>
-            <p className="mt-3 mx-auto max-w-[560px] text-sm text-content-secondary leading-relaxed">
+            <p className="mt-2 mx-auto max-w-[720px] text-sm text-content-secondary leading-relaxed">
               {t('support.modal_subtitle', {
                 defaultValue:
                   'We build OpenConstructionERP in the open and ship every feature for free. If you share a video, case study or article about your work – there is a very high chance industry professionals will notice it: senior estimators, BIM managers, planning leads and cost engineers from the largest construction and engineering firms follow DataDrivenConstruction across LinkedIn, X and our newsletter (tens of thousands of subscribers). One repost from us can put your project in front of the right people overnight.',
@@ -367,8 +367,8 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="px-6 sm:px-8 pt-5 space-y-3">
+        {/* Actions: two columns from lg so the whole panel fits 1366x768 without scrolling. */}
+        <div className="px-6 sm:px-8 pt-4 grid gap-3 lg:grid-cols-2">
           {/* 1. Star on GitHub */}
           <a
             href={REPO_URL}
@@ -549,12 +549,12 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           {/* 4. Fund development - donations keep the platform free */}
           <div
             className={clsx(
-              'group rounded-xl border-2 p-4',
+              'group rounded-xl border-2 p-4 lg:col-span-2 lg:flex lg:items-center lg:gap-4',
               'border-semantic-success/30 bg-gradient-to-br from-emerald-50/60 to-green-50/30',
               'dark:border-emerald-500/30 dark:from-emerald-950/30 dark:to-green-950/20',
             )}
           >
-            <div className="flex items-start gap-3 mb-2">
+            <div className="flex items-start gap-3 mb-2 lg:mb-0 lg:flex-1">
               <div className="shrink-0 h-11 w-11 rounded-xl bg-semantic-success/15 text-semantic-success flex items-center justify-center">
                 <HandCoins size={20} strokeWidth={1.75} />
               </div>
@@ -583,7 +583,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 ml-14">
+            <div className="flex flex-wrap gap-2 ml-14 lg:ml-0 lg:shrink-0 lg:max-w-[300px]">
               <a
                 href={PAYPAL_DONATE_URL}
                 target="_blank"
@@ -618,7 +618,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
         </div>
 
         {/* Thank-you footer */}
-        <div className="mt-5 px-6 sm:px-8 py-4 border-t border-border-light bg-surface-secondary/40 rounded-b-2xl text-center">
+        <div className="mt-3 px-6 sm:px-8 py-3 border-t border-border-light bg-surface-secondary/40 rounded-b-2xl text-center">
           <p className="text-xs text-content-secondary leading-relaxed">
             {t('support.thanks', {
               defaultValue:
