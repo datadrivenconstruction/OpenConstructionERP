@@ -78,6 +78,16 @@ _COLOR_PIN = "#f59e0b"
 
 _SEED_SOURCE = "dwg_takeoff_demo_seed"
 
+# Envelope outlines (gross floor area, plot boundary, building footprint) and the
+# sheet frame enclose the rooms, so largest-first would always pick them over what
+# an estimator measures. Matched against AIA layer name parts, e.g. A-AREA-GROS,
+# C-PROP, C-BLDG, A-ANNO-TTLB.
+_ENVELOPE_LAYER_PARTS = frozenset({"GROS", "PROP", "BLDG", "TTLB"})
+
+
+def _is_envelope_layer(layer: str) -> bool:
+    return any(part in _ENVELOPE_LAYER_PARTS for part in layer.upper().split("-"))
+
 
 def _unit_factor(units: str | None) -> float | None:
     """Metres per raw drawing unit, or None when the unit is not recognised."""
@@ -141,7 +151,7 @@ def _plan_annotations(entities: Sequence[dict[str, Any]], factor: float | None) 
         if etype in ("LWPOLYLINE", "POLYLINE") and entity.get("closed"):
             ring = _points(entity.get("vertices"))
             raw_area = _polygon_area(ring)
-            if raw_area <= 0:
+            if raw_area <= 0 or _is_envelope_layer(layer):
                 continue
             areas.append(
                 (
@@ -168,7 +178,7 @@ def _plan_annotations(entities: Sequence[dict[str, Any]], factor: float | None) 
         if etype == "LINE":
             start = _point(entity.get("start"))
             end = _point(entity.get("end"))
-            if start is None or end is None:
+            if start is None or end is None or _is_envelope_layer(layer):
                 continue
             raw_length = _distance(start, end)
             if raw_length <= 0:
@@ -218,6 +228,10 @@ def _plan_annotations(entities: Sequence[dict[str, Any]], factor: float | None) 
 
     # Largest first: the room before the cupboard, the long run before the
     # short one, which is the order an estimator works in.
+    # Room polygons live on an AIA area layer (A-AREA); when the drawing has them,
+    # roof, slab and wall outlines are not what a takeoff measures.
+    room_areas = [item for item in areas if "AREA" in item[1]["metadata_"]["derived_from"]["layer"].upper().split("-")]
+    areas = room_areas or areas
     areas.sort(key=lambda item: item[0], reverse=True)
 
     planned = [fields for _size, fields in areas[:_MAX_AREAS]]
