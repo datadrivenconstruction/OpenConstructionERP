@@ -182,6 +182,13 @@
   --oe-error-vivid: #ff3b30;
   --oe-info-vivid: #5ac8fa;
 
+  /* Brand palette of the product family, for illustrations (course covers):
+     ERP blue, Academy green, Design orange; cover ground is paper or ink. */
+  --oe-brand-erp: #2987f8;
+  --oe-brand-academy: #16a269;
+  --oe-brand-design: #e45128;
+  --oe-cover-ground: #f0eeeb;
+
   /* Shadows — Apple uses very subtle, layered shadows */
   --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --oe-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -342,6 +349,8 @@
   --oe-warning-vivid: #f59e0b;
   --oe-error-vivid: #ef4444;
   --oe-info-vivid: #38bdf8;
+
+  --oe-cover-ground: #181b1f;
 
   /* Shadows — darker, more spread for depth on dark surfaces */
   --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);

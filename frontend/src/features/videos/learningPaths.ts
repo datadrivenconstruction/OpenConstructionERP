@@ -247,8 +247,3 @@ export function useCoursesDone(): [Record<string, true>, (id: string) => void] {
   }, []);
   return [done, toggle];
 }
-
-/** The photo every course ships with (`public/academy-courses/<slug>.webp`). */
-export function coursePhoto(item: AcademyItem): string {
-  return `${import.meta.env.BASE_URL}academy-courses/${slugOf(item)}.webp`;
-}
