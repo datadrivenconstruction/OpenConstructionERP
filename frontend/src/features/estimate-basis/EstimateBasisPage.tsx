@@ -9,7 +9,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { CollapsibleSection, PageHeader } from '@/shared/ui';
+import { Breadcrumb, CollapsibleSection, DismissibleInfo, PageHeader } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { EstimateBasisPanel } from './EstimateBasisPanel';
@@ -26,6 +26,9 @@ export function EstimateBasisPage() {
   // default here would read as a change and show nothing.
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumb
+        items={[{ label: t('nav.estimate_basis', { defaultValue: 'Basis of Estimate' }) }]}
+      />
       <PageHeader
         srTitle={t('estimate_basis.title', { defaultValue: 'Basis of Estimate' })}
         subtitle={t('estimate_basis.subtitle', {
@@ -33,6 +36,12 @@ export function EstimateBasisPage() {
             'Draft the inclusions, exclusions, assumptions and pricing basis behind the estimate, so a reviewer can see what the number does and does not cover.',
         })}
       />
+      <DismissibleInfo
+        storageKey="estimate-basis"
+        title={t('estimate_basis.intro_title', { defaultValue: 'Say what the number covers' })}
+      >
+        {t('estimate_basis.intro_body', { defaultValue: 'Draft the inclusions, exclusions, assumptions and pricing basis behind an estimate, so a reviewer can see what the figure does and does not cover.' })}
+      </DismissibleInfo>
       {/* Collapsible, like every other module explainer: helpful the first time,
           and in the way once you know the module. It used to sit open above the
           document permanently, which pushed the estimate's own figure below the

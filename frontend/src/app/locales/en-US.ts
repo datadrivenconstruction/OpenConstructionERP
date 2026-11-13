@@ -1578,6 +1578,7 @@ const resource = {
     "credentials.flow_1_desc": "Licenses, certifications, statutory memberships, indemnity cover, registrations and training, each with the authority that issued it and the dates it runs between.",
     "credentials.page_subtitle": "Licenses, certifications and training on this project, what the project requires of whom, and who that leaves unable to work today.",
     "credentials.type.professional_license": "Professional license",
+    "credentials.intro_body": "Record licenses, certifications and training, state what the project requires of whom, and see who is missing or about to lapse. Expiry is worked out from the dates, never from a typed status.",
     "module_builder.describe_placeholder": "A register of concrete pours: pour reference, date, volume in cubic meters, the mix, and who signed it off.",
     "module_builder.feature.status_desc": "Each entry moves through stages, shown as a colored badge you can filter by.",
     "module_builder.tpl.work_permits.desc": "Permits to work for hot work, heights, confined spaces and more, with their validity.",

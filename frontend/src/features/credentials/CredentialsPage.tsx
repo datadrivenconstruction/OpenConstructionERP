@@ -46,8 +46,10 @@ import clsx from 'clsx';
 import {
   Badge,
   Button,
+  Breadcrumb,
   CollapsibleSection,
   ConfirmDialog,
+  DismissibleInfo,
   DateDisplay,
   EmptyState,
   Input,
@@ -766,6 +768,10 @@ export function CredentialsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      <Breadcrumb
+        items={[{ label: t('nav.credentials', { defaultValue: 'Credentials' }) }]}
+      />
+
       <PageHeader
         srTitle={t('credentials.page_title', { defaultValue: 'Credentials register' })}
         subtitle={t('credentials.page_subtitle', {
@@ -789,6 +795,13 @@ export function CredentialsPage() {
           ) : null
         }
       />
+
+      <DismissibleInfo
+        storageKey="credentials"
+        title={t('credentials.intro_title', { defaultValue: 'Know who is cleared to work before the shift starts' })}
+      >
+        {t('credentials.intro_body', { defaultValue: 'Record licences, certifications and training, state what the project requires of whom, and see who is missing or about to lapse. Expiry is worked out from the dates, never from a typed status.' })}
+      </DismissibleInfo>
 
       <div className="mb-4">
         <HowCredentialsWork />

@@ -28,3 +28,17 @@ export function useActiveProjectId(): string {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   return routeProjectId || activeProjectId || '';
 }
+
+/**
+ * `useActiveProjectId` for pages that fall back to the first project: a stored
+ * selection the loaded project list no longer contains (deleted or archived in
+ * another session) is skipped, so the page never queries an id the server
+ * answers with "Project not found". Until the list has loaded the stored id is
+ * trusted, as before.
+ */
+export function useResolvedProjectId(projects: ReadonlyArray<{ id: string }>, loaded: boolean): string {
+  const id = useActiveProjectId();
+  const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
+  const stale = !routeProjectId && !!id && loaded && !projects.some((p) => p.id === id);
+  return (stale ? '' : id) || projects[0]?.id || '';
+}

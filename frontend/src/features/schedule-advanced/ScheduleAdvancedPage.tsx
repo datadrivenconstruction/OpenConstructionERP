@@ -815,7 +815,6 @@ export function ScheduleAdvancedPage() {
             onRetry={() => masterQ.refetch()}
             masterId={masterId}
             onSelect={setMasterId}
-            onCreate={() => setCreateMaster(true)}
             onEdit={setEditMaster}
             onDelete={setDeleteMaster}
             current={currentMaster}
@@ -1154,7 +1153,6 @@ function MasterTab({
   onRetry,
   masterId,
   onSelect,
-  onCreate,
   onEdit,
   onDelete,
   current,
@@ -1165,7 +1163,6 @@ function MasterTab({
   onRetry?: () => void;
   masterId: string;
   onSelect: (id: string) => void;
-  onCreate: () => void;
   onEdit: (m: MasterSchedule) => void;
   onDelete: (m: MasterSchedule) => void;
   current: MasterSchedule | undefined;
@@ -1191,10 +1188,6 @@ function MasterTab({
             defaultValue:
               'The master schedule is the top-level plan that every phase plan, look-ahead and weekly work plan rolls up to. Create one to start pull-planning - you can rename it, change its dates, or delete it at any time.',
           })}
-          action={{
-            label: t('schedule_advanced.create_master', { defaultValue: 'Create Master' }),
-            onClick: onCreate,
-          }}
         />
       </Card>
     );
