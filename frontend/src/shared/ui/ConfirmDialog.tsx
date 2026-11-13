@@ -88,9 +88,9 @@ export function ConfirmDialog({
   const Icon = isDanger ? Trash2 : AlertTriangle;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in" />
 
       {/* Dialog */}
       <div
@@ -101,47 +101,44 @@ export function ConfirmDialog({
         aria-describedby="confirm-dialog-message"
         tabIndex={-1}
         className={clsx(
-          'relative z-10 w-full max-w-sm mx-4',
-          'rounded-2xl border border-border-light',
+          'relative z-10 w-full sm:max-w-md sm:mx-4',
+          'rounded-t-2xl sm:rounded-2xl border border-border-light',
           'bg-surface-elevated shadow-xl',
-          'animate-scale-in',
+          'animate-slide-up sm:animate-scale-in',
           'focus:outline-none',
         )}
       >
         {/* Body */}
-        <div className="px-6 pt-6 pb-4">
-          {/* Icon */}
+        <div className="flex items-start gap-3 px-5 pt-5 pb-4">
           <div
             className={clsx(
-              'mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4',
+              'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
               isDanger
                 ? 'bg-semantic-error/10 text-semantic-error'
                 : 'bg-semantic-warning/10 text-semantic-warning',
             )}
           >
-            <Icon size={20} />
+            <Icon size={18} />
           </div>
-
-          {/* Title */}
-          <h2 className="text-base font-semibold text-content-primary text-center">{title}</h2>
-
-          {/* Message */}
-          <p
-            id="confirm-dialog-message"
-            className="mt-2 text-sm text-content-secondary text-center leading-relaxed"
-          >
-            {message}
-          </p>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+            <p
+              id="confirm-dialog-message"
+              className="mt-1 text-sm text-content-secondary leading-snug"
+            >
+              {message}
+            </p>
+          </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 px-6 pb-6">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border-light bg-surface-secondary/40 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:rounded-b-2xl">
           <button
             type="button"
             onClick={onCancel}
             disabled={loading}
             className={clsx(
-              'flex-1 rounded-lg px-4 py-2.5',
+              'h-8 rounded-lg px-3',
               'text-sm font-medium transition-all',
               'bg-surface-primary text-content-primary',
               'border border-border',
@@ -159,13 +156,12 @@ export function ConfirmDialog({
             disabled={loading}
             data-testid="confirm-dialog-confirm"
             className={clsx(
-              'flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5',
+              'h-8 inline-flex items-center justify-center gap-1.5 rounded-lg px-3',
               'text-sm font-medium transition-all',
               'text-content-inverse',
               isDanger
                 ? 'bg-semantic-error hover:opacity-90 active:opacity-80'
                 : 'bg-semantic-warning hover:opacity-90 active:opacity-80',
-              'shadow-xs hover:shadow-md',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               isDanger
                 ? 'focus-visible:ring-semantic-error'

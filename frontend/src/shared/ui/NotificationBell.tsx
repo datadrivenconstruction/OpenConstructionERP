@@ -371,7 +371,7 @@ export function NotificationBell() {
           className={clsx(
             'absolute right-0 top-full mt-1.5 z-50',
             'w-[min(360px,calc(100vw-1rem))]',
-            'rounded-xl border border-border-light bg-surface-elevated shadow-xl',
+            'rounded-xl border border-border-light bg-surface-elevated shadow-md',
             'animate-scale-in overflow-hidden',
           )}
         >

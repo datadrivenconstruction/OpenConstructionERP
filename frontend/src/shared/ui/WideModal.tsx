@@ -174,17 +174,18 @@ export function WideModal({
       aria-labelledby={headingId}
       aria-describedby={subtitle ? subtitleId : undefined}
       onMouseDown={handleBackdrop}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm py-8 px-4"
+      className="fixed inset-0 z-modal flex items-end sm:items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-[2px] sm:py-8 sm:px-4"
     >
       <div
         ref={panelRef}
         className={clsx(
-          'relative w-full mx-auto my-auto',
+          'relative w-full mx-auto mt-auto sm:my-auto',
           SIZE_CLASSES[size],
-          'rounded-2xl border border-border-light shadow-2xl',
+          // 390 px: bottom sheet; sm and up: centred dialog.
+          'rounded-t-2xl sm:rounded-2xl border border-border-light shadow-xl',
           'bg-surface-elevated',
-          'animate-scale-in',
-          'flex flex-col max-h-[calc(100vh-4rem)]',
+          'animate-slide-up sm:animate-scale-in',
+          'flex flex-col max-h-[92dvh] sm:max-h-[calc(100dvh-4rem)]',
           className,
         )}
         // Stop propagation so click inside the panel does not bubble up
@@ -199,18 +200,19 @@ export function WideModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <header className="flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-border-light/60">
+        <div aria-hidden="true" className="mx-auto mt-2 -mb-1 h-1 w-9 shrink-0 rounded-full bg-border sm:hidden" />
+        <header className="flex items-start justify-between gap-3 px-5 py-3.5 border-b border-border-light">
           <div className="min-w-0">
             <h2
               id={headingId}
-              className="text-lg font-semibold text-content-primary truncate"
+              className="text-base font-semibold text-content-primary truncate"
             >
               {title}
             </h2>
             {subtitle && (
               <p
                 id={subtitleId}
-                className="mt-1 text-sm text-content-secondary leading-relaxed"
+                className="mt-0.5 text-sm text-content-secondary leading-snug"
               >
                 {subtitle}
               </p>
@@ -223,24 +225,24 @@ export function WideModal({
               disabled={busy}
               aria-label={t('common.close', { defaultValue: 'Close' })}
               className={clsx(
-                'shrink-0 -mt-1 -mr-1 inline-flex h-8 w-8 items-center justify-center rounded-lg',
+                'shrink-0 -mt-0.5 -mr-1.5 inline-flex h-8 w-8 items-center justify-center rounded-lg',
                 'text-content-secondary hover:text-content-primary',
                 'hover:bg-surface-secondary',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                 'disabled:opacity-40 disabled:pointer-events-none transition-colors',
               )}
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           )}
         </header>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
 
         {/* Sticky footer */}
         {footer && (
-          <footer className="shrink-0 px-6 py-4 border-t border-border-light/60 bg-surface-primary/30 rounded-b-2xl flex items-center justify-end gap-2">
+          <footer className="shrink-0 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-border-light bg-surface-secondary/40 sm:rounded-b-2xl flex flex-wrap items-center justify-end gap-2">
             {footer}
           </footer>
         )}
@@ -285,7 +287,7 @@ export function WideModalSection({
   checkRef,
 }: WideModalSectionProps) {
   return (
-    <section className={clsx('mb-6 last:mb-0', className)} data-check-ref={checkRef || undefined}>
+    <section className={clsx('mb-5 last:mb-0', className)} data-check-ref={checkRef || undefined}>
       {title && (
         <h3 className="text-sm font-semibold text-content-primary mb-1">
           {title}
@@ -296,7 +298,7 @@ export function WideModalSection({
           {description}
         </p>
       )}
-      <div className={clsx('grid gap-4', COLUMN_CLASSES[columns])}>
+      <div className={clsx('grid gap-x-4 gap-y-3', COLUMN_CLASSES[columns])}>
         {children}
       </div>
     </section>
@@ -388,7 +390,7 @@ export function WideModalField({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="text-xs font-medium text-content-primary mb-1.5 flex items-center gap-1"
+          className="text-xs font-medium text-content-primary mb-1 flex items-center gap-1"
         >
           {label}
           {required && (

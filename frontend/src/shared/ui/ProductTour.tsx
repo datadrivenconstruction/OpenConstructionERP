@@ -1458,8 +1458,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
           // as the violet Tour rather than the blue guide.
           'border-border-light dark:border-violet-400/60',
           'bg-surface-elevated shadow-xl',
-          'dark:shadow-[0_8px_32px_rgba(2,6,23,0.6),0_0_0_1px_rgba(196,181,253,0.25)]',
-          'p-5 pointer-events-auto animate-scale-in',
+                    'p-4 pointer-events-auto animate-scale-in',
         )}
       >
         {/* Header row */}

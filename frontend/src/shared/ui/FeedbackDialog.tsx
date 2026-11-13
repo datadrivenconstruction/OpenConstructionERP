@@ -118,9 +118,9 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in" />
 
       {/* Dialog */}
       <div
@@ -130,15 +130,15 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
         aria-label={t('feedback.title', { defaultValue: 'Send Feedback' })}
         tabIndex={-1}
         className={clsx(
-          'relative z-10 w-full max-w-md mx-4',
-          'rounded-2xl border border-border-light',
+          'relative z-10 w-full sm:max-w-md sm:mx-4',
+          'rounded-t-2xl sm:rounded-2xl border border-border-light',
           'bg-surface-elevated shadow-xl',
           'animate-scale-in',
           'focus:outline-none',
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <h2 className="text-base font-semibold text-content-primary">
             {t('feedback.title', { defaultValue: 'Send Feedback' })}
           </h2>
@@ -155,7 +155,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
+        <form onSubmit={handleSubmit} className="px-5 pb-5 space-y-3">
           {/* Category pills */}
           <div className="flex gap-2">
             {CATEGORIES.map((cat) => {
@@ -197,12 +197,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
               placeholder={t('feedback.subject_placeholder', { defaultValue: 'Brief summary...' })}
               required aria-required="true"
               maxLength={200}
-              className={clsx(
-                'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2',
-                'text-sm text-content-primary placeholder:text-content-quaternary',
-                'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-                'transition-colors',
-              )}
+              className="oe-input w-full"
             />
           </div>
 
@@ -219,12 +214,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
               required aria-required="true"
               rows={4}
               maxLength={2000}
-              className={clsx(
-                'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2',
-                'text-sm text-content-primary placeholder:text-content-quaternary',
-                'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-                'transition-colors resize-none',
-              )}
+              className="oe-textarea w-full resize-none"
             />
           </div>
 
@@ -238,12 +228,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className={clsx(
-                'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2',
-                'text-sm text-content-primary placeholder:text-content-quaternary',
-                'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
-                'transition-colors',
-              )}
+              className="oe-input w-full"
             />
             <p className="mt-1 text-2xs text-content-quaternary">
               {t('feedback.email_hint', { defaultValue: 'For follow-up - we won\'t spam' })}
@@ -269,8 +254,8 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
               type="submit"
               disabled={sending || !subject.trim() || !description.trim()}
               className={clsx(
-                'flex items-center gap-2 rounded-lg px-4 py-2',
-                'text-sm font-medium text-white transition-all',
+                'flex h-8 items-center gap-1.5 rounded-lg px-3',
+                'text-sm font-medium text-white transition-colors',
                 'bg-oe-blue hover:bg-oe-blue-hover',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
               )}

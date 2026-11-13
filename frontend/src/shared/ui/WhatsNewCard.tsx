@@ -260,21 +260,17 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
           aria-label={t('whatsnew.reopen', { defaultValue: "What's new" })}
           className={[
             'inline-flex items-center gap-2 rounded-full',
-            'border border-sky-400/50 ring-1 ring-sky-500/20',
-            'dark:border-sky-500/40 dark:ring-sky-400/15',
-            'bg-white/65 backdrop-blur-md',
-            'px-4 py-2 text-sm font-medium',
-            'text-blue-700 hover:text-blue-800 dark:text-sky-200 dark:hover:text-sky-100',
-            'hover:bg-semantic-info/10',
-            'hover:ring-sky-500/40 hover:shadow-md hover:shadow-sky-500/20',
-            'shadow-sm shadow-sky-500/10 transition-all',
+            'border border-semantic-info/30 bg-semantic-info-bg',
+            'px-3 py-1.5 text-sm font-medium',
+            'text-semantic-info hover:bg-semantic-info/10',
+            'transition-colors',
           ].join(' ')}
         >
           <Sparkles size={16} strokeWidth={2.25} />
           <span>
             {t('whatsnew.reopen', { defaultValue: "What's new" })}
           </span>
-          <span className="text-blue-600/70 dark:text-sky-300/70">v{version}</span>
+          <span className="text-content-tertiary">v{version}</span>
         </button>
       </div>
     );
@@ -290,12 +286,8 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
         version,
       })}
       className={[
-        'relative overflow-visible rounded-xl border ring-1',
-        'border-sky-400/50 ring-sky-500/10',
-        'dark:border-sky-500/40 dark:ring-sky-400/10',
-        'bg-gradient-to-br from-sky-50/90 via-blue-50/85 to-cyan-50/80',
-        'dark:from-sky-950/40 dark:via-blue-950/30 dark:to-cyan-950/20',
-        'backdrop-blur-md shadow-md shadow-sky-500/10',
+        'relative overflow-visible rounded-xl border',
+        'border-semantic-info/30 bg-semantic-info-bg',
         'transition-all duration-300 ease-out',
         mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2',
       ].join(' ')}
@@ -307,20 +299,20 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
             aria-hidden="true"
             className="absolute inset-0 rounded-lg bg-semantic-info/30 animate-ping"
           />
-          <div className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-blue-500/30">
+          <div className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue text-white">
             <Sparkles size={13} strokeWidth={2.5} />
           </div>
         </div>
 
         {/* Headline + tagline (single line on desktop) */}
         <div className="flex min-w-0 items-baseline gap-2">
-          <h2 className="truncate text-sm sm:text-sm font-semibold text-blue-900 dark:text-sky-100 leading-tight">
+          <h2 className="truncate text-sm sm:text-sm font-semibold text-content-primary leading-tight">
             {t('whatsnew.title', {
               defaultValue: "What's new in v{{version}}",
               version,
             })}
           </h2>
-          <span className="hidden md:inline truncate text-xs text-blue-700/75 dark:text-sky-300/70">
+          <span className="hidden md:inline truncate text-xs text-content-secondary">
             {t('whatsnew.tagline', {
               defaultValue: 'Tap a chip for details.',
             })}
@@ -357,7 +349,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
           <button
             type="button"
             onClick={handleTour}
-            className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-2.5 py-1 text-2xs font-semibold text-white shadow-sm shadow-blue-500/30 ring-1 ring-blue-500/20 transition-all"
+            className="inline-flex items-center gap-1 rounded-full bg-oe-blue hover:bg-oe-blue-hover px-2.5 py-1 text-2xs font-semibold text-white transition-colors"
           >
             <Sparkles size={11} />
             <span className="hidden sm:inline">
@@ -370,7 +362,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
           <button
             type="button"
             onClick={handleChangelog}
-            className="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-2xs font-medium text-blue-700 hover:text-blue-800 hover:bg-semantic-info/10 transition-colors"
+            className="hidden sm:inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-2xs font-medium text-oe-blue hover:text-oe-blue-hover hover:bg-semantic-info/10 transition-colors"
           >
             {t('whatsnew.changelog_link', {
               defaultValue: 'Full release notes',
@@ -381,7 +373,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
             type="button"
             onClick={handleDismiss}
             aria-label={t('whatsnew.dismiss', { defaultValue: 'Dismiss' })}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-sky-600/70 hover:text-blue-700 hover:bg-semantic-info/10 dark:text-sky-300/70 dark:hover:text-sky-100 dark:hover:bg-sky-400/10 transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue hover:bg-semantic-info/10 transition-colors"
           >
             <X size={14} />
           </button>
@@ -483,8 +475,8 @@ function ChipWithPopover({
           'inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-medium',
           'ring-1 transition-colors',
           expanded
-            ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white ring-blue-500/40 shadow-sm shadow-blue-500/30'
-            : 'bg-white/65 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-semantic-info/15 dark:hover:bg-sky-400/15',
+            ? 'bg-oe-blue text-white'
+            : 'bg-surface-primary text-content-primary ring-border hover:bg-semantic-info/15',
         ].join(' ')}
       >
         <Icon size={11} strokeWidth={2.25} />
@@ -501,27 +493,25 @@ function ChipWithPopover({
                 position: 'fixed',
                 top: pos.top,
                 left: pos.left,
-                width: 400,
+                width: 'min(400px, calc(100vw - 16px))',
                 // z-[1000] sits above the sticky AppLayout header (z-30),
                 // dashboard widget cards, and any module floating UI we ship.
                 // Modal overlays use z-[2000]+ so this still ducks under them.
                 zIndex: 1000,
               }}
               className={[
-                'rounded-lg border border-semantic-info/30 ring-1 ring-sky-500/10',
-                'dark:border-sky-700/50 dark:ring-sky-400/10',
-                'bg-white/95 backdrop-blur-md',
-                'shadow-lg shadow-sky-500/20 p-3',
+                'rounded-xl border border-border-light',
+                'bg-surface-elevated shadow-md p-3',
               ].join(' ')}
             >
-              <h3 className="text-xs font-semibold text-blue-900 dark:text-sky-100 leading-snug mb-1.5 line-clamp-4">
+              <h3 className="text-xs font-semibold text-content-primary leading-snug mb-1.5 line-clamp-4">
                 {t(s.titleKey, { defaultValue: s.titleDefault })}
               </h3>
               <ul className="space-y-0.5">
                 {s.bullets.map((b) => (
                   <li
                     key={b.key}
-                    className="flex items-start gap-1.5 text-xs leading-snug text-blue-900/85 dark:text-sky-100/85"
+                    className="flex items-start gap-1.5 text-xs leading-snug text-content-secondary"
                   >
                     <span
                       aria-hidden="true"
@@ -534,7 +524,7 @@ function ChipWithPopover({
               <button
                 type="button"
                 onClick={onReadMore}
-                className="mt-2 inline-flex items-center gap-0.5 text-2xs font-medium text-blue-700 hover:text-blue-800 dark:text-sky-300 dark:hover:text-sky-100 transition-colors"
+                className="mt-2 inline-flex items-center gap-0.5 text-2xs font-medium text-oe-blue hover:text-oe-blue-hover transition-colors"
               >
                 {t('whatsnew.read_more', { defaultValue: 'Read more' })}
                 <ArrowRight size={11} />

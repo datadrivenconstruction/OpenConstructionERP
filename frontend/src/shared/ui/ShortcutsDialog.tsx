@@ -165,9 +165,9 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
     // z-[60], like the command palette: this dialog mounts early in the DOM
     // (App.tsx GlobalShortcuts), so at z-50 it would open UNDER the AI dock
     // and its backdrop when "?" is pressed with the dock open as an overlay.
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-popover flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in" />
 
       {/* Dialog */}
       <div
@@ -177,15 +177,15 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
         aria-label={t('shortcuts.title')}
         tabIndex={-1}
         className={clsx(
-          'relative z-10 w-full max-w-lg mx-4',
-          'rounded-2xl border border-border-light',
+          'relative z-10 w-full sm:max-w-lg sm:mx-4',
+          'rounded-t-2xl sm:rounded-2xl border border-border-light',
           'bg-surface-elevated shadow-xl',
           'animate-scale-in',
           'focus:outline-none',
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <h2 className="text-base font-semibold text-content-primary">
             {t('shortcuts.title')}
           </h2>
@@ -203,7 +203,7 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-6 max-h-[70vh] overflow-y-auto">
+        <div className="px-5 pb-5 max-h-[70dvh] overflow-y-auto">
           {SHORTCUT_GROUPS.map((group, groupIdx) => (
             <div key={group.titleKey} className={clsx(groupIdx > 0 && 'mt-5')}>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2.5">
@@ -248,7 +248,7 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border-light px-6 py-3">
+        <div className="border-t border-border-light px-5 py-3">
           <p className="text-xs text-content-tertiary">
             {t('shortcuts.footer_hint')}
           </p>

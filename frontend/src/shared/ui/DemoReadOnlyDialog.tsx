@@ -117,8 +117,8 @@ export function DemoReadOnlyDialog() {
     // inside a modal or from a cell editor in the BOQ grid, both of which sit
     // near the top of the stacking order, and an explanation rendered behind
     // the thing that provoked it explains nothing.
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center" data-testid="demo-read-only-dialog">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+    <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center" data-testid="demo-read-only-dialog">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in" />
 
       <div
         ref={dialogRef}
@@ -128,14 +128,14 @@ export function DemoReadOnlyDialog() {
         aria-describedby="demo-read-only-example"
         tabIndex={-1}
         className={clsx(
-          'relative z-10 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto',
-          'rounded-2xl border border-border-light',
+          'relative z-10 w-full sm:max-w-lg sm:mx-4 max-h-[92dvh] overflow-y-auto',
+          'rounded-t-2xl sm:rounded-2xl border border-border-light',
           'bg-surface-elevated shadow-xl',
-          'animate-scale-in',
+          'animate-slide-up sm:animate-scale-in',
           'focus:outline-none',
         )}
       >
-        <div className="px-6 pt-6 pb-4">
+        <div className="px-5 pt-5 pb-4">
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4 bg-oe-blue/10 text-oe-blue">
             <Info size={20} />
           </div>
@@ -169,14 +169,14 @@ export function DemoReadOnlyDialog() {
           </ul>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row gap-3 px-6 pb-6">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-5 pb-5">
           <button
             ref={dismissRef}
             type="button"
             onClick={dismiss}
             data-testid="demo-read-only-dismiss"
             className={clsx(
-              'flex-1 rounded-lg px-4 py-2.5',
+              'flex h-8 items-center justify-center rounded-lg px-3',
               'text-sm font-medium transition-all',
               'bg-surface-primary text-content-primary',
               'border border-border',
@@ -192,13 +192,13 @@ export function DemoReadOnlyDialog() {
             rel="noopener noreferrer"
             data-testid="demo-read-only-download"
             className={clsx(
-              'flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5',
+              'inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3',
               'text-sm font-medium transition-all',
               'bg-oe-blue text-white hover:bg-oe-blue-hover active:bg-oe-blue-active',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
             )}
           >
-            <Download size={16} />
+            <Download size={14} />
             {t('demo_read_only.get_it', { defaultValue: 'Get it for your machine' })}
           </a>
         </div>

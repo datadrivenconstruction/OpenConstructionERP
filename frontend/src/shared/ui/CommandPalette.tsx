@@ -624,10 +624,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const resetShortcutLabel = t('palette.shortcut.reset', { defaultValue: 'Restore the default shortcut' });
 
   const dialog = (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
+    <div className="fixed inset-0 z-popover flex items-start justify-center pt-[10vh] sm:pt-[15vh]">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
+        className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
         onClick={onClose}
       />
 
