@@ -436,7 +436,7 @@ function AddMarkupModal({
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
       <div
         ref={dialogRef}
         role="dialog"
@@ -453,7 +453,7 @@ function AddMarkupModal({
           <button
             onClick={onClose}
             aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="p-1 rounded-md hover:bg-surface-secondary text-content-tertiary transition-colors"
+            className="p-1 rounded-lg hover:bg-surface-secondary text-content-tertiary transition-colors"
           >
             <X size={16} />
           </button>
@@ -714,7 +714,7 @@ function StatsBar({ summary }: { summary: MarkupsSummary | undefined }) {
   return (
     <div className="flex items-center gap-2 flex-wrap text-xs">
       {/* Total */}
-      <span className="inline-flex items-center gap-1 font-semibold text-content-primary bg-surface-secondary px-2 py-1 rounded-md">
+      <span className="inline-flex items-center gap-1 font-semibold text-content-primary bg-surface-secondary px-2 py-1 rounded-lg">
         {t('markups.stat_total_short', { defaultValue: 'Total' })}: {total}
       </span>
 
@@ -919,7 +919,7 @@ function MarkupDetail({
             aria-label={t('markups.previous', { defaultValue: 'Previous markup' })}
             title={t('markups.previous', { defaultValue: 'Previous' }) + ' (←)'}
             className={clsx(
-              'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+              'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors',
               prevId
                 ? 'text-content-primary hover:bg-surface-primary'
                 : 'text-content-tertiary opacity-50 cursor-not-allowed',
@@ -946,7 +946,7 @@ function MarkupDetail({
             aria-label={t('markups.next', { defaultValue: 'Next markup' })}
             title={t('markups.next', { defaultValue: 'Next' }) + ' (→)'}
             className={clsx(
-              'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+              'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors',
               nextId
                 ? 'text-content-primary hover:bg-surface-primary'
                 : 'text-content-tertiary opacity-50 cursor-not-allowed',
@@ -2153,7 +2153,7 @@ export function MarkupsPage() {
               onClick={() => setScopeTab('unified')}
               data-testid="markups-tab-unified"
               className={clsx(
-                'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
                 scopeTab === 'unified'
                   ? 'bg-oe-blue text-content-inverse'
                   : 'text-content-secondary hover:bg-surface-secondary',
@@ -2171,7 +2171,7 @@ export function MarkupsPage() {
               onClick={() => setScopeTab('hub')}
               data-testid="markups-tab-hub"
               className={clsx(
-                'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
                 scopeTab === 'hub'
                   ? 'bg-oe-blue text-content-inverse'
                   : 'text-content-secondary hover:bg-surface-secondary',

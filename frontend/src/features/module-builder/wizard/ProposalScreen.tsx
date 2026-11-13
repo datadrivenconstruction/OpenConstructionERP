@@ -95,7 +95,7 @@ export function ProposalScreen({
   return (
     <div className="space-y-6" data-testid="module-builder-proposal">
       {/* The summary card: what a person would say about the register. */}
-      <section className="rounded-2xl border border-border-light bg-gradient-to-b from-surface-secondary/50 to-surface-primary p-4 sm:p-5">
+      <section className="rounded-xl border border-border-light bg-gradient-to-b from-surface-secondary/50 to-surface-primary p-4 sm:p-5">
         <div className="flex items-start gap-3 sm:gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text sm:h-12 sm:w-12">
             <ModuleIcon name={spec.icon} />

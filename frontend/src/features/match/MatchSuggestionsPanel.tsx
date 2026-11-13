@@ -764,7 +764,7 @@ function CatalogBindingBar({
 
       {picking && (
         <div
-          className="absolute top-full right-3 mt-1 z-dropdown w-64 max-w-xs rounded border border-border-light bg-surface shadow-lg p-1"
+          className="absolute top-full right-3 mt-1 z-dropdown w-64 max-w-xs rounded-lg border border-border-light bg-surface-primary shadow-md p-1"
           data-testid="match-catalog-picker"
           role="listbox"
           aria-label={t('match.catalog_picker_aria', {
@@ -1153,7 +1153,7 @@ function ScoreBadge({
           id={tooltipId}
           role="tooltip"
           data-testid={`match-boosts-tooltip-${candidate.code}`}
-          className="absolute right-0 top-full mt-1 z-dropdown min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-2xs"
+          className="absolute right-0 top-full mt-1 z-dropdown min-w-[180px] rounded-lg border border-border-light bg-surface-primary shadow-md p-2 text-2xs"
         >
           <div className="flex items-center justify-between mb-1 font-semibold text-content-primary">
             <span>

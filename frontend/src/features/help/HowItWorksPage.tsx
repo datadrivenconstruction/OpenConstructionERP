@@ -183,7 +183,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
     <div
       data-testid={`howto-card-${module.id}`}
       className={clsx(
-        'rounded-2xl border bg-surface-elevated transition-colors',
+        'rounded-xl border bg-surface-elevated transition-colors',
         expanded
           ? 'border-oe-blue/40 shadow-md'
           : 'border-border-light hover:border-oe-blue/30 hover:shadow-sm',
@@ -195,7 +195,7 @@ function ModuleCard({ module, index, expanded, onToggle, onLocate, onOpen }: Car
         onClick={onToggle}
         aria-expanded={expanded}
         aria-controls={panelId}
-        className="flex w-full items-start gap-3 rounded-2xl p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+        className="flex w-full items-start gap-3 rounded-xl p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
       >
         <span
           aria-hidden="true"
@@ -470,7 +470,7 @@ export function HowItWorksPage() {
                   aria-pressed={mode === opt.mode}
                   data-testid={`howto-sort-${opt.mode}`}
                   className={clsx(
-                    'rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
+                    'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
                     mode === opt.mode
                       ? 'bg-oe-blue text-white shadow-sm'
                       : 'text-content-secondary hover:text-content-primary',
@@ -504,7 +504,7 @@ export function HowItWorksPage() {
 
       {/* Grouped sections. */}
       {orderedGroups.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-content-secondary">
             {t('howto.no_results', { defaultValue: 'No modules match your search.' })}
           </p>

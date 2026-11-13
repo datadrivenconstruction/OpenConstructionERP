@@ -37,7 +37,7 @@ export function UpdateScreen({ spec, additions, preview, previewing, empty = fal
 
   return (
     <div className="space-y-5" data-testid="module-builder-update-screen">
-      <section className="rounded-2xl border border-border-light p-4 sm:p-5">
+      <section className="rounded-xl border border-border-light p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
             <ModuleIcon name={spec.icon} />

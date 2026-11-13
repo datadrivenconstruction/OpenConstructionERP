@@ -665,7 +665,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => removeOnCost(row.key)}
-                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
+                    className="rounded-lg p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
                     aria-label={t('laborRates.remove', { defaultValue: 'Remove' })}
                   >
                     <Trash2 size={16} />
@@ -719,7 +719,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => useAllInFor(row.key)}
-                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-blue-600"
+                    className="rounded-lg p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-blue-600"
                     title={t('laborRates.use_all_in', {
                       defaultValue: 'Use the all-in rate above',
                     })}
@@ -732,7 +732,7 @@ export function LaborRatesPage() {
                   <button
                     type="button"
                     onClick={() => removeCrew(row.key)}
-                    className="rounded-md p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
+                    className="rounded-lg p-1.5 text-content-quaternary hover:bg-surface-secondary hover:text-semantic-error"
                     aria-label={t('laborRates.remove', { defaultValue: 'Remove' })}
                   >
                     <Trash2 size={16} />
@@ -742,7 +742,7 @@ export function LaborRatesPage() {
             </div>
 
             {crewBreakdown && crewBreakdown.headcount > 0 && (
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-sm">
                 <span className="text-content-secondary">
                   {t('laborRates.crew_summary', {
                     defaultValue: '{{count}} people · {{total}}/h total',

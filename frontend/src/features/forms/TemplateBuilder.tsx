@@ -413,7 +413,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
               <button
                 type="button"
                 onClick={() => setShowPreview((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary lg:hidden"
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary lg:hidden"
               >
                 {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
                 {showPreview
@@ -452,7 +452,7 @@ export function TemplateBuilder({ open, onClose, initial, projectId, onSaved }: 
                 {t('forms.add_field', { defaultValue: 'Add field' })}
               </Button>
               {showPalette && (
-                <div className="absolute z-dropdown mt-2 grid w-full max-w-2xl grid-cols-2 gap-1 rounded-xl border border-border bg-surface-elevated p-2 shadow-xl sm:grid-cols-3">
+                <div className="absolute z-dropdown mt-2 grid w-full max-w-2xl grid-cols-2 gap-1 rounded-xl border border-border bg-surface-elevated p-2 shadow-md sm:grid-cols-3">
                   {FIELD_TYPES.map((m) => (
                     <PaletteButton key={m.type} meta={m} onClick={() => addField(m.type)} />
                   ))}
@@ -1123,7 +1123,7 @@ function IconBtn({
       disabled={disabled}
       onClick={onClick}
       className={clsx(
-        'inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+        'inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
         'disabled:opacity-30 disabled:pointer-events-none',
         danger
           ? 'text-semantic-error hover:bg-semantic-error-bg'

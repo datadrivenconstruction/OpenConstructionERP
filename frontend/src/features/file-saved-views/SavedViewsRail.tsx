@@ -170,7 +170,7 @@ export function SavedViewsRail({ projectId, onApply, compact = false }: SavedVie
                 onClick={() => handleClick(view)}
                 onContextMenu={(e) => handleContext(e, view)}
                 className={clsx(
-                  'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm',
+                  'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm',
                   'hover:bg-surface-secondary active:bg-surface-tertiary',
                   'border border-transparent hover:border-border-light',
                   view.is_pinned && 'bg-surface-secondary/60',
@@ -205,7 +205,7 @@ export function SavedViewsRail({ projectId, onApply, compact = false }: SavedVie
         <div
           role="menu"
           data-testid="saved-views-context-menu"
-          className="fixed z-popover min-w-[10rem] rounded-lg border border-border bg-surface-elevated shadow-2xl"
+          className="fixed z-popover min-w-[10rem] rounded-lg border border-border bg-surface-elevated shadow-xl"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >

@@ -179,7 +179,7 @@ export function DemoQuickStart() {
             <article
               key={c.id}
               data-testid={`demo-quick-card-${c.id}`}
-              className="group relative flex min-w-0 flex-col rounded-2xl border border-border-light bg-surface-primary p-5 ps-14 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group relative flex min-w-0 flex-col rounded-xl border border-border-light bg-surface-primary p-5 ps-14 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <HexMark icon={c.icon} size={48} className="-top-3 -start-3" />
               <h3 className="oe-card-title">{c.title}</h3>

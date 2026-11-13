@@ -50,7 +50,7 @@ export const PRIORITY_CHIP_CLASSES: Record<MarkupPriority, string> = {
   high: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700',
   medium:
     'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  low: 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600',
+  low: 'bg-surface-secondary text-content-secondary border-border',
 };
 
 export function isMarkupPriority(v: unknown): v is MarkupPriority {

@@ -167,7 +167,7 @@ export function SaveViewDialog({ open, onClose, projectId, filter }: SaveViewDia
                 aria-label={t(labelKey, { defaultValue: label })}
                 aria-pressed={icon === key}
                 className={clsx(
-                  'flex h-8 w-8 items-center justify-center rounded-md border',
+                  'flex h-8 w-8 items-center justify-center rounded-lg border',
                   icon === key
                     ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
                     : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary',
@@ -207,7 +207,7 @@ export function SaveViewDialog({ open, onClose, projectId, filter }: SaveViewDia
         {error && (
           <div
             role="alert"
-            className="rounded-md border border-semantic-error/40 bg-semantic-error/10 px-3 py-2 text-sm text-semantic-error"
+            className="rounded-lg border border-semantic-error/40 bg-semantic-error/10 px-3 py-2 text-sm text-semantic-error"
           >
             {error}
           </div>

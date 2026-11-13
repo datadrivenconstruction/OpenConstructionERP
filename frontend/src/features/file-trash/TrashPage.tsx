@@ -232,7 +232,7 @@ export function TrashPage() {
             return (
               <Card key={item.id} padding="sm" data-testid={`trash-row-${item.id}`}>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
                     <Icon size={16} strokeWidth={1.75} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -328,7 +328,7 @@ export function TrashPage() {
       {list.data && <TruncationNotice page={list.data} className="mt-2" />}
 
       {list.isError && (
-        <div className="mt-4 flex items-center gap-2 px-3 py-2 text-xs text-semantic-error bg-semantic-error/5 rounded-md">
+        <div className="mt-4 flex items-center gap-2 px-3 py-2 text-xs text-semantic-error bg-semantic-error/5 rounded-lg">
           <Loader2 size={12} className="animate-spin" />
           {t('files.trash.load_failed', {
             defaultValue: 'Could not load the Recycle Bin. Please try again.',

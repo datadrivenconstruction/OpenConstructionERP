@@ -33,7 +33,7 @@ export function TrashNode({ projectId, active, className }: TrashNodeProps) {
       onClick={() => navigate('/files/trash')}
       data-testid="file-tree-trash-node"
       className={clsx(
-        'flex w-full items-center gap-2 px-2 py-1.5 rounded-md text-left',
+        'flex w-full items-center gap-2 px-2 py-1.5 rounded-lg text-left',
         'text-xs text-content-secondary',
         'hover:bg-surface-secondary hover:text-content-primary',
         'transition-colors',

@@ -409,7 +409,7 @@ export function GeneratedModulePage() {
                 {exportOpen && (
                   <div
                     role="menu"
-                    className="absolute end-0 z-dropdown mt-1 min-w-[10rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
+                    className="absolute end-0 z-dropdown mt-1 min-w-[10rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-md"
                   >
                     <button
                       type="button"
@@ -740,7 +740,7 @@ export function GeneratedModulePage() {
                           setFormOpen(true);
                         }}
                         aria-label={t('common.edit', { defaultValue: 'Edit' })}
-                        className="rounded-md p-1.5 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
+                        className="rounded-lg p-1.5 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
                       >
                         <Pencil size={14} />
                       </button>
@@ -748,7 +748,7 @@ export function GeneratedModulePage() {
                         type="button"
                         onClick={() => setPendingDelete(record)}
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                        className="rounded-md p-1.5 text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error"
+                        className="rounded-lg p-1.5 text-content-tertiary transition-colors hover:bg-semantic-error-bg hover:text-semantic-error"
                       >
                         <Trash2 size={14} />
                       </button>

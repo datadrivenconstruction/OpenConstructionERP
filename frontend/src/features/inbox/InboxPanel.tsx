@@ -103,7 +103,7 @@ function kindIcon(item: InboxItem) {
 
 /** Shared styling for the small icon buttons at the end of a row. */
 const ROW_ACTION_CLASS =
-  'shrink-0 rounded-md p-1 text-content-quaternary transition-colors hover:bg-surface-tertiary ' +
+  'shrink-0 rounded-lg p-1 text-content-quaternary transition-colors hover:bg-surface-tertiary ' +
   'hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 ' +
   'focus-visible:ring-oe-blue/40 disabled:pointer-events-none disabled:opacity-40';
 
@@ -191,7 +191,7 @@ function InboxRow({ item }: { item: InboxItem }) {
     <>
       <span
         className={clsx(
-          'shrink-0 h-7 w-7 rounded-md flex items-center justify-center',
+          'shrink-0 h-7 w-7 rounded-lg flex items-center justify-center',
           sevStyle.bg,
         )}
       >
@@ -250,7 +250,7 @@ function InboxRow({ item }: { item: InboxItem }) {
         <button
           type="button"
           onClick={onClick}
-          className="flex min-w-0 flex-1 items-start gap-3 rounded-md px-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+          className="flex min-w-0 flex-1 items-start gap-3 rounded-lg px-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
         >
           {rowBody}
         </button>
@@ -314,7 +314,7 @@ export function InboxPanel({
         <div className="px-4 py-6 space-y-3" aria-busy="true">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex items-start gap-2">
-              <div className="h-7 w-7 rounded-md bg-surface-secondary animate-pulse shrink-0" />
+              <div className="h-7 w-7 rounded-lg bg-surface-secondary animate-pulse shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-2.5 w-3/4 rounded bg-surface-secondary animate-pulse" />
                 <div className="h-2 w-1/2 rounded bg-surface-secondary animate-pulse" />
@@ -397,7 +397,7 @@ export function InboxPanel({
         onClick={() => navigate('/inbox')}
         className="group flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-semantic-warning-bg">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-warning-bg">
           <ClipboardCheck size={16} className="text-semantic-warning" />
         </span>
         <span className="min-w-0">
@@ -414,7 +414,7 @@ export function InboxPanel({
         onClick={() => navigate('/inbox')}
         className="group flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-secondary lg:flex-none"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-oe-blue-subtle">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
           <Bell size={16} className="text-oe-blue" />
         </span>
         <span className="min-w-0">

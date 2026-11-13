@@ -10,7 +10,7 @@
  * only ever offers the transitions that are legal for the current state.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -20,7 +20,6 @@ import clsx from 'clsx';
 import {
   Replace,
   Plus,
-  X,
   Search,
   ChevronDown,
   ChevronRight,
@@ -62,6 +61,7 @@ import {
   IntroRichText,
   ModuleGuideButton,
   InfoHint,
+  WideModal,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -482,47 +482,36 @@ function MoCFormModal({
     if (canSubmit) onSubmit(form);
   };
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('moc.new_change', { defaultValue: 'New change request' })}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <div>
-            <h2 className="oe-section-title">
-              {mode === 'create'
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={mode === 'create'
                 ? t('moc.new_change', { defaultValue: 'New change request' })
                 : t('moc.edit_change', { defaultValue: 'Edit change request' })}
-            </h2>
-            {projectName && (
-              <p className="text-xs text-content-tertiary mt-0.5">
-                {t('common.creating_in_project', { defaultValue: 'In {{project}}', project: projectName })}
-              </p>
+      subtitle={projectName ? (t('common.creating_in_project', { defaultValue: 'In {{project}}', project: projectName })) : undefined}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <Plus size={16} className="mr-1.5 shrink-0" />
             )}
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="px-6 py-4 space-y-5">
+            <span>
+              {mode === 'create'
+                ? t('moc.create_change', { defaultValue: 'Create change request' })
+                : t('common.save', { defaultValue: 'Save' })}
+            </span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-5">
           {/* Category */}
           <div>
             <label className="oe-label">
@@ -677,27 +666,7 @@ function MoCFormModal({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <Plus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>
-              {mode === 'create'
-                ? t('moc.create_change', { defaultValue: 'Create change request' })
-                : t('common.save', { defaultValue: 'Save' })}
-            </span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -721,14 +690,6 @@ function TransitionModal({
   const cfg = TRANSITION_CONFIG[action];
   const Icon = cfg.icon;
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   const titleMap: Record<MoCTransition, string> = {
     review: t('moc.confirm_review_title', { defaultValue: 'Mark as reviewed' }),
     accept: t('moc.confirm_accept_title', { defaultValue: 'Approve this change' }),
@@ -751,30 +712,29 @@ function TransitionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-md bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
-        role="dialog"
-        aria-modal="true"
-        aria-label={titleMap[action]}
-      >
-        <div className="px-6 py-4 border-b border-border-light flex items-center gap-3">
-          <span
-            className={clsx(
-              'flex h-9 w-9 items-center justify-center rounded-lg shrink-0',
-              action === 'decline'
-                ? 'bg-semantic-error-bg text-semantic-error'
-                : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+    <WideModal
+      open
+      onClose={onClose}
+      size="sm"
+      title={titleMap[action]}
+      subtitle={entry.code}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant={cfg.variant} onClick={() => onConfirm(notes)} disabled={isPending}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <Icon size={16} className="mr-1.5 shrink-0" />
             )}
-          >
-            <Icon size={20} />
-          </span>
-          <div>
-            <h2 className="oe-card-title">{titleMap[action]}</h2>
-            <p className="text-xs text-content-tertiary font-mono">{entry.code}</p>
-          </div>
-        </div>
-        <div className="px-6 py-4 space-y-3">
+            <span>{t(`moc.action_${action}`, { defaultValue: MOC_ACTION_LABELS[action] ?? cap(action) })}</span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
           <p className="text-sm text-content-secondary">{bodyMap[action]}</p>
           <div>
             <label htmlFor="moc-trans-notes" className="oe-label">
@@ -795,21 +755,7 @@ function TransitionModal({
             />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant={cfg.variant} onClick={() => onConfirm(notes)} disabled={isPending}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <Icon size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t(`moc.action_${action}`, { defaultValue: MOC_ACTION_LABELS[action] ?? cap(action) })}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -837,38 +783,43 @@ function AddImpactModal({
   const [cost, setCost] = useState('');
   const [days, setDays] = useState('');
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('moc.add_impact', { defaultValue: 'Add impact assessment' })}
-      >
-        <div className="px-6 py-4 border-b border-border-light flex items-center justify-between">
-          <div>
-            <h2 className="oe-card-title">
-              {t('moc.add_impact', { defaultValue: 'Add impact assessment' })}
-            </h2>
-            <p className="text-xs text-content-tertiary font-mono">{entry.code}</p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+    <WideModal
+      open
+      onClose={onClose}
+      size="sm"
+      title={t('moc.add_impact', { defaultValue: 'Add impact assessment' })}
+      subtitle={entry.code}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() =>
+              onSubmit({
+                impact_area: area,
+                severity,
+                description,
+                mitigation,
+                cost_impact: toDecimalPayloadString(cost),
+                schedule_delta_days: days ? Number.parseInt(days, 10) : 0,
+              })
+            }
+            disabled={isPending}
           >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-6 py-4 space-y-4">
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <ListPlus size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('moc.add_impact', { defaultValue: 'Add impact' })}</span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="imp-area" className="oe-label">
@@ -960,34 +911,7 @@ function AddImpactModal({
             />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() =>
-              onSubmit({
-                impact_area: area,
-                severity,
-                description,
-                mitigation,
-                cost_impact: toDecimalPayloadString(cost),
-                schedule_delta_days: days ? Number.parseInt(days, 10) : 0,
-              })
-            }
-            disabled={isPending}
-          >
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <ListPlus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t('moc.add_impact', { defaultValue: 'Add impact' })}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -1087,7 +1011,7 @@ const MoCRow = React.memo(function MoCRow({
           <div className="flex flex-wrap items-center gap-4 text-xs text-content-tertiary">
             <span className="flex items-center gap-1.5">
               <span
-                className={clsx('inline-flex items-center rounded-md border px-1.5 py-0.5 font-medium', catCfg.color)}
+                className={clsx('inline-flex items-center rounded-lg border px-1.5 py-0.5 font-medium', catCfg.color)}
               >
                 <CatIcon size={12} className="mr-1" />
                 {t(`moc.category_${catKey}`, { defaultValue: MOC_CATEGORY_LABELS[catKey] ?? cap(catKey) })}
