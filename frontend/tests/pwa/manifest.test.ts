@@ -48,8 +48,8 @@ describe('PWA manifest', () => {
 
   it('sets the OCE theme palette', () => {
     const manifest = manifestJson();
-    expect(manifest.theme_color).toBe('#0284c7');
-    expect(manifest.background_color).toBe('#f7fbff');
+    expect(manifest.theme_color).toBe('#2987F8');
+    expect(manifest.background_color).toBe('#F0EEEB');
   });
 
   it('declares display=standalone and the root scope', () => {
@@ -72,9 +72,9 @@ describe('PWA manifest', () => {
     const maskable = icons.find((i) => (i.purpose ?? '').includes('maskable'));
     expect(maskable, 'manifest must include a maskable icon for adaptive launchers').toBeTruthy();
 
-    // Every src should resolve under /pwa/
+    // Raster icons live under /pwa/, the scalable brand mark under /brand/erp/.
     for (const icon of icons) {
-      expect(icon.src.startsWith('/pwa/')).toBe(true);
+      expect(icon.src.startsWith('/pwa/') || icon.src.startsWith('/brand/erp/')).toBe(true);
     }
   });
 });
@@ -89,6 +89,6 @@ describe('PWA plugin configuration', () => {
     expect(config).toContain('VitePWA');
     expect(config).toContain("'OpenConstructionERP'");
     expect(config).toContain("'OCERP'");
-    expect(config).toContain("'#0284c7'");
+    expect(config).toContain("'#2987F8'");
   });
 });
