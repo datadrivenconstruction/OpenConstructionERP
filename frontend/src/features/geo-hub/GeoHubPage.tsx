@@ -201,8 +201,8 @@ function GlobalNoProjectsEmpty({
       <div
         className={[
           'pointer-events-auto relative w-full max-w-md overflow-hidden',
-          'rounded-xl border border-white/10 bg-slate-900/70 p-6 text-slate-100',
-          'shadow-xl backdrop-blur-md ring-1 ring-white/5',
+          'rounded-xl border border-border bg-surface-elevated/90 p-6 text-content-primary',
+          'shadow-xl backdrop-blur-md ring-1 ring-border-light',
         ].join(' ')}
         role="status"
       >
@@ -223,12 +223,12 @@ function GlobalNoProjectsEmpty({
           >
             <MapPin size={20} strokeWidth={2} />
           </div>
-          <h3 className="text-base font-semibold text-white">
+          <h3 className="text-base font-semibold text-content-primary">
             {t('geo_hub.empty.global_no_projects_title', {
               defaultValue: 'No anchored projects yet',
             })}
           </h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+          <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">
             {t('geo_hub.empty.global_no_projects_description_v2', {
               defaultValue:
                 'If your projects have addresses we can place them on the globe automatically. Otherwise open a project and anchor it manually.',
@@ -261,8 +261,8 @@ function GlobalNoProjectsEmpty({
               to="/projects"
               className={[
                 'inline-flex items-center gap-1.5 rounded-md',
-                'border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white',
-                'shadow-sm transition hover:bg-white/10',
+                'border border-border bg-surface-secondary px-3 py-1.5 text-xs font-semibold text-content-primary',
+                'shadow-sm transition hover:bg-surface-secondary',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
               ].join(' ')}
             >
@@ -277,8 +277,8 @@ function GlobalNoProjectsEmpty({
               to="/property-dev"
               className={[
                 'inline-flex items-center gap-1.5 rounded-md',
-                'border border-white/10 px-3 py-1.5 text-xs font-medium text-slate-200',
-                'transition hover:bg-white/5',
+                'border border-border px-3 py-1.5 text-xs font-medium text-content-primary',
+                'transition hover:bg-surface-secondary',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
               ].join(' ')}
             >
@@ -288,7 +288,7 @@ function GlobalNoProjectsEmpty({
               <ArrowUpRight size={14} strokeWidth={2.25} />
             </Link>
           </div>
-          <p className="mt-3 text-2xs text-slate-400">
+          <p className="mt-3 text-2xs text-content-tertiary">
             {t('geo_hub.empty.bulk_attribution', {
               defaultValue:
                 'Auto-anchor uses OpenStreetMap Nominatim (1 req/sec, cached 30 days).',
@@ -357,9 +357,9 @@ function AnchoredProjectsOverlay({
         onClick={onToggleCollapsed}
         className={[
           'absolute top-3 left-3 z-20 inline-flex items-center gap-2',
-          'rounded-full border border-white/15 bg-slate-900/85 px-3 py-1.5',
-          'text-xs font-medium text-white shadow-lg shadow-black/20 backdrop-blur-md',
-          'ring-1 ring-white/5 transition hover:bg-slate-800/90',
+          'rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5',
+          'text-xs font-medium text-content-primary shadow-lg shadow-black/20 backdrop-blur-md',
+          'ring-1 ring-border-light transition hover:bg-surface-secondary',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
         ].join(' ')}
         aria-expanded={false}
@@ -374,7 +374,7 @@ function AnchoredProjectsOverlay({
         <span className="tabular-nums">
           {isLoading ? '…' : isError ? '!' : projects.length}
         </span>
-        <ChevronRight size={14} strokeWidth={2.25} className="text-white/70" />
+        <ChevronRight size={14} strokeWidth={2.25} className="text-content-tertiary" />
       </button>
     );
   }
@@ -384,7 +384,7 @@ function AnchoredProjectsOverlay({
       className={[
         // Floating overlay — never claims the full map height.
         'absolute top-3 left-3 z-20 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95',
+        'rounded-xl border border-border bg-surface-elevated/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         // Hide on phone-width so it doesn't cover the whole map; users
         // get the collapsed pill instead (rendered when toggled).
@@ -395,7 +395,7 @@ function AnchoredProjectsOverlay({
       })}
       data-testid="geo-tour-anchored-rail"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
+      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-border">
         <div className="min-w-0">
           <h2 className="oe-overline">
             {t('geo_hub.rail.title', { defaultValue: 'Anchored projects' })}
@@ -626,7 +626,7 @@ function GeoSearchOverlay({
     >
       <div
         className={[
-          'pointer-events-auto rounded-xl border border-white/15 bg-white/95',
+          'pointer-events-auto rounded-xl border border-border bg-surface-elevated/95',
           'p-2 shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
           '',
         ].join(' ')}
@@ -1092,11 +1092,11 @@ export function GeoHubPage() {
       {/* Full-width canvas — the project list is overlay-mounted on top
           (via CesiumViewer's ``overlay`` slot) so the globe always gets
           the full viewport width. */}
-      <main className="relative flex-1 overflow-hidden bg-slate-900">
+      <main className="relative flex-1 overflow-hidden bg-surface-tertiary">
         {engine === '2d' ? (
           <Suspense
             fallback={
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-300">
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-content-secondary">
                 <Loader2 size={20} className="animate-spin text-emerald-300" />
                 <span className="font-medium">
                   {t('geo_hub.loading_map_title', { defaultValue: 'Loading map' })}
@@ -1121,14 +1121,14 @@ export function GeoHubPage() {
         ) : (
           <Suspense
             fallback={
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-300">
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-content-secondary">
                 <Loader2 size={20} className="animate-spin text-emerald-300" />
                 <span className="font-medium">
                   {t('geo_hub.loading_viewer_title', {
                     defaultValue: 'Loading 3D globe runtime',
                   })}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-content-tertiary">
                   {t('geo_hub.loading_viewer_hint', {
                     defaultValue: 'Streaming Cesium chunks (~3 MB) - first load only.',
                   })}

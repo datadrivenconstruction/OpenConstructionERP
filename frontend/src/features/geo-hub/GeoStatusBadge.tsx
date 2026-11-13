@@ -24,7 +24,7 @@ const STATUS_TONE: Record<TilesetStatus, string> = {
     'bg-blue-50 text-blue-700 border-blue-200 ' +
     'dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/60',
   draft:
-    'bg-slate-50 text-slate-600 border-slate-200 ' +
+    'bg-surface-secondary text-content-secondary border-border-light ' +
     '',
   failed:
     'bg-semantic-error-bg text-semantic-error border-semantic-error/30 ' +
@@ -37,7 +37,7 @@ const STATUS_TONE: Record<TilesetStatus, string> = {
 const STATUS_DOT: Record<TilesetStatus, string> = {
   ready: 'bg-semantic-success',
   generating: 'bg-blue-500 animate-pulse',
-  draft: 'bg-slate-400',
+  draft: 'bg-content-quaternary',
   failed: 'bg-semantic-error',
   obsolete: 'bg-semantic-warning',
 };

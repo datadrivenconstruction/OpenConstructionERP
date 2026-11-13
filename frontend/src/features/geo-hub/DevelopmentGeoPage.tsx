@@ -222,7 +222,7 @@ export function DevelopmentGeoPage() {
       {/* Full-width canvas — the tileset rail is overlay-mounted on top
           (via CesiumViewer's ``overlay`` slot) so the map gets the full
           viewport width on every viewport size. */}
-      <main className="relative flex-1 overflow-hidden bg-slate-900">
+      <main className="relative flex-1 overflow-hidden bg-surface-tertiary">
         {error && (
           <div className="absolute inset-0 z-30 flex items-center justify-center p-6">
             {isStaleBackend ? (
@@ -249,7 +249,7 @@ export function DevelopmentGeoPage() {
         )}
         {!error && loading && (
           <div
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-xs text-slate-300"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-xs text-content-secondary"
             role="status"
             aria-live="polite"
           >
@@ -257,14 +257,14 @@ export function DevelopmentGeoPage() {
                 they're about to interact with, not just a blank globe. */}
             <div
               aria-hidden
-              className="absolute top-3 left-3 hidden w-72 flex-col gap-2 rounded-xl border border-white/10 bg-slate-900/40 p-3 backdrop-blur-md md:flex"
+              className="absolute top-3 left-3 hidden w-72 flex-col gap-2 rounded-xl border border-border bg-surface-elevated/90 p-3 backdrop-blur-md md:flex"
             >
-              <div className="h-3 w-1/2 rounded bg-slate-700/60 animate-pulse" />
-              <div className="h-2 w-2/3 rounded bg-slate-700/50 animate-pulse" />
+              <div className="h-3 w-1/2 rounded bg-surface-tertiary animate-pulse" />
+              <div className="h-2 w-2/3 rounded bg-surface-tertiary animate-pulse" />
               <div className="mt-2 space-y-1.5">
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
               </div>
             </div>
             <Loader2 size={20} className="animate-spin text-emerald-300" />
@@ -278,7 +278,7 @@ export function DevelopmentGeoPage() {
         {!error && mapConfig.data && (
           <Suspense
             fallback={
-              <div className="flex h-full items-center justify-center text-sm text-slate-300">
+              <div className="flex h-full items-center justify-center text-sm text-content-secondary">
                 {t('geo_hub.loading_viewer', {
                   defaultValue: 'Loading Cesium viewer (~3 MB)...',
                 })}

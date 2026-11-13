@@ -266,9 +266,9 @@ export function GeoEmptyState({
           onClick={() => setDismissed(false)}
           className={[
             'pointer-events-auto inline-flex items-center gap-2 rounded-full',
-            'border border-white/15 bg-slate-900/85 px-3 py-1.5',
-            'text-xs font-medium text-white shadow-lg shadow-black/20 backdrop-blur-md',
-            'ring-1 ring-white/5 transition hover:bg-slate-800/90',
+            'border border-border bg-surface-elevated/90 px-3 py-1.5',
+            'text-xs font-medium text-content-primary shadow-lg shadow-black/20 backdrop-blur-md',
+            'ring-1 ring-border-light transition hover:bg-surface-secondary',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           aria-expanded={false}
@@ -278,7 +278,7 @@ export function GeoEmptyState({
           {t('geo_hub.empty.no_anchor_pill', {
             defaultValue: 'Anchor this project',
           })}
-          <ChevronUp size={14} strokeWidth={2.25} className="text-white/70" />
+          <ChevronUp size={14} strokeWidth={2.25} className="text-content-tertiary" />
         </button>
       </div>
     );
@@ -298,8 +298,8 @@ export function GeoEmptyState({
       <div
         className={[
           `pointer-events-auto relative w-full overflow-hidden ${collapsible ? '' : 'max-w-md'}`,
-          'rounded-xl border border-white/10 bg-slate-900/70 p-6 text-slate-100',
-          'shadow-xl backdrop-blur-md ring-1 ring-white/5',
+          'rounded-xl border border-border bg-surface-elevated/90 p-6 text-content-primary',
+          'shadow-xl backdrop-blur-md ring-1 ring-border-light',
         ].join(' ')}
         role="status"
       >
@@ -317,7 +317,7 @@ export function GeoEmptyState({
             onClick={() => setDismissed(true)}
             className={[
               'absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md',
-              'text-slate-400 transition hover:bg-white/10 hover:text-slate-100',
+              'text-content-tertiary transition hover:bg-surface-secondary hover:text-content-primary',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
             ].join(' ')}
             aria-label={t('geo_hub.empty.dismiss', {
@@ -337,8 +337,8 @@ export function GeoEmptyState({
           >
             <Icon size={20} strokeWidth={2} />
           </div>
-          <h3 className="text-base font-semibold text-white">{v.title}</h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+          <h3 className="text-base font-semibold text-content-primary">{v.title}</h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">
             {v.description}
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -393,8 +393,8 @@ export function GeoEmptyState({
                   'inline-flex items-center gap-1.5 rounded-md',
                   // Secondary to the emerald auto-anchor button: this is the
                   // "I'll point at it myself" alternative, not the default.
-                  'border border-white/15 bg-white/5 px-3 py-1.5',
-                  'text-xs font-semibold text-white shadow-sm transition hover:bg-white/10',
+                  'border border-border bg-surface-secondary px-3 py-1.5',
+                  'text-xs font-semibold text-content-primary shadow-sm transition hover:bg-surface-secondary',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
               >
@@ -410,8 +410,8 @@ export function GeoEmptyState({
                 className={[
                   'inline-flex items-center gap-1.5 rounded-md',
                   hasPrimaryAction
-                    ? 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
-                    : 'bg-white text-slate-900 hover:bg-slate-100',
+                    ? 'border border-border bg-surface-secondary text-content-primary hover:bg-surface-secondary'
+                    : 'bg-content-primary text-content-inverse hover:opacity-90',
                   'px-3 py-1.5 text-xs font-semibold shadow-sm transition',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
@@ -422,7 +422,7 @@ export function GeoEmptyState({
             )}
           </div>
           {kind === 'no_anchor' && (
-            <p className="mt-3 text-2xs text-slate-400">
+            <p className="mt-3 text-2xs text-content-tertiary">
               {t('geo_hub.empty.auto_anchor_attribution', {
                 defaultValue:
                   'Geocoded via OpenStreetMap Nominatim. Cached for 30 days.',

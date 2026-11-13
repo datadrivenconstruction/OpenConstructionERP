@@ -343,9 +343,9 @@ export function OverlaySidebar({
         data-testid="geo-overlay-sidebar-toggle"
         className={[
           'absolute bottom-3 left-3 z-20 inline-flex items-center gap-2',
-          'rounded-full border border-white/15 bg-slate-900/85 px-3 py-1.5',
-          'text-xs font-medium text-white shadow-lg shadow-black/20 backdrop-blur-md',
-          'ring-1 ring-white/5 transition hover:bg-slate-800/90',
+          'rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5',
+          'text-xs font-medium text-content-primary shadow-lg shadow-black/20 backdrop-blur-md',
+          'ring-1 ring-border-light transition hover:bg-surface-secondary',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400',
         ].join(' ')}
         aria-expanded={false}
@@ -358,7 +358,7 @@ export function OverlaySidebar({
       >
         <Layers size={14} strokeWidth={2} className="text-emerald-300" />
         <span className="tabular-nums">{isLoading ? '…' : totalCount}</span>
-        <ChevronRight size={14} strokeWidth={2.25} className="text-white/70" />
+        <ChevronRight size={14} strokeWidth={2.25} className="text-content-tertiary" />
       </button>
     );
   }
@@ -374,7 +374,7 @@ export function OverlaySidebar({
         // can be open simultaneously since the canvas is tall enough for a
         // 60vh top panel + a 50vh bottom panel.
         'absolute bottom-3 left-3 z-20 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95',
+        'rounded-xl border border-border bg-surface-elevated/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         // Hide on phone-width so it doesn't cover the whole map; users
         // get the collapsed pill instead (rendered when toggled).
@@ -384,7 +384,7 @@ export function OverlaySidebar({
         defaultValue: 'Overlays and tilesets',
       })}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
+      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-border">
         <div className="min-w-0">
           <h2 className="oe-overline">
             {t('geo_hub.overlay_sidebar.title', {
