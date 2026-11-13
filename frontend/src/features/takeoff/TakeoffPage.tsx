@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 
 import { Button, Card, Badge, Input, Skeleton, DismissibleInfo, IntroRichText, Breadcrumb, ModuleGuideButton, ProjectFilePicker, type PickedProjectFile } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { PDF_TAKEOFF_FORMATS } from '@/shared/lib/projectFileFormats';
 import type { FileKind } from '@/features/file-manager/types';
 import { PdfCompareDrawer } from './PdfCompareDrawer';
@@ -2153,30 +2154,20 @@ export function TakeoffPage() {
           so the canonical breadcrumb > header > info > tabs block carries its
           own space-y-5 rhythm here (style guide §1 viewer exception). */}
       <div className="shrink-0 space-y-5">
-      {/* Breadcrumb and the "How it works" guide button share one row so the
-          guide action sits level with the project / page trail and the blocks
-          below move up (founder layout request). The module name + icon still
-          come from the global top app bar; the sr-only h1 keeps the accessible
-          page heading, and the "what this page does" copy lives in the
-          dismissible info card just below. */}
-      <div className="flex min-h-7 flex-wrap items-center gap-x-4 gap-y-2">
-        <Breadcrumb
-          items={[
-            ...(() => {
-              const sel = projects?.find((p) => p.id === selectedProjectId);
-              return sel ? [{ label: sel.name, to: `/projects/${sel.id}` }] : [];
-            })(),
-            { label: t('nav.pdf_measurements', 'PDF Measurements') },
-          ]}
-        />
-        <h1 className="sr-only">{t('nav.pdf_measurements', 'PDF Measurements')}</h1>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <ModuleGuideButton
-            content={takeoffGuide}
-            onCta={() => setActiveTab('documents')}
-          />
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          ...(() => {
+            const sel = projects?.find((p) => p.id === selectedProjectId);
+            return sel ? [{ label: sel.name, to: `/projects/${sel.id}` }] : [];
+          })(),
+          { label: t('nav.pdf_measurements', 'PDF Measurements') },
+        ]}
+      />
+      <PageHeader
+        srTitle={t('nav.pdf_measurements', 'PDF Measurements')}
+        subtitle={t('howto.takeoff.summary', { defaultValue: 'Measure lengths, areas and counts directly on a PDF drawing.' })}
+        actions={<ModuleGuideButton content={takeoffGuide} onCta={() => setActiveTab('documents')} />}
+      />
 
       <DismissibleInfo
         storageKey="takeoff"

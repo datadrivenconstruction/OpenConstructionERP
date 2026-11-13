@@ -838,6 +838,10 @@ const resource = {
     "learn.hive.cell_label": "{{n}}. {{title}}, {{duration}}, {{status}}",
     "header.search_palette": "Find a module or command…",
     "header.search_projects": "Search projects…",
+    "tax_withholding.subtitle": "Work out what to withhold from a subcontractor payment before it is made",
+    "einvoice_clearance.subtitle": "Prepare, send and track invoices that a tax authority must clear",
+    "cost_match.subtitle": "Price a subcontractor bid schedule line by line against your own cost base",
+    "inbound_email.subtitle": "Read an exported message for what it says about delay",
   }
 } as { translation: Record<string, string> };
 

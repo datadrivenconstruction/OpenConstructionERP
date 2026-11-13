@@ -20,6 +20,7 @@ import {
   Box, Ruler, Square, Building2, Palette,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, DismissibleInfo, EmptyState, ModuleGuideButton, ProjectFilePicker, projectDocumentToFile } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { CAD_EXPLORER_FORMATS } from '@/shared/lib/projectFileFormats';
 import type { DocumentItem } from '@/features/documents/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -3915,20 +3916,15 @@ export function CadDataExplorerPage() {
 
     return (
       <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light animate-fade-in" style={{ height: 'calc(100vh - 56px)' }}>
-        <div className="space-y-3 px-6 pt-4 pb-3 border-b border-border-light">
-          <div className="flex items-center justify-between gap-3">
-            {/* #149: the page names itself from the same key the Sidebar
-                entry that leads here uses, so the name cannot change under
-                the user between the click and the screen. The defaultValue
-                here used to read "CAD-BIM Explorer", a spelling that exists
-                nowhere else - invisible while the key resolves, and a
-                seventh name for this one destination the moment it does
-                not. */}
-            <Breadcrumb items={[
-              { label: t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' }) },
-            ]} />
-            <ModuleGuideButton content={cadExplorerGuide} />
-          </div>
+        <div className="space-y-3 px-4 sm:px-7 pt-4 pb-3 border-b border-border-light">
+          {/* #149: the page names itself from the same key the Sidebar entry uses. */}
+          <Breadcrumb items={[
+            { label: t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' }) },
+          ]} />
+          <PageHeader
+            srTitle={t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' })}
+            actions={<ModuleGuideButton content={cadExplorerGuide} />}
+          />
           <DismissibleInfo
             storageKey="data-explorer"
             title={t('cad_explorer.intro_title', {
