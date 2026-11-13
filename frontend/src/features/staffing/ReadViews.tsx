@@ -75,7 +75,7 @@ export function OrgChartView({ projectId, catalogue, labels, chart }: ViewBase &
                 </h3>
                 <ul className="space-y-2">
                   {org.positions.map((p) => (
-                    <li key={p.position_id} className="rounded-md bg-surface-secondary px-2.5 py-1.5" data-testid="org-position">
+                    <li key={p.position_id} className="rounded-lg bg-surface-secondary px-2.5 py-1.5" data-testid="org-position">
                       <div className="flex items-center gap-1.5 text-sm font-medium text-content-primary">
                         {positionName(labels, catalogue, p)}
                         {p.key_role && <KeyRound size={12} className="text-oe-blue-text" aria-label={t('staffing.position.key_role', { defaultValue: 'Key role' })} />}

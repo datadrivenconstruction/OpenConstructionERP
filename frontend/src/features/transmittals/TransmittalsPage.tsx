@@ -513,7 +513,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
         />
 
         {/* TR # */}
-        <span className="text-sm font-mono font-semibold text-content-secondary w-20 shrink-0">
+        <span className="text-sm font-mono font-semibold text-content-secondary w-28 shrink-0 whitespace-nowrap">
           {transmittal.transmittal_number}
         </span>
 
@@ -523,21 +523,25 @@ const TransmittalRow = React.memo(function TransmittalRow({
         </span>
 
         {/* Purpose badge */}
-        <Badge variant="neutral" size="sm" className={clsx(purposeCls, 'hidden md:inline-flex')}>
-          {t(`transmittals.purpose_${transmittal.purpose}`, {
-            defaultValue: PURPOSE_LABELS[transmittal.purpose],
-          })}
-        </Badge>
+        <span className="hidden w-32 shrink-0 md:flex">
+          <Badge variant="neutral" size="sm" className={purposeCls}>
+            {t(`transmittals.purpose_${transmittal.purpose}`, {
+              defaultValue: PURPOSE_LABELS[transmittal.purpose],
+            })}
+          </Badge>
+        </span>
 
         {/* Status badge */}
-        <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>
-          {t(`transmittals.status_${transmittal.status}`, {
-            defaultValue: STATUS_LABELS[transmittal.status],
-          })}
-        </Badge>
+        <span className="flex w-28 shrink-0 justify-center">
+          <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>
+            {t(`transmittals.status_${transmittal.status}`, {
+              defaultValue: STATUS_LABELS[transmittal.status] ?? String(transmittal.status).replace(/_/g, ' '),
+            })}
+          </Badge>
+        </span>
 
         {/* Issued Date */}
-        <span className="text-xs w-20 shrink-0 hidden sm:block">
+        <span className="text-xs w-24 shrink-0 hidden sm:block whitespace-nowrap">
           <DateDisplay
             value={transmittal.issued_date}
             className="text-xs text-content-tertiary"
@@ -547,7 +551,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
         {/* Response Due */}
         <span
           className={clsx(
-            'text-xs w-20 shrink-0 hidden lg:block',
+            'text-xs w-24 shrink-0 hidden lg:block whitespace-nowrap',
             isOverdue ? 'text-semantic-error font-semibold' : '',
           )}
         >
@@ -567,9 +571,9 @@ const TransmittalRow = React.memo(function TransmittalRow({
         </span>
 
         {/* Locked indicator */}
-        {transmittal.locked && (
-          <Lock size={14} className="text-content-tertiary shrink-0" />
-        )}
+        <span className="flex w-5 shrink-0 justify-center">
+          {transmittal.locked && <Lock size={14} className="text-content-tertiary" />}
+        </span>
       </div>
 
       {/* Expanded detail */}
@@ -838,37 +842,28 @@ function EditTransmittalModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
-      onClick={onClose}
-      role="presentation"
+    <WideModal
+      open
+      onClose={onClose}
+      size="sm"
+      busy={isPending}
+      title={t('transmittals.edit_title', {
+        defaultValue: 'Edit {{number}}',
+        number: transmittal.transmittal_number,
+      })}
+      footer={
+        <>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button type="submit" form="edit-transmittal-form" variant="primary" disabled={!canSave} loading={isPending}>
+            {t('common.save', { defaultValue: 'Save' })}
+          </Button>
+        </>
+      }
     >
-      <div
-        className="w-full max-w-xl bg-surface-primary rounded-2xl shadow-xl border border-border"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="edit-transmittal-title"
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
-            <h2 id="edit-transmittal-title" className="oe-section-title">
-              {t('transmittals.edit_title', {
-                defaultValue: 'Edit {{number}}',
-                number: transmittal.transmittal_number,
-              })}
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 rounded hover:bg-surface-secondary text-content-tertiary"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="px-5 py-4 space-y-4">
+        <form id="edit-transmittal-form" onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div>
               <label className="oe-label">
                 {t('transmittals.field_subject', { defaultValue: 'Subject' })}
@@ -929,19 +924,8 @@ function EditTransmittalModal({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-light bg-surface-secondary/30 rounded-b-2xl">
-            <Button type="button" variant="secondary" size="sm" onClick={onClose}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button type="submit" variant="primary" size="sm" disabled={!canSave}>
-              {isPending
-                ? t('common.saving', { defaultValue: 'Saving…' })
-                : t('common.save', { defaultValue: 'Save' })}
-            </Button>
-          </div>
         </form>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -1540,7 +1524,7 @@ export function TransmittalsPage() {
               defaultValue: 'Search transmittals...',
             })}
             aria-label={t('transmittals.search_placeholder', { defaultValue: 'Search transmittals...' })}
-            className={`${inputCls} pl-9`}
+            className="oe-input pl-9"
           />
         </div>
 
@@ -1550,7 +1534,7 @@ export function TransmittalsPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TransmittalStatus | '')}
             aria-label={t('transmittals.filter_all', { defaultValue: 'All Statuses' })}
-            className="oe-select oe-input-lg sm:w-44"
+            className="oe-select sm:w-44"
           >
             <option value="">
               {t('transmittals.filter_all', { defaultValue: 'All Statuses' })}
@@ -1633,22 +1617,22 @@ export function TransmittalsPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider whitespace-nowrap min-w-[640px]">
                 <span className="w-5" />
-                <span className="w-20">#</span>
+                <span className="w-28">#</span>
                 <span className="flex-1">
                   {t('transmittals.col_subject', { defaultValue: 'Subject' })}
                 </span>
-                <span className="w-24 hidden md:block">
+                <span className="w-32 hidden md:block">
                   {t('transmittals.col_purpose', { defaultValue: 'Purpose' })}
                 </span>
-                <span className="w-24 text-center">
+                <span className="w-28 text-center">
                   {t('transmittals.col_status', { defaultValue: 'Status' })}
                 </span>
-                <span className="w-20 hidden sm:block">
+                <span className="w-24 hidden sm:block">
                   {t('transmittals.col_issued', { defaultValue: 'Issued' })}
                 </span>
-                <span className="w-20 hidden lg:block">
+                <span className="w-24 hidden lg:block">
                   {t('transmittals.col_due', { defaultValue: 'Due' })}
                 </span>
                 <span className="w-12 hidden sm:block">

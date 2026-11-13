@@ -21,7 +21,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { PROCUREMENT_LINK, purchaseOrderDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 import { fmtDate } from '@/shared/lib/formatters';
-import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button } from '@/shared/ui';
+import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button, WideModal } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1342,7 +1342,7 @@ function AwardOrderLink({
       <span className="text-content-tertiary">{t('rfq_bidding.award_next', { defaultValue: 'Next step:' })}</span>
       <Link
         to={PROCUREMENT_LINK}
-        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+        className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
         title={t('rfq_bidding.award_raise_po_hint', {
           defaultValue: 'Open Procurement to raise the purchase order for the awarded vendor',
         })}
@@ -1371,29 +1371,6 @@ function CreateRFQDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handler, { capture: true });
-    return () => document.removeEventListener('keydown', handler, { capture: true });
-  }, [onClose]);
-
-  // Close on backdrop click
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    },
-    [onClose],
-  );
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -1410,31 +1387,24 @@ function CreateRFQDialog({
   );
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40"
-      onClick={handleBackdropClick}
+    <WideModal
+      open
+      onClose={onClose}
+      size="sm"
+      busy={loading}
+      title={t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} type="button">
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" type="submit" form="rfq-create-form" disabled={!title.trim() || loading} loading={loading}>
+            {t('rfq_bidding.create_submit', { defaultValue: 'Create RFQ' })}
+          </Button>
+        </>
+      }
     >
-      <div
-        ref={dialogRef}
-        className="w-full max-w-lg rounded-2xl border border-border-light bg-surface-primary p-6 shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="oe-section-title">
-            {t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X className="h-5 w-5" aria-hidden />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form id="rfq-create-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="oe-label">
               {t('rfq_bidding.field_title', { defaultValue: 'Title' })}
@@ -1477,18 +1447,7 @@ function CreateRFQDialog({
               className="oe-input"
             />
           </div>
-
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button variant="ghost" onClick={onClose} type="button">
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button variant="primary" type="submit" disabled={!title.trim() || loading}>
-              {loading && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden />}
-              {t('rfq_bidding.create_submit', { defaultValue: 'Create RFQ' })}
-            </Button>
-          </div>
         </form>
-      </div>
-    </div>
+    </WideModal>
   );
 }

@@ -538,7 +538,7 @@ export function FromCatalogueDialog({
         <ul className="mt-3 grid gap-1 sm:grid-cols-2" data-testid="from-catalogue-roles">
           {offered.map((r) => (
             <li key={r.code}>
-              <label className="flex items-start gap-2 rounded-md px-2 py-1 text-sm text-content-primary hover:bg-surface-secondary">
+              <label className="flex items-start gap-2 rounded-lg px-2 py-1 text-sm text-content-primary hover:bg-surface-secondary">
                 <input type="checkbox" className="mt-0.5" checked={picked.has(r.code)} onChange={() => toggle(r.code)} />
                 <span>
                   {catalogueName(labels, catalogue, 'role', r.code)}

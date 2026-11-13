@@ -12,7 +12,6 @@ import {
   Clock,
   Plus,
   Search,
-  X,
   Send,
   CheckCircle2,
   XCircle,
@@ -38,6 +37,7 @@ import {
   DismissibleInfo,
   IntroRichText,
   ModuleGuideButton,
+  SideDrawer,
 } from '@/shared/ui';
 import {
   ProvabilityGauge,
@@ -2782,38 +2782,20 @@ export function DetailDrawer({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={
-          heading || t('variations.detail', { defaultValue: 'Variation detail' })
-        }
-        className="relative h-full w-full max-w-xl overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 className="text-base font-semibold">{heading}</h2>
-          <div className="flex items-center gap-2">
-            {/* Only a request has a printed form of its own; notices, orders,
-                daywork sheets and claims are printed as registers. */}
-            {request && (
-              <RecordPdfButton
-                download={(locale) => downloadVariationRequestPdf(request.id, locale, request.code)}
-                testId="variation-request-pdf"
-              />
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded p-1 hover:bg-surface-secondary"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-xl"
+      title={<>{heading}</>}
+      headerActions={
+        request ? (
+          <RecordPdfButton
+            download={(locale) => downloadVariationRequestPdf(request.id, locale, request.code)}
+            testId="variation-request-pdf"
+          />
+        ) : undefined
+      }
+    >
 
         <div className="space-y-4 p-5">
           {(selected.kind === 'notices' ||
@@ -3412,8 +3394,7 @@ export function DetailDrawer({
             </>
           )}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 

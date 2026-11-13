@@ -1625,7 +1625,7 @@ export function ReviewAuthorityPage() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as CycleStatus | '')}
                 aria-label={t('review_authority.filter_all_status', { defaultValue: 'All Statuses' })}
-                className="oe-select oe-input-lg sm:w-44"
+                className="oe-select sm:w-44"
               >
                 <option value="">
                   {t('review_authority.filter_all_status', { defaultValue: 'All Statuses' })}
@@ -1646,7 +1646,7 @@ export function ReviewAuthorityPage() {
                 value={authorityFilter}
                 onChange={(e) => setAuthorityFilter(e.target.value as AuthorityKind | '')}
                 aria-label={t('review_authority.filter_all_authority', { defaultValue: 'All Authority Kinds' })}
-                className="oe-select oe-input-lg sm:w-52"
+                className="oe-select sm:w-52"
               >
                 <option value="">
                   {t('review_authority.filter_all_authority', { defaultValue: 'All Authority Kinds' })}

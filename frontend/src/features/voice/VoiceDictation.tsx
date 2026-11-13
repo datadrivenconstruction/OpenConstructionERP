@@ -200,7 +200,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                 type="button"
                 onClick={voice.clearError}
                 aria-label={t('voice.dictation.dismiss', { defaultValue: 'Dismiss' })}
-                className="shrink-0 rounded-md p-1 text-content-secondary hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                className="shrink-0 rounded-lg p-1 text-content-secondary hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
               >
                 <X size={14} aria-hidden />
               </button>
@@ -244,7 +244,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                   onClick={voice.cancel}
                   aria-label={t('voice.dictation.cancel', { defaultValue: 'Discard' })}
                   title={t('voice.dictation.cancel', { defaultValue: 'Discard' })}
-                  className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                  className="rounded-lg p-1.5 text-content-secondary hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                   data-testid="voice-dictation-cancel"
                 >
                   <X size={16} aria-hidden />
@@ -255,7 +255,7 @@ export function VoiceDictation({ onTranscript, scopeRef, disabled, language, cla
                     onClick={voice.stop}
                     aria-label={stopLabel}
                     title={stopLabel}
-                    className="rounded-md bg-oe-blue p-1.5 text-oe-on-accent hover:bg-oe-blue-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+                    className="rounded-lg bg-oe-blue p-1.5 text-oe-on-accent hover:bg-oe-blue-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
                     data-testid="voice-dictation-done"
                   >
                     <Check size={16} aria-hidden />

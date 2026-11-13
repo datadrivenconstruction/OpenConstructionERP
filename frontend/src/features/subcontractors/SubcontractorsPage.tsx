@@ -9,7 +9,6 @@ import {
   HardHat,
   Plus,
   Search,
-  X,
   Loader2,
   Star,
   FileText,
@@ -46,6 +45,7 @@ import {
   WideModal,
   WideModalSection,
   WideModalField,
+  SideDrawer,
 } from '@/shared/ui';
 import { Toggle } from '@/shared/ui/Toggle';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
@@ -867,95 +867,55 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        className="relative h-full w-full max-w-2xl overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3 gap-3">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold truncate">
-              {sub?.legal_name || t('common.loading', { defaultValue: 'Loading…' })}
-            </h2>
-            {sub?.trade_name && (
-              <p className="text-xs text-content-tertiary truncate">{sub.trade_name}</p>
+    <>
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-2xl"
+      title={<>{sub?.legal_name || t('common.loading', { defaultValue: 'Loading…' })}</>}
+      subtitle={sub?.trade_name && sub.trade_name !== sub.legal_name ? sub.trade_name : undefined}
+      headerActions={
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<ClipboardCheck size={14} />}
+            onClick={() => setPrequalOpen(true)}
+            disabled={!sub}
+          >
+            {t('subcontractors.prequalify', { defaultValue: 'Prequalify' })}
+            {typeof sub?.prequal_score === 'number' && (
+              <span className="tabular-nums text-content-tertiary">({sub.prequal_score})</span>
             )}
-          </div>
-          {/* Action toolbar — Edit + Delete + Close. Disabled while the
-              subcontractor record is still loading so the buttons cannot
-              fire against an undefined id. Edit reopens the form modal in
-              edit mode; Delete is danger-confirmed. */}
-          <div className="flex items-center gap-1 shrink-0">
-            {/* Prequalify — opens the questionnaire modal. Available regardless
-                of the current prequalification_status so the user can re-run
-                the assessment and update the score over time. */}
-            <button
-              type="button"
-              onClick={() => setPrequalOpen(true)}
-              disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t('subcontractors.prequalify', {
-                defaultValue: 'Prequalify',
-              })}
-            >
-              <ClipboardCheck size={12} />
-              {t('subcontractors.prequalify', { defaultValue: 'Prequalify' })}
-              {typeof sub?.prequal_score === 'number' && (
-                <span className="ml-0.5 tabular-nums text-content-tertiary">
-                  ({sub.prequal_score})
-                </span>
-              )}
-            </button>
-            {/* Block / Unblock — single button, label flips by current state.
-                Block prompts for a reason; unblock clears. Both invalidate
-                the subcontractors query so the row badge refreshes. */}
-            <button
-              type="button"
-              onClick={handleBlockToggle}
-              disabled={!sub || blockBusy}
-              className={clsx(
-                'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-                sub?.is_blocked
-                  ? 'border-semantic-success/30 bg-semantic-success-bg text-semantic-success hover:bg-semantic-success-bg'
-                  : 'border-border-light bg-surface-primary text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg',
-              )}
-            >
-              {sub?.is_blocked ? <CheckCircle2 size={12} /> : <Ban size={12} />}
-              {sub?.is_blocked
-                ? t('subcontractors.unblock_button', { defaultValue: 'Unblock' })
-                : t('subcontractors.block_button', { defaultValue: 'Block' })}
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditOpen(true)}
-              disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t('common.edit', { defaultValue: 'Edit' })}
-            >
-              <Pencil size={12} />
-              {t('common.edit', { defaultValue: 'Edit' })}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteOpen(true)}
-              disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t('common.delete', { defaultValue: 'Delete' })}
-            >
-              <Trash2 size={12} />
-              {t('common.delete', { defaultValue: 'Delete' })}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ml-1 rounded p-1 hover:bg-surface-secondary"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={sub?.is_blocked ? <CheckCircle2 size={14} /> : <Ban size={14} />}
+            onClick={handleBlockToggle}
+            disabled={!sub || blockBusy}
+            className={sub?.is_blocked ? 'text-semantic-success' : 'hover:text-semantic-error'}
+          >
+            {sub?.is_blocked
+              ? t('subcontractors.unblock_button', { defaultValue: 'Unblock' })
+              : t('subcontractors.block_button', { defaultValue: 'Block' })}
+          </Button>
+          <Button variant="secondary" size="sm" icon={<Pencil size={14} />} onClick={() => setEditOpen(true)} disabled={!sub}>
+            {t('common.edit', { defaultValue: 'Edit' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Trash2 size={14} />}
+            onClick={() => setDeleteOpen(true)}
+            disabled={!sub}
+            className="hover:text-semantic-error"
+          >
+            {t('common.delete', { defaultValue: 'Delete' })}
+          </Button>
+        </>
+      }
+    >
 
         {/* Compliance banner — only when expiry or block conditions hit.
             Shows at the very top of the drawer below the action toolbar
@@ -1102,7 +1062,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               </span>
               <Link
                 to="/bid-management"
-                className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
               >
                 {t('subcontractors.invite_to_bid', {
                   defaultValue: 'Invite to a bid package',
@@ -1112,7 +1072,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   to it as the counterparty so the agreement is one click away. */}
               <Link
                 to={`/contracts?counterparty=${sub.id}`}
-                className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
               >
                 <FileSignature size={12} />
                 {t('subcontractors.subcontract', {
@@ -1125,7 +1085,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 to={`/portal?invite=1&role=subcontractor&name=${encodeURIComponent(
                   sub.legal_name,
                 )}`}
-                className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
               >
                 <Send size={12} />
                 {t('subcontractors.invite_to_portal', {
@@ -1263,7 +1223,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             </div>
           </>
         )}
-      </div>
+    </SideDrawer>
 
       {/* Edit modal — only mounts when the user clicks "Edit" AND the
           subcontractor record has finished loading. Reuses CreateModal
@@ -1304,7 +1264,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         onCancel={() => setDeleteOpen(false)}
         loading={deleting}
       />
-    </div>
+    </>
   );
 }
 
@@ -1753,14 +1713,14 @@ function RatingSourceLinks({ subName }: { subName: string }) {
       </span>
       <Link
         to={`/ncr?sub=${q}`}
-        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+        className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
       >
         <ShieldCheck size={12} />
         {t('subcontractors.quality_ncrs', { defaultValue: 'Quality NCRs' })}
       </Link>
       <Link
         to={`/safety?sub=${q}`}
-        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+        className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
       >
         <HeartPulse size={12} />
         {t('subcontractors.hse_incidents', { defaultValue: 'HSE incidents' })}

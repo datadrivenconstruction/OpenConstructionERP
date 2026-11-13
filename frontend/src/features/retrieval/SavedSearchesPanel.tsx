@@ -63,7 +63,7 @@ export function SavedSearches({
             type="button"
             onClick={onSaveCurrent}
             disabled={currentIsSaved || saveBusy}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:cursor-default disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:cursor-default disabled:opacity-50"
           >
             {currentIsSaved ? (
               <BookmarkCheck className="h-3.5 w-3.5" />
@@ -89,7 +89,7 @@ export function SavedSearches({
                 <button
                   type="button"
                   onClick={() => onRunSaved(s)}
-                  className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-start text-sm text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary"
+                  className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1 text-start text-sm text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary"
                 >
                   <Search className="h-3.5 w-3.5 shrink-0 text-content-tertiary" />
                   <span className="truncate">{s.label || describeQuery(s.query)}</span>
@@ -99,7 +99,7 @@ export function SavedSearches({
                   onClick={() => onRemoveSaved(s.id)}
                   aria-label={t('retrieval.remove_saved', { defaultValue: 'Remove saved search' })}
                   title={t('retrieval.remove_saved', { defaultValue: 'Remove saved search' })}
-                  className="shrink-0 rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-semantic-error"
+                  className="shrink-0 rounded-lg p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-semantic-error"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

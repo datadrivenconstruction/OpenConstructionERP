@@ -81,7 +81,7 @@ export function ScopedMandates({ labels, rows, decisionTypes, columns, columnNam
         </p>
       )}
       {rows.map((r, i) => (
-        <div key={i} className="flex flex-wrap items-end gap-2 rounded-md border border-border-light bg-surface-elevated p-2" data-testid="scoped-edit-row">
+        <div key={i} className="flex flex-wrap items-end gap-2 rounded-lg border border-border-light bg-surface-elevated p-2" data-testid="scoped-edit-row">
           <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-content-secondary">
             {t('stakeholders.ui.mandate.col_decision', { defaultValue: 'Decision' })}
             <select

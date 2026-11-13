@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Download } from 'lucide-react';
-import { Badge, Button, Card, CardContent, CardHeader } from '@/shared/ui';
+import { Badge, Button, Card, CardContent, CardHeader, WideModal } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -41,19 +41,24 @@ function StrikeDialog({
   const u = useSensorUnits(strip.project_id);
   const [reason, setReason] = useState('');
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="strike-dialog-title"
-        className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 id="strike-dialog-title" className="oe-section-title flex items-center gap-2">
-          <AlertTriangle size={16} className="text-semantic-warning" />
-          {t('site_sensors.strips.below_title', { defaultValue: 'Strike below target strength?' })}
-        </h2>
-        <p className="mt-2 text-sm text-content-secondary">
+    <WideModal
+      open
+      onClose={onCancel}
+      size="sm"
+      busy={loading}
+      title={t('site_sensors.strips.below_title', { defaultValue: 'Strike below target strength?' })}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onCancel}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" disabled={!reason.trim()} loading={loading} onClick={() => onConfirm(reason.trim())}>
+            {t('site_sensors.strips.strike_anyway', { defaultValue: 'Record strike' })}
+          </Button>
+        </>
+      }
+    >
+        <p className="text-sm text-content-secondary">
           {t('site_sensors.strips.below_message', {
             defaultValue:
               'The sensor has not shown {{target}} on {{element}} yet. Record why it is safe to strike, for example a cube result or back-propping.',
@@ -72,22 +77,7 @@ function StrikeDialog({
             className="oe-textarea mt-1"
           />
         </label>
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={onCancel}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={!reason.trim()}
-            loading={loading}
-            onClick={() => onConfirm(reason.trim())}
-          >
-            {t('site_sensors.strips.strike_anyway', { defaultValue: 'Record strike' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 

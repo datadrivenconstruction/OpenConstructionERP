@@ -351,7 +351,7 @@ export function PlanPanel({
           </p>
         )}
         {submittable && blockers.length > 0 && (
-          <div className="mt-3 rounded-md bg-surface-secondary p-3" data-testid="plan-blockers">
+          <div className="mt-3 rounded-lg bg-surface-secondary p-3" data-testid="plan-blockers">
             <h3 className="mb-1.5 text-sm font-medium text-content-primary">
               {t('staffing.plan.findings', { defaultValue: 'Before you can submit' })}
             </h3>

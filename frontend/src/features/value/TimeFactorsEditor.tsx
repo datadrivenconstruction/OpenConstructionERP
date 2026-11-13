@@ -163,7 +163,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
               return (
                 <li
                   key={key}
-                  className="flex flex-wrap items-center gap-2 rounded-md border border-border-light p-2"
+                  className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light p-2"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
                       }}
                       title={t('value.factors.reset', { defaultValue: 'Reset to default' })}
                       aria-label={t('value.factors.reset', { defaultValue: 'Reset to default' })}
-                      className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
+                      className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
                     >
                       <RotateCcw className="h-4 w-4" />
                     </button>
@@ -228,7 +228,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
+            className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
           >
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </button>
@@ -236,7 +236,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
             type="button"
             disabled={!canSave}
             onClick={() => saveMutation.mutate(changed)}
-            className="rounded-md bg-oe-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 disabled:opacity-40"
+            className="rounded-lg bg-oe-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 disabled:opacity-40"
           >
             {saveMutation.isPending
               ? t('common.saving', { defaultValue: 'Saving...' })

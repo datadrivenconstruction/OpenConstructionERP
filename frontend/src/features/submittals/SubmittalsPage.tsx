@@ -9,7 +9,6 @@ import {
   FileCheck,
   Search,
   Plus,
-  X,
   ChevronDown,
   ChevronRight,
   Info,
@@ -516,24 +515,26 @@ function ApproveModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-modal="true" aria-label={t('submittals.review_title', { defaultValue: 'Review {{number}}', number: submittal.submittal_number })}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">
-            {t('submittals.review_title', {
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={t('submittals.review_title', {
               defaultValue: 'Review {{number}}',
               number: submittal.submittal_number,
             })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-6 py-4 space-y-4">
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+            {t('submittals.submit_review', { defaultValue: 'Submit Review' })}
+          </Button>
+        </>
+      }
+    >
+        <div className="space-y-4">
           <div className="rounded-lg bg-surface-secondary p-3">
             <p className="text-xs text-content-tertiary mb-1">
               {t('submittals.label_title', { defaultValue: 'Title' })}
@@ -634,16 +635,7 @@ function ApproveModal({
             />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
-            {t('submittals.submit_review', { defaultValue: 'Submit Review' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -1550,9 +1542,9 @@ export function SubmittalsPage() {
       <SubmittalTypeTabs filters={filters} onFilters={setFilters} summary={summary} typeLabel={typeLabel} />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative sm:w-60">
           <Search
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
@@ -1564,7 +1556,7 @@ export function SubmittalsPage() {
               defaultValue: 'Search submittals...',
             })}
             aria-label={t('submittals.search_placeholder', { defaultValue: 'Search submittals...' })}
-            className={`${inputCls} pl-9`}
+            className="oe-input pl-9"
           />
         </div>
 
@@ -1581,7 +1573,7 @@ export function SubmittalsPage() {
               }))
             }
             aria-label={t('submittals.filter_all', { defaultValue: 'All Statuses' })}
-            className="oe-select oe-input-lg sm:w-48"
+            className="oe-select sm:w-44"
           >
             <option value="">
               {t('submittals.filter_all', { defaultValue: 'All Statuses' })}

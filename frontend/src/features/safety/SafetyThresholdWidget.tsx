@@ -259,7 +259,7 @@ export function SafetyThresholdWidget({ projectId }: SafetyThresholdWidgetProps)
                 ? t('common.collapse', { defaultValue: 'Collapse' })
                 : t('common.expand', { defaultValue: 'Expand' })
             }
-            className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
             data-testid="threshold-expand-toggle"
           >
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

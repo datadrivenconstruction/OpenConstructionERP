@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -17,9 +17,8 @@ import {
   Receipt,
   Trash2,
   Warehouse,
-  X,
 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, SkeletonTable, TabBar } from '@/shared/ui';
+import { Badge, Button, Card, EmptyState, SkeletonTable, TabBar, WideModal } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -128,42 +127,11 @@ function Modal({
   footer: React.ReactNode;
   maxWidth?: string;
 }) {
-  const { t } = useTranslation();
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
+  const size = maxWidth === 'max-w-md' || maxWidth === 'max-w-lg' ? 'sm' : 'md';
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-fade-in">
-      <div
-        className={clsx(
-          'w-full bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in max-h-[90vh] overflow-y-auto',
-          maxWidth,
-        )}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label={t('site_inventory.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-6 py-4 space-y-4">{children}</div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          {footer}
-        </div>
-      </div>
-    </div>
+    <WideModal open onClose={onClose} title={title} size={size} footer={footer}>
+      <div className="space-y-4">{children}</div>
+    </WideModal>
   );
 }
 

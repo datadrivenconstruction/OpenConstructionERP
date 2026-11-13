@@ -10,7 +10,7 @@
  * valid permit to load (a compliance breach), shown in red at the top.
  */
 
-import { useState, useMemo, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useCallback, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -19,7 +19,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   Plus,
-  X,
   ChevronRight,
   Pencil,
   Trash2,
@@ -30,7 +29,7 @@ import {
   Search,
   HardHat,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, ConfirmDialog, SkeletonTable } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, ConfirmDialog, SkeletonTable, WideModal } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -343,39 +342,10 @@ function ModalShell({
   children: ReactNode;
   footer: ReactNode;
 }) {
-  const { t } = useTranslation();
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
-      >
-        <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="oe-section-title">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label={t('temporary_works.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-6 py-4">{children}</div>
-        <div className="flex items-center justify-end gap-3 border-t border-border-light px-6 py-4">
-          {footer}
-        </div>
-      </div>
-    </div>
+    <WideModal open onClose={onClose} title={title} size="md" footer={footer}>
+      {children}
+    </WideModal>
   );
 }
 
