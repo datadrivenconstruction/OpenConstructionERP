@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { Receipt } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { TaxWithholdingPanel } from './TaxWithholdingPanel';
 
@@ -28,7 +29,11 @@ export function TaxWithholdingPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.tax_withholding', { defaultValue: 'Withholding Tax' })}
+        subtitle={t('tax_withholding.subtitle', { defaultValue: 'Work out what to withhold from a subcontractor payment before it is made' })}
+      />
       <CollapsibleSection
         storageKey="tax_withholding.how"
         icon={<Receipt size={16} className="text-oe-blue" />}

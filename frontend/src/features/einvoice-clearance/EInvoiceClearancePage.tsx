@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { Landmark } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { EInvoiceClearancePanel } from './EInvoiceClearancePanel';
 
@@ -28,7 +29,11 @@ export function EInvoiceClearancePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.einvoice_clearance', { defaultValue: 'E-invoice Clearance' })}
+        subtitle={t('einvoice_clearance.subtitle', { defaultValue: 'Prepare, send and track invoices that a tax authority must clear' })}
+      />
       <CollapsibleSection
         storageKey="einvoice_clearance.how"
         icon={<Landmark size={16} className="text-oe-blue" />}

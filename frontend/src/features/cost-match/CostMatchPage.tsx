@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { Layers } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { CostMatchPanel } from './CostMatchPanel';
 
@@ -28,7 +29,11 @@ export function CostMatchPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.cost_match', { defaultValue: 'Cost Match' })}
+        subtitle={t('cost_match.subtitle', { defaultValue: 'Price a subcontractor bid schedule line by line against your own cost base' })}
+      />
       <CollapsibleSection
         storageKey="cost_match.how"
         icon={<Layers size={16} className="text-oe-blue" />}

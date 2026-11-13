@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { Inbox } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { InboundEmailPanel } from './InboundEmailPanel';
 
@@ -18,7 +19,11 @@ export function InboundEmailPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.inbound_email', { defaultValue: 'Email Delay Scan' })}
+        subtitle={t('inbound_email.subtitle', { defaultValue: 'Read an exported message for what it says about delay' })}
+      />
       <CollapsibleSection
         storageKey="inbound_email.how"
         icon={<Inbox size={16} className="text-oe-blue" />}

@@ -29,6 +29,7 @@ const resource = {
     "cost_match.run_create_failed": "The bid schedule could not be matched",
     "cost_match.run_created": "The bid schedule was matched",
     "cost_match.runs_title": "Matched bid schedules",
+    "cost_match.subtitle": "Price a subcontractor bid schedule line by line against your own cost base",
     "full_evm.flow_links": "An index within half a percent of one is reported as on track, not ahead or behind, because a project called late at 0.998 teaches everybody to ignore the color. Where the requested forecast formula could not run, the screen names the one that did.",
     "formwork.assignments.emptyBody": "Pick a system from the catalog and give it the area to be formed. The rate is built from the panel cost divided by the reuses plus the erect-and-strike labor.",
     "formwork.badge.notOnBill": "Not on the bid schedule",
@@ -1257,6 +1258,7 @@ const resource = {
     "hse_advanced.no_permits_desc": "Issue a Permit to Work to authorize hot work, confined-space entry, work-at-height and other high-risk tasks. Each permit tracks scope, hazards, controls and signatures.",
     "inbound_email.flow_step2": "The message is normalized into a record: subject, sender, recipients, the threading ids that place it in a conversation, the text body and the attachment names and sizes.",
     "inbound_email.flow_step4": "Each category carries a short starter fragnet, the activities a planner would normally add to the schedule for that kind of event. Take what fits and leave the rest.",
+    "inbound_email.subtitle": "Read an exported message for what it says about delay",
     "laborRates.cost_item_saved_title": "Saved to cost catalog",
     "laborRates.cost_item_saved_msg": "\"{{code}}\" is now a cost item you can add to a bid schedule.",
     "laborRates.publish_hint": "Publish this rate to the cost catalog so it can be applied in a bid schedule or assembly.",
@@ -1616,6 +1618,7 @@ const resource = {
     "crm.flow_intro": "The CRM turns an inquiry into a qualified deal, moves it across the pipeline, and hands a win off to delivery. People come from Contacts; won work flows on to bids and contracts.",
     "crm.intro_more": "The CRM gives you five tabs across the top: Pipeline, Deals, Leads, Activities and Insights. Most of the work happens on the Pipeline board, where each stage is a column and each deal is a card you drag from one column to the next. Dragging a card moves its stage in one click. Open a deal to see its value, weighted value and probability, click a stage in the stepper to advance it, log a quick note, or close it with the Win and Lose buttons. New inquiries start on the Leads tab; qualify a lead and convert it into a deal.\n\nA deal links out to the rest of the platform rather than storing its own copies of anything:\n\n- People and companies are resolved live from **Contacts** through the deal's primary contact; the picker pulls your live contacts list.\n- A deal links to its delivery **Projects** record and deep-links straight to it.\n- A won deal points you on to **Bid Management** to issue packages and to **Contracts** to formalize the award.\n\n**Getting the most out of it:**\n\n- Drag-and-drop is the fastest way to keep the board honest, do it after every call.\n- Use the Win and Lose buttons to close deals, the final stages on the board are intentionally not droppable.\n- Pick a loss reason when you lose a deal so the Insights tab can show you why you are dropping work.",
     "einvoice_clearance.event.cancelled": "Canceled",
+    "einvoice_clearance.subtitle": "Prepare, send and track invoices that a tax authority must clear",
     "equipment.fleet_intel.underutilized": "Underutilized units",
     "equipment.fleet_intel.utilization": "Utilization",
     "equipment.health.section_desc": "A single Health Score (0-100) summarizing this asset from its telemetry history, open work orders and inspection status. Higher is healthier. We also flag unusual readings and forecast when the next service is likely due.",
@@ -1686,6 +1689,7 @@ const resource = {
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
     "site_sensors.import.bad_time": "Time not recognized",
+    "tax_withholding.subtitle": "Work out what to withhold from a subcontractor payment before it is made",
   }
 } as { translation: Record<string, string> };
 
