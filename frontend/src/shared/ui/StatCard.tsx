@@ -81,7 +81,7 @@ export function StatCard({
         // 90% surface, no blur - see the design contract in the header.
         'rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs',
         'transition-shadow duration-normal ease-oe hover:shadow-sm',
-        size === 'sm' ? 'p-3' : 'p-4',
+        size === 'sm' ? 'px-3 py-2.5' : 'px-4 py-3',
         className,
       )}
       {...props}
@@ -94,7 +94,7 @@ export function StatCard({
           <div
             className={clsx(
               'mt-1 truncate font-semibold tabular-nums leading-tight',
-              size === 'sm' ? 'text-lg' : 'text-2xl',
+              size === 'sm' ? 'text-lg' : 'text-xl',
               tintValue ? VALUE_TONES[tone] : 'text-content-primary',
             )}
           >

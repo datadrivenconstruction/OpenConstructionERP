@@ -64,12 +64,12 @@ export function EmptyState({ icon, title, description, action, className }: Empt
   return (
     <div
       className={clsx(
-        'flex flex-col items-center justify-center py-16 px-6 text-center',
+        'flex flex-col items-center justify-center py-10 px-6 text-center',
         className,
       )}
     >
       {icon && (
-        <div data-decorative-icon className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-light bg-surface-secondary text-content-tertiary">
+        <div data-decorative-icon className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-border-light bg-surface-secondary text-content-tertiary">
           {icon}
         </div>
       )}
@@ -78,7 +78,7 @@ export function EmptyState({ icon, title, description, action, className }: Empt
         <p className="mt-1.5 max-w-sm text-sm text-content-secondary">{description}</p>
       )}
       {action && (
-        <div className="mt-5">
+        <div className="mt-4">
           {isActionObject(action) ? (
             <Button variant="primary" onClick={action.onClick}>
               {action.label}

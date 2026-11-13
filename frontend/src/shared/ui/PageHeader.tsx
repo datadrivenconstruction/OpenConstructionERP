@@ -1,9 +1,10 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { type ReactNode } from 'react';
+import { type ReactNode, useCallback } from 'react';
 import clsx from 'clsx';
 
 import { ButtonSizeOverrideContext } from './Button';
+import { usePageHeaderSlot } from './pageHeaderSlot';
 
 /**
  * Canonical module page top block (MODULE_STYLE_GUIDE.md section 2).
@@ -43,6 +44,13 @@ export interface PageHeaderProps {
   className?: string;
 }
 
+function HeaderSlot() {
+  const setEl = usePageHeaderSlot((s) => s.setEl);
+  const ref = useCallback((node: HTMLSpanElement | null) => setEl(node), [setEl]);
+  // `contents`: portalled children join the action row's flex flow and gap.
+  return <span ref={ref} className="contents" data-oe-header-slot />;
+}
+
 export function PageHeader({ subtitle, actions, srTitle, className }: PageHeaderProps) {
   if (!subtitle && !actions) {
     // srTitle-only pages (chat / full-bleed surfaces) still need the a11y
@@ -58,7 +66,7 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
     // NO own margin (audit fix S1): the page root's space-y-5 is the ONLY
     // vertical rhythm - a built-in mb-4 stacked on top of it produced the
     // double gaps the founder flagged.
-    <div className={clsx('flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-2', className)}>
+    <div data-oe-page-header className={clsx('flex min-h-8 flex-wrap items-center justify-between gap-x-4 gap-y-2', className)}>
       {srTitle && <h1 className="sr-only">{srTitle}</h1>}
       {subtitle ? (
         <p className="min-w-0 flex-1 basis-64 text-sm leading-relaxed text-content-tertiary">
@@ -73,11 +81,10 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
           390px viewport the seven action buttons laid out in one 668px line and
           scrolled the whole page sideways. The cap is inert whenever the row
           fits, so wide layouts are unchanged. */}
-      {actions && (
-        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">
-          <ButtonSizeOverrideContext.Provider value="md">{actions}</ButtonSizeOverrideContext.Provider>
-        </div>
-      )}
+      <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2 empty:hidden">
+        {actions && <ButtonSizeOverrideContext.Provider value="md">{actions}</ButtonSizeOverrideContext.Provider>}
+        <HeaderSlot />
+      </div>
     </div>
   );
 }

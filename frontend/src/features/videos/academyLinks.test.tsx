@@ -25,6 +25,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 import { ModuleVideosSlot } from './ModuleVideosSlot';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { AcademyItemCard, AcademyItemRow } from './AcademyItemLinks';
 import { CoursesPage } from './CoursesPage';
 import { LearningTipsCard } from '../settings/LearningTipsCard';
@@ -62,7 +63,7 @@ afterEach(() => cleanup());
 describe('the chip on a screen', () => {
   it('is there in the first render for a route that has courses but no videos', () => {
     expect(itemOnlyRoute).toBeTruthy();
-    renderAt(itemOnlyRoute, <ModuleVideosSlot />);
+    renderAt(itemOnlyRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     const toggle = screen.getByTestId('module-videos-toggle');
     expect(toggle.textContent).toContain('Learn this step');
     expect(toggle.textContent).toContain(String(ITEM_COUNT_BY_ROUTE[itemOnlyRoute]));
@@ -70,37 +71,37 @@ describe('the chip on a screen', () => {
 
   it('keeps the videos wording where a route has videos only', () => {
     const videoOnly = Object.keys(VIDEO_COUNT_BY_ROUTE).find((r) => !(r in ITEM_COUNT_BY_ROUTE))!;
-    renderAt(videoOnly, <ModuleVideosSlot />);
+    renderAt(videoOnly, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(screen.getByTestId('module-videos-toggle').textContent).toContain('Videos for this step');
   });
 
   it('counts videos and courses together', () => {
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     const total = VIDEO_COUNT_BY_ROUTE[bothRoute]! + ITEM_COUNT_BY_ROUTE[bothRoute]!;
     expect(screen.getByTestId('module-videos-toggle').textContent).toContain(String(total));
   });
 
   it('is hidden after "hide here" for that screen only, and when hidden everywhere', () => {
     useVideoHintsStore.getState().hideOn(itemOnlyRoute);
-    renderAt(itemOnlyRoute, <ModuleVideosSlot />);
+    renderAt(itemOnlyRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(screen.queryByTestId('module-videos')).toBeNull();
     cleanup();
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(screen.getByTestId('module-videos')).toBeTruthy();
     cleanup();
     useVideoHintsStore.setState({ off: true, hidden: [] });
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(screen.queryByTestId('module-videos')).toBeNull();
   });
 
   it('opens nothing by itself', () => {
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(screen.getByTestId('module-videos-toggle').getAttribute('aria-expanded')).toBe('false');
     expect(screen.queryByTestId('academy-item-row')).toBeNull();
   });
 
   it('opens the courses in a popover: new-tab links, at most one purple row', async () => {
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     fireEvent.click(screen.getByTestId('module-videos-toggle'));
     const rows = await screen.findAllByTestId('academy-item-row');
     expect(rows.length).toBeGreaterThan(0);
@@ -117,7 +118,7 @@ describe('the chip on a screen', () => {
   });
 
   it('lists what the ranking picked, and no more than three', async () => {
-    renderAt(bothRoute, <ModuleVideosSlot />);
+    renderAt(bothRoute, <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     fireEvent.click(screen.getByTestId('module-videos-toggle'));
     const rows = await screen.findAllByTestId('academy-item-row');
     const allowed = itemsForRoute(bothRoute).map((i) => i.title);
