@@ -27,6 +27,7 @@ depends_on: str | Sequence[str] | None = None
 _T = "oe_projects_project"
 
 # boot-repair: registry=project_country_from_region
+# data-rewrite-ack: table=oe_projects_project growth=bounded rows=one row per project created by hand, not a per-event log
 
 
 def upgrade() -> None:
