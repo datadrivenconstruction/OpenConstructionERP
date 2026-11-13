@@ -146,7 +146,7 @@ export function LinkToEntityModal({
     >
       <div
         className={clsx(
-          'w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl',
+          'w-full max-w-md rounded-2xl border border-border-light bg-surface-primary p-5 shadow-xl',
         )}
       >
         <h2

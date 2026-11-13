@@ -479,7 +479,7 @@ function BuilderConcepts() {
           data-testid={`module-builder-concept-${concept.id}`}
         >
           <p className="flex items-center gap-2 text-sm font-semibold text-content-primary">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-oe-blue-subtle text-oe-blue-text">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               {concept.icon}
             </span>
             {concept.title}

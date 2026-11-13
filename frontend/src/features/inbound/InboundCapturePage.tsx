@@ -262,7 +262,7 @@ export function InboundCapturePage() {
         actions={
           <a
             href="/connectors"
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
           >
             {t('inbound.manage_sources', { defaultValue: 'Manage sources' })}
             <ArrowRight className="h-4 w-4" />

@@ -69,7 +69,7 @@ export function DescribeScreen({
       </div>
 
       {assistantAvailable ? (
-        <div className="rounded-2xl border border-border-light bg-surface-secondary/40 p-3 shadow-sm focus-within:border-oe-blue/50 sm:p-4">
+        <div className="rounded-xl border border-border-light bg-surface-secondary/40 p-3 focus-within:border-oe-blue/50 sm:p-4">
           <label htmlFor="module-builder-description" className="sr-only">
             {t('module_builder.describe_heading', { defaultValue: 'Say what you need' })}
           </label>
@@ -178,7 +178,7 @@ function DraftingState() {
         <Sparkles size={16} className="animate-pulse text-oe-blue-text" />
         {t('module_builder.drafting', { defaultValue: 'Drafting your register, this takes up to 20 seconds' })}
       </p>
-      <div className="rounded-2xl border border-border-light p-5">
+      <div className="rounded-xl border border-border-light p-5">
         <div className="flex items-center gap-3">
           <Skeleton className="h-11 w-11" rounded="lg" />
           <div className="flex-1 space-y-2">

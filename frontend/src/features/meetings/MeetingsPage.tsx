@@ -499,7 +499,7 @@ function AttachmentDropzone({
           {attachments.map((att) => (
             <li
               key={att.id}
-              className="flex items-center gap-2 rounded-md border border-border-light bg-surface-secondary px-2 py-1.5 text-sm"
+              className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-2 py-1.5 text-sm"
             >
               <FileText size={14} className="text-content-tertiary shrink-0" />
               <span className="flex-1 truncate text-content-primary" title={att.name}>
@@ -1197,8 +1197,8 @@ function ImportSummaryModal({
   const sourceCfg = detectedSource ? SOURCE_LABELS[detectedSource] || SOURCE_LABELS.other : null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('meetings.import_summary', { defaultValue: 'Import Meeting Summary' })}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-2xl shadow-xl border border-border-light animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('meetings.import_summary', { defaultValue: 'Import Meeting Summary' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
@@ -1900,7 +1900,7 @@ const MeetingRow = React.memo(function MeetingRow({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary hover:border-oe-blue hover:text-oe-blue transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary hover:border-oe-blue hover:text-oe-blue transition-colors"
                     data-testid="meeting-row-attachment-chip"
                     title={docId}
                   >

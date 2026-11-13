@@ -930,7 +930,7 @@ export function PdfComparePage() {
         {/* Swap button */}
         <button
           onClick={handleSwap}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary transition-colors"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary transition-colors"
           aria-label={t('pdf_compare.swap', { defaultValue: 'Swap A and B' })}
           title={t('pdf_compare.swap', { defaultValue: 'Swap A and B' })}
         >
@@ -996,7 +996,7 @@ export function PdfComparePage() {
               aria-controls={`pdf-compare-mode-panel-${id}`}
               tabIndex={mode === id ? 0 : -1}
               onClick={() => setMode(id)}
-              className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${
                 mode === id
                   ? 'bg-oe-blue text-white'
                   : 'text-content-secondary hover:bg-surface-secondary'
@@ -1015,7 +1015,7 @@ export function PdfComparePage() {
         <button
           onClick={handleZoomOut}
           disabled={zoomIdx <= 0}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
           aria-label={t('common.zoom_out', { defaultValue: 'Zoom out' })}
         >
           <ZoomOut size={14} />
@@ -1026,7 +1026,7 @@ export function PdfComparePage() {
         <button
           onClick={handleZoomIn}
           disabled={zoomIdx >= ZOOM_LEVELS.length - 1}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
           aria-label={t('common.zoom_in', { defaultValue: 'Zoom in' })}
         >
           <ZoomIn size={14} />
@@ -1038,7 +1038,7 @@ export function PdfComparePage() {
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
           aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
         >
           <ChevronLeft size={14} />
@@ -1060,7 +1060,7 @@ export function PdfComparePage() {
         <button
           onClick={() => setPage((p) => Math.min(maxPages, p + 1))}
           disabled={page >= maxPages}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
           aria-label={t('common.next_page', { defaultValue: 'Next page' })}
         >
           <ChevronRight size={14} />

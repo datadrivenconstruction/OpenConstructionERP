@@ -66,7 +66,7 @@ export function VersionDropdown({
     return (
       <div
         className={clsx(
-          'inline-flex items-center gap-1.5 px-2 h-7 rounded-md text-2xs text-semantic-error border border-semantic-error/20 bg-semantic-error/5',
+          'inline-flex items-center gap-1.5 px-2 h-7 rounded-lg text-2xs text-semantic-error border border-semantic-error/20 bg-semantic-error/5',
           className,
         )}
       >
@@ -84,7 +84,7 @@ export function VersionDropdown({
         disabled={isLoading || total === 0}
         data-testid="version-dropdown-button"
         className={clsx(
-          'inline-flex items-center gap-1.5 h-7 px-2 rounded-md',
+          'inline-flex items-center gap-1.5 h-7 px-2 rounded-lg',
           'text-2xs font-medium border border-border-light',
           'text-content-secondary hover:bg-surface-secondary',
           'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -120,7 +120,7 @@ export function VersionDropdown({
           aria-label={t('files.versions.dropdown_aria', { defaultValue: 'File version history' })}
           className={clsx(
             'absolute right-0 mt-1 w-72 max-h-80 overflow-y-auto',
-            'rounded-lg border border-border-light bg-surface-elevated shadow-lg z-dropdown',
+            'rounded-lg border border-border-light bg-surface-elevated shadow-md z-dropdown',
           )}
         >
           <ul className="divide-y divide-border-light">

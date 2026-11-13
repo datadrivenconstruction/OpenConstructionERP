@@ -12,7 +12,6 @@ import {
   FileCheck,
   Wrench,
   Users,
-  X,
   Plus,
   Search,
   ShieldCheck,
@@ -43,6 +42,8 @@ import {
   IntroRichText,
   ModuleGuideButton,
   CollapsibleSection,
+  WideModal,
+  type WideModalSize,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -1100,45 +1101,12 @@ function ModalShell({
   footer: React.ReactNode;
   size?: string;
 }) {
-  const { t } = useTranslation();
-
-  // Escape-to-close — standard accessible-dialog behaviour.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
+  const wide: WideModalSize =
+    size === 'max-w-3xl' ? 'lg' : size === 'max-w-lg' || size === 'max-w-md' || size === 'max-w-xl' ? 'sm' : 'md';
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        className={`w-full ${size} bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-6 py-4 space-y-4">{children}</div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          {footer}
-        </div>
-      </div>
-    </div>
+    <WideModal open onClose={onClose} title={title} size={wide} footer={footer}>
+      <div className="space-y-4">{children}</div>
+    </WideModal>
   );
 }
 
@@ -1946,7 +1914,7 @@ function JSADetailDrawer({
             {item.hazards.map((h, i) => (
               <li
                 key={i}
-                className="rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2"
+                className="rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2"
               >
                 <div className="text-content-primary">
                   {h.step ? `${h.step}: ` : ''}
@@ -3932,7 +3900,7 @@ function AuditDetailDrawer({
             {findings.map((f) => (
               <li
                 key={f.id}
-                className="flex items-start gap-2 rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2"
+                className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2"
               >
                 {f.is_passed ? (
                   <CheckCircle2 size={16} className="text-semantic-success mt-0.5 shrink-0" />
@@ -4111,7 +4079,7 @@ function CAPATab({ projectId }: { projectId: string }) {
           role="tab"
           aria-selected={subTab === 'capa'}
           onClick={() => setSubTab('capa')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
             subTab === 'capa'
               ? 'bg-oe-blue-subtle text-oe-blue-text'
               : 'text-content-tertiary hover:bg-surface-secondary'
@@ -4123,7 +4091,7 @@ function CAPATab({ projectId }: { projectId: string }) {
           role="tab"
           aria-selected={subTab === 'corrective_actions'}
           onClick={() => setSubTab('corrective_actions')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
             subTab === 'corrective_actions'
               ? 'bg-oe-blue-subtle text-oe-blue-text'
               : 'text-content-tertiary hover:bg-surface-secondary'

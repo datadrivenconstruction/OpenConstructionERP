@@ -53,7 +53,7 @@ export function CreateScreen({ spec, preview, previewing }: CreateScreenProps) {
 
   return (
     <div className="space-y-5" data-testid="module-builder-create">
-      <section className="rounded-2xl border border-border-light p-4 sm:p-5">
+      <section className="rounded-xl border border-border-light p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
             <ModuleIcon name={spec.icon} />
@@ -183,7 +183,7 @@ export function InstallEffects({ spec }: { spec: ModuleSpec }) {
   ];
 
   return (
-    <section className="rounded-2xl border border-border-light p-4 sm:p-5" data-testid="module-builder-install-effects">
+    <section className="rounded-xl border border-border-light p-4 sm:p-5" data-testid="module-builder-install-effects">
       <h3 className="oe-card-title">
         {t('module_builder.install_effects_title', { defaultValue: 'What happens when you press Create module' })}
       </h3>
@@ -194,7 +194,7 @@ export function InstallEffects({ spec }: { spec: ModuleSpec }) {
             className="flex items-start gap-2 text-sm text-content-secondary"
             data-testid={`module-builder-install-effect-${item.testId}`}
           >
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
               {item.icon}
             </span>
             <span className="min-w-0">{item.text}</span>

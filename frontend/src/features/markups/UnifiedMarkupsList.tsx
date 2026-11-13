@@ -284,7 +284,7 @@ export function UnifiedMarkupsList({ projectId }: UnifiedMarkupsListProps) {
                 onClick={() => toggleType(tp)}
                 data-testid={`unified-filter-type-${tp}`}
                 className={clsx(
-                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-2xs font-medium transition-all capitalize',
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-2xs font-medium transition-all capitalize',
                   active
                     ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                     : 'border-border-light bg-surface-primary text-content-tertiary hover:bg-surface-secondary',

@@ -226,7 +226,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
           }}
         >
           <div
-            className="w-full max-w-sm rounded-xl bg-surface-primary shadow-xl border border-border p-5"
+            className="w-full max-w-sm rounded-2xl bg-surface-primary shadow-xl border border-border-light p-5"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"

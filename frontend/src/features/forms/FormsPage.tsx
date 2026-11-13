@@ -682,7 +682,7 @@ function CardIconBtn({
       title={label}
       onClick={onClick}
       className={clsx(
-        'inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors',
+        'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
         danger
           ? 'text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error'
           : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-primary',

@@ -81,7 +81,7 @@ export function InterfaceHistoryPanel({
           {entries.map((h) => {
             const moved = h.from_status && h.to_status && h.from_status !== h.to_status;
             return (
-              <li key={h.id} className="rounded-md bg-surface-primary/70 px-2.5 py-1.5 text-sm">
+              <li key={h.id} className="rounded-lg bg-surface-primary/70 px-2.5 py-1.5 text-sm">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span className="font-medium text-content-primary">
                     {t(`interface_management.history_event_${h.event}`, {

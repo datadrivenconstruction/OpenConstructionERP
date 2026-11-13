@@ -171,7 +171,7 @@ export function LeaseDetailPage() {
             aria-selected={tab === v}
             onClick={() => setTab(v)}
             className={clsx(
-              'rounded-md px-3 py-1.5 text-xs font-medium',
+              'rounded-lg px-3 py-1.5 text-xs font-medium',
               tab === v ? 'bg-surface-primary text-content-primary shadow-sm' : 'text-content-tertiary hover:text-content-primary',
             )}
           >

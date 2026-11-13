@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import {
   Network,
   Plus,
-  X,
   ChevronRight,
   Search,
   Trash2,
@@ -26,7 +25,7 @@ import {
   ExternalLink,
   Link2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, ConfirmDialog } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, ConfirmDialog, WideModal } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -393,38 +392,30 @@ function InterfaceModal({
     if (canSubmit) onSubmit(formToPayload(form));
   };
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   const heading = initial
     ? t('interface_management.edit_interface', { defaultValue: 'Edit interface' })
     : t('interface_management.new_interface', { defaultValue: 'New interface' });
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="mx-4 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
-        role="dialog"
-        aria-modal="true"
-        aria-label={heading}
-      >
-        <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="oe-section-title">{heading}</h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-4 px-6 py-4">
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={heading}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit} loading={isPending}>
+            {initial
+              ? t('common.save', { defaultValue: 'Save' })
+              : t('interface_management.create_interface', { defaultValue: 'Create interface' })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="if-reference" className="oe-label">
@@ -753,19 +744,7 @@ function InterfaceModal({
             </div>
           </div>
         </div>
-
-        <div className="flex items-center justify-end gap-3 border-t border-border-light px-6 py-4">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit} loading={isPending}>
-            {initial
-              ? t('common.save', { defaultValue: 'Save' })
-              : t('interface_management.create_interface', { defaultValue: 'Create interface' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -823,7 +802,7 @@ function ActionsPanel({
             return (
               <li
                 key={a.id}
-                className="flex items-center gap-2 rounded-md bg-surface-primary/70 px-2.5 py-1.5"
+                className="flex items-center gap-2 rounded-lg bg-surface-primary/70 px-2.5 py-1.5"
               >
                 <button
                   type="button"

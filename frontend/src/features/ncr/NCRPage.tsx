@@ -9,7 +9,6 @@ import {
   AlertOctagon,
   Search,
   Plus,
-  X,
   ChevronDown,
   ChevronRight,
   DollarSign,
@@ -33,7 +32,7 @@ import {
   Ban,
   Save,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, MoneyDisplay, CollapsibleSection } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, MoneyDisplay, CollapsibleSection, WideModal } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { SectionIntro } from '@/features/validation';
@@ -202,43 +201,36 @@ function CreateNCRModal({
     if (canSubmit) onSubmit(form);
   };
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('ncr.new_ncr', { defaultValue: 'New NCR' })}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <div>
-            <h2 className="oe-section-title">
-              {t('ncr.new_ncr', { defaultValue: 'New NCR' })}
-            </h2>
-            {projectName && (
-              <p className="text-xs text-content-tertiary mt-0.5">
-                {t('common.creating_in_project', {
-                  defaultValue: 'In {{project}}',
-                  project: projectName,
-                })}
-              </p>
+    <WideModal
+      open
+      onClose={onClose}
+      busy={isPending}
+      size="md"
+      title={t('ncr.new_ncr', { defaultValue: 'New NCR' })}
+      subtitle={
+        projectName
+          ? t('common.creating_in_project', { defaultValue: 'In {{project}}', project: projectName })
+          : undefined
+      }
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <Plus size={16} className="mr-1.5 shrink-0" />
             )}
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
+            <span>{t('ncr.create_ncr', { defaultValue: 'Create NCR' })}</span>
+          </Button>
+        </>
+      }
+    >
         {/* Form */}
-        <div className="px-6 py-4 space-y-5">
+        <div className="space-y-5">
           {/* ── NCR Type ── */}
           <div>
             <label className="oe-label">
@@ -411,23 +403,7 @@ function CreateNCRModal({
             />
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <Plus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t('ncr.create_ncr', { defaultValue: 'Create NCR' })}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -657,7 +633,7 @@ const NCRRow = React.memo(function NCRRow({
                     e.stopPropagation();
                     navigate(inspectionDeepLink);
                   }}
-                  className="rounded-md transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                  className="rounded-lg transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                   title={t('ncr.view_inspection', { defaultValue: 'View Inspection' })}
                 >
                   <Badge variant="blue" size="sm">

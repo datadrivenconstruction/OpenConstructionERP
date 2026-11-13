@@ -107,7 +107,7 @@ export function InlinePdfPreviewModal({
       onClick={onClose}
     >
       <div
-        className="flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-surface-elevated shadow-2xl"
+        className="flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-elevated shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-2 border-b border-border-light px-4 py-2.5">
@@ -123,7 +123,7 @@ export function InlinePdfPreviewModal({
                 href={objectUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary"
+                className="inline-flex h-7 items-center gap-1 rounded-lg border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary"
                 title={t('files.preview.open_new_tab', {
                   defaultValue: 'Open in a new tab',
                 })}
@@ -137,7 +137,7 @@ export function InlinePdfPreviewModal({
               onClick={handleDownload}
               disabled={downloading}
               data-testid="inline-pdf-download"
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex h-7 items-center gap-1 rounded-lg border border-border-light px-2 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {downloading ? (
                 <Loader2 size={12} className="animate-spin" />
@@ -151,7 +151,7 @@ export function InlinePdfPreviewModal({
               onClick={onClose}
               aria-label={t('common.close', { defaultValue: 'Close' })}
               data-testid="inline-pdf-close"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
             >
               <X size={16} />
             </button>
@@ -176,7 +176,7 @@ export function InlinePdfPreviewModal({
               <button
                 type="button"
                 onClick={handleDownload}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary"
               >
                 <Download size={14} />
                 {t('files.actions.download', { defaultValue: 'Download' })}
