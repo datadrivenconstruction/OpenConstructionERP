@@ -13,7 +13,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from '@/shared/ui';
+import { AcademyMark, ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { UserAvatar } from '@/shared/ui/UserAvatar';
@@ -1216,7 +1216,7 @@ function HelpMenu() {
             data-testid="help-menu-academy"
             className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
           >
-            <GraduationCap size={14} className="text-content-tertiary shrink-0" />
+            <AcademyMark className="h-3.5 w-3.5" />
             <span className="flex-1">{t('nav.academy', { defaultValue: 'Academy' })}</span>
             <ExternalLink size={11} className="text-content-quaternary shrink-0" />
           </a>

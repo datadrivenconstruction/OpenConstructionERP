@@ -106,3 +106,16 @@ export function LogoWithText({ size = 'md', animate, tone, className }: LogoWith
     </span>
   );
 }
+
+/* ── Academy mark ──────────────────────────────────────────────────────── */
+
+/** OpenConstruction Academy mark from the unmodified brand-kit SVGs. */
+export function AcademyMark({ className }: { className?: string }) {
+  const img = 'block h-full w-full select-none';
+  return (
+    <span className={clsx('relative inline-block shrink-0', className ?? 'h-4 w-4')} data-testid="oe-academy-mark" aria-hidden>
+      <img src="/brand/academy/academy-mark-light.svg" alt="" draggable={false} className={clsx(img, 'dark:hidden')} />
+      <img src="/brand/academy/academy-mark-dark.svg" alt="" draggable={false} className={clsx(img, 'hidden dark:block')} />
+    </span>
+  );
+}

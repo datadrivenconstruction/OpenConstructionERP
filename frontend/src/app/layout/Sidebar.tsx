@@ -38,7 +38,6 @@ import {
   Github,
   Loader2,
   LayoutGrid,
-  GraduationCap,
   Palette,
   RotateCcw,
   type LucideIcon,
@@ -53,6 +52,7 @@ import { useModuleStore } from '@/stores/useModuleStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet } from '@/shared/lib/api';
 import { UpdateBadge, UpdateNotification } from '@/shared/ui/UpdateChecker';
+import { AcademyMark } from '@/shared/ui/Logo';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -2569,10 +2569,10 @@ function LearnSection({
       <div className="group/learnhead relative flex items-center gap-1.5 px-1.5 pb-1 pt-0.5">
         <span
           {...{ [LEARN_ANCHOR_ATTR]: 'sidebar' }}
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-oe-blue/15 text-oe-blue"
+          className="flex h-5 w-5 shrink-0 items-center justify-center"
           aria-hidden
         >
-          <GraduationCap size={12} strokeWidth={2.25} />
+          <AcademyMark className="h-4 w-4" />
         </span>
         <span
           className="min-w-0 flex-1 truncate text-2xs font-semibold uppercase tracking-wider text-oe-blue/80 dark:text-oe-blue"
