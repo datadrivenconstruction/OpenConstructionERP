@@ -192,11 +192,13 @@
   /* Radius: three working steps. 4-6 small parts, 8 every control (button,
      input, select, segment group), 12 cards, panels and modals. `rounded`,
      `rounded-2xl` and `rounded-3xl` are mapped onto this ladder in tailwind.config.js. */
-  --oe-radius-xs: 4px;
-  --oe-radius-sm: 6px;
-  --oe-radius-md: 6px;
-  --oe-radius-lg: 8px;
-  --oe-radius-xl: 12px;
+  /* One radius scale (founder 13.11): 4 inner parts, 6 controls, 10 cards, 14 dialogs. */
+  --oe-radius-xs: 3px;
+  --oe-radius-sm: 4px;
+  --oe-radius-md: 4px;
+  --oe-radius-lg: 6px;
+  --oe-radius-xl: 10px;
+  --oe-radius-2xl: 14px;
   --oe-radius-full: 9999px;
 
   /* Spacing scale — 4px base */
@@ -2099,6 +2101,7 @@ html[data-radius='sharp'] {
   --oe-radius-md: 4px;
   --oe-radius-lg: 4px;
   --oe-radius-xl: 6px;
+  --oe-radius-2xl: 8px;
 }
 html[data-radius='round'] {
   --oe-radius-xs: 6px;
@@ -2106,6 +2109,7 @@ html[data-radius='round'] {
   --oe-radius-md: 12px;
   --oe-radius-lg: 14px;
   --oe-radius-xl: 18px;
+  --oe-radius-2xl: 22px;
 }
 
 /* Density: Tailwind spacing and control heights are rem, the type scale is px,

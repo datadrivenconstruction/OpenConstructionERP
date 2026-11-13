@@ -30,7 +30,6 @@ export function Card({
         // opened inside it would paint under the next card. Lift the card that holds
         // focus or an open popup above its siblings (below the sticky header, z-30).
         'relative focus-within:z-20 has-[[aria-expanded=true]]:z-20',
-        'shadow-xs',
         'transition-all duration-normal ease-oe transform-gpu',
         hoverable && [
           'hover:shadow-sm hover:border-border',
