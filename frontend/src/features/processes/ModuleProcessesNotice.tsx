@@ -8,10 +8,11 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Loader2, Power } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Loader2, Power } from 'lucide-react';
 
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtList } from '@/shared/lib/formatters';
+import { useInfoBlockPrefsStore } from '@/stores/useInfoBlockPrefsStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { isControllable, isLoading, isUnsupported, ramOf, useEnsureModule, useProcessAction, useProcesses } from './api';
 import { formatMb, processName, processOffImpact, useIsProcessAdmin } from './labels';
@@ -21,11 +22,14 @@ export function ModuleProcessesNotice({
   moduleId,
   className,
   exclude = [],
+  collapsible = false,
 }: {
   moduleId: string;
   className?: string;
   /** Process ids another notice on the page already speaks for. */
   exclude?: string[];
+  /** One line by default; details open on demand and the choice is kept per user. */
+  collapsible?: boolean;
 }) {
   const { t } = useTranslation();
   const isAdmin = useIsProcessAdmin();
@@ -34,6 +38,10 @@ export function ModuleProcessesNotice({
   const action = useProcessAction();
   const openPanel = useProcessesUi((s) => s.openPanel);
   const addToast = useToastStore((s) => s.addToast);
+  const prefKey = `processes-notice.${moduleId}`;
+  const storedCollapsed = useInfoBlockPrefsStore((s) => s.blocks[prefKey]);
+  const setCollapsedPref = useInfoBlockPrefsStore((s) => s.setCollapsed);
+  const folded = collapsible && (storedCollapsed ?? true);
 
   const off = (data?.processes ?? []).filter(
     (p) => p.modules.includes(moduleId) && !exclude.includes(p.id) && (!p.enabled || p.status === 'error' || isLoading(p)),
@@ -69,7 +77,9 @@ export function ModuleProcessesNotice({
       className={
         (starting
           ? 'flex items-center gap-2 rounded-xl border border-semantic-info/25 bg-semantic-info/5 px-3 py-2 text-xs '
-          : 'flex flex-col gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-sm sm:flex-row sm:items-center ') +
+          : folded
+            ? 'flex flex-wrap items-center gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 px-3 py-1.5 text-xs '
+            : 'flex flex-col gap-2 rounded-xl border border-semantic-warning/30 bg-semantic-warning/10 p-3 text-sm sm:flex-row sm:items-center ') +
         (className ?? '')
       }
     >
@@ -77,7 +87,7 @@ export function ModuleProcessesNotice({
         {starting ? (
           <Loader2 size={14} className="mt-0.5 shrink-0 animate-spin text-semantic-info" aria-hidden />
         ) : (
-          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
+          <AlertTriangle size={folded ? 14 : 16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
         )}
         <div className="min-w-0">
           <p className="font-medium text-content-primary">
@@ -88,7 +98,7 @@ export function ModuleProcessesNotice({
                 })
               : t('processes.notice.needs', { defaultValue: 'This feature needs {{names}}. It is off.', names })}
           </p>
-          {!starting && off.length === 1 && (
+          {!starting && !folded && off.length === 1 && (
             <p className="mt-0.5 text-xs text-content-secondary">{processOffImpact(t, off[0]!)}</p>
           )}
         </div>
@@ -101,7 +111,10 @@ export function ModuleProcessesNotice({
               onClick={turnOn}
               disabled={action.isPending}
               data-testid="module-processes-turn-on"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60"
+              className={
+                'inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 text-xs font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60 ' +
+                (folded ? 'h-7' : 'py-1.5')
+              }
             >
               <Power size={12} aria-hidden />
               {t('processes.notice.turn_on', { defaultValue: 'Turn on (uses ~{{value}})', value: formatMb(t, mb) })}
@@ -118,6 +131,20 @@ export function ModuleProcessesNotice({
           >
             {t('processes.notice.more', { defaultValue: 'What is this?' })}
           </button>
+          {collapsible && (
+            <button
+              type="button"
+              onClick={() => setCollapsedPref(prefKey, !folded)}
+              aria-expanded={!folded}
+              data-testid="module-processes-toggle"
+              className="inline-flex items-center gap-0.5 text-xs font-medium text-content-secondary hover:text-content-primary"
+            >
+              {folded
+                ? t('common.show_more', { defaultValue: 'Show more' })
+                : t('common.show_less', { defaultValue: 'Show less' })}
+              {folded ? <ChevronDown size={12} aria-hidden /> : <ChevronUp size={12} aria-hidden />}
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -26,6 +26,7 @@ import { ProcessesButton } from './ProcessesButton';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ModuleProcessesNotice } from './ModuleProcessesNotice';
 import { useProcessesUi } from './useProcessesUi';
+import { useInfoBlockPrefsStore } from '@/stores/useInfoBlockPrefsStore';
 import { useToastStore } from '@/stores/useToastStore';
 
 function proc(over) {
@@ -464,6 +465,18 @@ describe('ModuleProcessesNotice', () => {
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
     await new Promise((r) => setTimeout(r, 50));
     expect(container.querySelector('[data-testid^="module-processes-notice"]')).toBeNull();
+  });
+
+  it('folds to one line when collapsible and keeps the reader choice', async () => {
+    vi.mocked(apiGet).mockResolvedValue(snapshot([proc()]));
+    useInfoBlockPrefsStore.setState({ blocks: {} });
+    renderWith(<ModuleProcessesNotice moduleId="costs" collapsible />);
+    const toggle = await screen.findByTestId('module-processes-toggle');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('module-processes-turn-on')).toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(useInfoBlockPrefsStore.getState().blocks['processes-notice.costs']).toBe(false);
+    expect(screen.getByTestId('module-processes-toggle')).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('tells a non-admin to ask an administrator', async () => {
