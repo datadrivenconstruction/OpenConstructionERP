@@ -3339,7 +3339,7 @@ export function DwgTakeoffPage() {
                 <div className="h-px w-8 bg-blue-400 absolute top-1/2 -translate-y-1/2 -left-4" />
               </div>
 
-              <div className="relative z-10 max-w-7xl mx-auto pt-20 pb-4 w-full">
+              <div className="relative z-10 max-w-7xl mx-auto pt-6 pb-4 w-full">
                 <DismissibleInfo
                   storageKey="dwg-takeoff"
                   className="mb-6 !bg-neutral-900/90 [&_.text-content-primary]:!text-gray-100 [&_.text-content-secondary]:!text-gray-300 [&_.text-content-tertiary]:!text-gray-400"
@@ -3357,7 +3357,7 @@ export function DwgTakeoffPage() {
                 <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-8 items-stretch">
                   {/* LEFT · Upload card (gets the larger half) */}
                   <div className="flex flex-col">
-                    <div className="rounded-2xl bg-[#22252b]/90 backdrop-blur-sm border border-[#333842] shadow-2xl shadow-black/30 p-3 flex flex-col h-full">
+                    <div className="rounded-xl bg-[#22252b]/90 backdrop-blur-sm border border-[#333842] p-3 flex flex-col h-full">
                       <button
                         type="button"
                         aria-label={t('dwg_takeoff.upload_aria', { defaultValue: 'Upload DWG or DXF file' })}
@@ -3379,12 +3379,12 @@ export function DwgTakeoffPage() {
                         )}
                         onClick={() => setShowUpload(true)}
                       >
-                        <div className="w-20 h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover/drop:scale-110 group-hover/drop:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
-                          <Upload size={36} className="text-blue-400" />
+                        <div className="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover/drop:scale-110 group-hover/drop:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
+                          <Upload size={28} className="text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-base font-semibold text-content-quaternary">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
-                          <p className="text-sm text-content-tertiary mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
+                          <p className="text-sm font-semibold text-white/85">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
+                          <p className="text-sm text-white/55 mt-1">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dwg</span>
@@ -3403,7 +3403,7 @@ export function DwgTakeoffPage() {
                   <div className="flex flex-col justify-center gap-4">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h1 className="text-2xl font-semibold text-content-quaternary tracking-tight leading-tight">
+                        <h1 className="text-lg font-semibold text-white/90 tracking-tight leading-tight">
                           {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
                         </h1>
                         <OfflineReadyBadge
@@ -3413,7 +3413,7 @@ export function DwgTakeoffPage() {
                         />
                         <ModuleGuideButton content={dwgTakeoffGuide} />
                       </div>
-                      <p className="text-base text-content-quaternary mt-3 leading-relaxed">
+                      <p className="text-sm text-white/65 mt-2 leading-relaxed">
                         {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
                       </p>
                       {dwgRange && (
@@ -3430,8 +3430,8 @@ export function DwgTakeoffPage() {
                         <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-[#22252b]/80 backdrop-blur-sm border border-[#333842] hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.06)] transition-all">
                           <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"><f.icon size={15} className="text-orange-400" /></div>
                           <div className="min-w-0">
-                            <h3 className="oe-card-title text-content-quaternary">{f.title}</h3>
-                            <p className="text-2xs text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                            <h3 className="oe-card-title text-white/85">{f.title}</h3>
+                            <p className="text-2xs text-white/55 leading-snug mt-1">{f.desc}</p>
                           </div>
                         </div>
                       ))}

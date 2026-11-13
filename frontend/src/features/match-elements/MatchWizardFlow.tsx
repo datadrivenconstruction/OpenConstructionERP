@@ -304,7 +304,7 @@ function PanelHeader({ stage }: { stage: StageDef }) {
             total: STAGES.length,
           })}
         </div>
-        <h2 className="text-xl font-semibold text-content-primary">
+        <h2 className="text-lg font-semibold text-content-primary">
           {t(stage.titleKey, { defaultValue: stage.titleDefault })}
         </h2>
         <p className="mt-0.5 text-sm text-content-secondary">
@@ -335,7 +335,7 @@ function StatTile({
             : 'border-border-light bg-surface-secondary',
       )}
     >
-      <div className="text-2xl font-semibold text-content-primary tabular-nums">{value}</div>
+      <div className="text-xl font-semibold text-content-primary tabular-nums">{value}</div>
       <div className="text-xs text-content-secondary">{label}</div>
     </div>
   );
@@ -1243,7 +1243,7 @@ export function MatchWizardFlow() {
           tuning). The banner sets the right expectation and gives a
           1-click path to file an issue against the public repo. */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-semantic-warning/30 bg-gradient-to-r from-amber-50/80 via-white to-white px-3 py-2 shadow-sm dark:from-amber-950/20 dark:via-surface-primary dark:to-surface-primary">
-        <span className="inline-flex shrink-0 items-center gap-1 rounded border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-semantic-warning">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-sm border border-semantic-warning/30 bg-semantic-warning/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-semantic-warning">
           <Sparkles className="h-2.5 w-2.5" />
           {t('match_elements.beta_badge', { defaultValue: 'Beta' })}
         </span>
@@ -1257,7 +1257,7 @@ export function MatchWizardFlow() {
           href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new?labels=match-elements&template=bug_report.yml"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-semantic-warning/30 bg-white/90 px-2.5 py-1 text-2xs font-semibold text-semantic-warning shadow-sm transition-all hover:-translate-y-px hover:bg-semantic-warning-bg dark:bg-surface-primary/80"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-semantic-warning/30 bg-surface-primary px-2.5 py-1 text-2xs font-semibold text-semantic-warning transition-colors hover:bg-semantic-warning-bg"
         >
           <MessageSquarePlus className="h-3 w-3" />
           {t('match_elements.beta_cta', { defaultValue: 'Open an issue' })}
@@ -1308,7 +1308,7 @@ export function MatchWizardFlow() {
             onClick={() => setShowTemplates(true)}
             className="inline-flex items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-secondary"
           >
-            <Library className="h-4 w-4 text-indigo-500" />
+            <Library className="h-4 w-4 text-oe-blue" />
             {t('match.wizard.openTemplateLibrary', {
               defaultValue: 'Open template library',
             })}
@@ -1727,8 +1727,8 @@ export function MatchWizardFlow() {
                       shortlist, using the user's own provider key. */}
                   <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10">
-                        <Sparkles className="h-4 w-4 text-indigo-500" />
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10">
+                        <Sparkles className="h-4 w-4 text-oe-blue" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
