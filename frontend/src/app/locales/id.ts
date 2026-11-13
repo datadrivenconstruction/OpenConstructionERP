@@ -50498,6 +50498,7 @@ const resource = {
     "common.right": "Kanan",
     "common.default_filter_save": "Simpan sebagai default saya",
     "common.default_filter_clear": "Hapus default saya",
+    "common.more_actions": "Tindakan lainnya",
     "commitment.abort.follow_up.cancel": "Batalkan pesanan ini di pengadaan",
     "commitment.abort.follow_up.terminate": "Akhiri kontrak ini di modul kontrak",
     "commitment.abort.follow_up_title": "Masih harus dilakukan manual. Menghentikan butir tidak mengakhiri kontrak atau pesanan apa pun dengan sendirinya:",

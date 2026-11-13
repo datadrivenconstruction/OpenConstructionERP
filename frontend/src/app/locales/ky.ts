@@ -50914,6 +50914,7 @@ const resource = {
     "common.right": "Оң жак",
     "common.default_filter_save": "Менин демейки катары сактоо",
     "common.default_filter_clear": "Менин демейкимди тазалоо",
+    "common.more_actions": "Кошумча аракеттер",
     "commitment.abort.follow_up.cancel": "Сатып алууда бул буйрутмадан баш тартуу",
     "commitment.abort.follow_up.terminate": "Келишимдер модулунда бул келишимди бузуу",
     "commitment.abort.follow_up_title": "Дагы кол менен аткаруу керек. Пунктту токтотуу өзүнөн өзү эч бир келишимди же буйрутманы бүтүрбөйт:",

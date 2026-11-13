@@ -50729,6 +50729,7 @@ const resource = {
     "common.right": "Paremale",
     "common.default_filter_save": "Salvesta minu vaikeseadena",
     "common.default_filter_clear": "Tühista minu vaikeseade",
+    "common.more_actions": "Veel toiminguid",
     "commitment.abort.follow_up.cancel": "Tühista see tellimus hankes",
     "commitment.abort.follow_up.terminate": "Lõpeta see leping lepingute moodulis",
     "commitment.abort.follow_up_title": "Tuleb veel käsitsi teha. Positsiooni peatamine ei lõpeta ise ühtegi lepingut ega tellimust:",

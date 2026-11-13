@@ -52076,6 +52076,7 @@ const resource = {
     "common.right": "右",
     "common.default_filter_save": "自分の既定として保存",
     "common.default_filter_clear": "自分の既定をクリア",
+    "common.more_actions": "その他の操作",
     "commitment.abort.follow_up.cancel": "調達でこの発注を取り消す",
     "commitment.abort.follow_up.terminate": "契約モジュールでこの契約を解除する",
     "commitment.abort.follow_up_title": "引き続き手作業が必要です。この項目を中止しても、契約や発注は自動では終了しません:",

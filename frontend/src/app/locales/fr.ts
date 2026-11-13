@@ -53661,6 +53661,7 @@ const resource = {
     "common.right": "Droite",
     "common.default_filter_save": "Enregistrer comme par défaut",
     "common.default_filter_clear": "Effacer mon par défaut",
+    "common.more_actions": "Autres actions",
     "commitment.abort.follow_up.cancel": "Annuler cette commande dans les achats",
     "commitment.abort.follow_up.terminate": "Résilier ce contrat dans le module des contrats",
     "commitment.abort.follow_up_title": "Reste à faire à la main. Arrêter le poste ne met fin à lui seul à aucun contrat ni à aucune commande :",

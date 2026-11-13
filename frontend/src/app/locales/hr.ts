@@ -51006,6 +51006,7 @@ const resource = {
     "common.right": "Desno",
     "common.default_filter_save": "Spremi kao moj zadani",
     "common.default_filter_clear": "Obriši moj zadani",
+    "common.more_actions": "Više radnji",
     "commitment.abort.follow_up.cancel": "Otkaži ovu narudžbu u nabavi",
     "commitment.abort.follow_up.terminate": "Raskini ovaj ugovor u modulu ugovora",
     "commitment.abort.follow_up_title": "Još treba napraviti ručno. Zaustavljanje stavke samo po sebi ne završava ugovor ni narudžbu:",

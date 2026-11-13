@@ -51678,6 +51678,7 @@ const resource = {
     "common.right": "Sağ",
     "common.default_filter_save": "Varsayılanım olarak kaydet",
     "common.default_filter_clear": "Varsayılanımı temizle",
+    "common.more_actions": "Diğer işlemler",
     "commitment.abort.follow_up.cancel": "Bu siparişi satın almada iptal et",
     "commitment.abort.follow_up.terminate": "Bu sözleşmeyi sözleşmeler modülünde feshet",
     "commitment.abort.follow_up_title": "Elle yapılması gerekiyor. Kalemi durdurmak tek başına hiçbir sözleşmeyi veya siparişi sonlandırmaz:",

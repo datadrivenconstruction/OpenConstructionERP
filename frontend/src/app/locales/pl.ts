@@ -52230,6 +52230,7 @@ const resource = {
     "common.right": "Do prawej",
     "common.default_filter_save": "Zapisz jako mój domyślny",
     "common.default_filter_clear": "Wyczyść mój domyślny",
+    "common.more_actions": "Więcej działań",
     "commitment.abort.follow_up.cancel": "Anuluj to zamówienie w zakupach",
     "commitment.abort.follow_up.terminate": "Rozwiąż tę umowę w module umów",
     "commitment.abort.follow_up_title": "Do zrobienia jeszcze ręcznie. Zatrzymanie pozycji samo nie kończy żadnej umowy ani zamówienia:",

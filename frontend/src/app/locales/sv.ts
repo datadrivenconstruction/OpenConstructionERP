@@ -51418,6 +51418,7 @@ const resource = {
     "common.right": "Höger",
     "common.default_filter_save": "Spara som min standard",
     "common.default_filter_clear": "Rensa min standard",
+    "common.more_actions": "Fler åtgärder",
     "commitment.abort.follow_up.cancel": "Avbeställ den här beställningen i inköp",
     "commitment.abort.follow_up.terminate": "Säg upp det här avtalet i avtalsmodulen",
     "commitment.abort.follow_up_title": "Återstår att göra för hand. Att stoppa posten avslutar inget avtal eller någon beställning av sig själv:",

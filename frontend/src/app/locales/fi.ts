@@ -50628,6 +50628,7 @@ const resource = {
     "common.right": "Oikea",
     "common.default_filter_save": "Tallenna oletukseksi",
     "common.default_filter_clear": "Tyhjennä oletukseni",
+    "common.more_actions": "Lisää toimintoja",
     "commitment.abort.follow_up.cancel": "Peruuta tämä tilaus hankinnassa",
     "commitment.abort.follow_up.terminate": "Päätä tämä sopimus sopimusmoduulissa",
     "commitment.abort.follow_up_title": "Tehtävä vielä käsin. Nimikkeen pysäyttäminen ei itsessään päätä yhtään sopimusta tai tilausta:",

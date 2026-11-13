@@ -50801,6 +50801,7 @@ const resource = {
     "common.right": "Дясно",
     "common.default_filter_save": "Запази като мое по подразбиране",
     "common.default_filter_clear": "Изчисти моето по подразбиране",
+    "common.more_actions": "Още действия",
     "commitment.abort.follow_up.cancel": "Отмени тази поръчка в доставките",
     "commitment.abort.follow_up.terminate": "Прекрати този договор в модула за договори",
     "commitment.abort.follow_up_title": "Остава да се направи ръчно. Спирането на позицията само по себе си не прекратява договор или поръчка:",

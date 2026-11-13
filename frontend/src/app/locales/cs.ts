@@ -51969,6 +51969,7 @@ const resource = {
     "common.right": "Vpravo",
     "common.default_filter_save": "Uložit jako můj výchozí",
     "common.default_filter_clear": "Vymazat můj výchozí",
+    "common.more_actions": "Další akce",
     "commitment.abort.follow_up.cancel": "Zrušte tuto objednávku v nákupu",
     "commitment.abort.follow_up.terminate": "Ukončete tuto smlouvu v modulu smluv",
     "commitment.abort.follow_up_title": "Zbývá udělat ručně. Zastavení položky samo neukončí žádnou smlouvu ani objednávku:",

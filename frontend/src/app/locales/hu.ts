@@ -52585,6 +52585,7 @@ const resource = {
     "common.right": "Jobbra",
     "common.default_filter_save": "Mentés alapértelmezettként",
     "common.default_filter_clear": "Alapértelmezett törlése",
+    "common.more_actions": "További műveletek",
     "commitment.abort.follow_up.cancel": "A megrendelés lemondása a beszerzésben",
     "commitment.abort.follow_up.terminate": "A szerződés felmondása a szerződések modulban",
     "commitment.abort.follow_up_title": "Még kézzel kell elvégezni. A tétel leállítása önmagában nem szüntet meg szerződést vagy megrendelést:",

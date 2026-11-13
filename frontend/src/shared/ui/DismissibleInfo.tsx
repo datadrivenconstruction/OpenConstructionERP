@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Info, X } from 'lucide-react';
+import { useInfoCardPresence } from './pageHeaderSlot';
 import { useModuleInfoStore } from '@/stores/useModuleInfoStore';
 import { useInfoBlockPrefsStore, readLegacyCollapsed } from '@/stores/useInfoBlockPrefsStore';
 
@@ -158,6 +159,14 @@ export function DismissibleInfo({
     register({ key: storageKey, expand });
     return () => unregister(storageKey);
   }, [collapsed, storageKey, expand, register, unregister]);
+
+  const addPresence = useInfoCardPresence((s) => s.add);
+  const removePresence = useInfoCardPresence((s) => s.remove);
+  useEffect(() => {
+    if (collapsed) return undefined;
+    addPresence();
+    return removePresence;
+  }, [collapsed, addPresence, removePresence]);
 
   if (collapsed) return null;
 

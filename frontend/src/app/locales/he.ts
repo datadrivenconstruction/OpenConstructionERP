@@ -50998,6 +50998,7 @@ const resource = {
     "common.right": "ימין",
     "common.default_filter_save": "שמור כברירת מחדל שלי",
     "common.default_filter_clear": "נקה את ברירת המחדל שלי",
+    "common.more_actions": "פעולות נוספות",
     "commitment.abort.follow_up.cancel": "ביטול ההזמנה הזו ברכש",
     "commitment.abort.follow_up.terminate": "סיום החוזה הזה במודול החוזים",
     "commitment.abort.follow_up_title": "עדיין יש לעשות ידנית. עצירת הפריט כשלעצמה אינה מסיימת חוזה או הזמנה:",

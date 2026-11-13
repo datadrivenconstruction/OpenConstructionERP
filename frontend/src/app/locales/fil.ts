@@ -50601,6 +50601,7 @@ const resource = {
     "common.right": "Kanan",
     "common.default_filter_save": "I-save bilang aking default",
     "common.default_filter_clear": "I-clear ang aking default",
+    "common.more_actions": "Iba pang aksyon",
     "commitment.abort.follow_up.cancel": "Kanselahin ang order na ito sa procurement",
     "commitment.abort.follow_up.terminate": "Tapusin ang kontratang ito sa module ng mga kontrata",
     "commitment.abort.follow_up_title": "Kailangan pang gawin nang mano-mano. Hindi nito tinatapos ang anumang kontrata o order kapag itinigil ang item:",

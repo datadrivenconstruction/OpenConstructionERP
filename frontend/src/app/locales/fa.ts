@@ -50636,6 +50636,7 @@ const resource = {
     "common.right": "راست",
     "common.default_filter_save": "ذخیره به‌عنوان پیش‌فرض من",
     "common.default_filter_clear": "پاک کردن پیش‌فرض من",
+    "common.more_actions": "اقدامات بیشتر",
     "commitment.abort.follow_up.cancel": "لغو این سفارش در بخش تدارکات",
     "commitment.abort.follow_up.terminate": "فسخ این قرارداد در ماژول قراردادها",
     "commitment.abort.follow_up_title": "هنوز باید دستی انجام شود. توقف ردیف به‌خودی‌خود هیچ قرارداد یا سفارشی را پایان نمی‌دهد:",

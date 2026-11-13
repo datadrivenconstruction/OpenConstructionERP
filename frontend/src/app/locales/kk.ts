@@ -50758,6 +50758,7 @@ const resource = {
     "common.right": "Оң жақ",
     "common.default_filter_save": "Менің әдепкім ретінде сақтау",
     "common.default_filter_clear": "Менің әдепкімді тазалау",
+    "common.more_actions": "Қосымша әрекеттер",
     "commitment.abort.follow_up.cancel": "Сатып алуда осы тапсырысты бас тарту",
     "commitment.abort.follow_up.terminate": "Шарттар модулінде осы шартты бұзу",
     "commitment.abort.follow_up_title": "Әлі қолмен орындау керек. Тармақты тоқтату өздігінен ешбір шартты немесе тапсырысты аяқтамайды:",

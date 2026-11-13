@@ -51962,6 +51962,7 @@ const resource = {
     "common.right": "Destra",
     "common.default_filter_save": "Salva come predefinito",
     "common.default_filter_clear": "Cancella il mio predefinito",
+    "common.more_actions": "Altre azioni",
     "commitment.abort.follow_up.cancel": "Annulla questo ordine negli acquisti",
     "commitment.abort.follow_up.terminate": "Risolvi questo contratto nel modulo contratti",
     "commitment.abort.follow_up_title": "Resta da fare a mano. Fermare la voce non chiude da solo nessun contratto né ordine:",

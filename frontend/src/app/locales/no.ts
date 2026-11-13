@@ -50803,6 +50803,7 @@ const resource = {
     "common.right": "Høyre",
     "common.default_filter_save": "Lagre som min standard",
     "common.default_filter_clear": "Tøm min standard",
+    "common.more_actions": "Flere handlinger",
     "commitment.abort.follow_up.cancel": "Kanseller denne bestillingen i innkjøp",
     "commitment.abort.follow_up.terminate": "Si opp denne kontrakten i kontraktmodulen",
     "commitment.abort.follow_up_title": "Må fortsatt gjøres for hånd. Å stanse posten avslutter ingen kontrakt eller bestilling av seg selv:",

@@ -51042,6 +51042,7 @@ const resource = {
     "common.right": "ডানে",
     "common.default_filter_save": "আমার ডিফল্ট হিসেবে সংরক্ষণ",
     "common.default_filter_clear": "আমার ডিফল্ট মুছুন",
+    "common.more_actions": "আরও কাজ",
     "commitment.abort.follow_up.cancel": "ক্রয়ে এই অর্ডার বাতিল করুন",
     "commitment.abort.follow_up.terminate": "চুক্তি মডিউলে এই চুক্তি সমাপ্ত করুন",
     "commitment.abort.follow_up_title": "এখনো হাতে করতে হবে। আইটেম বন্ধ করলে কোনো চুক্তি বা অর্ডার নিজে থেকে শেষ হয় না:",

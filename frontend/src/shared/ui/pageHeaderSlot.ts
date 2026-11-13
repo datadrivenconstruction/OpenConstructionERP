@@ -16,3 +16,20 @@ export const usePageHeaderSlot = create<PageHeaderSlotState>((set) => ({
   el: null,
   setEl: (el) => set({ el }),
 }));
+
+/**
+ * How many expanded info cards (`DismissibleInfo`) the page shows. An Explainer
+ * the reader never toggled starts collapsed while one is open, so the two long
+ * reads are never stacked at the top of a page (founder 13.11).
+ */
+interface InfoPresenceState {
+  open: number;
+  add: () => void;
+  remove: () => void;
+}
+
+export const useInfoCardPresence = create<InfoPresenceState>((set) => ({
+  open: 0,
+  add: () => set((s) => ({ open: s.open + 1 })),
+  remove: () => set((s) => ({ open: Math.max(0, s.open - 1) })),
+}));

@@ -51079,6 +51079,7 @@ const resource = {
     "common.right": "Dreapta",
     "common.default_filter_save": "Salvează ca implicit al meu",
     "common.default_filter_clear": "Șterge implicitul meu",
+    "common.more_actions": "Alte acțiuni",
     "commitment.abort.follow_up.cancel": "Anulați această comandă în achiziții",
     "commitment.abort.follow_up.terminate": "Reziliați acest contract în modulul de contracte",
     "commitment.abort.follow_up_title": "Rămâne de făcut manual. Oprirea poziției nu încheie singură niciun contract și nicio comandă:",

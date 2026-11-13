@@ -44,14 +44,15 @@ import { ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
 
 import { useModuleInfoStore } from '@/stores/useModuleInfoStore';
+import { useInfoCardPresence } from './pageHeaderSlot';
 
-function readCollapsed(key: string, fallback: boolean): boolean {
+function readCollapsed(key: string): boolean | null {
   try {
     const raw = localStorage.getItem(`oce.collapse.${key}`);
-    if (raw === null) return fallback;
+    if (raw === null) return null;
     return raw === '1';
   } catch {
-    return fallback;
+    return null;
   }
 }
 
@@ -91,12 +92,17 @@ export function CollapsibleSection({
   className,
   bodyClassName,
 }: CollapsibleSectionProps) {
-  const [collapsed, setCollapsed] = useState<boolean>(() => readCollapsed(storageKey, defaultCollapsed));
+  // null = the reader never chose; then an open info card above wins the space.
+  const [choice, setChoice] = useState<boolean | null>(() => readCollapsed(storageKey));
+  const infoOpen = useInfoCardPresence((s) => s.open > 0);
+  const collapsed = choice ?? (defaultCollapsed || infoOpen);
 
-  useEffect(() => persistCollapsed(storageKey, collapsed), [storageKey, collapsed]);
+  useEffect(() => {
+    if (choice !== null) persistCollapsed(storageKey, choice);
+  }, [storageKey, choice]);
 
-  const collapse = useCallback(() => setCollapsed(true), []);
-  const expand = useCallback(() => setCollapsed(false), []);
+  const collapse = useCallback(() => setChoice(true), []);
+  const expand = useCallback(() => setChoice(false), []);
 
   // While collapsed the block is out of the page, so the way back is the pill
   // next to the Cases button. Unmount (navigation) unregisters automatically.
@@ -122,7 +128,7 @@ export function CollapsibleSection({
   return (
     <section
       className={clsx(
-        'overflow-hidden rounded-xl border border-border-light bg-surface-primary/70 shadow-sm',
+        'overflow-hidden rounded-xl border border-border-light bg-surface-primary/70',
         className,
       )}
     >

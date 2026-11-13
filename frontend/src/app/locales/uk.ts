@@ -52771,6 +52771,7 @@ const resource = {
     "common.right": "Праворуч",
     "common.default_filter_save": "Зберегти як мій типовий",
     "common.default_filter_clear": "Очистити мій типовий",
+    "common.more_actions": "Ще дії",
     "commitment.abort.follow_up.cancel": "Скасувати це замовлення в закупівлях",
     "commitment.abort.follow_up.terminate": "Розірвати цей договір у модулі договорів",
     "commitment.abort.follow_up_title": "Ще потрібно зробити вручну. Зупинка позиції сама не завершує ні договір, ні замовлення:",
