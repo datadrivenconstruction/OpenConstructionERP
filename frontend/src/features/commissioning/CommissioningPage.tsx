@@ -1120,7 +1120,7 @@ function HowCommissioningWorks() {
         })}
       </p>
 
-      <ol className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-stretch">
+      <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:flex 2xl:flex-row 2xl:items-stretch">
         {steps.map((s, i) => (
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
@@ -1138,7 +1138,7 @@ function HowCommissioningWorks() {
             {i < steps.length - 1 && (
               <li
                 aria-hidden="true"
-                className="hidden shrink-0 items-center self-center text-content-quaternary lg:flex"
+                className="hidden shrink-0 items-center self-center text-content-quaternary 2xl:flex"
               >
                 <ArrowRight size={16} />
               </li>
