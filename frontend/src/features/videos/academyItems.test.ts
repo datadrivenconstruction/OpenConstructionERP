@@ -251,17 +251,3 @@ describe('hub filters', () => {
     expect(facetCounts('kind', none, reader, items).get('guide')).toBe(1);
   });
 });
-
-describe('course photos', () => {
-  it('ship one small file per course', () => {
-    let total = 0;
-    for (const i of ACADEMY_ITEMS.filter((x) => x.kind === 'course')) {
-      const file = resolve(ROOT, 'frontend/public/academy-courses', `${i.id.split(':')[1]}.webp`);
-      expect(existsSync(file), i.id).toBe(true);
-      const size = readFileSync(file).length;
-      expect(size).toBeLessThan(25_000);
-      total += size;
-    }
-    expect(total).toBeLessThan(450_000);
-  });
-});

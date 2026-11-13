@@ -373,7 +373,7 @@ export function CoursesPage() {
             onChange={(e) => set('topic', e.target.value || null)}
             aria-label={t('learn.filter.topic', { defaultValue: 'Topic' })}
             data-testid="courses-filter-topic"
-            className={clsx(selectCls, filters.topic ? 'border-oe-blue/50' : 'border-border-light')}
+            className={clsx(selectCls, 'w-full sm:w-64', filters.topic ? 'border-oe-blue/50' : 'border-border-light')}
           >
             <option value="">{all}</option>
             {topics
@@ -384,13 +384,13 @@ export function CoursesPage() {
                 </option>
               ))}
           </select>
-          <span className="ms-2 text-content-tertiary">{t('learn.filter.track', { defaultValue: 'Track' })}</span>
+          <span className="text-content-tertiary sm:ms-3">{t('learn.filter.track', { defaultValue: 'Track' })}</span>
           <select
             value={filters.track ?? ''}
             onChange={(e) => set('track', e.target.value || null)}
             aria-label={t('learn.filter.track', { defaultValue: 'Track' })}
             data-testid="courses-filter-track"
-            className={clsx(selectCls, filters.track ? 'border-oe-blue/50' : 'border-border-light')}
+            className={clsx(selectCls, 'w-full sm:w-64', filters.track ? 'border-oe-blue/50' : 'border-border-light')}
           >
             <option value="">{all}</option>
             {tracks
