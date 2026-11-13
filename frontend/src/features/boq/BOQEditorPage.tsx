@@ -5315,7 +5315,11 @@ export function BOQEditorPage() {
       {/* ── Header: subtitle + actions (PageHeader collapses the tail into "...") */}
       <PageHeader
         className="mb-4"
-        subtitle={boq.description || undefined}
+        subtitle={
+          boq.description ? (
+            <span className="line-clamp-2" title={boq.description}>{boq.description}</span>
+          ) : undefined
+        }
         actions={
           <>
             {!boq.is_locked && boq.status === 'draft' && (

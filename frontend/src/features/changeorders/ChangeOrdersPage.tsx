@@ -2862,11 +2862,11 @@ export function ChangeOrdersPage() {
       )}
 
       {/* Status filter */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="oe-select"
+          className="oe-select w-48"
           aria-label={t('changeorders.filter_status', { defaultValue: 'Filter by status' })}
         >
           <option value="">{t('changeorders.all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -2875,7 +2875,7 @@ export function ChangeOrdersPage() {
           <option value="approved">{translateStatus('approved', t)}</option>
           <option value="rejected">{translateStatus('rejected', t)}</option>
         </select>
-        <span className="text-xs text-content-tertiary">
+        <span className="whitespace-nowrap text-xs text-content-tertiary">
           {filteredOrders.length} {t('changeorders.of_total', { defaultValue: 'of' })} {orders.length}
         </span>
       </div>

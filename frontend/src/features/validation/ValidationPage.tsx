@@ -352,13 +352,13 @@ function SelectDropdown({
   placeholder: string;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="oe-label">{label}</label>
+    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+      <label htmlFor={id} className="oe-label mb-0 shrink-0 whitespace-nowrap">{label}</label>
       <select
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm transition-all duration-normal ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary ${
+        className={`oe-select sm:max-w-xl ${
           !value ? 'text-content-tertiary' : 'text-content-primary'
         }`}
       >
@@ -806,11 +806,11 @@ export function ValidationPage() {
 
       {/* Selector bar — BOQ picker + Run. The project is global (top bar). */}
       {selectedProjectId && (
-        <Card>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <Card padding="sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1">
               {boqsLoading ? (
-                <Skeleton height={40} className="w-full" rounded="md" />
+                <Skeleton height={32} className="w-full" rounded="md" />
               ) : (
                 <SelectDropdown
                   id="validation-boq-select"
@@ -846,7 +846,7 @@ export function ValidationPage() {
               exactly which checks will be applied to this project. Once a
               report exists the summary strip names the sets it ran. */}
           {!report && (
-          <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-border-light pt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-border-light pt-3">
             <span className="text-xs text-content-tertiary">
               {t('validation.will_check_with', { defaultValue: 'Will check with' })}:
             </span>

@@ -1178,10 +1178,24 @@ export function CostsPage() {
         }
         actions={
           <>
-            {/* "How it works" guide — explains the cost database concepts and
-                the add-item flow. Sits at the head of the action cluster (this
-                page has no UI Tour button); its closing CTA opens Add Item. */}
-            <ModuleGuideButton content={costsGuide} onCta={() => setShowCreateItem(true)} />
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Upload size={14} />}
+              onClick={() => navigate('/costs/import')}
+              data-guide="costs-import"
+            >
+              {t('costs.import_database', { defaultValue: 'Import' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Plus size={14} />}
+              onClick={() => setShowCreateItem(true)}
+              data-guide="costs-add-item"
+            >
+              {t('costs.add_item', { defaultValue: 'Add Item' })}
+            </Button>
             {total > 0 && (
               <Button
                 variant="secondary"
@@ -1217,15 +1231,6 @@ export function CostsPage() {
             >
               {t('costs.regional_adjust.toggle', { defaultValue: 'Regional Adjust' })}
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Plus size={14} />}
-              onClick={() => setShowCreateItem(true)}
-              data-guide="costs-add-item"
-            >
-              {t('costs.add_item', { defaultValue: 'Add Item' })}
-            </Button>
             {/* CONN-83 — outbound AI affordance. Send the user to the Cost
                 Advisor to sanity-check rates in plain language. Carries the
                 active region as ?region= so the advisor opens scoped to the
@@ -1240,15 +1245,10 @@ export function CostsPage() {
             >
               {t('costs.ask_cost_advisor', { defaultValue: 'Ask the Cost Advisor' })}
             </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Upload size={14} />}
-              onClick={() => navigate('/costs/import')}
-              data-guide="costs-import"
-            >
-              {t('costs.import_database', { defaultValue: 'Import' })}
-            </Button>
+            {/* "How it works" guide — explains the cost database concepts and
+                the add-item flow. Sits at the end of the action cluster (this
+                page has no UI Tour button); its closing CTA opens Add Item. */}
+            <ModuleGuideButton content={costsGuide} onCta={() => setShowCreateItem(true)} />
           </>
         }
       />
@@ -1435,13 +1435,13 @@ export function CostsPage() {
       <div className="min-w-0">
 
       {/* Search & Filters */}
-      <Card padding="none" className="mb-6">
-        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
+      <Card padding="none" className="mb-4">
+        <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
           {/* Search input + AI toggle */}
           <div className="relative flex-1 flex gap-2" data-guide="costs-search">
             <div className="relative flex-1">
               <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
-                <Search size={16} />
+                <Search size={14} />
               </div>
               <input
                 type="text"
@@ -1455,7 +1455,7 @@ export function CostsPage() {
                       : t('costs.search_placeholder', 'Search by description or code...')
                 }
                 aria-label={t('costs.search_placeholder', { defaultValue: 'Search cost items' })}
-                className={`h-10 w-full rounded-lg border bg-surface-primary ps-10 ${query ? 'pe-8' : 'pe-3'} text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:border-transparent hover:border-content-tertiary ${
+                className={`h-8 w-full rounded-lg border bg-surface-primary ps-9 ${query ? 'pe-8' : 'pe-3'} text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:border-transparent hover:border-content-tertiary ${
                   semanticSearch ? 'border-purple-400 focus:ring-purple-400/30' : 'border-border focus:ring-oe-blue'
                 }`}
               />
@@ -1472,7 +1472,7 @@ export function CostsPage() {
             <button
               onClick={() => setSemanticSearch(!semanticSearch)}
               title={semanticSearch ? t('costs.switch_to_text_search', { defaultValue: 'Switch to text search' }) : t('costs.switch_to_ai_search', { defaultValue: 'Switch to AI semantic search' })}
-              className={`flex h-10 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 transition-all text-xs font-medium ${
+              className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 transition-all text-xs font-medium ${
                 semanticSearch
                   ? 'border-purple-400 bg-purple-500/10 text-purple-500'
                   : 'border-border bg-surface-primary text-content-tertiary hover:text-purple-500 hover:border-purple-300'
@@ -1511,7 +1511,7 @@ export function CostsPage() {
             <select
               value={unit}
               onChange={(e) => handleUnitChange(e.target.value)}
-              className="oe-select-lg w-full ps-3 sm:w-32"
+              className="oe-select sm:w-32"
             >
               <option value="">{t('costs.all_units', 'All units')}</option>
               {unitOptions.map((u) => (
@@ -1520,9 +1520,6 @@ export function CostsPage() {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-              <ChevronDown size={14} />
-            </div>
           </div>
 
           {/* Source filter */}
@@ -1530,7 +1527,7 @@ export function CostsPage() {
             <select
               value={source}
               onChange={(e) => handleSourceChange(e.target.value)}
-              className="oe-select-lg w-full ps-3 sm:w-36"
+              className="oe-select sm:w-36"
             >
               <option value="">{t('costs.all_sources', 'All sources')}</option>
               {SOURCES.filter(Boolean).map((s) => (
@@ -1539,9 +1536,6 @@ export function CostsPage() {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-              <ChevronDown size={14} />
-            </div>
           </div>
 
           {/* Category filter */}
@@ -1550,7 +1544,7 @@ export function CostsPage() {
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="oe-select-lg w-full ps-3 sm:w-48"
+                className="oe-select sm:w-48"
               >
                 <option value="">
                   {t('costs.all_categories', 'All categories')}
@@ -1561,9 +1555,6 @@ export function CostsPage() {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-                <ChevronDown size={14} />
-              </div>
             </div>
           )}
         </div>
