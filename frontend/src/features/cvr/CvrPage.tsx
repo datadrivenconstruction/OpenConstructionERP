@@ -37,6 +37,7 @@ import {
   SkeletonTable,
   ConfirmDialog,
   SideDrawer,
+  Breadcrumb,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
@@ -86,10 +87,7 @@ interface Project {
   name: string;
 }
 
-const INPUT_CLS =
-  'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm ' +
-  'text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none ' +
-  'focus:ring-2 focus:ring-oe-blue/30 dark:focus:ring-oe-blue/40';
+const INPUT_CLS = 'oe-input';
 
 /** Current month as YYYY-MM, the natural default for a new CVR / cash point. */
 function currentPeriod(): string {
@@ -146,11 +144,11 @@ function SummaryStrip({ summary, currency }: { summary: CvrSummary; currency: st
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {tiles.map((tile) => (
-        <Card key={tile.label} padding="sm">
+        <Card key={tile.label} padding="none" className="px-4 py-3">
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">{tile.label}</div>
           <div
             className={
-              'mt-1 text-lg font-semibold tabular-nums ' +
+              'mt-1 text-xl font-semibold tabular-nums ' +
               (tile.tone === 'good'
                 ? 'text-semantic-success'
                 : tile.tone === 'bad'
@@ -666,12 +664,20 @@ export function CvrPage() {
     [payapps, reportCurrency, t],
   );
 
+  const projectName = projects.find((p) => p.id === projectId)?.name ?? '';
+
   if (!projectId) {
     return <RequiresProject>{null}</RequiresProject>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <Breadcrumb
+        items={[
+          ...(projectName ? [{ label: projectName, to: `/projects/${projectId}` }] : []),
+          { label: t('cvr.title', { defaultValue: 'Cost-Value Reconciliation' }) },
+        ]}
+      />
       <PageHeader
         srTitle={t('cvr.title', { defaultValue: 'Cost-Value Reconciliation' })}
         subtitle={t('cvr.subtitle', {
@@ -741,12 +747,12 @@ export function CvrPage() {
       ) : (
         <>
           {/* Report picker + report-level actions */}
-          <Card padding="md">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <Card padding="sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <label className="text-sm text-content-secondary">{t('cvr.report', { defaultValue: 'Report' })}</label>
                 <select
-                  className={INPUT_CLS + ' w-auto'}
+                  className="oe-select w-auto min-w-32"
                   value={selectedReportId}
                   onChange={(e) => setSelectedReportId(e.target.value)}
                   aria-label={t('cvr.select_report', { defaultValue: 'Select CVR report' })}
@@ -781,7 +787,7 @@ export function CvrPage() {
                   type="button"
                   onClick={() => deleteReportMut.mutate()}
                   disabled={deleteReportMut.isPending}
-                  className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
+                  className="rounded-lg p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('cvr.delete_report', { defaultValue: 'Delete report' })}
                 >
                   <Trash2 size={16} />
@@ -1389,7 +1395,7 @@ function PaymentApplicationsSection({
 
       <div className="grid grid-cols-2 items-end gap-2 rounded-lg border border-dashed border-border-light p-3 sm:grid-cols-6">
         <select
-          className={INPUT_CLS}
+          className="oe-select"
           value={claimId}
           onChange={(e) => pickClaim(e.target.value)}
           aria-label={t('cvr.payapp_claim_picker', { defaultValue: 'Raise from progress claim' })}

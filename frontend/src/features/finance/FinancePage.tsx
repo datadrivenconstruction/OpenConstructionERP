@@ -20,7 +20,6 @@ import {
   X,
   Plus,
   Camera,
-  ChevronDown,
   Lightbulb,
   TrendingUp,
   ExternalLink,
@@ -1690,10 +1689,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
     <Card padding="none">
       {/* Search + actions */}
-      <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="p-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
         <div className="relative flex-1 max-w-sm">
-          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-            <Search size={16} />
+          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2.5 text-content-tertiary">
+            <Search size={14} />
           </div>
           <input
             type="text"
@@ -1703,7 +1702,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             placeholder={t('finance.search_budgets', {
               defaultValue: 'Search by WBS or category...',
             })}
-            className="oe-input oe-input-lg w-full ps-10 pe-3"
+            className="oe-input w-full ps-8 pe-3"
           />
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -2523,7 +2522,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
         <div className="flex items-center gap-2" title={t('finance.payable_receivable_tooltip', { defaultValue: 'Payable = invoices you owe to vendors. Receivable = invoices clients owe to you.' })}>
           <button
             onClick={() => setSubTab('payable')}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium transition-colors ${
               subTab === 'payable'
                 ? 'bg-oe-blue-subtle text-oe-blue'
                 : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
@@ -2533,7 +2532,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           </button>
           <button
             onClick={() => setSubTab('receivable')}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium transition-colors ${
               subTab === 'receivable'
                 ? 'bg-oe-blue-subtle text-oe-blue'
                 : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
@@ -2587,10 +2586,10 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
 
       <Card padding="none">
         {/* Search + Status filter */}
-        <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="p-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="relative flex-1 max-w-sm">
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-              <Search size={16} />
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2.5 text-content-tertiary">
+              <Search size={14} />
             </div>
             <input
               type="text"
@@ -2600,15 +2599,15 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
               placeholder={t('finance.search_invoices', {
                 defaultValue: 'Search invoices...',
               })}
-              className="oe-input oe-input-lg w-full ps-10 pe-3"
+              className="oe-input w-full ps-8 pe-3"
             />
           </div>
-          <div className="relative shrink-0">
+          <div className="shrink-0">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={t('finance.filter_status', { defaultValue: 'Filter by status' })}
-              className="oe-select oe-input-lg ps-3 pe-9 sm:w-36"
+              className="oe-select sm:w-44"
             >
               <option value="">{t('finance.filter_all_statuses', { defaultValue: 'All Statuses' })}</option>
               <option value="draft">{t('finance.status_draft', { defaultValue: 'Draft' })}</option>
@@ -2621,9 +2620,6 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                 {t('finance.status_credit_note_issued', { defaultValue: 'Credit note issued' })}
               </option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-              <ChevronDown size={14} />
-            </div>
           </div>
         </div>
 

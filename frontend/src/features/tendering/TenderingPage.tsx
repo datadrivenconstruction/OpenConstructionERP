@@ -979,11 +979,11 @@ export function BidComparisonTable({
         )}
       </div>
       <div className="overflow-x-auto relative">
-        <table className="oe-table">
+        <table className="oe-table oe-table-compact">
           <thead className="sticky top-0 z-10">
             <tr>
               <th
-                className={`whitespace-nowrap px-3 py-2.5 text-left font-semibold text-content-primary ${stickyColClass} z-20`}
+                className={`whitespace-nowrap text-left font-semibold text-content-primary ${stickyColClass} z-20`}
               >
                 {t('tendering.position', 'Position')}
               </th>
@@ -1019,11 +1019,16 @@ export function BidComparisonTable({
                 key={`${row.description}-${row.unit}-${idx}`}
                 className="group"
               >
-                <td className={`px-3 py-2.5 ${stickyColClass} z-20 group-hover:bg-surface-secondary/30`}>
-                  <span className="text-content-primary">{row.description || '-'}</span>
-                  <span className="ml-2 text-xs text-content-tertiary">
-                    {localizedUnitCode(row.unit, i18n.language)}
-                  </span>
+                <td className={`${stickyColClass} z-20 group-hover:bg-surface-secondary/30`}>
+                  {/* GAEB long texts run to paragraphs: one line here, full text on hover. */}
+                  <div className="flex min-w-0 max-w-md items-baseline gap-2">
+                    <span className="truncate text-content-primary" title={row.description || undefined}>
+                      {row.description || '-'}
+                    </span>
+                    <span className="shrink-0 text-xs text-content-tertiary">
+                      {localizedUnitCode(row.unit, i18n.language)}
+                    </span>
+                  </div>
                 </td>
                 <td className="whitespace-nowrap text-right tabular-nums text-content-secondary">
                   {formatNumber(row.budget_rate)}
@@ -1056,7 +1061,7 @@ export function BidComparisonTable({
                   return (
                     <td
                       key={`bid-${bid.bid_id}`}
-                      className={`whitespace-nowrap px-3 py-2.5 text-right tabular-nums ${flagCls}`}
+                      className={`whitespace-nowrap text-right tabular-nums ${flagCls}`}
                       title={
                         rate === null
                           ? t('tendering.not_priced_hint', {
@@ -1093,7 +1098,7 @@ export function BidComparisonTable({
           <tfoot>
             <tr className="border-t-2 bg-surface-secondary/30">
               <td
-                className={`px-3 py-3 font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
+                className={`font-semibold text-content-primary sticky left-0 z-20 bg-surface-secondary shadow-[2px_0_3px_-2px_rgba(0,0,0,0.1)]`}
               >
                 {t('tendering.total', 'TOTAL')}
               </td>
