@@ -79,7 +79,7 @@ export function StatCard({
     <div
       className={clsx(
         // 90% surface, no blur - see the design contract in the header.
-        'rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs',
+        'rounded-xl border border-border-light bg-surface-elevated/90',
         'transition-shadow duration-normal ease-oe hover:shadow-sm',
         size === 'sm' ? 'px-3 py-2.5' : 'px-4 py-3',
         className,

@@ -163,8 +163,8 @@ export default {
       },
       borderRadius: {
         DEFAULT: 'var(--oe-radius-sm)',
-        '2xl': 'var(--oe-radius-xl)',
-        '3xl': 'var(--oe-radius-xl)',
+        '2xl': 'var(--oe-radius-2xl)',
+        '3xl': 'var(--oe-radius-2xl)',
         xs: 'var(--oe-radius-xs)',
         sm: 'var(--oe-radius-sm)',
         md: 'var(--oe-radius-md)',

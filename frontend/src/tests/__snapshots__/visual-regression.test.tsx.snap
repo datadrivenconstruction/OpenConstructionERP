@@ -311,7 +311,7 @@ exports[`Visual Regression - Button > with icon (left) 1`] = `
 exports[`Visual Regression - Card > card with footer and hoverable 1`] = `
 <div>
   <div
-    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 p-4"
+    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 p-4"
   >
     <div
       class="flex items-start justify-between gap-4"
@@ -357,7 +357,7 @@ exports[`Visual Regression - Card > card with footer and hoverable 1`] = `
 exports[`Visual Regression - Card > card with header and content 1`] = `
 <div>
   <div
-    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-4"
+    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu p-4"
   >
     <div
       class="flex items-start justify-between gap-4"
@@ -391,7 +391,7 @@ exports[`Visual Regression - Card > card with header and content 1`] = `
 exports[`Visual Regression - Card > card with no padding 1`] = `
 <div>
   <div
-    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu"
+    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu"
   >
     <div>
       Full-width content
@@ -1977,7 +1977,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           style="animation-delay: 120ms;"
         >
           <div
-            class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu h-full"
+            class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu h-full"
           >
             <div
               aria-label="File upload area"
@@ -2161,7 +2161,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             style="animation-delay: 60ms;"
           >
             <div
-              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu animate-fade-in"
+              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu animate-fade-in"
               data-testid="cost-database-invite-compact"
             >
               <div
@@ -2314,7 +2314,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 120ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -2416,7 +2416,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 180ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -2522,7 +2522,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 240ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -2650,7 +2650,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 300ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 relative overflow-hidden h-full flex flex-col  "
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -2793,7 +2793,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 360ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -2902,7 +2902,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="animation-delay: 420ms;"
             >
               <div
-                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
+                class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu relative overflow-hidden h-full flex flex-col  opacity-50"
               >
                 <div
                   class="flex flex-1 flex-col p-5"
@@ -3270,7 +3270,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             style="animation-delay: 220ms;"
           >
             <div
-              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-4 h-full"
+              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 transition-all duration-normal ease-oe transform-gpu p-4 h-full"
             >
               <div
                 class="flex items-start justify-between gap-4"
