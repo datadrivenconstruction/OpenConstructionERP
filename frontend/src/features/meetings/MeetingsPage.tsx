@@ -2659,7 +2659,6 @@ export function MeetingsPage() {
       </>
       ) : (
         <RequiresProject
-          emptyHint={t('meetings.select_project', { defaultValue: 'Select a project from the header to schedule meetings, track attendance, and manage action items.' })}
         >{null}</RequiresProject>
       )}
 

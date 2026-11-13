@@ -1144,10 +1144,6 @@ export function FinancePage() {
 
       {/* Tab Content */}
       <RequiresProject
-        emptyHint={t('finance.select_project', {
-          defaultValue:
-            'Track invoices, budgets, and payments here. Select a project to view its financial data, or lock a BOQ to auto-generate budget lines.',
-        })}
       >
         <div
           role="tabpanel"

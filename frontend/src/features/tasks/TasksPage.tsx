@@ -1984,7 +1984,6 @@ export function TasksPage() {
       </>
       ) : (
         <RequiresProject
-          emptyHint={t('tasks.select_project', { defaultValue: 'Select a project from the header to view and manage tasks, assignments, and deadlines.' })}
         >{null}</RequiresProject>
       )}
 

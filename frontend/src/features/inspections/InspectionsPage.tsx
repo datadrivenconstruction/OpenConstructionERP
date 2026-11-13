@@ -1927,7 +1927,6 @@ export function InspectionsPage() {
       </>
       ) : (
         <RequiresProject
-          emptyHint={t('inspections.select_project', { defaultValue: 'Open a project first to view and manage inspections.' })}
         >{null}</RequiresProject>
       )}
 
