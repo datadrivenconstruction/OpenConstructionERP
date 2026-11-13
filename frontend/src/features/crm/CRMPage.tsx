@@ -41,7 +41,6 @@ import {
   Activity as ActivityIcon,
   Plus,
   Search,
-  X,
   Loader2,
   Trophy,
   Frown,
@@ -76,6 +75,7 @@ import {
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { crmGuide } from './crmGuide';
 import {
@@ -1431,40 +1431,22 @@ function DealDrawer({
   const currentIdx = stages.findIndex((s) => s.id === opp.stage_id);
 
   return (
-    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('crm.opportunity_detail', {
-          defaultValue: 'Deal: {{title}}',
-          title: opp.title,
-        })}
-        className="relative h-full w-full max-w-2xl overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <div className="min-w-0">
-            <h2 className="oe-section-title truncate">{opp.title}</h2>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant={OPP_STATUS_VARIANT[opp.status]} dot>
-                {oppStatusLabel(opp.status, t)}
-              </Badge>
-              <span className="truncate text-xs text-content-tertiary">
-                {accountsById[opp.account_id]?.name || ''}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="rounded p-1 hover:bg-surface-secondary"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-2xl"
+      title={opp.title}
+      subtitle={
+        <span className="flex items-center gap-2">
+          <Badge variant={OPP_STATUS_VARIANT[opp.status]} dot>
+            {oppStatusLabel(opp.status, t)}
+          </Badge>
+          <span className="truncate text-xs text-content-tertiary">
+            {accountsById[opp.account_id]?.name || ''}
+          </span>
+        </span>
+      }
+    >
         <div className="space-y-4 p-5">
           {/* KPIs */}
           <div className="grid grid-cols-3 gap-3">
@@ -1933,8 +1915,7 @@ function DealDrawer({
             )}
           </Card>
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 
@@ -2201,35 +2182,18 @@ function LeadDrawer({
     !convForm.title.trim() || !convForm.account_id || !convForm.stage_id;
 
   return (
-    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('crm.lead_detail', {
-          defaultValue: 'Lead: {{name}}',
-          name: lead.contact_name,
-        })}
-        className="relative h-full w-full max-w-lg overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <div>
-            <h2 className="oe-section-title">{lead.contact_name}</h2>
-            <Badge variant={LEAD_STATUS_VARIANT[lead.status]} dot>
-              {leadStatusLabel(lead.status, t)}
-            </Badge>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="rounded p-1 hover:bg-surface-secondary"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
+    <>
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-lg"
+      title={lead.contact_name}
+      subtitle={
+        <Badge variant={LEAD_STATUS_VARIANT[lead.status]} dot>
+          {leadStatusLabel(lead.status, t)}
+        </Badge>
+      }
+    >
         <div className="space-y-4 p-5">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <Field
@@ -2572,7 +2536,7 @@ function LeadDrawer({
             </Card>
           )}
         </div>
-      </div>
+    </SideDrawer>
 
       {/* Confirm step - says what is about to go before it goes. */}
       <ConfirmDialog
@@ -2588,7 +2552,7 @@ function LeadDrawer({
         })}
         confirmLabel={t('crm.remove_lead_action', { defaultValue: 'Delete lead' })}
       />
-    </div>
+    </>
   );
 }
 

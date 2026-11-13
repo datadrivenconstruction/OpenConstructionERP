@@ -179,7 +179,7 @@ export function FindingList({
           <li
             key={`${f.code}-${f.ref}-${i}`}
             data-severity={f.severity}
-            className={clsx('flex items-start gap-1.5 text-xs', isError ? 'text-semantic-error' : 'text-[#b45309]')}
+            className={clsx('flex items-start gap-1.5 text-xs', isError ? 'text-semantic-error' : 'text-semantic-warning')}
           >
             {isError ? <XCircle size={14} className="mt-px shrink-0" aria-hidden /> : <AlertTriangle size={14} className="mt-px shrink-0" aria-hidden />}
             <span>

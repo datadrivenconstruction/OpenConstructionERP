@@ -45,10 +45,10 @@ import {
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { TabBar } from '@/shared/ui/TabBar';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
-import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import {
   listEquipment,
   getEquipment,
@@ -303,12 +303,6 @@ export function EquipmentPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [pageTab, setPageTab] = useState<PageTab>('assets');
-  const onTabKeyDown = useTabKeyboardNav<PageTab>({
-    ids: EQUIPMENT_TAB_IDS,
-    activeId: pageTab,
-    onChange: setPageTab,
-    orientation: 'horizontal',
-  });
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [ownershipFilter, setOwnershipFilter] = useState<string>('');
@@ -475,46 +469,17 @@ export function EquipmentPage() {
 
       <HowEquipmentWorks />
 
-      <div className="border-b border-border-light">
-        <nav
-          className="flex gap-1 -mb-px"
-          role="tablist"
-          aria-label={t('equipment.tabs_aria', { defaultValue: 'Equipment sections' })}
-          onKeyDown={onTabKeyDown}
-        >
-          {(
-            [
-              { id: 'assets', label: t('equipment.tab_assets', { defaultValue: 'Assets' }), icon: Truck },
-              { id: 'types', label: t('equipment.tab_types', { defaultValue: 'Types' }), icon: Tags },
-              { id: 'telematics', label: t('equipment.tab_telematics', { defaultValue: 'Telematics' }), icon: Radio },
-            ] as { id: PageTab; label: string; icon: React.ElementType }[]
-          ).map((pt) => {
-            const Icon = pt.icon;
-            const active = pageTab === pt.id;
-            return (
-              <button
-                key={pt.id}
-                type="button"
-                role="tab"
-                id={`equipment-tab-${pt.id}`}
-                aria-selected={active}
-                aria-controls={`equipment-panel-${pt.id}`}
-                tabIndex={active ? 0 : -1}
-                onClick={() => setPageTab(pt.id)}
-                className={clsx(
-                  'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors',
-                  active
-                    ? 'border-oe-blue text-oe-blue'
-                    : 'border-transparent text-content-secondary hover:text-content-primary',
-                )}
-              >
-                <Icon size={14} />
-                {pt.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+      <TabBar
+        ariaLabel={t('equipment.tabs_aria', { defaultValue: 'Equipment sections' })}
+        idPrefix="equipment"
+        activeId={pageTab}
+        onChange={setPageTab}
+        tabs={[
+          { id: 'assets', label: t('equipment.tab_assets', { defaultValue: 'Assets' }), icon: <Truck size={14} /> },
+          { id: 'types', label: t('equipment.tab_types', { defaultValue: 'Types' }), icon: <Tags size={14} /> },
+          { id: 'telematics', label: t('equipment.tab_telematics', { defaultValue: 'Telematics' }), icon: <Radio size={14} /> },
+        ]}
+      />
 
       {pageTab === 'types' ? (
         <TypesPage />

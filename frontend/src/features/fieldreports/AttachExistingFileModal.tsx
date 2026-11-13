@@ -107,13 +107,13 @@ export default function AttachExistingFileModal({
 
   return (
     <div
-      className="fixed inset-0 z-popover flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
+      className="fixed inset-0 z-popover flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="bg-surface-primary rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-border-light"
+        className="bg-surface-elevated rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-border-light"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

@@ -170,7 +170,7 @@ function CreateWorkflowDialog({
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
-      <div className="mx-4 w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-6 shadow-lg">
+      <div className="mx-4 w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="oe-section-title">
             {t('enterprise_workflows.create_workflow', { defaultValue: 'Create Workflow' })}

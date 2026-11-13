@@ -122,8 +122,8 @@ function ModalShell({ title, onClose, children, footer, wide }: {
     return () => document.removeEventListener('keydown', h);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div role="dialog" aria-modal="true" className={clsx('mx-4 max-h-[90vh] w-full overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in', wide ? 'max-w-2xl' : 'max-w-xl')}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div role="dialog" aria-modal="true" className={clsx('mx-4 max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-card-in', wide ? 'max-w-2xl' : 'max-w-xl')}>
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <h2 className="oe-section-title">{title}</h2>
           <button onClick={onClose} aria-label={t('defects_liability.close', { defaultValue: 'Close' })}
@@ -453,7 +453,7 @@ function RetentionReadinessBanner({ register, readiness }: { register: DlpRegist
     neutral: 'border-border-light bg-surface-secondary/50',
   };
   const Icon = tone === 'success' ? ShieldCheck : tone === 'warning' ? AlertTriangle : Clock;
-  const iconColor = tone === 'success' ? 'text-semantic-success' : tone === 'warning' ? 'text-[#b45309]' : 'text-content-tertiary';
+  const iconColor = tone === 'success' ? 'text-semantic-success' : tone === 'warning' ? 'text-semantic-warning' : 'text-content-tertiary';
 
   const title = readyCount > 0
     ? t('defects_liability.banner_ready_title', { defaultValue: 'Clear to release retention' })

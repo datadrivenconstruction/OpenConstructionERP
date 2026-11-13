@@ -42,6 +42,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { todayLocalISO } from '@/shared/lib/dates';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
+import { TabBar } from '@/shared/ui/TabBar';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { TimesheetEditor } from './TimesheetEditor';
 import { OfflineDayRecorder } from './OfflineDayRecorder';
@@ -233,34 +234,22 @@ function FieldTimeContent() {
 
   return (
     <div className="space-y-5">
-      <div
-        role="tablist"
-        aria-label={t('field_clock.tabs_label', { defaultValue: 'Field time sections' })}
-        className="-mx-1 flex gap-1 overflow-x-auto border-b border-border-light px-1"
-      >
-        {FIELD_TABS.map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="tab"
-            aria-selected={tab === k}
-            onClick={() => goTab(k)}
-            className={
-              'min-h-[44px] shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium transition-colors ' +
-              (tab === k
-                ? 'border-oe-blue text-oe-blue-text'
-                : 'border-transparent text-content-secondary hover:text-content-primary')
-            }
-          >
-            {labels[k]}
-            {k === 'approvals' && pending > 0 && (
-              <span className="ml-1.5 rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning">
+      <TabBar
+        ariaLabel={t('field_clock.tabs_label', { defaultValue: 'Field time sections' })}
+        idPrefix="field-time"
+        activeId={tab}
+        onChange={goTab}
+        tabs={FIELD_TABS.map((k) => ({
+          id: k,
+          label: labels[k],
+          badge:
+            k === 'approvals' && pending > 0 ? (
+              <span className="rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning">
                 {pending}
               </span>
-            )}
-          </button>
-        ))}
-      </div>
+            ) : undefined,
+        }))}
+      />
 
       {tab === 'timesheets' && (
         <TimesheetsTab externalOpenId={openId} onExternalOpened={() => setOpenId(null)} />

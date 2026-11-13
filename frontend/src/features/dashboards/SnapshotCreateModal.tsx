@@ -122,7 +122,7 @@ export function SnapshotCreateModal({
       }}
       data-testid="snapshot-create-modal"
     >
-      <div className="w-full max-w-lg rounded-lg border border-border-light bg-surface-primary shadow-xl">
+      <div className="w-full max-w-lg rounded-2xl border border-border-light bg-surface-elevated shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
           <h2 className="oe-card-title">
             {t('dashboards.create_snapshot', { defaultValue: 'Create snapshot' })}
@@ -131,7 +131,7 @@ export function SnapshotCreateModal({
             type="button"
             onClick={onClose}
             className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-            aria-label="close"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X className="h-4 w-4" />
           </button>
@@ -205,7 +205,7 @@ export function SnapshotCreateModal({
                         type="button"
                         onClick={() => removeFile(i)}
                         className="text-content-tertiary hover:text-semantic-error"
-                        aria-label="remove"
+                        aria-label={t('common.remove', { defaultValue: 'Remove' })}
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
