@@ -54,7 +54,7 @@ export function InfoHint({ text, className, style, inline, label }: InfoHintProp
         </button>
         {open && (
           <div className="absolute left-0 top-full z-20 mt-1.5 w-80">
-            <div className="rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 text-xs text-content-secondary leading-relaxed shadow-lg">
+            <div className="rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 text-xs text-content-secondary leading-relaxed shadow-md">
               {text}
               <button
                 onClick={() => setOpen(false)}
@@ -75,7 +75,7 @@ export function InfoHint({ text, className, style, inline, label }: InfoHintProp
       <button
         onClick={() => setOpen(!open)}
         className={clsx(
-          'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
+          'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all',
           open
             ? 'text-oe-blue bg-oe-blue/10'
             : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary/60',

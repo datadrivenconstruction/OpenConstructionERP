@@ -210,13 +210,13 @@ export function SideDrawer({
       // Outer wrapper covers the viewport; backdrop click handler lives
       // here so any click NOT inside the panel collapses to close.
       onMouseDown={handleBackdrop}
-      className="fixed inset-0 z-50 flex justify-end"
+      className="fixed inset-0 z-drawer flex justify-end"
     >
       {/* Backdrop — separate node so we can fade it independently. */}
       <div
         aria-hidden="true"
         className={clsx(
-          'absolute inset-0 bg-black/30 transition-opacity duration-200',
+          'absolute inset-0 bg-black/40 transition-opacity duration-200',
           isShown ? 'opacity-100' : 'opacity-0',
         )}
       />
@@ -231,12 +231,11 @@ export function SideDrawer({
         // focus trap, but initial focus needs *something*).
         tabIndex={-1}
         className={clsx(
-          'relative h-full w-full sm:w-auto',
-          // Narrow viewports → full width; sm breakpoint → caller's
-          // configured width with sane fallback.
-          `sm:${widthClass}`,
-          widthClass, // also apply unprefixed so the panel never exceeds it
-          'overflow-y-auto bg-surface-elevated shadow-xl',
+          // Always fill the width the caller caps with max-w-*; without w-full
+          // the panel shrinks to its content and ignores the cap.
+          'relative h-full w-full',
+          widthClass,
+          'overflow-y-auto bg-surface-elevated border-s border-border-light shadow-xl sm:rounded-s-2xl',
           'transform transition-transform duration-200 ease-out',
           isShown ? 'translate-x-0' : 'translate-x-full',
           // Safe-area inset on the right matters on iOS notch landscape;
@@ -250,7 +249,7 @@ export function SideDrawer({
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Sticky header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border-light bg-surface-elevated px-5 py-3">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border-light bg-surface-elevated px-4 py-3 sm:rounded-ss-2xl">
           <div className="min-w-0 flex-1">
             <h2
               id={headingId}
@@ -271,7 +270,7 @@ export function SideDrawer({
                 disabled={busy}
                 aria-label={t('common.close', { defaultValue: 'Close' })}
                 className={clsx(
-                  'inline-flex h-7 w-7 items-center justify-center rounded',
+                  'inline-flex h-8 w-8 items-center justify-center rounded-lg',
                   'text-content-secondary hover:text-content-primary hover:bg-surface-secondary',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                   'disabled:opacity-40 disabled:pointer-events-none transition-colors',

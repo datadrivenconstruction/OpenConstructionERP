@@ -418,8 +418,8 @@ export function OnboardingTour({
         }}
         className={clsx(
           'rounded-2xl border border-border-light',
-          'bg-surface-elevated shadow-lg',
-          'p-5 pointer-events-auto',
+          'bg-surface-elevated shadow-xl',
+          'p-4 pointer-events-auto',
           'animate-scale-in',
           // Position in bottom-right corner to avoid blocking main content
         )}

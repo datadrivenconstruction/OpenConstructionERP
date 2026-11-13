@@ -16,7 +16,7 @@ export function ToastContainer() {
     // Toasts start below the top bar (and below the desktop shell's toolbar)
     // so they never cover its buttons or what the reader was about to click.
     <div
-      className="oe-dock-aware fixed right-4 z-[9999] flex flex-col gap-2"
+      className="oe-dock-aware fixed inset-x-4 sm:inset-x-auto sm:right-4 z-[9999] flex flex-col gap-2"
       style={{ top: TOAST_TOP }}
       data-testid="toast-stack"
     >

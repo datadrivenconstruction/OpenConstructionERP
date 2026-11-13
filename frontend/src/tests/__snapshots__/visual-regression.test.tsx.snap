@@ -403,35 +403,35 @@ exports[`Visual Regression - Card > card with no padding 1`] = `
 exports[`Visual Regression - ConfirmDialog > renders danger variant (open) 1`] = `
 <div>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-modal flex items-end sm:items-center justify-center"
   >
     <div
-      class="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
+      class="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
     />
     <div
       aria-describedby="confirm-dialog-message"
       aria-label="Delete Project"
       aria-modal="true"
-      class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
+      class="relative z-10 w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-slide-up sm:animate-scale-in focus:outline-none"
       role="alertdialog"
       tabindex="-1"
     >
       <div
-        class="px-6 pt-6 pb-4"
+        class="flex items-start gap-3 px-5 pt-5 pb-4"
       >
         <div
-          class="mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4 bg-semantic-error/10 text-semantic-error"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-semantic-error/10 text-semantic-error"
         >
           <svg
             class="lucide lucide-trash2"
             fill="none"
-            height="20"
+            height="18"
             stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
             viewBox="0 0 24 24"
-            width="20"
+            width="18"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -457,29 +457,33 @@ exports[`Visual Regression - ConfirmDialog > renders danger variant (open) 1`] =
             />
           </svg>
         </div>
-        <h2
-          class="text-base font-semibold text-content-primary text-center"
+        <div
+          class="min-w-0 flex-1"
         >
-          Delete Project
-        </h2>
-        <p
-          class="mt-2 text-sm text-content-secondary text-center leading-relaxed"
-          id="confirm-dialog-message"
-        >
-          Are you sure? This action cannot be undone.
-        </p>
+          <h2
+            class="text-base font-semibold text-content-primary"
+          >
+            Delete Project
+          </h2>
+          <p
+            class="mt-1 text-sm text-content-secondary leading-snug"
+            id="confirm-dialog-message"
+          >
+            Are you sure? This action cannot be undone.
+          </p>
+        </div>
       </div>
       <div
-        class="flex gap-3 px-6 pb-6"
+        class="flex flex-wrap items-center justify-end gap-2 border-t border-border-light bg-surface-secondary/40 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:rounded-b-2xl"
       >
         <button
-          class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 rounded-lg px-3 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
           type="button"
         >
           Cancel
         </button>
         <button
-          class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all text-content-inverse bg-semantic-error hover:opacity-90 active:opacity-80 shadow-xs hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-error disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-all text-content-inverse bg-semantic-error hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-error disabled:opacity-40 disabled:pointer-events-none"
           data-testid="confirm-dialog-confirm"
           type="button"
         >
@@ -494,35 +498,35 @@ exports[`Visual Regression - ConfirmDialog > renders danger variant (open) 1`] =
 exports[`Visual Regression - ConfirmDialog > renders loading state 1`] = `
 <div>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-modal flex items-end sm:items-center justify-center"
   >
     <div
-      class="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
+      class="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
     />
     <div
       aria-describedby="confirm-dialog-message"
       aria-label="Deleting..."
       aria-modal="true"
-      class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
+      class="relative z-10 w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-slide-up sm:animate-scale-in focus:outline-none"
       role="alertdialog"
       tabindex="-1"
     >
       <div
-        class="px-6 pt-6 pb-4"
+        class="flex items-start gap-3 px-5 pt-5 pb-4"
       >
         <div
-          class="mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4 bg-semantic-error/10 text-semantic-error"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-semantic-error/10 text-semantic-error"
         >
           <svg
             class="lucide lucide-trash2"
             fill="none"
-            height="20"
+            height="18"
             stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
             viewBox="0 0 24 24"
-            width="20"
+            width="18"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -548,30 +552,34 @@ exports[`Visual Regression - ConfirmDialog > renders loading state 1`] = `
             />
           </svg>
         </div>
-        <h2
-          class="text-base font-semibold text-content-primary text-center"
+        <div
+          class="min-w-0 flex-1"
         >
-          Deleting...
-        </h2>
-        <p
-          class="mt-2 text-sm text-content-secondary text-center leading-relaxed"
-          id="confirm-dialog-message"
-        >
-          Please wait while the item is being deleted.
-        </p>
+          <h2
+            class="text-base font-semibold text-content-primary"
+          >
+            Deleting...
+          </h2>
+          <p
+            class="mt-1 text-sm text-content-secondary leading-snug"
+            id="confirm-dialog-message"
+          >
+            Please wait while the item is being deleted.
+          </p>
+        </div>
       </div>
       <div
-        class="flex gap-3 px-6 pb-6"
+        class="flex flex-wrap items-center justify-end gap-2 border-t border-border-light bg-surface-secondary/40 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:rounded-b-2xl"
       >
         <button
-          class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 rounded-lg px-3 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
           disabled=""
           type="button"
         >
           Cancel
         </button>
         <button
-          class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all text-content-inverse bg-semantic-error hover:opacity-90 active:opacity-80 shadow-xs hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-error disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-all text-content-inverse bg-semantic-error hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-error disabled:opacity-40 disabled:pointer-events-none"
           data-testid="confirm-dialog-confirm"
           disabled=""
           type="button"
@@ -605,35 +613,35 @@ exports[`Visual Regression - ConfirmDialog > renders nothing when closed 1`] = `
 exports[`Visual Regression - ConfirmDialog > renders warning variant (open) 1`] = `
 <div>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-modal flex items-end sm:items-center justify-center"
   >
     <div
-      class="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
+      class="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
     />
     <div
       aria-describedby="confirm-dialog-message"
       aria-label="Discard Changes"
       aria-modal="true"
-      class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
+      class="relative z-10 w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-slide-up sm:animate-scale-in focus:outline-none"
       role="alertdialog"
       tabindex="-1"
     >
       <div
-        class="px-6 pt-6 pb-4"
+        class="flex items-start gap-3 px-5 pt-5 pb-4"
       >
         <div
-          class="mx-auto flex h-11 w-11 items-center justify-center rounded-full mb-4 bg-semantic-warning/10 text-semantic-warning"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-semantic-warning/10 text-semantic-warning"
         >
           <svg
             class="lucide lucide-triangle-alert"
             fill="none"
-            height="20"
+            height="18"
             stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
             viewBox="0 0 24 24"
-            width="20"
+            width="18"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -647,29 +655,33 @@ exports[`Visual Regression - ConfirmDialog > renders warning variant (open) 1`] 
             />
           </svg>
         </div>
-        <h2
-          class="text-base font-semibold text-content-primary text-center"
+        <div
+          class="min-w-0 flex-1"
         >
-          Discard Changes
-        </h2>
-        <p
-          class="mt-2 text-sm text-content-secondary text-center leading-relaxed"
-          id="confirm-dialog-message"
-        >
-          You have unsaved changes. Do you want to discard them?
-        </p>
+          <h2
+            class="text-base font-semibold text-content-primary"
+          >
+            Discard Changes
+          </h2>
+          <p
+            class="mt-1 text-sm text-content-secondary leading-snug"
+            id="confirm-dialog-message"
+          >
+            You have unsaved changes. Do you want to discard them?
+          </p>
+        </div>
       </div>
       <div
-        class="flex gap-3 px-6 pb-6"
+        class="flex flex-wrap items-center justify-end gap-2 border-t border-border-light bg-surface-secondary/40 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:rounded-b-2xl"
       >
         <button
-          class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 rounded-lg px-3 text-sm font-medium transition-all bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
           type="button"
         >
           Keep editing
         </button>
         <button
-          class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all text-content-inverse bg-semantic-warning hover:opacity-90 active:opacity-80 shadow-xs hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-warning disabled:opacity-40 disabled:pointer-events-none"
+          class="h-8 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-all text-content-inverse bg-semantic-warning hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-semantic-warning disabled:opacity-40 disabled:pointer-events-none"
           data-testid="confirm-dialog-confirm"
           type="button"
         >

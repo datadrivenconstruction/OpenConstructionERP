@@ -183,7 +183,7 @@ export function PWAInstallPrompt() {
         aria-live="polite"
         aria-label={t('pwa.install_prompt_title', { defaultValue: 'Install OCERP' })}
         data-testid="pwa-install-prompt-ios"
-        className="oe-dock-aware fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
+        className="oe-dock-aware fixed bottom-4 right-4 z-popover flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-md backdrop-blur-sm"
       >
         <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
           <Share size={16} />
@@ -202,7 +202,7 @@ export function PWAInstallPrompt() {
             <button
               type="button"
               onClick={handleDismissIosHint}
-              className="rounded-md px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
+              className="rounded-lg px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
             >
               {t('pwa.not_now_button', { defaultValue: 'Got it' })}
             </button>
@@ -212,7 +212,7 @@ export function PWAInstallPrompt() {
           type="button"
           onClick={handleDismissIosHint}
           aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
-          className="shrink-0 rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+          className="shrink-0 rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
         >
           <X size={14} />
         </button>
@@ -228,7 +228,7 @@ export function PWAInstallPrompt() {
       aria-live="polite"
       aria-label={t('pwa.install_prompt_title', { defaultValue: 'Install OCERP' })}
       data-testid="pwa-install-prompt"
-      className="oe-dock-aware fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
+      className="oe-dock-aware fixed bottom-4 right-4 z-popover flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-md backdrop-blur-sm"
     >
       <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
         <Download size={16} />
@@ -248,7 +248,7 @@ export function PWAInstallPrompt() {
             type="button"
             onClick={handleDismiss}
             disabled={installing}
-            className="rounded-md px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-60"
+            className="rounded-lg px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-60"
           >
             {t('pwa.not_now_button', { defaultValue: 'Not now' })}
           </button>
@@ -256,7 +256,7 @@ export function PWAInstallPrompt() {
             type="button"
             onClick={handleInstall}
             disabled={installing}
-            className="inline-flex items-center gap-1 rounded-md bg-oe-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-lg bg-oe-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60"
           >
             <Download size={12} />
             {t('pwa.install_button', { defaultValue: 'Install' })}
@@ -268,7 +268,7 @@ export function PWAInstallPrompt() {
         onClick={handleDismiss}
         aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
         disabled={installing}
-        className="shrink-0 rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-60"
+        className="shrink-0 rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-60"
       >
         <X size={14} />
       </button>
