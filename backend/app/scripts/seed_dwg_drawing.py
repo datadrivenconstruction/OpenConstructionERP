@@ -36,77 +36,25 @@ logger = logging.getLogger(__name__)
 
 
 def _build_demo_dxf(path: str) -> bool:
-    """Write a small, valid demo floor-plan DXF to ``path``.
+    """Write the demo architectural drawing set DXF to ``path``.
 
-    Uses ``ezdxf`` (a base dependency) to author a tidy little plan: an outer
-    room rectangle, an interior partition, a door swing arc, a window, and a
-    room label per side - enough that the viewer has real geometry to render
-    and the layer panel shows named layers. Units are set to millimetres
-    (``$INSUNITS = 4``) so the drawing reads at a realistic building scale.
-
-    The plan is presented as a German Grundriss, so the labels are written the
-    way a German plan writes them (see the room labels below). Layer names stay
-    on the AIA ``DISCIPLINE-MAJOR-MINOR`` codes, which are a drafting standard
-    rather than prose and are what the match extractors classify on.
+    The set (site, plans, roof, section, elevations, schedule; eight A2 sheets in
+    model space) is authored by :mod:`app.scripts.demo_drawing_set`, units mm.
 
     Returns ``True`` on success, ``False`` when ezdxf is unavailable (the
     caller then falls back to a metadata-only reference row).
     """
     try:
-        import ezdxf
+        import ezdxf  # noqa: F401
     except ImportError:
         logger.info("seed_dwg_drawing: ezdxf not installed - skipping ready DXF seed")
         return False
 
     try:
-        doc = ezdxf.new(dxfversion="R2010")
-        doc.header["$INSUNITS"] = 4  # millimetres
-        msp = doc.modelspace()
-
-        # Named layers so the LayerPanel has something meaningful to toggle.
-        doc.layers.add("A-WALL", color=7)
-        doc.layers.add("A-WALL-PART", color=8)
-        doc.layers.add("A-DOOR", color=3)
-        doc.layers.add("A-GLAZ", color=5)
-        doc.layers.add("A-ANNO-TEXT", color=2)
-
-        # Outer room: 6000 x 4000 mm rectangle (closed polyline).
-        msp.add_lwpolyline(
-            [(0, 0), (6000, 0), (6000, 4000), (0, 4000)],
-            close=True,
-            dxfattribs={"layer": "A-WALL"},
-        )
-        # Interior partition.
-        msp.add_line((3600, 0), (3600, 2600), dxfattribs={"layer": "A-WALL-PART"})
-        # Door opening + swing arc.
-        msp.add_line((3600, 2600), (3600, 3500), dxfattribs={"layer": "A-DOOR"})
-        msp.add_arc(
-            center=(3600, 2600),
-            radius=900,
-            start_angle=0,
-            end_angle=90,
-            dxfattribs={"layer": "A-DOOR"},
-        )
-        # Window on the south wall.
-        msp.add_line((1200, 0), (2800, 0), dxfattribs={"layer": "A-GLAZ"})
-        msp.add_line((1200, 120), (2800, 120), dxfattribs={"layer": "A-GLAZ"})
-        # Room labels. A German Grundriss names the room and states its
-        # dimensions as width/depth in metres, with a decimal comma and two
-        # decimals - "3,60/4,00", not "3.6 x 4.0". Each label states the room
-        # it sits in: the partition at x=3600 divides the 6.00 m envelope into
-        # a 3.60 m living side and a 2.40 m sleeping side, so the left label
-        # reads 3,60 and not the 6,00 of the outer wall it is not describing.
-        msp.add_text(
-            "Wohnen 3,60/4,00",
-            dxfattribs={"layer": "A-ANNO-TEXT", "height": 200, "insert": (300, 3600)},
-        )
-        msp.add_text(
-            "Schlafen 2,40/4,00",
-            dxfattribs={"layer": "A-ANNO-TEXT", "height": 200, "insert": (3900, 3600)},
-        )
+        from app.scripts.demo_drawing_set import build_drawing_set
 
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        doc.saveas(path)
+        build_drawing_set(path)
         return True
     except Exception:  # noqa: BLE001 - seed is best-effort, never fatal
         logger.warning("seed_dwg_drawing: failed to build demo DXF", exc_info=True)
@@ -161,11 +109,16 @@ async def seed_ready_dwg_drawing(
     entities_path = os.path.join(_get_entities_dir(), entities_key)
 
     # Fast idempotency: a ready row whose entities are on disk is already good.
-    if existing is not None and existing.status == "ready" and os.path.exists(entities_path):
-        return True
+    from app.scripts.demo_drawing_set import SET_VERSION
 
     upload_dir = _get_upload_dir()
     file_path = os.path.join(upload_dir, f"{drawing_id}.dxf")
+    stale = existing is not None and (existing.metadata_ or {}).get("seed_set_version") != SET_VERSION
+    if existing is not None and existing.status == "ready" and os.path.exists(entities_path) and not stale:
+        return True
+    if stale and (existing.metadata_ or {}).get("seed_ready_dxf") and os.path.exists(file_path):
+        # An older demo drawing: rebuild it so upgrades get the current set.
+        os.remove(file_path)
 
     built = True
     if not os.path.exists(file_path):
@@ -202,6 +155,7 @@ async def seed_ready_dwg_drawing(
                 metadata_={
                     "source": source,
                     "seed_ready_dxf": True,
+                    "seed_set_version": SET_VERSION,
                     "element_count": int(parsed.get("entity_count") or 0),
                 },
             )
@@ -246,6 +200,7 @@ async def seed_ready_dwg_drawing(
             existing.size_bytes = os.path.getsize(file_path)
         meta = dict(existing.metadata_ or {})
         meta["seed_ready_dxf"] = True
+        meta["seed_set_version"] = SET_VERSION
         # The row is being promoted off a parse we just ran, so its count is
         # restated from that parse. A row half-seeded by an older build can
         # carry a count that was never about this DXF; leaving it would keep
@@ -259,7 +214,7 @@ async def seed_ready_dwg_drawing(
 
         version_repo = DwgDrawingVersionRepository(session)
         latest = await version_repo.get_latest_for_drawing(drawing_id)
-        if latest is None or (latest.entity_count or 0) == 0:
+        if stale or latest is None or (latest.entity_count or 0) == 0:
             await _create_ready_version(session, drawing_id, parsed, entities_key)
         return True
 
