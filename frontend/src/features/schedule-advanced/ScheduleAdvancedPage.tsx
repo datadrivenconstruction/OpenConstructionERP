@@ -46,7 +46,6 @@ import {
   SkeletonTable,
   WideModal,
   ConfirmDialog,
-  InfoHint,
   ModuleGuideButton,
   CollapsibleSection,
 } from '@/shared/ui';
@@ -721,6 +720,10 @@ export function ScheduleAdvancedPage() {
         title={t('schedule_advanced.intro_title', {
           defaultValue: 'Keep the weekly promises the plan depends on',
         })}
+        more={t('schedule_advanced.master_hint', {
+          defaultValue:
+            'Select a master schedule to make it the working plan for the Phases, Look-Ahead, Weekly and Constraints tabs. Use the row actions to rename it, change its planned dates and status, or delete it.',
+        })}
         links={[
           { label: t('schedule_advanced.intro_link_schedule', { defaultValue: '4D Schedule' }), onClick: () => navigate('/schedule') },
           { label: t('schedule_advanced.intro_link_takt', { defaultValue: 'Takt planning' }), onClick: () => navigate('/takt') },
@@ -1198,24 +1201,6 @@ function MasterTab({
   }
   return (
     <div className="space-y-4">
-      <InfoHint
-        text={t('schedule_advanced.master_hint', {
-          defaultValue:
-            'Select a master schedule to make it the working plan for the Phases, Look-Ahead, Weekly and Constraints tabs. Use the row actions to rename it, change its planned dates and status, or delete it.',
-        })}
-      />
-
-      <div className="flex justify-end">
-        <Button
-          variant="primary"
-          size="sm"
-          icon={<Plus size={14} />}
-          onClick={onCreate}
-        >
-          {t('schedule_advanced.create_master', { defaultValue: 'Create Master' })}
-        </Button>
-      </div>
-
       <Card padding="none">
         <div className="overflow-x-auto">
           <table className="oe-table">

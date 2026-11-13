@@ -137,12 +137,16 @@ export function SideDrawer({
   // commits the initial transform before the transition kicks in.
   const [isShown, setIsShown] = useState(false);
 
+  // Registered before the Escape effect so Escape can yield to a newer overlay.
+  // See the ordering note on the initial-focus effect below.
+  const isTopmost = useFocusTrap(panelRef, open);
+
   // Escape closes (unless busy). Listener attached to document, NOT
   // window, with capture phase so we beat any page-level keybindings.
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !busy) {
+      if (e.key === 'Escape' && !busy && isTopmost()) {
         e.preventDefault();
         e.stopPropagation();
         onClose();
@@ -150,7 +154,7 @@ export function SideDrawer({
     };
     document.addEventListener('keydown', handler, { capture: true });
     return () => document.removeEventListener('keydown', handler, { capture: true });
-  }, [open, onClose, busy]);
+  }, [open, onClose, busy, isTopmost]);
 
   // Body scroll lock — capture the previous overflow so nested drawers
   // restore the correct value (not a hard-coded empty string).
@@ -184,7 +188,6 @@ export function SideDrawer({
   // would capture the close button as the "previously focused" element
   // and on close try to restore focus to a control that has been
   // unmounted, leaving the page with no focus at all.
-  useFocusTrap(panelRef, open);
 
   // Move initial focus into the first focusable element (matches
   // WideModal). If there is nothing focusable, focus the panel itself.

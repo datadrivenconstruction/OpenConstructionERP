@@ -657,10 +657,6 @@ export function ProcurementPage() {
         </Suspense>
       ) : !projectId ? (
         <RequiresProject
-          emptyHint={t('procurement.select_project', {
-            defaultValue:
-              'Open a project first to view its procurement data',
-          })}
         >{null}</RequiresProject>
       ) : (
         <>

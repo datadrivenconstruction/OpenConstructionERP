@@ -88,15 +88,15 @@ const VARIANT_CLASSES: Record<TabBarVariant, { container: string }> = {
     // reached 1672px with 16. Scrolling the strip is the usual mobile answer
     // and it costs nothing when the tabs already fit, which is every desktop
     // width we ship. Only this variant is scoped; pill and segmented lay out
-    // differently and were not measured.
+    // differently; they get the same scroll cap below.
     container: 'flex items-stretch overflow-x-auto border-b border-border-light',
   },
   pill: {
-    container: 'flex items-center gap-1 p-1 rounded-lg bg-surface-secondary',
+    container: 'flex max-w-full items-center gap-1 overflow-x-auto p-1 rounded-lg bg-surface-secondary',
   },
   segmented: {
     container:
-      'inline-flex items-center rounded-lg border border-border-light bg-surface-secondary p-0.5',
+      'inline-flex max-w-full items-center overflow-x-auto rounded-lg border border-border-light bg-surface-secondary p-0.5',
   },
 };
 

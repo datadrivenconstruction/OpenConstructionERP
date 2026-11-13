@@ -27,6 +27,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useState } from 'react';
 
 import { SideDrawer } from './SideDrawer';
+import { WideModal } from './WideModal';
 
 // requestAnimationFrame is fired synchronously in tests so the slide-in
 // transform settles immediately and we don't have to await frames.
@@ -284,5 +285,52 @@ describe('SideDrawer - headerActions slot', () => {
     const position = editBtn.compareDocumentPosition(closeBtn);
     // eslint-disable-next-line no-bitwise
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+describe('SideDrawer - nested overlay', () => {
+  function Host({ onDrawerClose }: { onDrawerClose: () => void }) {
+    const [modal, setModal] = useState(false);
+    return (
+      <SideDrawer open onClose={onDrawerClose} title="Contract">
+        <button type="button" onClick={() => setModal(true)}>
+          open-gate
+        </button>
+        <WideModal open={modal} onClose={() => setModal(false)} title="Gate">
+          <button type="button" data-testid="modal-a">
+            a
+          </button>
+          <button type="button" data-testid="modal-b">
+            b
+          </button>
+        </WideModal>
+      </SideDrawer>
+    );
+  }
+
+  it('does not pull Tab out of a modal opened inside the drawer', () => {
+    const onDrawerClose = vi.fn();
+    render(<Host onDrawerClose={onDrawerClose} />);
+    fireEvent.click(screen.getByText('open-gate'));
+    const last = screen.getByTestId('modal-b');
+    act(() => last.focus());
+    const ev = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    act(() => {
+      last.dispatchEvent(ev);
+    });
+    // The modal trap wraps to its own first control; the drawer must not
+    // have moved focus to its own.
+    expect(document.activeElement?.closest('[role="dialog"]')?.textContent).toContain('Gate');
+  });
+
+  it('Escape closes only the modal, then the drawer once the modal is gone', () => {
+    const onDrawerClose = vi.fn();
+    render(<Host onDrawerClose={onDrawerClose} />);
+    fireEvent.click(screen.getByText('open-gate'));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onDrawerClose).not.toHaveBeenCalled();
+    expect(screen.queryByText('Gate')).toBeNull();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onDrawerClose).toHaveBeenCalledTimes(1);
   });
 });
