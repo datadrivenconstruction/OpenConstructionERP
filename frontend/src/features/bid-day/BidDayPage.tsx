@@ -27,7 +27,7 @@ import {
   Unlock,
   X,
 } from 'lucide-react';
-import { Badge, Button, Breadcrumb, EmptyState, SkeletonTable } from '@/shared/ui';
+import { Badge, Button, Breadcrumb, EmptyState, PageHeader, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
 import { fmtList, fmtDate } from '@/shared/lib/formatters';
@@ -135,7 +135,7 @@ function AmountInput({
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={onKey}
-      className="w-full rounded border border-transparent bg-transparent px-1.5 py-1 text-right tabular-nums text-content-primary hover:border-border-light focus:border-oe-blue focus:bg-surface-primary focus:outline-none disabled:cursor-not-allowed"
+      className="w-full rounded-sm border border-transparent bg-transparent px-1.5 py-1 text-right tabular-nums text-content-primary hover:border-border-light focus:border-oe-blue focus:bg-surface-primary focus:outline-none disabled:cursor-not-allowed"
     />
   );
 }
@@ -192,7 +192,7 @@ function Figure({ label, value, accent, children }: { label: string; value: stri
   return (
     <div className="min-w-0">
       <div className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</div>
-      <div className={clsx('tabular-nums', accent ? 'text-2xl font-semibold text-content-primary' : 'text-base font-semibold text-content-primary')}>
+      <div className={clsx('tabular-nums', accent ? 'text-xl font-semibold text-content-primary' : 'text-base font-semibold text-content-primary')}>
         {value}
         {children}
       </div>
@@ -330,7 +330,7 @@ function QuoteEditor({
           )}
           <ul className="space-y-2">
             {rows.map((r, i) => (
-              <li key={r.id ?? `n${i}`} className="rounded border border-border-light p-2">
+              <li key={r.id ?? `n${i}`} className="rounded-lg border border-border-light p-2">
                 <div className="flex gap-2">
                   <input
                     value={r.text}
@@ -443,7 +443,7 @@ function LateQuoteForm({
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
       <form
-        className="w-full max-w-md space-y-3 rounded-xl bg-surface-elevated p-5 shadow-xl"
+        className="w-full max-w-md space-y-3 rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
@@ -658,21 +658,21 @@ export function BidDayPage() {
           { label: t('bid_day.title', { defaultValue: 'Bid day' }) },
         ]}
       />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-content-primary">
-            {t('bid_day.title', { defaultValue: 'Bid day' })}
-            <span className="ms-2 font-normal text-content-secondary">{board.tender_name}</span>
-          </h1>
-          {frozen ? (
-            <Badge variant="purple">{t('bid_day.status_frozen', { defaultValue: 'Submitted' })}</Badge>
-          ) : (
-            <Badge variant="blue">{t('bid_day.status_open', { defaultValue: 'Live' })}</Badge>
-          )}
-          <PresenceIndicator entityType="tender_package" entityId={board.tender_id} />
-        </div>
-        <DeadlineCountdown deadline={board.deadline} />
-      </div>
+      <PageHeader
+        srTitle={t('bid_day.title', { defaultValue: 'Bid day' })}
+        subtitle={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <span className="font-medium text-content-secondary">{board.tender_name}</span>
+            {frozen ? (
+              <Badge variant="purple">{t('bid_day.status_frozen', { defaultValue: 'Submitted' })}</Badge>
+            ) : (
+              <Badge variant="blue">{t('bid_day.status_open', { defaultValue: 'Live' })}</Badge>
+            )}
+            <PresenceIndicator entityType="tender_package" entityId={board.tender_id} />
+          </span>
+        }
+        actions={<DeadlineCountdown deadline={board.deadline} />}
+      />
 
       {conflict && (
         <div role="alert" className="flex items-start gap-2 rounded-lg border border-semantic-warning bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary">
@@ -691,7 +691,7 @@ export function BidDayPage() {
       )}
 
       {/* Totals stay in view while the estimator scrolls the packages. */}
-      <section className="sticky top-0 z-sticky rounded-xl border border-border-light bg-surface-elevated/95 p-4 shadow-sm backdrop-blur">
+      <section className="sticky top-0 z-sticky rounded-xl border border-border-light bg-surface-elevated/95 p-4 backdrop-blur">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
           <Figure label={t('bid_day.direct_cost', { defaultValue: 'Direct cost' })} value={money(tot.direct, ccy)} />
           <Figure label={t('bid_day.markup', { defaultValue: 'Markup' })} value={money(tot.markup, ccy)} />
@@ -762,7 +762,7 @@ export function BidDayPage() {
                       {(findingsByRef.get(row.id) ?? 0) > 0 && <AlertTriangle size={12} className="text-semantic-warning" />}
                     </div>
                     {row.suggestion && !row.suggestion.is_chosen && (
-                      <div className="mt-1.5 rounded bg-surface-secondary px-2 py-1 text-2xs text-content-secondary">
+                      <div className="mt-1.5 rounded-sm bg-surface-secondary px-2 py-1 text-2xs text-content-secondary">
                         <span className="inline-flex items-center gap-1 font-medium text-content-primary">
                           <Sparkles size={12} />
                           {t('bid_day.suggested', {
@@ -804,7 +804,7 @@ export function BidDayPage() {
                       return (
                         <td key={qi}>
                           {qi === row.quotes.length && !frozen && (
-                            <button type="button" onClick={() => setLateFor(row)} className="flex w-full items-center justify-center gap-1 rounded border border-dashed border-border-light px-2 py-3 text-xs text-content-tertiary hover:border-oe-blue hover:text-oe-blue">
+                            <button type="button" onClick={() => setLateFor(row)} className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-border-light px-2 py-3 text-xs text-content-tertiary hover:border-oe-blue hover:text-oe-blue">
                               <Phone size={12} />
                               {t('bid_day.add_late_quote', { defaultValue: 'Late quote' })}
                             </button>
@@ -957,7 +957,7 @@ export function BidDayPage() {
             ) : (
               <ul className="space-y-2 text-xs">
                 {board.snapshots.map((s) => (
-                  <li key={s.id} className="rounded border border-border-light p-2">
+                  <li key={s.id} className="rounded-lg border border-border-light p-2">
                     <div className="font-semibold tabular-nums text-content-primary">{money(s.bid_total, s.currency)}</div>
                     <div className="text-content-tertiary">
                       {fmtDate(s.created_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} {s.submitted_by_name && `· ${s.submitted_by_name}`}
@@ -1023,7 +1023,7 @@ export function BidDayPage() {
 
       {freezeOpen && (
         <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-md space-y-3 rounded-xl bg-surface-elevated p-5 shadow-xl">
+          <div className="w-full max-w-md space-y-3 rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl">
             <h2 className="oe-card-title">{t('bid_day.freeze_title', { defaultValue: 'Freeze and submit this bid?' })}</h2>
             <p className="text-sm text-content-secondary">
               {t('bid_day.freeze_body', {
@@ -1047,7 +1047,7 @@ export function BidDayPage() {
 
       {push && (
         <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30 p-4" role="dialog" aria-modal="true">
-          <div className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-xl bg-surface-elevated p-5 shadow-xl">
+          <div className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl">
             <h2 className="oe-card-title">{t('bid_day.push_title', { defaultValue: 'Write chosen quotes into the estimate' })}</h2>
             <p className="mt-1 text-xs text-content-secondary">
               {t('bid_day.push_body', { defaultValue: 'Each chosen quote, adjusted for plugged scope, is spread over its package positions in proportion to their current totals. Nothing is written until you confirm.' })}

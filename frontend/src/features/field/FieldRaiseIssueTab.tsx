@@ -477,7 +477,7 @@ export function FieldRaiseIssueTab({
             type="button"
             onClick={captureGeo}
             disabled={geoBusy}
-            className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white text-base font-medium text-content-secondary disabled:opacity-50"
+            className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-surface-primary text-base font-medium text-content-secondary disabled:opacity-50"
           >
             {geoBusy ? (
               <Loader2 size={20} className="animate-spin" aria-hidden="true" />

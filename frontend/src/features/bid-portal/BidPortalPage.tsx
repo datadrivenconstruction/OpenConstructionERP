@@ -290,7 +290,7 @@ export function BidPortalPage() {
                   <code className="break-all font-mono text-xs">{v.receipt_sha256}</code>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5 text-xs hover:bg-surface-secondary"
+                    className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-0.5 text-xs hover:bg-surface-secondary"
                     onClick={() => void copyToClipboard(v.receipt_sha256 ?? '')}
                   >
                     <Copy size={12} aria-hidden />
@@ -426,7 +426,7 @@ export function BidPortalPage() {
                       aria-invalid={p?.invalid || !!serverReason}
                       data-testid={`bid-price-input-${line.ordinal}`}
                       className={
-                        'min-h-11 w-full rounded border px-2 text-right tabular-nums bg-surface-primary ' +
+                        'min-h-11 w-full rounded-lg border px-2 text-right tabular-nums bg-surface-primary ' +
                         'focus:outline-none focus:ring-2 focus:ring-oe-blue disabled:bg-surface-secondary ' +
                         (p?.invalid || serverReason ? 'border-semantic-error' : 'border-border-light')
                       }

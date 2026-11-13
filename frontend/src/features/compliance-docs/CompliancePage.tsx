@@ -279,7 +279,7 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
                         if (!ok) return;
                         removeMutation.mutate(row.id);
                       }}
-                      className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
+                      className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
                       aria-label={t('common.delete', {
                         defaultValue: 'Delete',
                       })}

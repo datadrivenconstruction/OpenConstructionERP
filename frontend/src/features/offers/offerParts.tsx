@@ -19,12 +19,13 @@ export function SendAction({
 }) {
   const { t } = useTranslation();
   return (
-    <span className="flex flex-col items-end">
+    <span className="inline-flex">
       <Button size="sm" icon={<Send size={14} />} disabled={!canSend || pending} onClick={onSend} title={!canSend ? (firstError ?? '') : undefined}>
         {t('offers.download_mark_sent', { defaultValue: 'Download and mark sent' })}
       </Button>
+      {/* Read out by screen readers; on screen the subtitle's "to fix" count and the section finding say it. */}
       {!canSend && firstError && (
-        <span role="note" data-testid="send-blocked-reason" className="mt-1 max-w-xs text-right text-xs text-semantic-error">
+        <span role="note" data-testid="send-blocked-reason" className="sr-only">
           {firstError}
         </span>
       )}

@@ -148,7 +148,7 @@ function HowFieldWorks() {
         {steps.map((s, i) => (
           <li
             key={s.title}
-            className="flex items-start gap-2 rounded-lg border border-border-light bg-white p-3"
+            className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-primary p-3"
           >
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-semantic-info-bg text-2xs font-semibold text-semantic-info">
               {i + 1}
@@ -246,7 +246,7 @@ export function FieldShellPage() {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-white"
+      className="mx-auto flex min-h-screen w-full max-w-2xl flex-col bg-surface-primary sm:border-x sm:border-border-light"
       style={{
         // iOS safe-area inset so the bottom nav doesn't sit under the
         // home indicator on iPhone X+ in standalone PWA mode.
@@ -255,7 +255,7 @@ export function FieldShellPage() {
       }}
     >
       {/* Sticky 56 px header — project name placeholder + offline/sync badge. */}
-      <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b border-border-light bg-white px-4">
+      <header className="sticky top-0 z-sticky flex h-14 items-center justify-between gap-2 border-b border-border-light bg-surface-primary px-4">
         <span className="min-w-0 truncate text-base font-semibold text-content-primary">
           {session
             ? t('field.header', { defaultValue: 'Field time' })
@@ -320,7 +320,7 @@ export function FieldShellPage() {
 
       {/* Bottom nav — fixed 64 px, 4 tabs. */}
       <nav
-        className="sticky bottom-0 flex border-t border-border-light bg-white"
+        className="sticky bottom-0 flex border-t border-border-light bg-surface-primary"
         aria-label={t('field.nav_label', { defaultValue: 'Field navigation' })}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -338,7 +338,7 @@ export function FieldShellPage() {
                 active ? 'text-semantic-info' : 'text-content-tertiary'
               }`}
             >
-              <Icon size={28} aria-hidden="true" />
+              <Icon size={24} aria-hidden="true" />
               <span>{tabLabel}</span>
             </button>
           );

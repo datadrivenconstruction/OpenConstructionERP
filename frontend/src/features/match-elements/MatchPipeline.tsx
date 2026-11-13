@@ -57,9 +57,9 @@ const ORDER: StageName[] = [
 export function PipelinePreview() {
   const { t } = useTranslation();
   return (
-    <section className="mt-2 rounded-xl border border-indigo-200/70 dark:border-indigo-800/50 bg-surface-primary shadow-sm">
-      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border bg-gradient-to-r from-indigo-50/70 via-white to-white dark:from-indigo-950/20 dark:via-surface-primary dark:to-surface-primary">
-        <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 inline-flex items-center justify-center">
+    <section className="rounded-xl border border-border-light bg-surface-primary">
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-light bg-surface-secondary/50">
+        <span className="w-7 h-7 rounded-lg bg-oe-blue/10 text-oe-blue inline-flex items-center justify-center">
           <Workflow className="w-4 h-4" />
         </span>
         <div className="min-w-0">
@@ -80,7 +80,7 @@ export function PipelinePreview() {
             key={name}
             className="inline-flex items-center gap-1 text-2xs font-semibold"
           >
-            <span className="px-1.5 py-0.5 rounded border bg-surface-secondary border-border text-content-tertiary">
+            <span className="px-1.5 py-0.5 rounded-sm border bg-surface-secondary border-border text-content-tertiary">
               {i + 1}. {t(`match_elements.pipeline.step_${name}`, { defaultValue: name })}
             </span>
             {i < ORDER.length - 1 && (
@@ -220,15 +220,15 @@ export function MatchPipeline({ sessionId }: Props) {
   return (
     <section
       ref={rootRef}
-      className="mt-2 rounded-xl border border-indigo-200/70 dark:border-indigo-800/50 bg-surface-primary shadow-sm scroll-mt-20"
+      className="rounded-xl border border-border-light bg-surface-primary scroll-mt-20"
     >
       {/* Header — this is the headline deep wizard of /match-elements,
           not a collapsible afterthought. The 7-step preview strip below
           makes the full Convert → … → Rollup journey self-evident even
           before the user expands a single stage. */}
-      <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-border bg-gradient-to-r from-indigo-50/70 via-white to-white dark:from-indigo-950/20 dark:via-surface-primary dark:to-surface-primary">
+      <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-border-light bg-surface-secondary/50">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 inline-flex items-center justify-center">
+          <span className="w-7 h-7 rounded-lg bg-oe-blue/10 text-oe-blue inline-flex items-center justify-center">
             <Workflow className="w-4 h-4" />
           </span>
           <div className="min-w-0">
@@ -301,7 +301,7 @@ export function MatchPipeline({ sessionId }: Props) {
               className="inline-flex items-center gap-1 text-2xs font-semibold"
             >
               <span
-                className={`px-1.5 py-0.5 rounded border ${
+                className={`px-1.5 py-0.5 rounded-sm border ${
                   status === 'done'
                     ? 'bg-semantic-success-bg border-semantic-success/30 text-semantic-success'
                     : status === 'running'
