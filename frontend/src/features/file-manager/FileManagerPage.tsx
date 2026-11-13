@@ -14,9 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronRight, HardDrive, UploadCloud, Search, Send, Loader2, ClipboardCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { EmptyState, ModuleGuideButton } from '@/shared/ui';
+import { Button, EmptyState, ModuleGuideButton, PageHeader } from '@/shared/ui';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { filesGuide } from './filesGuide';
 import { fetchTagsForFile } from '@/features/file-tags/api';
@@ -832,13 +831,52 @@ export function FileManagerPage() {
               : []),
             { label: t('nav.documents') },
           ]}
+          className="mb-3"
+        />
+        <PageHeader
+          actions={
+            <>
+              <Button
+                variant="primary"
+                icon={<UploadCloud size={14} />}
+                data-guide="files-upload-button"
+                onClick={() => handleOpenUpload(selectedKind)}
+              >
+                {t('files.upload', { defaultValue: 'Upload files' })}
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<Search size={14} />}
+                onClick={() => navigate('/files/search')}
+                title={t('files.global_search.title', { defaultValue: 'Search across projects' })}
+              >
+                {t('files.global_search.short', { defaultValue: 'Search all projects' })}
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<Send size={14} />}
+                data-guide="files-transmittal-link"
+                onClick={() => navigate('/files/transmittals')}
+              >
+                {t('files.transmittals.open_log', { defaultValue: 'Transmittal log' })}
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<ClipboardCheck size={14} />}
+                data-guide="files-approvals-link"
+                onClick={() => navigate('/files/approvals')}
+              >
+                {t('files.approvals.register_title', { defaultValue: 'Approvals register' })}
+              </Button>
+              <ModuleGuideButton content={filesGuide} onCta={() => handleOpenUpload(selectedKind)} />
+            </>
+          }
         />
       </div>
       <PathBar locations={locations} isLoading={locLoading} selectedKind={selectedKind} />
 
-      {/* Page-level breadcrumb + primary upload CTA. Lives outside the
-          tree/main split so it's always visible whether the user is on
-          the folder grid or drilled into a category. */}
+      {/* Folder-level navigation. Lives outside the tree/main split so it's
+          always visible whether the user is on the folder grid or a category. */}
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-light bg-surface-elevated">
         <nav
           className="flex items-center gap-1.5 text-sm min-w-0"
@@ -868,59 +906,6 @@ export function FileManagerPage() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
-          {/* "How it works" guide — concepts + how to upload and feed
-              takeoff/BOQ. Sits in the page action cluster; its closing CTA
-              opens the upload dialog. */}
-          <ModuleGuideButton
-            content={filesGuide}
-            onCta={() => handleOpenUpload(selectedKind)}
-          />
-          {/* W10 — cross-project search */}
-          <Link
-            to="/files/search"
-            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
-            title={t('files.global_search.title', { defaultValue: 'Search across projects' })}
-          >
-            <Search size={14} />
-            <span className="hidden md:inline">
-              {t('files.global_search.short', { defaultValue: 'Search all projects' })}
-            </span>
-          </Link>
-          {/* W7 — transmittal log entry point */}
-          <Link
-            to="/files/transmittals"
-            data-guide="files-transmittal-link"
-            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
-            title={t('files.transmittals.open_log', { defaultValue: 'Transmittal log' })}
-          >
-            <Send size={14} />
-            <span className="hidden md:inline">
-              {t('files.transmittals.open_log', { defaultValue: 'Transmittal log' })}
-            </span>
-          </Link>
-          {/* Project-wide file-approvals register + one-click Excel export */}
-          <Link
-            to="/files/approvals"
-            data-guide="files-approvals-link"
-            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
-            title={t('files.approvals.register_title', { defaultValue: 'Approvals register' })}
-          >
-            <ClipboardCheck size={14} />
-            <span className="hidden md:inline">
-              {t('files.approvals.register_title', { defaultValue: 'Approvals register' })}
-            </span>
-          </Link>
-          <button
-            type="button"
-            data-guide="files-upload-button"
-            onClick={() => handleOpenUpload(selectedKind)}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors shrink-0"
-          >
-            <UploadCloud size={14} />
-            {t('files.upload', { defaultValue: 'Upload files' })}
-          </button>
-        </div>
       </div>
 
       <div className="flex-1 flex min-h-0">
