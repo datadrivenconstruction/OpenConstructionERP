@@ -2790,7 +2790,7 @@ function DashboardPageInner() {
           below merges DDC attribution + OSS badge + status pills into a
           thin meta-strip. Saves ~180px above the fold. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between animate-card-in">
-        <h1 className="text-2xl font-semibold tracking-tight gradient-text pl-2">
+        <h1 className="text-lg font-semibold tracking-tight text-content-primary">
           {(() => {
             const h = new Date().getHours();
             const key =
@@ -2842,9 +2842,9 @@ function DashboardPageInner() {
             {t('dashboard.new_estimate', { defaultValue: 'New Estimate' })}
           </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="md"
-            icon={<Sparkles size={14} />}
+            icon={<Sparkles size={16} />}
             onClick={() => {
               if (lastBoq) { navigate(`/boq/${lastBoq.id}`); return; }
               const firstProject = projects?.[0];
@@ -2862,7 +2862,7 @@ function DashboardPageInner() {
               : t('dashboard.quick_start', { defaultValue: 'Quick Start' })}
           </Button>
           <Button
-            variant={customizing ? 'primary' : 'ghost'}
+            variant={customizing ? 'primary' : 'secondary'}
             size="md"
             icon={<LayoutGrid size={16} />}
             onClick={() => setCustomizing((v) => !v)}
@@ -2894,7 +2894,7 @@ function DashboardPageInner() {
       </div>
 
       {/* ─── 2. Hero · row B - thin meta-strip ───────────────────────── */}
-      <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pl-2 animate-stagger-in" style={{ animationDelay: '140ms' }}>
+      <div className="flex items-center flex-wrap gap-x-4 gap-y-2 animate-stagger-in" style={{ animationDelay: '140ms' }}>
         {/* DDC attribution - slim inline link with tiny logo */}
         <a
           href="https://datadrivenconstruction.io/?utm_source=erp"

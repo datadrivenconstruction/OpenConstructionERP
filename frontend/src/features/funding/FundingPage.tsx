@@ -42,6 +42,7 @@ import {
   SkeletonTable,
   StatCard,
 } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate } from '@/shared/lib/formatters';
@@ -323,25 +324,30 @@ export function FundingPage() {
     : null;
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <Breadcrumb
-          items={[
-            ...(breadcrumbProjectName
-              ? [{ label: breadcrumbProjectName, to: `/projects/${activeProjectId}` }]
-              : []),
-            { label: t('funding.title', { defaultValue: 'Public Funding' }) },
-          ]}
-        />
-        <div className="flex items-center gap-2">
-          <InsightsToggleButton open={insights.open} onClick={() => insights.setOpen(!insights.open)} />
-          <ModuleGuideButton content={fundingGuide} />
-          <Button onClick={() => setShowCreate(true)} disabled={!projectId}>
-            <Plus className="h-4 w-4" />
-            {t('funding.new_application', { defaultValue: 'New application' })}
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-5 animate-fade-in">
+      <Breadcrumb
+        items={[
+          ...(breadcrumbProjectName
+            ? [{ label: breadcrumbProjectName, to: `/projects/${activeProjectId}` }]
+            : []),
+          { label: t('funding.title', { defaultValue: 'Public Funding' }) },
+        ]}
+      />
+      <PageHeader
+        srTitle={t('funding.title', { defaultValue: 'Public Funding' })}
+        subtitle={t('onboarding.mod_funding_desc', {
+          defaultValue: 'Grants and subsidies: programmes, applications, what was drawn, and the proof of use that closes them.',
+        })}
+        actions={
+          <>
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowCreate(true)} disabled={!projectId}>
+              {t('funding.new_application', { defaultValue: 'New application' })}
+            </Button>
+            <InsightsToggleButton open={insights.open} onClick={() => insights.setOpen(!insights.open)} />
+            <ModuleGuideButton content={fundingGuide} />
+          </>
+        }
+      />
 
       <InsightsPanel
         open={insights.open}

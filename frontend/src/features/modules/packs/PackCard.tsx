@@ -133,7 +133,8 @@ function PackCardImpl({
         <span
           className="inline-flex h-5 items-center gap-1 rounded-md bg-surface-secondary px-1.5 text-2xs font-semibold uppercase tracking-wide text-content-secondary"
         >
-          <TypeIcon size={12} aria-hidden style={{ color: pack.branding.accent_color ?? pack.branding.primary_color }} />
+          {/* Primary, not accent: some flags carry a white accent that vanishes on the chip. */}
+          <TypeIcon size={12} aria-hidden style={{ color: pack.branding.primary_color }} />
           {t(meta.labelKey, { defaultValue: meta.defaultLabel })}
         </span>
         <span

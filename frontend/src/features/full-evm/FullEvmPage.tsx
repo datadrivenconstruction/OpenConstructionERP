@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { LineChart } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { FullEvmPanel } from './FullEvmPanel';
 
@@ -28,7 +29,11 @@ export function FullEvmPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.full_evm', { defaultValue: 'Earned Value' })}
+        subtitle={t('howto.full_evm.summary', { defaultValue: 'See whether the job is ahead or behind on cost and time, with SPI, CPI and a forecast final cost.' })}
+      />
       <CollapsibleSection
         storageKey="full_evm.how"
         icon={<LineChart size={16} className="text-oe-blue" />}

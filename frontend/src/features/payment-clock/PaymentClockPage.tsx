@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { PaymentClockPanel } from './PaymentClockPanel';
 import { VideoHint } from '@/features/videos/VideoHint';
@@ -29,7 +30,11 @@ export function PaymentClockPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.payment_clock', { defaultValue: 'Payment Clock' })}
+        subtitle={t('onboarding.mod_payment_clock_desc', { defaultValue: 'Statutory payment regimes: due dates, notice deadlines and the consequence of missing one' })}
+      />
       <CollapsibleSection
         storageKey="payment_clock.how"
         icon={<Scale size={16} className="text-oe-blue" />}

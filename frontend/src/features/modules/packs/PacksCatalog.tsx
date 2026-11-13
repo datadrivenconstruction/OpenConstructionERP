@@ -632,7 +632,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
       >
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative min-w-0 flex-1">
-            <Search size={16} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
+            <Search size={14} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
             <input
               type="search"
               value={qInput}
@@ -648,7 +648,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
                 defaultValue: 'Search by name, country, language or standard',
               })}
               data-testid="packs-search"
-              className="oe-input oe-input-lg w-full pe-9 ps-9 [&::-webkit-search-cancel-button]:hidden"
+              className="oe-input w-full pe-9 ps-9 [&::-webkit-search-cancel-button]:hidden"
             />
             {qInput && (
               <button

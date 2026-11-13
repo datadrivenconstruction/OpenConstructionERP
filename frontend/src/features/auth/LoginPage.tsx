@@ -709,7 +709,7 @@ export function LoginPage() {
           ].map((feat) => {
             const Icon = feat.icon;
             return (
-              <div key={feat.title} className="relative pl-4 max-w-[210px]">
+              <div key={feat.title} className="relative pl-4 max-w-[260px]">
                 <span aria-hidden className="absolute left-0 top-1 h-[14px] w-[2px] rounded-full bg-gradient-to-b from-oe-blue to-sky-500/60" />
                 <div className="flex items-center gap-1.5">
                   <Icon size={13} strokeWidth={1.8} className="text-oe-blue/85" />
@@ -717,7 +717,7 @@ export function LoginPage() {
                     {feat.title}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-[1.55] text-content-tertiary tracking-tight whitespace-pre-line">
+                <p className="mt-1 text-xs leading-[1.55] text-content-tertiary tracking-tight">
                   {feat.desc}
                 </p>
               </div>
