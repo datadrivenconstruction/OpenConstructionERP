@@ -223,7 +223,7 @@ export function SnagsBlock({
               {snags.map((s) => (
                 <li
                   key={s.id}
-                  className="rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs"
+                  className="rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={SNAG_STATUS_VARIANT[s.status]} dot>
@@ -603,7 +603,7 @@ function CreateSnagModal({
         </WideModalField>
       </WideModalSection>
       {!buyerId && (
-        <div className="mx-5 mb-3 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
+        <div className="mx-5 mb-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning">
           {t('propdev.snag.no_buyer_warn', {
             defaultValue:
               'No buyer is linked to this plot - the snag will be unattributed and cannot be promoted to a warranty claim until a buyer is assigned.',

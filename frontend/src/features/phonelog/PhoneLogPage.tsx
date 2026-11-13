@@ -146,7 +146,7 @@ function PhoneLogCard({
             {proto.decisions.map((line, i) => (
               <li
                 key={i}
-                className="rounded-md border-s-2 border-semantic-success/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
+                className="rounded-lg border-s-2 border-semantic-success/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
               >
                 {line}
               </li>
@@ -165,7 +165,7 @@ function PhoneLogCard({
             {proto.action_items.map((item, i) => (
               <li
                 key={i}
-                className="flex flex-wrap items-center gap-x-2 rounded-md border-s-2 border-oe-blue/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
+                className="flex flex-wrap items-center gap-x-2 rounded-lg border-s-2 border-oe-blue/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
               >
                 <span className="text-content-primary">{item.task}</span>
                 {item.owner && <span className="text-xs text-content-tertiary">- {item.owner}</span>}
@@ -190,7 +190,7 @@ function PhoneLogCard({
             {log.instructions.map((line, i) => (
               <li
                 key={i}
-                className="rounded-md border-s-2 border-oe-blue/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
+                className="rounded-lg border-s-2 border-oe-blue/50 bg-surface-secondary px-2 py-1 text-sm text-content-secondary"
               >
                 {line}
               </li>
@@ -210,7 +210,7 @@ function PhoneLogCard({
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
         >
           <Pencil className="h-3.5 w-3.5" />
           {t('phonelog.edit', { defaultValue: 'Edit' })}
@@ -218,7 +218,7 @@ function PhoneLogCard({
         <button
           type="button"
           onClick={onDelete}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
         >
           <Trash2 className="h-3.5 w-3.5" />
           {t('phonelog.delete', { defaultValue: 'Delete' })}
@@ -452,7 +452,7 @@ export function PhoneLogPage() {
             type="button"
             disabled={!canSubmit || createMutation.isPending}
             onClick={() => createMutation.mutate()}
-            className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {form.channel === 'voice_note' ? <Mic className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
             {t('phonelog.log_call', { defaultValue: 'Log the call' })}
@@ -527,7 +527,7 @@ export function PhoneLogPage() {
                       type="button"
                       disabled={safePage === 0}
                       onClick={() => setPage(safePage - 1)}
-                      className="inline-flex items-center gap-1 rounded-md border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <ChevronLeft className="h-4 w-4" />
                       {t('phonelog.prev', { defaultValue: 'Previous' })}
@@ -543,7 +543,7 @@ export function PhoneLogPage() {
                       type="button"
                       disabled={safePage >= pageCount - 1}
                       onClick={() => setPage(safePage + 1)}
-                      className="inline-flex items-center gap-1 rounded-md border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2.5 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {t('phonelog.next', { defaultValue: 'Next' })}
                       <ChevronRight className="h-4 w-4" />

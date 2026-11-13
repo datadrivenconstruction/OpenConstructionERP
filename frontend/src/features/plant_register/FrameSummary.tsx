@@ -49,7 +49,7 @@ export interface FrameSummaryProps {
 
 function Tile({ label, value, alert }: { label: string; value: number; alert?: boolean }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="frame-tile">
+    <div className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="frame-tile">
       <dt className="text-xs text-content-secondary">{label}</dt>
       <dd className={alert && value > 0 ? 'text-2xl font-semibold text-semantic-error' : 'text-2xl font-semibold text-content-primary'}>
         {fmtNumber(value, 0)}

@@ -489,7 +489,7 @@ export function NotificationsPage() {
                           <button
                             type="button"
                             onClick={() => handleRowClick(n)}
-                            className="flex items-start gap-3 flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded-md -m-1 p-1"
+                            className="flex items-start gap-3 flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded-lg -m-1 p-1"
                           >
                             <span
                               className={clsx(
@@ -527,7 +527,7 @@ export function NotificationsPage() {
                             type="button"
                             onClick={() => deleteMutation.mutate(n.id)}
                             className={clsx(
-                              'shrink-0 flex h-7 w-7 items-center justify-center rounded-md',
+                              'shrink-0 flex h-7 w-7 items-center justify-center rounded-lg',
                               'text-content-quaternary',
                               'opacity-0 group-hover:opacity-100 focus:opacity-100',
                               'hover:bg-semantic-error-bg hover:text-semantic-error',
@@ -556,7 +556,7 @@ export function NotificationsPage() {
       {/* Pagination — only visible when there's more than a page of data
           AND the request didn't error. */}
       {totalPages > 1 && (
-        <div className="mt-3 flex items-center justify-between text-xs text-content-tertiary">
+        <div className="flex items-center justify-between text-xs text-content-tertiary">
           <span>
             {t('common.showing_range', {
               defaultValue: 'Showing {{from}}-{{to}} of {{total}}',
@@ -566,27 +566,25 @@ export function NotificationsPage() {
             })}
           </span>
           <div className="flex items-center gap-1">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label={t('common.previous', { defaultValue: 'Previous' })}
-            >
-              <ChevronLeft size={14} />
-            </button>
+              icon={<ChevronLeft size={14} />}
+            />
             <span className="px-2 tabular-nums">
               {page + 1} / {totalPages}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="h-8 w-8 inline-flex items-center justify-center rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label={t('common.next', { defaultValue: 'Next' })}
-            >
-              <ChevronRight size={14} />
-            </button>
+              icon={<ChevronRight size={14} />}
+            />
           </div>
         </div>
       )}

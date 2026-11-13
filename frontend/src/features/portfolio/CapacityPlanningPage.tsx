@@ -114,7 +114,7 @@ export function CapacityPlanningPage() {
                   data-oe-segment
                   aria-pressed={bucket === b}
                   onClick={() => setBucket(b)}
-                  className={`h-full rounded-md px-2.5 text-xs font-medium transition-colors ${
+                  className={`h-full rounded-lg px-2.5 text-xs font-medium transition-colors ${
                     bucket === b
                       ? 'bg-surface-tertiary text-content-primary shadow-xs'
                       : 'text-content-secondary hover:text-content-primary'
@@ -332,7 +332,7 @@ export function CapacityPlanningPage() {
                             cell && cell.allocation_percent > 0
                               ? `${cell.allocation_percent}%`
                               : '';
-                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${cellClasses(
+                          const cellCls = `relative flex h-9 items-center justify-center rounded-lg text-2xs tabular-nums ${cellClasses(
                             cell,
                           )} ${cell?.cross_project ? 'ring-2 ring-inset ring-semantic-error/60' : ''}`;
                           if (cell?.over_allocated) {
@@ -375,7 +375,7 @@ export function CapacityPlanningPage() {
               <LegendSwatch className="bg-amber-400/80" label={t('capacity.legend_high', { defaultValue: '81-100%' })} />
               <LegendSwatch className="bg-semantic-error/90" label={t('capacity.legend_over', { defaultValue: 'Over 100%' })} />
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-semantic-error/60" />
+                <span className="h-3.5 w-3.5 rounded-lg ring-2 ring-inset ring-semantic-error/60" />
                 {t('capacity.legend_cross', { defaultValue: 'Two or more projects compete' })}
               </span>
             </div>
@@ -413,7 +413,7 @@ function SummaryChip({
 function LegendSwatch({ className, label }: { className: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={`h-3.5 w-3.5 rounded-md ${className}`} />
+      <span className={`h-3.5 w-3.5 rounded-lg ${className}`} />
       {label}
     </span>
   );

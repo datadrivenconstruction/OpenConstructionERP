@@ -193,7 +193,7 @@ export function PaperDialog({ open, onClose, projectId, item, paper, onSaved }: 
             </Button>
           </div>
           {draft.options.map((o, index) => (
-            <div key={o.rowId} className="space-y-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="option-row">
+            <div key={o.rowId} className="space-y-2 rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="option-row">
               <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,4fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]">
                 <input
                   aria-label={t('plant.paper.option_code_n', { defaultValue: 'Code of option {{n}}', n: index + 1 })}

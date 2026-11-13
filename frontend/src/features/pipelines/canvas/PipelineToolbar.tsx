@@ -71,7 +71,7 @@ function TBtn({ label, testId, icon, onClick, disabled, variant = 'default', tit
       title={title ?? label}
       aria-label={label}
       className={clsx(
-        'inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium',
+        'inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium',
         'transition-colors disabled:cursor-not-allowed disabled:opacity-40',
         variant === 'primary' &&
           'border-oe-blue bg-oe-blue text-white hover:bg-oe-blue/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
@@ -165,7 +165,7 @@ export function PipelineToolbar({
       {issueCount > 0 && (
         <span
           data-testid="pipeline-issue-chip"
-          className="ms-1 inline-flex items-center gap-1 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-2 py-1 text-xs font-medium text-semantic-warning"
+          className="ms-1 inline-flex items-center gap-1 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-2 py-1 text-xs font-medium text-semantic-warning"
         >
           {t('pipeline.toolbar.issues', {
             defaultValue: '{{count}} issue(s)',
@@ -179,7 +179,7 @@ export function PipelineToolbar({
       {dirty && (
         <span
           data-testid="pipeline-dirty-badge"
-          className="inline-flex items-center gap-1.5 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-2 py-1 text-xs font-medium text-semantic-warning"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-2 py-1 text-xs font-medium text-semantic-warning"
           title={t('pipeline.toolbar.unsaved_hint', {
             defaultValue: 'You have unsaved changes. Press Save to keep them.',
           })}

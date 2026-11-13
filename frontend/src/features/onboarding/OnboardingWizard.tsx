@@ -1336,7 +1336,7 @@ function StepWelcome({
         }}
         icon={<ArrowRight size={20} />}
         iconPosition="right"
-        className="mt-5 shadow-lg shadow-oe-blue/20"
+        className="mt-5"
       >
         {t('onboarding.get_started', { defaultValue: 'Get Started' })}
       </Button>
@@ -1384,7 +1384,7 @@ function StepStartChoice({
 
       <div
         className={clsx(
-          'mt-10 w-full grid grid-cols-1 gap-5',
+          'mt-8 w-full grid grid-cols-1 gap-4',
           canInstallPacks ? 'max-w-5xl sm:grid-cols-3' : 'max-w-3xl sm:grid-cols-2',
         )}
       >
@@ -1392,16 +1392,16 @@ function StepStartChoice({
         <button
           onClick={onQuickStart}
           className={clsx(
-            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
-            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
-            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'bg-surface-elevated',
+            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
           <Badge variant="blue" size="sm" className="mb-4">
             {t('onboarding.recommended', { defaultValue: 'Recommended' })}
           </Badge>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
             <Sparkles size={26} />
           </div>
           <h3 className="text-xl font-semibold text-content-primary">
@@ -1422,16 +1422,16 @@ function StepStartChoice({
         <button
           onClick={onReadyPack}
           className={clsx(
-            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
-            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
-            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'bg-surface-elevated',
+            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
           <Badge variant="blue" size="sm" className="mb-4">
             {t('onboarding.turnkey', { defaultValue: 'Turnkey' })}
           </Badge>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
             <Boxes size={26} />
           </div>
           <h3 className="text-xl font-semibold text-content-primary">
@@ -1450,14 +1450,14 @@ function StepStartChoice({
         <button
           onClick={onChooseProfile}
           className={clsx(
-            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
-            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
-            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'bg-surface-elevated',
+            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
           <div className="h-[22px] mb-4" aria-hidden />
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
             <Settings2 size={26} />
           </div>
           <h3 className="text-xl font-semibold text-content-primary">

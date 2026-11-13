@@ -535,7 +535,7 @@ function ScopeDialog({ projectId, concept, onClose }: PanelProps & { onClose: ()
     >
       <div className="space-y-2">
         {rows.map((r) => (
-          <div key={r.rowId} className="grid gap-2 rounded-md bg-surface-secondary p-2 md:grid-cols-12" data-testid="package-row">
+          <div key={r.rowId} className="grid gap-2 rounded-lg bg-surface-secondary p-2 md:grid-cols-12" data-testid="package-row">
             <input
               className={`${inputCls} md:col-span-2`}
               value={r.ref}

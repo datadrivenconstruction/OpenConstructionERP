@@ -157,7 +157,7 @@ function PermitTransitionDialog({ open, onClose, projectId, permit }: { open: bo
           const flag = permit.can?.transition?.[x];
           const refused = flag?.allowed === false;
           return (
-            <label key={x} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
+            <label key={x} className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-elevated p-2 text-sm">
               <input type="radio" name="permit-target" className="mt-1" disabled={refused} checked={target === x} onChange={() => setTarget(x)} />
               <span>
                 <span className={refused ? 'text-content-tertiary' : undefined}>{vocab(t, PERMIT_STEP, x)}</span>
@@ -235,7 +235,7 @@ export function PermitsRegister({
           const warn = p.lapse_warning;
           const step = workStep(p);
           return (
-            <li key={p.id} className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="permit-entry">
+            <li key={p.id} className="space-y-3 rounded-xl border border-border-light bg-surface-elevated p-4" data-testid="permit-entry">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -311,7 +311,7 @@ export function PermitsRegister({
                 <p
                   role="status"
                   data-testid="lapse-warning"
-                  className="flex items-start gap-2 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
+                  className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
                 >
                   <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
                   {warn.level === 'lapsed'

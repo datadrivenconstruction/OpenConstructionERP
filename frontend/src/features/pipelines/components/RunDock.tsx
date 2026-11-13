@@ -306,7 +306,7 @@ export function RunDock({
                       onClick={() =>
                         setHistoryVisible((v) => v + HISTORY_PAGE_SIZE)
                       }
-                      className="rounded-md border border-border bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30"
+                      className="rounded-lg border border-border bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30"
                     >
                       {t('pipeline.dock.show_more', {
                         defaultValue: 'Show older runs ({{count}} more)',

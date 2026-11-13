@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Search,
   Plus,
-  X,
   Loader2,
   TrendingUp,
   Send,
@@ -41,6 +40,7 @@ import {
   IntroRichText,
   ModuleGuideButton,
   CollapsibleSection,
+  SideDrawer,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1472,28 +1472,12 @@ function NCRDrawer({
   const canEscalate = ncr.status !== 'closed' && ncr.status !== 'cancelled';
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="qms-ncr-drawer-title"
-        className="relative h-full w-full max-w-lg overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 id="qms-ncr-drawer-title" className="text-base font-semibold truncate">
-            {ncr.title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
+    <SideDrawer
+      open
+      onClose={onClose}
+      title={ncr.title}
+      widthClass="max-w-lg"
+    >
         <div className="space-y-4 p-5">
           <p className="text-sm text-content-secondary whitespace-pre-wrap">{ncr.description}</p>
           <div className="grid grid-cols-2 gap-3 text-sm">
@@ -1541,7 +1525,7 @@ function NCRDrawer({
                 {actions.map((a: NCRAction) => (
                   <li
                     key={a.id}
-                    className="flex items-start justify-between gap-2 rounded-md border border-border-light p-2"
+                    className="flex items-start justify-between gap-2 rounded-lg border border-border-light p-2"
                   >
                     <div className="min-w-0">
                       <p className="text-sm text-content-primary break-words">{a.description}</p>
@@ -1662,8 +1646,7 @@ function NCRDrawer({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 
@@ -1732,30 +1715,14 @@ function ITPPlanDrawer({
   const items = itemsQ.data?.items ?? [];
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="qms-plan-drawer-title"
-        className="relative h-full w-full max-w-lg overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 id="qms-plan-drawer-title" className="text-base font-semibold">
-            {plan?.name || t('qms.itp_plan', { defaultValue: 'ITP plan' })}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
+    <SideDrawer
+      open
+      onClose={onClose}
+      title={plan?.name || t('qms.itp_plan', { defaultValue: 'ITP plan' })}
+      widthClass="max-w-lg"
+    >
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary px-3 py-2">
+          <div className="flex items-center justify-between rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
             <span className="flex items-center gap-1.5 text-xs text-content-secondary">
               <FileCheck size={14} />
               {t('qms.compliance_dossier', {
@@ -1802,7 +1769,7 @@ function ITPPlanDrawer({
                       <button
                         type="button"
                         onClick={() => setEditItemId(editItemId === it.id ? null : it.id)}
-                        className="flex w-full items-center justify-between gap-2 rounded-md border border-border-light bg-surface-secondary px-2.5 py-1.5 text-left text-xs hover:bg-surface-tertiary"
+                        className="flex w-full items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-left text-xs hover:bg-surface-tertiary"
                       >
                         <span className="truncate font-medium text-content-primary">
                           {it.sequence}. {it.control_point_name}
@@ -1827,8 +1794,7 @@ function ITPPlanDrawer({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 
@@ -1871,7 +1837,7 @@ function SpecLinkEditor({
   const candidates = items.filter((i) => i.id !== item.id);
 
   return (
-    <div className="mt-1.5 space-y-2 rounded-md border border-border-light bg-surface-primary p-3">
+    <div className="mt-1.5 space-y-2 rounded-xl border border-border-light bg-surface-primary p-3">
       <input
         value={csi}
         onChange={(e) => setCsi(e.target.value)}
@@ -2013,28 +1979,12 @@ function InspectionDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="qms-insp-drawer-title"
-        className="relative h-full w-full max-w-lg overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <h2 id="qms-insp-drawer-title" className="text-base font-semibold">
-            {insp.location_ref || t('qms.inspection', { defaultValue: 'Inspection' })}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
+    <SideDrawer
+      open
+      onClose={onClose}
+      title={insp.location_ref || t('qms.inspection', { defaultValue: 'Inspection' })}
+      widthClass="max-w-lg"
+    >
         <div className="space-y-4 p-5">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <Field label={t('qms.status')} value={<Badge variant={INSPECTION_VARIANT[insp.status] || 'neutral'} dot>{statusLabel(t, insp.status)}</Badge>} />
@@ -2197,7 +2147,7 @@ function InspectionDrawer({
                   return (
                     <div
                       key={idx}
-                      className="aspect-square rounded-md bg-surface-secondary overflow-hidden flex items-center justify-center text-content-tertiary text-2xs"
+                      className="aspect-square rounded-lg bg-surface-secondary overflow-hidden flex items-center justify-center text-content-tertiary text-2xs"
                     >
                       {url ? (
                         <img
@@ -2298,8 +2248,7 @@ function InspectionDrawer({
             </Card>
           )}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 

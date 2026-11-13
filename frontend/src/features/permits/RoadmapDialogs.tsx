@@ -303,7 +303,7 @@ export function ProposeDialog({ open, onClose, projectId, roadmap, labels }: Pro
         <ul className="space-y-1.5" data-testid="propose-list">
           {data.proposals.map((p) => (
             <li key={p.permit_type_code}>
-              <label className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
+              <label className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-elevated p-2 text-sm">
                 <input
                   type="checkbox"
                   className="mt-1"
@@ -674,7 +674,7 @@ export function DependenciesDialog({ open, onClose, projectId, roadmap, requirem
           {others.map((r) => {
             const name = r.title || typeName(labels, r.permit_type_code, r.name_key);
             return (
-              <li key={r.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
+              <li key={r.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light bg-surface-elevated p-2 text-sm">
                 <label className="flex min-w-0 flex-1 items-center gap-2">
                   <input type="checkbox" checked={r.id in chosen} onChange={() => toggle(r.id)} />
                   <span className="truncate text-content-primary">{name}</span>

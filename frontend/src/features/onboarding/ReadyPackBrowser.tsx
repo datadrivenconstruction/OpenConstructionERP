@@ -228,7 +228,7 @@ export function ReadyPackBrowser({
             type="button"
             onClick={() => setQuery('')}
             aria-label={t('packs.search_clear', { defaultValue: 'Clear search' })}
-            className="absolute end-2 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+            className="absolute end-2 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
             <X size={14} aria-hidden />
           </button>

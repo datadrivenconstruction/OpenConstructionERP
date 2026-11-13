@@ -129,7 +129,7 @@ export function Frameworks({ frameworks, canCreate, labels, onChanged }: Framewo
           {move.error ? <RefusalBox error={move.error} /> : null}
           <ul className="space-y-2">
             {frameworks.map((f) => (
-              <li key={f.id} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="framework-entry" data-framework={f.code}>
+              <li key={f.id} className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="framework-entry" data-framework={f.code}>
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -226,7 +226,7 @@ export function Frameworks({ frameworks, canCreate, labels, onChanged }: Framewo
                   </div>
                 </div>
                 {closing?.id === f.id && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-surface-secondary p-2" data-testid="framework-close-confirm">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-surface-secondary p-2" data-testid="framework-close-confirm">
                     <span className="text-xs text-content-primary">
                       {t('procurement_concept.ui.framework.close_confirm', {
                         defaultValue: 'This closes the agreement for good. No package can call off from it afterwards.',
@@ -276,7 +276,7 @@ function Ledger({ frameworkId, labels }: { frameworkId: string; labels: LabelCon
   const ledger = q.data;
   const share = calledOffShare(ledger);
   return (
-    <div className="mt-3 rounded-md bg-surface-secondary p-3" data-testid="framework-ledger">
+    <div className="mt-3 rounded-lg bg-surface-secondary p-3" data-testid="framework-ledger">
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm">
         <span>
           <span className="text-xs text-content-tertiary">{t('procurement_concept.ui.ledger.called_off', { defaultValue: 'Called off' })}</span>{' '}

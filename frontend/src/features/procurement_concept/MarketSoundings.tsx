@@ -99,7 +99,7 @@ export function MarketSoundings({ projectId, soundings, can, packages, labels, o
             {soundings.map((s) => {
               const pkgCodes = s.package_ids.map((id) => codes.get(id)).filter((c): c is string => !!c);
               return (
-                <li key={s.id} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="sounding-entry">
+                <li key={s.id} className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="sounding-entry">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-content-primary">
                       {s.trade || t('procurement_concept.ui.sounding.untitled', { defaultValue: 'Market sounding' })}
@@ -178,7 +178,7 @@ export function MarketSoundings({ projectId, soundings, can, packages, labels, o
                     </p>
                   )}
                   {removing === s.id && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-surface-secondary p-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-surface-secondary p-2">
                       <span className="text-xs text-content-primary">
                         {t('procurement_concept.ui.sounding.remove_confirm', { defaultValue: 'Remove this sounding from the record?' })}
                       </span>
@@ -461,7 +461,7 @@ function SoundingDialog({
           {t('procurement_concept.ui.sounding.resplit', { defaultValue: 'The packages are split again in answer to this' })}
         </label>
         {soundingUnmitigated(draft) && (
-          <p className="flex items-start gap-1.5 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note" data-testid="sounding-warning">
+          <p className="flex items-start gap-1.5 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note" data-testid="sounding-warning">
             <AlertTriangle size={14} className="mt-px shrink-0" aria-hidden />
             {t('procurement_concept.ui.sounding.unmitigated_hint', {
               defaultValue: 'Capacity is tight. Say what the project does about it, or the concept carries a warning.',

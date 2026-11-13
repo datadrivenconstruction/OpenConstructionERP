@@ -219,7 +219,7 @@ export function PackageDialog({
             {t('procurement_concept.ui.package.threshold_title', { defaultValue: '2. Which threshold it meets' })}
           </h3>
           {!view.award ? (
-            <p className="rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="threshold-pending">
+            <p className="rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="threshold-pending">
               {t('procurement_concept.ui.package.threshold_after_save', {
                 defaultValue: 'Save the value first. The threshold check and the procedures it allows appear right after.',
               })}
@@ -257,7 +257,7 @@ export function PackageDialog({
                 </p>
               )}
               {check.status === 'unconfirmed' && (
-                <p className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note">
+                <p className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note">
                   {t('procurement_concept.badge.unconfirmed_banner', {
                     defaultValue: 'This threshold is not yet confirmed on its primary source. It warns, it does not block.',
                   })}
@@ -424,7 +424,7 @@ export function PackageDialog({
           </div>
           {mustConfirmDrop && (
             <label
-              className="mt-3 flex items-start gap-2 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
+              className="mt-3 flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
               data-testid="criteria-drop-confirm"
             >
               <input type="checkbox" className="mt-1" checked={dropConfirmed} onChange={(e) => setDropConfirmed(e.target.checked)} />
@@ -434,7 +434,7 @@ export function PackageDialog({
             </label>
           )}
           {draft.evaluation_method === 'best_value' && (
-            <fieldset className="mt-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="award-criteria">
+            <fieldset className="mt-3 rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="award-criteria">
               <legend className="px-1 text-xs font-medium text-content-secondary">
                 {t('procurement_concept.ui.package.criteria_title', { defaultValue: 'Award criteria and their weights' })}
               </legend>

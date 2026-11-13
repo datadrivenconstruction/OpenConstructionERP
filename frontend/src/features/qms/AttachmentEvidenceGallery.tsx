@@ -100,7 +100,7 @@ export function AttachmentEvidenceGallery({
           {rows.map((a) => (
             <li
               key={a.id}
-              className="flex items-center justify-between gap-2 rounded-md border border-border-light bg-surface-secondary px-2.5 py-1.5 text-xs"
+              className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary px-2.5 py-1.5 text-xs"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium text-content-primary">

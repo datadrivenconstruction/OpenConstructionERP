@@ -92,7 +92,7 @@ export function DrillDrawer({
               <Link
                 to={boqHref}
                 onClick={onClose}
-                className="flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+                className="flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
                 title={t('controls.drill_boq_baseline_tip', {
                   defaultValue:
                     'This cost baseline (BAC) comes from the priced BOQ estimate. Open the BOQ to trace it.',
@@ -105,7 +105,7 @@ export function DrillDrawer({
             <Link
               to="/bi-dashboards"
               onClick={onClose}
-              className="flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
               title={t('controls.drill_trend_alerts_tip', {
                 defaultValue: 'See this KPI trend over time and configure threshold alerts in BI Dashboards',
               })}
@@ -137,7 +137,7 @@ export function DrillDrawer({
             return (
               <div
                 key={(fields['id'] as string) ?? idx}
-                className="rounded-md border border-border-light bg-surface-secondary p-3"
+                className="rounded-xl border border-border-light bg-surface-secondary p-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-sm font-medium text-content-primary">

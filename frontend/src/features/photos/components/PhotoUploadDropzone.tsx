@@ -5,6 +5,7 @@ import { useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Upload } from 'lucide-react';
+import { Button } from '@/shared/ui';
 import { captureDeviceEvidence } from '@/shared/lib/photoEvidence';
 import { useToastStore } from '@/stores/useToastStore';
 import { photosKeys, uploadPhotos, type TargetKind, type UploadResult } from '../api';
@@ -73,7 +74,7 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
       onDrop={onDrop}
       className={`flex items-center gap-3 rounded-lg border-2 border-dashed transition-colors ${
         over ? 'border-oe-blue bg-oe-blue/5' : 'border-border-light'
-      } ${compact ? 'px-3 py-2' : 'flex-col justify-center px-4 py-6 text-center'}`}
+      } ${compact ? 'px-3 py-2' : 'flex-wrap px-4 py-3'}`}
     >
       <input
         ref={input}
@@ -99,12 +100,12 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
         {upload.isPending ? t('photoArchive.upload.sending') : t('photoArchive.upload.hint')}
       </div>
       {!compact && (
-        <div className="flex flex-wrap items-center justify-center gap-2" data-testid="upload-batch-meta">
+        <div className="flex flex-wrap items-center gap-2" data-testid="upload-batch-meta">
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             aria-label={t('photos.category')}
-            className="oe-select oe-input-sm"
+            className="oe-select oe-input-sm w-36"
           >
             {PHOTO_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -122,14 +123,9 @@ export function PhotoUploadDropzone({ projectId, target, compact, onUploaded }: 
           <span className="w-full text-2xs text-content-tertiary">{t('photos.batch_meta_hint')}</span>
         </div>
       )}
-      <button
-        type="button"
-        disabled={upload.isPending}
-        onClick={() => input.current?.click()}
-        className="rounded-md bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 disabled:opacity-50"
-      >
+      <Button size="sm" className="ml-auto" disabled={upload.isPending} onClick={() => input.current?.click()}>
         {t('photoArchive.upload.pick')}
-      </button>
+      </Button>
     </div>
   );
 }

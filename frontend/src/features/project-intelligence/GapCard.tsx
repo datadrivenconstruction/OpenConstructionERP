@@ -141,7 +141,7 @@ export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: Ga
                 e.stopPropagation();
                 onAction();
               }}
-              className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-oe-blue rounded-md hover:bg-oe-blue-dark transition-colors"
+              className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-oe-blue rounded-lg hover:bg-oe-blue-dark transition-colors"
             >
               <Zap size={12} />
               {actionLabel}

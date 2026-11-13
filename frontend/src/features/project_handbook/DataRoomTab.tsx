@@ -109,7 +109,7 @@ function Tree({ room, projectId }: { room: DataRoom; projectId: string }) {
           [t('projectHandbook.data_room.documents', { defaultValue: 'Documents filed' }), room.documents - room.unfiled],
           [t('projectHandbook.data_room.unfiled', { defaultValue: 'Not filed yet' }), room.unfiled],
         ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-lg border border-border bg-surface-elevated shadow-sm px-4 py-3">
+          <div key={String(label)} className="rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
             <p className="text-xs text-content-tertiary">{label}</p>
             <p className="text-xl font-semibold tabular-nums text-content-primary">{value}</p>
           </div>

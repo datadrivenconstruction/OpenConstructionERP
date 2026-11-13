@@ -158,7 +158,7 @@ const CELL_STYLE: Record<DeliverableStatus, string> = {
 };
 
 const INPUT_CLASS =
-  'h-9 w-full rounded-md border border-border bg-surface-primary px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue';
+  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue';
 
 // ── Coverage chip ───────────────────────────────────────────────────────
 
@@ -394,7 +394,7 @@ function RequirementEditor({ state, setId, onClose, onSaved }: ReqEditorProps) {
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder={t('requirements.notes_placeholder', { defaultValue: 'Additional notes or context...' })}
-            className="w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+            className="w-full rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
           />
         </WideModalField>
       </WideModalSection>
@@ -506,7 +506,7 @@ function SetEditor({ state, projectId, onClose, onSaved }: SetEditorProps) {
             placeholder={t('requirements.matrix.set_description_placeholder', {
               defaultValue: 'Optional, e.g. structural information requirements for stage 4',
             })}
-            className="w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+            className="w-full rounded-lg border border-border bg-surface-primary px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
           />
         </WideModalField>
       </WideModalSection>
@@ -980,7 +980,7 @@ export function RequirementsMatrixPage() {
               {sets.length > 1 && (
                 <label className="flex items-center gap-1.5 text-sm">
                   <span className="text-content-secondary">{t('requirements.matrix.set_label', { defaultValue: 'Requirement set' })}</span>
-                  <select value={setFilter} onChange={(e) => setSetFilter(e.target.value)} className="h-8 rounded-md border border-border bg-surface-primary px-2 text-sm">
+                  <select value={setFilter} onChange={(e) => setSetFilter(e.target.value)} className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm">
                     <option value="">{t('requirements.matrix.set_all', { defaultValue: 'All sets' })}</option>
                     {sets.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -992,7 +992,7 @@ export function RequirementsMatrixPage() {
               )}
               <label className="flex items-center gap-1.5 text-sm">
                 <span className="text-content-secondary">{t('requirements.matrix.col_deliverable', { defaultValue: 'Deliverable' })}</span>
-                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="h-8 rounded-md border border-border bg-surface-primary px-2 text-sm">
+                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm">
                   <option value="">{t('common.all', { defaultValue: 'All' })}</option>
                   {cols.map((tcol) => (
                     <option key={tcol} value={tcol}>
@@ -1006,7 +1006,7 @@ export function RequirementsMatrixPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as DeliverableStatus | '')}
-                  className="h-8 rounded-md border border-border bg-surface-primary px-2 text-sm"
+                  className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm"
                 >
                   <option value="">{t('common.all', { defaultValue: 'All' })}</option>
                   <option value="accepted">{t('requirements.matrix.status_accepted', { defaultValue: 'Accepted' })}</option>
@@ -1192,7 +1192,7 @@ export function RequirementsMatrixPage() {
                           onClick={() => setReqEditor({ open: true, row })}
                           aria-label={t('requirements.matrix.row_edit', { defaultValue: 'Edit requirement' })}
                           title={t('requirements.matrix.row_edit', { defaultValue: 'Edit requirement' })}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-secondary hover:bg-surface-secondary hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                         >
                           <Pencil size={14} />
                         </button>
@@ -1201,7 +1201,7 @@ export function RequirementsMatrixPage() {
                           onClick={() => setReqToDelete(row)}
                           aria-label={t('requirements.matrix.row_delete', { defaultValue: 'Delete requirement' })}
                           title={t('requirements.matrix.row_delete', { defaultValue: 'Delete requirement' })}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-secondary hover:bg-semantic-error-bg hover:text-semantic-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                         >
                           <Trash2 size={14} />
                         </button>

@@ -61,7 +61,7 @@ function MenuSchematic({ look, accent, k = 1, fill = false }: { look: MenuLook; 
       style={{ width }}
     >
       <div
-        className={`flex h-full flex-col ${floating ? 'rounded-md border border-border-light bg-surface-elevated shadow-sm' : ''}`}
+        className={`flex h-full flex-col ${floating ? 'rounded-lg border border-border-light bg-surface-elevated shadow-sm' : ''}`}
         style={{ padding: 3 * k, gap }}
       >
         {look.headers !== 'none' && !rail && (

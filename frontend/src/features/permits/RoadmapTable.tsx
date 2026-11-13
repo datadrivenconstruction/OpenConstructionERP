@@ -99,7 +99,7 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
       </div>
       {reasons}
       {gatesInUse === false && (
-        <p role="status" className="rounded-md border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="roadmap-no-gates">
+        <p role="status" className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="roadmap-no-gates">
           {t('permits.ui.roadmap.no_gates', {
             defaultValue:
               'This project does not use gates. The roadmap is a working list: it is not agreed at a gate, and permits can be added or removed without a change request.',
@@ -107,7 +107,7 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
         </p>
       )}
       {binding && (
-        <p role="status" className="rounded-md border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="roadmap-binding">
+        <p role="status" className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="roadmap-binding">
           {t('permits.ui.roadmap.binding', {
             defaultValue:
               'The roadmap is binding. Adding or removing a permit now needs an approved change request in project governance.',
@@ -118,7 +118,7 @@ export function RoadmapTable({ rows, binding, can, gatesInUse, labels, onOpen, o
         <p
           role="status"
           data-testid="roadmap-conflicts"
-          className="flex items-start gap-2 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
+          className="flex items-start gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" aria-hidden />
           {t('permits.ui.roadmap.conflicts', {

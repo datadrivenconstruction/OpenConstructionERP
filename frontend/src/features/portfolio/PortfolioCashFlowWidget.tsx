@@ -77,9 +77,9 @@ export function PortfolioCashFlowWidget() {
           {getErrorMessage(error)}
         </p>
       ) : (
-        <div className="mt-3 space-y-3">
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
           {(data?.currencies ?? []).length === 0 && (
-            <p className="text-sm text-content-tertiary">
+            <p className="col-span-full text-sm text-content-tertiary">
               {t('portfolio.cf_empty', { defaultValue: 'No project has cash-flow inputs yet.' })}
             </p>
           )}
@@ -89,7 +89,7 @@ export function PortfolioCashFlowWidget() {
               <div
                 key={c.currency}
                 data-testid={`portfolio-cf-${c.currency}`}
-                className="rounded-lg border border-border-light p-3"
+                className="rounded-xl border border-border-light p-3"
               >
                 <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
                   <span className="text-sm font-semibold">{c.currency}</span>
@@ -143,7 +143,7 @@ export function PortfolioCashFlowWidget() {
             );
           })}
           {withoutForecast.length > 0 && (
-            <div className="text-xs text-content-secondary" data-testid="portfolio-cf-missing">
+            <div className="col-span-full text-xs text-content-secondary" data-testid="portfolio-cf-missing">
               {t('portfolio.cf_without_forecast', { defaultValue: 'Projects without a forecast' })}
               {': '}
               {withoutForecast.map((p, i) => (

@@ -389,7 +389,7 @@ export function TaxQuotePanel({
           type="button"
           onClick={computeQuote}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 disabled:opacity-50"
         >
           {loading ? (
             <Loader2 size={12} className="animate-spin" aria-hidden="true" />
@@ -409,7 +409,7 @@ export function TaxQuotePanel({
 
       {quote && (
         <div
-          className="rounded-md border border-border-light overflow-hidden"
+          className="rounded-lg border border-border-light overflow-hidden"
           data-testid="taxquote-breakdown"
         >
           <table className="oe-table-compact">

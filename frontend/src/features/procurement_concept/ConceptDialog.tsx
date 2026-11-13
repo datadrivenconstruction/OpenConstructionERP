@@ -137,7 +137,7 @@ export function ConceptDialog({ open, onClose, projectId, concept, catalogues, c
           </p>
         )}
         {!cataloguesLoading && usable.length === 0 && (
-          <p className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary" role="note" data-testid="catalogues-none">
+          <p className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary" role="note" data-testid="catalogues-none">
             {t('procurement_concept.ui.concept.catalogues_none', {
               defaultValue:
                 'No rule catalogue can be used yet, so the concept cannot be started. A catalogue needs a published version with at least one procurement law. Ask the person who manages the catalogues of your company to publish one.',

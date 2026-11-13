@@ -70,7 +70,7 @@ export function RecordingPlayer({ id, src, label }: RecordingPlayerProps) {
       type="button"
       onClick={load}
       disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
     >
       {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
       {label ?? t('phonelog.rec.play', { defaultValue: 'Play recording' })}

@@ -2622,7 +2622,7 @@ function PriceMatrixFormModal({
           {rules.map((r, i) => (
             <div
               key={i}
-              className="grid grid-cols-12 gap-2 items-center bg-surface-secondary/50 rounded-md p-2"
+              className="grid grid-cols-12 gap-2 items-center bg-surface-secondary/50 rounded-lg p-2"
             >
               <select
                 value={r.factor_type}
@@ -3057,7 +3057,7 @@ function EscrowAccountCard({
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-        <div className="bg-surface-secondary rounded-md p-2">
+        <div className="bg-surface-secondary rounded-lg p-2">
           <div className="text-content-tertiary">
             {t('propdev.escrow.credit', { defaultValue: 'Credit' })}
           </div>
@@ -3067,7 +3067,7 @@ function EscrowAccountCard({
               : '—'}
           </div>
         </div>
-        <div className="bg-surface-secondary rounded-md p-2">
+        <div className="bg-surface-secondary rounded-lg p-2">
           <div className="text-content-tertiary">
             {t('propdev.escrow.debit', { defaultValue: 'Debit' })}
           </div>
@@ -3077,7 +3077,7 @@ function EscrowAccountCard({
               : '—'}
           </div>
         </div>
-        <div className="bg-oe-blue/10 rounded-md p-2">
+        <div className="bg-oe-blue/10 rounded-lg p-2">
           <div className="text-content-tertiary">
             {t('propdev.escrow.balance', { defaultValue: 'Balance' })}
           </div>

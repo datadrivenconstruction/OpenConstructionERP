@@ -305,7 +305,7 @@ function UnitCell({
       title={label}
       aria-label={label}
       onClick={() => onClick?.(unit)}
-      className="h-7 w-9 cursor-pointer rounded-md border text-2xs font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-1"
+      className="h-7 w-9 cursor-pointer rounded-lg border text-2xs font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-1"
       style={{ backgroundColor: fill, borderColor: stroke }}
     >
       {unit.plot_number.slice(-3)}

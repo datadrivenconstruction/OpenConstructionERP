@@ -654,7 +654,7 @@ export function ProjectIntelligencePage() {
       {/* Section 2 — Readiness + Critical gaps (side-by-side, equal height) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Readiness ring card (compact, fixed width) */}
-        <div className="lg:col-span-3 bg-surface-primary rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+        <div className="lg:col-span-3 bg-surface-primary rounded-xl border border-border-light p-4 flex flex-col">
           <h3 className="text-xs font-semibold text-content-primary mb-2">
             {t('project_intelligence.readiness_title', {
               defaultValue: 'Estimation readiness',
@@ -678,7 +678,7 @@ export function ProjectIntelligencePage() {
         </div>
 
         {/* Critical gaps card — fills remaining width */}
-        <div className="lg:col-span-9 bg-surface-primary rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+        <div className="lg:col-span-9 bg-surface-primary rounded-xl border border-border-light p-4 flex flex-col">
           {score.critical_gaps.length > 0 ? (
             <>
               <h3 className="oe-card-title flex items-center gap-2 mb-2">
@@ -751,7 +751,7 @@ export function ProjectIntelligencePage() {
 
       {/* Section 2c — Predictive EVM forecast + alerts (TOP-30 #19) */}
       <div id="pi-forecasts" className="scroll-mt-20">
-        <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
+        <div className="rounded-xl border border-border-light bg-surface-primary p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
             <h2 className="oe-card-title">
@@ -779,7 +779,7 @@ export function ProjectIntelligencePage() {
 
       {/* Section 2d — Live predictive cost + schedule + risk analytics (#19) */}
       <div>
-        <div className="rounded-xl border border-border-light bg-surface-primary shadow-sm p-4">
+        <div className="rounded-xl border border-border-light bg-surface-primary p-4">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} className="text-oe-blue" />
             <h2 className="oe-card-title">

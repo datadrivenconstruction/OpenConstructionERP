@@ -148,7 +148,7 @@ function VersionRow({ version }: { version: ChapterVersion }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
-    <li className="rounded-md border border-border bg-surface-elevated" data-testid={`handbook-version-${version.version}`}>
+    <li className="rounded-lg border border-border bg-surface-elevated" data-testid={`handbook-version-${version.version}`}>
       <button
         type="button"
         className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm"
@@ -275,7 +275,7 @@ export function ChapterPanel({
         </div>
       </header>
 
-      <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm px-4 py-3 md:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border-light bg-surface-elevated px-4 py-3 md:grid-cols-4">
         <Fact label={t('projectHandbook.owner', { defaultValue: 'Owner' })}>
           <OwnerControl projectId={projectId} chapter={chapter} canChange={editable} onChanged={done} />
         </Fact>

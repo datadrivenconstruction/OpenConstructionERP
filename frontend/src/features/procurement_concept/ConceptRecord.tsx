@@ -170,7 +170,7 @@ export function ConceptRecord({
 
   return (
     <div className="space-y-5" data-testid="concept-record">
-      <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
         <div className="flex flex-wrap items-start gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -200,7 +200,7 @@ export function ConceptRecord({
         </div>
 
         {reopening && (
-          <div className="mt-3 rounded-md border border-border-light bg-surface-elevated p-3" data-testid="concept-reopen-form">
+          <div className="mt-3 rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="concept-reopen-form">
             <Field
               label={t('procurement_concept.ui.record.reopen_reason', { defaultValue: 'Why the concept is reopened (required)' })}
               htmlFor="pc-reopen-reason"
@@ -235,7 +235,7 @@ export function ConceptRecord({
           </div>
         )}
         {noGates ? (
-          <p className="mt-3 flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-hand">
+          <p className="mt-3 flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-hand">
             <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
             {t('procurement_concept.ui.record.approval_by_hand', {
               defaultValue:
@@ -243,7 +243,7 @@ export function ConceptRecord({
             })}
           </p>
         ) : (
-          <p className="mt-3 flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-gate">
+          <p className="mt-3 flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="approval-by-gate">
             <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
             {t('procurement_concept.approval.by_gate', {
               defaultValue: 'The governance gate approves the concept. Submit it, then decide the gate.',
@@ -251,7 +251,7 @@ export function ConceptRecord({
           </p>
         )}
         {concept.four_eyes_violated && (
-          <p className="mt-2 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note" data-testid="four-eyes">
+          <p className="mt-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note" data-testid="four-eyes">
             {t('procurement_concept.ui.record.four_eyes', {
               defaultValue: 'The person who submitted the concept also approved it. A second person should have decided.',
             })}
@@ -264,7 +264,7 @@ export function ConceptRecord({
         ) : null}
       </section>
 
-      <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="oe-section-title">
             {t('procurement_concept.ui.record.rules_title', { defaultValue: 'Rules this project procures under' })}
@@ -289,7 +289,7 @@ export function ConceptRecord({
           ))}
         </dl>
         {concept.review_status !== 'verified' && (
-          <p className="mt-3 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note">
+          <p className="mt-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-xs text-content-primary" role="note">
             {t('procurement_concept.ui.record.catalogue_unconfirmed', {
               defaultValue:
                 'Parts of this catalogue are not yet confirmed on their primary source. Check a threshold against its source before relying on it.',
@@ -298,7 +298,7 @@ export function ConceptRecord({
         )}
       </section>
 
-      <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="concept-findings">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4" data-testid="concept-findings">
         <h2 className="oe-section-title">
           {t('procurement_concept.ui.record.findings_title', { defaultValue: 'What the rule check found' })}
         </h2>
@@ -327,7 +327,7 @@ export function ConceptRecord({
         )}
       </section>
 
-      <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
         <h2 className="oe-section-title mb-1">
           {t('procurement_concept.ui.export.title', { defaultValue: 'Printable record' })}
         </h2>

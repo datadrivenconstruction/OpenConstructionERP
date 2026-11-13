@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { Download, Loader2, Lock, LockOpen, Plus, RefreshCw, Coins } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Input } from '@/shared/ui';
+import { Badge, Button, Card, EmptyState, Input, WideModal } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui/Badge';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -116,16 +116,24 @@ function ReopenDialog({
   const [reason, setReason] = useState('');
   const valid = reason.trim().length >= 3;
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('payroll.reopen_title', { defaultValue: 'Reopen payroll period' })}
-        className="w-full max-w-md space-y-3 rounded-xl bg-surface-primary p-5 shadow-xl"
-      >
-        <h3 className="oe-card-title">
-          {t('payroll.reopen_title', { defaultValue: 'Reopen payroll period' })}
-        </h3>
+    <WideModal
+      open
+      onClose={onCancel}
+      busy={busy}
+      size="sm"
+      title={t('payroll.reopen_title', { defaultValue: 'Reopen payroll period' })}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onCancel}>
+            {t('confirm_dialog.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button disabled={!valid || busy} onClick={() => onConfirm(reason.trim())}>
+            {t('payroll.reopen_confirm', { defaultValue: 'Reopen period' })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
         <p className="text-xs text-content-tertiary">
           {t('payroll.reopen_desc', {
             defaultValue: 'Timesheets in this period become editable again. The reason is kept in the audit trail.',
@@ -141,21 +149,8 @@ function ReopenDialog({
             aria-label={t('payroll.reopen_reason', { defaultValue: 'Reason (at least 3 characters)' })}
           />
         </label>
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={onCancel}>
-            {t('confirm_dialog.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={!valid || busy}
-            onClick={() => onConfirm(reason.trim())}
-          >
-            {t('payroll.reopen_confirm', { defaultValue: 'Reopen period' })}
-          </Button>
-        </div>
       </div>
-    </div>
+    </WideModal>
   );
 }
 

@@ -411,7 +411,7 @@ function ToolbarButton({
           </span>
         )}
       </button>
-      <span className="pointer-events-none absolute left-1/2 top-full z-tooltip mt-2 hidden -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md bg-content-primary px-2 py-1 text-2xs font-medium text-surface-primary shadow-lg group-hover:flex">
+      <span className="pointer-events-none absolute left-1/2 top-full z-tooltip mt-2 hidden -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-lg bg-content-primary px-2 py-1 text-2xs font-medium text-surface-primary shadow-lg group-hover:flex">
         {label}
         {shortcut && (
           <kbd className="rounded border border-surface-primary/30 px-1 font-sans text-2xs font-semibold uppercase leading-tight">
@@ -2020,7 +2020,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
                 onClick={() => setPanelOpen(false)}
                 aria-label={t('pointcloud.panel_hide', { defaultValue: 'Hide panel' })}
                 title={t('pointcloud.panel_hide', { defaultValue: 'Hide panel' })}
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
                 data-testid="pointcloud-panel-close"
               >
                 <PanelRightClose size={16} />
@@ -3258,7 +3258,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         {pathMetrics && pathMetrics.segmentCount >= 1 && (
           <div
             ref={measureLabelRef}
-            className="pointer-events-none absolute left-0 top-0 z-tooltip -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-2xs font-medium text-white shadow-lg"
+            className="pointer-events-none absolute left-0 top-0 z-tooltip -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-lg bg-black/80 px-2 py-1 text-2xs font-medium text-white shadow-lg"
             data-testid="pointcloud-measure-label"
           >
             <div>{formatLengthMm(pathMetrics.totalLength)}</div>

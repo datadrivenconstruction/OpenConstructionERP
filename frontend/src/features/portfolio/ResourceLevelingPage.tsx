@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import {
+  Button,
   Card,
   CardContent,
   Badge,
@@ -264,7 +265,7 @@ export function ResourceLevelingPage() {
                   data-oe-segment
                   aria-pressed={bucket === b}
                   onClick={() => setBucket(b)}
-                  className={`h-full rounded-md px-2.5 text-xs font-medium transition-colors ${
+                  className={`h-full rounded-lg px-2.5 text-xs font-medium transition-colors ${
                     bucket === b
                       ? 'bg-surface-tertiary text-content-primary shadow-xs'
                       : 'text-content-secondary hover:text-content-primary'
@@ -456,7 +457,7 @@ export function ResourceLevelingPage() {
                         <button
                           type="button"
                           onClick={() => setDrawer({ row })}
-                          className="flex min-w-0 items-center gap-2 rounded-md py-1 pr-2 text-left hover:bg-surface-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                          className="flex min-w-0 items-center gap-2 rounded-lg py-1 pr-2 text-left hover:bg-surface-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
                           title={t('leveling.open_drawer', {
                             defaultValue: 'View bookings and leveling suggestions',
                           })}
@@ -506,7 +507,7 @@ export function ResourceLevelingPage() {
                             cell && cell.allocation_percent > 0
                               ? `${cell.allocation_percent}%`
                               : '';
-                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${cellClasses(
+                          const cellCls = `relative flex h-9 items-center justify-center rounded-lg text-2xs tabular-nums ${cellClasses(
                             cell,
                           )} ${cell?.cross_project ? 'ring-2 ring-inset ring-semantic-error/60' : ''}`;
                           // Capacity Planning already ships a red cell as a
@@ -571,7 +572,7 @@ export function ResourceLevelingPage() {
                 label={t('leveling.legend_unknown', { defaultValue: 'Capacity unknown' })}
               />
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-3.5 w-3.5 rounded-md ring-2 ring-inset ring-semantic-error/60" />
+                <span className="h-3.5 w-3.5 rounded-lg ring-2 ring-inset ring-semantic-error/60" />
                 {t('leveling.legend_cross', { defaultValue: 'Two or more projects compete' })}
               </span>
             </div>
@@ -849,15 +850,9 @@ function SuggestionItem({
           planner to the booking instead of fabricating a date. */}
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         {canApply ? (
-          <button
-            type="button"
-            onClick={onApply}
-            disabled={applying}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1 disabled:opacity-50"
-          >
-            <Check size={12} />
+          <Button size="sm" onClick={onApply} disabled={applying} icon={<Check size={12} />}>
             {t('leveling.apply', { defaultValue: 'Apply' })}
-          </button>
+          </Button>
         ) : (
           onOpenSchedule && (
             <button
@@ -914,7 +909,7 @@ function SummaryChip({
 function LegendSwatch({ className, label }: { className: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={`h-3.5 w-3.5 rounded-md ${className}`} />
+      <span className={`h-3.5 w-3.5 rounded-lg ${className}`} />
       {label}
     </span>
   );

@@ -298,7 +298,7 @@ export function StagesPanel(props: PanelProps) {
                                 state: vocab(t as TFn, STAGE_STATE, p.computed_state),
                               })}
                               onClick={() => setSelected(selected === p.id ? null : p.id)}
-                              className={clsx('rounded-md p-0.5', selected === p.id && 'ring-2 ring-oe-blue')}
+                              className={clsx('rounded-lg p-0.5', selected === p.id && 'ring-2 ring-oe-blue')}
                               data-testid="matrix-cell"
                             >
                               <StateBadge map={STAGE_STATE} tones={STAGE_TONE} code={p.computed_state} />

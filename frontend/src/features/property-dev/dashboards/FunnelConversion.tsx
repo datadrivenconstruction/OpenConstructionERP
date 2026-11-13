@@ -137,8 +137,8 @@ export function FunnelConversion({ developmentId }: FunnelConversionProps) {
               onClick={() => setPeriodDays(d)}
               className={
                 periodDays === d
-                  ? 'rounded-md bg-surface-primary px-2.5 py-1 font-medium shadow-sm'
-                  : 'rounded-md px-2.5 py-1 text-content-tertiary hover:text-content-primary'
+                  ? 'rounded-lg bg-surface-primary px-2.5 py-1 font-medium shadow-sm'
+                  : 'rounded-lg px-2.5 py-1 text-content-tertiary hover:text-content-primary'
               }
             >
               {t('propdev.dashboards.funnel.last_n_days', {
@@ -173,14 +173,14 @@ export function FunnelConversion({ developmentId }: FunnelConversionProps) {
                 })}
               </div>
               <div
-                className="relative h-7 flex-1 overflow-hidden rounded-md bg-surface-secondary"
+                className="relative h-7 flex-1 overflow-hidden rounded-lg bg-surface-secondary"
                 role="progressbar"
                 aria-valuenow={Math.round(pct)}
                 aria-valuemin={0}
                 aria-valuemax={100}
               >
                 <span
-                  className="absolute inset-y-0 left-0 rounded-md"
+                  className="absolute inset-y-0 left-0 rounded-lg"
                   style={{
                     width: `${pct}%`,
                     backgroundColor: color,

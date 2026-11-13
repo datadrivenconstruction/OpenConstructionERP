@@ -71,7 +71,7 @@ function ReadinessStrip({ projectId }: { projectId: string }) {
   const failed = (validation.data ?? []).filter((v) => !v.passed);
 
   return (
-    <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="readiness-strip">
+    <section className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="readiness-strip">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
         <h2 className="text-xs font-semibold text-content-secondary">
           {t('qualityConcept.readiness.title', { defaultValue: 'Readiness' })}

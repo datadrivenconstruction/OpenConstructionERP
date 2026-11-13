@@ -133,7 +133,7 @@ export function PlotsTab({
                 type="button"
                 onClick={() => onSelect(p.id)}
                 className={clsx(
-                  'flex flex-col items-center justify-center rounded-md border-2 px-1 py-2 text-center transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-oe-blue',
+                  'flex flex-col items-center justify-center rounded-lg border-2 px-1 py-2 text-center transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-oe-blue',
                   PLOT_STATUS_COLOR[p.status],
                 )}
                 title={`${p.plot_number} - ${p.status}`}

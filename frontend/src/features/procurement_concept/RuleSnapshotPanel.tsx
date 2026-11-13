@@ -40,7 +40,7 @@ export function RuleSnapshotPanel({ projectId, packageId }: { projectId: string;
       {q.isError ? (
         <RefusalBox error={q.error} />
       ) : snapshots.length === 0 ? (
-        <p className="rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="rule-snapshot-empty">
+        <p className="rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="rule-snapshot-empty">
           {t('procurement_concept.ui.snapshot.none', { defaultValue: 'No record yet. It is taken when a procedure is set.' })}
         </p>
       ) : (

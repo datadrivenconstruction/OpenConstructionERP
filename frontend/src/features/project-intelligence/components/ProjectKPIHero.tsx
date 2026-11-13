@@ -172,7 +172,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 1 — Budget variance */}
       <div
         data-testid="kpi-card-variance"
-        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${varianceStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light  p-4 ring-2 ${varianceStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">
@@ -204,7 +204,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 2 — Schedule health */}
       <div
         data-testid="kpi-card-schedule"
-        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${scheduleStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light  p-4 ring-2 ${scheduleStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">
@@ -230,7 +230,7 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
       {/* Card 3 — Risk-adjusted cost */}
       <div
         data-testid="kpi-card-risk"
-        className={`rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 ring-2 ${riskStyle.ring}`}
+        className={`rounded-xl bg-surface-primary border border-border-light  p-4 ring-2 ${riskStyle.ring}`}
       >
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-medium text-content-secondary">

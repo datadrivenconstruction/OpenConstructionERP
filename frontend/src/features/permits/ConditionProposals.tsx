@@ -32,7 +32,7 @@ function ProposalRow({
   const due = vocab(t, TRIGGER, proposal.trigger);
 
   return (
-    <li className="space-y-2 rounded-md border border-border-light bg-surface-primary p-3" data-testid="condition-proposal">
+    <li className="space-y-2 rounded-xl border border-border-light bg-surface-primary p-3" data-testid="condition-proposal">
       <div className="flex flex-wrap items-center gap-2 text-xs text-content-secondary">
         <span className="font-medium text-content-primary" data-testid="proposal-number">
           {t('permits.ui.proposals.number', { defaultValue: 'Condition {{number}}', number: proposal.number })}
@@ -52,7 +52,7 @@ function ProposalRow({
         {proposal.text}
       </blockquote>
       {proposal.passage && (
-        <figure className="rounded-md bg-surface-secondary px-3 py-2 text-xs text-content-secondary" data-testid="proposal-passage">
+        <figure className="rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-secondary" data-testid="proposal-passage">
           <figcaption className="mb-1 font-medium">
             {t('permits.ui.proposals.passage', { defaultValue: 'Quoted from the notice' })}
           </figcaption>
@@ -172,7 +172,7 @@ export function ExtractConditions({ projectId, permit }: { projectId: string; pe
       {!offer.enabled && offer.reason && (
         <p
           role="status"
-          className="rounded-md border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary"
+          className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary"
           data-testid="extract-unavailable"
         >
           {errorText(t as TFn, offer.reason, null)}
@@ -180,7 +180,7 @@ export function ExtractConditions({ projectId, permit }: { projectId: string; pe
       )}
       {read.error && <Refusal testId="extract-refusal">{read.error}</Refusal>}
       {result && (
-        <div role="status" className="space-y-1 rounded-md border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary" data-testid="extract-result">
+        <div role="status" className="space-y-1 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-primary" data-testid="extract-result">
           <p>
             {result.items.length > 0
               ? t('permits.ui.extract.found', {
