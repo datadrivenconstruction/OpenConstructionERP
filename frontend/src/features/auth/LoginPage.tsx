@@ -12,7 +12,7 @@ import {
   PenTool, FolderOpen, ClipboardList,
   Sun, Moon, Monitor,
 } from 'lucide-react';
-import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
+import { BrandLockup, Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
@@ -378,7 +378,7 @@ export function LoginPage() {
       <div className="relative flex h-screen flex-col items-center justify-center bg-surface-secondary overflow-hidden">
         <AuthBackground />
         <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
-          <Logo size="lg" animate />
+          <BrandLockup size="lg" animate />
           <svg
             className="h-7 w-7 animate-spin text-oe-blue"
             viewBox="0 0 24 24"
@@ -790,12 +790,12 @@ export function LoginPage() {
                   >
                     by{' '}
                     <span className="whitespace-nowrap">
-                      OpenConstruction<span className="font-bold"> ERP</span>
+                      OpenConstruction<span className="font-semibold">ERP</span>
                     </span>
                   </span>
                 </div>
               ) : (
-                <LogoWithText size="lg" animate />
+                <BrandLockup size="lg" animate />
               )}
               {/* White-label trigger - same editor as the in-app sidebar
                   brand control, available pre-auth so a tenant can put

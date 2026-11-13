@@ -32,7 +32,7 @@ import clsx from 'clsx';
 import { Pencil, Upload, Trash2, X, Building2, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Logo } from '@/shared/ui';
+import { BrandLockup, Logo } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -131,7 +131,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
         className="hover:opacity-80 transition-opacity"
         title="OpenConstruction ERP"
       >
-        <Logo size="md" className="!h-[32px] !w-[32px]" />
+        <Logo size="md" className="!h-[24px] !w-[24px]" />
       </a>
     );
   }
@@ -200,7 +200,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
               >
                 by{' '}
                 <span className="whitespace-nowrap">
-                  OpenConstruction<span className="font-bold"> ERP</span>
+                  OpenConstruction<span className="font-semibold">ERP</span>
                 </span>
               </span>
             </button>
@@ -210,12 +210,10 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="ms-2 flex w-fit items-center py-2 hover:opacity-80 transition-opacity"
-              title="OpenConstruction ERP"
-              aria-label="OpenConstruction ERP"
+              title="OpenConstructionERP"
             >
-              {/* Mark only (founder): 32 px kit SVG, clear space of a quarter mark (8 px),
-                  ms-2 puts its left edge on the nav icon column. */}
-              <Logo size="md" className="!h-[32px] !w-[32px]" />
+              {/* 24 px mark + one-word name; ms-2 puts the mark on the nav icon column. */}
+              <BrandLockup size="nav" />
             </a>
           )}
         </div>

@@ -25,7 +25,7 @@ import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
 import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
-import { Logo, SkeletonTable, ShortcutsDialog, CommandPalette, ToastContainer, GlobalTitleTooltip, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
+import { BrandLockup, SkeletonTable, ShortcutsDialog, CommandPalette, ToastContainer, GlobalTitleTooltip, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
 import { TableEnhancerHost } from '@/shared/ui/TableEnhancerHost';
 import { ChecksPanel } from '@/shared/ui/ChecksPanel';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
@@ -934,7 +934,7 @@ function LoadingScreen() {
   return (
     <div className="flex h-screen items-center justify-center bg-surface-secondary">
       <div className="flex flex-col items-center gap-3 animate-fade-in">
-        <Logo size="lg" animate />
+        <BrandLockup size="lg" animate />
         <div className="h-1 w-16 overflow-hidden rounded-full bg-surface-secondary">
           <div className="h-full w-8 animate-shimmer rounded-full bg-oe-blue opacity-60" />
         </div>

@@ -46,7 +46,7 @@ export function PortalBrandHeader() {
       <span className="mt-2 block text-2xs leading-none text-content-tertiary">
         by{' '}
         <span className="whitespace-nowrap">
-          OpenConstruction<span className="font-bold"> ERP</span>
+          OpenConstruction<span className="font-semibold">ERP</span>
         </span>
       </span>
     </header>
