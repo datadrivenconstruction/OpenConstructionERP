@@ -257,7 +257,6 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
         style={{
           marginTop: 6,
           fontSize: 11,
-          fontFamily: 'var(--chat-font-mono)',
           color: 'var(--chat-text-tertiary)',
           textAlign: 'center',
         }}
