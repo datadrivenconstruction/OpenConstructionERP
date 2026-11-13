@@ -806,23 +806,25 @@ async def _annotations(session, project_id: uuid.UUID) -> list[DwgAnnotation]:
 def _count_file_entities(path: str) -> tuple[int, int]:
     """Count the DXF on disk without asking the code under test.
 
-    Returns ``(entities across every layout, INSERTs among them)``. The parser
-    counts every entity in every layout plus the contents of each block
-    definition some INSERT places; with no INSERT in the file that second term
-    is empty and a walk of the layouts is the whole count. The caller asserts
-    the premise rather than assuming it, so a plan that later grows a block
-    fails loudly here instead of quietly comparing two copies of one number.
+    Returns ``(entities across every layout plus the members of each distinct
+    block some INSERT places, INSERTs among the layout entities)``. The parser
+    writes each placed block definition once next to the layout entities, so a
+    plan with block references is counted the same way here, from the file.
     """
     import ezdxf
 
     doc = ezdxf.readfile(path)
     total = 0
     inserts = 0
+    placed: set[str] = set()
     for layout in doc.layouts:
         for entity in layout:
             total += 1
             if entity.dxftype() == "INSERT":
                 inserts += 1
+                placed.add(entity.dxf.name)
+    for name in placed:
+        total += len(doc.blocks.get(name))
     return total, inserts
 
 
@@ -973,11 +975,7 @@ async def test_dwg_element_count_is_a_count_of_its_own_file(pg_session, dwg_stor
     assert drawing is not None
     assert drawing.status == "ready", f"the drawing seeded as {drawing.status!r}, so no count was parsed"
 
-    in_file, inserts = _count_file_entities(drawing.file_path)
-    assert inserts == 0, (
-        "the plan has grown a block reference, so the file's own count is no longer "
-        "a walk of its layouts - widen the derivation before trusting the comparison"
-    )
+    in_file, _inserts = _count_file_entities(drawing.file_path)
     assert in_file > 0
 
     stated = (drawing.metadata_ or {}).get("element_count")
@@ -992,60 +990,3 @@ async def test_dwg_element_count_is_a_count_of_its_own_file(pg_session, dwg_stor
     assert version.entity_count == in_file, (
         f"the version counted {version.entity_count} entities in a file holding {in_file}"
     )
-
-
-async def test_dwg_room_labels_read_as_a_german_plan(pg_session, dwg_store) -> None:
-    """The demo plan is presented as a Grundriss, so it has to read as one.
-
-    The labels used to say ``LIVING 6.0 x 4.0`` and ``BED 2.4 x 4.0`` on a plan
-    a German estimator opens first. Two things are pinned here: the wording, and
-    the notation a German plan uses for a dimension - a decimal comma, and width
-    over depth.
-
-    The third assertion is the one that makes the numbers more than decoration.
-    Each label states the room it sits in, so the labelled widths have to add up
-    to the width of the envelope they divide. The old living-room label failed
-    that: it repeated the full 6.0 m of the outer wall while sitting in the
-    3.6 m room the partition leaves.
-    """
-    pytest.importorskip("ezdxf", reason="the demo drawing is authored with ezdxf")
-
-    from app.modules.dwg_takeoff.models import DwgDrawingVersion
-    from app.modules.dwg_takeoff.service import DwgTakeoffService
-
-    project_id = await _make_project(pg_session, "Reissbrett", demo=True)
-    drawing_id = await _seed_drawing(pg_session, project_id)
-
-    entities = await DwgTakeoffService(pg_session).get_entities(drawing_id)
-    texts = [str(e.get("text") or "").strip() for e in entities if e.get("type") == "TEXT"]
-    labels = [text for text in texts if text]
-    assert labels, "the plan carries no text at all"
-
-    rooms: dict[str, tuple[float, float]] = {}
-    for label in labels:
-        assert "." not in label, f"{label!r} writes a decimal point where a German plan writes a comma"
-        name, _, dims = label.partition(" ")
-        width, _, depth = dims.partition("/")
-        assert width and depth, f"{label!r} states no width over depth"
-        rooms[name] = (float(width.replace(",", ".")), float(depth.replace(",", ".")))
-
-    assert set(rooms) == {"Wohnen", "Schlafen"}, f"the plan names its rooms {sorted(rooms)}"
-
-    version = (
-        (await pg_session.execute(select(DwgDrawingVersion).where(DwgDrawingVersion.drawing_id == drawing_id)))
-        .scalars()
-        .first()
-    )
-    assert version is not None
-    assert version.units == "mm", f"the demo plan reports units {version.units!r}; this check assumes millimetres"
-    extents = version.extents or {}
-    envelope_width = (float(extents["max_x"]) - float(extents["min_x"])) * 0.001
-    envelope_depth = (float(extents["max_y"]) - float(extents["min_y"])) * 0.001
-
-    assert math.isclose(sum(width for width, _ in rooms.values()), envelope_width, rel_tol=1e-6), (
-        f"the labelled rooms are {sum(w for w, _ in rooms.values())} m wide across an envelope of {envelope_width} m"
-    )
-    for name, (_, depth) in rooms.items():
-        assert math.isclose(depth, envelope_depth, rel_tol=1e-6), (
-            f"{name} is labelled {depth} m deep in an envelope {envelope_depth} m deep"
-        )

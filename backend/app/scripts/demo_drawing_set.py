@@ -66,6 +66,7 @@ LAYERS: dict[str, int] = {
     "A-ELEV-GLAZ": 4,
     "A-ROOF": 7,
     "A-BALC": 7,
+    "C-BLDG": 7,
     "C-PROP": 1,
     "C-ROAD": 8,
     "C-PKNG": 8,
@@ -171,7 +172,10 @@ def _mirror_open(o: Opening) -> Opening:
     wall = {"west": "east", "south": "south", "north": "north"}.get(o.wall, o.wall + "_e")
     if wall in ("east",):
         return Opening(wall, o.a, o.b, o.tag, o.swing, o.hinge_at_a)
-    swing = -o.swing if o.wall.endswith("_w") and o.wall in ("core_w", "hall_w") else o.swing
+    if o.wall in ("core_w", "hall_w"):
+        # Vertical walls mirror across x: positions along the wall (y) stay, the leaf swings the other way.
+        return Opening(wall, o.a, o.b, o.tag, -o.swing, o.hinge_at_a)
+    swing = o.swing
     return Opening(wall, _mx(o.b), _mx(o.a), o.tag, swing, not o.hinge_at_a)
 
 
@@ -201,13 +205,15 @@ class Pen:
         self.msp = msp
         self.ox = 0.0
         self.oy = 0.0
+        self.cm = 1.0  # coordinate multiplier, 2 only while the 1:200 site frame is drawn
+        self.tm = 1.0  # annotation size multiplier, 2 on the 1:200 site content
 
     def at(self, ox: float, oy: float) -> Pen:
         self.ox, self.oy = ox, oy
         return self
 
     def p(self, x: float, y: float) -> tuple[float, float]:
-        return (x + self.ox, y + self.oy)
+        return (x * self.cm + self.ox, y * self.cm + self.oy)
 
     def line(self, a: tuple[float, float], b: tuple[float, float], layer: str) -> None:
         self.msp.add_line(self.p(*a), self.p(*b), dxfattribs={"layer": layer})
@@ -220,7 +226,7 @@ class Pen:
         self.poly(pts + ([] if closed else [(x0, y0)]), layer, closed)
 
     def circle(self, c: tuple[float, float], r: float, layer: str) -> None:
-        self.msp.add_circle(self.p(*c), r, dxfattribs={"layer": layer})
+        self.msp.add_circle(self.p(*c), r * self.cm, dxfattribs={"layer": layer})
 
     def arc(self, c: tuple[float, float], r: float, a0: float, a1: float, layer: str) -> None:
         self.msp.add_arc(self.p(*c), r, a0, a1, dxfattribs={"layer": layer})
@@ -229,6 +235,7 @@ class Pen:
         self, x: float, y: float, s: str, h: float = TXT, layer: str = "A-ANNO-TEXT", align: str = "L", rot: float = 0
     ) -> None:
         # The viewer places TEXT at its insert point, so alignment is resolved here.
+        h *= self.cm * self.tm
         w = len(s) * h * 0.82
         dx = {"L": 0.0, "C": -w / 2, "R": -w}[align]
         if rot:
@@ -259,20 +266,22 @@ class Pen:
 
     def dim_h(self, x0: float, x1: float, y: float, ref_y: float, label: str | None = None) -> None:
         """Horizontal dimension with extension lines from ref_y and tick marks."""
+        t = 100 * self.tm
         self.line((x0, y), (x1, y), "A-DIMS")
         for x in (x0, x1):
-            d = 150 if y > ref_y else -150
+            d = 150 * self.tm if y > ref_y else -150 * self.tm
             self.line((x, ref_y + (d * 2 if y > ref_y else d * 2)), (x, y + d), "A-DIMS")
-            self.line((x - 100, y - 100), (x + 100, y + 100), "A-DIMS")
-        self.text((x0 + x1) / 2, y + 80, label or f"{round(abs(x1 - x0)):d}", 200, "A-DIMS", "C")
+            self.line((x - t, y - t), (x + t, y + t), "A-DIMS")
+        self.text((x0 + x1) / 2, y + 80 * self.tm, label or f"{round(abs(x1 - x0)):d}", 200, "A-DIMS", "C")
 
     def dim_v(self, y0: float, y1: float, x: float, ref_x: float, label: str | None = None) -> None:
+        t = 100 * self.tm
         self.line((x, y0), (x, y1), "A-DIMS")
         for y in (y0, y1):
-            d = 150 if x > ref_x else -150
+            d = 150 * self.tm if x > ref_x else -150 * self.tm
             self.line((ref_x + d * 2, y), (x + d, y), "A-DIMS")
-            self.line((x - 100, y - 100), (x + 100, y + 100), "A-DIMS")
-        self.text(x - 80, (y0 + y1) / 2, label or f"{round(abs(y1 - y0)):d}", 200, "A-DIMS", "C", rot=90)
+            self.line((x - t, y - t), (x + t, y + t), "A-DIMS")
+        self.text(x - 80 * self.tm, (y0 + y1) / 2, label or f"{round(abs(y1 - y0)):d}", 200, "A-DIMS", "C", rot=90)
 
     def chain_h(self, xs: list[float], y: float, ref_y: float) -> None:
         for a, b in zip(xs, xs[1:], strict=False):
@@ -543,7 +552,15 @@ def _lvl(mm: float) -> str:
 # ── Sheets ────────────────────────────────────────────────────────────────
 
 
-def _frame(pen: Pen, number: str, title: str, scale: str) -> None:
+def _frame(pen: Pen, number: str, title: str, scale: str, k: float = 1.0) -> None:
+    pen.cm = k
+    try:
+        _frame_1x(pen, number, title, scale)
+    finally:
+        pen.cm = 1.0
+
+
+def _frame_1x(pen: Pen, number: str, title: str, scale: str) -> None:
     layer = "A-ANNO-TTLB"
     pen.rect(0, 0, SHEET_W, SHEET_H, layer, closed=False)
     pen.rect(2000, 1000, SHEET_W - 1000, SHEET_H - 1000, layer, closed=False)
@@ -624,8 +641,11 @@ def _sheet_roof(pen: Pen) -> None:
 
 
 def _sheet_site(pen: Pen) -> None:
-    s = 0.5  # content drawn at 1:200 inside a 1:100 frame
-    ox, oy = 5000, 10500
+    # True model millimetres. The A3 frame is drawn at 1:200 (twice the 1:100 size, see _frame),
+    # and annotation sizes double with it, so takeoff on this sheet measures real distances.
+    s = 1.0
+    ox, oy = 10000, 21000
+    pen.tm = 2.0
 
     def q(x: float, y: float) -> tuple[float, float]:
         return (ox + x * s, oy + y * s)
@@ -633,14 +653,14 @@ def _sheet_site(pen: Pen) -> None:
     plot = [(0, 0), (44000, 0), (44000, 32000), (6000, 35000), (0, 30000), (0, 0)]
     pen.poly([q(*p) for p in plot], "C-PROP")
     for x, y in plot[:-1]:
-        pen.circle(q(x, y), 120, "C-PROP")
+        pen.circle(q(x, y), 240, "C-PROP")
     area = abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(plot, plot[1:], strict=False))) / 2e6
     pen.poly([q(-6000, -1500), q(36000, -1500)], "C-ROAD")
     pen.poly([q(-6000, -3000), q(36000, -3000)], "C-ROAD")
     pen.poly([q(-6000, -10000), q(36000, -10000)], "C-ROAD")
     pen.text(*q(14000, -7000), "RESIDENTIAL STREET", 300, "C-ROAD")
     bx, by = 10000, 9000  # building placement on the plot (outer faces)
-    pen.poly([q(bx, by), q(bx + 24365, by), q(bx + 24365, by + 12365), q(bx, by + 12365), q(bx, by)], "A-WALL")
+    pen.poly([q(bx, by), q(bx + 24365, by), q(bx + 24365, by + 12365), q(bx, by + 12365), q(bx, by)], "C-BLDG")
     pen.hatch_rect(*q(bx, by), *q(bx + 24365, by + 12365), "A-WALL-PATT", 300)
     pen.text(*q(bx + 12182, by + 6800), "RESIDENTIAL BLOCK, 3 STOREYS, FLAT ROOF", 260, align="C")
     pen.text(*q(bx + 12182, by + 4800), "FFL +/-0.00 = 212.35 m ASL", 220, align="C")
@@ -655,10 +675,11 @@ def _sheet_site(pen: Pen) -> None:
         pen.insert("LAND_TREE", *q(tx, ty), s * 0.8, s * 0.8)
     pen.dim_h(ox, ox + bx * s, oy + (by + 15000) * s, oy + (by + 12365) * s, "10000")
     pen.dim_v(oy, oy + by * s, ox + (bx + 26500) * s, ox + (bx + 24365) * s, "9000")
-    pen.dim_h(ox, ox + 44000 * s, oy - 2200, oy - 750, "44000")
-    pen.text(*q(16000, 33000), f"PLOT 1187/4   AREA {area:.0f} m2", 260, "C-PROP")
-    pen.insert("SYMB_NORTH", 36000, 24000)
-    pen.text(ox, 2200, "SITE PLAN   1:200", 500, "A-ANNO-TEXT")
+    pen.dim_h(ox, ox + 44000 * s, oy - 4400, oy - 1500, "44000")
+    pen.text(*q(16000, 29500), f"PLOT 1187/4   AREA {area:.0f} m2", 260, "C-PROP")
+    pen.insert("SYMB_NORTH", 72000, 48000, 2.0, 2.0)
+    pen.text(ox, 4400, "SITE PLAN   1:200", 500, "A-ANNO-TEXT")
+    pen.tm = 1.0
 
 
 def _section_frame(pen: Pen) -> None:
@@ -853,6 +874,11 @@ def build_drawing_set(path: str) -> None:
         i = order.index(number)
         col, row = i % 4, i // 4
         pen.at(col * (SHEET_W + SHEET_GAP), (1 - row) * (SHEET_H + SHEET_GAP))
+        k = 1.0
+        if number == "A-001":
+            # 1:200 sheet: twice the model size of a 1:100 one, parked left of the set.
+            k = 2.0
+            pen.at(-(2 * SHEET_W + SHEET_GAP), 0)
         draw()
-        _frame(pen, number, title, scale)
+        _frame(pen, number, title, scale, k)
     doc.saveas(path)
