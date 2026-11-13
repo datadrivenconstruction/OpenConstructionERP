@@ -93,6 +93,11 @@ function storageKeyFor(tourId: TourId): string {
   return tourId === 'global' ? TOUR_COMPLETED_KEY : `${TOUR_COMPLETED_KEY}.${tourId}`;
 }
 
+/** Set the moment the tour auto-opens, so it auto-opens on the first visit only; the Tour button still launches it. */
+function autoStartedKeyFor(tourId: TourId): string {
+  return `${storageKeyFor(tourId)}.auto_started`;
+}
+
 /** Per-tour persistence record returned by the backend. */
 interface TourStateEntry {
   dismissed_at: string | null;
@@ -1273,6 +1278,11 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
       /* ignore */
     }
     if (completed === 'true') return;
+    try {
+      if (localStorage.getItem(autoStartedKeyFor(defaultTourId)) === 'true') return;
+    } catch {
+      /* ignore */
+    }
 
     const blocked = AUTO_START_BLOCKED_PREFIXES.some((p) => location.pathname.startsWith(p));
     if (blocked) return;
@@ -1281,6 +1291,11 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
 
     // Small delay so the dashboard has time to mount its targets.
     const id = window.setTimeout(() => {
+      try {
+        localStorage.setItem(autoStartedKeyFor(defaultTourId), 'true');
+      } catch {
+        /* ignore */
+      }
       warnedRef.current.clear();
       setActiveTourId(defaultTourId);
       setCurrentStep(0);
