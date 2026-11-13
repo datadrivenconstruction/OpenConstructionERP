@@ -26,7 +26,7 @@ from typing import Any
 
 PROJECT_NAME = "Residential Block, 6 apartments"
 PROJECT_NO = "OE-DEMO-2026-014"
-SET_VERSION = 2  # bump when the drawing changes so seeded rows regenerate
+SET_VERSION = 3  # bump when the drawing changes so seeded rows regenerate
 
 # A3 sheet at 1:100 in model millimetres.
 SHEET_W = 42000.0
@@ -464,8 +464,9 @@ def _draw_plan(pen: Pen, level: int) -> None:
         if name == "STAIR / LOBBY":
             cy = 3200
         pen.text(cx, cy + 250, name, 220, "A-ANNO-TEXT", "C")
-        pen.text(cx, cy - 100, f"{level}.{i:02d}   {area:.2f} m2", 200, "A-ANNO-TEXT", "C")
-        pen.text(cx, cy - 400, "FFL " + _lvl(level * FLOOR_H), 170, "A-ANNO-TEXT", "C")
+        pen.text(cx, cy - 50, f"{level}.{i:02d}", 200, "A-ANNO-TEXT", "C")
+        pen.text(cx, cy - 350, f"{area:.2f} m2", 200, "A-ANNO-TEXT", "C")
+        pen.text(cx, cy - 650, "FFL " + _lvl(level * FLOOR_H), 170, "A-ANNO-TEXT", "C")
 
     # Furniture, west flat then mirrored east.
     for sx, fx in ((1, lambda x: x), (-1, _mx)):
@@ -539,7 +540,7 @@ def _draw_stair(pen: Pen, level: int) -> None:
     )
     ax = (x0 + mid) / 2 if level < STOREYS - 1 else (mid + x1) / 2
     pen.poly([(ax - 120, y_end - 300), (ax, y_end - 80), (ax + 120, y_end - 300)], "A-STRS")
-    pen.text((x0 + mid) / 2, y_start - 350, f"{n} x 176/{tread}", 170, "A-STRS", "C")
+    pen.text(mid, y_start - 350, f"{n} x 176/{tread}", 170, "A-STRS", "C")
     if level < STOREYS - 1:
         pen.line((x0, y_start + 1700), (mid - gap, y_start + 2300), "A-STRS")
 
