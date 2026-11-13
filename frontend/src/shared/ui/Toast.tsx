@@ -64,7 +64,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
 
   return (
     <div
-      className={`flex items-start gap-3 w-80 rounded-xl border px-4 py-3 shadow-md animate-toast-in ${styles.bg} ${styles.border}`}
+      className={`flex items-start gap-3 w-full sm:w-80 rounded-xl border px-3 py-2.5 shadow-md animate-toast-in ${styles.bg} ${styles.border}`}
       role="alert"
     >
       <div className="relative shrink-0 mt-0.5">

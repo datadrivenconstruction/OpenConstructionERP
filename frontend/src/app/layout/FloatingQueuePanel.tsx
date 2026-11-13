@@ -40,10 +40,10 @@ export function FloatingQueuePanel() {
   // Minimized: just a small badge
   if (minimized) {
     return (
-      <div className="oe-dock-aware fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 lg:bottom-4">
+      <div className="oe-dock-aware fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-popover lg:bottom-4">
         <button
           onClick={() => setMinimized(false)}
-          className="flex items-center gap-2 px-3 py-2 rounded-full bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
+          className="flex items-center gap-2 px-3 py-2 rounded-full bg-surface-elevated border border-border-light shadow-md hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1"
         >
           {activeTasks.length > 0 ? (
             <>
@@ -67,7 +67,7 @@ export function FloatingQueuePanel() {
   }
 
   return (
-    <div className="oe-dock-aware fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 lg:bottom-4 w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in">
+    <div className="oe-dock-aware fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-popover lg:bottom-4 w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-secondary/50 border-b border-border-light">
         <div className="flex items-center gap-2">

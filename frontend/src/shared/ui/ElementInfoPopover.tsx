@@ -245,7 +245,7 @@ export function ElementInfoPopover({
   const content = (
     <div
       ref={ref}
-      className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
+      className="rounded-xl shadow-md border border-border-light dark:border-border-dark
                  bg-white dark:bg-surface-elevated overflow-hidden"
       style={{ ...style, width: 340, zIndex: 9999 }}
       onClick={(e) => e.stopPropagation()}

@@ -209,7 +209,7 @@ export default function GlobalSearchModal() {
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-start justify-center bg-black/70 backdrop-blur-lg pt-[8vh] px-3 sm:px-4 pb-4"
+      className="fixed inset-0 z-popover flex items-start justify-center bg-black/50 backdrop-blur-[2px] pt-[8vh] px-3 sm:px-4 pb-4"
       onClick={closeModal}
     >
       {/* A modal dialog, and marked as one: the AI dock (and any other
@@ -220,7 +220,7 @@ export default function GlobalSearchModal() {
         role="dialog"
         aria-modal="true"
         aria-label={t('common.search', { defaultValue: 'Search' })}
-        className="w-full max-w-3xl bg-surface-primary rounded-2xl shadow-2xl ring-1 ring-black/5 border border-border-light flex flex-col max-h-[85vh] min-h-0 overflow-hidden"
+        className="w-full max-w-3xl bg-surface-primary rounded-2xl shadow-xl border border-border-light flex flex-col max-h-[85vh] min-h-0 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}

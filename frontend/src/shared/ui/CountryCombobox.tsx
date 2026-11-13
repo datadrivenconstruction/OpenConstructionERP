@@ -249,7 +249,7 @@ export function CountryCombobox({
         <div
           ref={popoverRef}
           className={clsx(
-            'absolute z-[60] mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface-elevated shadow-xl',
+            'absolute z-popover mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface-elevated shadow-md',
             'animate-scale-in origin-top',
           )}
         >
