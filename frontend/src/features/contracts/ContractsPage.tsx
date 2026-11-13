@@ -824,7 +824,7 @@ export function ContractsPage() {
 
       {/* Tabs */}
       <div className="border-b border-border-light">
-        <nav className="flex gap-1 -mb-px">
+        <nav className="flex gap-1 -mb-px overflow-x-auto whitespace-nowrap">
           {(
             [
               {
