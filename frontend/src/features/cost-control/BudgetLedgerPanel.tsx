@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { Badge, Button, ConfirmDialog, Skeleton } from '@/shared/ui';
+import { Badge, Button, ConfirmDialog, Skeleton, TabBar } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { parseMoneyInput } from '@/shared/lib/parseDecimal';
 import type { BadgeVariant } from '@/shared/ui';
@@ -344,24 +344,14 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
         <ModificationForm projectId={projectId} currency={currency} onDone={created} onCancel={() => setForm(null)} onError={fail} />
       )}
 
-      <div role="tablist" className="mt-3 flex gap-1 border-b border-border-light px-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={view === tab.id}
-            className={`px-3 py-2 text-sm ${
-              view === tab.id
-                ? 'border-b-2 border-oe-blue font-medium text-content-primary'
-                : 'text-content-secondary hover:text-content-primary'
-            }`}
-            onClick={() => setView(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        ariaLabel={t('cost_control.ledger.title', { defaultValue: 'Budget moves and changes' })}
+        idPrefix="cost-control-ledger"
+        className="mt-3 px-4"
+        activeId={view}
+        onChange={setView}
+        tabs={tabs.map((tab) => ({ id: tab.id, label: tab.label }))}
+      />
 
       {ledger.isLoading ? (
         <Skeleton className="m-4 h-16" />

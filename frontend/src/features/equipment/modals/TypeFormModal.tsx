@@ -150,7 +150,7 @@ export function TypeFormModal({
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
       <div
-        className="relative w-full max-w-md rounded-xl bg-surface-elevated p-5 shadow-2xl"
+        className="relative w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

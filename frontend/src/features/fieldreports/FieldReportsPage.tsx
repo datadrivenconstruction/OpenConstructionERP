@@ -624,7 +624,7 @@ export function FieldReportsPage() {
           select-a-project empty state as a rhythm child (instead of a
           full-page short-circuit that dropped the breadcrumb / header). */}
       {!projectId ? (
-        <Card className="py-12">
+        <Card padding="none">
           <RequiresProject
             emptyHint={t('fieldreports.no_project_desc', {
               defaultValue: 'Choose a project from the sidebar to view field reports.',
@@ -1092,8 +1092,8 @@ function ImportFieldReportsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('fieldreports.import_reports', { defaultValue: 'Import Field Reports' })}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border-light animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('fieldreports.import_reports', { defaultValue: 'Import Field Reports' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="oe-section-title">
@@ -1143,7 +1143,7 @@ function ImportFieldReportsModal({
                     defaultValue: 'Drop Excel or CSV file here, or click to browse',
                   })}
             </p>
-            <p className="text-xs text-content-quaternary mt-1">
+            <p className="mt-1 text-xs text-content-tertiary">
               {t('fieldreports.file_types', { defaultValue: '.xlsx, .csv' })}
             </p>
           </div>

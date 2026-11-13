@@ -357,7 +357,7 @@ function OptionSources({
 
       {/* Says where a new model comes from, rather than growing a second
           uploader beside the one the BIM hub already owns. */}
-      <p className="text-2xs leading-relaxed text-content-quaternary">
+      <p className="text-2xs leading-relaxed text-content-tertiary">
         {t('designOptions.source.importHint', {
           defaultValue: 'A model that is not in the project yet is imported in the BIM hub.',
         })}{' '}

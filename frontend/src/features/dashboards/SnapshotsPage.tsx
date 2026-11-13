@@ -204,7 +204,7 @@ export function SnapshotsPage() {
               content={dashboardsGuide}
               onCta={() => setCreateOpen(true)}
             />
-            <div className="flex rounded-lg border border-border-light p-0.5" role="tablist">
+            <div className="inline-flex h-8 items-center rounded-lg border border-border bg-surface-primary p-0.5" role="tablist">
               <ViewTab
                 active={view === 'list'}
                 onClick={() => setView('list')}
@@ -299,7 +299,7 @@ export function SnapshotsPage() {
           <Card>
             <div className="grid gap-3 p-4 sm:grid-cols-2">
               <label className="space-y-1">
-                <span className="text-xs font-medium text-content-quaternary">
+                <span className="text-xs font-medium text-content-secondary">
                   {t('dashboards.diff_pick_a', { defaultValue: 'Older snapshot (A)' })}
                 </span>
                 <select
@@ -319,7 +319,7 @@ export function SnapshotsPage() {
                 </select>
               </label>
               <label className="space-y-1">
-                <span className="text-xs font-medium text-content-quaternary">
+                <span className="text-xs font-medium text-content-secondary">
                   {t('dashboards.diff_pick_b', { defaultValue: 'Newer snapshot (B)' })}
                 </span>
                 <select
@@ -502,13 +502,14 @@ function ViewTab({ active, onClick, icon, label, testId }: ViewTabProps) {
     <button
       type="button"
       role="tab"
+      data-oe-segment
       aria-selected={active}
       onClick={onClick}
       data-testid={testId}
-      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`flex h-full items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors ${
         active
-          ? 'bg-oe-blue text-white'
-          : 'text-content-quaternary hover:bg-neutral-800/60 hover:text-content-quaternary'
+          ? 'bg-surface-tertiary text-content-primary shadow-xs'
+          : 'text-content-secondary hover:text-content-primary'
       }`}
     >
       {icon}
@@ -540,7 +541,7 @@ function SnapshotCard({
       <div className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="oe-card-title truncate text-content-quaternary">
+            <h3 className="oe-card-title truncate">
               {snapshot.label}
             </h3>
             <p className="mt-0.5 text-xs text-content-tertiary">
@@ -552,26 +553,26 @@ function SnapshotCard({
             onClick={onDelete}
             disabled={deleting}
             className="rounded p-1 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error disabled:opacity-40"
-            aria-label="delete"
+            aria-label={t('common.delete', { defaultValue: 'Delete' })}
             data-testid={`snapshot-delete-${snapshot.id}`}
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded bg-neutral-800/60 px-2 py-1">
+          <div className="rounded-lg bg-surface-secondary px-2 py-1">
             <div className="text-content-tertiary">
               {t('dashboards.entities', { defaultValue: 'Entities' })}
             </div>
-            <div className="tabular-nums font-medium text-content-quaternary">
+            <div className="tabular-nums font-medium text-content-primary">
               {formatNumber(snapshot.total_entities)}
             </div>
           </div>
-          <div className="rounded bg-neutral-800/60 px-2 py-1">
+          <div className="rounded-lg bg-surface-secondary px-2 py-1">
             <div className="text-content-tertiary">
               {t('dashboards.categories', { defaultValue: 'Categories' })}
             </div>
-            <div className="tabular-nums font-medium text-content-quaternary">
+            <div className="tabular-nums font-medium text-content-primary">
               {formatNumber(snapshot.total_categories)}
             </div>
           </div>
@@ -592,27 +593,25 @@ function SnapshotCard({
             the model a user prices in matching or measures off in
             takeoff; surface both quantity flows straight from the card so
             the snapshot is not a dead end. */}
-        <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-          <button
-            type="button"
+        <div className="flex flex-wrap gap-2 border-t border-border-light pt-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Calculator size={14} />}
             onClick={onMatchToCost}
             data-testid={`snapshot-match-${snapshot.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-quaternary transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
           >
-            <Calculator className="h-3.5 w-3.5" />
-            {t('dashboards.snapshot_match_to_cost', {
-              defaultValue: 'Match to cost',
-            })}
-          </button>
-          <button
-            type="button"
+            {t('dashboards.snapshot_match_to_cost', { defaultValue: 'Match to cost' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Ruler size={14} />}
             onClick={onTakeoff}
             data-testid={`snapshot-takeoff-${snapshot.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-quaternary transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
           >
-            <Ruler className="h-3.5 w-3.5" />
             {t('dashboards.snapshot_takeoff', { defaultValue: 'Takeoff' })}
-          </button>
+          </Button>
         </div>
       </div>
     </Card>

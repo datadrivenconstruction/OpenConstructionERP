@@ -374,7 +374,7 @@ function MetricCard({
 
       {!hasReading ? (
         <div className="mt-4 flex flex-1 flex-col items-start justify-between gap-3">
-          <p className="text-sm text-content-quaternary">
+          <p className="text-sm text-content-tertiary">
             {t('esg.no_readings_yet', { defaultValue: 'No readings yet' })}
           </p>
           <Button variant="ghost" size="sm" onClick={() => onAdd(summary.metric_key)}>
@@ -427,7 +427,7 @@ function MetricCard({
                 {t('esg.target', { defaultValue: 'Target' })} {fmtNum(target)} {unit}
               </span>
             ) : (
-              <span className="text-content-quaternary">
+              <span className="text-content-tertiary">
                 {t('esg.no_target', { defaultValue: 'No target set' })}
               </span>
             )}
@@ -561,7 +561,7 @@ function ReadingModal({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-label={
         isEdit
@@ -569,7 +569,7 @@ function ReadingModal({
           : t('esg.new_reading', { defaultValue: 'New reading' })
       }
     >
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border-light animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="oe-section-title">

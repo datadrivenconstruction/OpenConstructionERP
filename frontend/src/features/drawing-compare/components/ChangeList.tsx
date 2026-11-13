@@ -218,7 +218,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
             <p className="mt-0.5 truncate text-xs">
               <span className="text-semantic-error line-through">{change.old_text}</span>
               {change.old_text && change.new_text ? ' ' : ''}
-              <span className="text-blue-600">{change.new_text}</span>
+              <span className="text-oe-blue">{change.new_text}</span>
             </p>
           )}
           <div className="mt-1 flex flex-wrap gap-1 text-xs">
@@ -336,7 +336,7 @@ export function RemeasureDialog({ change, comparisonId, onClose }: RemeasureDial
       aria-labelledby="dc-remeasure-title"
       onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
-      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-4 shadow-xl">
+      <div className="w-full max-w-lg rounded-2xl border border-border-light bg-surface-elevated p-4 shadow-xl">
         <h2 id="dc-remeasure-title" className="oe-section-title">
           {t('drawing_compare.remeasure_title', { defaultValue: 'Flag quantities in change {{seq}} for re-measure', seq: change.seq })}
         </h2>

@@ -220,7 +220,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               ['new', newId, setNewId, newPage, setNewPage],
             ] as const).map(([side, value, setValue, page, setPage]) => (
               <fieldset key={side} className="rounded-lg border border-border p-2">
-                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-blue-600')}>
+                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-oe-blue')}>
                   {side === 'old'
                     ? t('drawing_compare.old_revision', { defaultValue: 'Older revision' })
                     : t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}
@@ -348,7 +348,7 @@ export function NewComparePanel({ projectId, initialOld, initialNew, onSaved }: 
               ['new', newDrawing, setNewDrawing, newVersion, setNewVersion, newVersions.data],
             ] as const).map(([side, drawing, setDrawing, version, setVersion, versions]) => (
               <fieldset key={side} className="rounded-lg border border-border p-2">
-                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-blue-600')}>
+                <legend className={clsx('px-1 text-xs font-semibold', side === 'old' ? 'text-semantic-error' : 'text-oe-blue')}>
                   {side === 'old'
                     ? t('drawing_compare.old_revision', { defaultValue: 'Older revision' })
                     : t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}
