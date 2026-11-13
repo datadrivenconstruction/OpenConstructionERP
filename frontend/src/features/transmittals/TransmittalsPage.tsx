@@ -47,6 +47,7 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useResolvedProjectId } from '@/shared/hooks/useActiveProjectId';
 import {
   fetchTransmittals,
   createTransmittal,
@@ -1063,13 +1064,13 @@ export function TransmittalsPage() {
   }, [autoCreate, searchParams, setSearchParams]);
 
   // Data
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [], isSuccess: projectsLoaded } = useQuery({
     queryKey: ['projects'],
     queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 
-  const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
+  const projectId = useResolvedProjectId(projects, projectsLoaded);
   // Genuinely-selected project (route param or shared context) — used for
   // the breadcrumb so the trail never shows a first-project guess.
   const selectedProjectId = routeProjectId || activeProjectId || '';

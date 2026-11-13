@@ -21,7 +21,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { PROCUREMENT_LINK, purchaseOrderDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 import { fmtDate } from '@/shared/lib/formatters';
-import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button, WideModal } from '@/shared/ui';
+import { Badge, Breadcrumb, CollapsibleSection, ConfirmDialog, DismissibleInfo, EmptyState, StatCard, Button, WideModal } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -426,12 +426,21 @@ export function RFQBiddingPage() {
   if (!projectId) {
     return (
       <div className="space-y-5">
+        <Breadcrumb
+          items={[{ label: t('nav.rfq_bidding', { defaultValue: 'RFQ Bidding' }) }]}
+        />
         <PageHeader
           srTitle={t('rfq_bidding.title', { defaultValue: 'RFQ Bidding' })}
           subtitle={t('rfq_bidding.subtitle', {
             defaultValue: 'Manage requests for quotation, compare bids and track awards',
           })}
         />
+        <DismissibleInfo
+          storageKey="rfq-bidding"
+          title={t('rfq_bidding.intro_title', { defaultValue: 'Compare supplier bids side by side' })}
+        >
+          {t('rfq_bidding.intro_body', { defaultValue: 'Send a request for quotation to several suppliers, collect their prices in one place, compare the bids and award the winner. The award can be turned into a purchase order.' })}
+        </DismissibleInfo>
         <RFQBiddingExplainer />
         <EmptyState
           icon={<FileText className="h-12 w-12" />}
@@ -446,6 +455,9 @@ export function RFQBiddingPage() {
 
   return (
     <div className="space-y-5">
+      <Breadcrumb
+        items={[{ label: t('nav.rfq_bidding', { defaultValue: 'RFQ Bidding' }) }]}
+      />
       <PageHeader
         srTitle={t('rfq_bidding.title', { defaultValue: 'RFQ Bidding' })}
         subtitle={t('rfq_bidding.subtitle', {
@@ -458,6 +470,13 @@ export function RFQBiddingPage() {
           </Button>
         }
       />
+
+      <DismissibleInfo
+        storageKey="rfq-bidding"
+        title={t('rfq_bidding.intro_title', { defaultValue: 'Compare supplier bids side by side' })}
+      >
+        {t('rfq_bidding.intro_body', { defaultValue: 'Send a request for quotation to several suppliers, collect their prices in one place, compare the bids and award the winner. The award can be turned into a purchase order.' })}
+      </DismissibleInfo>
 
       {/* Statistics cards */}
       {!rfqLoading && rfqs.length > 0 && (

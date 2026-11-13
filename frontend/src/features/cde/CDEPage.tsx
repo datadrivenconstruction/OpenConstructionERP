@@ -3,7 +3,7 @@
 import React, { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Database,
@@ -32,7 +32,7 @@ import { apiGet, type Page } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
-import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useResolvedProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchCDEContainers,
@@ -1515,14 +1515,12 @@ function CdeReadiness({ projectId }: { projectId: string }) {
 export function CDEPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   // `?container=<id>` deep-links one container (the notification sent when a
   // container is published points here).
   const [searchParams] = useSearchParams();
   const focusContainerId = searchParams.get('container');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   // Authoritative role drives which container actions are offered (the
   // backend gates promotions by role — see canRoleCrossGate).
   const userRole = useAuthStore((s) => s.userRole);
@@ -1534,13 +1532,13 @@ export function CDEPage() {
   const [stateFilter, setStateFilter] = useState<CDEState | ''>('');
 
   // Data
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [], isSuccess: projectsLoaded } = useQuery({
     queryKey: ['projects'],
     queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 
-  const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
+  const projectId = useResolvedProjectId(projects, projectsLoaded);
   const projectName = projects.find((p) => p.id === projectId)?.name || '';
 
   const {

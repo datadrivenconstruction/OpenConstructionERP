@@ -37,6 +37,7 @@ vi.mock('@/shared/hooks/useActiveProjectId', () => ({
   useActiveProjectId: () => 'proj-1',
 }));
 
+import { useInfoBlockPrefsStore } from '@/stores/useInfoBlockPrefsStore';
 import { RFQBiddingPage } from '../RFQBiddingPage';
 import type { RFQ, RFQStatus } from '../api';
 
@@ -189,6 +190,8 @@ describe('the awards tab leads to the purchase order the award drafted', () => {
   });
 
   it('lists Procurement among the related modules', async () => {
+    // The explainer stays folded while the module info card is open.
+    useInfoBlockPrefsStore.setState({ blocks: { 'rfq-bidding': true } });
     register([]);
     mountPage();
     await screen.findAllByText('RFQ won');
