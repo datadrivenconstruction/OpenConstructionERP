@@ -311,7 +311,7 @@ exports[`Visual Regression - Button > with icon (left) 1`] = `
 exports[`Visual Regression - Card > card with footer and hoverable 1`] = `
 <div>
   <div
-    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 p-5"
+    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu hover:shadow-sm hover:border-border focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40 p-4"
   >
     <div
       class="flex items-start justify-between gap-4"
@@ -357,7 +357,7 @@ exports[`Visual Regression - Card > card with footer and hoverable 1`] = `
 exports[`Visual Regression - Card > card with header and content 1`] = `
 <div>
   <div
-    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-5"
+    class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-4"
   >
     <div
       class="flex items-start justify-between gap-4"
@@ -3270,7 +3270,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             style="animation-delay: 220ms;"
           >
             <div
-              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-5 h-full"
+              class="oe-card rounded-xl border border-border-light bg-surface-elevated relative focus-within:z-20 has-[[aria-expanded=true]]:z-20 shadow-xs transition-all duration-normal ease-oe transform-gpu p-4 h-full"
             >
               <div
                 class="flex items-start justify-between gap-4"
@@ -3575,7 +3575,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
 exports[`Visual Regression - EmptyState > renders minimal (title only) 1`] = `
 <div>
   <div
-    class="flex flex-col items-center justify-center py-16 px-6 text-center"
+    class="flex flex-col items-center justify-center py-10 px-6 text-center"
   >
     <h3
       class="oe-section-title"
@@ -3589,7 +3589,7 @@ exports[`Visual Regression - EmptyState > renders minimal (title only) 1`] = `
 exports[`Visual Regression - EmptyState > renders with custom ReactNode action 1`] = `
 <div>
   <div
-    class="flex flex-col items-center justify-center py-16 px-6 text-center"
+    class="flex flex-col items-center justify-center py-10 px-6 text-center"
   >
     <h3
       class="oe-section-title"
@@ -3602,7 +3602,7 @@ exports[`Visual Regression - EmptyState > renders with custom ReactNode action 1
       Import data from an external source.
     </p>
     <div
-      class="mt-5"
+      class="mt-4"
     >
       <button
         class="custom-btn"
@@ -3617,10 +3617,10 @@ exports[`Visual Regression - EmptyState > renders with custom ReactNode action 1
 exports[`Visual Regression - EmptyState > renders with icon, description, and action button 1`] = `
 <div>
   <div
-    class="flex flex-col items-center justify-center py-16 px-6 text-center"
+    class="flex flex-col items-center justify-center py-10 px-6 text-center"
   >
     <div
-      class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-light bg-surface-secondary text-content-tertiary"
+      class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-border-light bg-surface-secondary text-content-tertiary"
       data-decorative-icon="true"
     >
       <span
@@ -3640,7 +3640,7 @@ exports[`Visual Regression - EmptyState > renders with icon, description, and ac
       Create your first project to get started.
     </p>
     <div
-      class="mt-5"
+      class="mt-4"
     >
       <button
         class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs border border-transparent h-8 px-3 text-sm gap-1.5 rounded-lg"
@@ -4129,9 +4129,9 @@ exports[`Visual Regression - Logo > LogoWithText - default 1`] = `
         OpenConstruction
       </span>
       <span
-        class="font-bold"
+        class="font-semibold"
       >
-         ERP
+        ERP
       </span>
     </span>
   </span>
@@ -4174,9 +4174,9 @@ exports[`Visual Regression - Logo > LogoWithText - without version 1`] = `
         OpenConstruction
       </span>
       <span
-        class="font-bold"
+        class="font-semibold"
       >
-         ERP
+        ERP
       </span>
     </span>
   </span>

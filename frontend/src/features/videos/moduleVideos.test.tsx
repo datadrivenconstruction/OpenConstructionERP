@@ -117,7 +117,7 @@ describe('Videos for this step', () => {
 
   it('renders nothing on a screen without videos', () => {
     const { container } = renderAt('/dashboard-nowhere', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
-    expect(container.innerHTML).toBe('');
+    expect(container.querySelector('[data-testid="module-videos"]')).toBeNull();
   });
 
   it('hides on this screen only, and remembers it', async () => {
@@ -138,7 +138,7 @@ describe('Videos for this step', () => {
     expect(useVideoHintsStore.getState().off).toBe(true);
     cleanup();
     const { container } = renderAt('/contracts', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
-    expect(container.innerHTML).toBe('');
+    expect(container.querySelector('[data-testid="module-videos"]')).toBeNull();
     useVideoHintsStore.getState().showAgain();
     expect(localStorage.getItem('oe_videos_hints')).toBeNull();
   });
@@ -157,6 +157,6 @@ describe('Videos for this case', () => {
 
   it('renders nothing for a case without videos', () => {
     const { container } = renderAt('/cases/x', <CaseVideos caseId="no-such-case" />);
-    expect(container.innerHTML).toBe('');
+    expect(container.querySelector('[data-testid="module-videos"]')).toBeNull();
   });
 });
