@@ -846,11 +846,11 @@ def _schedule(pen: Pen) -> None:
     pen.text(x0, 14000, "TYPES (VIEW FROM OUTSIDE)  1:60", 300)
 
 
-def build_drawing_set(path: str) -> None:
-    """Write the demo drawing set to ``path`` as DXF R2010, units mm."""
+def build_drawing_set(path: str, dxfversion: str = "R2010") -> None:
+    """Write the demo drawing set to ``path`` as DXF (R2010 unless told otherwise), units mm."""
     import ezdxf
 
-    doc = ezdxf.new(dxfversion="R2010", setup=True)
+    doc = ezdxf.new(dxfversion=dxfversion, setup=True)
     doc.header["$INSUNITS"] = 4
     doc.header["$MEASUREMENT"] = 1
     doc.styles.add("OE_ARCH", font="arial.ttf")
@@ -883,3 +883,65 @@ def build_drawing_set(path: str) -> None:
         draw()
         _frame(pen, number, title, scale, k)
     doc.saveas(path)
+
+
+# Handles LibreDWG's dxf2dwg allocates for objects of its own (a VPENTITY_CONTROL and a
+# BLOCK_RECORD). ezdxf hands the same two handles to a dictionary and a material, and a
+# DWG with duplicate handles is refused by the DDC converter's DXF writer.
+_LIBREDWG_RESERVED_HANDLES = ("B", "1F")
+_HANDLE_CODES = frozenset({5, 105, 1005, *range(320, 370), *range(390, 400), 480, 481})
+
+
+def _free_reserved_handles(path: str) -> None:
+    """Move the objects holding LibreDWG's reserved handles to unused handles, in place."""
+    with open(path, encoding="utf-8", errors="surrogateescape", newline="") as fh:
+        lines = fh.read().split("\n")
+    pairs = range(0, len(lines) - 1, 2)
+
+    def code(i: int) -> int | None:
+        try:
+            return int(lines[i].strip())
+        except ValueError:
+            return None
+
+    top = max((int(lines[i + 1], 16) for i in pairs if code(i) == 5), default=0)
+    moved = {h: format(top + 1 + k, "X") for k, h in enumerate(_LIBREDWG_RESERVED_HANDLES)}
+    for i in pairs:
+        c = code(i)
+        if c in _HANDLE_CODES and lines[i + 1].strip().upper() in moved:
+            lines[i + 1] = moved[lines[i + 1].strip().upper()]
+        elif c == 9 and lines[i + 1].strip() == "$HANDSEED":
+            lines[i + 3] = format(top + len(moved) + 16, "X")
+    with open(path, "w", encoding="utf-8", errors="surrogateescape", newline="") as fh:
+        fh.write("\n".join(lines))
+
+
+def build_drawing_set_for_dwg(path: str) -> None:
+    """Write the same set as :func:`build_drawing_set`, shaped for LibreDWG's DXF to DWG conversion.
+
+    DXF R2000, block references exploded into plain entities on their layer, no block
+    definitions and no dimension styles (dimensions here are explicit lines), and the
+    two handles LibreDWG reserves for itself left free. The drawing looks the same;
+    what the DDC converter would refuse in a LibreDWG-written file is gone.
+    """
+    import ezdxf
+
+    build_drawing_set(path, "R2000")
+    doc = ezdxf.readfile(path)
+    msp = doc.modelspace()
+    for ins in list(msp.query("INSERT")):
+        layer = ins.dxf.layer
+        for ent in ins.explode():
+            if ent.dxf.layer == "0":
+                ent.dxf.layer = layer
+    for style in list(doc.dimstyles):
+        if style.dxf.name.lower() != "standard":
+            doc.dimstyles.remove(style.dxf.name)
+        else:
+            for attr in ("dimblk", "dimblk1", "dimblk2", "dimldrblk"):
+                style.dxf.discard(attr)
+    for block in list(doc.blocks):
+        if not block.name.startswith("*"):
+            doc.blocks.delete_block(block.name, safe=False)
+    doc.saveas(path)
+    _free_reserved_handles(path)
