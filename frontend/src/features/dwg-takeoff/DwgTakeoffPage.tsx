@@ -3633,14 +3633,14 @@ export function DwgTakeoffPage() {
                   swallow clicks meant for the drawing underneath - and the right
                   group needs the opt-in explicitly, because it did not sit under
                   a pointer-events-none parent before. */}
-              <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-3">
+              <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2">
                 {/* Floating ToolPalette. Lives here rather than in a fixed header
                     bar so the drawing gets the full viewport height and the tools
                     stay visually attached to the thing they act on. Each group
                     inside re-enables pointer events for itself: with three groups
                     the row wraps on a narrow viewer, and an empty transparent box
                     beside the second row would swallow clicks. */}
-                <div className="pointer-events-none flex min-w-0 flex-wrap items-start gap-2">
+                <div className="pointer-events-none flex max-w-full flex-wrap items-start gap-2">
                   <div className="pointer-events-auto rounded-lg border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md shadow-xl shadow-black/30 ring-1 ring-black/5">
                     <ToolPalette
                       activeTool={activeTool}
@@ -3779,7 +3779,7 @@ export function DwgTakeoffPage() {
                     paired with the badge so estimators discover it while
                     glancing at converter status without stealing real estate
                     from the drawing. */}
-                  <div className="pointer-events-auto flex shrink-0 flex-wrap items-center justify-end gap-2">
+                  <div className="pointer-events-auto ml-auto flex max-w-full flex-wrap items-center justify-end gap-2">
                   <ModuleGuideButton content={dwgTakeoffGuide} />
                   <button
                     type="button"
