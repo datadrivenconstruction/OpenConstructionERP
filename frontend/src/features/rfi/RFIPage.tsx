@@ -41,6 +41,7 @@ import {
   WideModalField,
   ModuleGuideButton,
   CollapsibleSection,
+  StatCard,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -2464,41 +2465,15 @@ export function RFIPage() {
       <>
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-guide="rfi-stats">
-        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
-          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
-            {t('rfi.stat_total', { defaultValue: 'Total RFIs' })}
-          </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">
-            {stats.total}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
-          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
-            {t('rfi.stat_open', { defaultValue: 'Open' })}
-          </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-oe-blue">{stats.open}</p>
-        </div>
-        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
-          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
-            {t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
-          </p>
-          <p
-            className={clsx(
-              'text-lg font-semibold mt-1 tabular-nums',
-              stats.overdue > 0 ? 'text-semantic-error' : 'text-content-primary',
-            )}
-          >
-            {stats.overdue}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
-          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
-            {t('rfi.stat_avg_days', { defaultValue: 'Avg. Days Open' })}
-          </p>
-          <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">
-            {stats.avgDays}
-          </p>
-        </div>
+        <StatCard label={t('rfi.stat_total', { defaultValue: 'Total RFIs' })} value={stats.total} />
+        <StatCard label={t('rfi.stat_open', { defaultValue: 'Open' })} value={stats.open} tone="blue" tintValue />
+        <StatCard
+          label={t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
+          value={stats.overdue}
+          tone={stats.overdue > 0 ? 'danger' : 'default'}
+          tintValue={stats.overdue > 0}
+        />
+        <StatCard label={t('rfi.stat_avg_days', { defaultValue: 'Avg. Days Open' })} value={stats.avgDays} />
       </div>
 
       {/* Requests by type - one chip per type the project uses, from the
@@ -2612,11 +2587,11 @@ export function RFIPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search
-            size={16}
+            size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
           />
           <input
@@ -2626,7 +2601,7 @@ export function RFIPage() {
               defaultValue: 'Search RFIs...',
             })}
             aria-label={t('rfi.search_placeholder', { defaultValue: 'Search RFIs...' })}
-            className={`${inputCls} pl-9`}
+            className="oe-input pl-9"
           />
         </div>
 
@@ -2638,7 +2613,7 @@ export function RFIPage() {
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label={t('rfi.filter_type_all', { defaultValue: 'All types' })}
               data-testid="rfi-type-filter"
-              className="oe-select oe-input-lg sm:w-48"
+              className="oe-select sm:w-48"
             >
               <option value="">{t('rfi.filter_type_all', { defaultValue: 'All types' })}</option>
               {requestTypes.map((rt) => (
@@ -2659,7 +2634,7 @@ export function RFIPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RFIStatus | '')}
             aria-label={t('rfi.filter_all', { defaultValue: 'All Statuses' })}
-            className="oe-select oe-input-lg sm:w-40"
+            className="oe-select sm:w-40"
           >
             <option value="">
               {t('rfi.filter_all', { defaultValue: 'All Statuses' })}
@@ -2683,7 +2658,7 @@ export function RFIPage() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as RFIPriority | '')}
             aria-label={t('rfi.filter_priority', { defaultValue: 'All priorities' })}
-            className="oe-select oe-input-lg sm:w-40"
+            className="oe-select sm:w-40"
           >
             <option value="">
               {t('rfi.filter_priority', { defaultValue: 'All priorities' })}
@@ -2709,7 +2684,7 @@ export function RFIPage() {
             aria-label={t('rfi.filter_discipline', {
               defaultValue: 'All disciplines',
             })}
-            className="oe-select oe-input-lg sm:w-40"
+            className="oe-select sm:w-40"
           >
             <option value="">
               {t('rfi.filter_discipline', { defaultValue: 'All disciplines' })}

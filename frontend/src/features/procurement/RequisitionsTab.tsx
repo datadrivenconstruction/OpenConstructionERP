@@ -27,6 +27,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, ShoppingCart, Settings, ExternalLink } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal, type BadgeVariant } from '@/shared/ui';
@@ -416,6 +417,7 @@ interface RequisitionsTabProps {
 
 export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<RequisitionStatus | ''>('');
   const [openId, setOpenId] = useState<string | null>(focusRequisitionId ?? null);
   const [picked, setPicked] = useState<string[]>([]);
@@ -506,13 +508,19 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
           </div>
         </Card>
       ) : !data || data.items.length === 0 ? (
-        <EmptyState
-          icon={<ClipboardList className="h-6 w-6" />}
-          title={t('procurement.requisitions.empty_title', { defaultValue: 'No requisitions yet' })}
-          description={t('procurement.requisitions.empty_description', {
-            defaultValue: 'Open the material buy-list in Resource Summary, select materials and create a requisition.',
-          })}
-        />
+        <Card padding="none">
+          <EmptyState
+            icon={<ClipboardList size={20} />}
+            title={t('procurement.requisitions.empty_title', { defaultValue: 'No requisitions yet' })}
+            description={t('procurement.requisitions.empty_description', {
+              defaultValue: 'Open the material buy-list in Resource Summary, select materials and create a requisition.',
+            })}
+            action={{
+              label: t('nav.resource_summary', { defaultValue: 'Resource Summary' }),
+              onClick: () => navigate('/resource-summary'),
+            }}
+          />
+        </Card>
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">

@@ -1583,22 +1583,16 @@ export function PunchListPage() {
         })}
         actions={
           <>
-            <SyncStatusPill />
-            <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
-            <ModuleGuideButton content={punchlistGuide} />
-            <IssueHubLink />
-            {projectId && (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<MapPin size={14} />}
-                onClick={() => navigate(`/projects/${projectId}/geo`)}
-                title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
-                data-testid="punchlist-view-on-map"
-              >
-                {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
-              </Button>
-            )}
+            {/* Order is priority: PageHeader keeps the primary and the first four, the rest go to "...". */}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowAddModal(true)}
+              disabled={!projectId}
+              icon={<Plus size={14} />}
+            >
+              {t('punch.new_item', { defaultValue: 'New Item' })}
+            </Button>
             {projectId && (
               <Button
                 variant="secondary"
@@ -1618,6 +1612,18 @@ export function PunchListPage() {
               </Button>
             )}
             {projectId && <PunchBcfButtons projectId={projectId} selectedIds={Array.from(selectedIds)} />}
+            {projectId && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<MapPin size={14} />}
+                onClick={() => navigate(`/projects/${projectId}/geo`)}
+                title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
+                data-testid="punchlist-view-on-map"
+              >
+                {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
+              </Button>
+            )}
             <VoiceEntry
               projectId={projectId}
               target="defect"
@@ -1638,16 +1644,11 @@ export function PunchListPage() {
                 });
               }}
             />
+            <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <ModuleGuideButton content={punchlistGuide} />
+            <IssueHubLink />
+            <SyncStatusPill />
             <VideoHint topic="punch-list" className="self-center" />
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setShowAddModal(true)}
-              disabled={!projectId}
-              icon={<Plus size={14} />}
-            >
-              {t('punch.new_item', { defaultValue: 'New Item' })}
-            </Button>
           </>
         }
       />
@@ -1710,11 +1711,11 @@ export function PunchListPage() {
       />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search
-            size={16}
+            size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
           />
           <input
@@ -1724,7 +1725,7 @@ export function PunchListPage() {
               defaultValue: 'Search title, description, location...',
             })}
             aria-label={t('punch.search', { defaultValue: 'Search title, description, location...' })}
-            className="oe-input oe-input-lg pl-9"
+            className="oe-input pl-9"
           />
         </div>
 
@@ -1740,15 +1741,17 @@ export function PunchListPage() {
           </Button>
 
           {/* View toggle */}
-          <div className="flex items-center rounded-lg border border-border overflow-hidden">
+          <div className="inline-flex h-8 items-center rounded-lg border border-border bg-surface-primary p-0.5">
             <button
               onClick={() => setViewMode('list')}
               aria-label={t('punch.view_list', { defaultValue: 'List view' })}
+              data-oe-segment
+              aria-pressed={viewMode === 'list'}
               className={clsx(
-                'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
+                'flex h-full items-center gap-1.5 rounded-sm px-2.5 text-xs font-medium transition-colors',
                 viewMode === 'list'
-                  ? 'bg-oe-blue text-white'
-                  : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+                  ? 'bg-surface-tertiary text-content-primary'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
               title={t('punch.view_list', { defaultValue: 'List view' })}
             >
@@ -1759,11 +1762,13 @@ export function PunchListPage() {
             </button>
             <button
               onClick={() => setViewMode('kanban')}
+              data-oe-segment
+              aria-pressed={viewMode === 'kanban'}
               className={clsx(
-                'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
+                'flex h-full items-center gap-1.5 rounded-sm px-2.5 text-xs font-medium transition-colors',
                 viewMode === 'kanban'
-                  ? 'bg-oe-blue text-white'
-                  : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+                  ? 'bg-surface-tertiary text-content-primary'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
               aria-label={t('punch.view_kanban', { defaultValue: 'Kanban view' })}
               title={t('punch.view_kanban', { defaultValue: 'Kanban view' })}
@@ -1775,11 +1780,13 @@ export function PunchListPage() {
             </button>
             <button
               onClick={() => setViewMode('pins')}
+              data-oe-segment
+              aria-pressed={viewMode === 'pins'}
               className={clsx(
-                'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
+                'flex h-full items-center gap-1.5 rounded-sm px-2.5 text-xs font-medium transition-colors',
                 viewMode === 'pins'
-                  ? 'bg-oe-blue text-white'
-                  : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+                  ? 'bg-surface-tertiary text-content-primary'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
               aria-label={t('punch.view_pins', { defaultValue: 'Pin board view' })}
               title={t('punch.view_pins', { defaultValue: 'Pin board view' })}
@@ -1791,11 +1798,13 @@ export function PunchListPage() {
             </button>
             <button
               onClick={() => setViewMode('map')}
+              data-oe-segment
+              aria-pressed={viewMode === 'map'}
               className={clsx(
-                'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
+                'flex h-full items-center gap-1.5 rounded-sm px-2.5 text-xs font-medium transition-colors',
                 viewMode === 'map'
-                  ? 'bg-oe-blue text-white'
-                  : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+                  ? 'bg-surface-tertiary text-content-primary'
+                  : 'text-content-secondary hover:text-content-primary',
               )}
               aria-label={t('punch.view_map', { defaultValue: 'Map view' })}
               title={t('punch.view_map', { defaultValue: 'Map view' })}
@@ -1812,12 +1821,12 @@ export function PunchListPage() {
 
       {/* Collapsible filters */}
       {showFilters && (
-        <div className="flex flex-wrap gap-3 animate-fade-in">
+        <div className="flex flex-wrap gap-2 animate-fade-in">
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as PunchPriority | '')}
             aria-label={t('punch.all_priorities', { defaultValue: 'All Priorities' })}
-            className={`${inputCls} max-w-[160px]`}
+            className={`oe-select max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_priorities', { defaultValue: 'All Priorities' })}
@@ -1835,7 +1844,7 @@ export function PunchListPage() {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as PunchStatus | '')}
             aria-label={t('punch.all_statuses', { defaultValue: 'All Statuses' })}
-            className={`${inputCls} max-w-[160px]`}
+            className={`oe-select max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_statuses', { defaultValue: 'All Statuses' })}
@@ -1856,7 +1865,7 @@ export function PunchListPage() {
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as PunchCategory | '')}
             aria-label={t('punch.all_categories', { defaultValue: 'All Categories' })}
-            className={`${inputCls} max-w-[160px]`}
+            className={`oe-select max-w-[160px]`}
           >
             <option value="">
               {t('punch.all_categories', { defaultValue: 'All Categories' })}
@@ -1877,7 +1886,7 @@ export function PunchListPage() {
             value={filterArea}
             onChange={(e) => setFilterArea(e.target.value)}
             aria-label={t('punch.all_areas', { defaultValue: 'All Areas' })}
-            className={`${inputCls} max-w-[180px]`}
+            className={`oe-select max-w-[180px]`}
           >
             <option value="">{t('punch.all_areas', { defaultValue: 'All Areas' })}</option>
             {filterOptions.areas.map((area) => (
@@ -1889,7 +1898,7 @@ export function PunchListPage() {
             value={filterAsset}
             onChange={(e) => setFilterAsset(e.target.value)}
             aria-label={t('punch.all_assets', { defaultValue: 'All Assets' })}
-            className={`${inputCls} max-w-[180px]`}
+            className={`oe-select max-w-[180px]`}
           >
             <option value="">{t('punch.all_assets', { defaultValue: 'All Assets' })}</option>
             {filterOptions.assets.map((asset) => (
@@ -1901,7 +1910,7 @@ export function PunchListPage() {
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
             aria-label={t('punch.all_assignees', { defaultValue: 'All Assignees' })}
-            className={`${inputCls} max-w-[180px]`}
+            className={`oe-select max-w-[180px]`}
           >
             <option value="">
               {t('punch.all_assignees', { defaultValue: 'All Assignees' })}
