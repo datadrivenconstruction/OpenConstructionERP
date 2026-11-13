@@ -1230,10 +1230,10 @@ export function ReportsPage() {
       <>
       {/* BOQ selector - a within-project picker, kept per canon §4 exception. */}
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-3">
           <label
             htmlFor="report-boq"
-            className="oe-label"
+            className="oe-label mb-0 whitespace-nowrap"
           >
             {t('boq.title', { defaultValue: 'BOQ' })}
           </label>
@@ -1242,7 +1242,7 @@ export function ReportsPage() {
             value={selectedBoqId}
             onChange={(e) => setSelectedBoqId(e.target.value)}
             disabled={loadingBoqs || boqs.length === 0}
-            className="oe-select min-w-[220px]"
+            className="oe-select w-auto min-w-64"
           >
             {loadingBoqs && (
               <option value="">
@@ -1264,7 +1264,7 @@ export function ReportsPage() {
       </div>
 
       {/* Report cards grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {REPORT_CARDS.map((card) => (
           <ReportCardComponent
             key={card.id}
@@ -1276,15 +1276,17 @@ export function ReportsPage() {
         ))}
 
         {/* Custom Report Builder card */}
-        <div className="flex flex-col justify-between rounded-xl border border-dashed border-oe-blue/40 bg-oe-blue-subtle/10 p-5 shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex flex-col justify-between rounded-xl border border-dashed border-oe-blue/40 bg-oe-blue-subtle/10 p-4 transition-shadow hover:shadow-sm">
           <div>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10">
-              <Settings2 size={20} className="text-oe-blue" strokeWidth={1.75} />
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10">
+                <Settings2 size={16} className="text-oe-blue" strokeWidth={1.75} />
+              </div>
+              <h3 className="oe-card-title">
+                {t('reports.custom_report', { defaultValue: 'Custom Report' })}
+              </h3>
             </div>
-            <h3 className="oe-card-title">
-              {t('reports.custom_report', { defaultValue: 'Custom Report' })}
-            </h3>
-            <p className="mt-1 text-sm leading-relaxed text-content-secondary">
+            <p className="mt-2 text-sm leading-relaxed text-content-secondary">
               {t('reports.custom_report_desc', {
                 defaultValue: 'Build a combined report with the sections you choose.',
               })}
@@ -1646,22 +1648,24 @@ function ReportCardComponent({
   const Icon = card.icon;
 
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-border-light bg-surface-primary p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col justify-between rounded-xl border border-border-light bg-surface-primary p-4 transition-shadow hover:shadow-sm">
       {/* Icon + Title */}
       <div>
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue-subtle">
-          <Icon size={20} className="text-oe-blue" strokeWidth={1.75} />
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
+            <Icon size={16} className="text-oe-blue" strokeWidth={1.75} />
+          </div>
+          <h3 className="oe-card-title">
+            {t(card.titleKey, { defaultValue: card.id })}
+          </h3>
         </div>
-        <h3 className="oe-card-title">
-          {t(card.titleKey, { defaultValue: card.id })}
-        </h3>
-        <p className="mt-1 text-sm leading-relaxed text-content-secondary">
+        <p className="mt-2 text-sm leading-relaxed text-content-secondary">
           {t(card.descriptionKey, { defaultValue: '' })}
         </p>
       </div>
 
       {/* Action buttons */}
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         {card.comingSoon ? (
           <span className="inline-flex items-center rounded-md bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-tertiary">
             {t('reports.coming_soon', { defaultValue: 'Coming soon' })}

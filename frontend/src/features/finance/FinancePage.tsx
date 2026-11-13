@@ -773,20 +773,19 @@ export function FinanceSummaryCards({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <div
             key={card.key}
             data-testid={`finance-card-${card.key}`}
-            className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
+            className="relative overflow-hidden rounded-xl border border-border-light bg-surface-primary"
           >
-            <div className={`absolute top-0 start-0 end-0 h-1 ${card.accent}`} />
-            <div className="p-4 pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="min-w-0 truncate text-2xs font-medium uppercase tracking-wider text-content-tertiary" title={card.label}>
                   {card.label}
                 </span>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${card.color}`}>
+                <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg [&_svg]:h-4 [&_svg]:w-4 ${card.color}`}>
                   {card.icon}
                 </div>
               </div>

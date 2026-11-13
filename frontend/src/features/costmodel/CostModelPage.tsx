@@ -127,15 +127,13 @@ const KPICard = memo(function KPICard({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="relative flex-1 min-w-[200px] overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-      {/* Top accent bar */}
-      <div className={`absolute top-0 start-0 end-0 h-1 ${accentColor === 'green' ? 'bg-semantic-success' : accentColor === 'amber' ? 'bg-semantic-warning' : accentColor === 'rose' ? 'bg-semantic-error' : 'bg-oe-blue'}`} />
-      <div className="p-5 pt-4">
-        <div className="flex items-center justify-between mb-3">
+    <div className="relative flex-1 min-w-[200px] overflow-hidden rounded-xl border border-border-light bg-surface-primary">
+      <div className="px-4 py-3">
+        <div className="flex items-center justify-between mb-1.5">
           <span className="oe-overline">
             {label}
           </span>
-          <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+          <div className={`flex h-7 w-7 items-center justify-center rounded-lg [&_svg]:h-4 [&_svg]:w-4 ${
             accentColor === 'green' ? 'bg-semantic-success-bg text-semantic-success'
             : accentColor === 'amber' ? 'bg-semantic-warning-bg text-semantic-warning'
             : accentColor === 'rose' ? 'bg-semantic-error-bg text-semantic-error'
@@ -144,11 +142,11 @@ const KPICard = memo(function KPICard({
             {icon}
           </div>
         </div>
-        <div className="text-2xl font-semibold tabular-nums text-content-primary leading-tight">
+        <div className="text-xl font-semibold tabular-nums text-content-primary leading-tight">
           {formatCurrency(amount, currency)}
         </div>
         {variance !== undefined && variance !== 0 && (
-          <div className="mt-2.5 flex items-center gap-1.5">
+          <div className="mt-1.5 flex items-center gap-1.5">
             {/* The badge says "vs budget", so the number has to be the deviation
                 from it - spending above budget is a plus. What the callers pass
                 is the opposite quantity, budget minus spend, which is the
@@ -2930,21 +2928,6 @@ export function CostModelPage() {
         <PlanningCrossLinks active="5d" />
 
         <HowCostModelConnects />
-
-        {/* Scope indicator — single project */}
-        <div
-          className="flex items-center gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue-subtle/40 px-3 py-2"
-          role="status"
-          aria-live="polite"
-        >
-          <Target size={14} className="text-oe-blue shrink-0" />
-          <span className="text-xs font-medium text-oe-blue">
-            {t('costmodel.scope_single_project', {
-              defaultValue: 'Project: {{name}}',
-              name: selectedProject.name,
-            })}
-          </span>
-        </div>
 
         <FiveDDashboard project={selectedProject} />
       </div>
