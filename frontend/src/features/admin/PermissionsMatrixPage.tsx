@@ -1169,23 +1169,9 @@ export function PermissionsMatrixPage() {
 
   return (
     <div
-      className="relative min-h-full overflow-hidden"
+      className="animate-fade-in"
       data-testid="permissions-matrix-page"
     >
-      {/* Page-level gradient backdrop (mirrors CoordinationHubPage). */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-sky-50 via-white to-emerald-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 -left-40 -z-10 h-96 w-96 rounded-full bg-gradient-radial from-sky-400/15 to-transparent blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -right-40 -z-10 h-96 w-96 rounded-full bg-gradient-radial from-emerald-400/15 to-transparent blur-3xl"
-      />
-
       <div className="space-y-5">
         {/* Hero header — glass pill */}
         <PageHeader
@@ -1230,7 +1216,7 @@ export function PermissionsMatrixPage() {
         />
 
         {/* Filter bar — glass card */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 px-4 py-3 backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[240px] max-w-md">
               <Search
@@ -1249,7 +1235,7 @@ export function PermissionsMatrixPage() {
                   defaultValue: 'Search permissions',
                 })}
                 data-testid="permissions-matrix-search"
-                className="oe-input w-full ps-9 pe-3 bg-white/80"
+                className="oe-input w-full ps-9 pe-3"
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-content-secondary">
@@ -1260,7 +1246,7 @@ export function PermissionsMatrixPage() {
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as MatrixRole | 'all')}
                 data-testid="permissions-matrix-role-filter"
-                className="oe-select bg-white/80"
+                className="oe-select"
               >
                 <option value="all">
                   {t('admin.permissions.role_filter_all', { defaultValue: 'All roles' })}
@@ -1286,7 +1272,7 @@ export function PermissionsMatrixPage() {
                     type="button"
                     onClick={() => setConfirmState({ kind: 'preset', preset })}
                     disabled={presetMutation.isPending}
-                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-elevated px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-oe-blue"
                     data-testid={`permissions-matrix-preset-${preset}`}
                   >
                     <RotateCcw size={12} aria-hidden />
@@ -1310,7 +1296,7 @@ export function PermissionsMatrixPage() {
                       })
                     : undefined
                 }
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-elevated px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-oe-blue"
               >
                 {allExpanded ? (
                   <ChevronsDownUp size={14} aria-hidden />
@@ -1342,7 +1328,7 @@ export function PermissionsMatrixPage() {
         </div>
 
         {/* Matrix table — glass card */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04]">
+        <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated">
           <div className="overflow-x-auto">
             <table
               className="oe-table w-full"

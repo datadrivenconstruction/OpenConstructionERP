@@ -2,8 +2,8 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { X, History, ArrowRight } from 'lucide-react';
-import { Badge, DateDisplay } from '@/shared/ui';
+import { History, ArrowRight } from 'lucide-react';
+import { Badge, DateDisplay, SideDrawer } from '@/shared/ui';
 import { fetchContainerHistory, type StateTransitionEntry } from './api';
 
 /**
@@ -27,40 +27,14 @@ export function CDEHistoryDrawer({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex justify-end bg-black/40 animate-fade-in"
-      onClick={onClose}
-      role="dialog"
-      aria-label={t('cde.history_title', { defaultValue: 'State transition history' })}
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-md"
+      title={t('cde.history_title', { defaultValue: 'State transition history' })}
+      subtitle={<span className="font-mono">{containerCode}</span>}
     >
-      <div
-        className="w-full max-w-md bg-surface-primary border-l border-border shadow-xl flex flex-col animate-slide-in-right"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <History size={20} className="text-oe-blue" />
-            <div>
-              <h3 className="oe-section-title">
-                {t('cde.history_title', { defaultValue: 'State transition history' })}
-              </h3>
-              <p className="text-xs text-content-tertiary mt-0.5 font-mono">
-                {containerCode}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-surface-secondary text-content-tertiary hover:text-content-primary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+      <div className="px-5 py-4">
           {isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -86,9 +60,8 @@ export function CDEHistoryDrawer({
               ))}
             </ol>
           )}
-        </div>
       </div>
-    </div>
+    </SideDrawer>
   );
 }
 

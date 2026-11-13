@@ -1807,44 +1807,26 @@ function DashboardRenderPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-dropdown flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="bi-dashboard-drawer-title"
-        className="relative h-full w-full max-w-3xl overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <SideDrawer
+        open
+        onClose={onClose}
+        widthClass="max-w-3xl"
+        title={data?.dashboard.name ?? t('bi.dashboard', { defaultValue: 'Dashboard' })}
+        subtitle={
+          data?.rendered_at ? <DateDisplay value={data.rendered_at} format="datetime" /> : undefined
+        }
+        headerActions={
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={() => setAddWidgetOpen(true)}
+          >
+            {t('bi.add_widget', { defaultValue: 'Add widget' })}
+          </Button>
+        }
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <div>
-            <h2 id="bi-dashboard-drawer-title" className="oe-section-title">
-              {data?.dashboard.name ?? t('bi.dashboard', { defaultValue: 'Dashboard' })}
-            </h2>
-            {data?.rendered_at && (
-              <p className="text-xs text-content-tertiary">
-                <DateDisplay value={data.rendered_at} format="datetime" />
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              icon={<Plus size={14} />}
-              onClick={() => setAddWidgetOpen(true)}
-            >
-              {t('bi.add_widget', { defaultValue: 'Add widget' })}
-            </Button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded p-1 hover:bg-surface-secondary"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
         <div className="space-y-3 p-5">
           {data?.dashboard.cross_filter_enabled && Object.keys(filtersForQuery).length > 0 && (
             <CrossFilterChips
@@ -1957,7 +1939,7 @@ function DashboardRenderPanel({
             </div>
           )}
         </div>
-      </div>
+      </SideDrawer>
       {addWidgetOpen && (
         <AddWidgetModal
           dashboardId={dashboardId}
@@ -1965,7 +1947,7 @@ function DashboardRenderPanel({
           onCreated={refreshBoard}
         />
       )}
-    </div>
+    </>
   );
 }
 

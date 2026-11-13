@@ -8,11 +8,12 @@
 // and category. The backend compiles those guided fields into a well-formed
 // system prompt. An optional "advanced" disclosure lets a power user paste a
 // raw prompt instead, but it is never the default path.
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Loader2, Sparkles, ChevronDown, Wand2, Clock, Wrench, Zap } from 'lucide-react';
+import { Loader2, Sparkles, ChevronDown, Wand2, Clock, Wrench, Zap } from 'lucide-react';
 import clsx from 'clsx';
 
+import { Button, WideModal } from '@/shared/ui';
 import { resolveAgentIcon } from './agentMeta';
 import { SchedulePanel } from './SchedulePanel';
 import { ToolPanel } from './ToolPanel';
@@ -135,7 +136,6 @@ export function CustomAgentBuilder({
   onSubmit,
 }: CustomAgentBuilderProps): JSX.Element | null {
   const { t } = useTranslation();
-  const dialogRef = useRef<HTMLDivElement>(null);
 
   const [displayName, setDisplayName] = useState('');
   const [tagline, setTagline] = useState('');
@@ -196,20 +196,6 @@ export function CustomAgentBuilder({
     if ((initialTriggers ?? []).length > 0) setTriggersOpen(true);
   }, [open, initialSchedule, initialTools, initialTriggers]);
 
-  // Close on Escape.
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handler, { capture: true });
-    return () => document.removeEventListener('keydown', handler, { capture: true });
-  }, [open, onClose]);
-
   if (!open) return null;
 
   const useRaw = advancedOpen && rawPrompt.trim().length > 0;
@@ -247,7 +233,6 @@ export function CustomAgentBuilder({
     onSubmit({ agent: input, schedule, allowedTools: selectedTools, triggers: selectedTriggers });
   };
 
-  const PreviewIcon = resolveAgentIcon(icon);
   const inputClass = clsx(
     'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2',
     'text-sm text-content-primary placeholder:text-content-quaternary',
@@ -255,54 +240,39 @@ export function CustomAgentBuilder({
   );
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} />
-
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={
-          editing
-            ? t('agents.builder.edit_title', { defaultValue: 'Edit your agent' })
-            : t('agents.builder.create_title', { defaultValue: 'Create your own agent' })
-        }
-        className={clsx(
-          'relative z-10 mx-4 flex max-h-[90vh] w-full max-w-lg flex-col',
-          'rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in',
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 px-6 pb-3 pt-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-              <PreviewIcon className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="oe-section-title">
-                {editing
-                  ? t('agents.builder.edit_title', { defaultValue: 'Edit your agent' })
-                  : t('agents.builder.create_title', { defaultValue: 'Create your own agent' })}
-              </h2>
-              <p className="text-xs text-content-tertiary">
-                {t('agents.builder.subtitle', {
-                  defaultValue: 'Answer a few questions - we turn them into a ready-to-run agent.',
-                })}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-secondary"
-            aria-label={t('common.cancel', { defaultValue: 'Close' })}
+    <WideModal
+      open={open}
+      onClose={onClose}
+      title={
+        editing
+          ? t('agents.builder.edit_title', { defaultValue: 'Edit your agent' })
+          : t('agents.builder.create_title', { defaultValue: 'Create your own agent' })
+      }
+      subtitle={t('agents.builder.subtitle', {
+        defaultValue: 'Answer a few questions - we turn them into a ready-to-run agent.',
+      })}
+      size="md"
+      busy={saving}
+      footer={
+        <>
+          <Button variant="ghost" type="button" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            form="custom-agent-form"
+            disabled={!canSubmit}
+            icon={saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           >
-            <X size={16} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-2">
+            {editing
+              ? t('agents.builder.save', { defaultValue: 'Save changes' })
+              : t('agents.builder.create', { defaultValue: 'Create agent' })}
+          </Button>
+        </>
+      }
+    >
+      <form id="custom-agent-form" onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
             <div>
               <label htmlFor="ca-name" className="oe-label">
@@ -665,39 +635,8 @@ export function CustomAgentBuilder({
                 {error}
               </div>
             )}
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 border-t border-border-light px-6 py-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-content-secondary transition-colors hover:bg-surface-secondary"
-            >
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className={clsx(
-                'inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-content-inverse transition-all',
-                'hover:bg-oe-blue-hover disabled:cursor-not-allowed disabled:opacity-40',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
-              )}
-            >
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {editing
-                ? t('agents.builder.save', { defaultValue: 'Save changes' })
-                : t('agents.builder.create', { defaultValue: 'Create agent' })}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </WideModal>
   );
 }
 
