@@ -2769,6 +2769,7 @@ function HowCostModelConnects() {
   return (
     <CollapsibleSection
       storageKey="costmodel.how"
+      defaultCollapsed
       icon={<Network size={16} className="text-oe-blue" />}
       title={t('costmodel.flow_title', { defaultValue: 'How the 5D cost model connects' })}
     >
