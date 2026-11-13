@@ -1255,7 +1255,7 @@ function PurchaseOrdersTab({
 
   if (isError) {
     return (
-      <Card className="py-12">
+      <Card>
         <RecoveryCard error={error} onRetry={() => refetch()} />
       </Card>
     );
@@ -1732,10 +1732,10 @@ function PurchaseOrdersTab({
     <>
     <Card padding="none">
       {/* Search + New PO button */}
-      <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="px-4 py-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-            <Search size={16} />
+            <Search size={14} />
           </div>
           <input
             type="text"
@@ -1747,7 +1747,7 @@ function PurchaseOrdersTab({
             aria-label={t('procurement.search_po', {
               defaultValue: 'Search by PO # or vendor...',
             })}
-            className="oe-input oe-input-lg ps-10"
+            className="oe-input ps-9"
           />
         </div>
         <div className="shrink-0">
@@ -2286,7 +2286,7 @@ function GoodsReceiptsTab({
 
   if (isError) {
     return (
-      <Card className="py-12">
+      <Card>
         <RecoveryCard error={error} onRetry={() => refetch()} />
       </Card>
     );
@@ -2335,10 +2335,10 @@ function GoodsReceiptsTab({
     <>
     <Card padding="none">
       {/* Search + Record Delivery */}
-      <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="px-4 py-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-            <Search size={16} />
+            <Search size={14} />
           </div>
           <input
             type="text"
@@ -2350,7 +2350,7 @@ function GoodsReceiptsTab({
             aria-label={t('procurement.search_gr', {
               defaultValue: 'Search by GR reference or PO #...',
             })}
-            className="oe-input oe-input-lg ps-10"
+            className="oe-input ps-9"
           />
         </div>
         {canReceive && (
