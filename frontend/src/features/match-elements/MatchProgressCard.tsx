@@ -431,7 +431,7 @@ export function MatchProgressCard({
   return (
     <div
       className={clsx(
-        'rounded-2xl border bg-surface-primary shadow-sm p-5 sm:p-7 max-w-3xl mx-auto mt-4 transition-opacity duration-500',
+        'rounded-xl border border-border-light bg-surface-primary p-4 sm:p-5 max-w-3xl mx-auto transition-opacity duration-500',
         isError
           ? 'border-semantic-error/30'
           : isEmpty
@@ -474,7 +474,7 @@ export function MatchProgressCard({
               </>
             ) : (
               <>
-                <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+                <Loader2 className="w-5 h-5 animate-spin text-oe-blue" />
                 {t('match_progress.title_running', {
                   defaultValue: 'Matching in progress',
                 })}
@@ -536,7 +536,7 @@ export function MatchProgressCard({
               ? 'bg-semantic-warning'
               : isDone
               ? 'bg-semantic-success'
-              : 'bg-gradient-to-r from-indigo-500 to-indigo-700',
+              : 'bg-oe-blue',
           )}
           style={{ width: `${overallPct}%` }}
           role="progressbar"
@@ -603,7 +603,7 @@ export function MatchProgressCard({
             }
             if (isCurrent) {
               return (
-                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-white inline-flex items-center justify-center shadow-md shadow-indigo-500/40 ring-2 ring-indigo-200 dark:ring-indigo-900/40">
+                <span className="w-7 h-7 rounded-full bg-oe-blue text-content-inverse inline-flex items-center justify-center ring-2 ring-oe-blue/20">
                   <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2.5} />
                 </span>
               );
@@ -673,7 +673,7 @@ export function MatchProgressCard({
             <button
               type="button"
               onClick={onRetry}
-              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-sm shadow-rose-500/30 hover:shadow-md hover:shadow-rose-500/40 hover:-translate-y-px transition-all"
+              className="shrink-0 inline-flex h-8 items-center gap-1.5 px-3 rounded-lg text-sm font-medium bg-semantic-error text-content-inverse hover:bg-semantic-error/90 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               {t('match_progress.retry', { defaultValue: 'Try again' })}
@@ -742,7 +742,7 @@ export function MatchProgressCard({
                 type="button"
                 data-testid="match-progress-empty-adjust"
                 onClick={onAdjust}
-                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-sm shadow-amber-500/30 hover:shadow-md hover:shadow-amber-500/40 hover:-translate-y-px transition-all"
+                className="shrink-0 inline-flex h-8 items-center gap-1.5 px-3 rounded-lg text-sm font-medium bg-semantic-warning text-content-inverse hover:bg-semantic-warning/90 transition-colors"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 {t('match_progress.empty_adjust', {

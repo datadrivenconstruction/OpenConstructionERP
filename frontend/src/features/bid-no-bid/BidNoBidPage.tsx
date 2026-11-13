@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { AlertTriangle } from 'lucide-react';
-import { Badge, Breadcrumb, Button, EmptyState, SkeletonTable } from '@/shared/ui';
+import { Badge, Breadcrumb, Button, EmptyState, PageHeader, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { api, ledgerKey, scorecardKey, useLedger, useScorecard, type Scorecard, type ScorecardPatch } from './api';
@@ -116,7 +116,6 @@ export function BidNoBidPage() {
 
   return (
     <div className="space-y-5 animate-fade-in pb-16" data-testid="bid-no-bid-page">
-      <h1 className="sr-only">{t('bid_no_bid.title', { defaultValue: 'Bid / no-bid' })}</h1>
       <Breadcrumb
         items={[
           { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tendering' },
@@ -124,14 +123,15 @@ export function BidNoBidPage() {
           { label: t('bid_no_bid.title', { defaultValue: 'Bid / no-bid' }) },
         ]}
       />
+      <PageHeader srTitle={t('bid_no_bid.title', { defaultValue: 'Bid / no-bid' })} subtitle={card.tender_name} />
 
       <section className="rounded-xl border border-border-light bg-surface-primary p-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="text-2xs uppercase tracking-wide text-content-tertiary">{t('bid_no_bid.score', { defaultValue: 'Score' })}</div>
-            <div className="text-4xl font-semibold tabular-nums text-content-primary" data-testid="bid-no-bid-score">
+            <div className="text-xl font-semibold tabular-nums text-content-primary" data-testid="bid-no-bid-score">
               {score == null ? '–' : fmtFixed(score, 1)}
-              <span className="text-base font-normal text-content-tertiary"> / 100</span>
+              <span className="text-sm font-normal text-content-tertiary"> / 100</span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-sm">
               <Badge variant={card.recommendation === 'bid' ? 'success' : card.recommendation === 'no_bid' ? 'warning' : 'neutral'}>{recText}</Badge>
@@ -149,7 +149,7 @@ export function BidNoBidPage() {
                 const n = Number(e.target.value);
                 if (n >= 1 && n <= 100 && n !== card.threshold) void patch({ threshold: n });
               }}
-              className="mt-1 block w-24 rounded border border-border-light bg-surface-primary px-2 py-1 text-right tabular-nums"
+              className="oe-input mt-1 block w-24 text-right tabular-nums"
               data-testid="bid-no-bid-threshold"
             />
           </label>
@@ -188,7 +188,7 @@ export function BidNoBidPage() {
                       const n = Number(e.target.value);
                       if (n >= 0 && n <= 100 && n !== card.weights[k]) void patch({ weights: { [k]: n } });
                     }}
-                    className="w-16 rounded border border-border-light bg-surface-primary px-2 py-1 text-right tabular-nums"
+                    className="oe-input-sm w-16 text-right tabular-nums"
                     aria-label={t('bid_no_bid.weight', { defaultValue: 'Weight %' })}
                   />
                 </td>
@@ -222,7 +222,7 @@ export function BidNoBidPage() {
                     onBlur={(e) => {
                       if (e.target.value !== (card.notes[k] ?? '')) void patch({ notes: { [k]: e.target.value } });
                     }}
-                    className="w-full min-w-40 rounded border border-border-light bg-surface-primary px-2 py-1"
+                    className="oe-input-sm w-full min-w-40"
                     aria-label={t('bid_no_bid.note', { defaultValue: 'Note' })}
                   />
                 </td>

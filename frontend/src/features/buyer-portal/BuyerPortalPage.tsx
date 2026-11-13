@@ -357,27 +357,29 @@ export function BuyerPortalPage() {
   if (state.kind === 'invalid') {
     return (
       <ShellWrapper>
-        <div
-          data-testid="buyer-portal-invalid"
-          className="rounded-2xl border border-semantic-error/30 bg-semantic-error/5 p-6 text-center space-y-3"
-        >
-          <ShieldX
-            size={32}
-            strokeWidth={1.5}
-            className="mx-auto text-semantic-error"
-          />
-          <h2 className="oe-section-title">
-            {t('buyer_portal.invalid.title', {
-              defaultValue: 'Your access link has expired',
-            })}
-          </h2>
-          <p className="text-sm text-content-secondary">
-            {t('buyer_portal.invalid.body', {
-              defaultValue:
-                'Contact your sales agent to receive a new link. We never ask for a password to view your information.',
-            })}
-          </p>
-        </div>
+        <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
+          <div
+            data-testid="buyer-portal-invalid"
+            className="rounded-xl border border-semantic-error/30 bg-semantic-error/5 p-6 text-center space-y-3"
+          >
+            <ShieldX
+              size={32}
+              strokeWidth={1.5}
+              className="mx-auto text-semantic-error"
+            />
+            <h2 className="oe-section-title">
+              {t('buyer_portal.invalid.title', {
+                defaultValue: 'Your access link has expired',
+              })}
+            </h2>
+            <p className="text-sm text-content-secondary">
+              {t('buyer_portal.invalid.body', {
+                defaultValue:
+                  'Contact your sales agent to receive a new link. We never ask for a password to view your information.',
+              })}
+            </p>
+          </div>
+        </main>
       </ShellWrapper>
     );
   }
@@ -385,29 +387,31 @@ export function BuyerPortalPage() {
   if (state.kind === 'error') {
     return (
       <ShellWrapper>
-        <div
-          data-testid="buyer-portal-error"
-          className="rounded-2xl border border-semantic-warning/30 bg-semantic-warning-bg p-6 text-center space-y-3"
-        >
-          <AlertTriangle
-            size={28}
-            strokeWidth={1.5}
-            className="mx-auto text-semantic-warning"
-          />
-          <h2 className="oe-section-title">
-            {t('buyer_portal.error.title', {
-              defaultValue: 'Something went wrong',
-            })}
-          </h2>
-          <p className="text-sm text-content-secondary">{state.message}</p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="mt-2 inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-lg bg-oe-blue text-white text-sm font-medium hover:bg-oe-blue-hover"
+        <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
+          <div
+            data-testid="buyer-portal-error"
+            className="rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg p-6 text-center space-y-3"
           >
-            {t('buyer_portal.error.retry', { defaultValue: 'Try again' })}
-          </button>
-        </div>
+            <AlertTriangle
+              size={28}
+              strokeWidth={1.5}
+              className="mx-auto text-semantic-warning"
+            />
+            <h2 className="oe-section-title">
+              {t('buyer_portal.error.title', {
+                defaultValue: 'Something went wrong',
+              })}
+            </h2>
+            <p className="text-sm text-content-secondary">{state.message}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-2 inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-lg bg-oe-blue text-white text-sm font-medium hover:bg-oe-blue-hover"
+            >
+              {t('buyer_portal.error.retry', { defaultValue: 'Try again' })}
+            </button>
+          </div>
+        </main>
       </ShellWrapper>
     );
   }
@@ -415,21 +419,23 @@ export function BuyerPortalPage() {
   if (state.kind === 'loading') {
     return (
       <ShellWrapper>
-        <div
-          data-testid="buyer-portal-loading"
-          className="rounded-2xl border border-border-light bg-surface-elevated p-8 text-center space-y-3"
-        >
-          <Loader2
-            size={24}
-            className="animate-spin mx-auto text-content-tertiary"
-            aria-hidden
-          />
-          <p className="text-sm text-content-tertiary">
-            {t('buyer_portal.loading', {
-              defaultValue: 'Loading your portal…',
-            })}
-          </p>
-        </div>
+        <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6">
+          <div
+            data-testid="buyer-portal-loading"
+            className="rounded-xl border border-border-light bg-surface-elevated p-8 text-center space-y-3"
+          >
+            <Loader2
+              size={24}
+              className="animate-spin mx-auto text-content-tertiary"
+              aria-hidden
+            />
+            <p className="text-sm text-content-tertiary">
+              {t('buyer_portal.loading', {
+                defaultValue: 'Loading your portal…',
+              })}
+            </p>
+          </div>
+        </main>
       </ShellWrapper>
     );
   }

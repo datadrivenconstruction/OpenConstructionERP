@@ -15,7 +15,7 @@ export function ProjectOffersWidget({ projectId }: { projectId: string }) {
       <ul className="space-y-1 text-sm">
         {rows.slice(0, 5).map((o) => (
           <li key={o.id} className="flex items-center justify-between gap-2">
-            <Link className="underline" to={`/boq/${o.boq_id}/offer`}>
+            <Link className="underline" to={`/boq/${o.boq_id}/offer?project=${encodeURIComponent(projectId)}`}>
               {o.number} {o.revision}
             </Link>
             <span className="truncate text-content-tertiary">{o.customer_name}</span>

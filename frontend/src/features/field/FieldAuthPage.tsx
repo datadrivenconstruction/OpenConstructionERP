@@ -72,7 +72,7 @@ export function FieldAuthPage() {
   }, [pin, token, navigate, t]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-white px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-surface-primary px-6">
       <div className="flex w-full max-w-sm flex-col gap-5">
         <div className="text-center">
           <h1 className="text-xl font-semibold text-content-primary">

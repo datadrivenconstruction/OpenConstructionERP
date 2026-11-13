@@ -1,10 +1,11 @@
 /** Customer offer for one estimate: a scrolling form on the left and a server-rendered PDF preview on the right. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Download } from 'lucide-react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { AlertTriangle, Download, FileText } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/shared/ui/Badge';
+import { Breadcrumb, EmptyState, PageHeader, Skeleton } from '@/shared/ui';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
@@ -72,6 +73,7 @@ export function OfferPage() {
   const { boqId } = useParams<{ boqId: string }>();
   const [params] = useSearchParams();
   const projectId = params.get('project') ?? undefined;
+  const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
   const qc = useQueryClient();
 
@@ -124,10 +126,33 @@ export function OfferPage() {
     });
 
   if (!projectId) {
-    return <div className="p-6 text-sm text-content-secondary">{t('offers.no_project', { defaultValue: 'Open the offer from an estimate.' })}</div>;
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <PageHeader srTitle={t('offers.page_title', { defaultValue: 'Customer offer' })} />
+        <EmptyState
+          icon={<FileText size={40} />}
+          title={t('offers.no_project', { defaultValue: 'Open the offer from an estimate.' })}
+          action={
+            boqId ? (
+              <Button variant="primary" onClick={() => navigate(`/boq/${boqId}`)}>
+                {t('boq.title', { defaultValue: 'Bill of Quantities' })}
+              </Button>
+            ) : undefined
+          }
+        />
+      </div>
+    );
   }
   if (!offer) {
-    return <div className="p-6 text-sm text-content-secondary">{t('common.loading', { defaultValue: 'Loading...' })}</div>;
+    return (
+      <div className="space-y-5" aria-busy="true" aria-label={t('common.loading', { defaultValue: 'Loading...' })}>
+        <Skeleton height={32} />
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Skeleton height={420} rounded="lg" />
+          <Skeleton height={420} rounded="lg" />
+        </div>
+      </div>
+    );
   }
 
   const findings = valQ.data?.findings ?? [];
@@ -136,38 +161,47 @@ export function OfferPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link to={`/boq/${boqId}`} className="text-content-secondary hover:text-content-primary" aria-label={t('common.back', { defaultValue: 'Back' })}>
-          <ArrowLeft size={20} />
-        </Link>
-        <h1 className="text-lg font-semibold">{t('offers.page_title', { defaultValue: 'Customer offer' })}</h1>
-        <span className="text-sm text-content-secondary">
-          {offer.number} · {t('offers.revision', { defaultValue: 'Rev' })} {offer.revision}
-        </span>
-        <Badge variant={STATUS_VARIANT[offer.status]}>{t(`offers.status.${offer.status}`, { defaultValue: offer.status })}</Badge>
-        {valQ.data && valQ.data.errors + valQ.data.warnings > 0 && (
-          <span className="flex items-center gap-1 text-sm text-semantic-warning">
-            <AlertTriangle size={14} />
-            {t('offers.to_fix', { count: valQ.data.errors + valQ.data.warnings, defaultValue: '{{count}} to fix' })}
+      <Breadcrumb
+        items={[
+          { label: t('boq.title', { defaultValue: 'Bill of Quantities' }), to: `/boq/${boqId}` },
+          { label: t('offers.page_title', { defaultValue: 'Customer offer' }) },
+        ]}
+      />
+      <PageHeader
+        srTitle={t('offers.page_title', { defaultValue: 'Customer offer' })}
+        subtitle={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <span>
+              {offer.number} · {t('offers.revision', { defaultValue: 'Rev' })} {offer.revision}
+            </span>
+            <Badge variant={STATUS_VARIANT[offer.status]}>{t(`offers.status.${offer.status}`, { defaultValue: offer.status })}</Badge>
+            {valQ.data && valQ.data.errors + valQ.data.warnings > 0 && (
+              <span className="inline-flex items-center gap-1 text-semantic-warning">
+                <AlertTriangle size={14} />
+                {t('offers.to_fix', { count: valQ.data.errors + valQ.data.warnings, defaultValue: '{{count}} to fix' })}
+              </span>
+            )}
           </span>
-        )}
-        <div className="ml-auto flex gap-2">
-          <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => void downloadPdf(offer)}>
-            {offer.status === 'draft' ? t('offers.download_draft', { defaultValue: 'Download draft' }) : t('offers.download', { defaultValue: 'Download' })}
-          </Button>
-          {offer.status === 'draft' && (
-            <SendAction
-              canSend={valQ.data?.can_send !== false}
-              firstError={valQ.data?.first_error ?? null}
-              pending={send.isPending}
-              onSend={() => run(send, t('offers.send', { defaultValue: 'Send offer' }), (r) => void downloadPdf(r as Offer))}
-            />
-          )}
-        </div>
-      </div>
+        }
+        actions={
+          <>
+            {offer.status === 'draft' && (
+              <SendAction
+                canSend={valQ.data?.can_send !== false}
+                firstError={valQ.data?.first_error ?? null}
+                pending={send.isPending}
+                onSend={() => run(send, t('offers.send', { defaultValue: 'Send offer' }), (r) => void downloadPdf(r as Offer))}
+              />
+            )}
+            <Button variant="secondary" icon={<Download size={16} />} onClick={() => void downloadPdf(offer)}>
+              {offer.status === 'draft' ? t('offers.download_draft', { defaultValue: 'Download draft' }) : t('offers.download', { defaultValue: 'Download' })}
+            </Button>
+          </>
+        }
+      />
 
       {offer.status !== 'draft' && (
-        <div className={`mb-4 rounded-md px-3 py-2 text-sm ${offer.stale ? 'bg-semantic-warning-bg text-semantic-warning' : 'bg-surface-secondary text-content-secondary'}`}>
+        <div className={`rounded-lg border border-border-light px-3 py-2 text-sm ${offer.stale ? 'bg-semantic-warning-bg text-semantic-warning' : 'bg-surface-secondary text-content-secondary'}`}>
           {offer.stale
             ? t('offers.stale_banner', { rev: offer.revision, defaultValue: 'The estimate changed after revision {{rev}} was sent.' })
             : t('offers.sent_banner', { date: offer.sent_at?.slice(0, 10) ?? '', rev: nextRevision(offer.revision), defaultValue: 'Sent on {{date}}. Changes create revision {{rev}}.' })}
@@ -308,7 +342,7 @@ export function OfferPage() {
 function SectionCard({ id, title, findings, children }: { id: string; title: string; findings: OfferFinding[]; children: React.ReactNode }) {
   return (
     <Card>
-      <section id={`offer-${id}`} className="p-4">
+      <section id={`offer-${id}`}>
         <h2 className="mb-3 text-sm font-semibold">{title}</h2>
         {children}
         {findings.length > 0 && (

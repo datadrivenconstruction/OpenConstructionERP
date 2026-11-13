@@ -357,7 +357,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={installM.isPending}
               onClick={() => installM.mutate()}
-              className="inline-flex items-center gap-1.5 rounded-md bg-semantic-error px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-semantic-error disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-semantic-error px-3 text-xs font-semibold text-content-inverse transition-colors hover:bg-semantic-error/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {installM.isPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -374,7 +374,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={readinessQ.isFetching || installM.isPending}
               onClick={() => void readinessQ.refetch()}
-              className="inline-flex items-center gap-1.5 rounded-md border border-semantic-error/30 bg-white/70 px-3 py-1.5 text-xs font-medium text-semantic-error transition-colors hover:bg-white disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-semantic-error/30 bg-surface-primary px-3 text-xs font-medium text-semantic-error transition-colors hover:bg-semantic-error-bg disabled:opacity-60"
             >
               <RefreshCw className={readinessQ.isFetching ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
               {t('qdrant_health.refresh_button', { defaultValue: 'Refresh status' })}
@@ -440,7 +440,7 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               type="button"
               disabled={switchM.isPending}
               onClick={() => void handleSwitch(switchItem.params.catalogue!)}
-              className="inline-flex items-center gap-1 rounded-full border border-semantic-warning/30 bg-white/90 px-2.5 py-1 text-2xs font-semibold text-semantic-warning hover:bg-semantic-warning-bg disabled:opacity-60 dark:bg-surface-primary/80"
+              className="inline-flex items-center gap-1 rounded-full border border-semantic-warning/30 bg-surface-primary px-2.5 py-1 text-2xs font-semibold text-semantic-warning hover:bg-semantic-warning-bg disabled:opacity-60"
             >
               {t('match_readiness.switch', {
                 defaultValue: 'Switch to {{catalogue}}',
