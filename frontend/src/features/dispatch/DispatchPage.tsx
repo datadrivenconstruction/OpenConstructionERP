@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Card, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { TabBar } from '@/shared/ui/TabBar';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -258,24 +259,20 @@ export function DispatchPage() {
         <Button variant="ghost" size="sm" onClick={() => setDay(today)}>
           {t('dispatch.today', { defaultValue: 'Today' })}
         </Button>
-        <div role="tablist" className="ml-auto flex rounded border border-border">
-          {(['day', 'week', 'utilisation'] as View[]).map((v) => (
-            <button
-              key={v}
-              role="tab"
-              type="button"
-              aria-selected={view === v}
-              onClick={() => setView(v)}
-              className={clsx('px-3 py-1 text-sm', view === v ? 'bg-oe-blue text-white' : 'text-content-secondary')}
-            >
-              {v === 'day'
-                ? t('dispatch.view_day', { defaultValue: 'Day' })
-                : v === 'week'
-                  ? t('dispatch.view_week', { defaultValue: 'Week' })
-                  : t('dispatch.view_utilisation', { defaultValue: 'Use of machines' })}
-            </button>
-          ))}
-        </div>
+        <TabBar
+          variant="segmented"
+          size="sm"
+          className="ml-auto"
+          ariaLabel={t('dispatch.title', { defaultValue: 'Dispatch board' })}
+          idPrefix="dispatch-view"
+          activeId={view}
+          onChange={setView}
+          tabs={[
+            { id: 'day', label: t('dispatch.view_day', { defaultValue: 'Day' }) },
+            { id: 'week', label: t('dispatch.view_week', { defaultValue: 'Week' }) },
+            { id: 'utilisation', label: t('dispatch.view_utilisation', { defaultValue: 'Use of machines' }) },
+          ]}
+        />
       </div>
 
       {showPlan && <PlanPanel day={addDays(day, day === today ? 1 : 0)} onClose={() => setShowPlan(false)} />}

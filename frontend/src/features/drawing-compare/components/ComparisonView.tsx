@@ -92,7 +92,7 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
             {side(comparison.old_label, comparison.old_revision, comparison.old_page)}
           </p>
           <p className="truncate">
-            <span className="font-medium text-blue-600">{t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}:</span>{' '}
+            <span className="font-medium text-oe-blue">{t('drawing_compare.new_revision', { defaultValue: 'Newer revision' })}:</span>{' '}
             {side(comparison.new_label, comparison.new_revision, comparison.new_page)}
           </p>
           <p className="text-xs text-content-secondary">
@@ -237,7 +237,7 @@ function DwgLayerTable({ comparison }: { comparison: Comparison }) {
               <tr key={`${r.layer}-${r.entity_type}`} className="border-t border-border">
                 <td className="font-mono">{r.layer}</td>
                 <td>{r.entity_type}</td>
-                <td className="text-right text-blue-600">{r.added}</td>
+                <td className="text-right text-oe-blue">{r.added}</td>
                 <td className="text-right text-semantic-error">{r.removed}</td>
                 <td className="text-right text-semantic-warning">{r.modified}</td>
               </tr>

@@ -33,7 +33,7 @@ export interface SyncReportDrawerProps {
 }
 
 const SEVERITY_TONE: Record<SyncSeverity, string> = {
-  warning: 'bg-semantic-warning-bg text-[#b45309] border-semantic-warning',
+  warning: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning',
   error: 'bg-semantic-error-bg text-semantic-error border-semantic-error',
 };
 

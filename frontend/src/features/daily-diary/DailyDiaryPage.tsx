@@ -59,6 +59,7 @@ import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { TabBar } from '@/shared/ui/TabBar';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { DIARY_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { useToastStore } from '@/stores/useToastStore';
@@ -496,43 +497,24 @@ export function DailyDiaryPage() {
         })}
       </DismissibleInfo>
 
-      <div className="border-b border-border-light">
-        <nav className="flex gap-1 -mb-px">
-          {(
-            [
-              { id: 'diaries', label: t('daily_diary.tab_diaries', { defaultValue: 'Diaries' }), icon: Calendar },
-              { id: 'today', label: t('daily_diary.tab_today', { defaultValue: 'Today' }), icon: BookOpen },
-              { id: 'archive', label: t('daily_diary.tab_archive', { defaultValue: 'Archive' }), icon: Archive },
-            ] as { id: Tab; label: string; icon: React.ElementType }[]
-          ).map((it) => {
-            const Icon = it.icon;
-            return (
-              <button
-                key={it.id}
-                type="button"
-                onClick={() => {
-                  // Clicking the "Today" tab itself always means *today's*
-                  // diary - drop any diary selected from the calendar.
-                  if (it.id === 'today') setActiveDiaryId('');
-                  setTab(it.id);
-                }}
-                className={clsx(
-                  'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                  tab === it.id
-                    ? 'border-oe-blue text-oe-blue'
-                    : 'border-transparent text-content-secondary hover:text-content-primary',
-                )}
-              >
-                <Icon size={14} />
-                {it.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+      <TabBar
+        ariaLabel={t('daily_diary.title', { defaultValue: 'Daily Site Diary' })}
+        idPrefix="daily-diary"
+        activeId={tab}
+        onChange={(id) => {
+          // The "Today" tab always means today's diary: drop any diary picked from the calendar.
+          if (id === 'today') setActiveDiaryId('');
+          setTab(id);
+        }}
+        tabs={[
+          { id: 'diaries', label: t('daily_diary.tab_diaries', { defaultValue: 'Diaries' }), icon: <Calendar size={14} /> },
+          { id: 'today', label: t('daily_diary.tab_today', { defaultValue: 'Today' }), icon: <BookOpen size={14} /> },
+          { id: 'archive', label: t('daily_diary.tab_archive', { defaultValue: 'Archive' }), icon: <Archive size={14} /> },
+        ]}
+      />
 
       {projectsQ.isError ? (
-        <Card className="py-12">
+        <Card padding="none">
           <EmptyState
             icon={<AlertTriangle size={22} />}
             title={t('common.error', { defaultValue: 'Error' })}
@@ -560,7 +542,7 @@ export function DailyDiaryPage() {
         </Card>
       ) : tab === 'diaries' ? (
         diariesQ.isError ? (
-          <Card className="py-12">
+          <Card padding="none">
             <EmptyState
               icon={<AlertTriangle size={22} />}
               title={t('common.error', { defaultValue: 'Error' })}
@@ -591,7 +573,7 @@ export function DailyDiaryPage() {
         )
       ) : tab === 'today' ? (
         activeError ? (
-          <Card className="py-12">
+          <Card padding="none">
             <EmptyState
               icon={<AlertTriangle size={22} />}
               title={t('common.error', { defaultValue: 'Error' })}
@@ -624,7 +606,7 @@ export function DailyDiaryPage() {
           />
         )
       ) : archiveQ.isError ? (
-        <Card className="py-12">
+        <Card padding="none">
           <EmptyState
             icon={<AlertTriangle size={22} />}
             title={t('common.error', { defaultValue: 'Error' })}
@@ -3153,7 +3135,7 @@ function PhotoUploadModal({
                     defaultValue: 'Click to choose an image from this device',
                   })}
             </span>
-            <span className="text-2xs text-content-quaternary">
+            <span className="text-2xs text-content-tertiary">
               {t('daily_diary.photo_supported', {
                 defaultValue: 'JPEG, PNG, WebP, HEIC, TIFF. Saved as a site photo.',
               })}

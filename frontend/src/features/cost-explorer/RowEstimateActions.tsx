@@ -284,7 +284,7 @@ function AddToBoqDialog({ row, onClose }: { row: EstimateRow; onClose: () => voi
         role="dialog"
         aria-modal="true"
         aria-labelledby="ce-add-boq-title"
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-2xl"
+        className="w-full max-w-md overflow-hidden rounded-2xl border border-border-light bg-surface-elevated shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-border-light px-5 py-4">
