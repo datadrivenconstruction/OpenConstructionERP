@@ -1316,3 +1316,30 @@ def desktop_mode() -> bool:
     if getattr(sys, "frozen", False):
         return True
     return os.environ.get("OE_DESKTOP", "").strip().lower() in {"1", "true"}
+
+
+def effective_registration_mode(settings: Settings) -> str:
+    """Return the self-registration mode that actually applies.
+
+    Two gated modes cannot work on an install that has no way to deliver the
+    gate, which left a self-registered user with a dormant account and no way
+    in:
+
+    * ``email-verify`` needs a mail transport; without SMTP no message is ever
+      sent, so it degrades to ``open``. With SMTP configured it is unchanged.
+    * On the desktop (single-user local workspace) the shipped ``admin-approve``
+      default has no reachable approver, so it degrades to ``open`` unless the
+      operator set ``OE_REGISTRATION_MODE`` explicitly.
+
+    Args:
+        settings: The loaded application settings.
+
+    Returns:
+        One of ``open``, ``email-verify``, ``admin-approve``, ``closed``.
+    """
+    mode = settings.registration_mode or "open"
+    if mode == "email-verify" and not (settings.email_backend == "smtp" and settings.smtp_host):
+        return "open"
+    if mode == "admin-approve" and desktop_mode() and "registration_mode" not in settings.model_fields_set:
+        return "open"
+    return mode
