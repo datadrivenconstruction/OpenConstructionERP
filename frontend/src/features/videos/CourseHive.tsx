@@ -54,7 +54,7 @@ function hexPoints(inset: number): string {
     [cx + r / 2, cy + h],
     [cx - r / 2, cy + h],
   ]
-    .map(([x, y]) => `${x!.toFixed(1)},${y!.toFixed(1)}`)
+    .map(([x, y]) => `${Math.round(x! * 10) / 10},${Math.round(y! * 10) / 10}`)
     .join(' ');
 }
 

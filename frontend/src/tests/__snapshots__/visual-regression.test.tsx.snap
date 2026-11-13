@@ -1043,7 +1043,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between animate-card-in"
     >
       <h1
-        class="text-2xl font-semibold tracking-tight gradient-text pl-2"
+        class="text-lg font-semibold tracking-tight text-content-primary"
       >
         Good morning, Test
       </h1>
@@ -1135,8 +1135,8 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           </span>
         </button>
         <button
-          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-transparent text-content-secondary hover:bg-surface-secondary hover:text-content-primary active:bg-surface-tertiary border border-transparent h-8 px-3 text-sm gap-1.5 rounded-lg"
-          data-oe-button="ghost"
+          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs h-8 px-3 text-sm gap-1.5 rounded-lg"
+          data-oe-button="secondary"
           title="Jump into an estimate - resumes the latest or starts a new one"
         >
           <span
@@ -1145,13 +1145,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             <svg
               class="lucide lucide-sparkles"
               fill="none"
-              height="14"
+              height="16"
               stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
               viewBox="0 0 24 24"
-              width="14"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
@@ -1179,8 +1179,8 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         </button>
         <button
           aria-pressed="false"
-          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-transparent text-content-secondary hover:bg-surface-secondary hover:text-content-primary active:bg-surface-tertiary border border-transparent h-8 px-3 text-sm gap-1.5 rounded-lg"
-          data-oe-button="ghost"
+          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs h-8 px-3 text-sm gap-1.5 rounded-lg"
+          data-oe-button="secondary"
           data-testid="dashboard-tour-customize-button"
           title="Reorder, show or hide dashboard sections"
         >
@@ -1325,7 +1325,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
       </div>
     </div>
     <div
-      class="flex items-center flex-wrap gap-x-4 gap-y-2 pl-2 animate-stagger-in"
+      class="flex items-center flex-wrap gap-x-4 gap-y-2 animate-stagger-in"
       style="animation-delay: 140ms;"
     >
       <a
@@ -4096,7 +4096,7 @@ exports[`Visual Regression - Logo > Logo - small 1`] = `
 exports[`Visual Regression - Logo > LogoWithText - default 1`] = `
 <div>
   <span
-    aria-label="OpenConstruction ERP"
+    aria-label="OpenConstructionERP"
     class="inline-flex items-center gap-2"
     role="img"
   >
@@ -4141,7 +4141,7 @@ exports[`Visual Regression - Logo > LogoWithText - default 1`] = `
 exports[`Visual Regression - Logo > LogoWithText - without version 1`] = `
 <div>
   <span
-    aria-label="OpenConstruction ERP"
+    aria-label="OpenConstructionERP"
     class="inline-flex items-center gap-2"
     role="img"
   >
