@@ -91,7 +91,7 @@ function HowItWorks() {
             'Lease the units you built or manage, bill the rent through finance and see who is behind, without a second ledger.',
         })}
       </p>
-      <ol className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-stretch">
+      <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:flex 2xl:flex-row 2xl:items-stretch">
         {steps.map((s, i) => (
           <Fragment key={s.title}>
             <li className="flex-1 rounded-lg border border-border-light bg-surface-secondary/40 p-3">
@@ -107,7 +107,7 @@ function HowItWorks() {
               <p className="mt-1.5 text-2xs leading-relaxed text-content-tertiary">{s.desc}</p>
             </li>
             {i < steps.length - 1 && (
-              <li aria-hidden="true" className="hidden shrink-0 items-center self-center text-content-quaternary lg:flex">
+              <li aria-hidden="true" className="hidden shrink-0 items-center self-center text-content-quaternary 2xl:flex">
                 <ArrowRight size={16} className="rtl:rotate-180" />
               </li>
             )}
