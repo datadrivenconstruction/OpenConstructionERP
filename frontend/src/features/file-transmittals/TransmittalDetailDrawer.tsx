@@ -120,7 +120,7 @@ export function TransmittalDetailDrawer({
         })}
         className={clsx(
           'fixed inset-y-0 right-0 z-drawer w-full max-w-md',
-          'bg-surface-elevated border-l border-border-light shadow-2xl',
+          'bg-surface-elevated border-l border-border-light shadow-xl',
           'flex flex-col animate-slide-in-right',
         )}
       >

@@ -239,7 +239,7 @@ export function LinkPicker({ id, target, projectId, value, onChange, label, inva
           id={listId}
           role="listbox"
           aria-label={label}
-          className="absolute z-dropdown mt-1 max-h-64 w-full overflow-auto rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute z-dropdown mt-1 max-h-64 w-full overflow-auto rounded-lg border border-border-light bg-surface-primary py-1 shadow-md"
         >
           {results.isLoading ? (
             <li className="flex items-center gap-2 px-3 py-2 text-xs text-content-tertiary">

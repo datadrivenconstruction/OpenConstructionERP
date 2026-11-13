@@ -288,7 +288,7 @@ export function CascadeSection({
                     <button
                       type="button"
                       onClick={() => removeBaseToken(token)}
-                      className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+                      className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}
                     >
                       <Trash2 size={14} />
@@ -371,7 +371,7 @@ export function CascadeSection({
                     <button
                       type="button"
                       onClick={() => removeComposite(name)}
-                      className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+                      className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                       aria-label={t('common.delete', { defaultValue: 'Delete' })}
                     >
                       <Trash2 size={14} />
@@ -462,7 +462,7 @@ export function CascadeSection({
                     <span className="text-content-tertiary" aria-hidden>
                       <GripVertical size={16} />
                     </span>
-                    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-surface-secondary px-1.5 text-2xs font-semibold tabular-nums text-content-secondary">
+                    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-lg bg-surface-secondary px-1.5 text-2xs font-semibold tabular-nums text-content-secondary">
                       {index + 1}
                     </span>
                     <input
@@ -492,7 +492,7 @@ export function CascadeSection({
                           type="button"
                           onClick={() => moveStep(index, -1)}
                           disabled={index === 0}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
                           aria-label={t('methodology.cascade.steps.move_up', { defaultValue: 'Move up' })}
                         >
                           <ArrowUp size={14} />
@@ -501,7 +501,7 @@ export function CascadeSection({
                           type="button"
                           onClick={() => moveStep(index, 1)}
                           disabled={index === steps.length - 1}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30"
                           aria-label={t('methodology.cascade.steps.move_down', { defaultValue: 'Move down' })}
                         >
                           <ArrowDown size={14} />
@@ -509,7 +509,7 @@ export function CascadeSection({
                         <button
                           type="button"
                           onClick={() => removeStep(index)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                           aria-label={t('common.delete', { defaultValue: 'Delete' })}
                         >
                           <Trash2 size={14} />

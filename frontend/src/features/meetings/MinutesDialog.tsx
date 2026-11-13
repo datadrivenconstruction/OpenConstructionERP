@@ -56,7 +56,7 @@ interface MinutesDialogProps {
 }
 
 const inputCls =
-  'h-9 w-full rounded-md border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+  'h-9 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
   'oe-textarea w-full resize-vertical';
 
@@ -533,7 +533,7 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
                 {minutes.content.action_items.map((ai, i) => (
                   <div
                     key={`${ai.description}-${i}`}
-                    className="flex flex-wrap items-center gap-2 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm"
+                    className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm"
                   >
                     <span className="flex-1 min-w-[160px] text-content-primary">{ai.description}</span>
                     {ai.brought_forward && (

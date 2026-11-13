@@ -118,7 +118,7 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
                           <button
                             type="button"
                             onClick={() => setModal({ open: true, initial: fs })}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
                             aria-label={t('common.edit', { defaultValue: 'Edit' })}
                           >
                             <Pencil size={14} />
@@ -126,7 +126,7 @@ export function FundingSourcesSection({ projectId, readOnly }: Props) {
                           <button
                             type="button"
                             onClick={() => deleteMut.mutate(fs.id)}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
                             aria-label={t('common.delete', { defaultValue: 'Delete' })}
                           >
                             <Trash2 size={14} />

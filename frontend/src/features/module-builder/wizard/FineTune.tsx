@@ -84,7 +84,7 @@ export function LockedMark({ testId }: { testId?: string }) {
   const { t } = useTranslation();
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-tertiary"
+      className="inline-flex items-center gap-1 rounded-lg bg-surface-secondary px-1.5 py-0.5 text-2xs font-medium text-content-tertiary"
       title={t('module_builder.locked_hint', {
         defaultValue: 'Entries already use this. Its wording can change. What it holds stays as it is.',
       })}
@@ -456,7 +456,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                         type="button"
                         onClick={() => setSpec(removeOption(spec, index, optionIndex))}
                         aria-label={t('common.remove', { defaultValue: 'Remove' })}
-                        className="rounded-md p-1 text-content-tertiary hover:text-semantic-error"
+                        className="rounded-lg p-1 text-content-tertiary hover:text-semantic-error"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -503,7 +503,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                   onClick={() => setSpec(moveField(spec, index, -1))}
                   aria-label={t('common.move_up', { defaultValue: 'Move up' })}
                   disabled={index === 0 || locked || previousLocked}
-                  className="rounded-md p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
+                  className="rounded-lg p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
                 >
                   <ArrowUp size={14} />
                 </button>
@@ -512,7 +512,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                   onClick={() => setSpec(moveField(spec, index, 1))}
                   aria-label={t('common.move_down', { defaultValue: 'Move down' })}
                   disabled={index === spec.entity.fields.length - 1 || locked}
-                  className="rounded-md p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
+                  className="rounded-lg p-1 text-content-tertiary hover:text-content-primary disabled:opacity-30"
                 >
                   <ArrowDown size={14} />
                 </button>
@@ -522,7 +522,7 @@ function FieldsEditor({ spec, setSpec, vocabulary, problems, baseline = null }: 
                     onClick={() => setSpec(removeField(spec, index))}
                     aria-label={t('module_builder.remove_field', { defaultValue: 'Remove this field' })}
                     disabled={spec.entity.fields.length === 1}
-                    className="rounded-md p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
+                    className="rounded-lg p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
                     data-testid={`module-builder-remove-field-${index}`}
                   >
                     <Trash2 size={14} />
@@ -714,7 +714,7 @@ function RulesEditor({ spec, setSpec, vocabulary, problems, baseline = null }: E
                     type="button"
                     onClick={() => setSpec(removeRule(spec, index))}
                     aria-label={t('module_builder.remove_rule', { defaultValue: 'Remove this rule' })}
-                    className="rounded-md p-1 hover:text-semantic-error"
+                    className="rounded-lg p-1 hover:text-semantic-error"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -785,7 +785,7 @@ function FeatureSettings({ spec, setSpec, problems, baseline = null }: Omit<Edit
                   setSpec(setFeatures(spec, { status: { states: status.states.filter((_, i) => i !== index) } }))
                 }
                 aria-label={t('common.remove', { defaultValue: 'Remove' })}
-                className="rounded-md p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
+                className="rounded-lg p-1 text-content-tertiary hover:text-semantic-error disabled:opacity-30"
               >
                 <Trash2 size={14} />
               </button>

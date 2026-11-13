@@ -44,7 +44,7 @@ export function SeenOnBadge(props: SeenQuery) {
       {open && (
         <div
           data-testid="seen-on-popover"
-          className="absolute end-0 z-dropdown mt-1 w-80 rounded-lg border border-border-light bg-surface-primary p-3 shadow-lg"
+          className="absolute end-0 z-dropdown mt-1 w-80 rounded-lg border border-border-light bg-surface-primary p-3 shadow-md"
         >
           <ul className="space-y-2">
             {data.top.map((l) => (

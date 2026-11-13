@@ -245,7 +245,7 @@ export function IsoNameBuilder({
         ))}
       </div>
 
-      <div className="mt-4 rounded-md border border-border bg-surface-secondary p-3">
+      <div className="mt-4 rounded-lg border border-border bg-surface-secondary p-3">
         <div className="text-xs font-medium uppercase text-content-tertiary">
           {t('iso.preview', { defaultValue: 'Preview' })}
         </div>

@@ -188,7 +188,7 @@ export function AttachChecklistToIssue({
             type="button"
             aria-label={t('common.close', { defaultValue: 'Close' })}
             onClick={onClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
           >
             <X size={16} />
           </button>

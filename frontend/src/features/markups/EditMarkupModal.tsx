@@ -196,7 +196,7 @@ export function EditMarkupModal({
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
       <div
         ref={dialogRef}
         role="dialog"
@@ -213,7 +213,7 @@ export function EditMarkupModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-surface-secondary text-content-tertiary transition-colors"
+            className="p-1 rounded-lg hover:bg-surface-secondary text-content-tertiary transition-colors"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={16} />

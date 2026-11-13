@@ -102,14 +102,14 @@ export function InsightsPanel({
   return (
     <section
       ref={sectionRef}
-      className="animate-fade-in overflow-hidden rounded-2xl border border-border-light bg-surface-secondary/30"
+      className="animate-fade-in overflow-hidden rounded-xl border border-border-light bg-surface-primary"
       aria-label={title ?? t('insights.toggle', { defaultValue: 'Insights' })}
     >
       {/* Header strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-light bg-surface-primary/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-light px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
-            <BarChart3 size={16} />
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
+            <BarChart3 size={14} />
           </span>
           <div className="min-w-0">
             <h2 className="oe-card-title flex items-center gap-2">
@@ -137,11 +137,11 @@ export function InsightsPanel({
         </Button>
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 bg-surface-secondary/30 p-4">
         {/* No records in this module yet, so there is nothing honest to draw. */}
         {!hasData && (
-          <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <FlaskConical size={26} className="text-content-tertiary" strokeWidth={1.5} />
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <FlaskConical size={32} className="text-content-tertiary" strokeWidth={1.5} />
             <p className="text-sm text-content-secondary">
               {t('insights.no_data_title', { defaultValue: 'No data to chart yet' })}
             </p>
@@ -196,8 +196,8 @@ export function InsightsPanel({
 
         {/* There is data, but the user has removed every chart. */}
         {hasData && all.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <BarChart3 size={26} className="text-content-tertiary" strokeWidth={1.5} />
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <BarChart3 size={32} className="text-content-tertiary" strokeWidth={1.5} />
             <p className="text-sm text-content-secondary">
               {t('insights.empty_title', { defaultValue: 'No charts yet' })}
             </p>
@@ -227,7 +227,7 @@ export function InsightsPanel({
         type="button"
         onClick={collapse}
         aria-expanded
-        className="group flex w-full items-center justify-center gap-2 border-t border-border-light bg-surface-primary/50 px-4 py-2.5 text-xs font-medium text-content-tertiary transition-colors hover:bg-surface-secondary/70 hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue/40"
+        className="group flex w-full items-center justify-center gap-2 border-t border-border-light bg-surface-primary px-4 py-2 text-xs font-medium text-content-tertiary transition-colors hover:bg-surface-secondary/70 hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue/40"
       >
         <ChevronUp
           size={14}

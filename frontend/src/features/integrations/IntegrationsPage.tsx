@@ -612,7 +612,7 @@ function InfoPopover({
         <Info size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-dropdown mt-1 w-72 rounded-lg border border-border-light bg-surface-primary p-3 shadow-lg animate-fade-in">
+        <div className="absolute right-0 top-full z-dropdown mt-1 w-72 rounded-lg border border-border-light bg-surface-primary p-3 shadow-md animate-fade-in">
           <p className="text-xs text-content-secondary leading-relaxed">{text}</p>
           {externalUrl && (
             <a
@@ -825,7 +825,7 @@ function ConnectModal({
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-surface-primary p-6 shadow-xl">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-primary p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

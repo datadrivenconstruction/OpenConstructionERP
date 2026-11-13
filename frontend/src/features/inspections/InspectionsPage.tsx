@@ -10,7 +10,6 @@ import {
   ClipboardCheck,
   Search,
   Plus,
-  X,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
@@ -37,7 +36,7 @@ import {
   ArrowRight,
   Gauge,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, CollapsibleSection, WideModal } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { SyncStatusPill } from '@/features/field/SyncStatusPill';
@@ -293,54 +292,41 @@ function CreateInspectionModal({
     if (canSubmit) onSubmit(form);
   };
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-label={
-          isEdit
-            ? t('inspections.edit_inspection', { defaultValue: 'Edit Inspection' })
-            : t('inspections.new_inspection', { defaultValue: 'New Inspection' })
-        }
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <div>
-            <h2 className="oe-section-title">
-              {isEdit
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={isEdit
                 ? t('inspections.edit_inspection', { defaultValue: 'Edit Inspection' })
                 : t('inspections.new_inspection', { defaultValue: 'New Inspection' })}
-            </h2>
-            {projectName && (
-              <p className="text-xs text-content-tertiary mt-0.5">
-                {t('common.creating_in_project', {
+      subtitle={projectName ? (t('common.creating_in_project', {
                   defaultValue: 'In {{project}}',
                   project: projectName,
-                })}
-              </p>
+                })) : undefined}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : isEdit ? (
+              <Pencil size={16} className="mr-1.5 shrink-0" />
+            ) : (
+              <Plus size={16} className="mr-1.5 shrink-0" />
             )}
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="px-6 py-4 space-y-5">
+            <span>
+              {isEdit
+                ? t('inspections.save_changes', { defaultValue: 'Save Changes' })
+                : t('inspections.create_inspection', { defaultValue: 'Create Inspection' })}
+            </span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-5">
           {/* ── Inspection Type ── */}
           <div>
             <label className="oe-label">
@@ -592,29 +578,7 @@ function CreateInspectionModal({
           </div>
           {inspectionId && <PhotoStrip projectId={projectId} kind="inspection" targetId={inspectionId} />}
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : isEdit ? (
-              <Pencil size={16} className="mr-1.5 shrink-0" />
-            ) : (
-              <Plus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>
-              {isEdit
-                ? t('inspections.save_changes', { defaultValue: 'Save Changes' })
-                : t('inspections.create_inspection', { defaultValue: 'Create Inspection' })}
-            </span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -660,14 +624,6 @@ function CompleteInspectionDialog({
   const { t } = useTranslation();
   const [result, setResult] = useState<InspectionResult>('pass');
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   const resultLabels: Record<InspectionResult, string> = {
     pass: t('inspections.result_pass', { defaultValue: 'Pass' }),
     partial: t('inspections.result_partial', { defaultValue: 'Partial' }),
@@ -684,32 +640,33 @@ function CompleteInspectionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-md bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('inspections.record_result_title', { defaultValue: 'Record inspection result' })}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <div>
-            <h2 className="oe-section-title">
-              {t('inspections.record_result_title', { defaultValue: 'Record inspection result' })}
-            </h2>
-            <p className="text-xs text-content-tertiary mt-0.5 truncate">
-              {inspection.inspection_number} · {inspection.title}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors shrink-0"
+    <WideModal
+      open
+      onClose={onClose}
+      size="sm"
+      title={t('inspections.record_result_title', { defaultValue: 'Record inspection result' })}
+      subtitle={<>{inspection.inspection_number} · {inspection.title}</>}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => onConfirm(result)}
+            disabled={isPending}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="px-6 py-5 space-y-2">
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <CheckCircle2 size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('inspections.record_result_confirm', { defaultValue: 'Record Result' })}</span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-2">
           <p className="text-sm text-content-secondary mb-2">
             {t('inspections.record_result_prompt', {
               defaultValue: 'Choose the outcome. A fail or partial result lets you raise a Punch List item or NCR.',
@@ -744,26 +701,7 @@ function CompleteInspectionDialog({
             );
           })}
         </div>
-
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => onConfirm(result)}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <CheckCircle2 size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t('inspections.record_result_confirm', { defaultValue: 'Record Result' })}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -925,7 +863,7 @@ const InspectionRow = React.memo(function InspectionRow({
                   <div
                     key={item.id}
                     className={clsx(
-                      'flex items-start gap-2 text-sm rounded-md px-2 py-1',
+                      'flex items-start gap-2 text-sm rounded-lg px-2 py-1',
                       item.critical && !item.passed && 'bg-semantic-error-bg',
                     )}
                   >

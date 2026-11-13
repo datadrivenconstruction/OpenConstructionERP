@@ -333,14 +333,14 @@ export function NewTransmittalWizard({
           columns={1}
         >
           {items.length === 0 ? (
-            <p className="text-sm text-content-tertiary py-6 text-center border border-dashed border-border rounded-md">
+            <p className="text-sm text-content-tertiary py-6 text-center border border-dashed border-border rounded-lg">
               {t('files.transmittals.no_items', {
                 defaultValue:
                   'No files selected. Close this wizard, select files on the list, then click "Send transmittal" again.',
               })}
             </p>
           ) : (
-            <ul className="divide-y divide-border-light border border-border-light rounded-md">
+            <ul className="divide-y divide-border-light border border-border-light rounded-lg">
               {items.map((it, idx) => (
                 <li
                   key={`${it.file_kind}-${it.file_id}-${idx}`}
@@ -445,13 +445,13 @@ export function NewTransmittalWizard({
           </div>
 
           {recipients.length === 0 ? (
-            <p className="text-sm text-content-tertiary py-4 mt-2 text-center border border-dashed border-border rounded-md">
+            <p className="text-sm text-content-tertiary py-4 mt-2 text-center border border-dashed border-border rounded-lg">
               {t('files.transmittals.no_recipients', {
                 defaultValue: 'No recipients yet. Add at least one to send.',
               })}
             </p>
           ) : (
-            <ul className="divide-y divide-border-light border border-border-light rounded-md mt-2">
+            <ul className="divide-y divide-border-light border border-border-light rounded-lg mt-2">
               {recipients.map((r, idx) => (
                 <li
                   key={r.email}

@@ -83,7 +83,7 @@ function ActionRow({
   const closed = action.status === 'done' || action.status === 'cancelled';
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-md border border-border-light bg-surface-primary px-2.5 py-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-2.5 py-2">
       <div className="flex-1 min-w-[180px]">
         <p
           className={

@@ -896,7 +896,7 @@ export function InlinePdfAnnotator({
             key={id}
             onClick={() => { setActiveTool(id); setShowTextInput(false); }}
             title={t(`markups.tool_${id}`, { defaultValue: label })}
-            className={`p-1.5 rounded-md transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors ${
               activeTool === id
                 ? 'bg-oe-blue text-white'
                 : 'text-content-secondary hover:bg-surface-secondary'
@@ -958,7 +958,7 @@ export function InlinePdfAnnotator({
         <button aria-label={t('common.zoom_out', { defaultValue: 'Zoom out' })}
           onClick={() => changeZoom(-1)}
           disabled={zoom <= ZOOM_LEVELS[0]!}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
         >
           <ZoomOut size={14} />
         </button>
@@ -968,7 +968,7 @@ export function InlinePdfAnnotator({
         <button aria-label={t('common.zoom_in', { defaultValue: 'Zoom in' })}
           onClick={() => changeZoom(1)}
           disabled={zoom >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1]!}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
         >
           <ZoomIn size={14} />
         </button>
@@ -978,7 +978,7 @@ export function InlinePdfAnnotator({
         <button aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
           onClick={() => goPage(-1)}
           disabled={currentPage <= 1}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
         >
           <ChevronLeft size={14} />
         </button>
@@ -988,7 +988,7 @@ export function InlinePdfAnnotator({
         <button aria-label={t('common.next_page', { defaultValue: 'Next page' })}
           onClick={() => goPage(1)}
           disabled={currentPage >= totalPages}
-          className="p-1.5 rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+          className="p-1.5 rounded-lg text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
         >
           <ChevronRight size={14} />
         </button>

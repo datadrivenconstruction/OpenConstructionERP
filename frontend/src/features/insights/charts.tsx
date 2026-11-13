@@ -112,7 +112,7 @@ function VizTooltip({ active, payload, format = 'number', currency }: TooltipPro
   const p = payload[0];
   if (!p) return null;
   return (
-    <div className="rounded-lg border border-border bg-surface-primary px-2.5 py-1.5 text-xs shadow-lg">
+    <div className="rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs shadow-md">
       <div className="max-w-[180px] truncate font-medium text-content-primary">{p.payload.name}</div>
       <div className="tabular-nums text-content-secondary">{formatFull(p.value, format, currency)}</div>
     </div>
@@ -273,13 +273,13 @@ export interface KpiTileProps {
 export function KpiTile({ label, value, format = 'number', currency, color = 0, caption }: KpiTileProps) {
   const accent = paletteColor(color);
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-primary p-3">
+    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-primary px-4 py-3">
       <span className="absolute inset-y-0 left-0 w-1" style={{ background: accent }} aria-hidden />
       <div className="pl-1.5">
         <div className="truncate text-2xs font-medium uppercase tracking-wider text-content-tertiary" title={label}>
           {label}
         </div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
+        <div className="mt-0.5 text-xl font-semibold tabular-nums text-content-primary">
           {formatFull(value, format, currency)}
         </div>
         {caption && <div className="mt-0.5 truncate text-2xs text-content-tertiary">{caption}</div>}

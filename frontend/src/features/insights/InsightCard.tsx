@@ -30,7 +30,7 @@ export function CardControls({ onEdit, onRemove }: { onEdit?: () => void; onRemo
           onClick={onEdit}
           aria-label={t('insights.edit_chart', { defaultValue: 'Edit chart' })}
           title={t('insights.edit_chart', { defaultValue: 'Edit chart' })}
-          className="rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-oe-blue"
+          className="rounded-lg p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-oe-blue"
         >
           <Pencil size={14} />
         </button>
@@ -41,7 +41,7 @@ export function CardControls({ onEdit, onRemove }: { onEdit?: () => void; onRemo
           onClick={onRemove}
           aria-label={t('insights.remove_chart', { defaultValue: 'Remove chart' })}
           title={t('insights.remove_chart', { defaultValue: 'Remove chart' })}
-          className="rounded-md p-1 text-content-tertiary transition-colors hover:bg-semantic-error-bg/40 hover:text-semantic-error"
+          className="rounded-lg p-1 text-content-tertiary transition-colors hover:bg-semantic-error-bg/40 hover:text-semantic-error"
         >
           <X size={14} />
         </button>
