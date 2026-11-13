@@ -44,6 +44,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { WideModal } from '@/shared/ui/WideModal';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -840,35 +841,38 @@ function ApplyModal({
   }, []);
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg rounded-2xl bg-surface-0 shadow-xl border border-border-subtle"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
-          <h2 className="oe-section-title flex items-center gap-2">
-            <Play className="w-4 h-4 text-oe-blue" />
-            {t('clash.profiles.applyTitle', {
-              defaultValue: 'Run "{{name}}"',
-              name: profile.name,
-            })}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-7 w-7 flex items-center justify-center rounded text-content-tertiary hover:text-content-primary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      busy={applyMut.isPending}
+      title={t('clash.profiles.applyTitle', {
+        defaultValue: 'Run "{{name}}"',
+        name: profile.name,
+      })}
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            size="sm"
+            icon={
+              applyMut.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )
+            }
+            disabled={selModels.length === 0 || applyMut.isPending}
+            onClick={() => applyMut.mutate()}
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="px-5 py-4 space-y-4">
+            {t('clash.profiles.createRun', { defaultValue: 'Create run' })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
           <div>
             <label className="oe-label" htmlFor="apply-run-name">
               {t('clash.profiles.runName', {
@@ -930,28 +934,7 @@ function ApplyModal({
               </div>
             )}
           </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border-light">
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            size="sm"
-            icon={
-              applyMut.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Play className="w-4 h-4" />
-              )
-            }
-            disabled={selModels.length === 0 || applyMut.isPending}
-            onClick={() => applyMut.mutate()}
-          >
-            {t('clash.profiles.createRun', { defaultValue: 'Create run' })}
-          </Button>
-        </div>
       </div>
-    </div>
+    </WideModal>
   );
 }

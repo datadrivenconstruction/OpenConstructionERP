@@ -82,6 +82,8 @@ import {
   Breadcrumb,
   ModuleGuideButton,
   CollapsibleSection,
+  WideModal,
+  SideDrawer,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -2567,77 +2569,50 @@ export function ClashDetectionPage() {
           </Card>
 
           {/* Save-as-profile dialog (item #23). */}
-          {showSaveProfile && (
-            <div
-              className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-              role="dialog"
-              aria-modal="true"
-              onClick={() => setShowSaveProfile(false)}
-            >
-              <div
-                className="w-full max-w-md rounded-2xl border border-border-subtle bg-surface-0 shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
-                  <h2 className="oe-section-title flex items-center gap-2">
-                    <Bookmark className="h-4 w-4 text-oe-blue" />
-                    {t('clash.save_as_profile', {
-                      defaultValue: 'Save configuration as a profile',
-                    })}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowSaveProfile(false)}
-                    aria-label={t('common.close', { defaultValue: 'Close' })}
-                    className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-content-primary"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="px-5 py-4">
-                  <label className="oe-label">
-                    {t('clash.profile_name', { defaultValue: 'Profile name' })}
-                    <input
-                      type="text"
-                      maxLength={255}
-                      value={saveProfileName}
-                      onChange={(e) => setSaveProfileName(e.target.value)}
-                      placeholder={t('clash.profile_name_ph', {
-                        defaultValue: 'e.g. MEP × Structural - tight',
-                      })}
-                      className="oe-input mt-1 w-full"
-                    />
-                  </label>
-                  <p className="mt-2 text-2xs text-content-tertiary">
-                    {t('clash.save_profile_hint', {
-                      defaultValue:
-                        'Saves the tolerance, clearance, type, mode and selection sets above. Models are not part of a profile.',
-                    })}
-                  </p>
-                </div>
-                <div className="flex items-center justify-end gap-2 border-t border-border-light px-5 py-4">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setShowSaveProfile(false)}
-                  >
-                    {t('common.cancel', { defaultValue: 'Cancel' })}
-                  </Button>
-                  <Button
-                    size="sm"
-                    loading={saveProfileMut.isPending}
-                    disabled={
-                      !saveProfileName.trim() || saveProfileMut.isPending
-                    }
-                    icon={<Save className="h-4 w-4" />}
-                    onClick={() => saveProfileMut.mutate()}
-                  >
-                    {t('common.save', { defaultValue: 'Save' })}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+          <WideModal
+            open={showSaveProfile}
+            onClose={() => setShowSaveProfile(false)}
+            size="sm"
+            title={t('clash.save_as_profile', {
+              defaultValue: 'Save configuration as a profile',
+            })}
+            footer={
+              <>
+                <Button variant="secondary" size="sm" onClick={() => setShowSaveProfile(false)}>
+                  {t('common.cancel', { defaultValue: 'Cancel' })}
+                </Button>
+                <Button
+                  size="sm"
+                  loading={saveProfileMut.isPending}
+                  disabled={!saveProfileName.trim() || saveProfileMut.isPending}
+                  icon={<Save className="h-4 w-4" />}
+                  onClick={() => saveProfileMut.mutate()}
+                >
+                  {t('common.save', { defaultValue: 'Save' })}
+                </Button>
+              </>
+            }
+          >
+            <label className="oe-label">
+              {t('clash.profile_name', { defaultValue: 'Profile name' })}
+              <input
+                type="text"
+                maxLength={255}
+                value={saveProfileName}
+                onChange={(e) => setSaveProfileName(e.target.value)}
+                placeholder={t('clash.profile_name_ph', {
+                  defaultValue: 'e.g. MEP × Structural - tight',
+                })}
+                className="oe-input mt-1 w-full"
+              />
+            </label>
+            <p className="mt-2 text-2xs text-content-tertiary">
+              {t('clash.save_profile_hint', {
+                defaultValue:
+                  'Saves the tolerance, clearance, type, mode and selection sets above. Models are not part of a profile.',
+              })}
+            </p>
+          </WideModal>
 
           <Card padding="md">
             <h2 className="oe-card-title">
@@ -6011,45 +5986,17 @@ function ClashDetailPanel({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-dropdown flex justify-end"
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('clash.detail_title', {
-        defaultValue: 'Clash details',
-      })}
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-md"
+      title={t('clash.detail_title', { defaultValue: 'Clash details' })}
+      subtitle={
+        <span className="text-2xs">
+          {(row.a_name || row.a_stable_id) + ' ↔ ' + (row.b_name || row.b_stable_id)}
+        </span>
+      }
     >
-      <button
-        type="button"
-        aria-label={t('common.close', { defaultValue: 'Close' })}
-        onClick={onClose}
-        className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
-      />
-      <div className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-border bg-surface-elevated shadow-2xl animate-slide-in-right">
-        <div className="flex items-start justify-between gap-3 border-b border-border-light p-4">
-          <div className="min-w-0">
-            <h2 className="oe-card-title flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-oe-blue" />
-              {t('clash.detail_title', {
-                defaultValue: 'Clash details',
-              })}
-            </h2>
-            <p className="mt-1 truncate text-2xs text-content-tertiary">
-              {(row.a_name || row.a_stable_id) +
-                ' ↔ ' +
-                (row.b_name || row.b_stable_id)}
-            </p>
-          </div>
-          <button
-            type="button"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            onClick={onClose}
-            className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
         <div className="space-y-5 p-4">
           {/* Quick 3D preview of the two clashing elements + a prominent
               jump into the full BIM viewer. Mirrors the BOQ grid
@@ -6453,8 +6400,7 @@ function ClashDetailPanel({
             })}
           </Link>
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 

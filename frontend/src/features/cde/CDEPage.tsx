@@ -9,7 +9,6 @@ import {
   Database,
   Search,
   Plus,
-  X,
   ChevronDown,
   ChevronRight,
   ArrowRight,
@@ -24,7 +23,7 @@ import {
   Users,
   Gauge,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, RecoveryCard, SkeletonTable, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, WideModal, KpiBand, RecoveryCard, SkeletonTable, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -215,24 +214,28 @@ function CreateCDEModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('cde.new_container', { defaultValue: 'New Container' })}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">
-            {t('cde.new_container', { defaultValue: 'New Container' })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <div className="px-6 py-4 space-y-4">
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('cde.new_container', { defaultValue: 'New Container' })}
+      size="md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <Plus size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('cde.create_container', { defaultValue: 'Create Container' })}</span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
           {errorMessage && (
             <div
               className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-sm text-semantic-error"
@@ -392,24 +395,8 @@ function CreateCDEModal({
               className={inputCls}
             />
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <Plus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t('cde.create_container', { defaultValue: 'Create Container' })}</span>
-          </Button>
-        </div>
       </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -453,26 +440,31 @@ function ApprovalSignatureModal({
   }, [onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
-      role="dialog"
-      aria-label={t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
-    >
-      <div className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">
-            {t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary"
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
+      size="sm"
+      busy={isPending}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isPending || !canSubmit}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="px-6 py-4 space-y-4">
+            {isPending && (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            )}
+            {t('cde.approval_submit', { defaultValue: 'Sign and publish' })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
           <p className="text-sm text-content-secondary">
             {t('cde.approval_modal_body', {
               defaultValue:
@@ -529,25 +521,8 @@ function ApprovalSignatureModal({
               })}
             />
           </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={isPending || !canSubmit}
-          >
-            {isPending && (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            )}
-            {t('cde.approval_submit', { defaultValue: 'Sign and publish' })}
-          </Button>
-        </div>
       </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -702,36 +677,38 @@ function LinkDocumentModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface-primary rounded-2xl shadow-xl border border-border w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <div>
-            <div className="flex items-center gap-2">
-              <Link2 size={20} className="text-oe-blue" />
-              <h3 className="oe-section-title">
-                {t('cde.link_documents', { defaultValue: 'Link Documents' })}
-              </h3>
-            </div>
-            <p className="text-xs text-content-secondary mt-0.5">
-              {container.container_code} — {container.title}
-            </p>
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('cde.link_documents', { defaultValue: 'Link Documents' })}
+      subtitle={`${container.container_code} - ${container.title}`}
+      size="md"
+      busy={linking}
+      footer={
+        <div className="flex w-full items-center justify-between gap-2">
+          <span className="text-xs text-content-tertiary">
+            {filtered.length} {t('cde.documents_available', { defaultValue: 'documents available' })}
+          </span>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleLink}
+              disabled={selected.length === 0 || linking}
+            >
+              <Link2 size={14} className="mr-1" />
+              {linking
+                ? t('cde.linking', { defaultValue: 'Linking...' })
+                : `${t('cde.link_selected', { defaultValue: 'Link' })} ${selected.length} ${t('cde.documents', { defaultValue: 'Document(s)' })}`}
+            </Button>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="p-1 rounded hover:bg-surface-secondary"
-          >
-            <X size={16} />
-          </button>
         </div>
-
+      }
+    >
+      <div className="-mx-5 -my-4 flex flex-col">
         {/* Search */}
         <div className="px-5 py-3 border-b border-border shrink-0">
           <div className="relative">
@@ -825,31 +802,8 @@ function LinkDocumentModal({
             is not linkable and only this line would say so. Gated on the
             server page, never on the search-filtered rows. */}
         {docPage ? <TruncationNotice page={docPage} className="px-5 pb-2" /> : null}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-border shrink-0">
-          <span className="text-xs text-content-tertiary">
-            {filtered.length} {t('cde.documents_available', { defaultValue: 'documents available' })}
-          </span>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleLink}
-              disabled={selected.length === 0 || linking}
-            >
-              <Link2 size={14} className="mr-1" />
-              {linking
-                ? t('cde.linking', { defaultValue: 'Linking...' })
-                : `${t('cde.link_selected', { defaultValue: 'Link' })} ${selected.length} ${t('cde.documents', { defaultValue: 'Document(s)' })}`}
-            </Button>
-          </div>
-        </div>
       </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -1276,12 +1230,13 @@ function CdeFunctionalRoles() {
   const { roles, states, matrix } = data;
 
   return (
-    <Card padding="md">
-      <h2 className="oe-card-title flex items-center gap-1.5">
-        <Users size={16} className="text-oe-blue" />
-        {t('cde.roles_title', { defaultValue: 'Roles and responsibilities' })}
-      </h2>
-      <p className="mt-1 text-xs text-content-tertiary">
+    <CollapsibleSection
+      storageKey="cde.roles"
+      defaultCollapsed
+      icon={<Users size={16} className="text-oe-blue" />}
+      title={t('cde.roles_title', { defaultValue: 'Roles and responsibilities' })}
+    >
+      <p className="text-xs text-content-tertiary">
         {t('cde.roles_intro', {
           defaultValue:
             'ISO 19650 organises information work around four functional roles. Agree who does what once and reuse it on every discipline - the same person can author their own package and only view another.',
@@ -1368,7 +1323,7 @@ function CdeFunctionalRoles() {
           </tbody>
         </table>
       </div>
-    </Card>
+    </CollapsibleSection>
   );
 }
 
@@ -1429,15 +1384,17 @@ function CdeReadiness({ projectId }: { projectId: string }) {
   const done = data.signals.filter((s) => s.done).length;
 
   return (
-    <Card padding="md">
+    <CollapsibleSection
+      storageKey="cde.readiness"
+      defaultCollapsed
+      icon={<Gauge size={16} className="text-oe-blue" />}
+      title={t('cde.readiness_title', { defaultValue: 'Go-live readiness' })}
+      subtitle={`${data.score}/100 · ${t(`cde.readiness_level_${level}`, { defaultValue: cfg.label })}`}
+    >
       {/* Header + score */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="oe-card-title flex items-center gap-1.5">
-            <Gauge size={16} className="text-oe-blue" />
-            {t('cde.readiness_title', { defaultValue: 'Go-live readiness' })}
-          </h2>
-          <p className="mt-1 max-w-xl text-xs text-content-tertiary">
+          <p className="max-w-xl text-xs text-content-tertiary">
             {t('cde.readiness_intro', {
               defaultValue:
                 'Standing up a CDE is more than switching it on. This scores how far this project has actually run the ISO 19650 workflow - naming, classification, the move through Shared and Published, signed gates and versioned revisions - and points at the next few things to fix.',
@@ -1549,7 +1506,7 @@ function CdeReadiness({ projectId }: { projectId: string }) {
           ))}
         </div>
       )}
-    </Card>
+    </CollapsibleSection>
   );
 }
 
@@ -1973,48 +1930,16 @@ export function CDEPage() {
           many containers sit in WIP, Shared, Published and Archived at a
           glance. */}
       {projectId && stats && stats.total > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="oe-overline">
-              {t('cde.stat_total', { defaultValue: 'Total containers' })}
-            </span>
-            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
-              {stats.total}
-            </span>
-          </div>
-          <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="oe-overline">
-              {t('cde.state_wip', { defaultValue: 'WIP' })}
-            </span>
-            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
-              {stats.by_state?.wip ?? 0}
-            </span>
-          </div>
-          <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="oe-overline">
-              {t('cde.state_shared', { defaultValue: 'Shared' })}
-            </span>
-            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
-              {stats.by_state?.shared ?? 0}
-            </span>
-          </div>
-          <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="oe-overline">
-              {t('cde.state_published', { defaultValue: 'Published' })}
-            </span>
-            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
-              {stats.by_state?.published ?? 0}
-            </span>
-          </div>
-          <div className="flex flex-col rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-            <span className="oe-overline">
-              {t('cde.state_archived', { defaultValue: 'Archived' })}
-            </span>
-            <span className="mt-1 text-2xl font-semibold tabular-nums text-content-primary">
-              {stats.by_state?.archived ?? 0}
-            </span>
-          </div>
-        </div>
+        <KpiBand
+          columns={5}
+          items={[
+            { key: 'total', label: t('cde.stat_total', { defaultValue: 'Total containers' }), value: stats.total },
+            { key: 'wip', label: t('cde.state_wip', { defaultValue: 'WIP' }), value: stats.by_state?.wip ?? 0 },
+            { key: 'shared', label: t('cde.state_shared', { defaultValue: 'Shared' }), value: stats.by_state?.shared ?? 0 },
+            { key: 'published', label: t('cde.state_published', { defaultValue: 'Published' }), value: stats.by_state?.published ?? 0 },
+            { key: 'archived', label: t('cde.state_archived', { defaultValue: 'Archived' }), value: stats.by_state?.archived ?? 0 },
+          ]}
+        />
       )}
 
       {/* State filter tabs */}
@@ -2068,7 +1993,7 @@ export function CDEPage() {
           placeholder={t('cde.search_placeholder', {
             defaultValue: 'Search containers...',
           })}
-          className={inputCls + ' pl-9'}
+          className={inputCls.replace('h-10', 'h-8') + ' pl-9'}
         />
       </div>
 

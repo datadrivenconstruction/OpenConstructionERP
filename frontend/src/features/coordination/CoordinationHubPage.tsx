@@ -110,13 +110,9 @@ function GlassPanel({
   return (
     <section
       data-testid={testId}
-      className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04] dark:shadow-slate-950/30"
+      className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-gradient-radial from-sky-500/15 to-transparent blur-3xl"
-      />
-      <div className="relative flex items-start justify-between gap-3 border-b border-white/40 px-5 py-4 dark:border-white/5">
+      <div className="relative flex items-start justify-between gap-3 border-b border-border-light px-4 py-3">
         <div className="flex items-start gap-3">
           {icon ? (
             <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-surface-secondary text-content-secondary">
@@ -204,7 +200,7 @@ function QuickActionTile({
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/40 bg-white/40 px-3.5 py-3 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:bg-white/70 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-border-light bg-surface-elevated px-3.5 py-3 text-left transition-colors hover:border-oe-blue/40 hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue transition-colors group-hover:bg-oe-blue group-hover:text-white">
         {icon}
@@ -396,25 +392,10 @@ export function CoordinationHubPage() {
   return (
     <div
       data-testid="coordination-hub-page"
-      className="relative min-h-full overflow-hidden"
+      className="animate-fade-in"
     >
       <BetaBanner moduleKey="coordination-hub" className="mt-3" />
-      {/* Page-level gradient backdrop. Layered so the glass cards
-          above pick up a tint without us needing per-card gradients. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-sky-50 via-white to-emerald-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 -left-40 -z-10 h-96 w-96 rounded-full bg-gradient-radial from-sky-400/15 to-transparent blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -right-40 -z-10 h-96 w-96 rounded-full bg-gradient-radial from-emerald-400/15 to-transparent blur-3xl"
-      />
-
-      <div className="space-y-5 py-5 lg:py-6">
+      <div className="space-y-5">
         <Breadcrumb
           items={[
             ...(projectName

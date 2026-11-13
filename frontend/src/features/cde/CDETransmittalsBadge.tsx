@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Send, X, FileText } from 'lucide-react';
-import { Badge, DateDisplay } from '@/shared/ui';
+import { Send, FileText } from 'lucide-react';
+import { Badge, DateDisplay, SideDrawer } from '@/shared/ui';
 import { fetchContainerTransmittals, type ContainerTransmittalLink } from './api';
 
 /**
@@ -69,36 +69,15 @@ function TransmittalsDrawer({
 }) {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed inset-0 z-modal flex justify-end bg-black/40 animate-fade-in"
-      onClick={onClose}
-      role="dialog"
-      aria-label={t('cde.transmittals_drawer_title', {
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-md"
+      title={t('cde.transmittals_drawer_title', {
         defaultValue: 'Transmittals carrying this container',
       })}
     >
-      <div
-        className="w-full max-w-md bg-surface-primary border-l border-border shadow-xl flex flex-col animate-slide-in-right"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <Send size={20} className="text-oe-blue" />
-            <h3 className="oe-section-title">
-              {t('cde.transmittals_drawer_title', {
-                defaultValue: 'Transmittals carrying this container',
-              })}
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-surface-secondary text-content-tertiary hover:text-content-primary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+        <div className="px-5 py-4 space-y-2">
           {links.map((link) => (
             <div
               key={`${link.transmittal_id}-${link.revision_id ?? ''}`}
@@ -128,7 +107,6 @@ function TransmittalsDrawer({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }

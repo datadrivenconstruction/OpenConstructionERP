@@ -49,6 +49,7 @@ import {
   ModuleGuideButton,
   CollapsibleSection,
 } from '@/shared/ui';
+import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
@@ -1398,7 +1399,7 @@ function ConnectorCard({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border-light bg-surface-primary p-3 transition-colors hover:border-border-medium">
+    <div className="flex flex-col gap-2 rounded-xl border border-border-light bg-surface-primary p-3 transition-colors hover:border-border-medium">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Icon size={16} className="shrink-0 text-content-tertiary" />
@@ -1415,26 +1416,13 @@ function ConnectorCard({
         </Badge>
       </div>
       <p className="text-xs text-content-tertiary leading-relaxed">{description}</p>
-      <div className="mt-1">
-        {status === 'available' ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onSetup}
-          >
+      {status === 'available' && (
+        <div className="mt-1">
+          <Button variant="secondary" size="sm" onClick={onSetup}>
             {t('correspondence.setup_integration', { defaultValue: 'Set Up in Integrations' })}
           </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled
-            className="opacity-50 cursor-not-allowed"
-          >
-            {t('correspondence.connector_coming_soon', { defaultValue: 'Coming Soon' })}
-          </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1893,18 +1881,13 @@ export function CorrespondencePage() {
 
       <HowCorrespondenceWorks />
 
-      {/* No-project warning */}
-      {!projectId && (
-        <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-4 text-sm text-semantic-warning">
-          {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
-        </div>
-      )}
+      {!projectId && <RequiresProject>{null}</RequiresProject>}
 
       {/* Connectors — inbound auto-import (IMAP / webhook ingestion) is not
           built yet; the integrations module only dispatches OUTBOUND
           webhooks. Marked "Coming Soon" so the cards don't promise a flow
           that doesn't exist. Entries are logged manually today. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <ConnectorCard
           name={t('correspondence.connector_email', { defaultValue: 'Email (IMAP/SMTP)' })}
           status="coming_soon"
@@ -1938,7 +1921,7 @@ export function CorrespondencePage() {
               defaultValue: 'Search correspondence...',
             })}
             aria-label={t('correspondence.search_placeholder', { defaultValue: 'Search correspondence...' })}
-            className={inputCls + ' pl-9'}
+            className={inputCls.replace('h-10', 'h-8') + ' pl-9'}
           />
         </div>
 
@@ -1950,7 +1933,7 @@ export function CorrespondencePage() {
               setDirectionFilter(e.target.value as CorrespondenceDirection | '')
             }
             aria-label={t('correspondence.filter_all_dir', { defaultValue: 'All Directions' })}
-            className="oe-select-lg ps-3 sm:w-36"
+            className="oe-select ps-3 sm:w-36"
           >
             <option value="">
               {t('correspondence.filter_all_dir', { defaultValue: 'All Directions' })}
@@ -1973,7 +1956,7 @@ export function CorrespondencePage() {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as CorrespondenceType | '')}
             aria-label={t('correspondence.filter_all_type', { defaultValue: 'All Types' })}
-            className="oe-select-lg ps-3 sm:w-36"
+            className="oe-select ps-3 sm:w-36"
           >
             <option value="">
               {t('correspondence.filter_all_type', { defaultValue: 'All Types' })}
@@ -1995,7 +1978,7 @@ export function CorrespondencePage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as CorrespondenceStatus | '')}
             aria-label={t('correspondence.filter_all_status', { defaultValue: 'All Statuses' })}
-            className="oe-select-lg ps-3 sm:w-40"
+            className="oe-select ps-3 sm:w-40"
           >
             <option value="">
               {t('correspondence.filter_all_status', { defaultValue: 'All Statuses' })}
