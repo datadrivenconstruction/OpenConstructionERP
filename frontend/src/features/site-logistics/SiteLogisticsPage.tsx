@@ -377,6 +377,9 @@ function BillPositionPicker({
       onClose={onClose}
       size="lg"
       title={t('siteLogistics.pick_from_bill', { defaultValue: 'Pick from the bill' })}
+      subtitle={t('siteLogistics.pick_from_bill_hint', {
+        defaultValue: 'Every line shows what is still outstanding against the estimate.',
+      })}
     >
         <div className="border-b border-border-light">
           <div className="relative">
@@ -396,6 +399,82 @@ function BillPositionPicker({
             />
           </div>
         </div>
+        <div className="-mx-1 max-h-[55vh] overflow-y-auto">
+          {isLoading ? (
+            <div className="p-2">
+              <SkeletonTable rows={6} />
+            </div>
+          ) : isError ? (
+            <p className="px-3 py-8 text-center text-sm text-semantic-error">
+              {t('siteLogistics.bill_load_failed', {
+                defaultValue: 'Could not read the bill for this project',
+              })}
+            </p>
+          ) : rows.length === 0 ? (
+            <EmptyState
+              icon={<Table2 size={40} />}
+              title={t('siteLogistics.no_bill_positions', {
+                defaultValue: 'No estimate lines to deliver against',
+              })}
+              description={t('siteLogistics.no_bill_positions_hint', {
+                defaultValue:
+                  'This project has no priced bill yet, or nothing matches your search.',
+              })}
+            />
+          ) : (
+            <ul className="divide-y divide-border-light">
+              {rows.map((row) => {
+                const picked = row.position_id ? chosen.has(row.position_id) : false;
+                return (
+                  <li key={row.position_id}>
+                    <button
+                      type="button"
+                      onClick={() => onPick(row)}
+                      disabled={picked}
+                      className={clsx(
+                        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
+                        picked
+                          ? 'cursor-not-allowed opacity-50'
+                          : 'hover:bg-surface-secondary/60',
+                      )}
+                    >
+                      <span className="w-24 shrink-0 font-mono text-xs text-content-tertiary tabular-nums">
+                        {row.ordinal || '-'}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-content-primary">
+                        {row.description}
+                      </span>
+                      <span className="shrink-0 text-right text-xs tabular-nums">
+                        <span className="block text-content-secondary">
+                          {t('siteLogistics.outstanding_short', { defaultValue: 'Outstanding' })}{' '}
+                          <QuantityDisplay
+                            value={row.outstanding_quantity}
+                            unit={row.unit}
+                            className="font-medium text-content-primary"
+                          />
+                        </span>
+                        <span className="block text-content-tertiary">
+                          {t('siteLogistics.of_bill_quantity', { defaultValue: 'of' })}{' '}
+                          <QuantityDisplay value={row.bill_quantity} unit={row.unit} />
+                        </span>
+                      </span>
+                      {picked ? (
+                        <Check size={14} className="shrink-0 text-semantic-success" />
+                      ) : (
+                        <Plus size={14} className="shrink-0 text-content-tertiary" />
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        {data && (
+          <div className="border-t border-border-light pt-2">
+            <TruncationNotice page={{ items: data.rows, total: data.total }} />
+          </div>
+        )}
     </WideModal>
   );
 }
@@ -491,6 +570,7 @@ function BookDeliveryModal({
   };
 
   return (
+    <>
     <WideModal
       open
       onClose={onClose}
@@ -797,6 +877,15 @@ function BookDeliveryModal({
           </div>
         </div>
     </WideModal>
+      {picking && projectId && (
+        <BillPositionPicker
+          projectId={projectId}
+          chosen={chosenPositions}
+          onPick={addLine}
+          onClose={() => setPicking(false)}
+        />
+      )}
+    </>
   );
 }
 
