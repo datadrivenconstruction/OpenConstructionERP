@@ -850,12 +850,12 @@ export function ProjectsPage() {
           an empty list, and hiding the toolbar there would strand the user on
           the Archived view with no Active/Archived switch to get back. */}
       {((projects && projects.length > 0) || hasActiveFilter || hasArchivedOnly) && (
-        <Card padding="none" className="mb-6">
-          <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <Card padding="none">
+          <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
             {/* Search */}
             <div className="relative flex-1">
-              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-                <Search size={16} />
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
+                <Search size={14} />
               </div>
               <input
                 type="text"
@@ -865,7 +865,7 @@ export function ProjectsPage() {
                   defaultValue: 'Search projects...',
                 })}
                 aria-label={t('projects.search_placeholder', { defaultValue: 'Search projects...' })}
-                className="oe-input oe-input-lg ps-10"
+                className="oe-input ps-9"
               />
             </div>
 
@@ -881,7 +881,7 @@ export function ProjectsPage() {
                 aria-label={t('a11y.projects.status_filter', {
                   defaultValue: 'Filter projects by status',
                 })}
-                className="oe-select oe-input-lg sm:w-36"
+                className="oe-select sm:w-36"
               >
                 {availableStatuses.map((s) => (
                   <option key={s} value={s}>
@@ -895,9 +895,6 @@ export function ProjectsPage() {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-                <ChevronDown size={14} />
-              </div>
             </div>
 
             {/* Region filter */}
@@ -908,7 +905,7 @@ export function ProjectsPage() {
                 aria-label={t('a11y.projects.region_filter', {
                   defaultValue: 'Filter projects by region',
                 })}
-                className="oe-select oe-input-lg sm:w-40"
+                className="oe-select sm:w-40"
               >
                 {availableRegions.map((r) => (
                   <option key={r} value={r}>
@@ -918,9 +915,6 @@ export function ProjectsPage() {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-                <ChevronDown size={14} />
-              </div>
             </div>
 
             {/* Sort buttons */}
@@ -930,7 +924,7 @@ export function ProjectsPage() {
                   key={opt.value}
                   onClick={() => setSortOption(opt.value)}
                   title={opt.title}
-                  className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
+                  className={`flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-medium transition-colors ${
                     sortOption === opt.value
                       ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
@@ -1358,7 +1352,7 @@ export function ProjectCard({
       // would also catch project-card-view-on-map on the button inside.
       data-testid="project-card"
       padding="none"
-      className={`group relative animate-card-in overflow-hidden rounded-xl bg-gradient-to-b from-surface-elevated to-surface-primary hover:shadow-xl hover:border-oe-blue/40 focus-within:ring-2 focus-within:ring-oe-blue/30 motion-safe:transition-all ${isArchived ? 'cursor-default opacity-90' : 'cursor-pointer'}`}
+      className={`group relative animate-card-in overflow-hidden rounded-xl bg-gradient-to-b from-surface-elevated to-surface-primary hover:shadow-sm hover:border-oe-blue/40 focus-within:ring-2 focus-within:ring-oe-blue/30 motion-safe:transition-all ${isArchived ? 'cursor-default opacity-90' : 'cursor-pointer'}`}
       style={style}
       // An archived (deleted) project has no page to open: the project route
       // answers 404 for it. Its card offers Restore instead.
@@ -1404,9 +1398,9 @@ export function ProjectCard({
           )}
         </div>
       )}
-      <div className="p-5">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-semibold ring-1 ring-inset ring-white/40 dark:ring-white/5 shadow-sm transition-transform duration-normal ease-oe group-hover:scale-105 ${getRegionAvatarClass(project.region)}`}>
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ring-1 ring-inset ring-white/40 dark:ring-white/5 ${getRegionAvatarClass(project.region)}`}>
             {project.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex items-center gap-1.5">

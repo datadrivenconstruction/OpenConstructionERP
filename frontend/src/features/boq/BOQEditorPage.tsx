@@ -7,7 +7,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUnitsSystem } from '@/features/market/api';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
 import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal } from 'lucide-react';
-import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText } from '@/shared/ui';
+import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText, PageHeader } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
 import { activeLanguageTag, apiGet, apiPost, apiPatch, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
@@ -5304,12 +5304,229 @@ export function BOQEditorPage() {
     >
       {/* ── Breadcrumb ────────────────────────────────────────────────── */}
       <Breadcrumb
-        className="mb-5"
+        className="mb-3"
         items={[
           ...(project ? [{ label: project.name, to: `/projects/${project.id}` }] : []),
           { label: t('boq.title', 'Bill of Quantities'), to: '/boq' },
           { label: boq.name },
         ]}
+      />
+
+      {/* ── Header: subtitle + actions (PageHeader collapses the tail into "...") */}
+      <PageHeader
+        className="mb-4"
+        subtitle={boq.description || undefined}
+        actions={
+          <>
+            {!boq.is_locked && boq.status === 'draft' && (
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  try {
+                    await apiPatch(`/v1/boq/boqs/${boqId}`, { status: 'final' });
+                    queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
+                    addToast({ type: 'success', title: t('boq.submitted_for_review', { defaultValue: 'Submitted for review' }) });
+                  } catch (err) {
+                    addToast({ type: 'error', title: t('boq.submit_review_failed', { defaultValue: 'Could not submit for review' }), message: editorErrorText(err, t) });
+                  }
+                }}
+                title={t('boq.submit_review_tooltip', { defaultValue: 'Submit this estimate for review and approval' })}
+              >
+                <CheckCircle size={14} className="mr-1" />
+                {t('boq.submit_for_review', { defaultValue: 'Submit for Review' })}
+              </Button>
+            )}
+            {!boq.is_locked && boq.status === 'final' && isManager && (
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  try {
+                    await apiPatch(`/v1/boq/boqs/${boqId}`, { status: 'draft' });
+                    queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
+                    addToast({ type: 'info', title: t('boq.returned_to_draft', { defaultValue: 'Returned to draft for changes' }) });
+                  } catch (err) {
+                    addToast({ type: 'error', title: t('boq.request_changes_failed', { defaultValue: 'Could not return the estimate to draft' }), message: editorErrorText(err, t) });
+                  }
+                }}
+              >
+                <ArrowLeft size={14} className="mr-1" />
+                {t('boq.request_changes', { defaultValue: 'Request Changes' })}
+              </Button>
+            )}
+            {!boq.is_locked && isManager && (
+              <Button variant="secondary" onClick={handleLock} disabled={lockMutation.isPending} title={t('boq.lock_tooltip', { defaultValue: 'Lock prevents edits. Create a revision to make changes to a locked estimate.' })}>
+                <Lock size={14} className="mr-1" />
+                {t('boq.lock', { defaultValue: 'Lock Estimate' })}
+              </Button>
+            )}
+            {boq.is_locked && isManager && (
+              <Button variant="secondary" onClick={handleUnlock} disabled={unlockMutation.isPending}>
+                <Lock size={14} className="mr-1" />
+                {t('boq.unlock', { defaultValue: 'Unlock' })}
+              </Button>
+            )}
+            {boq.is_locked && (
+              <Button variant="secondary" onClick={handleCreateBudget} disabled={createBudgetMutation.isPending}>
+                <Wallet size={14} className="mr-1" />
+                {t('boq.create_budget', { defaultValue: 'Create Budget' })}
+              </Button>
+            )}
+            {/* Deep link OUT to the Validation dashboard, carrying this BOQ and
+                its project so the target lands pre-selected (2 clicks to a
+                result). The dashboard persists a server-side report; the
+                toolbar's inline Validate keeps the quick in-grid check. */}
+            <Button
+              variant="secondary"
+              onClick={() =>
+                navigate(`/validation?boq_id=${boq.id}&project=${boq.project_id}`)
+              }
+              title={t('boq.validate_dashboard_hint', {
+                defaultValue: 'Open the Validation dashboard for this BOQ',
+              })}
+            >
+              <ShieldCheck size={14} className="mr-1" />
+              {t('boq.validate_dashboard_btn', { defaultValue: 'Validate' })}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setTenderOpen(true)}
+              title={t('boq.tender_btn_hint', {
+                defaultValue: 'Create a tender package from this estimate',
+              })}
+            >
+              <Send size={14} className="mr-1" />
+              {t('boq.tender_btn', { defaultValue: 'To tender' })}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setCompareOpen(true)}
+              title={t('boq.compare_btn_hint', {
+                defaultValue: 'Compare this estimate against another BOQ',
+              })}
+            >
+              <GitCompare size={14} className="mr-1" />
+              {t('boq.compare_btn', { defaultValue: 'Compare' })}
+            </Button>
+            <Button variant="secondary" onClick={handleCreateRevision} disabled={createRevisionMutation.isPending}>
+              <Copy size={14} className="mr-1" />
+              {t('boq.create_revision', { defaultValue: 'Create Revision' })}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleJumpToMarkups}
+              title={t('boq.markups_btn_hint', {
+                defaultValue: 'Overhead, profit, tax and contingency (OH&P)',
+              })}
+            >
+              <Percent size={14} className="mr-1" />
+              {t('boq.markups_btn', { defaultValue: 'Markups' })}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setScenarioOpen(true)}
+              title={t('boq.scenario_btn_hint', {
+                defaultValue: 'Clone this estimate into a what-if scenario and adjust it freely',
+              })}
+            >
+              <FlaskConical size={14} className="mr-1" />
+              {t('boq.scenario_btn', { defaultValue: 'What-if' })}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setModelReviewOpen(true)}
+              title={t('boq.model_review_btn_hint', {
+                defaultValue: 'Re-pull quantities from linked BIM models',
+              })}
+            >
+              <RefreshCw size={14} className="mr-1" />
+              {t('boq.model_review_btn', { defaultValue: 'Model sync' })}
+            </Button>
+            {/* Quantity rules scoped to this bill: the rules page opens with
+                this project, BOQ and model preselected. A locked bill cannot
+                take the positions a rule writes, so the action says why
+                instead of disappearing. Hidden for a role without bim.create
+                and with BIM Hub off (see offerModelEntryPoints). */}
+            {offerModelEntryPoints && (
+            <span
+              title={
+                boq.is_locked
+                  ? t('boq.qty_from_model_locked', {
+                      defaultValue: 'This estimate is locked. Unlock it or create a revision to add quantities from the model.',
+                    })
+                  : t('bim_rules.what_a_rule_does', {
+                      defaultValue:
+                        'A quantity rule picks model elements by category and properties, such as walls built in a given phase, and writes their total area, volume, length or count into a BOQ position.',
+                    })
+              }
+            >
+              <Button
+                variant="secondary"
+                disabled={boq.is_locked}
+                data-testid="boq-quantities-from-model"
+                onClick={() =>
+                  navigate(
+                    buildQuantityRulesUrl({ projectId: boq.project_id, boqId: boq.id, modelId: bimModelId }),
+                  )
+                }
+              >
+                <SlidersHorizontal size={14} className="mr-1" />
+                {t('boq.qty_from_model_btn', { defaultValue: 'Quantities from the model' })}
+              </Button>
+            </span>
+            )}
+            {boqId && <ChangeReviewButton boqId={boqId} onClick={() => setChangeReviewOpen(true)} />}
+            {/* A Russian local estimate opens its resource-index breakdown:
+                each resource group times its regional quarterly index, then
+                NR and SP on the wage fund. Read-only over this BOQ. */}
+            {((project?.region ?? '').toUpperCase().startsWith('RU') ||
+              (project?.classification_standard ?? '').toLowerCase() === 'gesn') && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate(`/price-index/resource-index?boq=${boq.id}&project=${boq.project_id}`)
+                }
+                title={t('boq.resource_index_btn_hint', {
+                  defaultValue: 'Price this estimate by the resource-index method, with every multiplication shown',
+                })}
+              >
+                <Percent size={14} className="mr-1" />
+                {t('boq.resource_index_btn', { defaultValue: 'Resource-index' })}
+              </Button>
+            )}
+            {boqId && (
+              <BranchControls
+                boqId={boqId}
+                boqName={boq.name}
+                branchOfId={boq.branch_of_id}
+                onNavigate={(id) => navigate(`/boq/${id}`)}
+                onChanged={() => invalidateAll()}
+              />
+            )}
+            {showCostPlan && (
+              <Button
+                variant="secondary"
+                onClick={() => setCostPlanOpen(true)}
+                title={t('cost_plan.open_hint', {
+                  defaultValue: 'Roll this bill up into an NRM 1 elemental cost plan with cost per m2 GIFA',
+                })}
+              >
+                <LayoutList size={14} className="mr-1" />
+                {t('cost_plan.open_button', { defaultValue: 'Cost plan' })}
+              </Button>
+            )}
+            {/* Per-module Tour CTA — launches the BOQ-specific guided tour
+                via the registered TOUR_REGISTRY entry, independent of any
+                global / first-login tour state. The Guide button sits in the
+                same cluster: Tour walks the live UI, Guide explains the
+                concepts and the data-entry flow. Its closing CTA opens the
+                Add position flow. */}
+            <ModuleHelpButton tourId="boq" />
+            <ModuleGuideButton
+              content={boqGuide}
+              onCta={() => handleAddPosition()}
+            />
+          </>
+        }
       />
 
       {/* ── Info card ─────────────────────────────────────────────────────
@@ -5350,9 +5567,9 @@ export function BOQEditorPage() {
         })}
       </DismissibleInfo>
 
-      {/* ── Header bar ─────────────────────────────────────────────────── */}
-      <div className="mb-4 space-y-2">
-        <div className="flex items-center gap-3 min-w-0">
+      {/* ── Title row ─────────────────────────────────────────────────── */}
+      <div className="mb-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           <BOQRenameTitle boqId={boq.id} name={boq.name} locked={boq.is_locked || boq.status === 'final'} />
           <Badge
             variant={
@@ -5363,248 +5580,22 @@ export function BOQEditorPage() {
             {boq.status === 'draft' ? t('boq.draft', { defaultValue: 'draft' }) : boq.status === 'final' ? t('boq.final', { defaultValue: 'final' }) : boq.status}
           </Badge>
           {boq.is_locked && (
-            <Badge variant="warning" size="sm" className="ml-2">
+            <Badge variant="warning" size="sm">
               <Lock size={12} className="mr-1" /> {t('boq.locked', { defaultValue: 'LOCKED' })}
             </Badge>
           )}
           {boq.estimate_type && (
-            <Badge variant="neutral" size="sm" className="ml-2">
+            <Badge variant="neutral" size="sm">
               {t(`boq.estimate_type_${boq.estimate_type}`, { defaultValue: boq.estimate_type })}
             </Badge>
           )}
-        </div>
-        {/* The action row wraps instead of holding one line: with every
-            button shown it is wider than a 1440 px window in German or
-            Russian, and pushed the whole page sideways on a phone. */}
-        <div className="flex flex-wrap items-center gap-2">
-          {boq.description && (
-            <p className="text-sm text-content-secondary truncate flex-1 min-w-[12rem]">{boq.description}</p>
+          {!boq.is_locked && boq.status === 'final' && !isManager && (
+            <Badge variant="blue" size="sm">{t('boq.in_review', { defaultValue: 'In Review' })}</Badge>
           )}
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
-            {!boq.is_locked && boq.status === 'draft' && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await apiPatch(`/v1/boq/boqs/${boqId}`, { status: 'final' });
-                    queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
-                    addToast({ type: 'success', title: t('boq.submitted_for_review', { defaultValue: 'Submitted for review' }) });
-                  } catch (err) {
-                    addToast({ type: 'error', title: t('boq.submit_review_failed', { defaultValue: 'Could not submit for review' }), message: editorErrorText(err, t) });
-                  }
-                }}
-                title={t('boq.submit_review_tooltip', { defaultValue: 'Submit this estimate for review and approval' })}
-              >
-                <CheckCircle size={14} className="mr-1" />
-                {t('boq.submit_for_review', { defaultValue: 'Submit for Review' })}
-              </Button>
-            )}
-            {!boq.is_locked && boq.status === 'final' && !isManager && (
-              <Badge variant="blue" size="sm">{t('boq.in_review', { defaultValue: 'In Review' })}</Badge>
-            )}
-            {!boq.is_locked && boq.status === 'final' && isManager && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await apiPatch(`/v1/boq/boqs/${boqId}`, { status: 'draft' });
-                    queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
-                    addToast({ type: 'info', title: t('boq.returned_to_draft', { defaultValue: 'Returned to draft for changes' }) });
-                  } catch (err) {
-                    addToast({ type: 'error', title: t('boq.request_changes_failed', { defaultValue: 'Could not return the estimate to draft' }), message: editorErrorText(err, t) });
-                  }
-                }}
-              >
-                <ArrowLeft size={14} className="mr-1" />
-                {t('boq.request_changes', { defaultValue: 'Request Changes' })}
-              </Button>
-            )}
-            {!boq.is_locked && isManager && (
-              <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending} title={t('boq.lock_tooltip', { defaultValue: 'Lock prevents edits. Create a revision to make changes to a locked estimate.' })}>
-                <Lock size={14} className="mr-1" />
-                {t('boq.lock', { defaultValue: 'Lock Estimate' })}
-              </Button>
-            )}
-            {boq.is_locked && isManager && (
-              <Button variant="ghost" size="sm" onClick={handleUnlock} disabled={unlockMutation.isPending}>
-                <Lock size={14} className="mr-1" />
-                {t('boq.unlock', { defaultValue: 'Unlock' })}
-              </Button>
-            )}
-            {boq.is_locked && (
-              <Button variant="secondary" size="sm" onClick={handleCreateBudget} disabled={createBudgetMutation.isPending}>
-                <Wallet size={14} className="mr-1" />
-                {t('boq.create_budget', { defaultValue: 'Create Budget' })}
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setModelReviewOpen(true)}
-              title={t('boq.model_review_btn_hint', {
-                defaultValue: 'Re-pull quantities from linked BIM models',
-              })}
-            >
-              <RefreshCw size={14} className="mr-1" />
-              {t('boq.model_review_btn', { defaultValue: 'Model sync' })}
-            </Button>
-            {/* Quantity rules scoped to this bill: the rules page opens with
-                this project, BOQ and model preselected. A locked bill cannot
-                take the positions a rule writes, so the action says why
-                instead of disappearing. Hidden for a role without bim.create
-                and with BIM Hub off (see offerModelEntryPoints). */}
-            {offerModelEntryPoints && (
-            <span
-              title={
-                boq.is_locked
-                  ? t('boq.qty_from_model_locked', {
-                      defaultValue: 'This estimate is locked. Unlock it or create a revision to add quantities from the model.',
-                    })
-                  : t('bim_rules.what_a_rule_does', {
-                      defaultValue:
-                        'A quantity rule picks model elements by category and properties, such as walls built in a given phase, and writes their total area, volume, length or count into a BOQ position.',
-                    })
-              }
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={boq.is_locked}
-                data-testid="boq-quantities-from-model"
-                onClick={() =>
-                  navigate(
-                    buildQuantityRulesUrl({ projectId: boq.project_id, boqId: boq.id, modelId: bimModelId }),
-                  )
-                }
-              >
-                <SlidersHorizontal size={14} className="mr-1" />
-                {t('boq.qty_from_model_btn', { defaultValue: 'Quantities from the model' })}
-              </Button>
-            </span>
-            )}
-            {boqId && <ChangeReviewButton boqId={boqId} onClick={() => setChangeReviewOpen(true)} />}
-            {/* Deep link OUT to the Validation dashboard, carrying this BOQ and
-                its project so the target lands pre-selected (2 clicks to a
-                result). The dashboard persists a server-side report; the
-                toolbar's inline Validate keeps the quick in-grid check. */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                navigate(`/validation?boq_id=${boq.id}&project=${boq.project_id}`)
-              }
-              title={t('boq.validate_dashboard_hint', {
-                defaultValue: 'Open the Validation dashboard for this BOQ',
-              })}
-            >
-              <ShieldCheck size={14} className="mr-1" />
-              {t('boq.validate_dashboard_btn', { defaultValue: 'Validate' })}
-            </Button>
-            {/* A Russian local estimate opens its resource-index breakdown:
-                each resource group times its regional quarterly index, then
-                NR and SP on the wage fund. Read-only over this BOQ. */}
-            {((project?.region ?? '').toUpperCase().startsWith('RU') ||
-              (project?.classification_standard ?? '').toLowerCase() === 'gesn') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  navigate(`/price-index/resource-index?boq=${boq.id}&project=${boq.project_id}`)
-                }
-                title={t('boq.resource_index_btn_hint', {
-                  defaultValue: 'Price this estimate by the resource-index method, with every multiplication shown',
-                })}
-              >
-                <Percent size={14} className="mr-1" />
-                {t('boq.resource_index_btn', { defaultValue: 'Resource-index' })}
-              </Button>
-            )}
-            {boqId && (
-              <BranchControls
-                boqId={boqId}
-                boqName={boq.name}
-                branchOfId={boq.branch_of_id}
-                onNavigate={(id) => navigate(`/boq/${id}`)}
-                onChanged={() => invalidateAll()}
-              />
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCompareOpen(true)}
-              title={t('boq.compare_btn_hint', {
-                defaultValue: 'Compare this estimate against another BOQ',
-              })}
-            >
-              <GitCompare size={14} className="mr-1" />
-              {t('boq.compare_btn', { defaultValue: 'Compare' })}
-            </Button>
-            <Button variant="secondary" size="sm" onClick={handleCreateRevision} disabled={createRevisionMutation.isPending}>
-              <Copy size={14} className="mr-1" />
-              {t('boq.create_revision', { defaultValue: 'Create Revision' })}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setScenarioOpen(true)}
-              title={t('boq.scenario_btn_hint', {
-                defaultValue: 'Clone this estimate into a what-if scenario and adjust it freely',
-              })}
-            >
-              <FlaskConical size={14} className="mr-1" />
-              {t('boq.scenario_btn', { defaultValue: 'What-if' })}
-            </Button>
-            {showCostPlan && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCostPlanOpen(true)}
-                title={t('cost_plan.open_hint', {
-                  defaultValue: 'Roll this bill up into an NRM 1 elemental cost plan with cost per m2 GIFA',
-                })}
-              >
-                <LayoutList size={14} className="mr-1" />
-                {t('cost_plan.open_button', { defaultValue: 'Cost plan' })}
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleJumpToMarkups}
-              title={t('boq.markups_btn_hint', {
-                defaultValue: 'Overhead, profit, tax and contingency (OH&P)',
-              })}
-            >
-              <Percent size={14} className="mr-1" />
-              {t('boq.markups_btn', { defaultValue: 'Markups' })}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setTenderOpen(true)}
-              title={t('boq.tender_btn_hint', {
-                defaultValue: 'Create a tender package from this estimate',
-              })}
-            >
-              <Send size={14} className="mr-1" />
-              {t('boq.tender_btn', { defaultValue: 'To tender' })}
-            </Button>
-            <SeenOnBadge projectId={boq.project_id} />
-            <EstimateCheckBadge boqId={boq.id} onJumpToPosition={handleOutlineJump} />
-            <BOQOutline positions={boq.positions} onJump={handleOutlineJump} />
-            {/* Per-module Tour CTA — launches the BOQ-specific guided tour
-                via the registered TOUR_REGISTRY entry, independent of any
-                global / first-login tour state. The Guide button sits in the
-                same cluster: Tour walks the live UI, Guide explains the
-                concepts and the data-entry flow. Its closing CTA opens the
-                Add position flow. */}
-            <ModuleHelpButton tourId="boq" />
-            <ModuleGuideButton
-              content={boqGuide}
-              onCta={() => handleAddPosition()}
-            />
+          <div className="ms-auto flex flex-wrap items-center gap-2">
+          <SeenOnBadge projectId={boq.project_id} />
+          <EstimateCheckBadge boqId={boq.id} onJumpToPosition={handleOutlineJump} />
+          <BOQOutline positions={boq.positions} onJump={handleOutlineJump} />
           </div>
         </div>
 

@@ -2935,8 +2935,14 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
    height, radius, border, focus and invalid state as <Input>/<Button>. Layout
    classes (w-*, flex-*) go next to them; colours, radius and height never do. */
 @layer components {
+  /* -sm/-lg also work alone: 250+ call sites wrote `oe-input-lg` or `oe-select-lg`
+     without the base class and rendered as borderless text. */
   .oe-input,
+  .oe-input-sm,
+  .oe-input-lg,
   .oe-select,
+  .oe-select-sm,
+  .oe-select-lg,
   .oe-textarea {
     width: 100%;
     border: 1px solid var(--oe-border);
@@ -2952,12 +2958,14 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
   .oe-select {
     height: 32px;
   }
-  .oe-input-sm {
+  .oe-input-sm,
+  .oe-select-sm {
     height: 28px;
     font-size: 12px;
     padding-inline: 8px;
   }
-  .oe-input-lg {
+  .oe-input-lg,
+  .oe-select-lg {
     height: 40px;
     padding-inline: 12px;
   }
@@ -2965,14 +2973,18 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
     padding-block: 6px;
     min-height: 72px;
   }
-  .oe-select {
+  .oe-select,
+  .oe-select-sm,
+  .oe-select-lg {
     appearance: none;
     padding-inline-end: 28px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a8e99' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
   }
-  [dir='rtl'] .oe-select {
+  [dir='rtl'] .oe-select,
+  [dir='rtl'] .oe-select-sm,
+  [dir='rtl'] .oe-select-lg {
     background-position: left 8px center;
   }
   /* Small selects (sidebar mode switch): keep the chevron clear of the border. */
@@ -2984,33 +2996,55 @@ html[data-look='classic'] ::-webkit-scrollbar-thumb {
     background-position: left 11px center;
   }
   .oe-input::placeholder,
+  .oe-input-sm::placeholder,
+  .oe-input-lg::placeholder,
   .oe-textarea::placeholder {
     color: var(--oe-text-quaternary);
   }
   .oe-input:hover,
+  .oe-input-sm:hover,
+  .oe-input-lg:hover,
   .oe-select:hover,
+  .oe-select-sm:hover,
+  .oe-select-lg:hover,
   .oe-textarea:hover {
     border-color: var(--oe-text-quaternary);
   }
   .oe-input:focus,
+  .oe-input-sm:focus,
+  .oe-input-lg:focus,
   .oe-select:focus,
+  .oe-select-sm:focus,
+  .oe-select-lg:focus,
   .oe-textarea:focus {
     outline: none;
     border-color: var(--oe-blue);
     box-shadow: 0 0 0 3px rgb(var(--oe-blue-ch) / 0.18);
   }
   .oe-input[aria-invalid='true'],
+  .oe-input-sm[aria-invalid='true'],
+  .oe-input-lg[aria-invalid='true'],
   .oe-select[aria-invalid='true'],
+  .oe-select-sm[aria-invalid='true'],
+  .oe-select-lg[aria-invalid='true'],
   .oe-textarea[aria-invalid='true'] {
     border-color: var(--oe-error);
   }
   .oe-input[aria-invalid='true']:focus,
+  .oe-input-sm[aria-invalid='true']:focus,
+  .oe-input-lg[aria-invalid='true']:focus,
   .oe-select[aria-invalid='true']:focus,
+  .oe-select-sm[aria-invalid='true']:focus,
+  .oe-select-lg[aria-invalid='true']:focus,
   .oe-textarea[aria-invalid='true']:focus {
     box-shadow: 0 0 0 3px rgb(var(--oe-error-ch) / 0.18);
   }
   .oe-input:disabled,
+  .oe-input-sm:disabled,
+  .oe-input-lg:disabled,
   .oe-select:disabled,
+  .oe-select-sm:disabled,
+  .oe-select-lg:disabled,
   .oe-textarea:disabled {
     opacity: 0.5;
     cursor: not-allowed;

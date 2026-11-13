@@ -54,7 +54,7 @@ import {
 } from 'lucide-react';
 import {
   Button, Card, CardHeader, CardContent, Badge, Skeleton, EmptyState, Breadcrumb,
-  ProjectMap, ProjectWeather,
+  PageHeader, ProjectMap, ProjectWeather,
 } from '@/shared/ui';
 import { DismissibleInfo } from '@/shared/ui/DismissibleInfo';
 import { ProjectLayoutManager } from './ProjectLayoutManager';
@@ -569,7 +569,7 @@ function computeProjectHealth(
    project saved as "Construction" or "construction-phase" still highlights
    the right step. Unmatched values fall back to a single chip. */
 const PHASE_STEPS = [
-  { key: 'planning', match: ['planning', 'pre', 'feasibility'] },
+  { key: 'planning', match: ['planning', 'pre', 'feasibility', 'brief'] },
   { key: 'design', match: ['design', 'concept', 'detailed'] },
   { key: 'procurement', match: ['procurement', 'tender', 'bidding', 'award'] },
   { key: 'construction', match: ['construction', 'execution', 'build'] },
@@ -882,11 +882,11 @@ function ProjectHealthBar({
     : 'text-semantic-warning';
 
   return (
-    <Card padding="md" className="h-full flex flex-col justify-center">
-      <div className="flex items-center gap-5">
+    <Card padding="md" className="h-full flex flex-col gap-3">
+      <div className="flex items-center gap-3">
         {/* Circular progress ring */}
         <div className="relative shrink-0">
-          <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+          <svg className="h-12 w-12 -rotate-90" viewBox="0 0 64 64">
             <circle
               cx="32"
               cy="32"
@@ -909,55 +909,48 @@ function ProjectHealthBar({
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-semibold text-content-primary tabular-nums">{percent}%</span>
+            <span className="text-xs font-semibold text-content-primary tabular-nums">{percent}%</span>
           </div>
         </div>
-
-        {/* Text + checkpoints */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('projects.health_label', { defaultValue: 'Project Health' })}
-            </span>
-            <span className="text-2xs text-content-quaternary">·</span>
-            <span className="text-2xs text-content-tertiary tabular-nums">
-              {doneCount}/{checks.length} {t('projects.health_complete', { defaultValue: 'complete' })}
-            </span>
+          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+            {t('projects.health_label', { defaultValue: 'Project Health' })}
           </div>
-          {nextStep && (
-            <p className="text-sm text-content-primary truncate">
-              <span className="font-semibold">
-                {t('projects.health_next', { defaultValue: 'Next:' })}
-              </span>{' '}
-              <span className="text-content-secondary">{nextStep.description}</span>
-            </p>
-          )}
-          {/* Checkpoint dots — hover shows label */}
-          <div className="mt-2 flex items-center gap-1.5">
-            {checks.map((check) => (
-              <div
-                key={check.key}
-                title={check.label + (check.done ? ' (done)' : '')}
-                className={`h-1.5 flex-1 max-w-[60px] rounded-full transition-colors ${
-                  check.done ? (isComplete ? 'bg-semantic-success' : 'bg-oe-blue') : 'bg-surface-secondary'
-                }`}
-              />
-            ))}
+          <div className="text-xs text-content-tertiary tabular-nums">
+            {doneCount}/{checks.length} {t('projects.health_complete', { defaultValue: 'complete' })}
           </div>
         </div>
-
-        {/* Next action button */}
-        {nextStep && (
-          <Button
-            variant={nextStep.variant === 'success' ? 'secondary' : 'primary'}
-            size="sm"
-            onClick={() => navigate(nextStep.to)}
-            className="shrink-0"
-          >
-            {nextStep.label}
-          </Button>
-        )}
       </div>
+      {nextStep && (
+        <p className="line-clamp-2 text-sm text-content-primary">
+          <span className="font-semibold">
+            {t('projects.health_next', { defaultValue: 'Next:' })}
+          </span>{' '}
+          <span className="text-content-secondary">{nextStep.description}</span>
+        </p>
+      )}
+      {/* Checkpoint dots: hover shows label */}
+      <div className="flex items-center gap-1.5">
+        {checks.map((check) => (
+          <div
+            key={check.key}
+            title={check.label + (check.done ? ' (done)' : '')}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              check.done ? (isComplete ? 'bg-semantic-success' : 'bg-oe-blue') : 'bg-surface-secondary'
+            }`}
+          />
+        ))}
+      </div>
+      {nextStep && (
+        <Button
+          variant={nextStep.variant === 'success' ? 'secondary' : 'primary'}
+          size="sm"
+          onClick={() => navigate(nextStep.to)}
+          className="mt-auto self-start"
+        >
+          {nextStep.label}
+        </Button>
+      )}
     </Card>
   );
 }
@@ -1932,148 +1925,17 @@ export function ProjectDetailPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Breadcrumb + Customize toggle */}
-      <div className="flex items-start justify-between gap-3">
-        <Breadcrumb
-          items={[
-            { label: t('projects.title', 'Projects'), to: '/projects' },
-            { label: project.name },
-          ]}
-        />
-        <div className="flex items-center gap-2">
-        {frameworkPackActive && (
-        <>
+      <Breadcrumb
+        items={[
+          { label: t('projects.title', 'Projects'), to: '/projects' },
+          { label: project.name },
+        ]}
+      />
+      <PageHeader
+        actions={
+          <>
         <Button
-          variant="ghost"
-          size="sm"
-          icon={<Stamp size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/commitments`)}
-          data-testid="project-commitments-link"
-        >
-          {t('commitment.page.title', { defaultValue: 'Commitments and releases' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Banknote size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/economics`)}
-          data-testid="project-economics-link"
-        >
-          {t('economics.ui.title', { defaultValue: 'Economics' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Handshake size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/delivery`)}
-          data-testid="project-delivery-model-link"
-        >
-          {t('delivery_model.ui.title', { defaultValue: 'Delivery model' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Factory size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/plant-register`)}
-          data-testid="project-plant-register-link"
-        >
-          {t('plant.nav.title', { defaultValue: 'Plant register' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Gavel size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/procurement-concept`)}
-          data-testid="procurement-concept-link"
-        >
-          {t('procurement_concept.nav.title', { defaultValue: 'Procurement concept' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<DraftingCompass size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/design`)}
-          data-testid="design-management-link"
-        >
-          {t('design.ui.title', { defaultValue: 'Design management' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Handshake size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/stakeholders`)}
-          data-testid="project-stakeholders-link"
-        >
-          {t('stakeholders.ui.title', { defaultValue: 'Stakeholders' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<UsersRound size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/staffing`)}
-          data-testid="project-staffing-link"
-        >
-          {t('staffing.title', { defaultValue: 'Staffing' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<FileText size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/engineering-brief`)}
-          data-testid="project-engineering-brief-link"
-        >
-          {t('engineeringBrief.title', { defaultValue: 'Engineering brief' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<FileText size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/handbook`)}
-          data-testid="project-handbook-link"
-        >
-          {t('projectHandbook.title', { defaultValue: 'Project handbook' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Flag size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/governance`)}
-          data-testid="project-governance-link"
-        >
-          {t('governance.project.title', { defaultValue: 'Project governance' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<FileCheck size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/permits`)}
-          data-testid="project-permits-link"
-        >
-          {t('permits.ui.title', { defaultValue: 'Permits' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<ShieldCheck size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/quality-concept`)}
-          data-testid="quality-concept-link"
-        >
-          {t('qualityConcept.title', { defaultValue: 'Quality concept' })}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<HardHat size={14} />}
-          onClick={() => navigate(`/projects/${project.id}/hse-frame`)}
-          data-testid="hse-frame-link"
-        >
-          {t('hseFrame.title', { defaultValue: 'Health, safety and environment' })}
-        </Button>
-        </>
-        )}
-        <Button
-          variant={customizing ? 'primary' : 'ghost'}
-          size="sm"
+          variant={customizing ? 'primary' : 'secondary'}
           icon={<LayoutGrid size={14} />}
           onClick={() => setCustomizing((v) => !v)}
           aria-pressed={customizing}
@@ -2086,8 +1948,125 @@ export function ProjectDetailPage() {
             ? t('project.layout.done', { defaultValue: 'Done' })
             : t('project.layout.customize', { defaultValue: 'Customize' })}
         </Button>
-        </div>
-      </div>
+        {frameworkPackActive && (
+        <>
+        <Button
+          variant="secondary"
+          icon={<Stamp size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/commitments`)}
+          data-testid="project-commitments-link"
+        >
+          {t('commitment.page.title', { defaultValue: 'Commitments and releases' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Banknote size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/economics`)}
+          data-testid="project-economics-link"
+        >
+          {t('economics.ui.title', { defaultValue: 'Economics' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Handshake size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/delivery`)}
+          data-testid="project-delivery-model-link"
+        >
+          {t('delivery_model.ui.title', { defaultValue: 'Delivery model' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Factory size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/plant-register`)}
+          data-testid="project-plant-register-link"
+        >
+          {t('plant.nav.title', { defaultValue: 'Plant register' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Gavel size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/procurement-concept`)}
+          data-testid="procurement-concept-link"
+        >
+          {t('procurement_concept.nav.title', { defaultValue: 'Procurement concept' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<DraftingCompass size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/design`)}
+          data-testid="design-management-link"
+        >
+          {t('design.ui.title', { defaultValue: 'Design management' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Handshake size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/stakeholders`)}
+          data-testid="project-stakeholders-link"
+        >
+          {t('stakeholders.ui.title', { defaultValue: 'Stakeholders' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<UsersRound size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/staffing`)}
+          data-testid="project-staffing-link"
+        >
+          {t('staffing.title', { defaultValue: 'Staffing' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<FileText size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/engineering-brief`)}
+          data-testid="project-engineering-brief-link"
+        >
+          {t('engineeringBrief.title', { defaultValue: 'Engineering brief' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<FileText size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/handbook`)}
+          data-testid="project-handbook-link"
+        >
+          {t('projectHandbook.title', { defaultValue: 'Project handbook' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<Flag size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/governance`)}
+          data-testid="project-governance-link"
+        >
+          {t('governance.project.title', { defaultValue: 'Project governance' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<FileCheck size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/permits`)}
+          data-testid="project-permits-link"
+        >
+          {t('permits.ui.title', { defaultValue: 'Permits' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<ShieldCheck size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/quality-concept`)}
+          data-testid="quality-concept-link"
+        >
+          {t('qualityConcept.title', { defaultValue: 'Quality concept' })}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={<HardHat size={14} />}
+          onClick={() => navigate(`/projects/${project.id}/hse-frame`)}
+          data-testid="hse-frame-link"
+        >
+          {t('hseFrame.title', { defaultValue: 'Health, safety and environment' })}
+        </Button>
+        </>
+        )}
+          </>
+        }
+      />
 
       <DismissibleInfo
         storageKey="project-detail"
@@ -2153,7 +2132,7 @@ export function ProjectDetailPage() {
                 <input
                   value={editForm.name}
                   onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full text-2xl font-semibold text-content-primary bg-transparent border-b-2 border-oe-blue focus:outline-none pb-1"
+                  className="w-full text-lg font-semibold text-content-primary bg-transparent border-b-2 border-oe-blue focus:outline-none pb-1"
                   placeholder={t('projects.project_name', 'Project name')}
                   autoFocus
                 />
@@ -2221,7 +2200,7 @@ export function ProjectDetailPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <h1 className="min-w-0 max-w-full break-words text-2xl font-semibold text-content-primary">{project.name}</h1>
+                  <h1 className="min-w-0 max-w-full break-words text-lg font-semibold text-content-primary">{project.name}</h1>
                   <ProjectStatusBadge status={project.status} size="md" />
                   {/* Owner/admin status picker (#274). Archiving stays its
                       own action (the project menu / list), so 'archived' is
