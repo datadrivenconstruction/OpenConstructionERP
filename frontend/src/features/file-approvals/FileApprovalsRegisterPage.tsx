@@ -316,7 +316,7 @@ function RegisterInner() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as WorkflowStatus | '')}
-          className="oe-select oe-input-sm cursor-pointer"
+          className="oe-select oe-input-sm w-48 cursor-pointer"
           aria-label={t('files.approvals.filter_status', { defaultValue: 'Status' })}
         >
           <option value="">

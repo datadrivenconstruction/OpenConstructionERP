@@ -9,7 +9,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  X,
   Check,
   XCircle,
   Clock,
@@ -22,6 +21,7 @@ import clsx from 'clsx';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
+import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -75,15 +75,6 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
     setDecisionNote('');
     setActiveStepId(null);
   }, [workflowId]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -189,58 +180,24 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
           ? 'neutral'
           : 'blue';
 
-  return (
-    <>
-      <div
-        className="fixed inset-0 z-drawer bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('files.approvals.drawer_title', {
-          defaultValue: 'Approval workflow',
+  const title = t('files.approvals.drawer_title', { defaultValue: 'Approval workflow' });
+  const subtitle = workflow ? (
+    <span className="flex items-center gap-2">
+      <Badge variant={workflowStatusVariant} dot>
+        {t(`files.approvals.status.${workflow.status}`, {
+          defaultValue:
+            workflow.status.charAt(0).toUpperCase() +
+            workflow.status.slice(1).replace('_', ' '),
         })}
-        className={clsx(
-          'fixed inset-y-0 right-0 z-drawer w-full max-w-md',
-          'bg-surface-elevated border-l border-border-light shadow-2xl',
-          'flex flex-col animate-slide-in-right',
-        )}
-      >
-        <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border-light">
-          <div className="min-w-0">
-            <h2 className="oe-card-title">
-              {t('files.approvals.drawer_title', {
-                defaultValue: 'Approval workflow',
-              })}
-            </h2>
-            {workflow && (
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant={workflowStatusVariant} dot>
-                  {t(`files.approvals.status.${workflow.status}`, {
-                    defaultValue:
-                      workflow.status.charAt(0).toUpperCase() +
-                      workflow.status.slice(1).replace('_', ' '),
-                  })}
-                </Badge>
-                <span className="text-xs text-content-tertiary">
-                  <DateDisplay value={workflow.submitted_at} />
-                </span>
-              </div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="text-content-tertiary hover:text-content-primary"
-          >
-            <X size={20} />
-          </button>
-        </header>
+      </Badge>
+      <DateDisplay value={workflow.submitted_at} />
+    </span>
+  ) : undefined;
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+  return (
+    <SideDrawer open={open} onClose={onClose} title={title} subtitle={subtitle} widthClass="max-w-md">
+      <div className="flex min-h-[calc(100%-3.25rem)] flex-col">
+        <div className="flex-1 px-5 py-4">
           {isLoading && (
             <p className="text-sm text-content-tertiary text-center py-6">
               {t('common.loading', { defaultValue: 'Loading…' })}
@@ -250,7 +207,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
           {workflow && (
             <>
               {workflow.notes && (
-                <section className="mb-4 p-3 rounded-md bg-surface-secondary/50 border border-border-light">
+                <section className="mb-4 p-3 rounded-xl bg-surface-secondary/50 border border-border-light">
                   <p className="text-xs text-content-secondary uppercase mb-1">
                     {t('files.approvals.submitter_notes', {
                       defaultValue: 'Submitter notes',
@@ -315,7 +272,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
                         </p>
                       )}
                       {isActionable && (
-                        <div className="mt-3 p-3 rounded-md border border-oe-blue/40 bg-oe-blue-subtle/30 space-y-2">
+                        <div className="mt-3 p-3 rounded-xl border border-oe-blue/40 bg-oe-blue-subtle/30 space-y-2">
                           <p className="text-xs font-semibold text-oe-blue">
                             {t('files.approvals.your_turn', {
                               defaultValue: 'Your decision is needed',
@@ -383,7 +340,7 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
           )}
         </div>
 
-        <footer className="shrink-0 px-5 py-3 border-t border-border-light bg-surface-primary/30 flex items-center justify-between gap-2">
+        <footer className="sticky bottom-0 shrink-0 px-5 py-3 border-t border-border-light bg-surface-elevated flex items-center justify-between gap-2">
           {workflow?.status === 'in_review' &&
           workflow.submitted_by_id === currentUserId ? (
             <Button
@@ -409,8 +366,8 @@ export function ApprovalDrawer({ open, workflowId, onClose }: ApprovalDrawerProp
             </Button>
           )}
         </footer>
-      </aside>
-    </>
+      </div>
+    </SideDrawer>
   );
 }
 
