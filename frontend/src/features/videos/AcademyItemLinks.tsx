@@ -14,6 +14,7 @@ import { BookOpen, Crown, ExternalLink, FileText, GraduationCap, ListChecks, typ
 import { Badge } from '@/shared/ui/Badge';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 import type { AcademyItem, AcademyItemKind } from './academyTypes';
+import { CourseCover } from './CourseCover';
 import { academyUrlFor, formatItemDuration, inOtherLanguage, itemTopics, languageName } from './academyItems';
 
 const KIND_ICON: Record<AcademyItemKind, LucideIcon> = {
@@ -121,37 +122,13 @@ export function AcademyItemRow({ item }: { item: AcademyItem }) {
   );
 }
 
-/** The photo of a course: a still from the course itself, shipped as `public/academy-courses/<slug>.webp`. */
-function photoUrl(item: AcademyItem): string | null {
-  if (item.kind !== 'course') return null;
-  const slug = item.id.split(':')[1];
-  return slug ? `${import.meta.env.BASE_URL}academy-courses/${slug}.webp` : null;
-}
-
-function CardMedia({ item, Icon, country }: { item: AcademyItem; Icon: LucideIcon; country?: string }) {
-  const src = photoUrl(item);
-  const [failed, setFailed] = useState(false);
+function CardMedia({ item, country }: { item: AcademyItem; country?: string }) {
   return (
     <span
       className="relative block aspect-video overflow-hidden border-b border-border-light bg-surface-secondary"
       data-testid="academy-item-media"
     >
-      {src && !failed ? (
-        <img
-          src={src}
-          width={480}
-          height={300}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <span className="flex h-full w-full items-center justify-center text-content-quaternary">
-          <Icon size={32} strokeWidth={1.5} aria-hidden />
-        </span>
-      )}
+      <CourseCover item={item} className="absolute inset-0 h-full w-full" />
       {(item.country ?? item.market) && country && (
         <span
           data-testid="academy-item-country"
@@ -166,7 +143,7 @@ function CardMedia({ item, Icon, country }: { item: AcademyItem; Icon: LucideIco
   );
 }
 
-/** With `media`, the card opens with a 16:9 picture (the course photo, else a quiet kind tile) and shows
+/** With `media`, the card opens with its 16:9 illustrated cover and shows
  *  the item's country, named by `countryName`, over its corner. */
 export function AcademyItemCard({
   item,
@@ -202,7 +179,7 @@ export function AcademyItemCard({
           : 'border-border-light bg-surface-elevated hover:border-oe-blue/40 focus-visible:ring-oe-blue',
       )}
     >
-      {media && <CardMedia item={item} Icon={Icon} country={countryName} />}
+      {media && <CardMedia item={item} country={countryName} />}
       {body(
         <>
           <span className="flex items-center gap-1.5 pe-6 text-2xs font-medium text-content-tertiary">
