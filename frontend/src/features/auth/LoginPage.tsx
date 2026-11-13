@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight, Pencil,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight,
   ShieldCheck, Zap, Brain, Info,
   FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
   BarChart3, Upload, FileCheck,
@@ -15,7 +15,6 @@ import {
 import { BrandLockup, Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
-import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
 import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
@@ -85,7 +84,6 @@ export function LoginPage() {
   // on the login card instead of the default OpenConstructionERP wordmark.
   const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
     useBrandingStore();
-  const showLogoEdit = useBrandingStore((s) => s.options.showLogoEdit);
   const brandCustomised = brandMode === 'logo' || brandMode === 'text';
   // Pull the workspace brand from the server so an invited user sees it on this
   // very first (pre-auth) screen, not just the browser that set it (issue #272).
@@ -108,7 +106,6 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(readRememberChoice);
   const [langOpen, setLangOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [brandOpen, setBrandOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoHint, setDemoHint] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
@@ -797,20 +794,6 @@ export function LoginPage() {
               ) : (
                 <BrandLockup size="lg" animate />
               )}
-              {/* White-label trigger - same editor as the in-app sidebar
-                  brand control, available pre-auth so a tenant can put
-                  their own logo on the sign-in screen. */}
-              {showLogoEdit && (
-              <button
-                type="button"
-                onClick={() => setBrandOpen(true)}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light bg-surface-elevated/60 text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/5 hover:text-oe-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-                title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-              >
-                <Pencil size={14} strokeWidth={2.25} />
-              </button>
-              )}
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
               {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
@@ -1104,7 +1087,6 @@ export function LoginPage() {
       </div>
 
       {/* ── White-label branding editor (pre-auth) ── */}
-      {brandOpen && <BrandingEditorModal onClose={() => setBrandOpen(false)} />}
 
       {/* ── About modal ── */}
       {showInfo && (
