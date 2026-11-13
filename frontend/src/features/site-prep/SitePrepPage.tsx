@@ -15,7 +15,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  X,
   AlertTriangle,
   ListChecks,
   CircleCheck,
@@ -29,6 +28,7 @@ import {
   RecoveryCard,
   SkeletonTable,
   Skeleton,
+  WideModal,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -541,28 +541,33 @@ function ItemModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
-      <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="oe-section-title">
-            {isEdit
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={isEdit
               ? t('site_prep.edit_item_title', { defaultValue: 'Edit readiness item' })
               : t('site_prep.new_item_title', { defaultValue: 'New readiness item' })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('site_prep.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('site_prep.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            loading={isPending}
+            disabled={!canSubmit}
+            icon={!isPending ? <Plus size={16} /> : undefined}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-4 px-6 py-4">
+            {isEdit
+              ? t('site_prep.save', { defaultValue: 'Save' })
+              : t('site_prep.create', { defaultValue: 'Create item' })}
+          </Button>
+        </>
+      }
+    >
+        <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="oe-label">
@@ -693,25 +698,7 @@ function ItemModal({
             />
           </div>
         </div>
-
-        <div className="flex items-center justify-end gap-3 border-t border-border-light px-6 py-4">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('site_prep.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            loading={isPending}
-            disabled={!canSubmit}
-            icon={!isPending ? <Plus size={16} /> : undefined}
-          >
-            {isEdit
-              ? t('site_prep.save', { defaultValue: 'Save' })
-              : t('site_prep.create', { defaultValue: 'Create item' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -762,28 +749,35 @@ function PlanModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-lg rounded-xl border border-border bg-surface-elevated shadow-xl animate-card-in"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
-          <h2 className="oe-section-title">
-            {isEdit
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={isEdit
               ? t('site_prep.plan_modal_edit_title', { defaultValue: 'Edit mobilisation plan' })
               : t('site_prep.plan_modal_create_title', { defaultValue: 'Create mobilisation plan' })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('site_prep.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('site_prep.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            loading={isPending}
+            onClick={() =>
+              onSubmit({
+                target_start_date: form.target_start_date || null,
+                status: form.status,
+                notes: form.notes.trim() || null,
+              })
+            }
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="space-y-4 px-6 py-4">
+            {t('site_prep.save', { defaultValue: 'Save' })}
+          </Button>
+        </>
+      }
+    >
+        <div className="space-y-4">
           <div>
             <label className="oe-label">
               {t('site_prep.field_target_start', { defaultValue: 'Target start date' })}
@@ -828,27 +822,7 @@ function PlanModal({
             />
           </div>
         </div>
-
-        <div className="flex items-center justify-end gap-3 border-t border-border-light px-6 py-4">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('site_prep.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            loading={isPending}
-            onClick={() =>
-              onSubmit({
-                target_start_date: form.target_start_date || null,
-                status: form.status,
-                notes: form.notes.trim() || null,
-              })
-            }
-          >
-            {t('site_prep.save', { defaultValue: 'Save' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 

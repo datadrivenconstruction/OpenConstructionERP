@@ -39,7 +39,7 @@ function ConfirmRow({ row }: { row: TaxConfigRow }) {
   const ready = accountant.trim() !== '' && source.trim() !== '';
 
   return (
-    <li className="rounded-md border border-border-light p-3" data-testid="tax-pending-row">
+    <li className="rounded-lg border border-border-light p-3" data-testid="tax-pending-row">
       <p className="text-sm font-medium text-content-primary">
         {row.tax_name} · {row.rate_pct}%{row.subdivision_code ? ` · ${row.subdivision_code}` : ''}
         {row.effective_from ? ` · ${row.effective_from}` : ''}

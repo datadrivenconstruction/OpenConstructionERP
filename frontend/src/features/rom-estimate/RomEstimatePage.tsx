@@ -931,7 +931,7 @@ function RomSavedEstimates({ projectId }: { projectId: string }) {
                           onClick={() => del.mutate(row.id)}
                           disabled={isDeleting}
                           aria-label={t('romEstimate.saved_delete', { defaultValue: 'Delete estimate' })}
-                          className="inline-flex items-center gap-1 rounded-md p-1.5 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-lg p-1.5 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <Trash2 size={16} />
                         </button>

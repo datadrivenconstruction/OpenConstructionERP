@@ -240,7 +240,7 @@ export function VoiceEntry({
           </p>
 
           {transcriptionUnavailable && (
-            <div className="flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
+            <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
                 {t('voice.no_transcription', {
@@ -253,7 +253,7 @@ export function VoiceEntry({
 
           <div className="grid gap-3 sm:grid-cols-2">{def.fields.map(renderField)}</div>
 
-          <details className="rounded-md border border-border-light">
+          <details className="rounded-lg border border-border-light">
             <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-content-secondary">
               {t('voice.show_transcript', { defaultValue: 'Transcript / spoken note' })}
             </summary>
@@ -283,7 +283,7 @@ export function VoiceEntry({
     if (capture.phase === 'error') {
       return (
         <div className="space-y-4">
-          <div className="flex items-start gap-2 rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
+          <div className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{capture.error ?? t('voice.error', { defaultValue: 'Something went wrong.' })}</span>
           </div>
@@ -323,7 +323,7 @@ export function VoiceEntry({
             </span>
           </button>
         ) : (
-          <p className="rounded-md bg-surface-secondary px-3 py-2 text-xs text-content-tertiary">
+          <p className="rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-tertiary">
             {t('voice.mic_unsupported', {
               defaultValue: 'Recording is not available in this browser. Upload a recording or type the note below.',
             })}

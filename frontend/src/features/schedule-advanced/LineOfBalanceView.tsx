@@ -221,7 +221,7 @@ export function LineOfBalanceView({ lob }: Props) {
 
         {hover && (
           <div
-            className="pointer-events-none absolute left-2 top-2 z-10 rounded-md border border-border-light bg-surface-primary px-3 py-2 text-xs shadow-md"
+            className="pointer-events-none absolute left-2 top-2 z-10 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs shadow-md"
             role="status"
           >
             <div className="font-semibold text-content-primary">{hover.activity_name}</div>

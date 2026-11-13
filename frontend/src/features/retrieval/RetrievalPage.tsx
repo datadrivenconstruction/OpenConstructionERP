@@ -452,7 +452,7 @@ export function RetrievalPage() {
           <button
             type="button"
             onClick={runSearch}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-oe-blue px-4 py-2 text-sm font-medium text-white"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white"
           >
             <Search className="h-4 w-4" />
             {t('retrieval.search', { defaultValue: 'Search' })}
@@ -611,7 +611,7 @@ export function RetrievalPage() {
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:pointer-events-none disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:pointer-events-none disabled:opacity-40"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
                 {t('retrieval.prev', { defaultValue: 'Previous' })}
@@ -627,7 +627,7 @@ export function RetrievalPage() {
                 type="button"
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
                 disabled={page >= pageCount}
-                className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:pointer-events-none disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary disabled:pointer-events-none disabled:opacity-40"
               >
                 {t('retrieval.next', { defaultValue: 'Next' })}
                 <ChevronRight className="h-3.5 w-3.5" />

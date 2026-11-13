@@ -334,9 +334,9 @@ function ButtonsSection() {
 
         <Specimen no={14} name="Segmented Pill" family="iOS Native" note="iOS-style segmented control. Для view-switchers (List/Grid/Map).">
           <div className="inline-flex h-9 items-center rounded-lg bg-surface-tertiary p-0.5 ring-1 ring-inset ring-border-light">
-            <button className="h-8 px-3 text-xs font-medium rounded-md bg-surface-primary text-content-primary shadow-sm">List</button>
-            <button className="h-8 px-3 text-xs font-medium rounded-md text-content-tertiary hover:text-content-primary">Grid</button>
-            <button className="h-8 px-3 text-xs font-medium rounded-md text-content-tertiary hover:text-content-primary">Map</button>
+            <button className="h-8 px-3 text-xs font-medium rounded-lg bg-surface-primary text-content-primary shadow-sm">List</button>
+            <button className="h-8 px-3 text-xs font-medium rounded-lg text-content-tertiary hover:text-content-primary">Grid</button>
+            <button className="h-8 px-3 text-xs font-medium rounded-lg text-content-tertiary hover:text-content-primary">Map</button>
           </div>
         </Specimen>
       </Grid>
@@ -515,9 +515,9 @@ function TagsSection() {
 
         <Specimen no={10} name="Squircle Solid" family="iOS Native" note="iOS Section-style: пастельный блок с r=6px. Для категорий и tag-таксономий.">
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
-            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-warning-bg text-semantic-warning">Rebar</span>
-            <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-success-bg text-semantic-success">Finish</span>
+            <span className="inline-flex h-6 items-center rounded-lg px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
+            <span className="inline-flex h-6 items-center rounded-lg px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-warning-bg text-semantic-warning">Rebar</span>
+            <span className="inline-flex h-6 items-center rounded-lg px-2 text-2xs font-semibold uppercase tracking-wider bg-semantic-success-bg text-semantic-success">Finish</span>
           </div>
         </Specimen>
 
@@ -558,7 +558,7 @@ function TagsSection() {
           <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-semantic-success-bg px-2 text-xs font-medium text-semantic-success">Approved</span>
           <span className="inline-flex h-6 items-center gap-2 text-xs font-medium text-content-primary"><span className="h-2 w-2 rounded-full bg-semantic-warning ring-2 ring-semantic-warning/20"/>Waiting client</span>
           <span className="inline-flex h-6 items-center rounded-sm px-1.5 font-mono text-2xs text-content-primary bg-surface-tertiary border border-border-light">v2.9.36</span>
-          <span className="inline-flex h-6 items-center rounded-md px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
+          <span className="inline-flex h-6 items-center rounded-lg px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
           <span className="inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-semibold bg-semantic-success-bg text-semantic-success"><TrendingUp className="h-3 w-3"/> +12.4%</span>
           <span className="inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-xs font-semibold text-white bg-[linear-gradient(120deg,var(--oe-blue),#a855f7,#06b6d4)] bg-[length:200%_auto] animate-gradient-text">
             <Sparkles className="h-3 w-3"/> AI suggested

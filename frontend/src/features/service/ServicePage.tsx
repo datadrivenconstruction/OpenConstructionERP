@@ -14,7 +14,6 @@ import {
   Box,
   Plus,
   Search,
-  X,
   Loader2,
   Send,
   CheckCircle2,
@@ -38,6 +37,7 @@ import {
   ContactSearchInput,
   ConfirmDialog,
   ModuleGuideButton,
+  SideDrawer,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
@@ -1270,47 +1270,26 @@ function DetailDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="service-detail-drawer-title"
-        className="relative h-full w-full max-w-lg overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3 gap-3">
-          <h2
-            id="service-detail-drawer-title"
-            className="text-base font-semibold truncate min-w-0 flex-1"
-          >
-            {kind === 'tickets' && ticket?.ticket_number}
+    <>
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-lg"
+      title={<>            {kind === 'tickets' && ticket?.ticket_number}
             {kind === 'work_orders' && wo?.work_order_number}
             {kind === 'contracts' && contract?.contract_number}
             {kind === 'assets' && (asset?.asset_tag || asset?.name)}
-          </h2>
-          <div className="flex items-center gap-1 shrink-0">
+          </>}
+      headerActions={
+        <>
             {deletable && (
-              <button
-                type="button"
-                onClick={() => setDeleteOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-semantic-error hover:border-semantic-error/30 hover:bg-semantic-error-bg transition-colors"
-                aria-label={t('common.delete', { defaultValue: 'Delete' })}
-              >
-                <Trash2 size={12} />
+              <Button variant="secondary" size="sm" icon={<Trash2 size={14} />} onClick={() => setDeleteOpen(true)}>
                 {t('common.delete', { defaultValue: 'Delete' })}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="ml-1 rounded p-1 hover:bg-surface-secondary"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+        </>
+      }
+    >
 
         <div className="space-y-4 p-5">
           {ticket && (
@@ -1556,7 +1535,7 @@ function DetailDrawer({
             />
           )}
         </div>
-      </div>
+    </SideDrawer>
 
       {/* Destructive delete — second click required. ConfirmDialog already
           handles focus trapping + Escape. */}
@@ -1593,7 +1572,7 @@ function DetailDrawer({
         onCancel={() => setDeleteOpen(false)}
         loading={deleting}
       />
-    </div>
+    </>
   );
 }
 

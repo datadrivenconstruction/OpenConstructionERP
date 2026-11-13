@@ -510,7 +510,7 @@ function RegionalBenchmarksView() {
                   ['value.bench_max', 'Max', port.max],
                 ] as const
               ).map(([key, label, val]) => (
-                <div key={key} className="rounded-md bg-surface-secondary px-2 py-2">
+                <div key={key} className="rounded-lg bg-surface-secondary px-2 py-2">
                   <div className="text-2xs uppercase tracking-wide text-content-tertiary">
                     {t(key, { defaultValue: label })}
                   </div>

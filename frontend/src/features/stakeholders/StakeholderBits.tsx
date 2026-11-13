@@ -117,7 +117,7 @@ export function RefusalBox({ refusal }: { refusal: Refusal | null }) {
       role="alert"
       data-testid="refusal"
       data-code={refusal.code ?? undefined}
-      className="rounded-md border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-content-primary"
+      className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-content-primary"
     >
       <p>{refusal.message}</p>
       {lines.length > 0 && (
@@ -174,7 +174,7 @@ export function TickList({
       role="group"
       aria-label={label}
       data-testid={testId}
-      className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border-light bg-surface-elevated p-2"
+      className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-border-light bg-surface-elevated p-2"
     >
       {options.map((o) => (
         <label key={o.id} className="flex items-center gap-2 text-sm text-content-primary">

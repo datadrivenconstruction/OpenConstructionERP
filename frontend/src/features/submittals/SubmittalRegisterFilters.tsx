@@ -76,7 +76,7 @@ export function SubmittalTypeTabs({
 }
 
 const selectCls =
-  'oe-select oe-input-lg';
+  'oe-select';
 
 function FilterSelect({
   label,
@@ -127,7 +127,7 @@ function Toggle({
       data-testid={testId}
       onClick={onPress}
       className={clsx(
-        'h-10 rounded-lg border px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
+        'h-8 rounded-lg border px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
         pressed
           ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text font-medium'
           : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary',
@@ -245,7 +245,7 @@ export function SubmittalRegisterFilters({
           type="button"
           data-testid="submittals-filter-clear"
           onClick={() => onFilters(NO_FILTERS)}
-          className="inline-flex h-10 items-center gap-1.5 px-2 text-sm font-medium text-oe-blue-text hover:underline"
+          className="inline-flex h-8 items-center gap-1.5 px-2 text-sm font-medium text-oe-blue-text hover:underline"
         >
           <FilterX size={14} aria-hidden />
           {t('submittals.filter_clear', { defaultValue: 'Clear filters' })}

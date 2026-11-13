@@ -79,7 +79,7 @@ export function RaiseNoticeButton({
     return (
       <Link
         to={`/variations?tab=notices&highlight=${notice.id}`}
-        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10 hover:underline"
+        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10 hover:underline"
         data-testid="raise-notice-link"
       >
         <FileWarning size={12} />

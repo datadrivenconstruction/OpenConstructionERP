@@ -80,7 +80,7 @@ export function PaymentInsuranceGate({ paymentId }: { paymentId: string }) {
 
   return (
     <div
-      className="rounded-md border border-semantic-error/30 bg-semantic-error-bg px-2 py-1.5 text-2xs text-semantic-error"
+      className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-2 py-1.5 text-2xs text-semantic-error"
       role="alert"
       data-testid="insurance-gate-banner"
     >

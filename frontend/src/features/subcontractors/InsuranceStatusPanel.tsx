@@ -69,7 +69,7 @@ export function InsuranceCertificateRow({ cert }: { cert: InsuranceCertificateVi
   const { t } = useTranslation();
   return (
     <li
-      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-light px-2.5 py-1.5 text-xs"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-border-light px-2.5 py-1.5 text-xs"
       data-testid="insurance-cert-row"
       data-bucket={cert.bucket}
     >

@@ -42,6 +42,7 @@ import {
   RecoveryCard,
   MoneyDisplay,
   QuantityDisplay,
+  WideModal,
 } from '@/shared/ui';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -371,34 +372,13 @@ function BillPositionPicker({
   const rows = data?.rows ?? [];
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-3xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col"
-        role="dialog"
-        aria-label={t('siteLogistics.pick_from_bill', { defaultValue: 'Pick from the bill' })}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <div>
-            <h2 className="oe-section-title">
-              {t('siteLogistics.pick_from_bill', { defaultValue: 'Pick from the bill' })}
-            </h2>
-            <p className="text-xs text-content-tertiary">
-              {t('siteLogistics.pick_from_bill_hint', {
-                defaultValue:
-                  'Every line shows what is still outstanding against the estimate.',
-              })}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="px-6 py-3 border-b border-border-light">
+    <WideModal
+      open
+      onClose={onClose}
+      size="lg"
+      title={t('siteLogistics.pick_from_bill', { defaultValue: 'Pick from the bill' })}
+    >
+        <div className="border-b border-border-light">
           <div className="relative">
             <Search
               size={14}
@@ -416,86 +396,7 @@ function BillPositionPicker({
             />
           </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {isLoading ? (
-            <div className="p-4">
-              <SkeletonTable rows={6} />
-            </div>
-          ) : isError ? (
-            <p className="px-6 py-8 text-center text-sm text-semantic-error">
-              {t('siteLogistics.bill_load_failed', {
-                defaultValue: 'Could not read the bill for this project',
-              })}
-            </p>
-          ) : rows.length === 0 ? (
-            <EmptyState
-              icon={<Table2 size={40} />}
-              title={t('siteLogistics.no_bill_positions', {
-                defaultValue: 'No estimate lines to deliver against',
-              })}
-              description={t('siteLogistics.no_bill_positions_hint', {
-                defaultValue:
-                  'This project has no priced bill yet, or nothing matches your search.',
-              })}
-            />
-          ) : (
-            <ul className="divide-y divide-border-light">
-              {rows.map((row) => {
-                const picked = row.position_id ? chosen.has(row.position_id) : false;
-                return (
-                  <li key={row.position_id}>
-                    <button
-                      type="button"
-                      onClick={() => onPick(row)}
-                      disabled={picked}
-                      className={clsx(
-                        'flex w-full items-center gap-3 px-6 py-2.5 text-left transition-colors',
-                        picked
-                          ? 'cursor-not-allowed opacity-50'
-                          : 'hover:bg-surface-secondary/60',
-                      )}
-                    >
-                      <span className="w-24 shrink-0 font-mono text-xs text-content-tertiary tabular-nums">
-                        {row.ordinal || '-'}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-sm text-content-primary">
-                        {row.description}
-                      </span>
-                      <span className="shrink-0 text-right text-xs tabular-nums">
-                        <span className="block text-content-secondary">
-                          {t('siteLogistics.outstanding_short', { defaultValue: 'Outstanding' })}{' '}
-                          <QuantityDisplay
-                            value={row.outstanding_quantity}
-                            unit={row.unit}
-                            className="font-medium text-content-primary"
-                          />
-                        </span>
-                        <span className="block text-content-tertiary">
-                          {t('siteLogistics.of_bill_quantity', { defaultValue: 'of' })}{' '}
-                          <QuantityDisplay value={row.bill_quantity} unit={row.unit} />
-                        </span>
-                      </span>
-                      {picked ? (
-                        <Check size={14} className="shrink-0 text-semantic-success" />
-                      ) : (
-                        <Plus size={14} className="shrink-0 text-content-tertiary" />
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-
-        {data && (
-          <div className="border-t border-border-light px-6 py-2">
-            <TruncationNotice page={{ items: data.rows, total: data.total }} />
-          </div>
-        )}
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -590,24 +491,34 @@ function BookDeliveryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-label={title}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="px-6 py-4 space-y-4">
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      title={title}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={submit} disabled={isPending || !canSubmit}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : isEdit ? (
+              <Check size={16} className="mr-1.5 shrink-0" />
+            ) : (
+              <Truck size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>
+              {isEdit
+                ? t('siteLogistics.save_changes', { defaultValue: 'Save changes' })
+                : t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' })}
+            </span>
+          </Button>
+        </>
+      }
+    >
+        <div className="space-y-4">
           {errorMessage && (
             <div
               className="rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-sm text-semantic-error"
@@ -885,37 +796,7 @@ function BookDeliveryModal({
             />
           </div>
         </div>
-
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={submit} disabled={isPending || !canSubmit}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : isEdit ? (
-              <Check size={16} className="mr-1.5 shrink-0" />
-            ) : (
-              <Truck size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>
-              {isEdit
-                ? t('siteLogistics.save_changes', { defaultValue: 'Save changes' })
-                : t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' })}
-            </span>
-          </Button>
-        </div>
-      </div>
-
-      {picking && projectId && (
-        <BillPositionPicker
-          projectId={projectId}
-          chosen={chosenPositions}
-          onPick={addLine}
-          onClose={() => setPicking(false)}
-        />
-      )}
-    </div>
+    </WideModal>
   );
 }
 
@@ -2469,7 +2350,7 @@ function GateTimeline({
                                 delivery.window_end,
                               )}  ${delivery.supplier_name}`}
                               className={clsx(
-                                'absolute rounded-md border border-black/5 px-1.5 py-1 text-left overflow-hidden',
+                                'absolute rounded-lg border border-black/5 px-1.5 py-1 text-left overflow-hidden',
                                 cfg.cls,
                                 canEdit
                                   ? 'cursor-pointer hover:shadow-md hover:ring-1 hover:ring-oe-blue/40 transition-shadow'

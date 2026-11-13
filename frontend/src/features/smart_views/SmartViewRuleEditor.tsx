@@ -709,7 +709,7 @@ function RuleRow({
           >
             <input
               type="color"
-              className="h-9 w-9 rounded-md border border-border bg-surface-primary p-0"
+              className="h-9 w-9 rounded-lg border border-border bg-surface-primary p-0"
               value={rule.action_args.color ?? '#3b82f6'}
               onChange={(e) =>
                 onPatchActionArgs({ color: e.target.value })

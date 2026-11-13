@@ -226,7 +226,7 @@ export function PrequalModal({ subcontractor, onClose }: PrequalModalProps) {
                       type="button"
                       onClick={() => setAnswer(q.key, opt)}
                       className={clsx(
-                        'flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+                        'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
                         selected
                           ? opt === 'yes'
                             ? 'border-semantic-success/60 bg-semantic-success-bg text-semantic-success'

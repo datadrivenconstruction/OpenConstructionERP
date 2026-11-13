@@ -2230,7 +2230,7 @@ function PhasesTimelineView({
           return (
             <li
               key={p.id}
-              className="flex items-center gap-3 rounded-md border border-border-light bg-surface-primary px-3 py-2"
+              className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary px-3 py-2"
               data-phase-id={p.id}
             >
               <span className={clsx('inline-block h-2.5 w-2.5 shrink-0 rounded-full', pipColor)} aria-hidden />
@@ -2314,7 +2314,7 @@ function PhasesTimelineView({
                     <span className="truncate">{p.name}</span>
                     <VarianceBadge days={variance} />
                   </button>
-                  <div className="relative h-7 rounded-md bg-surface-secondary/40 border border-border-light">
+                  <div className="relative h-7 rounded-lg bg-surface-secondary/40 border border-border-light">
                     {hasDates && (
                       <>
                         {/* Baseline ghost bar — drawn behind the live bar so
@@ -2463,7 +2463,7 @@ function PhaseFormModal({
     >
       <div className="space-y-3">
         {error && (
-          <div className="rounded-md border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">{error}</div>
+          <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">{error}</div>
         )}
         <div>
           <label className={labelCls}>{t('schedule_advanced.phase_name', { defaultValue: 'Phase name' })} *</label>
@@ -2613,7 +2613,7 @@ function PhaseTemplateModal({
           <div className="text-xs uppercase tracking-wide text-content-tertiary mb-2">{t('schedule_advanced.template_preview', { defaultValue: 'Preview' })}</div>
           <ul className="space-y-1 text-sm">
             {preview.map((p, idx) => (
-              <li key={p.name} className="flex items-center justify-between rounded-md bg-surface-secondary/60 px-3 py-1.5">
+              <li key={p.name} className="flex items-center justify-between rounded-lg bg-surface-secondary/60 px-3 py-1.5">
                 <span className="flex items-center gap-2">
                   <span className="font-mono text-2xs text-content-tertiary tabular-nums w-6 text-right">{idx + 1}.</span>
                   {t(`schedule_advanced.template_phase.${slug(p.name)}`, { defaultValue: p.name })}
@@ -3242,7 +3242,7 @@ function AddCommitmentModal({
       disabled={!taskRef.trim()}
     >
       {error && (
-        <div className="rounded-md border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
+        <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
           {error}
         </div>
       )}
@@ -3476,10 +3476,10 @@ function ConstraintsTab({
           ))}
         </select>
         <div className="flex items-center gap-2 ml-auto text-xs">
-          <span className="rounded-md bg-semantic-warning-bg px-2 py-1 text-[#b45309]">
+          <span className="rounded-lg bg-semantic-warning-bg px-2 py-1 text-[#b45309]">
             {t('schedule_advanced.open_count', { count: openCount, defaultValue: '{{count}} open' })}
           </span>
-          <span className="rounded-md bg-semantic-success-bg px-2 py-1 text-semantic-success">
+          <span className="rounded-lg bg-semantic-success-bg px-2 py-1 text-semantic-success">
             {t('schedule_advanced.cleared_count', { count: clearedCount, defaultValue: '{{count}} cleared' })}
           </span>
           <Button
@@ -3676,7 +3676,7 @@ function NewConstraintModal({
       disabled={!taskRef.trim() || !isValidLink(linkType, linkId)}
     >
       {error && (
-        <div className="rounded-md border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
+        <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
           {error}
         </div>
       )}
@@ -3975,7 +3975,7 @@ function BaselinesTab({
                 {topDelays.map((e) => (
                   <li
                     key={e.task_ref}
-                    className="flex items-center justify-between rounded-md bg-surface-secondary/60 px-3 py-1.5"
+                    className="flex items-center justify-between rounded-lg bg-surface-secondary/60 px-3 py-1.5"
                   >
                     <span className="truncate" title={e.name ?? e.task_ref}>
                       {e.name || `${e.task_ref.slice(0, 8)}…`}
@@ -4165,7 +4165,7 @@ function MasterFormModal({
     >
       <div className="space-y-3">
         {error && (
-          <div className="rounded-md border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
+          <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
             {error}
           </div>
         )}

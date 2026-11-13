@@ -95,7 +95,7 @@ function KeysSection({ associationId, keys }: { associationId: string; keys: App
       ) : (
         <ul className="space-y-2">
           {keys.map((k) => (
-            <li key={k.id} className="rounded-md border border-border-light p-2">
+            <li key={k.id} className="rounded-lg border border-border-light p-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{k.name}</span>
                 <span className="flex items-center gap-2 text-xs text-content-tertiary">

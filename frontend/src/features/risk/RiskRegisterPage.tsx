@@ -8,10 +8,10 @@ import { clampInput } from '@/shared/lib/clampInput';
 import { fetchAllPages } from '@/shared/lib/apiHelpers';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
-  AlertTriangle, Shield, Trash2, X, Search, Filter, CalendarDays, TrendingUp,
+  AlertTriangle, Shield, Trash2, Search, Filter, CalendarDays, TrendingUp,
   LayoutGrid, Activity, Network, ArrowRight,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, RecoveryCard, SkeletonTable, SkeletonCard, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, RecoveryCard, SkeletonTable, SkeletonCard, ModuleGuideButton, CollapsibleSection, WideModal } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { MultiCurrencyTotal } from '@/shared/ui/MultiCurrencyTotal';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -166,7 +166,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
                 <td className="text-content-secondary">{getProbLabels(t)[p]}</td>
                 {IMPACT_LEVELS.map((i) => {
                   const c = map[`${p}|${i}`]?.count || 0;
-                  return <td key={i}><div className={`flex items-center justify-center h-10 rounded-md text-sm font-semibold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
+                  return <td key={i}><div className={`flex items-center justify-center h-10 rounded-lg text-sm font-semibold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
                 })}
               </tr>
             ))}
@@ -308,12 +308,21 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
   });
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-labelledby="risk-create-title" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-xl border border-border max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 id="risk-create-title" className="oe-section-title">{t('risk.new', { defaultValue: 'New Risk' })}</h2>
-          <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="text-content-tertiary hover:text-content-primary"><X size={20} /></button>
-        </div>
+    <WideModal
+      open
+      onClose={onClose}
+      size="md"
+      busy={mut.isPending}
+      title={t('risk.new', { defaultValue: 'New Risk' })}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button variant="primary" disabled={!f.title.trim() || mut.isPending} onClick={() => mut.mutate()}>
+            {mut.isPending ? t('common.creating', { defaultValue: 'Creating...' }) : t('common.create', { defaultValue: 'Create' })}
+          </Button>
+        </>
+      }
+    >
         <div className="space-y-4">
           <div>
             <label htmlFor="risk-title" className="oe-label">{t('common.title', { defaultValue: 'Title' })} *</label>
@@ -361,14 +370,7 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
             />
           </div>
         </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
-          <Button variant="primary" disabled={!f.title.trim() || mut.isPending} onClick={() => mut.mutate()}>
-            {mut.isPending ? t('common.creating', { defaultValue: 'Creating...' }) : t('common.create', { defaultValue: 'Create' })}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
