@@ -14,7 +14,7 @@ import { BookOpen, Crown, ExternalLink, FileText, GraduationCap, ListChecks, typ
 import { Badge } from '@/shared/ui/Badge';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 import type { AcademyItem, AcademyItemKind } from './academyTypes';
-import { CourseCover } from './CourseCover';
+import { CourseCardCover, CoursePathStrip } from './CourseCardCover';
 import { academyUrlFor, formatItemDuration, inOtherLanguage, itemTopics, languageName } from './academyItems';
 
 const KIND_ICON: Record<AcademyItemKind, LucideIcon> = {
@@ -122,37 +122,34 @@ export function AcademyItemRow({ item }: { item: AcademyItem }) {
   );
 }
 
-function CardMedia({ item, country }: { item: AcademyItem; country?: string }) {
+function CardMedia({ item, done }: { item: AcademyItem; done: boolean }) {
+  const steps = item.steps ?? [];
   return (
-    <span
-      className="relative block aspect-video overflow-hidden border-b border-border-light bg-surface-secondary"
-      data-testid="academy-item-media"
-    >
-      <CourseCover item={item} className="absolute inset-0 h-full w-full" />
-      {(item.country ?? item.market) && country && (
-        <span
-          data-testid="academy-item-country"
-          data-country={item.country ?? item.market}
-          className="absolute start-2 top-2 inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-elevated/95 px-1.5 py-1 text-2xs font-medium text-content-primary"
-        >
-          <CountryFlag code={(item.country ?? item.market)!} size={16} />
-          {country}
-        </span>
-      )}
-    </span>
+    <>
+      <span
+        className="relative block aspect-[16/9] overflow-hidden border-b border-border-light bg-surface-secondary"
+        data-testid="academy-item-media"
+      >
+        <CourseCardCover item={item} done={done} />
+      </span>
+      {steps.length > 0 && <CoursePathStrip steps={steps} done={done} className="relative z-[1] mx-3 -mt-12" />}
+    </>
   );
 }
 
-/** With `media`, the card opens with its 16:9 illustrated cover and shows
- *  the item's country, named by `countryName`, over its corner. */
+/** With `media`, the card opens with its cover (the project photo, role and path of a course; the
+ *  drawn cover of a checklist or guide) and names the item's country, given as `countryName`. */
 export function AcademyItemCard({
   item,
   media = false,
   countryName,
+  done = false,
 }: {
   item: AcademyItem;
   media?: boolean;
   countryName?: string;
+  /** The reader marked this course done: its path shows every step done. */
+  done?: boolean;
 }) {
   const { t } = useTranslation();
   const meta = useItemMeta(item);
@@ -179,17 +176,21 @@ export function AcademyItemCard({
           : 'border-border-light bg-surface-elevated hover:border-oe-blue/40 focus-visible:ring-oe-blue',
       )}
     >
-      {media && <CardMedia item={item} country={countryName} />}
+      {media && <CardMedia item={item} done={done} />}
       {body(
         <>
-          <span className="flex items-center gap-1.5 pe-6 text-2xs font-medium text-content-tertiary">
+          <span className={clsx('flex items-center gap-1.5 text-2xs font-medium text-content-tertiary', media ? 'order-2' : 'pe-6')}>
             <Icon size={14} className={paid ? 'text-oe-purple-text' : undefined} aria-hidden />
             <span className="truncate">{[meta.kindLabel, meta.duration, meta.otherLanguage].filter(Boolean).join(' · ')}</span>
+            {paid && media && <Crown size={14} strokeWidth={2} className="ms-auto shrink-0 text-oe-purple-text" aria-hidden />}
           </span>
-          <span lang={item.contentLanguage} className="line-clamp-2 text-sm font-semibold text-content-primary">
+          <span
+            lang={item.contentLanguage}
+            className={clsx('line-clamp-2 text-sm font-semibold text-content-primary', media && 'order-1 leading-snug')}
+          >
             {item.title}
           </span>
-          <span className="flex flex-wrap gap-1">
+          <span className={clsx('flex flex-wrap gap-1', media && 'order-3')}>
             {itemTopics(item)
               .slice(0, 2)
               .map((topic) => (
@@ -198,21 +199,26 @@ export function AcademyItemCard({
                 </Badge>
               ))}
           </span>
-          <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-oe-blue">
-            {t('learn.opens_academy', { defaultValue: 'Opens on Academy' })}
-            <ExternalLink size={12} className="rtl:-scale-x-100" aria-hidden />
-            <span className="sr-only">{meta.newTab}</span>
+          <span className={clsx('mt-auto flex items-center gap-2 text-xs', media && 'order-4')}>
+            {media && (item.country ?? item.market) && countryName && (
+              <span
+                data-testid="academy-item-country"
+                data-country={item.country ?? item.market}
+                className="inline-flex min-w-0 items-center gap-1.5 text-content-secondary"
+              >
+                <CountryFlag code={(item.country ?? item.market)!} size={16} />
+                <span className="truncate">{countryName}</span>
+              </span>
+            )}
+            <span className={clsx('inline-flex shrink-0 items-center gap-1 font-medium text-oe-blue', media && 'ms-auto')}>
+              {t('learn.opens_academy', { defaultValue: 'Opens on Academy' })}
+              <ExternalLink size={12} className="rtl:-scale-x-100" aria-hidden />
+              <span className="sr-only">{meta.newTab}</span>
+            </span>
           </span>
         </>,
       )}
-      {paid && (
-        <Crown
-          size={14}
-          strokeWidth={2}
-          className={clsx('absolute end-3 text-oe-purple-text', media ? 'bottom-3' : 'top-3')}
-          aria-hidden
-        />
-      )}
+      {paid && !media && <Crown size={14} strokeWidth={2} className="absolute end-3 top-3 text-oe-purple-text" aria-hidden />}
       {paid && <PaidHint id={hint.id} lesson={item.kind === 'lesson'} dismissed={hint.dismissed} />}
     </a>
   );

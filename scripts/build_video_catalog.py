@@ -785,6 +785,13 @@ def build(args: argparse.Namespace) -> None:
 # ── Academy items (courses, checklists, guides) ──────────────────────────────
 
 ITEM_KINDS = {"course", "lesson", "checklist", "article"}
+# ERP modules a course task works in; each consecutive run of one module is a step of the course path.
+STEP_MODULES = {
+    "bcf", "bid_management", "bim", "bim_hub", "bim_requirements", "boq", "carbon", "clash", "closeout", "contracts",
+    "costs", "cvr", "daily_diary", "defects_liability", "documents", "dwg_takeoff", "full_evm", "inspections", "ncr",
+    "punchlist", "rfi", "risk", "safety", "schedule", "takeoff", "variations",
+}
+ROLE_GROUPS = {"est", "qs", "site", "bim", "client"}
 # The site names the language of a course's case content in that language.
 CONTENT_LANGUAGES = {
     "english": "en",
@@ -882,6 +889,22 @@ def load_academy_items(snapshot: Path, root: Path) -> list[dict]:
         item["routes"] = routes
         if raw.get("parent_course"):
             item["parentCourse"] = raw["parent_course"]
+        steps = raw.get("path_steps") or []
+        for step in steps:
+            if not (len(step) == 3 and step[0] in STEP_MODULES and 1 <= step[1] <= step[2]):
+                fail(f"{item_id}: path step {step!r} is not [module, first task, last task]")
+        if steps:
+            item["steps"] = [{"module": m, "from": a, "to": b} for m, a, b in steps]
+        if raw.get("role_group"):
+            if raw["role_group"] not in ROLE_GROUPS:
+                fail(f"{item_id}: unknown role group {raw['role_group']!r}")
+            item["role"] = raw["role_group"]
+        people = raw.get("people")
+        if people:
+            for img in [people["you"], *people["others"]]:
+                if not (root / "frontend" / "public" / "academy-courses" / "people" / f"{img}.webp").is_file():
+                    fail(f"{item_id}: portrait {img} is not in public/academy-courses/people")
+            item["people"] = {"you": people["you"], "others": people["others"], "crew": people["crew"]}
         items.append(item)
     return items
 

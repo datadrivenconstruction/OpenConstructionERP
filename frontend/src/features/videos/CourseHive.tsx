@@ -3,7 +3,7 @@
 //
 // The learning path of one example project as a honeycomb: the goal in the
 // centre with a progress rim, its courses spiralling out in the order the work
-// happens. Each cell shows the course's subject glyph; a done cell fills green,
+// happens. Each cell shows the course's project photo; a done cell tints green,
 // the next one carries a blue rim, the rest stay quiet. Hover or focus shows
 // the course in a tooltip. Below `sm` the comb becomes a vertical chain.
 
@@ -16,6 +16,7 @@ import { HEX_CELL_CLIP } from '@/shared/lib/honeycomb';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
 import { academyUrlFor, formatItemDuration } from './academyItems';
 import type { AcademyItem } from './academyTypes';
+import { coursePhotoUrl } from './CourseCardCover';
 import { CourseGlyph, coverAccentColor } from './CourseCover';
 import { coverSubject } from './courseCovers';
 import {
@@ -68,11 +69,14 @@ function useStatusLabel() {
         : t('learn.hive.status_ahead', { defaultValue: 'Ahead' });
 }
 
-/** A hexagon with a status rim and the course's subject glyph inside it. */
+/** A hexagon with a status rim and the course's project photo inside it (its subject glyph without one). */
 function HexFace({ item, status, num, compact }: { item: AcademyItem; status: CourseStatus; num: number; compact?: boolean }) {
   const subject = coverSubject(item);
   const accent = coverAccentColor(subject);
   const rim = RIM[status];
+  const photo = coursePhotoUrl(item);
+  const [failed, setFailed] = useState(false);
+  const showPhoto = Boolean(photo) && !failed;
   return (
     <span
       className={clsx('absolute inset-0 block', rim.className)}
@@ -80,28 +84,51 @@ function HexFace({ item, status, num, compact }: { item: AcademyItem; status: Co
     >
       <span
         className={clsx(
-          'absolute block overflow-hidden',
-          status === 'ahead' ? 'inset-[3%] bg-surface-secondary' : 'inset-[6%]',
+          'absolute block overflow-hidden bg-surface-secondary',
+          status === 'ahead' ? 'inset-[3%]' : 'inset-[6%]',
         )}
         style={{
           clipPath: HEX_CELL_CLIP,
-          background: status === 'done' ? DONE_COLOR : status === 'next' ? 'var(--oe-cover-ground)' : undefined,
+          background: showPhoto ? undefined : status === 'done' ? DONE_COLOR : status === 'next' ? 'var(--oe-cover-ground)' : undefined,
         }}
       >
-        {status === 'next' && <span className="absolute inset-0" style={{ background: accent, opacity: 0.16 }} aria-hidden />}
+        {showPhoto ? (
+          <img
+            src={photo!}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={() => setFailed(true)}
+            className={clsx('absolute inset-0 h-full w-full object-cover', status === 'ahead' && 'opacity-80 grayscale')}
+            data-testid="course-hive-photo"
+          />
+        ) : (
+          <>
+            {status === 'next' && <span className="absolute inset-0" style={{ background: accent, opacity: 0.16 }} aria-hidden />}
+            <span
+              className={clsx(
+                'absolute inset-0 flex items-center justify-center',
+                status === 'done' ? 'text-white' : status === 'ahead' ? 'opacity-60' : undefined,
+              )}
+              style={status === 'done' ? undefined : { color: accent }}
+            >
+              <CourseGlyph subject={subject} className={compact ? 'h-[46%] w-[46%]' : 'h-[40%] w-[40%]'} />
+            </span>
+          </>
+        )}
+        {showPhoto && status === 'done' && (
+          <span className="absolute inset-0" style={{ background: DONE_COLOR, opacity: 0.55 }} aria-hidden />
+        )}
         <span
           className={clsx(
-            'absolute inset-0 flex items-center justify-center',
-            status === 'done' ? 'text-white' : status === 'ahead' ? 'opacity-60' : undefined,
+            'absolute inset-x-0 flex justify-center',
+            showPhoto ? 'top-1/2 -translate-y-1/2' : compact ? 'top-[4%]' : 'top-[9%]',
           )}
-          style={status === 'done' ? undefined : { color: accent }}
         >
-          <CourseGlyph subject={subject} className={compact ? 'h-[46%] w-[46%]' : 'h-[40%] w-[40%]'} />
-        </span>
-        <span className={clsx('absolute inset-x-0 flex justify-center', compact ? 'top-[4%]' : 'top-[9%]')}>
           <span
             className={clsx(
-              'inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-2xs font-semibold leading-none tabular-nums',
+              'inline-flex items-center justify-center rounded-full font-semibold leading-none tabular-nums shadow-sm',
+              showPhoto && !compact ? 'h-6 min-w-6 px-1.5 text-xs' : 'h-4 min-w-4 px-1 text-2xs',
               status === 'done'
                 ? 'bg-white'
                 : status === 'next'
@@ -110,7 +137,7 @@ function HexFace({ item, status, num, compact }: { item: AcademyItem; status: Co
             )}
             style={status === 'done' ? { color: DONE_COLOR } : status === 'next' ? { background: NEXT_COLOR } : undefined}
           >
-            {status === 'done' ? <Check size={10} strokeWidth={3} aria-hidden /> : num}
+            {status === 'done' ? <Check size={showPhoto && !compact ? 14 : 10} strokeWidth={3} aria-hidden /> : num}
           </span>
         </span>
         {item.access === 'paid' && !compact && (
@@ -125,12 +152,22 @@ function HexFace({ item, status, num, compact }: { item: AcademyItem; status: Co
   );
 }
 
-export function CourseHive({ paths, initialPath }: { paths: LearningPath[]; initialPath?: string }) {
+export function CourseHive({
+  paths,
+  initialPath,
+  shared,
+}: {
+  paths: LearningPath[];
+  initialPath?: string;
+  /** Progress shared with the page; the hive keeps its own when it is alone. */
+  shared?: ReturnType<typeof useCoursesDone>;
+}) {
   const { t, i18n } = useTranslation();
   const statusLabel = useStatusLabel();
   const [pathId, setPathId] = useState(initialPath ?? paths[0]?.id);
   const path = paths.find((p) => p.id === pathId) ?? paths[0];
-  const [done, toggleDone] = useCoursesDone();
+  const own = useCoursesDone();
+  const [done, toggleDone] = shared ?? own;
   const courses = path?.courses ?? [];
   const statuses = useMemo(() => courseStatuses(courses, done), [courses, done]);
   const percent = pathPercent(courses, done);
