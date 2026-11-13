@@ -1149,7 +1149,8 @@ export function ScheduleDetail({
 }: {
   schedule: Schedule;
   projectId: string;
-  onBack: () => void;
+  /** Kept for callers; the breadcrumb above the page is the way back now. */
+  onBack?: () => void;
   /** CONN-34: BOQ id to pre-load into Generate-from-BOQ (deep link). */
   generateBoqId?: string | null;
   /** Called once the generate modal has consumed the deep-link BOQ id. */
@@ -2852,7 +2853,6 @@ export function ScheduleDetail({
 
 export function ProjectSchedules({
   project,
-  onBack,
   generateBoqId,
   onConsumeGenerateBoq,
 }: {
@@ -2975,53 +2975,38 @@ export function ProjectSchedules({
   }
 
   return (
-    <div className="animate-fade-in">
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary transition-colors hover:text-content-primary"
-      >
-        <ArrowLeft size={14} />
-        {t('schedule.back_to_projects', 'Back to projects')}
-      </button>
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        subtitle={t('schedule.project_schedules', 'Schedules for this project')}
+        actions={
+          <>
+            <Button
+              variant="primary"
+              icon={<Plus size={16} />}
+              onClick={() => setShowCreate(true)}
+              disabled={!canCreateSchedule}
+              title={createHint}
+            >
+              {t('schedule.create_schedule', 'Create Schedule')}
+            </Button>
+            <Button
+              variant="secondary"
+              icon={<FileSpreadsheet size={16} />}
+              onClick={() => setShowSpreadsheetImport(true)}
+              disabled={!canCreateSchedule}
+              title={createHint}
+            >
+              {t('schedule.tabular_import.open', { defaultValue: 'Import spreadsheet' })}
+            </Button>
+          </>
+        }
+      />
 
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-content-primary">{project.name}</h1>
-          <p className="mt-1 text-sm text-content-secondary">
-            {t('schedule.project_schedules', 'Schedules for this project')}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="lg"
-            icon={<FileSpreadsheet size={20} />}
-            onClick={() => setShowSpreadsheetImport(true)}
-            disabled={!canCreateSchedule}
-            title={createHint}
-          >
-            {t('schedule.tabular_import.open', { defaultValue: 'Import spreadsheet' })}
-          </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            icon={<Plus size={20} />}
-            onClick={() => setShowCreate(true)}
-            disabled={!canCreateSchedule}
-            title={createHint}
-          >
-            {t('schedule.create_schedule', 'Create Schedule')}
-          </Button>
-        </div>
-      </div>
-
-      <label className="mb-4 flex flex-wrap items-center gap-2 text-sm text-content-secondary">
+      <label className="flex flex-wrap items-center gap-2 text-sm text-content-secondary">
         {t('schedule.archive_filter')}
         <select aria-label={t('schedule.archive_filter')} value={archiveState}
           onChange={(event) => { setArchiveState(event.target.value as typeof archiveState); setScheduleOffset(0); }}
-          className="oe-select">
+          className="oe-select w-auto min-w-40">
           <option value="current">{t('schedule.archive_filter_current')}</option>
           <option value="archived">{t('schedule.status_archived')}</option>
           <option value="all">{t('common.all')}</option>

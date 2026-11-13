@@ -695,14 +695,14 @@ export function AssembliesPage() {
 
       {/* Search & Filters — flat toolbar (was a Card with internal p-4
           giving a card-in-card look). 32px less vertical chrome. */}
-      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           {/* Search input */}
           <div className="relative flex-1">
             <label htmlFor="assemblies-search" className="sr-only">
               {t('common.search', { defaultValue: 'Search' })}
             </label>
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
-              <Search size={16} />
+              <Search size={14} />
             </div>
             <input
               id="assemblies-search"
@@ -714,7 +714,7 @@ export function AssembliesPage() {
                 'Search by name or code...',
               )}
               aria-label={t('assemblies.search_placeholder', { defaultValue: 'Search by name or code...' })}
-              className="oe-input-lg w-full ps-10 pe-9"
+              className="oe-input ps-9 pe-9"
             />
             {query && (
               <button
@@ -735,7 +735,7 @@ export function AssembliesPage() {
               aria-label={t('a11y.assemblies.category_filter', {
                 defaultValue: 'Filter assemblies by category',
               })}
-              className="oe-select-lg w-full ps-3 sm:w-44"
+              className="oe-select sm:w-44"
             >
               {CATEGORY_VALUES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -743,9 +743,6 @@ export function AssembliesPage() {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-              <ChevronDown size={14} />
-            </div>
           </div>
 
           {/* Tag filter */}
@@ -758,7 +755,7 @@ export function AssembliesPage() {
               value={tagFilter}
               onChange={(e) => { setTagFilter(e.target.value); setOffset(0); }}
               placeholder={t('assemblies.filter_by_tag', { defaultValue: 'Filter by tag...' })}
-              className="oe-input-lg w-full ps-9 pe-3 sm:w-40"
+              className="oe-input ps-9 pe-3 sm:w-40"
             />
           </div>
 
@@ -779,7 +776,7 @@ export function AssembliesPage() {
                 setSortDir(d);
               }}
               aria-label={t('assemblies.sort_label', { defaultValue: 'Sort' })}
-              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-8 pe-7 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+              className="oe-select w-auto ps-8" 
             >
               <option value="updated_at:desc">{t('assemblies.sort_recent', { defaultValue: 'Recently updated' })}</option>
               <option value="updated_at:asc">{t('assemblies.sort_oldest', { defaultValue: 'Oldest updated' })}</option>
@@ -792,20 +789,17 @@ export function AssembliesPage() {
               <option value="usage_count:desc">{t('assemblies.sort_usage_hi', { defaultValue: 'Most used' })}</option>
               <option value="component_count:desc">{t('assemblies.sort_comp_hi', { defaultValue: 'Most components' })}</option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2 text-content-tertiary">
-              <ChevronDown size={14} />
-            </div>
           </div>
 
           {/* Grid / table view toggle — segmented control. Persisted to
               localStorage so power users get their preference back. */}
-          <div className="inline-flex h-10 rounded-lg border border-border bg-surface-primary p-0.5 shrink-0">
+          <div className="inline-flex h-8 rounded-lg border border-border bg-surface-primary p-0.5 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
               aria-pressed={viewMode === 'grid'}
               title={t('assemblies.view_grid', { defaultValue: 'Card grid' })}
-              className={`flex items-center justify-center px-2.5 rounded-md transition-colors ${
+              className={`flex items-center justify-center px-2.5 rounded-sm transition-colors ${
                 viewMode === 'grid'
                   ? 'bg-oe-blue text-white shadow-sm'
                   : 'text-content-tertiary hover:text-content-primary'
@@ -818,7 +812,7 @@ export function AssembliesPage() {
               onClick={() => setViewMode('table')}
               aria-pressed={viewMode === 'table'}
               title={t('assemblies.view_table', { defaultValue: 'Compact table' })}
-              className={`flex items-center justify-center px-2.5 rounded-md transition-colors ${
+              className={`flex items-center justify-center px-2.5 rounded-sm transition-colors ${
                 viewMode === 'table'
                   ? 'bg-oe-blue text-white shadow-sm'
                   : 'text-content-tertiary hover:text-content-primary'

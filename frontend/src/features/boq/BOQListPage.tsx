@@ -1024,7 +1024,7 @@ export function BOQListPage() {
           Canon KPI tile: shared Card, top-aligned label+value, text-lg value. */}
       {stats && allBoqs && allBoqs.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-primary px-4 py-3">
             <div className="oe-overline">
               {isFiltered
                 ? t('boq.matching_estimates', { defaultValue: 'Matching Estimates' })
@@ -1032,11 +1032,11 @@ export function BOQListPage() {
             </div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.count}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-primary px-4 py-3">
             <div className="oe-overline">{t('boq.total_positions', { defaultValue: 'Total Positions' })}</div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.totalPositions.toLocaleString(getNumberLocale())}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-primary px-4 py-3">
             <div className="oe-overline">{t('boq.total_value', { defaultValue: 'Total Value' })}</div>
             {/* Money rule: never blend currencies into one scalar. One
                 labelled total when all share a currency; the dominant
@@ -1069,7 +1069,7 @@ export function BOQListPage() {
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-primary px-4 py-3">
             <div className="oe-overline">{t('boq.status', { defaultValue: 'Status' })}</div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {statusEntries.map(([status, n]) => (
@@ -1085,18 +1085,18 @@ export function BOQListPage() {
       {/* Search + Filters */}
       {allBoqs && allBoqs.length > 0 && (
         <Card padding="none">
-          <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
             {/* Search */}
             <div className="relative flex-1">
-              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center pl-3 text-content-tertiary">
-                <Search size={16} />
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
+                <Search size={14} />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boq.search_placeholder', { defaultValue: 'Search estimates...' })}
-                className="oe-input-lg w-full ps-10 pe-3"
+                className="oe-input ps-9 pe-3"
               />
             </div>
 
@@ -1109,16 +1109,13 @@ export function BOQListPage() {
                   aria-label={t('a11y.boq.project_filter', {
                     defaultValue: 'Filter estimates by project',
                   })}
-                  className="oe-select-lg max-w-full ps-3 sm:min-w-44 sm:max-w-80"
+                  className="oe-select max-w-full sm:min-w-44 sm:max-w-80"
                 >
                   <option value="">{t('boq.all_projects', { defaultValue: 'All projects' })}</option>
                   {uniqueProjects.map((p) => (
                     <option key={p.id} value={p.id}>{p.label}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-                  <ChevronDown size={14} />
-                </div>
               </div>
             )}
 
@@ -1131,16 +1128,13 @@ export function BOQListPage() {
                   aria-label={t('a11y.boq.status_filter', {
                     defaultValue: 'Filter estimates by status',
                   })}
-                  className="oe-select-lg ps-3 sm:w-32"
+                  className="oe-select sm:w-36"
                 >
                   <option value="">{t('boq.all_statuses', { defaultValue: 'All statuses' })}</option>
                   {uniqueStatuses.map((s) => (
                     <option key={s} value={s}>{statusLabel(s)}</option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
-                  <ChevronDown size={14} />
-                </div>
               </div>
             )}
 
@@ -1154,7 +1148,7 @@ export function BOQListPage() {
                 <button
                   key={field}
                   onClick={() => handleSort(field)}
-                  className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
+                  className={`flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-medium transition-colors ${
                     sortField === field
                       ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
