@@ -429,7 +429,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
         srTitle={t('photos.title')}
         subtitle={t('photoArchive.subtitle')}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {validation.data && (
               <Badge variant={problems === 0 ? 'success' : validation.data.status === 'errors' ? 'error' : 'warning'}>
                 {problems === 0 ? t('photoArchive.validation.clean') : t('photoArchive.validation.issues', { count: problems })}
@@ -463,7 +463,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
 
       <PhotoUploadDropzone projectId={projectId} />
 
-      <nav className="flex gap-1 border-b border-border-light" role="tablist" aria-label={t('photoArchive.views')}>
+      <nav className="flex gap-1 overflow-x-auto border-b border-border-light" role="tablist" aria-label={t('photoArchive.views')}>
         {(Object.keys(VIEW_ICONS) as PhotoView[]).map((v) => {
           const Icon = VIEW_ICONS[v];
           return (
@@ -473,7 +473,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
               role="tab"
               aria-selected={view === v}
               onClick={() => setView(v)}
-              className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm ${
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-sm ${
                 view === v ? 'border-oe-blue text-oe-blue' : 'border-transparent text-content-secondary hover:text-content-primary'
               }`}
             >
