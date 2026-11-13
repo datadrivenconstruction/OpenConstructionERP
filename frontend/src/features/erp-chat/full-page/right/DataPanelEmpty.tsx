@@ -153,25 +153,25 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
         }}
       >
         {/* Hero icon + headline */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div
             style={{
-              width: 64,
-              height: 64,
+              width: 48,
+              height: 48,
               borderRadius: '50%',
               background: 'var(--chat-surface-2)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--chat-accent)',
-              marginBottom: 16,
+              marginBottom: 12,
             }}
           >
-            <Sparkles size={28} strokeWidth={1.75} />
+            <Sparkles size={22} strokeWidth={1.75} />
           </div>
           <h1
             style={{
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: 600,
               color: 'var(--chat-text-primary)',
               margin: '0 0 8px',
@@ -350,12 +350,12 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
                     style={{
                       textAlign: 'left',
                       padding: '5px 10px',
-                      fontSize: 11,
-                      fontFamily: 'var(--chat-font-mono)',
+                      fontSize: 12,
+                      fontFamily: 'var(--chat-font-body)',
                       color: 'var(--chat-text-secondary)',
                       background: 'var(--chat-surface-2)',
                       border: '1px solid var(--chat-border-subtle)',
-                      borderRadius: 4,
+                      borderRadius: 6,
                       cursor: 'pointer',
                       transition: 'all 0.15s',
                     }}
