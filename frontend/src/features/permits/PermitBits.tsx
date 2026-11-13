@@ -217,7 +217,7 @@ export function Refusal({ children, testId = 'refusal' }: { children: ReactNode;
     <p
       role="alert"
       data-testid={testId}
-      className="rounded-md border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-content-primary"
+      className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-2 text-sm text-content-primary"
     >
       {children}
     </p>
@@ -330,7 +330,7 @@ export function FormDialog({
           <ul
             role="alert"
             data-testid={`${testId}-problems`}
-            className="list-disc space-y-0.5 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg py-2 pl-7 pr-3 text-sm text-content-primary"
+            className="list-disc space-y-0.5 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg py-2 pl-7 pr-3 text-sm text-content-primary"
           >
             {problems.map((p) => (
               <li key={p}>{p}</li>
@@ -395,7 +395,7 @@ export function MoreActions({ items, testId }: { items: MoreAction[]; testId: st
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-dropdown mt-1 min-w-[14rem] rounded-md border border-border-light bg-surface-primary py-1 shadow-lg"
+          className="absolute right-0 z-dropdown mt-1 min-w-[14rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
         >
           {items.map((item) => (
             <button

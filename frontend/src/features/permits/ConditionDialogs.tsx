@@ -591,7 +591,7 @@ export function DischargeDialog({
           {t('permits.ui.discharge.mode', { defaultValue: 'How it is closed' })}
         </legend>
         {modes.map((m) => (
-          <label key={m} className="flex items-start gap-2 rounded-md border border-border-light bg-surface-elevated p-2 text-sm">
+          <label key={m} className="flex items-start gap-2 rounded-lg border border-border-light bg-surface-elevated p-2 text-sm">
             <input
               type="radio"
               name="discharge-mode"

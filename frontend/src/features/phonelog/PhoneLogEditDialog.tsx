@@ -130,7 +130,7 @@ export function PhoneLogEditDialog({
             type="button"
             onClick={onClose}
             disabled={saveMutation.isPending}
-            className="rounded-md border border-border-light px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
+            className="rounded-lg border border-border-light px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
           >
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </button>
@@ -138,7 +138,7 @@ export function PhoneLogEditDialog({
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={!canSave || saveMutation.isPending}
-            className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {t('phonelog.save_changes', { defaultValue: 'Save changes' })}

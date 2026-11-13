@@ -179,7 +179,7 @@ export function ApplicationPanel({
         <p
           role="status"
           data-testid="deemed-proposal"
-          className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
+          className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
         >
           {t('permits.ui.clock.deemed_proposal', {
             defaultValue:
@@ -194,7 +194,7 @@ export function ApplicationPanel({
         </p>
       )}
 
-      <dl className="grid gap-4 rounded-lg border border-border bg-surface-elevated shadow-sm p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid gap-4 rounded-xl border border-border-light bg-surface-elevated p-4 sm:grid-cols-2 lg:grid-cols-4">
         <Fact label={t('permits.ui.application.authority', { defaultValue: 'Authority' })}>{a.authority_name || '-'}</Fact>
         <Fact label={t('permits.ui.application.reference', { defaultValue: 'Authority reference' })}>{a.authority_reference || '-'}</Fact>
         <Fact label={t('permits.ui.application.submitted', { defaultValue: 'Submitted' })}>{dateText(a.submitted_at)}</Fact>
@@ -203,7 +203,7 @@ export function ApplicationPanel({
         {a.appeal_note && <Fact label={t('permits.ui.application.appeal_note', { defaultValue: 'Appeal note' })}>{a.appeal_note}</Fact>}
       </dl>
 
-      <section className="space-y-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="clock-card">
+      <section className="space-y-3 rounded-xl border border-border-light bg-surface-elevated p-4" data-testid="clock-card">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="oe-card-title flex items-center gap-2">
             <Clock3 size={16} aria-hidden />
@@ -272,7 +272,7 @@ export function ApplicationPanel({
               // A corrected revision stays for the record; only the newest one can be corrected again.
               const replaced = a.decisions.some((x) => x.supersedes_id === d.id);
               return (
-              <li key={d.id} className={`space-y-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm ${replaced ? 'opacity-60' : ''}`} data-testid="decision-entry">
+              <li key={d.id} className={`space-y-2 rounded-xl border border-border-light bg-surface-elevated  p-3 text-sm ${replaced ? 'opacity-60' : ''}`} data-testid="decision-entry">
                 <div className="flex flex-wrap items-center gap-3">
                   <ToneBadge tone={OUTCOME_TONE[d.outcome]}>{vocab(t, OUTCOME, d.outcome)}</ToneBadge>
                   <span className="text-content-secondary">{dateText(d.decision_date)}</span>
@@ -318,7 +318,7 @@ export function ApplicationPanel({
                   ]}
                 />
                 {d.conditions_pending && (
-                  <div className="flex flex-wrap items-center gap-3 rounded-md bg-semantic-warning-bg px-3 py-2" data-testid="conditions-pending">
+                  <div className="flex flex-wrap items-center gap-3 rounded-lg bg-semantic-warning-bg px-3 py-2" data-testid="conditions-pending">
                     <span className="text-content-primary">
                       {t('permits.ui.decision.pending_banner', {
                         defaultValue: 'The conditions of this decision are not all entered yet. Readiness stays blocked until they are.',

@@ -142,7 +142,7 @@ export function ModelPicker({ projectId, model, canSet = null, gates, labels, on
   return (
     <div className="space-y-4" data-testid="model-picker">
       {model && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 text-sm">
           <Layers size={16} className="text-content-tertiary" aria-hidden />
           <span className="text-content-secondary">
             {t('governance.project.model.current', { defaultValue: 'Current phase model' })}

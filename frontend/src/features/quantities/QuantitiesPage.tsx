@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { isModuleLoaded } from '@/shared/lib/moduleProbe';
-import { Breadcrumb, CollapsibleSection, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
+import { Breadcrumb, Button, CollapsibleSection, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { quantitiesGuide } from './quantitiesGuide';
 import { useToastStore } from '@/stores/useToastStore';
@@ -471,7 +471,7 @@ function InstallProgressPanel({
         );
 
   return (
-    <div className="rounded-2xl border border-border-light bg-surface-elevated overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden">
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3 mb-4">
           {error ? (
@@ -987,7 +987,7 @@ export function QuantitiesPage() {
       </DismissibleInfo>
 
       {/* Method cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {methods.map((method) => {
           const Icon = method.icon;
           return (
@@ -996,16 +996,16 @@ export function QuantitiesPage() {
               onClick={() => method.available && navigate(method.route)}
               disabled={!method.available}
               className={clsx(
-                'group relative flex flex-col rounded-xl border border-border-light p-6 text-left transition-all duration-200',
+                'group relative flex items-start gap-3 rounded-xl border border-border-light p-4 text-left transition-colors',
                 method.available
-                  ? `bg-gradient-to-br ${method.gradient} cursor-pointer hover:shadow-md hover:border-oe-blue/30`
+                  ? `bg-gradient-to-br ${method.gradient} cursor-pointer hover:border-oe-blue/40`
                   : 'opacity-60 cursor-not-allowed bg-surface-secondary',
               )}
             >
               {method.badgeKey && (
                 <span
                   className={clsx(
-                    'absolute top-3 right-3 inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold',
+                    'absolute top-2.5 right-2.5 inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold',
                     method.badgeColor,
                   )}
                 >
@@ -1015,26 +1015,25 @@ export function QuantitiesPage() {
 
               <div
                 className={clsx(
-                  'flex h-12 w-12 items-center justify-center rounded-xl text-white',
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white',
                   method.iconBg,
                 )}
               >
-                <Icon size={24} strokeWidth={1.75} />
+                <Icon size={20} strokeWidth={1.75} />
               </div>
 
-              <h3 className="oe-section-title mt-4">
-                {t(method.titleKey)}
-              </h3>
-              <p className="mt-1 text-sm text-content-tertiary leading-relaxed">
-                {t(method.descriptionKey)}
-              </p>
-
-              {method.available && (
-                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-oe-blue opacity-0 transition-opacity group-hover:opacity-100">
-                  {t('quantities.open', { defaultValue: 'Open' })}
-                  <ArrowRight size={14} />
-                </div>
-              )}
+              <div className="min-w-0 flex-1">
+                <h3 className="oe-section-title">{t(method.titleKey)}</h3>
+                <p className="mt-1 text-sm text-content-tertiary leading-relaxed">
+                  {t(method.descriptionKey)}
+                </p>
+                {method.available && (
+                  <div className="mt-2 flex items-center gap-1 text-sm font-medium text-oe-blue opacity-0 transition-opacity group-hover:opacity-100">
+                    {t('quantities.open', { defaultValue: 'Open' })}
+                    <ArrowRight size={14} />
+                  </div>
+                )}
+              </div>
             </button>
           );
         })}
@@ -1218,13 +1217,9 @@ export function QuantitiesPage() {
               })}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/boq')}
-            className="flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-oe-blue-dark"
-          >
-            <MessageSquareText size={16} />
+          <Button onClick={() => navigate('/boq')} icon={<MessageSquareText size={16} />}>
             {t('quantities.open_boq', { defaultValue: 'Open BOQ Editor' })}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1330,13 +1325,9 @@ export function QuantitiesPage() {
             <p className="text-sm text-content-tertiary">
               {t('quantities.no_documents', { defaultValue: 'No documents uploaded yet' })}
             </p>
-            <button
-              onClick={() => navigate('/takeoff')}
-              className="mt-3 flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-oe-blue-dark"
-            >
-              <Upload size={16} />
+            <Button className="mt-3" onClick={() => navigate('/takeoff')} icon={<Upload size={16} />}>
               {t('quantities.upload_document', { defaultValue: 'Upload Document' })}
-            </button>
+            </Button>
           </div>
         )}
       </div>

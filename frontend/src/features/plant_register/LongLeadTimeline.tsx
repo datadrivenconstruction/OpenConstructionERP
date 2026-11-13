@@ -78,7 +78,7 @@ export function LongLeadTimeline({ items, catalogue, labels, today, onOpen }: Lo
           const open = orderDateOpen(item);
           const late = open && item.order_status === 'overdue';
           return (
-            <li key={item.id} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="timeline-row">
+            <li key={item.id} className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="timeline-row">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <button type="button" className="font-mono text-sm text-oe-blue-text hover:underline" onClick={() => onOpen(item.id)}>
                   {item.code}

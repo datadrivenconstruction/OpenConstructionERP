@@ -379,7 +379,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
       </div>
 
       {noTranscript && (
-        <div className="flex items-start gap-2 rounded-md border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
+        <div className="flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2 text-sm text-semantic-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
             {t('phonelog.rec.manual_note', {
@@ -475,7 +475,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
           <button
             type="button"
             onClick={addActionItem}
-            className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary"
+            className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary"
           >
             <Plus className="h-3.5 w-3.5" />
             {t('phonelog.rec.action_add', { defaultValue: 'Add action item' })}
@@ -489,7 +489,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
         ) : (
           <div className="space-y-2">
             {state.actionItems.map((item, index) => (
-              <div key={index} className="flex flex-col gap-2 rounded-md border border-border-light p-2 sm:flex-row">
+              <div key={index} className="flex flex-col gap-2 rounded-lg border border-border-light p-2 sm:flex-row">
                 <input
                   value={item.task}
                   onChange={(e) => updateActionItem(index, 'task', e.target.value)}
@@ -512,7 +512,7 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
                   type="button"
                   onClick={() => removeActionItem(index)}
                   aria-label={t('phonelog.rec.action_remove', { defaultValue: 'Remove action item' })}
-                  className="inline-flex items-center justify-center rounded-md px-2 py-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
+                  className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

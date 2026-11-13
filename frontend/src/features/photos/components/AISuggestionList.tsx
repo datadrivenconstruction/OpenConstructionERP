@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Loader2, Sparkles, X } from 'lucide-react';
-import { ConfidenceBadge } from '@/shared/ui';
+import { Button, ConfidenceBadge } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -48,7 +48,7 @@ function SuggestionRow({ s, photoId }: { s: Suggestion; photoId: string }) {
   const invalid = text !== original && editedPayload(s.kind, s.payload, text) === null;
 
   return (
-    <li className="space-y-1 rounded-md border border-border-light p-2" data-testid={`suggestion-${s.kind}`}>
+    <li className="space-y-1 rounded-lg border border-border-light p-2" data-testid={`suggestion-${s.kind}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium">{t(`photoArchive.ai.kind_${s.kind}`)}</span>
         <ConfidenceBadge score={s.confidence} showScore />
@@ -128,19 +128,20 @@ export function AISuggestionList({ photoId, canRun = true }: { photoId: string; 
               {t(`photoArchive.ai.kind_${k}`)}
             </label>
           ))}
-          <button
-            type="button"
+          <Button
+            size="sm"
             onClick={() => run.mutate()}
             disabled={run.isPending || kinds.length === 0}
-            className="inline-flex items-center gap-1 rounded bg-oe-blue px-2 py-1 text-xs text-white disabled:opacity-50"
+            icon={
+              run.isPending || waiting ? (
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+              ) : (
+                <Sparkles className="h-3 w-3" aria-hidden />
+              )
+            }
           >
-            {run.isPending || waiting ? (
-              <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
-            ) : (
-              <Sparkles className="h-3 w-3" aria-hidden />
-            )}
             {t('photoArchive.ai.run')}
-          </button>
+          </Button>
         </div>
       )}
       {items.length === 0 ? (

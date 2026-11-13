@@ -47,7 +47,7 @@ export function ReadinessCard({ gate, readiness }: { gate: ReadinessGate; readin
   const { t } = useTranslation();
   const items = sortReadinessItems(readiness.items);
   return (
-    <section className="space-y-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid={`readiness-${gate}`}>
+    <section className="space-y-2 rounded-xl border border-border-light bg-surface-elevated p-4" data-testid={`readiness-${gate}`}>
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="oe-card-title">{vocab(t, READINESS_GATE, gate)}</h3>
         <ToneBadge tone={READINESS_TONE[readiness.status]} testId={`readiness-${gate}-status`}>
@@ -132,14 +132,14 @@ export function ChecksPanel({ readiness, validation }: ChecksPanelProps) {
             onRetry={() => validation.refetch()}
           />
         ) : failed.length === 0 ? (
-          <p className="flex items-center gap-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-4 text-sm text-content-secondary" data-testid="validation-clean">
+          <p className="flex items-center gap-2 rounded-xl border border-border-light bg-surface-elevated p-4 text-sm text-content-secondary" data-testid="validation-clean">
             <CheckCircle2 size={16} className="text-semantic-success" aria-hidden />
             {t('permits.ui.validation.clean', { defaultValue: 'Every check on the permit data passes.' })}
           </p>
         ) : (
           <ul className="space-y-1.5" data-testid="validation-list">
             {failed.map((f, idx) => (
-              <li key={`${f.rule_id}-${f.element_ref ?? idx}`} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">
+              <li key={`${f.rule_id}-${f.element_ref ?? idx}`} className="rounded-xl border border-border-light bg-surface-elevated p-3 text-sm">
                 <span className="flex items-start gap-2 text-content-primary">
                   {f.severity === 'error' ? ITEM_ICON.not_met : ITEM_ICON.at_risk}
                   {f.message}

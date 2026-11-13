@@ -223,7 +223,7 @@ function AreaReadiness({
     : null;
 
   return (
-    <div className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="gate-area">
+    <div className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="gate-area">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -334,7 +334,7 @@ function AreaReadiness({
             {t('governance.project.gate.confirm_readiness', { defaultValue: 'Confirm readiness' })}
           </ReasonedButton>
         ) : (
-          <div className="space-y-2 rounded-md bg-surface-secondary p-2">
+          <div className="space-y-2 rounded-lg bg-surface-secondary p-2">
             <div className="flex flex-wrap gap-3 text-sm">
               {CONFIRMABLE.map((s) => (
                 <label key={s} className="inline-flex items-center gap-1.5">
@@ -395,7 +395,7 @@ export function SnapshotView({
   const checks = decision.snapshot.checks ?? [];
   const acknowledged = decision.snapshot.acknowledged_evidence ?? [];
   return (
-    <div className="mt-2 space-y-2 rounded-md bg-surface-secondary p-3 text-xs" data-testid="snapshot-view">
+    <div className="mt-2 space-y-2 rounded-lg bg-surface-secondary p-3 text-xs" data-testid="snapshot-view">
       {docs.length === 0 && checks.length === 0 && (
         <p className="text-content-tertiary">
           {t('governance.project.gate.snapshot_empty', { defaultValue: 'This decision froze no documents or checks.' })}
@@ -768,7 +768,7 @@ export function GatePanel({
             {[...detail.decisions]
               .sort((a, b) => b.attempt_no - a.attempt_no)
               .map((d) => (
-                <li key={d.id} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="decision-entry">
+                <li key={d.id} className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="decision-entry">
                   <div className="flex flex-wrap items-center gap-2 text-sm">
                     <span className="text-xs text-content-tertiary">
                       {t('governance.project.gate.attempt', { defaultValue: 'Attempt {{n}}', n: d.attempt_no })}

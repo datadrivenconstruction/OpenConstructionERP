@@ -344,7 +344,7 @@ function PriceIndexContent() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-content-secondary">
-              <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 font-medium text-content-primary hover:bg-surface-secondary">
+              <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 font-medium text-content-primary hover:bg-surface-secondary">
                 {importP0151Mut.isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (

@@ -275,7 +275,7 @@ export function DecisionDialog({
             </Button>
           </div>
           {draft.conditions.map((c, idx) => (
-            <div key={c.rowId} data-testid="decision-condition" className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+            <div key={c.rowId} data-testid="decision-condition" className="rounded-xl border border-border-light bg-surface-elevated p-3">
               <div className="mb-2 flex justify-end">
                 <Button
                   size="sm"

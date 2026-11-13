@@ -399,7 +399,7 @@ function FindingGroup({ icon, title, items }: { icon: ReactNode; title: string; 
         {items.map((num) => (
           <li
             key={num}
-            className="rounded-md border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs text-content-secondary"
+            className="rounded-lg border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs text-content-secondary"
           >
             {num}
           </li>

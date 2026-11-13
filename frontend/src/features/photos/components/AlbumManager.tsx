@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, FolderPlus, Images, Trash2 } from 'lucide-react';
-import { ConfirmDialog, EmptyState, ErrorState } from '@/shared/ui';
+import { Button, ConfirmDialog, EmptyState, ErrorState } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { createAlbum, deleteAlbum, fetchAlbums, photosKeys, type Album } from '../api';
@@ -57,14 +57,13 @@ export function AlbumManager({ projectId, onOpen, onExport }: AlbumManagerProps)
           maxLength={200}
           className="min-w-0 flex-1 oe-input"
         />
-        <button
+        <Button
           type="submit"
           disabled={!name.trim() || create.isPending}
-          className="inline-flex items-center gap-1 rounded-md bg-oe-blue px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          icon={<FolderPlus className="h-4 w-4" aria-hidden />}
         >
-          <FolderPlus className="h-4 w-4" aria-hidden />
           {t('photoArchive.albums.create')}
-        </button>
+        </Button>
       </form>
 
       {albums.isError ? (

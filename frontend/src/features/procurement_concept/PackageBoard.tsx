@@ -104,7 +104,7 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
   return (
     <div className="space-y-3">
       {edit && (
-        <p className="flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="board-locked">
+        <p className="flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="board-locked">
           <Info size={16} className="mt-0.5 shrink-0" aria-hidden />
           {errorText(labels.t, edit)}
         </p>
@@ -361,7 +361,7 @@ function LinkTenderDialog({
               return (
                 <li key={o.id}>
                   <label
-                    className="flex items-start gap-2 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm"
+                    className="flex items-start gap-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-sm"
                     data-testid="link-tender-option"
                     data-allowed={off ? 'no' : 'yes'}
                   >

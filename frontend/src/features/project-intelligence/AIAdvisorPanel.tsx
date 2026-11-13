@@ -189,7 +189,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
             </p>
             <Link
               to="/settings"
-              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-blue-100 px-3 py-1.5 font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/60 dark:text-blue-200 dark:hover:bg-blue-900"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-blue-100 px-3 py-1.5 font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/60 dark:text-blue-200 dark:hover:bg-blue-900"
             >
               <Settings size={12} />
               {t('project_intelligence.go_to_ai_settings', {
@@ -300,7 +300,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
             <button
               type="submit"
               disabled={chatLoading || !chatInput.trim()}
-              className="p-2 text-white bg-oe-blue rounded-md hover:bg-oe-blue-dark transition-colors disabled:opacity-50"
+              className="p-2 text-white bg-oe-blue rounded-lg hover:bg-oe-blue-dark transition-colors disabled:opacity-50"
               aria-label={t('common.send', { defaultValue: 'Send' })}
             >
               <Send size={14} />

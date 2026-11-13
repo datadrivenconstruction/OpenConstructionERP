@@ -389,7 +389,7 @@ export function HandoverDocumentsSection({
                       {visibleDocs.map((doc) => (
                     <li
                       key={doc.id}
-                      className="rounded-md border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs"
+                      className="rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs"
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <label className="inline-flex cursor-pointer items-center gap-1.5">

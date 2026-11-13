@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   Download,
   Plus,
-  X,
   ArrowRight,
   Search,
   Trash2,
@@ -33,6 +32,8 @@ import {
   ConfirmDialog,
   RecoveryCard,
   SkeletonTable,
+  WideModal,
+  SideDrawer,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo } from '@/shared/ui/DismissibleInfo';
@@ -320,35 +321,31 @@ function CreateUnitModal({
     if (canSubmit) onSubmit(form);
   };
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div
-        className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-label={t('prefab.new_unit', { defaultValue: 'New Unit' })}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-          <h2 className="oe-section-title">
-            {t('prefab.new_unit', { defaultValue: 'New Unit' })}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+    <WideModal
+      open
+      onClose={onClose}
+      busy={isPending}
+      size="md"
+      title={t('prefab.new_unit', { defaultValue: 'New Unit' })}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isPending || !canSubmit}
+            loading={isPending}
+            icon={<Plus size={16} />}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="px-6 py-4 space-y-4">
+            {t('prefab.create_unit', { defaultValue: 'Create unit' })}
+          </Button>
+        </>
+      }
+    >
+        <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="oe-label">
@@ -436,22 +433,7 @@ function CreateUnitModal({
             })}
           </p>
         </div>
-
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
-            {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
-            ) : (
-              <Plus size={16} className="mr-1.5 shrink-0" />
-            )}
-            <span>{t('prefab.create_unit', { defaultValue: 'Create unit' })}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </WideModal>
   );
 }
 
@@ -515,7 +497,7 @@ const UnitCard = React.memo(function UnitCard({
       {(overdue || dueSoon) && (
         <div className="mt-2">
           {overdue ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-error">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-semantic-error-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-error">
               <AlertTriangle size={12} className="shrink-0" />
               {days != null
                 ? t('prefab.overdue_by_days', {
@@ -525,7 +507,7 @@ const UnitCard = React.memo(function UnitCard({
                 : t('prefab.overdue', { defaultValue: 'Overdue' })}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-md bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-warning">
               <Clock size={12} className="shrink-0" />
               {days === 0
                 ? t('prefab.due_today', { defaultValue: 'Due today' })
@@ -538,7 +520,7 @@ const UnitCard = React.memo(function UnitCard({
         </div>
       )}
       {unit.cost_basis != null && (
-        <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success">
+        <div className="mt-2 inline-flex items-center gap-1 rounded-lg bg-semantic-success-bg px-1.5 py-0.5 text-2xs font-medium text-semantic-success">
           <Coins size={12} className="shrink-0" />
           <span className="tabular-nums">{unit.cost_basis}</span>
           {unit.earned_value != null && (
@@ -674,12 +656,12 @@ function LinkCostSection({
 
       {/* Link editor */}
       {editing ? (
-        <div className="space-y-2 rounded-md border border-border-light bg-surface-primary/60 p-2">
+        <div className="space-y-2 rounded-lg border border-border-light bg-surface-primary/60 p-2">
           <div className="flex gap-1">
             <button
               onClick={() => setMode('boq')}
               className={clsx(
-                'flex-1 rounded-md px-2 py-1 text-2xs font-medium transition-colors',
+                'flex-1 rounded-lg px-2 py-1 text-2xs font-medium transition-colors',
                 mode === 'boq'
                   ? 'bg-oe-blue text-white'
                   : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
@@ -690,7 +672,7 @@ function LinkCostSection({
             <button
               onClick={() => setMode('assembly')}
               className={clsx(
-                'flex-1 rounded-md px-2 py-1 text-2xs font-medium transition-colors',
+                'flex-1 rounded-lg px-2 py-1 text-2xs font-medium transition-colors',
                 mode === 'assembly'
                   ? 'bg-oe-blue text-white'
                   : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
@@ -812,48 +794,24 @@ function UnitDetailDrawer({
   const nextMeta = next ? stageMeta(next) : null;
   const hasPassedQa = POST_QA_STAGES.includes(unit.status as PrefabStage) || unit.status === 'qa';
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end bg-black/50 animate-fade-in" onClick={onClose}>
-      <div
-        className="h-full w-full max-w-md bg-surface-primary shadow-2xl border-l border-border flex flex-col animate-slide-in-right"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between px-5 py-4 border-b border-border shrink-0">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-base font-mono font-semibold text-content-primary truncate">
-                {unit.ref}
-              </span>
-              <Badge variant="neutral" size="sm" className={meta.badge}>
-                {t(`prefab.stage_${unit.status}`, { defaultValue: meta.label })}
-              </Badge>
-            </div>
-            <p className="text-2xs text-content-tertiary mt-0.5">
-              {t(`prefab.type_${unit.unit_type}`, {
-                defaultValue:
-                  (UNIT_TYPE_LABELS as Record<string, string>)[unit.unit_type] ?? unit.unit_type,
-              })}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="p-1 rounded hover:bg-surface-secondary shrink-0"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-md"
+      title={
+        <span className="flex items-center gap-2">
+          <span className="truncate font-mono">{unit.ref}</span>
+          <Badge variant="neutral" size="sm" className={meta.badge}>
+            {t(`prefab.stage_${unit.status}`, { defaultValue: meta.label })}
+          </Badge>
+        </span>
+      }
+      subtitle={t(`prefab.type_${unit.unit_type}`, {
+        defaultValue: (UNIT_TYPE_LABELS as Record<string, string>)[unit.unit_type] ?? unit.unit_type,
+      })}
+    >
+        <div className="space-y-5 px-5 py-4">
           {/* Facts */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
@@ -1026,7 +984,7 @@ function UnitDetailDrawer({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-border shrink-0">
+        <div className="flex items-center justify-between border-t border-border-light px-5 py-3">
           <Button variant="ghost" size="sm" onClick={onDelete} className="text-semantic-error">
             <Trash2 size={14} className="mr-1" />
             {t('common.delete', { defaultValue: 'Delete' })}
@@ -1035,8 +993,7 @@ function UnitDetailDrawer({
             {t('common.close', { defaultValue: 'Close' })}
           </Button>
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 

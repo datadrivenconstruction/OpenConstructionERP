@@ -97,7 +97,7 @@ export function AwardSchedule({ projectId, concept, schedule, labels, onGoToPack
       </div>
       {confirm.error ? <RefusalBox error={confirm.error} /> : null}
       {done > 0 && !confirm.error && (
-        <p className="flex items-center gap-2 rounded-md bg-semantic-success-bg px-3 py-2 text-sm text-content-primary" role="status" data-testid="schedule-confirmed">
+        <p className="flex items-center gap-2 rounded-lg bg-semantic-success-bg px-3 py-2 text-sm text-content-primary" role="status" data-testid="schedule-confirmed">
           <CheckCircle2 size={16} className="text-semantic-success" aria-hidden />
           {t('procurement_concept.ui.schedule.confirmed', {
             defaultValue: 'Milestones written to the project schedule. Packages: {{n}}.',

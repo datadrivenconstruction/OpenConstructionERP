@@ -177,13 +177,13 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
       />
       {refusal && <Refusal testId="condition-refusal">{refusal}</Refusal>}
       {canDischarge && dischargeRefusal && (
-        <p role="status" className="rounded-md border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="discharge-refusal">
+        <p role="status" className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="discharge-refusal">
           {t('permits.ui.discharge.not_you', { defaultValue: 'You cannot close this condition: {{reason}}', reason: dischargeRefusal })}
         </p>
       )}
 
       {!c.confirmed && (
-        <p role="status" className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary" data-testid="proposal-banner">
+        <p role="status" className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary" data-testid="proposal-banner">
           {t('permits.ui.condition.proposal_banner', {
             defaultValue: 'This condition was read out of the notice automatically. Compare it with the notice. Until you confirm it, it counts nowhere.',
           })}
@@ -209,7 +209,7 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
         </Refusal>
       )}
 
-      <dl className="grid gap-4 rounded-lg border border-border bg-surface-elevated shadow-sm p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid gap-4 rounded-xl border border-border-light bg-surface-elevated p-4 sm:grid-cols-2 lg:grid-cols-4">
         <Fact label={t('permits.ui.condition.kind', { defaultValue: 'Kind' })}>{vocab(t, CONDITION_KIND, c.kind)}</Fact>
         <Fact label={t('permits.ui.condition.trigger', { defaultValue: 'When it is due' })}>
           {vocab(t, TRIGGER, c.trigger) || '-'}
@@ -254,7 +254,7 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
           ) : (
             <ul className="space-y-1.5" data-testid="evidence-list">
               {c.evidence.map((e) => (
-                <li key={e.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">
+                <li key={e.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 text-sm">
                   <span className="font-medium text-content-primary">{vocab(t, EVIDENCE_KIND, e.kind)}</span>
                   {e.kind !== 'cde_revision' && e.ref_id && <span className="break-all text-content-secondary">{e.ref_id}</span>}
                   {e.kind === 'cde_revision' && (
@@ -291,7 +291,7 @@ export function ConditionPanel({ projectId, conditionId, row, personName, onBack
           <h3 className="oe-card-title">{t('permits.ui.discharge.heading', { defaultValue: 'How it was closed' })}</h3>
           <ul className="space-y-1.5" data-testid="discharge-list">
             {c.discharges.map((d) => (
-              <li key={d.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm">
+              <li key={d.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 text-sm">
                 <span className="font-medium text-content-primary">{vocab(t, DISCHARGE_MODE, d.mode)}</span>
                 <span className="text-content-secondary">{dateText(d.date)}</span>
                 {d.note && <span className="text-content-secondary">{d.note}</span>}

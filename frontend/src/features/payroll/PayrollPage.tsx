@@ -307,7 +307,7 @@ function DeductionEditor({
           {deductions.map((d: PayrollDeduction) => (
             <li
               key={d.id}
-              className="flex items-center justify-between gap-2 rounded-md bg-surface-primary px-2 py-1.5 text-xs"
+              className="flex items-center justify-between gap-2 rounded-lg bg-surface-primary px-2 py-1.5 text-xs"
             >
               <span className="flex min-w-0 items-center gap-2">
                 <Badge variant="neutral">{typeLabel(d.deduction_type)}</Badge>
@@ -1094,7 +1094,7 @@ export default function PayrollPage() {
                             <button
                               type="button"
                               onClick={() => toggleEntry(e.id)}
-                              className="inline-flex items-center gap-0.5 rounded-md px-1.5 py-1 text-xs text-content-tertiary transition hover:bg-surface-secondary hover:text-content-primary"
+                              className="inline-flex items-center gap-0.5 rounded-lg px-1.5 py-1 text-xs text-content-tertiary transition hover:bg-surface-secondary hover:text-content-primary"
                               aria-expanded={isOpen}
                               aria-label={t('payroll.toggle_deductions', {
                                 defaultValue: 'Show deductions',

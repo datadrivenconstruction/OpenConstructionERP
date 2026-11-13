@@ -95,7 +95,7 @@ function FilterBar({
           type="date"
           value={filters.from ?? ''}
           onChange={(e) => onChange({ ...filters, from: e.target.value || undefined })}
-          className={input}
+          className={`${input} w-36`}
         />
       </label>
       <label className="flex flex-col text-2xs text-content-tertiary">
@@ -104,14 +104,14 @@ function FilterBar({
           type="date"
           value={filters.to ?? ''}
           onChange={(e) => onChange({ ...filters, to: e.target.value || undefined })}
-          className={input}
+          className={`${input} w-36`}
         />
       </label>
       <select
         value={filters.source ?? ''}
         onChange={(e) => onChange({ ...filters, source: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.source')}
-        className={`${input} oe-select`}
+        className={`${input} oe-select w-44`}
       >
         <option value="">{t('photoArchive.filters.any_source')}</option>
         {SOURCE_MODULES.map((s) => (
@@ -124,7 +124,7 @@ function FilterBar({
         value={filters.category ?? ''}
         onChange={(e) => onChange({ ...filters, category: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.category')}
-        className={`${input} oe-select`}
+        className={`${input} oe-select w-44`}
       >
         <option value="">{t('photos.all_categories')}</option>
         {PHOTO_CATEGORIES.map((c) => (
@@ -137,7 +137,7 @@ function FilterBar({
         value={filters.album ?? ''}
         onChange={(e) => onChange({ ...filters, album: e.target.value || undefined })}
         aria-label={t('photoArchive.filters.album')}
-        className={`${input} oe-select`}
+        className={`${input} oe-select w-44`}
       >
         <option value="">{t('photoArchive.filters.any_album')}</option>
         {albums.map((a) => (
@@ -146,7 +146,7 @@ function FilterBar({
           </option>
         ))}
       </select>
-      <label className="inline-flex items-center gap-1 pb-1.5 text-sm">
+      <label className="inline-flex h-8 items-center gap-1.5 text-sm">
         <input
           type="checkbox"
           checked={Boolean(filters.hasGps)}
@@ -556,14 +556,13 @@ function PhotosArchive({ projectId }: { projectId: string }) {
             </ul>
             {grid.hasNextPage && (
               <div className="text-center">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   disabled={grid.isFetchingNextPage}
                   onClick={() => grid.fetchNextPage()}
-                  className="rounded-md border border-border-light px-4 py-1.5 text-sm disabled:opacity-50"
                 >
                   {grid.isFetchingNextPage ? t('photoArchive.loading') : t('photoArchive.load_more')}
-                </button>
+                </Button>
               </div>
             )}
           </>

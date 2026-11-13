@@ -227,7 +227,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
         <div
           role="alertdialog"
           aria-label={vocab(t, ITEM_STEP_ACTION, 'cancelled')}
-          className="flex flex-wrap items-center gap-3 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm text-content-primary"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm text-content-primary"
         >
           <span className="min-w-0 flex-1">
             {t('plant.item.cancel_confirm', {
@@ -324,7 +324,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
         {item.performance.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2" aria-label={t('plant.field.performance', { defaultValue: 'Performance requirements' })}>
             {item.performance.map((row) => (
-              <li key={row.key} className="rounded-md bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
+              <li key={row.key} className="rounded-lg bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
                 <span className="text-content-tertiary">{humanizeCode(row.key)}</span>{' '}
                 <span className="font-medium text-content-primary">
                   {row.value}
@@ -508,7 +508,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                     key={o.code}
                     data-testid="paper-option"
                     className={clsx(
-                      'flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md px-2 py-1.5 text-sm',
+                      'flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg px-2 py-1.5 text-sm',
                       o.code === paper.recommendation ? 'bg-oe-blue-subtle' : 'bg-surface-secondary',
                     )}
                   >
@@ -679,7 +679,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                 data-testid="limit-cell"
                 data-gap={gap || undefined}
                 className={clsx(
-                  'rounded-md border px-2 py-1.5 text-xs',
+                  'rounded-lg border px-2 py-1.5 text-xs',
                   gap ? 'border-semantic-error/40 bg-semantic-error-bg' : 'border-border-light',
                 )}
               >
@@ -798,7 +798,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                     </p>
                   )}
                   {waiving === s.id && (
-                    <div className="mt-2 space-y-2 rounded-md bg-surface-secondary p-2">
+                    <div className="mt-2 space-y-2 rounded-lg bg-surface-secondary p-2">
                       <textarea
                         rows={2}
                         data-testid="spare-waiver-reason"

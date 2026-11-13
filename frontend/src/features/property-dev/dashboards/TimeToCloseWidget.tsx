@@ -154,7 +154,7 @@ function StageBar({ stage, max }: { stage: StageDistribution; max: number }) {
         </span>
       </div>
       <div
-        className="relative h-5 overflow-hidden rounded-md bg-surface-secondary"
+        className="relative h-5 overflow-hidden rounded-lg bg-surface-secondary"
         role="progressbar"
         aria-valuenow={Math.round(mean)}
         aria-valuemin={0}

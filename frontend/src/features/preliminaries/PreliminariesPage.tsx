@@ -261,7 +261,7 @@ export function PreliminariesPage() {
   const fixedRows = rows.filter((r) => r.item_type === 'fixed');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('preliminaries.title', { defaultValue: 'Preliminaries' })}
         subtitle={t('preliminaries.subtitle', {

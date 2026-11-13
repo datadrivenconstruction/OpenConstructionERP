@@ -32,7 +32,7 @@ export function DomainBar({ label, score, color, onClick, isSelected }: DomainBa
     <button
       onClick={onClick}
       className={clsx(
-        'w-full flex items-center gap-2 py-1 px-1 rounded-md transition-colors text-left',
+        'w-full flex items-center gap-2 py-1 px-1 rounded-lg transition-colors text-left',
         isSelected
           ? 'bg-surface-tertiary'
           : 'hover:bg-surface-tertiary/50'

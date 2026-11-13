@@ -179,7 +179,7 @@ export function RefusalBox({ error, refLabel }: { error: unknown; refLabel?: (re
       role="alert"
       data-testid="refusal-box"
       data-code={code ?? undefined}
-      className="rounded-md border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm"
+      className="rounded-xl border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm"
     >
       <p className="font-medium text-content-primary">{text}</p>
       {violations.length > 0 && (

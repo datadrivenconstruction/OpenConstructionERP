@@ -17,7 +17,7 @@ export function PhotoComparePage() {
   const cmp = useQuery({ queryKey: photosKeys.compare(compareId), queryFn: () => fetchCompare(compareId), enabled: Boolean(compareId) });
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
+    <div className="space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('photoArchive.compare.title')}
         subtitle={cmp.data?.title || t('photoArchive.compare.subtitle')}

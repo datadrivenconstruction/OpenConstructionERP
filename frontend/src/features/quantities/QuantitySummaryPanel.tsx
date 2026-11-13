@@ -530,7 +530,7 @@ export function QuantitySummaryPanel({
                   key={d.id}
                   onClick={() => setDimension(d.id)}
                   className={clsx(
-                    'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                    'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
                     dimension === d.id
                       ? 'bg-surface-primary text-content-primary shadow-xs'
                       : 'text-content-tertiary hover:text-content-secondary',
@@ -580,7 +580,7 @@ export function QuantitySummaryPanel({
               {hasActiveFilters && (
                 <button
                   onClick={resetFilters}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-2xs font-medium text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-2xs font-medium text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
                 >
                   <RotateCcw size={12} />
                   {t('quantities.reset_filters', { defaultValue: 'Reset' })}

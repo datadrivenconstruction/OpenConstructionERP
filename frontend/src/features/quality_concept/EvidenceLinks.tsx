@@ -57,7 +57,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
   const offered = (candidates.data ?? []).filter((c) => !linked.has(c.id));
 
   return (
-    <div className="space-y-2 rounded-md bg-surface-secondary p-3" data-testid="evidence-links">
+    <div className="space-y-2 rounded-lg bg-surface-secondary p-3" data-testid="evidence-links">
       <ConfirmDialog {...confirmState} />
       <p className="text-xs font-semibold text-content-secondary">
         {t('qualityConcept.evidence.title', { defaultValue: 'Linked records' })}

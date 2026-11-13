@@ -112,7 +112,7 @@ export function RoutePin({ projectId, model, kind, onDone }: RoutePinProps) {
   const title = t(spec.title[0], { defaultValue: spec.title[1] });
 
   return (
-    <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid={`route-pin-${kind}`}>
+    <section className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid={`route-pin-${kind}`}>
       <h3 className="oe-card-title flex items-center gap-2">
         <RouteIcon size={16} className="text-content-tertiary" aria-hidden />
         {title}

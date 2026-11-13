@@ -303,7 +303,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       {/* Performance index chips + Forecast-to-Completion */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* SPI chip */}
-        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light p-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-medium text-content-secondary">
               {t('project_intelligence.forecast.spi', {
@@ -330,7 +330,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
         </div>
 
         {/* CPI chip */}
-        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light p-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-medium text-content-secondary">
               {t('project_intelligence.forecast.cpi', {
@@ -361,7 +361,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
 
         {/* Contingency / overrun gauge */}
         <div
-          className={`rounded-xl bg-surface-primary border shadow-sm p-4 ${
+          className={`rounded-xl bg-surface-primary border  p-4 ${
             overBudget ? 'border-semantic-error/30' : 'border-semantic-success/30'
           }`}
         >
@@ -395,7 +395,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       </div>
 
       {/* Forecast-to-Completion card */}
-      <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+      <div className="rounded-xl bg-surface-primary border border-border-light p-4">
         <h3 className="oe-card-title flex items-center gap-2 mb-3">
           <Target size={16} className="text-oe-blue" />
           {t('project_intelligence.forecast.ftc_title', {
@@ -470,7 +470,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
       </div>
 
       {/* Active Alerts table */}
-      <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+      <div className="rounded-xl bg-surface-primary border border-border-light p-4">
         <h3 className="oe-card-title flex items-center gap-2 mb-3">
           <AlertTriangle size={16} className={alerts.length ? 'text-semantic-error' : 'text-content-quaternary'} />
           {t('project_intelligence.forecast.active_alerts', {
@@ -557,7 +557,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                           <button
                             onClick={() => handleAcknowledge(a.forecast_id)}
                             disabled={busyId === a.forecast_id}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-oe-blue text-white text-2xs font-medium hover:bg-oe-blue-dark transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-oe-blue text-white text-2xs font-medium hover:bg-oe-blue-dark transition-colors disabled:opacity-50"
                           >
                             <CheckCircle2 size={12} />
                             {t('project_intelligence.forecast.acknowledge', {
@@ -568,7 +568,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                             <button
                               onClick={() => handleSnooze(a.forecast_id)}
                               disabled={busyId === a.forecast_id}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border-light text-content-secondary text-2xs font-medium hover:bg-surface-secondary transition-colors disabled:opacity-50"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-border-light text-content-secondary text-2xs font-medium hover:bg-surface-secondary transition-colors disabled:opacity-50"
                             >
                               <BellOff size={12} />
                               {t('project_intelligence.forecast.snooze_24h', {
@@ -581,7 +581,7 @@ export function ForecastPanel({ projectId, onAlertCountChange }: ForecastPanelPr
                               route, so the link landed on the catch-all NotFound. */}
                           <Link
                             to={`/5d?project_id=${projectId}`}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-content-tertiary text-2xs font-medium hover:text-oe-blue transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-content-tertiary text-2xs font-medium hover:text-oe-blue transition-colors"
                           >
                             <ExternalLink size={12} />
                             {t('project_intelligence.forecast.view', { defaultValue: 'View' })}

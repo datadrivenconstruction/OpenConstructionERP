@@ -75,7 +75,7 @@ export function DocumentAttach({ projectId, doc, areaCode, title, onDone, onCanc
   const list = containers.data ?? [];
 
   return (
-    <div className="mt-2 space-y-3 rounded-md bg-surface-secondary p-3" data-testid="document-attach">
+    <div className="mt-2 space-y-3 rounded-lg bg-surface-secondary p-3" data-testid="document-attach">
       <p className="text-xs text-content-secondary">
         {hasContainer
           ? t('governance.project.attach.revision_intro', {
@@ -107,7 +107,7 @@ export function DocumentAttach({ projectId, doc, areaCode, title, onDone, onCanc
           type="file"
           data-testid="attach-file-input"
           aria-label={t('governance.project.attach.file', { defaultValue: 'File' })}
-          className="block w-full text-sm text-content-primary file:mr-3 file:rounded-md file:border file:border-border-light file:bg-surface-primary file:px-3 file:py-1 file:text-sm"
+          className="block w-full text-sm text-content-primary file:mr-3 file:rounded-lg file:border file:border-border-light file:bg-surface-primary file:px-3 file:py-1 file:text-sm"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
       )}

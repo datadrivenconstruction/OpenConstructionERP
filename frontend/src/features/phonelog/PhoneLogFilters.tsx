@@ -132,7 +132,7 @@ export function PhoneLogFilters({
           type="button"
           onClick={onExport}
           disabled={shown === 0}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-4 w-4" />
           {t('phonelog.export_csv', { defaultValue: 'Export CSV' })}
@@ -175,7 +175,7 @@ export function PhoneLogFilters({
             <button
               type="button"
               onClick={() => onChange(EMPTY_FILTER)}
-              className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 font-medium text-oe-blue-text hover:bg-surface-secondary"
+              className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1 font-medium text-oe-blue-text hover:bg-surface-secondary"
             >
               <X className="h-3.5 w-3.5" />
               {t('phonelog.clear_filters', { defaultValue: 'Clear' })}

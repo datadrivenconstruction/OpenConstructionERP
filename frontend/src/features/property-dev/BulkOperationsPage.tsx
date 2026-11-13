@@ -137,15 +137,15 @@ function BulkResultPanel({
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-        <div className="rounded-md bg-semantic-success-bg px-2 py-1.5 text-semantic-success">
+        <div className="rounded-lg bg-semantic-success-bg px-2 py-1.5 text-semantic-success">
           <CheckCircle2 size={12} className="mr-1 inline" />
           {t('property_dev.bulk.ok_count', { defaultValue: '{{count}} ok', count: succeeded })}
         </div>
-        <div className="rounded-md bg-semantic-warning-bg px-2 py-1.5 text-semantic-warning">
+        <div className="rounded-lg bg-semantic-warning-bg px-2 py-1.5 text-semantic-warning">
           <ShieldAlert size={12} className="mr-1 inline" />
           {t('property_dev.bulk.skipped_count', { defaultValue: '{{count}} skipped', count: skipped.length })}
         </div>
-        <div className="rounded-md bg-semantic-error-bg px-2 py-1.5 text-semantic-error">
+        <div className="rounded-lg bg-semantic-error-bg px-2 py-1.5 text-semantic-error">
           <XCircle size={12} className="mr-1 inline" />
           {t('property_dev.bulk.failed_count', { defaultValue: '{{count}} failed', count: failed.length })}
         </div>
@@ -160,7 +160,7 @@ function BulkResultPanel({
             {failed.slice(0, 100).map((f, i) => (
               <li
                 key={`${f.entity_id}-${i}`}
-                className="rounded-md border border-semantic-error/30 bg-white p-2 dark:bg-surface-primary"
+                className="rounded-lg border border-semantic-error/30 bg-white p-2 dark:bg-surface-primary"
               >
                 <div className="font-mono text-2xs text-content-tertiary">
                   {f.entity_id}
@@ -191,7 +191,7 @@ function BulkResultPanel({
             {skipped.slice(0, 100).map((s, i) => (
               <li
                 key={`${s.entity_id}-${i}`}
-                className="rounded-md border border-semantic-warning/30 bg-white p-2 dark:bg-surface-primary"
+                className="rounded-lg border border-semantic-warning/30 bg-white p-2 dark:bg-surface-primary"
               >
                 <div className="font-mono text-2xs text-content-tertiary">
                   {s.entity_id}

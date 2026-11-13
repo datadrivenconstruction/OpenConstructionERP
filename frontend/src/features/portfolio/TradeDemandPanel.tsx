@@ -193,7 +193,7 @@ export function TradeDemandPanel() {
                             disabled={c.status === 'idle'}
                             onClick={() => setSel(active ? null : { trade: row.trade, week: c.week_index })}
                             title={`${t('workforce.demand', { defaultValue: 'Demand' })} ${fmt(c.demand_fte)} / ${t('workforce.available', { defaultValue: 'Available' })} ${fmt(c.available_fte)}`}
-                            className={`flex h-9 items-center justify-center rounded-md text-2xs tabular-nums ${demandCellClasses(c)} ${
+                            className={`flex h-9 items-center justify-center rounded-lg text-2xs tabular-nums ${demandCellClasses(c)} ${
                               active ? 'ring-2 ring-inset ring-oe-blue' : ''
                             }`}
                           >
@@ -212,7 +212,7 @@ export function TradeDemandPanel() {
               <span>{t('workforce.legend_gap', { defaultValue: 'Cell = available minus demand' })}</span>
               {(['short', 'tight', 'balanced', 'surplus'] as const).map((s) => (
                 <span key={s} className="inline-flex items-center gap-1.5">
-                  <span className={`h-3.5 w-3.5 rounded-md ${demandCellClasses({ status: s } as WorkforceCell)}`} />
+                  <span className={`h-3.5 w-3.5 rounded-lg ${demandCellClasses({ status: s } as WorkforceCell)}`} />
                   {t(`workforce.status_${s}`, {
                     defaultValue: { short: 'Short', tight: 'Tight', balanced: 'Covered', surplus: 'Spare people' }[s],
                   })}

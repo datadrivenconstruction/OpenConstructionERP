@@ -172,7 +172,7 @@ function FieldChip({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-2xs font-medium ${
+      className={`inline-flex items-center gap-1 rounded-lg border px-1.5 py-0.5 text-2xs font-medium ${
         present
           ? 'border-oe-blue/30 bg-oe-blue/10 text-oe-blue'
           : 'border-border-light bg-surface-secondary/50 text-content-quaternary line-through'
@@ -677,7 +677,7 @@ export function PointCloudPage() {
               {SUPPORTED_FORMATS.map((fmt) => (
                 <span
                   key={fmt}
-                  className="rounded-md border border-border-light bg-surface-secondary/60 px-2 py-0.5 text-2xs font-medium text-content-tertiary"
+                  className="rounded-lg border border-border-light bg-surface-secondary/60 px-2 py-0.5 text-2xs font-medium text-content-tertiary"
                 >
                   {fmt}
                 </span>
@@ -999,7 +999,7 @@ export function PointCloudPage() {
             {SUPPORTED_FORMATS.map((fmt) => (
               <span
                 key={fmt}
-                className="rounded-md border border-border-light bg-surface-secondary/60 px-2 py-0.5 text-2xs font-medium text-content-tertiary"
+                className="rounded-lg border border-border-light bg-surface-secondary/60 px-2 py-0.5 text-2xs font-medium text-content-tertiary"
               >
                 {fmt}
               </span>

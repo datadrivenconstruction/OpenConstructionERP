@@ -139,7 +139,7 @@ export function Refusal({ error, className }: { error: unknown; className?: stri
       role="alert"
       data-testid="plant-refusal"
       data-code={plantErrorCode(error) ?? undefined}
-      className={clsx('rounded-md border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm', className)}
+      className={clsx('rounded-xl border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm', className)}
     >
       <p className="font-medium text-content-primary">{refusalText(t, error)}</p>
       {violations.length > 0 && (
@@ -307,7 +307,7 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid={testId}>
+    <section className="rounded-xl border border-border-light bg-surface-elevated p-4" data-testid={testId}>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="oe-card-title">{title}</h3>

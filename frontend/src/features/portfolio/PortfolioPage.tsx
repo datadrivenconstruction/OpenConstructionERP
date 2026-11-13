@@ -143,7 +143,6 @@ function HowPortfolioWorks() {
   return (
     <CollapsibleSection
       storageKey="portfolio.how"
-      className="mt-4"
       icon={<Network size={16} className="text-oe-blue" />}
       title={t('portfolio.flow_title', { defaultValue: 'How the portfolio fits together' })}
     >
@@ -234,7 +233,7 @@ export function PortfolioPage() {
     // top padding, so pages must not re-cap their width or double the padding;
     // Portfolio used to wrap at max-w-7xl mx-auto, which rendered it narrower
     // and off-centre relative to the rest of the app.
-    <div className="w-full">
+    <div className="w-full space-y-5 animate-fade-in">
       <PageHeader
         srTitle={t('portfolio.title', { defaultValue: 'Portfolio' })}
         subtitle={t('portfolio.subtitle', {
@@ -251,14 +250,14 @@ export function PortfolioPage() {
         }
       />
 
-      <div className="mt-4">
+      <div>
         <PortfolioCashFlowWidget />
       </div>
 
       {/* How this module works + what it connects to */}
       <HowPortfolioWorks />
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
         {/* Left: the portfolio / programme tree */}
         <div className="space-y-4">
           <TreePanel
@@ -277,7 +276,7 @@ export function PortfolioPage() {
       </div>
 
       {/* Cross-project links - read / delete / author, scoped to the active project */}
-      <div className="mt-4">
+      <div>
         <CrossLinksPanel activeProjectId={activeProjectId} onError={toastError} />
       </div>
     </div>
@@ -381,7 +380,7 @@ function TreePanel({
                   aria-pressed={active}
                   onClick={() => onSelect(node.id)}
                   style={{ paddingLeft: `${8 + depth * 16}px` }}
-                  className={`flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm transition-colors ${
+                  className={`flex w-full items-center gap-2 rounded-lg py-1.5 pr-2 text-left text-sm transition-colors ${
                     active ? 'bg-oe-blue/10 text-oe-blue' : 'text-content-primary hover:bg-surface-secondary'
                   }`}
                 >
