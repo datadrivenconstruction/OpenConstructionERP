@@ -23,6 +23,7 @@ const ALLOWED: Record<string, string> = {
   'auth/ForgotPasswordPage.tsx': 'rendered outside AppLayout (public auth screen)',
   'auth/ResetPasswordPage.tsx': 'rendered outside AppLayout (public auth screen)',
   'field/FieldAuthPage.tsx': 'rendered outside AppLayout (field app sign-in)',
+  'field/FieldShellPage.tsx': 'rendered outside AppLayout (field app, phone-width column)',
   'file-manager/SharePage.tsx': 'rendered outside AppLayout (public share link)',
 };
 

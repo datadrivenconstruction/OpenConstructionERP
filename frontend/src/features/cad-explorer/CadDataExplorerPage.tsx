@@ -3914,15 +3914,14 @@ export function CadDataExplorerPage() {
       { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Descriptive statistics for every numeric column -- min, max, mean, std dev.' }), color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800', border: 'border-border-light/50', ic: 'text-orange-500' },
     ];
 
+    // #149: the page names itself from the same key the Sidebar entry uses.
+    const pageName = t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' });
     return (
       <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light animate-fade-in" style={{ height: 'calc(100vh - 56px)' }}>
         <div className="space-y-3 px-4 sm:px-7 pt-4 pb-3 border-b border-border-light">
-          {/* #149: the page names itself from the same key the Sidebar entry uses. */}
-          <Breadcrumb items={[
-            { label: t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' }) },
-          ]} />
+          <Breadcrumb items={[{ label: pageName }]} />
           <PageHeader
-            srTitle={t('nav.cad_bim_explorer', { defaultValue: 'CAD-BIM BI Explorer' })}
+            srTitle={pageName}
             actions={<ModuleGuideButton content={cadExplorerGuide} />}
           />
           <DismissibleInfo

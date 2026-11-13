@@ -100,10 +100,12 @@ function OverflowMenu({ items }: { items: ReactElement[] }) {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       />
-      {open && (
-        <div
+      {/* Stays mounted while closed: an action that owns a dialog or a running
+          export must not lose its state when the menu closes. */}
+      <div
           role="menu"
-          className="absolute end-0 top-full z-dropdown mt-1 flex min-w-48 flex-col gap-1 rounded-xl border border-border-light bg-surface-primary p-1.5 shadow-md [&_[data-oe-button]]:w-full [&_[data-oe-button]]:justify-start"
+          aria-hidden={!open}
+          className={`absolute end-0 top-full z-dropdown mt-1 ${open ? 'flex' : 'hidden'} min-w-48 flex-col gap-1 rounded-xl border border-border-light bg-surface-primary p-1.5 shadow-md [&_[data-oe-button]]:w-full [&_[data-oe-button]]:justify-start`}
           onClick={(e) => {
             // Plain actions close the menu; ones that open their own popup keep it.
             if (!(e.target as HTMLElement).closest('[aria-haspopup],[aria-expanded]')) setOpen(false);
@@ -111,7 +113,6 @@ function OverflowMenu({ items }: { items: ReactElement[] }) {
         >
           <ButtonSizeOverrideContext.Provider value="md">{items}</ButtonSizeOverrideContext.Provider>
         </div>
-      )}
     </div>
   );
 }
