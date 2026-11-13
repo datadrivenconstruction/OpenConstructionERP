@@ -24,7 +24,12 @@
 //     previously focused element regains focus, regardless of whether
 //     the dialog closed via Escape, backdrop click, or explicit button.
 
-import { useEffect, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
+
+// Open traps, oldest first. A dialog opened from inside a drawer registers
+// after it, so the drawer is no longer topmost and must neither pull Tab back
+// nor react to Escape while the newer overlay is up.
+const overlayStack: symbol[] = [];
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -47,20 +52,28 @@ function getFocusable(container: HTMLElement): HTMLElement[] {
     });
 }
 
+/** Returns `isTopmost()`: true while this overlay is the newest open one. */
 export function useFocusTrap(
   ref: RefObject<HTMLElement>,
   active: boolean,
-): void {
+): () => boolean {
+  const token = useRef(Symbol('overlay'));
+  const isTopmost = useCallback(
+    () => overlayStack[overlayStack.length - 1] === token.current,
+    [],
+  );
   useEffect(() => {
     if (!active) return;
     const container = ref.current;
     if (!container) return;
+    const mine = token.current;
+    overlayStack.push(mine);
 
     // Capture the trigger element so we can restore focus on close.
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || !isTopmost()) return;
       const focusable = getFocusable(container);
       if (focusable.length === 0) {
         // Nothing to focus inside; keep focus on the container itself
@@ -92,6 +105,8 @@ export function useFocusTrap(
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
+      const at = overlayStack.indexOf(mine);
+      if (at >= 0) overlayStack.splice(at, 1);
       // Restore focus to whatever opened the dialog. Guard against the
       // trigger having been removed from the DOM in the meantime
       // (rare, but happens when the dialog deletes its own host row).
@@ -103,5 +118,6 @@ export function useFocusTrap(
         }
       }
     };
-  }, [ref, active]);
+  }, [ref, active, isTopmost]);
+  return isTopmost;
 }

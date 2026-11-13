@@ -1655,7 +1655,6 @@ export function NCRPage() {
       </>
       ) : (
         <RequiresProject
-          emptyHint={t('ncr.select_project', { defaultValue: 'Open a project first to view and manage NCRs.' })}
         >{null}</RequiresProject>
       )}
 

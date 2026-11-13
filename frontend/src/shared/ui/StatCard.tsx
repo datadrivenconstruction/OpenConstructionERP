@@ -88,7 +88,7 @@ export function StatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="truncate text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+          <div className="line-clamp-2 break-words text-2xs font-medium uppercase leading-tight tracking-wide text-content-tertiary">
             {label}
           </div>
           <div
