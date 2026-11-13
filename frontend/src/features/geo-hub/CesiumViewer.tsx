@@ -2069,7 +2069,7 @@ export function CesiumViewer({
       <div
         ref={containerRef}
         data-testid="geo-hub-cesium-container"
-        className="h-full w-full bg-slate-900"
+        className="h-full w-full bg-surface-tertiary"
       />
       {/* Open-data attribution overlay — required by the OpenStreetMap
           tile usage policy AND a visible legal-clarity signal for
@@ -2086,7 +2086,7 @@ export function CesiumViewer({
           className={[
             'inline-flex cursor-pointer list-none items-center gap-1 rounded',
             'bg-black/40 px-1.5 py-0.5 text-2xs leading-tight text-white/80',
-            'backdrop-blur-sm hover:text-white',
+            'backdrop-blur-sm hover:text-content-primary',
             'marker:hidden [&::-webkit-details-marker]:hidden',
           ].join(' ')}
           title={t('geo_hub.licenses_title', {
@@ -2102,8 +2102,8 @@ export function CesiumViewer({
         </summary>
         <div
           className={[
-            'absolute bottom-full left-0 mb-1 w-72 rounded-md border border-white/15',
-            'bg-slate-900/95 px-3 py-2 text-2xs leading-relaxed text-slate-100',
+            'absolute bottom-full left-0 mb-1 w-72 rounded-md border border-border',
+            'bg-surface-elevated/90 px-3 py-2 text-2xs leading-relaxed text-content-primary',
             'shadow-lg backdrop-blur-md',
           ].join(' ')}
         >
@@ -2122,7 +2122,7 @@ export function CesiumViewer({
               >
                 Cesium
               </a>{' '}
-              <span className="text-slate-400">Apache 2.0 · 3D globe runtime</span>
+              <span className="text-content-tertiary">Apache 2.0 · 3D globe runtime</span>
             </li>
             <li>
               <a
@@ -2133,7 +2133,7 @@ export function CesiumViewer({
               >
                 OpenStreetMap
               </a>{' '}
-              <span className="text-slate-400">ODbL · map data and geocoding</span>
+              <span className="text-content-tertiary">ODbL · map data and geocoding</span>
             </li>
             <li>
               <a
@@ -2144,7 +2144,7 @@ export function CesiumViewer({
               >
                 OpenFreeMap
               </a>{' '}
-              <span className="text-slate-400">ODbL · keyless tile hosting</span>
+              <span className="text-content-tertiary">ODbL · keyless tile hosting</span>
             </li>
             <li>
               <a
@@ -2155,12 +2155,12 @@ export function CesiumViewer({
               >
                 Natural Earth
               </a>{' '}
-              <span className="text-slate-400">public domain · shaded relief base imagery</span>
+              <span className="text-content-tertiary">public domain · shaded relief base imagery</span>
             </li>
             {globeImagery?.streets && (
               <li data-testid="geo-hub-globe-streets-credit">
                 <span className="text-sky-300">{globeImagery.credit}</span>{' '}
-                <span className="text-slate-400">
+                <span className="text-content-tertiary">
                   {t('geo_hub.licenses_globe_streets', {
                     defaultValue: 'street base imagery on the globe',
                   })}
@@ -2176,7 +2176,7 @@ export function CesiumViewer({
               >
                 Nominatim
               </a>{' '}
-              <span className="text-slate-400">ODbL · structured geocoding</span>
+              <span className="text-content-tertiary">ODbL · structured geocoding</span>
             </li>
             <li>
               <a
@@ -2187,10 +2187,10 @@ export function CesiumViewer({
               >
                 Photon
               </a>{' '}
-              <span className="text-slate-400">Apache 2.0 · autocomplete geocoder</span>
+              <span className="text-content-tertiary">Apache 2.0 · autocomplete geocoder</span>
             </li>
           </ul>
-          <div className="mt-2 text-2xs text-slate-400">
+          <div className="mt-2 text-2xs text-content-tertiary">
             {t('geo_hub.licenses_footer', {
               defaultValue:
                 'No vendor lock-in. Self-host the entire stack. Cesium Ion + commercial imagery providers are intentionally not used.',
@@ -2199,7 +2199,7 @@ export function CesiumViewer({
         </div>
       </details>
       {cesiumStatus === 'pending' && (
-        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-slate-950/40 text-sm text-slate-200 backdrop-blur-sm">
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-surface-primary/60 text-sm text-content-primary backdrop-blur-sm">
           <div className="relative">
             <Globe2
               size={28}
@@ -2216,7 +2216,7 @@ export function CesiumViewer({
               defaultValue: 'Loading Cesium...',
             })}
           </span>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-content-tertiary">
             {t('geo_hub.cesium_loading_hint', {
               defaultValue: 'Streaming the 3D globe runtime (~3 MB).',
             })}
@@ -2227,7 +2227,7 @@ export function CesiumViewer({
         <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
           <div
             role="alert"
-            className="relative w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-slate-900/70 p-6 text-center text-slate-100 shadow-xl backdrop-blur-md ring-1 ring-white/5"
+            className="relative w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface-elevated/90 p-6 text-center text-content-primary shadow-xl backdrop-blur-md ring-1 ring-border-light"
           >
             <div
               aria-hidden
@@ -2237,18 +2237,18 @@ export function CesiumViewer({
               <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-warning/15 text-amber-300 ring-1 ring-amber-400/30">
                 <Download size={20} strokeWidth={2} />
               </div>
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-semibold text-content-primary">
                 {t('geo_hub.cesium_not_installed_title', {
                   defaultValue: 'CesiumJS is not installed',
                 })}
               </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+              <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">
                 {t('geo_hub.cesium_not_installed', {
                   defaultValue:
                     'CesiumJS is not installed in this build. Geo viewer is in degraded mode.',
                 })}
               </p>
-              <code className="mt-4 inline-block rounded-sm bg-slate-800/80 px-2 py-1 font-mono text-xs text-slate-200 ring-1 ring-white/10">
+              <code className="mt-4 inline-block rounded-sm bg-surface-secondary px-2 py-1 font-mono text-xs text-content-primary ring-1 ring-border-light">
                 npm install cesium
               </code>
             </div>
@@ -2259,7 +2259,7 @@ export function CesiumViewer({
         <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
           <div
             role="alert"
-            className="relative w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-slate-900/70 p-6 text-center text-slate-100 shadow-xl backdrop-blur-md ring-1 ring-white/5"
+            className="relative w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface-elevated/90 p-6 text-center text-content-primary shadow-xl backdrop-blur-md ring-1 ring-border-light"
           >
             <div
               aria-hidden
@@ -2269,12 +2269,12 @@ export function CesiumViewer({
               <div className="mx-auto mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-semantic-error/15 text-red-300 ring-1 ring-red-400/30">
                 <AlertTriangle size={20} strokeWidth={2} />
               </div>
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-semibold text-content-primary">
                 {t('geo_hub.cesium_init_failed_title', {
                   defaultValue: 'Could not start the 3D globe',
                 })}
               </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+              <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">
                 {t('geo_hub.cesium_init_failed_hint', {
                   defaultValue:
                     'The 3D globe runtime loaded but failed to initialise. This usually means WebGL is blocked or hardware acceleration is disabled in your browser.',
@@ -2286,15 +2286,15 @@ export function CesiumViewer({
                 data-testid="geo-hub-cesium-retry"
                 className={[
                   'mt-5 inline-flex items-center gap-1.5 rounded-md',
-                  'bg-white px-3 py-1.5 text-xs font-semibold text-slate-900',
-                  'shadow-sm transition hover:bg-slate-100',
+                  'bg-content-primary px-3 py-1.5 text-xs font-semibold text-content-inverse',
+                  'shadow-sm transition hover:opacity-90',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
                 ].join(' ')}
               >
                 <RefreshCw size={14} strokeWidth={2.25} />
                 {t('common.retry', { defaultValue: 'Retry' })}
               </button>
-              <p className="mt-3 text-2xs text-slate-400">
+              <p className="mt-3 text-2xs text-content-tertiary">
                 {t('geo_hub.cesium_init_failed_check', {
                   defaultValue:
                     'Tip: enable hardware acceleration in your browser settings, then click Retry.',
@@ -2319,9 +2319,9 @@ export function CesiumViewer({
           className={[
             'absolute bottom-3 right-3 z-10',
             'inline-flex items-center gap-1.5 rounded-md',
-            'border border-white/15 bg-slate-900/75 px-2.5 py-1.5',
-            'text-xs font-medium text-slate-100 shadow-lg backdrop-blur-md',
-            'transition hover:bg-slate-800/85 hover:text-white',
+            'border border-border bg-surface-elevated/90 px-2.5 py-1.5',
+            'text-xs font-medium text-content-primary shadow-lg backdrop-blur-md',
+            'transition hover:bg-surface-secondary hover:text-content-primary',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60',
           ].join(' ')}
           title={t('geo_hub.fit_to_data_hint', {

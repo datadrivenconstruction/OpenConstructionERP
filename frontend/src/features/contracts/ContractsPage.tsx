@@ -53,6 +53,7 @@ import {
   WideModalSection,
   WideModalField,
 } from '@/shared/ui/WideModal';
+import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { MultiCurrencyTotal } from '@/shared/ui/MultiCurrencyTotal';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -2054,14 +2055,6 @@ export function ContractDetailDrawer({
     },
   });
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   if (!contract) return null;
 
   const lineTotal = (linesQ.data ?? []).reduce(
@@ -2082,48 +2075,28 @@ export function ContractDetailDrawer({
   const someLineBilled = (linesQ.data ?? []).some((l) => l.billed === true);
 
   return (
-    <div className="fixed inset-0 z-dropdown flex justify-end">
-      {/* Close-on-backdrop lives on the backdrop itself, not on the wrapper.
-          The wrapper is also the React parent of the modals this drawer opens,
-          and a portal delivers its events to the React parent rather than to
-          whatever DOM node it was mounted under. A handler up here therefore
-          sees every click inside those modals and closes the drawer, taking
-          the modal down with it. The panel below needs no stopPropagation for
-          the same reason: nothing above it is listening any more. */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div
-        role="dialog"
-        data-check-ref={contract.id}
-        aria-modal="true"
-        aria-labelledby="contract-drawer-title"
-        className="relative h-full w-full max-w-2xl overflow-y-auto bg-surface-elevated shadow-xl"
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <div>
-            <div className="flex items-center gap-1">
-              <h2 id="contract-drawer-title" className="oe-section-title">
-                {contract.code} —{' '}
-                {contract.title || t('contracts.untitled', { defaultValue: 'Untitled' })}
-              </h2>
-              <ContractCodeRename key={contract.code} contract={contract} />
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <ContractTypeChip type={contract.contract_type} />
-              <Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>
-                {contractStatusLabel(t, contract.status)}
-              </Badge>
-              <ContractStatusPipeline status={contract.status} />
-              <ContractExpiryBadge endDate={contract.end_date} status={contract.status} />
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
+    <SideDrawer
+      open
+      onClose={onClose}
+      busy={gateOpen || deleteOpen}
+      widthClass="max-w-2xl"
+      aria-labelledby="contract-drawer-title"
+      title={
+        <>
+          {contract.code} —{' '}
+          {contract.title || t('contracts.untitled', { defaultValue: 'Untitled' })}
+        </>
+      }
+      headerActions={<ContractCodeRename key={contract.code} contract={contract} />}
+    >
+      <div data-check-ref={contract.id}>
+        <div className="flex flex-wrap items-center gap-2 border-b border-border-light px-5 py-2.5">
+          <ContractTypeChip type={contract.contract_type} />
+          <Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>
+            {contractStatusLabel(t, contract.status)}
+          </Badge>
+          <ContractStatusPipeline status={contract.status} />
+          <ContractExpiryBadge endDate={contract.end_date} status={contract.status} />
         </div>
 
         <div className="space-y-4 p-5">
@@ -2843,7 +2816,7 @@ export function ContractDetailDrawer({
         variant="danger"
         loading={deleteMut.isPending}
       />
-    </div>
+    </SideDrawer>
   );
 }
 
