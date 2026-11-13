@@ -80,7 +80,7 @@ export function Wordmark({ size = 'md', className }: { size?: LogoSize; classNam
       style={{ fontFamily: WORDMARK_FONT }}
     >
       <span className="font-normal">OpenConstruction</span>
-      <span className="font-bold"> ERP</span>
+      <span className="font-semibold">ERP</span>
     </span>
   );
 }
@@ -116,6 +116,34 @@ export function AcademyMark({ className }: { className?: string }) {
     <span className={clsx('relative inline-block shrink-0', className ?? 'h-4 w-4')} data-testid="oe-academy-mark" aria-hidden>
       <img src="/brand/academy/academy-mark-light.svg" alt="" draggable={false} className={clsx(img, 'dark:hidden')} />
       <img src="/brand/academy/academy-mark-dark.svg" alt="" draggable={false} className={clsx(img, 'hidden dark:block')} />
+    </span>
+  );
+}
+
+/* ── App lockup ────────────────────────────────────────────────────────── */
+
+const LOCKUP = {
+  nav: { mark: '24px', text: '14px', gap: 'gap-1.5' },
+  lg: { mark: '32px', text: '20px', gap: 'gap-2.5' },
+} as const;
+
+/**
+ * Product lockup for app chrome: kit mark plus the name as ONE word,
+ * "OpenConstructionERP", Onest semibold, "ERP" in brand blue (founder 13.11).
+ * Sizes are absolute so the root font scale never inflates the brand.
+ */
+export function BrandLockup({ size = 'nav', animate, className }: { size?: keyof typeof LOCKUP; animate?: boolean; className?: string }) {
+  const s = LOCKUP[size];
+  return (
+    <span className={clsx('inline-flex items-center', s.gap, className)} role="img" aria-label="OpenConstructionERP" style={{ ['--oe-lockup-mark' as string]: s.mark }}>
+      <Logo animate={animate} className="!h-[var(--oe-lockup-mark)] !w-[var(--oe-lockup-mark)]" />
+      <span
+        aria-hidden
+        className="whitespace-nowrap font-semibold leading-none tracking-tight text-content-primary"
+        style={{ fontFamily: WORDMARK_FONT, fontSize: s.text }}
+      >
+        OpenConstruction<span className="text-oe-blue">ERP</span>
+      </span>
     </span>
   );
 }

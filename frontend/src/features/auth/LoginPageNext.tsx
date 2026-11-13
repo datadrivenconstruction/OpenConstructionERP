@@ -29,7 +29,7 @@ import {
   CalendarDays, ShieldCheck, BrainCircuit, Boxes,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Button, Input, Logo, Wordmark, CountryFlag } from '@/shared/ui';
+import { Button, Input, BrandLockup, CountryFlag } from '@/shared/ui';
 import { safeNextPath } from './nextPath';
 import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
@@ -589,14 +589,12 @@ export function LoginPageNext() {
             <div className="rounded-[24px] p-7 sm:p-9">
               {/* Mobile-only logo */}
               <div className="lg:hidden mb-6 flex flex-col items-center">
-                <Logo size="lg" animate />
-                <Wordmark size="lg" className="mt-3" />
+                <BrandLockup size="lg" animate />
               </div>
 
               {/* Brand row (desktop) */}
-              <div className="hidden lg:flex items-center gap-3 mb-7">
-                <Logo size="lg" animate />
-                <Wordmark size="lg" />
+              <div className="hidden lg:flex items-center mb-7">
+                <BrandLockup size="lg" animate />
               </div>
 
               {/* Headline */}
