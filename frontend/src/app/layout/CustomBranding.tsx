@@ -144,7 +144,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
 
   return (
     <>
-      <div className="flex w-full items-center gap-1.5">
+      <div className="flex w-full items-center gap-1">
         {/* LEFT — brand area (grows to fill). Clicking opens the
             editor; whole block is a click target. `min-w-0` lets
             flex truncate long company names cleanly. */}
@@ -226,8 +226,8 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
           type="button"
           onClick={() => setEditing(true)}
           className={clsx(
-            'shrink-0 h-7 w-7 flex items-center justify-center rounded-lg',
-            'border border-border-light bg-surface-secondary/30',
+            'shrink-0 h-6 w-6 flex items-center justify-center rounded-lg',
+            'border border-transparent',
             'text-content-tertiary hover:text-oe-blue',
             'hover:border-oe-blue/40 hover:bg-oe-blue/5',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
@@ -238,7 +238,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
             defaultValue: 'Add your logo or company name',
           })}
         >
-          <Pencil size={14} strokeWidth={2.25} />
+          <Pencil size={13} strokeWidth={2} />
         </button>
         )}
       </div>
