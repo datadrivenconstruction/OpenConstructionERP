@@ -30,7 +30,9 @@ describe('PageHeader actions overflow', () => {
     render(<PageHeader subtitle="s" actions={actions(8, 7)} />);
     expect(screen.getByText('A7')).toBeTruthy();
     expect(screen.getByText('A2')).toBeTruthy();
-    expect(screen.queryByText('A3')).toBeNull();
+    // Overflowed actions stay mounted (their dialogs survive) inside the closed menu.
+    expect(screen.queryByRole('menu')).toBeNull();
+    expect(screen.getByText('A3').closest('[role="menu"]')?.getAttribute('aria-hidden')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
     expect(screen.getByRole('menu')).toBeTruthy();
     expect(screen.getByText('A6')).toBeTruthy();
