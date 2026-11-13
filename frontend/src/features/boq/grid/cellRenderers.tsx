@@ -1134,7 +1134,8 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   const descMultiline = (ctx?.descDensity ?? 'compact') !== 'compact';
   const descTextCls = descMultiline
     ? 'whitespace-pre-wrap break-words leading-snug min-w-0 w-full overflow-y-auto max-h-full'
-    : 'truncate min-w-0';
+    : // flex-1 + min-w-24: the position text keeps the room, the chips beside it shrink first.
+      'truncate min-w-24 flex-1';
   const descAlignCls = descMultiline ? 'items-start py-0.5' : 'items-center';
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
@@ -1290,7 +1291,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   const breakdownPill =
     breakdownEntries.length > 0 && ctx?.showResourceSplitPill ? (
       <span
-        className="shrink-0 inline-flex items-center gap-0.5 rounded text-2xs font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-help"
+        className="min-w-0 truncate rounded text-2xs font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-help"
         title={t('boq.resource_breakdown_tip', {
           defaultValue: 'Cost driver split - sourced from the linked assembly',
         })}
@@ -1395,8 +1396,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         {scopeHint}
         {breakdownPill}
         {provisChip}
-        {provisChip}
-      {provenanceChip}
+        {provenanceChip}
       </span>
     );
   }
@@ -1424,8 +1424,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         {scopeHint}
         {breakdownPill}
         {provisChip}
-        {provisChip}
-      {provenanceChip}
+        {provenanceChip}
       </span>
     );
   }
