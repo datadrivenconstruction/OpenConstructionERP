@@ -948,9 +948,9 @@ function CreateSystemModal({
   const [location, setLocation] = useState('');
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
       <div
-        className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4"
+        className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4"
         role="dialog"
         aria-label={t('commissioning.new_system', { defaultValue: 'New system' })}
       >

@@ -63,7 +63,7 @@ export function RequiresProject({ children, emptyHint, emptyTitle }: RequiresPro
   // rather than away from it. Decorative - the sentence beside it says the same
   // thing in words.
   return (
-    <div className="flex w-full justify-center px-4 py-10">
+    <div className="flex w-full justify-center px-4 py-6">
       <div className="w-full max-w-xl">
         <div className="mb-3 ms-2 flex" aria-hidden="true">
           {/* The bounce and the tilt have to live on DIFFERENT nodes. Both are
@@ -86,18 +86,18 @@ export function RequiresProject({ children, emptyHint, emptyTitle }: RequiresPro
             />
           </span>
         </div>
-        <div className="rounded-2xl border border-border-light bg-surface-primary p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-border-light bg-surface-primary p-5">
           <div className="flex items-start gap-4">
             <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
               <FolderOpen size={24} strokeWidth={1.5} />
             </span>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-content-secondary">{hint}</p>
-              <div className="mt-5">
+              <p className="mt-1 text-sm leading-relaxed text-content-secondary">{hint}</p>
+              <div className="mt-4">
                 <Link
                   to="/projects"
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-oe-blue px-4 text-sm font-medium text-white transition-colors hover:bg-oe-blue/90"
+                  className="inline-flex h-8 items-center justify-center rounded-lg bg-oe-blue px-3 text-sm font-medium text-white transition-colors hover:bg-oe-blue/90"
                 >
                   {t('requiresProject.cta', { defaultValue: 'Open Projects' })}
                 </Link>

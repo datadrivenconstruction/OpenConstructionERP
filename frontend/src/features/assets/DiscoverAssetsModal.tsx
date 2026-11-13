@@ -127,14 +127,14 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="discover-assets-title"
-        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary shadow-2xl"
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
         onClick={(e) => e.stopPropagation()}
         data-testid="discover-assets-modal"
       >

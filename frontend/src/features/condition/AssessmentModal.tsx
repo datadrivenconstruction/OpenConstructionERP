@@ -108,8 +108,8 @@ export function AssessmentModal({
   const canSave = elementName.trim().length > 0 && rating !== null && !saveMut.isPending;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-surface-elevated shadow-xl">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
           <h3 className="oe-section-title">
             {t('condition.new_rating', { defaultValue: 'Record condition' })}

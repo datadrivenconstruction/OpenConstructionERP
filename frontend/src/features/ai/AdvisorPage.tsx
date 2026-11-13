@@ -230,8 +230,8 @@ function ChatBubble({
       <div
         className={`relative max-w-[85%] sm:max-w-[75%] px-[14px] py-[9px] text-base leading-[1.38] ${
           isUser
-            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-md'
-            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-md'
+            ? 'bg-oe-blue text-white rounded-2xl rounded-br-md'
+            : 'bg-surface-secondary text-content-primary rounded-2xl rounded-bl-md'
         }`}
       >
         <div className="whitespace-pre-wrap break-words">
@@ -291,7 +291,7 @@ function ChatBubble({
                     defaultValue: 'Open {{code}} in the Cost Database',
                     code: s.code,
                   })}
-                  className="block w-full text-left text-[11px] leading-tight text-content-quaternary
+                  className="block w-full text-left text-2xs leading-tight text-content-quaternary
                     rounded px-1 -mx-1 hover:bg-oe-blue/[0.06] hover:text-oe-blue transition-colors"
                 >
                   {body}
@@ -310,7 +310,7 @@ function ChatBubble({
               key={i}
               onClick={() => onOptionClick(opt)}
               className="inline-flex items-center gap-1.5 rounded-full border border-oe-blue/30
-                bg-oe-blue/[0.06] px-3.5 py-[7px] text-[13px] font-medium text-oe-blue
+                bg-oe-blue/[0.06] px-3.5 py-[7px] text-sm font-medium text-oe-blue
                 transition-all duration-150 ease-out
                 hover:bg-oe-blue hover:text-white hover:border-oe-blue hover:shadow-sm
                 active:scale-[0.97]"
@@ -336,7 +336,7 @@ function ChatBubble({
               navigate(`/ai-estimate?tab=text&q=${encodeURIComponent(msg.query!)}`)
             }
             className="inline-flex items-center gap-1.5 rounded-full border border-border-light
-              bg-surface-elevated px-3 py-[6px] text-[12px] font-medium text-content-secondary
+              bg-surface-elevated px-3 py-[6px] text-xs font-medium text-content-secondary
               transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/[0.06] hover:text-oe-blue"
           >
             <Calculator size={14} />
@@ -810,7 +810,7 @@ export function AdvisorPage() {
                   <button
                     key={s}
                     onClick={() => sendMessage(s)}
-                    className="rounded-full border border-border-light bg-surface-elevated px-4 py-2 text-[13px] text-content-secondary
+                    className="rounded-full border border-border-light bg-surface-elevated px-4 py-2 text-sm text-content-secondary
                       transition-all duration-150
                       hover:border-oe-blue/40 hover:bg-oe-blue/[0.06] hover:text-oe-blue
                       active:scale-[0.97]"
@@ -874,7 +874,7 @@ export function AdvisorPage() {
           {/* Typing indicator */}
           {loading && (
             <div className="flex items-start animate-msg-in">
-              <div className="rounded-[20px] rounded-bl-md bg-surface-secondary">
+              <div className="rounded-2xl rounded-bl-md bg-surface-secondary">
                 <TypingDots />
               </div>
             </div>

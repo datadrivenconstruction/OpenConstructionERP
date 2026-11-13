@@ -164,7 +164,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-modal bg-black/40 backdrop-blur-[1px]"
+        className="fixed inset-0 z-modal bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         data-testid="asset-detail-backdrop"
       />

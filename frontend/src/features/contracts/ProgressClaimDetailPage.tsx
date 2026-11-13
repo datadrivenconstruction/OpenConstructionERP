@@ -32,6 +32,7 @@ import {
   Card,
   Badge,
   Breadcrumb,
+  PageHeader,
   DismissibleInfo,
   IntroRichText,
   RecoveryCard,
@@ -268,33 +269,34 @@ export function ProgressClaimDetailPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
+      <PageHeader
+        srTitle={t('contracts.claim_title', { number: claim.claim_number, defaultValue: 'Progress claim {{number}}' })}
+        subtitle={
+          <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             <Link
               to={claimsHref}
               className="text-content-tertiary hover:text-oe-blue"
               aria-label={t('common.back', { defaultValue: 'Back' })}
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={16} />
             </Link>
-            <h1 className="text-2xl font-semibold text-content-primary">
+            <span className="font-semibold text-content-primary">
               {t('contracts.claim_title', {
                 number: claim.claim_number,
                 defaultValue: 'Progress claim {{number}}',
               })}
-            </h1>
+            </span>
             <Badge variant={CLAIM_STATUS_VARIANT[claim.status]} dot>
               {claimStatusLabel(t, claim.status)}
             </Badge>
-          </div>
-          <p className="mt-1 text-sm text-content-secondary" data-testid="claim-period">
-            {/* The same component the claims list uses, so the two agree. */}
-            <ClaimPeriod claim={claim} />
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+            <span data-testid="claim-period">
+              {/* The same component the claims list uses, so the two agree. */}
+              <ClaimPeriod claim={claim} />
+            </span>
+          </span>
+        }
+        actions={
+          <>
           {linesEditable && (
             <Button
               variant="primary"
@@ -356,8 +358,9 @@ export function ProgressClaimDetailPage() {
               {t('contracts.mark_paid', { defaultValue: 'Mark paid' })}
             </Button>
           )}
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {editable && (
         <ClaimValidationPanel

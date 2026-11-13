@@ -153,7 +153,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-start justify-center bg-black/40 p-4 backdrop-blur-sm sm:p-8"
+      className="fixed inset-0 z-modal flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 backdrop-blur-sm sm:p-8"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -162,7 +162,7 @@ export function ScreenPicker({ value, onPick, onClose }: ScreenPickerProps) {
         role="dialog"
         aria-modal="true"
         aria-label={t('cases.editor.pick_title', { defaultValue: 'Which screen does this step open?' })}
-        className="flex max-h-full w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl"
+        className="flex max-h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
       >
         <div className="flex items-start gap-3 border-b border-border-light p-4">
           <div className="min-w-0 flex-1">

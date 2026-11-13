@@ -166,14 +166,14 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="asset-edit-modal-title"
-        className="w-full max-w-lg overflow-hidden rounded-lg border border-border-light bg-surface-primary shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
         onClick={(e) => e.stopPropagation()}
         data-testid="asset-edit-modal"
       >

@@ -1475,7 +1475,7 @@ function BookingDetailDrawer({
     <>
       {/* Backdrop — Material 220ms ease-standard fade-in */}
       <div
-        className="fixed inset-0 z-modal bg-black/40"
+        className="fixed inset-0 z-modal bg-black/60 backdrop-blur-sm"
         style={{
           animation: 'accomCalFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1) both',
         }}

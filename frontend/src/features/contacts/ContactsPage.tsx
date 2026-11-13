@@ -887,8 +887,8 @@ function ImportContactsModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('contacts.import_contacts', { defaultValue: 'Import Contacts' })}>
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-2xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('contacts.import_contacts', { defaultValue: 'Import Contacts' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="oe-section-title">
@@ -1066,7 +1066,7 @@ const ContactCard = React.memo(function ContactCard({
         flash && 'ring-2 ring-inset ring-oe-blue bg-oe-blue-subtle',
       )}
     >
-    <Card className="p-4 animate-card-in hover:shadow-md transition-shadow group">
+    <Card className="p-3 animate-card-in hover:shadow-sm transition-shadow group">
       {/* Top: company + type badge + actions */}
       <div className="flex items-start justify-between gap-2">
         <div
@@ -1083,18 +1083,20 @@ const ContactCard = React.memo(function ContactCard({
             <h3 className="oe-card-title truncate">
               {displayName}
             </h3>
-            {personName && contact.company_name && (
-              <p className="text-xs text-content-secondary truncate">{personName}</p>
-            )}
+            <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+              <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type] ?? 'neutral'} size="sm">
+                {t(`contacts.type_${contact.contact_type}`, {
+                  defaultValue: contact.contact_type.charAt(0).toUpperCase() + contact.contact_type.slice(1),
+                })}
+              </Badge>
+              {personName && contact.company_name && (
+                <p className="truncate text-xs text-content-secondary">{personName}</p>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type] ?? 'neutral'} size="sm">
-            {t(`contacts.type_${contact.contact_type}`, {
-              defaultValue: contact.contact_type.charAt(0).toUpperCase() + contact.contact_type.slice(1),
-            })}
-          </Badge>
-          <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity ml-1">
+          <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="sm"
@@ -1132,7 +1134,7 @@ const ContactCard = React.memo(function ContactCard({
       {/* Contact details — email/phone are click-to-act (mailto:/tel:).
           stopPropagation keeps the card's onEdit handler from firing when
           the user clicks the link. */}
-      <div className="mt-3 space-y-1.5">
+      <div className="mt-2.5 space-y-1">
         {contact.primary_email && (
           <a
             href={`mailto:${contact.primary_email}`}
@@ -1180,7 +1182,7 @@ const ContactCard = React.memo(function ContactCard({
       )}
 
       {/* Bottom row: country + prequal */}
-      <div className="mt-3 pt-2.5 border-t border-border-light flex items-center justify-between">
+      <div className="mt-2.5 pt-2 border-t border-border-light flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {contact.country_code && (
             <>

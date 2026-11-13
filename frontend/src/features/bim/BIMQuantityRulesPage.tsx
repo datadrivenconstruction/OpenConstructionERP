@@ -932,11 +932,11 @@ function RuleEditorModal({
         : t('bim_rules.new_rule', { defaultValue: 'New rule' });
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
-        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl"
+        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
@@ -1613,11 +1613,11 @@ function PreviewModal({ open, onClose, result, loading, onApply, applying, canAp
   if (!open) return null;
   const sample = result?.results.slice(0, 20) ?? [];
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
-        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl"
+        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
           <div className="flex items-center gap-2">
@@ -2017,11 +2017,11 @@ function RequirementRuleEditor({
         : t('bim_rules.req_new', { defaultValue: 'New Requirement Rule' });
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
-        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl"
+        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
@@ -2963,11 +2963,11 @@ function RequirementsTabContent({
       {/* Pick model modal */}
       {pickModelOpen && (
         <div
-          className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 px-4"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
           onClick={() => !validateMut.isPending && setPickModelOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-xl bg-surface-primary p-5 shadow-xl"
+            className="w-full max-w-md rounded-2xl border border-border-light bg-surface-primary p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="oe-card-title mb-1">

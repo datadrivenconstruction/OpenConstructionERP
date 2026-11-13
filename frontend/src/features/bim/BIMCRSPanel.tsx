@@ -157,7 +157,7 @@ export function BIMCRSPanel({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium
+          className="mt-1.5 inline-flex items-center gap-1 text-2xs font-medium
                      px-2 py-0.5 rounded border border-current hover:bg-black/5 dark:hover:bg-white/10
                      transition-colors"
           data-testid="bim-crs-set-button"
@@ -173,7 +173,7 @@ export function BIMCRSPanel({
                      rounded-lg border border-border-light bg-surface-primary
                      shadow-lg overflow-hidden text-content-primary"
         >
-          <div className="px-3 py-2 text-[10px] uppercase tracking-wide
+          <div className="px-3 py-2 text-2xs uppercase tracking-wide
                           text-content-tertiary border-b border-border-light">
             {t('bim.crs.pick_or_paste', { defaultValue: 'Pick a CRS or paste EPSG' })}
           </div>
@@ -184,7 +184,7 @@ export function BIMCRSPanel({
                 type="button"
                 onClick={() => handlePick(opt.epsg)}
                 className="w-full text-left px-3 py-1.5 hover:bg-surface-secondary
-                           text-[11px] flex items-center gap-2"
+                           text-2xs flex items-center gap-2"
               >
                 {opt.epsg === epsg && <Check size={10} className="text-semantic-success" />}
                 <span className="truncate flex-1">{opt.label}</span>
@@ -215,7 +215,7 @@ export function BIMCRSPanel({
             <button
               type="button"
               onClick={handleManual}
-              className="text-[11px] px-2 py-1 rounded bg-oe-blue text-white
+              className="text-2xs px-2 py-1 rounded bg-oe-blue text-white
                          hover:bg-oe-blue/90"
             >
               {t('bim.crs.apply', { defaultValue: 'Apply' })}
