@@ -45,6 +45,7 @@ import {
   DismissibleInfo,
   IntroRichText,
   ModuleGuideButton,
+  KpiBand,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import {
@@ -786,6 +787,40 @@ export function ContractsPage() {
       </DismissibleInfo>
 
       <HowContractsWork />
+
+      {tab === 'contracts' && projectId && contracts.length > 0 && (
+        <KpiBand
+          columns={4}
+          items={[
+            {
+              key: 'all',
+              label: t('contracts.tab_contracts', { defaultValue: 'Contracts' }),
+              value: contracts.length,
+            },
+            {
+              key: 'active',
+              label: contractStatusLabel(t, 'active'),
+              value: contracts.filter((c) => c.status === 'active').length,
+              tone: 'success',
+            },
+            {
+              key: 'draft',
+              label: contractStatusLabel(t, 'draft'),
+              value: contracts.filter((c) => c.status === 'draft').length,
+            },
+            {
+              key: 'value',
+              label: t('contracts.value', { defaultValue: 'Value' }),
+              value: (
+                <MultiCurrencyTotal
+                  items={contracts.map((c) => ({ amount: c.total_value, currency: c.currency }))}
+                  variant="inline"
+                />
+              ),
+            },
+          ]}
+        />
+      )}
 
       {/* Tabs */}
       <div className="border-b border-border-light">

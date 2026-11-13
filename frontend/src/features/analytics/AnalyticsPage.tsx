@@ -439,7 +439,7 @@ export function AnalyticsPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          icon={<FolderOpen size={20} />}
+          icon={<FolderOpen size={16} />}
           iconBg="bg-oe-blue-subtle"
           iconColor="text-oe-blue"
           label={t('analytics.total_projects', { defaultValue: 'Total Projects' })}
@@ -450,14 +450,14 @@ export function AnalyticsPage() {
           })}
         />
         <KPICard
-          icon={<DollarSign size={20} />}
+          icon={<DollarSign size={16} />}
           iconBg="bg-semantic-success-bg"
           iconColor="text-semantic-success"
           label={t('analytics.total_budget', { defaultValue: 'Total Budget' })}
           {...(isMultiCurrency
             ? {
                 valueNode: (
-                  <div className="space-y-0.5">
+                  <div className="max-h-24 space-y-0.5 overflow-y-auto pe-1">
                     {currencyTotals.map((v) => (
                       <div key={v.currency} className="flex items-baseline justify-between gap-2">
                         <span className="text-base font-semibold text-content-primary tabular-nums truncate">
@@ -484,7 +484,7 @@ export function AnalyticsPage() {
               })}
         />
         <KPICard
-          icon={<TrendingDown size={20} />}
+          icon={<TrendingDown size={16} />}
           iconBg={
             (data?.total_variance ?? 0) >= 0
               ? 'bg-semantic-success-bg'
@@ -497,7 +497,7 @@ export function AnalyticsPage() {
           {...(isMultiCurrency
             ? {
                 valueNode: (
-                  <div className="space-y-0.5">
+                  <div className="max-h-24 space-y-0.5 overflow-y-auto pe-1">
                     {currencyTotals.map((v) => (
                       <div key={v.currency} className="flex items-baseline justify-between gap-2">
                         <span
@@ -534,7 +534,7 @@ export function AnalyticsPage() {
               })}
         />
         <KPICard
-          icon={<AlertTriangle size={20} />}
+          icon={<AlertTriangle size={16} />}
           iconBg={
             (data?.over_budget_count ?? 0) > 0
               ? 'bg-semantic-error-bg'
@@ -551,12 +551,12 @@ export function AnalyticsPage() {
 
       {/* Projects Comparison Table */}
       <Card padding="none">
-        <div className="px-6 py-4 border-b border-border-light">
+        <div className="px-4 py-3 border-b border-border-light">
           <h2 className="oe-section-title">
             {t('analytics.project_comparison', { defaultValue: 'Project Comparison' })}
           </h2>
         </div>
-        <div className="px-6 py-3 border-b border-border-light flex flex-wrap items-center gap-3">
+        <div className="px-4 py-3 border-b border-border-light flex flex-wrap items-center gap-2">
           <input
             type="text"
             value={search}
@@ -568,7 +568,7 @@ export function AnalyticsPage() {
           <select
             value={regionFilter}
             onChange={(e) => setRegionFilter(e.target.value)}
-            className="oe-select"
+            className="oe-select w-44"
             aria-label={t('analytics.filter_region', { defaultValue: 'Filter by region' })}
           >
             <option value="">{t('analytics.all_regions', { defaultValue: 'All Regions' })}</option>
@@ -577,7 +577,7 @@ export function AnalyticsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="oe-select"
+            className="oe-select w-44"
             aria-label={t('analytics.filter_status', { defaultValue: 'Filter by status' })}
           >
             <option value="">{t('analytics.all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -917,14 +917,14 @@ function KPICard({
   badge?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+    <div className="rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
       {/* items-start keeps the icon + text on the same top baseline; the
           text column is a top-anchored flex-col so a single-line value tile
           and a 3-line multi-currency tile share the first-line position
           even when the grid stretches every tile to equal height (audit S8). */}
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor}`}
         >
           {icon}
         </div>

@@ -60,7 +60,7 @@ import {
   User as UserIcon,
   X,
 } from 'lucide-react';
-import { Badge, EmptyState, Breadcrumb, DismissibleInfo, IntroRichText, Button, ModuleGuideButton } from '@/shared/ui';
+import { Badge, EmptyState, Breadcrumb, DismissibleInfo, IntroRichText, Button, ModuleGuideButton, SideDrawer } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { adminGuide } from './adminGuide';
 import { useToastStore } from '@/stores/useToastStore';
@@ -300,7 +300,7 @@ function FilterBar({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-sm">
+    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated">
       <div className="p-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         {/* Free-text search — first column, spans two on wide screens */}
         <div className="xl:col-span-2">
@@ -655,51 +655,21 @@ function DetailDrawer({
   const diff = extractDiff(entry.details);
   const hasDiff = diff.before !== null || diff.after !== null;
 
-  // ESC to close — important for keyboard nav.
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   return (
-    <div
-      className="fixed inset-0 z-dropdown flex"
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('audit.drawer_title', { defaultValue: 'Audit entry detail' })}
+    <SideDrawer
+      open
+      onClose={onClose}
+      widthClass="max-w-2xl"
+      title={t('audit.drawer_title', { defaultValue: 'Audit entry detail' })}
     >
-      <div
-        className="absolute inset-0 bg-black/30"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <aside
-        data-testid="audit-drawer"
-        className="relative ml-auto h-full w-full max-w-2xl overflow-y-auto bg-surface-primary shadow-xl"
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface-primary px-4 py-3">
-          <div className="min-w-0">
-            <div className="text-xs text-content-tertiary">
-              {formatTimestamp(entry.created_at)}
-            </div>
-            <div className="truncate font-medium">
-              {entry.action} · {entry.entity_type}
-              {entry.entity_id ? ` · ${entry.entity_id}` : ''}
-            </div>
+      <div data-testid="audit-drawer" className="space-y-4 p-4">
+        <section>
+          <div className="text-xs text-content-tertiary">{formatTimestamp(entry.created_at)}</div>
+          <div className="truncate text-sm font-medium">
+            {entry.action} · {entry.entity_type}
+            {entry.entity_id ? ` · ${entry.entity_id}` : ''}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="space-y-4 p-4">
+        </section>
           <section>
             <div className="oe-overline mb-1">
               {t('audit.actor', { defaultValue: 'Actor' })}
@@ -751,9 +721,8 @@ function DetailDrawer({
             </div>
             <JsonBlock data={diff.raw} />
           </section>
-        </div>
-      </aside>
-    </div>
+      </div>
+    </SideDrawer>
   );
 }
 
@@ -1112,7 +1081,7 @@ export function AuditLogPage() {
 
         {PageControls}
 
-        <div className="overflow-hidden rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border-light bg-surface-elevated">
           {entriesQuery.isLoading ? (
             <div className="divide-y divide-border-light" aria-busy="true">
               {Array.from({ length: 6 }).map((_, i) => (

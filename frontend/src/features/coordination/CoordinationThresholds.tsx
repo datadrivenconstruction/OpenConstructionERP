@@ -108,15 +108,15 @@ export function ThresholdAlertBanner({
 
   const palette = {
     emerald: {
-      ring: 'ring-semantic-success/20',
-      bg: 'from-emerald-50 to-teal-50/40 dark:from-emerald-500/10 dark:to-teal-500/5',
+      ring: 'border-semantic-success/30',
+      bg: 'bg-semantic-success-bg',
       icon: 'text-semantic-success',
       Icon: CheckCircle2,
       title: t('coordination.health_ok_title', { defaultValue: 'All clear' }),
     },
     amber: {
-      ring: 'ring-semantic-warning/20',
-      bg: 'from-amber-50 to-orange-50/40 dark:from-amber-500/10 dark:to-orange-500/5',
+      ring: 'border-semantic-warning/30',
+      bg: 'bg-semantic-warning-bg',
       icon: 'text-semantic-warning',
       Icon: Activity,
       title: t('coordination.health_attention_title', {
@@ -124,8 +124,8 @@ export function ThresholdAlertBanner({
       }),
     },
     rose: {
-      ring: 'ring-semantic-error/30',
-      bg: 'from-rose-50 to-orange-50/50 dark:from-rose-500/10 dark:to-orange-500/5',
+      ring: 'border-semantic-error/30',
+      bg: 'bg-semantic-error-bg',
       icon: 'text-semantic-error',
       Icon: AlertTriangle,
       title: t('coordination.health_alert_title', {
@@ -159,13 +159,13 @@ export function ThresholdAlertBanner({
   return (
     <div
       data-testid="coordination-health-banner"
-      className={`relative overflow-hidden rounded-2xl border border-white/40 bg-gradient-to-br ${palette.bg} ring-1 ${palette.ring} px-5 py-4 backdrop-blur-xl dark:border-white/5`}
+      className={`relative overflow-hidden rounded-xl border ${palette.ring} ${palette.bg} px-4 py-3`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/70 backdrop-blur ${palette.icon}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated ${palette.icon}`}
         >
-          <Icon size={20} />
+          <Icon size={16} />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="oe-card-title">

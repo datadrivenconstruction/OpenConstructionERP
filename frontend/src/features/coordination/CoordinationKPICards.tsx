@@ -52,29 +52,21 @@ type Accent = 'rose' | 'amber' | 'emerald' | 'sky';
 
 const ACCENT_STYLES: Record<
   Accent,
-  { bar: string; glow: string; iconBg: string; iconText: string }
+  { iconBg: string; iconText: string }
 > = {
   rose: {
-    bar: 'from-rose-400/80 via-rose-500/80 to-orange-400/80',
-    glow: 'from-rose-500/20',
     iconBg: 'bg-semantic-error-bg',
     iconText: 'text-semantic-error',
   },
   amber: {
-    bar: 'from-amber-400/80 via-amber-500/80 to-yellow-400/80',
-    glow: 'from-amber-500/20',
     iconBg: 'bg-semantic-warning-bg',
     iconText: 'text-semantic-warning',
   },
   emerald: {
-    bar: 'from-emerald-400/80 via-emerald-500/80 to-teal-400/80',
-    glow: 'from-emerald-500/20',
     iconBg: 'bg-semantic-success-bg',
     iconText: 'text-semantic-success',
   },
   sky: {
-    bar: 'from-sky-400/80 via-blue-500/80 to-indigo-400/80',
-    glow: 'from-sky-500/20',
     iconBg: 'bg-semantic-info-bg',
     iconText: 'text-semantic-info',
   },
@@ -132,38 +124,19 @@ function KPICard({
       aria-label={clickable ? onClickTitle : undefined}
       title={clickable ? onClickTitle : undefined}
       className={clsx(
-        'group relative overflow-hidden rounded-2xl',
+        'group relative overflow-hidden rounded-xl',
         'border border-border-light',
-        'bg-surface-elevated/90',
-        'shadow-xs',
-        'transition-shadow duration-normal ease-oe',
-        'hover:shadow-sm',
+        'bg-surface-elevated',
         clickable &&
-          'cursor-pointer hover:border-border-strong hover:-translate-y-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus',
+          'cursor-pointer transition-colors hover:border-border-strong hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus',
       )}
     >
-      {/* Top accent bar */}
-      <div
-        aria-hidden
-        className={clsx(
-          'absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r opacity-80',
-          styles.bar,
-        )}
-      />
-      {/* Soft radial glow behind icon */}
-      <div
-        aria-hidden
-        className={clsx(
-          'pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-radial to-transparent blur-2xl opacity-60',
-          styles.glow,
-        )}
-      />
-      <div className="relative p-5">
+      <div className="relative px-4 py-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <div
               className={clsx(
-                'flex h-9 w-9 items-center justify-center rounded-xl',
+                'flex h-8 w-8 items-center justify-center rounded-lg',
                 styles.iconBg,
                 styles.iconText,
               )}
@@ -201,13 +174,13 @@ function KPICard({
             />
           ) : null}
         </div>
-        <div className="mt-4 text-3xl font-semibold tracking-tight text-content-primary">
+        <div className="mt-2 text-xl font-semibold text-content-primary">
           {primary}
         </div>
         {secondary ? (
-          <div className="mt-1.5 text-xs text-content-tertiary">{secondary}</div>
+          <div className="mt-1 text-xs text-content-tertiary">{secondary}</div>
         ) : (
-          <div className="mt-1.5 h-4" />
+          <div className="mt-1 h-4" />
         )}
       </div>
     </div>
@@ -216,13 +189,12 @@ function KPICard({
 
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-elevated/90 p-5 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800" />
+    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
       <div className="flex items-center gap-2">
-        <div className="h-9 w-9 animate-pulse rounded-xl bg-surface-secondary" />
+        <div className="h-8 w-8 animate-pulse rounded-lg bg-surface-secondary" />
         <div className="h-3 w-24 animate-pulse rounded bg-surface-secondary" />
       </div>
-      <div className="mt-4 h-8 w-3/4 animate-pulse rounded bg-surface-secondary" />
+      <div className="mt-2 h-6 w-3/4 animate-pulse rounded bg-surface-secondary" />
       <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-surface-secondary" />
     </div>
   );
