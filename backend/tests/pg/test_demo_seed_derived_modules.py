@@ -997,12 +997,15 @@ async def test_dwg_room_labels_match_the_rooms_of_the_set(pg_session, dwg_store)
 
     The labels are read back from the entities the viewer serves, and compared with
     the rooms the set is authored from, so a renamed room or a stale area fails here.
-    Each room is drawn once per storey and carries its own number and area.
+    The set has two plan sheets, the ground floor and the typical upper floor; each
+    room is drawn once per plan sheet and carries its own number and area.
     """
     pytest.importorskip("ezdxf", reason="the demo drawing is authored with ezdxf")
 
     from app.modules.dwg_takeoff.service import DwgTakeoffService
-    from app.scripts.demo_drawing_set import STOREYS, floor_rooms
+    from app.scripts.demo_drawing_set import floor_rooms
+
+    plan_levels = (0, 1)
 
     project_id = await _make_project(pg_session, "Reissbrett", demo=True)
     drawing_id = await _seed_drawing(pg_session, project_id)
@@ -1013,9 +1016,9 @@ async def test_dwg_room_labels_match_the_rooms_of_the_set(pg_session, dwg_store)
 
     rooms = floor_rooms()
     for name in {room[0] for room in rooms}:
-        wanted = sum(1 for room in rooms if room[0] == name) * STOREYS
+        wanted = sum(1 for room in rooms if room[0] == name) * len(plan_levels)
         assert labels.count(name) >= wanted, f"{name!r} is labelled {labels.count(name)} times, expected {wanted}"
-    for level in range(STOREYS):
+    for level in plan_levels:
         for i, (name, x0, y0, x1, y1) in enumerate(rooms, start=1):
             assert f"{level}.{i:02d}" in labels, f"{name} on level {level} has no room number"
             area = f"{(x1 - x0) * (y1 - y0) / 1e6:.2f} m2"
