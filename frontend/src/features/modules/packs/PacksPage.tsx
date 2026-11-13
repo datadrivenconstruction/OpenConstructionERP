@@ -15,8 +15,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowUpRight, BookOpen, Building2, Globe2, Layers3, Plus, Power } from 'lucide-react';
-import { Breadcrumb } from '@/shared/ui';
+import { ArrowUpRight, BookOpen, Building2, Globe2, Languages, Layers3, Plus, Power } from 'lucide-react';
+import { Breadcrumb, Button, KpiBand, PageHeader } from '@/shared/ui';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { PartnerPackDeactivateDialog } from '../PartnerPackDeactivateDialog';
@@ -353,42 +353,35 @@ export function PacksPage() {
     [setSearchParams],
   );
 
-  const stat = (value: number | string, label: string) => (
-    <div className="min-w-[5.5rem]">
-      <dd className="text-2xl font-semibold tabular-nums text-content-primary">{value}</dd>
-      <dt className="text-xs text-content-tertiary">{label}</dt>
-    </div>
-  );
-
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.packs', { defaultValue: 'Packs' }) }]} />
 
-      {/* Header */}
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
-          <h1 className="text-2xl font-semibold tracking-tight text-content-primary sm:text-3xl">
-            {t('nav.packs', { defaultValue: 'Packs' })}
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-content-secondary sm:text-base">
-            {t('packs.lead', {
-              defaultValue:
-                'A pack sets the platform up in one step. Combine one country pack with one company-type pack, for example Germany plus General contractor.',
-            })}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-            <Link to="/modules/developer-guide#partner-packs" className="inline-flex items-center gap-1.5 font-medium text-oe-blue hover:underline">
-              <BookOpen size={14} aria-hidden />
-              {t('modules.packs_build_own', { defaultValue: 'Build your own pack and share it with others' })}
-            </Link>
-          </div>
-        </div>
-        <dl className="flex flex-wrap gap-x-6 gap-y-3" aria-label={t('packs.stats_label', { defaultValue: 'Packs at a glance' })}>
-          {stat(list.isLoading || profiles.presetsLoading ? '–' : packCount, t('nav.packs', { defaultValue: 'Packs' }))}
-          {stat(list.isLoading ? '–' : countries, t('packs.stat_countries', { defaultValue: 'Countries' }))}
-          {stat(list.isLoading ? '–' : languages, t('packs.stat_languages', { defaultValue: 'Languages' }))}
-        </dl>
-      </header>
+      <PageHeader
+        srTitle={t('nav.packs', { defaultValue: 'Packs' })}
+        subtitle={t('packs.lead', {
+          defaultValue:
+            'A pack sets the platform up in one step. Combine one country pack with one company-type pack, for example Germany plus General contractor.',
+        })}
+        actions={
+          <Button
+            variant="secondary"
+            icon={<BookOpen size={16} aria-hidden />}
+            onClick={() => navigate('/modules/developer-guide#partner-packs')}
+          >
+            {t('modules.packs_build_own', { defaultValue: 'Build your own pack and share it with others' })}
+          </Button>
+        }
+      />
+
+      <KpiBand
+        columns={3}
+        items={[
+          { label: t('nav.packs', { defaultValue: 'Packs' }), value: list.isLoading || profiles.presetsLoading ? '–' : packCount, icon: Layers3 },
+          { label: t('packs.stat_countries', { defaultValue: 'Countries' }), value: list.isLoading ? '–' : countries, icon: Globe2 },
+          { label: t('packs.stat_languages', { defaultValue: 'Languages' }), value: list.isLoading ? '–' : languages, icon: Languages },
+        ]}
+      />
 
       {/* Your setup: one country pack + one company type. */}
       <section aria-labelledby="packs-setup-title" className="space-y-3">

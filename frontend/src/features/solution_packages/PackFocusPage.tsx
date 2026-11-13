@@ -11,7 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'lucide-react';
 import { fmtList } from '@/shared/lib/formatters';
-import { Breadcrumb, Button } from '@/shared/ui';
+import { Breadcrumb, Button, EmptyState, ErrorState, Skeleton } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
@@ -100,7 +100,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
 
   return (
     <div className="space-y-5" data-testid="pack-focus-summary">
-      <section className="rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm sm:p-6">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
         <p className="inline-flex items-center gap-1.5 text-sm font-medium text-semantic-success">
           <CheckCircle2 size={16} aria-hidden />
           {t('packs.focus_installed', { defaultValue: '{{pack}} is set up', pack: packName })}
@@ -120,7 +120,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
           })}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <a href="#more-modules" className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-oe-blue px-3 text-sm font-medium text-content-inverse hover:bg-oe-blue-hover">
+          <a href="#more-modules" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-oe-blue px-3 text-sm font-medium text-content-inverse hover:bg-oe-blue-hover">
             <Layers3 size={16} aria-hidden />
             {t('packs.focus_more', { defaultValue: 'Show more modules' })}
           </a>
@@ -132,7 +132,7 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
       </section>
 
       {steps.length > 0 && (
-        <section className="rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
+        <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
           <h2 className="oe-section-title mb-3 inline-flex items-center gap-2">
             <Rocket size={16} aria-hidden className="text-oe-blue" />
             {t('packs.focus_start', { defaultValue: 'Start here' })}
@@ -156,14 +156,14 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
         </section>
       )}
 
-      <section className="rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-4">
         <h2 className="oe-section-title mb-3">
           {t('packs.focus_on_title', { defaultValue: 'On in your menu' })}
         </h2>
         <FocusModuleList modules={on} testId="pack-focus-on" />
       </section>
 
-      <section id="more-modules" className="scroll-mt-20 rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-sm">
+      <section id="more-modules" className="scroll-mt-20 rounded-xl border border-border-light bg-surface-elevated p-4">
         <h2 className="oe-section-title mb-1 inline-flex items-center gap-2">
           <EyeOff size={16} aria-hidden className="text-content-tertiary" />
           {t('packs.focus_hidden_title', { defaultValue: 'Hidden modules' })}
@@ -185,7 +185,9 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
 
 export function PackFocusPage() {
   const { t } = useTranslation();
-  const { data, isLoading } = useSolutionPackages();
+  const packages = useSolutionPackages();
+  const { data, isLoading } = packages;
+  const navigate = useNavigate();
   const slug = data?.state.focus_pack ?? null;
   const preview = useFocusPreview(slug);
 
@@ -199,25 +201,47 @@ export function PackFocusPage() {
   );
 
   if (isLoading || (slug && preview.isLoading)) {
-    return <Loader2 className="animate-spin text-oe-blue" aria-label={t('common.loading', { defaultValue: 'Loading' })} />;
+    return (
+      <div className="space-y-5" aria-busy="true" aria-label={t('common.loading', { defaultValue: 'Loading' })} data-testid="pack-focus-loading">
+        {crumbs}
+        <Skeleton height={148} rounded="lg" />
+        <Skeleton height={180} rounded="lg" />
+        <Skeleton height={120} rounded="lg" />
+      </div>
+    );
+  }
+  if (packages.isError || (slug && preview.isError)) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        {crumbs}
+        <ErrorState
+          title={t('common.load_failed', { defaultValue: 'Could not load this page' })}
+          onRetry={() => {
+            void packages.refetch();
+            if (slug) void preview.refetch();
+          }}
+        />
+      </div>
+    );
   }
   if (!slug || !preview.data || !data) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-5 animate-fade-in">
         {crumbs}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-6 text-center" data-testid="pack-focus-empty">
-          <p className="text-sm text-content-secondary">
-            {t('packs.focus_none', { defaultValue: 'Your menu shows every module. Install a pack to keep only what it needs.' })}
-          </p>
-          <Link to="/packs" className="mt-3 inline-flex text-sm font-medium text-oe-blue hover:underline">
-            {t('packs.all_packs', { defaultValue: 'All packs' })}
-          </Link>
-        </div>
+        <EmptyState
+          icon={<Layers3 size={40} />}
+          title={t('packs.focus_none', { defaultValue: 'Your menu shows every module. Install a pack to keep only what it needs.' })}
+          action={
+            <Button variant="primary" onClick={() => navigate('/packs')} data-testid="pack-focus-empty">
+              {t('packs.all_packs', { defaultValue: 'All packs' })}
+            </Button>
+          }
+        />
       </div>
     );
   }
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {crumbs}
       <PackFocusSummary preview={preview.data} modules={data.state.modules} />
     </div>

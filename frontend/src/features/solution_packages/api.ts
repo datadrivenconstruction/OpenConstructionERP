@@ -110,6 +110,8 @@ export function useFocusPreview(slug: string | null | undefined) {
     queryFn: () => fetchFocusPreview(slug as string),
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
+    // A pack removed since it was focused answers 404; three backoff retries kept the page on its skeleton.
+    retry: 1,
   });
 }
 
