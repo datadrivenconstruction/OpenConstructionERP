@@ -177,7 +177,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           title={title}
           onMenuClick={openSidebar}
         />
-        <main className="px-4 pt-6 pb-4 sm:px-7">
+        <main className="px-4 pt-4 pb-6 sm:px-7">
           {children}
         </main>
         <MenuBottomNav onMore={openSidebar} />

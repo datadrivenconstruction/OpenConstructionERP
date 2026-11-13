@@ -182,7 +182,7 @@ export function DismissibleInfo({
   // out completely - the tint then reads as a solid plate. With the blur
   // gone the grid shows through the 8% tint and the card is visibly
   // translucent.
-  const wrapper = `group rounded-xl border border-oe-blue/20 border-l-2 border-l-oe-blue/70 bg-oe-blue/[0.045] dark:bg-oe-blue/[0.07] shadow-sm animate-fade-in ${
+  const wrapper = `group rounded-xl border border-oe-blue/20 border-l-2 border-l-oe-blue/70 bg-oe-blue/[0.045] dark:bg-oe-blue/[0.07] animate-fade-in ${
     className ?? ''
   }`;
 
@@ -194,14 +194,14 @@ export function DismissibleInfo({
           without having asked for that. The title is plain text now, and the
           one collapse control is a real button with an accessible name. The
           way back is the info icon the Header shows beside the module name. */}
-      <div className="flex items-start gap-3 rounded-xl px-4 py-4">
+      <div className="flex items-start gap-3 rounded-xl px-4 py-3">
         {/* Chip and title share the same 28px midline (uniformity sweep: the
             mt-0.5 chip on an items-start row read ~5px low on every page). */}
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue/15">
           <Info size={16} className="text-oe-blue-text" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="flex min-h-7 items-center text-base font-medium leading-snug text-content-primary">
+          <p className="flex min-h-7 items-center text-sm font-semibold leading-snug text-content-primary">
             {title}
           </p>
           {children != null && (

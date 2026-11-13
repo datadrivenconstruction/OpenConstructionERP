@@ -8,16 +8,18 @@
 // everywhere else this renders nothing and loads nothing.
 
 import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { ChevronDown, GraduationCap, MonitorPlay } from 'lucide-react';
+import { usePageHeaderSlot } from '@/shared/ui/pageHeaderSlot';
 import { itemCountForRoute, useVideoHintsStore, videoCountForRoute, videoRouteFor } from './videoRoutes';
 
 const loadPanel = () => import('./ModuleVideosPanel');
 const ModuleVideosPanel = lazy(loadPanel);
 
-function Chip({ route }: { route: string }) {
+function Chip({ route, inRow }: { route: string; inRow: boolean }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -48,38 +50,38 @@ function Chip({ route }: { route: string }) {
   }, [open]);
 
   return (
-    <div className="relative z-30 mb-2 flex justify-end" data-testid="module-videos">
-      <div ref={boxRef} className="relative">
-        <button
-          type="button"
-          onClick={() => {
-            setLoaded(true);
-            setOpen((o) => !o);
-          }}
-          onPointerEnter={() => void loadPanel()}
-          onFocus={() => void loadPanel()}
-          aria-expanded={open}
-          aria-controls={panelId}
-          data-testid="module-videos-toggle"
-          className={clsx(
-            'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium shadow-sm transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
-            open
-              ? 'border-oe-blue/50 bg-oe-blue/10 text-oe-blue'
-              : 'border-border-light bg-surface-primary/90 text-content-secondary backdrop-blur hover:border-oe-blue/40 hover:text-oe-blue',
-          )}
-        >
-          <Icon size={14} aria-hidden />
-          {label}
-          <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue">{count}</span>
-          <ChevronDown size={12} className={clsx('transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden />
-        </button>
-        {loaded && (
-          <Suspense fallback={null}>
-            <ModuleVideosPanel route={route} open={open} panelId={panelId} onClose={() => setOpen(false)} />
-          </Suspense>
+    <div ref={boxRef} className={clsx('relative', inRow ? 'z-30' : 'z-30 ms-auto w-fit')} data-testid="module-videos">
+      <button
+        type="button"
+        onClick={() => {
+          setLoaded(true);
+          setOpen((o) => !o);
+        }}
+        onPointerEnter={() => void loadPanel()}
+        onFocus={() => void loadPanel()}
+        aria-expanded={open}
+        aria-controls={panelId}
+        data-testid="module-videos-toggle"
+        data-oe-button="secondary"
+        className={clsx(
+          // Same geometry as a secondary `Button` md: it shares the header row.
+          'inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 text-sm font-medium shadow-xs transition-colors',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-1 active:scale-[0.98]',
+          open
+            ? 'border-oe-blue/50 bg-oe-blue/10 text-oe-blue-text'
+            : 'border-border bg-surface-primary text-content-primary hover:bg-surface-secondary',
         )}
-      </div>
+      >
+        <Icon size={16} className="text-oe-blue-text" aria-hidden />
+        {label}
+        <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue-text">{count}</span>
+        <ChevronDown size={14} className={clsx('text-content-tertiary transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden />
+      </button>
+      {loaded && (
+        <Suspense fallback={null}>
+          <ModuleVideosPanel route={route} open={open} panelId={panelId} onClose={() => setOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -88,6 +90,16 @@ export function ModuleVideosSlot() {
   const { pathname } = useLocation();
   const route = videoRouteFor(pathname);
   const hidden = useVideoHintsStore((s) => (route ? s.off || s.hidden.includes(route) : true));
+  const slot = usePageHeaderSlot((s) => s.el);
+  // Pages without a PageHeader get the chip on its own line, but only once it
+  // is clear none is coming, so header pages never flash the old row.
+  const [fallback, setFallback] = useState(false);
+  useEffect(() => {
+    setFallback(false);
+    const id = window.setTimeout(() => setFallback(true), 800);
+    return () => window.clearTimeout(id);
+  }, [pathname]);
   if (!route || hidden) return null;
-  return <Chip key={route} route={route} />;
+  if (slot) return createPortal(<Chip key={route} route={route} inRow />, slot);
+  return fallback ? <div className="mb-3"><Chip key={route} route={route} inRow={false} /></div> : null;
 }

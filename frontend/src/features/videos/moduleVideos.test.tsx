@@ -26,6 +26,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 import { ModuleVideosSlot } from './ModuleVideosSlot';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import CaseVideos from './CaseVideos';
 import { useVideoHintsStore, videoRouteFor } from './videoRoutes';
 import { VIDEO_COUNT_BY_CASE, VIDEO_COUNT_BY_ROUTE } from './academyIndex.generated';
@@ -90,8 +91,14 @@ describe('which screen a path belongs to', () => {
 });
 
 describe('Videos for this step', () => {
+  it('sits in the page header action row, not on a row of its own', () => {
+    renderAt('/boq', <><PageHeader subtitle="s" actions={<button type="button">a</button>} /><ModuleVideosSlot /></>);
+    const header = document.querySelector('[data-oe-page-header]')!;
+    expect(header.contains(screen.getByTestId('module-videos-toggle'))).toBe(true);
+  });
+
   it('stays folded until asked, then lists at most three and links to the rest', async () => {
-    renderAt('/boq', <ModuleVideosSlot />);
+    renderAt('/boq', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     const toggle = await screen.findByTestId('module-videos-toggle');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(toggle);
@@ -102,35 +109,35 @@ describe('Videos for this step', () => {
   });
 
   it('plays a video in place, without leaving the screen', async () => {
-    renderAt('/boq', <ModuleVideosSlot />);
+    renderAt('/boq', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     fireEvent.click(await screen.findByTestId('module-videos-toggle'));
     fireEvent.click(within(await screen.findByRole('region')).getAllByRole('listitem')[0]!.querySelector('button')!);
     expect(screen.getByTestId('video-player')).toBeTruthy();
   });
 
   it('renders nothing on a screen without videos', () => {
-    const { container } = renderAt('/dashboard-nowhere', <ModuleVideosSlot />);
+    const { container } = renderAt('/dashboard-nowhere', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(container.innerHTML).toBe('');
   });
 
   it('hides on this screen only, and remembers it', async () => {
-    renderAt('/boq', <ModuleVideosSlot />);
+    renderAt('/boq', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     fireEvent.click(await screen.findByTestId('module-videos-toggle'));
     fireEvent.click(screen.getByRole('button', { name: /Hide on this screen/ }));
     expect(screen.queryByTestId('module-videos')).toBeNull();
     expect(JSON.parse(localStorage.getItem('oe_videos_hints')!)).toEqual({ off: false, hidden: ['/boq'] });
     cleanup();
-    renderAt('/contracts', <ModuleVideosSlot />);
+    renderAt('/contracts', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(await screen.findByTestId('module-videos-toggle')).toBeTruthy();
   });
 
   it('hides everywhere, and the Videos page can bring it back', async () => {
-    renderAt('/boq', <ModuleVideosSlot />);
+    renderAt('/boq', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     fireEvent.click(await screen.findByTestId('module-videos-toggle'));
     fireEvent.click(screen.getByRole('button', { name: /Hide on every screen/ }));
     expect(useVideoHintsStore.getState().off).toBe(true);
     cleanup();
-    const { container } = renderAt('/contracts', <ModuleVideosSlot />);
+    const { container } = renderAt('/contracts', <><PageHeader subtitle="s" /><ModuleVideosSlot /></>);
     expect(container.innerHTML).toBe('');
     useVideoHintsStore.getState().showAgain();
     expect(localStorage.getItem('oe_videos_hints')).toBeNull();
