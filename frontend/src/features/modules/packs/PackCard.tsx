@@ -98,7 +98,8 @@ function PackCardImpl({
         style={{ backgroundColor: pack.branding.primary_color }}
       />
 
-      <div className="flex items-start gap-3">
+      {/* items-center: the flag sits on the midline of the title block, not above its cap height. */}
+      <div className="flex items-center gap-3">
         <PackEmblem pack={pack} size={44} bare glyph />
         <div className="min-w-0 flex-1">
           <h3 className="oe-card-title">
