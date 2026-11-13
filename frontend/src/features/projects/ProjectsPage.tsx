@@ -10,7 +10,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useOpenProject } from './useOpenProject';
 import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ArchiveRestore, ExternalLink,
-  Search, ChevronDown, ArrowUpDown, Star, Map as MapIcon, CloudSun,
+  Search, ArrowUpDown, Star, Map as MapIcon, CloudSun,
   Building2, DollarSign, Euro, PoundSterling, Globe2, MapPin, Layers, AlertTriangle,
 } from 'lucide-react';
 import { formatDistanceToNowStrict, isValid as isValidDate, parseISO } from 'date-fns';

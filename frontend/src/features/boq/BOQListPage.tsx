@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus, Pencil,
-  Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
+  Search, ArrowUpDown, GitCompareArrows, X, Loader2,
   CalendarDays, LayoutGrid, List,
 } from 'lucide-react';
 import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb, FileTypeChips, DismissibleInfo, IntroRichText, RecoveryCard } from '@/shared/ui';

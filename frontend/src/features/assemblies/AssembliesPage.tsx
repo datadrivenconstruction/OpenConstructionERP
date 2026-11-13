@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search, Plus, Layers, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal,
+  Search, Plus, Layers, ChevronLeft, ChevronRight, MoreHorizontal,
   Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
   Upload, Tag, Eye, Share2, LayoutGrid, Table2, ArrowUpDown, BarChart3, AlertCircle,
   CheckSquare, Square as SquareIcon, Library,
