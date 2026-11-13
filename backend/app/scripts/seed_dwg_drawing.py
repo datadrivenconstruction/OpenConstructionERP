@@ -25,6 +25,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import uuid
 from typing import Any
 
@@ -59,6 +60,28 @@ def _build_demo_dxf(path: str) -> bool:
     except Exception:  # noqa: BLE001 - seed is best-effort, never fatal
         logger.warning("seed_dwg_drawing: failed to build demo DXF", exc_info=True)
         return False
+
+
+def shipped_demo_dwg() -> str | None:
+    """Return the path of the DWG original of the current demo set, if it ships."""
+    from app.scripts.demo_drawing_set import SET_VERSION
+
+    path = os.path.join(os.path.dirname(__file__), "demo_drawing_assets", f"residential_block_set_v{SET_VERSION}.dwg")
+    return path if os.path.isfile(path) else None
+
+
+def _attach_original_dwg(upload_dir: str, drawing_id: uuid.UUID) -> str | None:
+    """Copy the shipped DWG next to the working DXF; return its file name or ``None``."""
+    src = shipped_demo_dwg()
+    if src is None:
+        return None
+    name = f"{drawing_id}.dwg"
+    try:
+        shutil.copyfile(src, os.path.join(upload_dir, name))
+    except OSError:
+        logger.warning("seed_dwg_drawing: could not attach the DWG original", exc_info=True)
+        return None
+    return name
 
 
 async def seed_ready_dwg_drawing(
@@ -140,6 +163,7 @@ async def seed_ready_dwg_drawing(
     if existing is None:
         if parsed is not None and int(parsed.get("entity_count") or 0) > 0:
             size_bytes = os.path.getsize(file_path) if os.path.exists(file_path) else 0
+            original_dwg = _attach_original_dwg(upload_dir, drawing_id)
             drawing = DwgDrawing(
                 id=drawing_id,
                 project_id=project_id,
@@ -157,6 +181,7 @@ async def seed_ready_dwg_drawing(
                     "seed_ready_dxf": True,
                     "seed_set_version": SET_VERSION,
                     "element_count": int(parsed.get("entity_count") or 0),
+                    **({"original_dwg": original_dwg} if original_dwg else {}),
                 },
             )
             session.add(drawing)
@@ -206,6 +231,11 @@ async def seed_ready_dwg_drawing(
         # carry a count that was never about this DXF; leaving it would keep
         # that number alive under a drawing that now reports its own.
         meta["element_count"] = int(parsed.get("entity_count") or 0)
+        original_dwg = _attach_original_dwg(upload_dir, drawing_id)
+        if original_dwg:
+            meta["original_dwg"] = original_dwg
+        else:
+            meta.pop("original_dwg", None)
         existing.metadata_ = meta
         session.add(existing)
         await session.flush()
