@@ -53013,6 +53013,7 @@ const resource = {
     "common.right": "居右",
     "common.default_filter_save": "保存为我的默认",
     "common.default_filter_clear": "清除我的默认",
+    "common.more_actions": "更多操作",
     "commitment.abort.follow_up.cancel": "在采购中取消此订单",
     "commitment.abort.follow_up.terminate": "在合同模块中终止此合同",
     "commitment.abort.follow_up_title": "仍需手动处理。终止该项本身不会结束任何合同或订单：",

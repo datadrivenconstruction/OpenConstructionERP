@@ -50544,6 +50544,7 @@ const resource = {
     "common.right": "ขวา",
     "common.default_filter_save": "บันทึกเป็นค่าเริ่มต้นของฉัน",
     "common.default_filter_clear": "ล้างค่าเริ่มต้นของฉัน",
+    "common.more_actions": "การดำเนินการเพิ่มเติม",
     "commitment.abort.follow_up.cancel": "ยกเลิกคำสั่งซื้อนี้ในงานจัดซื้อ",
     "commitment.abort.follow_up.terminate": "ยุติสัญญานี้ในโมดูลสัญญา",
     "commitment.abort.follow_up_title": "ยังต้องทำเอง การหยุดรายการไม่ได้ทำให้สัญญาหรือคำสั่งซื้อใดสิ้นสุดเอง:",

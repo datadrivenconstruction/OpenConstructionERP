@@ -50771,6 +50771,7 @@ const resource = {
     "common.right": "دائیں",
     "common.default_filter_save": "میرے ڈیفالٹ کے طور پر محفوظ کریں",
     "common.default_filter_clear": "میرا ڈیفالٹ صاف کریں",
+    "common.more_actions": "مزید اقدامات",
     "commitment.abort.follow_up.cancel": "خریداری میں یہ آرڈر منسوخ کریں",
     "commitment.abort.follow_up.terminate": "کنٹریکٹس ماڈیول میں یہ کنٹریکٹ ختم کریں",
     "commitment.abort.follow_up_title": "ابھی ہاتھ سے کرنا باقی ہے۔ آئٹم روکنے سے کوئی کنٹریکٹ یا آرڈر خود بخود ختم نہیں ہوتا:",

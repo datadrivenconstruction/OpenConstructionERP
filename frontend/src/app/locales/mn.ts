@@ -50444,6 +50444,7 @@ const resource = {
     "common.right": "Баруун",
     "common.default_filter_save": "Миний анхдагч болгож хадгалах",
     "common.default_filter_clear": "Миний анхдагчийг цэвэрлэх",
+    "common.more_actions": "Бусад үйлдэл",
     "commitment.abort.follow_up.cancel": "Худалдан авалтад энэ захиалгыг цуцлах",
     "commitment.abort.follow_up.terminate": "Гэрээний модульд энэ гэрээг цуцлах",
     "commitment.abort.follow_up_title": "Гараар хийх зүйл үлдсэн. Мөрийг зогсоох нь гэрээ эсвэл захиалгыг өөрөө дуусгадаггүй:",

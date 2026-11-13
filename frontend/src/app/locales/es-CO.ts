@@ -48742,6 +48742,7 @@ const resource = {
     "common.right": "Derecha",
     "common.default_filter_save": "Guardar como mi predeterminado",
     "common.default_filter_clear": "Borrar mi predeterminado",
+    "common.more_actions": "Más acciones",
     "commitment.abort.follow_up.cancel": "Cancelar este pedido en compras",
     "commitment.abort.follow_up.terminate": "Rescindir este contrato en el módulo de contratos",
     "commitment.abort.follow_up_title": "Falta hacerlo a mano. Detener la partida no termina por sí solo ningún contrato ni pedido:",

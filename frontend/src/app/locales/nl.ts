@@ -51684,6 +51684,7 @@ const resource = {
     "common.right": "Rechts",
     "common.default_filter_save": "Opslaan als mijn standaard",
     "common.default_filter_clear": "Mijn standaard wissen",
+    "common.more_actions": "Meer acties",
     "commitment.abort.follow_up.cancel": "Deze bestelling annuleren bij inkoop",
     "commitment.abort.follow_up.terminate": "Dit contract beëindigen in de module contracten",
     "commitment.abort.follow_up_title": "Nog met de hand te doen. Een post stopzetten beëindigt zelf geen contract of bestelling:",

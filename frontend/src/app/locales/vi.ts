@@ -50552,6 +50552,7 @@ const resource = {
     "common.right": "Phải",
     "common.default_filter_save": "Lưu làm mặc định của tôi",
     "common.default_filter_clear": "Xóa mặc định của tôi",
+    "common.more_actions": "Thêm thao tác",
     "commitment.abort.follow_up.cancel": "Hủy đơn hàng này trong mua sắm",
     "commitment.abort.follow_up.terminate": "Chấm dứt hợp đồng này trong mô-đun hợp đồng",
     "commitment.abort.follow_up_title": "Vẫn phải làm thủ công. Dừng hạng mục không tự kết thúc hợp đồng hay đơn hàng nào:",

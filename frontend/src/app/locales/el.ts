@@ -50757,6 +50757,7 @@ const resource = {
     "common.right": "Δεξιά",
     "common.default_filter_save": "Αποθήκευση ως προεπιλογή μου",
     "common.default_filter_clear": "Εκκαθάριση της προεπιλογής μου",
+    "common.more_actions": "Περισσότερες ενέργειες",
     "commitment.abort.follow_up.cancel": "Ακύρωση αυτής της παραγγελίας στις προμήθειες",
     "commitment.abort.follow_up.terminate": "Καταγγελία αυτής της σύμβασης στη λειτουργική ενότητα συμβάσεων",
     "commitment.abort.follow_up_title": "Μένει να γίνει χειροκίνητα. Η διακοπή του στοιχείου από μόνη της δεν τερματίζει καμία σύμβαση ή παραγγελία:",

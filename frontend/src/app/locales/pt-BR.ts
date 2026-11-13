@@ -48249,6 +48249,7 @@ const resource = {
     "common.right": "Direita",
     "common.default_filter_save": "Salvar como meu padrão",
     "common.default_filter_clear": "Limpar meu padrão",
+    "common.more_actions": "Mais ações",
     "commitment.abort.follow_up.cancel": "Cancelar este pedido nas compras",
     "commitment.abort.follow_up.terminate": "Rescindir este contrato no módulo de contratos",
     "commitment.abort.follow_up_title": "Falta fazer à mão. Parar o item não termina por si só nenhum contrato nem pedido:",

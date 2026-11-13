@@ -50731,6 +50731,7 @@ const resource = {
     "common.right": "दाएँ",
     "common.default_filter_save": "मेरे डिफ़ॉल्ट के रूप में सहेजें",
     "common.default_filter_clear": "मेरा डिफ़ॉल्ट साफ़ करें",
+    "common.more_actions": "और कार्रवाइयाँ",
     "commitment.abort.follow_up.cancel": "क्रय में यह ऑर्डर रद्द करें",
     "commitment.abort.follow_up.terminate": "अनुबंध मॉड्यूल में यह अनुबंध समाप्त करें",
     "commitment.abort.follow_up_title": "अभी हाथ से करना बाक़ी है। मद को रोकने से कोई अनुबंध या ऑर्डर अपने आप समाप्त नहीं होता:",

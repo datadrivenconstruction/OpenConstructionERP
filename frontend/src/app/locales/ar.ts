@@ -53659,6 +53659,7 @@ const resource = {
     "common.right": "يمين",
     "common.default_filter_save": "حفظ كالإعداد الافتراضي",
     "common.default_filter_clear": "مسح الإعداد الافتراضي",
+    "common.more_actions": "المزيد من الإجراءات",
     "commitment.abort.follow_up.cancel": "إلغاء هذا الطلب في المشتريات",
     "commitment.abort.follow_up.terminate": "إنهاء هذا العقد في وحدة العقود",
     "commitment.abort.follow_up_title": "ما زال عليك فعله يدويًا. إيقاف البند لا ينهي أي عقد أو طلب بحد ذاته:",

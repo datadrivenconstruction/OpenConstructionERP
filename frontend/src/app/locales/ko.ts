@@ -51161,6 +51161,7 @@ const resource = {
     "common.right": "오른쪽",
     "common.default_filter_save": "내 기본값으로 저장",
     "common.default_filter_clear": "내 기본값 지우기",
+    "common.more_actions": "더 많은 작업",
     "commitment.abort.follow_up.cancel": "조달에서 이 발주 취소",
     "commitment.abort.follow_up.terminate": "계약 모듈에서 이 계약 해지",
     "commitment.abort.follow_up_title": "아직 직접 처리해야 합니다. 항목을 중단해도 계약이나 발주가 저절로 종료되지는 않습니다:",

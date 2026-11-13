@@ -1,9 +1,11 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { type ReactNode, useCallback } from 'react';
+import { Children, Fragment, isValidElement, type ReactElement, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MoreHorizontal } from 'lucide-react';
 import clsx from 'clsx';
 
-import { ButtonSizeOverrideContext } from './Button';
+import { Button, ButtonSizeOverrideContext } from './Button';
 import { usePageHeaderSlot } from './pageHeaderSlot';
 
 /**
@@ -51,6 +53,94 @@ function HeaderSlot() {
   return <span ref={ref} className="contents" data-oe-header-slot />;
 }
 
+/** Header row holds at most this many page actions before the rest go to "...". */
+const MAX_VISIBLE_ACTIONS = 4;
+
+function flattenActions(actions: ReactNode): ReactElement[] {
+  const out: ReactElement[] = [];
+  Children.toArray(actions).forEach((c) => {
+    if (!isValidElement(c)) return;
+    if (c.type === Fragment) out.push(...flattenActions((c.props as { children?: ReactNode }).children));
+    else out.push(c);
+  });
+  return out;
+}
+
+function isPrimary(el: ReactElement): boolean {
+  return (el.props as { variant?: string }).variant === 'primary';
+}
+
+function OverflowMenu({ items }: { items: ReactElement[] }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e: MouseEvent) => {
+      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+  return (
+    <div ref={boxRef} className="relative" data-testid="page-header-overflow">
+      <Button
+        variant="secondary"
+        size="md"
+        icon={<MoreHorizontal size={16} />}
+        aria-label={t('common.more_actions', { defaultValue: 'More actions' })}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      />
+      {open && (
+        <div
+          role="menu"
+          className="absolute end-0 top-full z-dropdown mt-1 flex min-w-48 flex-col gap-1 rounded-xl border border-border-light bg-surface-primary p-1.5 shadow-md [&_[data-oe-button]]:w-full [&_[data-oe-button]]:justify-start"
+          onClick={(e) => {
+            // Plain actions close the menu; ones that open their own popup keep it.
+            if (!(e.target as HTMLElement).closest('[aria-haspopup],[aria-expanded]')) setOpen(false);
+          }}
+        >
+          <ButtonSizeOverrideContext.Provider value="md">{items}</ButtonSizeOverrideContext.Provider>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HeaderActions({ actions }: { actions: ReactNode }) {
+  const all = flattenActions(actions);
+  if (all.length <= MAX_VISIBLE_ACTIONS + 1) {
+    return <ButtonSizeOverrideContext.Provider value="md">{all}</ButtonSizeOverrideContext.Provider>;
+  }
+  // Primaries always stay in the row; the first secondaries fill the rest.
+  const primaries = all.filter(isPrimary);
+  let room = Math.max(0, MAX_VISIBLE_ACTIONS - primaries.length);
+  const visible: ReactElement[] = [];
+  const hidden: ReactElement[] = [];
+  all.forEach((el) => {
+    if (isPrimary(el)) visible.push(el);
+    else if (room > 0) {
+      visible.push(el);
+      room -= 1;
+    } else hidden.push(el);
+  });
+  return (
+    <ButtonSizeOverrideContext.Provider value="md">
+      {visible}
+      <OverflowMenu items={hidden} />
+    </ButtonSizeOverrideContext.Provider>
+  );
+}
+
 export function PageHeader({ subtitle, actions, srTitle, className }: PageHeaderProps) {
   if (!subtitle && !actions) {
     // srTitle-only pages (chat / full-bleed surfaces) still need the a11y
@@ -82,7 +172,7 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
           scrolled the whole page sideways. The cap is inert whenever the row
           fits, so wide layouts are unchanged. */}
       <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2 empty:hidden">
-        {actions && <ButtonSizeOverrideContext.Provider value="md">{actions}</ButtonSizeOverrideContext.Provider>}
+        {actions && <HeaderActions actions={actions} />}
         <HeaderSlot />
       </div>
     </div>

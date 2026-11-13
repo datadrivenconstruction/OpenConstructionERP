@@ -52588,6 +52588,7 @@ const resource = {
     "common.right": "Oʻngga",
     "common.default_filter_save": "Mening standartim sifatida saqlash",
     "common.default_filter_clear": "Mening standartimni tozalash",
+    "common.more_actions": "Qoʻshimcha amallar",
     "commitment.abort.follow_up.cancel": "Xaridda bu buyurtmani bekor qilish",
     "commitment.abort.follow_up.terminate": "Shartnomalar modulida bu shartnomani bekor qilish",
     "commitment.abort.follow_up_title": "Hali qoʻlda bajarish kerak. Bandni toʻxtatish oʻzi hech qanday shartnoma yoki buyurtmani tugatmaydi:",
