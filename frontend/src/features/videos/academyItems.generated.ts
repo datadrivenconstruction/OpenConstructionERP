@@ -63,7 +63,22 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "track": "Estimate and buy",
     "routes": [
       "/takeoff"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "takeoff",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ai_takeoff_you",
+      "others": [
+        "ai_takeoff_architect"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:ashbrook-bim-clash-detection",
@@ -122,7 +137,27 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/bim",
       "/clash"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "bim",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "clash",
+        "from": 2,
+        "to": 4
+      }
+    ],
+    "role": "bim",
+    "people": {
+      "you": "ashbrook_bim",
+      "others": [
+        "ashbrook_costconsultant"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:ashbrook-cash-flow",
@@ -180,7 +215,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/cvr"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "cvr",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [
+        "ashbrook_client",
+        "ashbrook_costconsultant"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-cost-control",
@@ -240,7 +291,29 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/full-evm",
       "/cost-control",
       "/cvr"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "full_evm",
+        "from": 1,
+        "to": 3
+      },
+      {
+        "module": "cvr",
+        "from": 4,
+        "to": 4
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [
+        "ashbrook_planner",
+        "ashbrook_site",
+        "ashbrook_client"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:ashbrook-delay-and-claims",
@@ -303,7 +376,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/variations",
       "/changeorders",
       "/schedule"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "risk",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "variations",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "schedule",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "variations",
+        "from": 4,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [
+        "ashbrook_costconsultant",
+        "ashbrook_planner",
+        "ashbrook_client"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:ashbrook-embodied-carbon",
@@ -360,7 +465,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/carbon"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "carbon",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_carbon",
+      "others": [
+        "ashbrook_site",
+        "ashbrook_client"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-estimate",
@@ -417,7 +538,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "ashbrook_estimator",
+      "others": [
+        "ashbrook_planner",
+        "ashbrook_client"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-handover-and-defects",
@@ -480,7 +617,38 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/inspections",
       "/punchlist",
       "/defects-liability"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "closeout",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "inspections",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "punchlist",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "defects_liability",
+        "from": 4,
+        "to": 5
+      }
+    ],
+    "role": "bim",
+    "people": {
+      "you": "ashbrook_bim",
+      "others": [
+        "ashbrook_client",
+        "ashbrook_costconsultant"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-health-and-safety",
@@ -537,7 +705,24 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/safety"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "safety",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "ashbrook_hs",
+      "others": [
+        "ashbrook_client",
+        "ashbrook_architect",
+        "ashbrook_site"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:ashbrook-nec4-compensation-events",
@@ -595,7 +780,24 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "variations",
+        "from": 1,
+        "to": 4
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [
+        "ashbrook_costconsultant",
+        "ashbrook_site",
+        "ashbrook_client"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:ashbrook-payment-applications",
@@ -652,7 +854,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/contracts"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "contracts",
+        "from": 1,
+        "to": 4
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_you_commercial",
+      "others": [
+        "ashbrook_costconsultant",
+        "ashbrook_client"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-programme-critical-path",
@@ -710,7 +928,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/schedule"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "schedule",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "ashbrook_planner",
+      "others": [
+        "ashbrook_costconsultant",
+        "ashbrook_site"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-quality",
@@ -775,7 +1009,44 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/rfi",
       "/punchlist",
       "/closeout"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "inspections",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "ncr",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "rfi",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "punchlist",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "closeout",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "ashbrook_quality",
+      "others": [
+        "ashbrook_site",
+        "ashbrook_architect",
+        "ashbrook_client"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:ashbrook-risk",
@@ -832,7 +1103,20 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/risks"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "risk",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [],
+      "crew": 0
+    }
   },
   {
     "id": "course:ashbrook-site-diary",
@@ -889,7 +1173,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/daily-diary"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "daily_diary",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "ashbrook_site",
+      "others": [
+        "ashbrook_costconsultant",
+        "ashbrook_commercial"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ashbrook-takeoff",
@@ -957,7 +1257,47 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/bim",
       "/boq",
       "/costs"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "documents",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "takeoff",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "dwg_takeoff",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "bim_hub",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "boq",
+        "from": 5,
+        "to": 5
+      },
+      {
+        "module": "costs",
+        "from": 6,
+        "to": 6
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "ashbrook_estimator",
+      "others": [
+        "ashbrook_architect"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:ashbrook-tender",
@@ -1015,7 +1355,22 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/tendering",
       "/bid-management"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "bid_management",
+        "from": 1,
+        "to": 4
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "ashbrook_commercial",
+      "others": [
+        "ashbrook_masonry"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:belosten-aktove-bg",
@@ -1076,7 +1431,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/daily-diary",
       "/inspections",
       "/ncr"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "daily_diary",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "inspections",
+        "from": 2,
+        "to": 3
+      },
+      {
+        "module": "ncr",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "daily_diary",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "belosten_you",
+      "others": [
+        "belosten_window_sub",
+        "belosten_supervisor",
+        "belosten_manager"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:belosten-bg",
@@ -1141,7 +1528,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "belosten_you",
+      "others": [
+        "belosten_manager",
+        "belosten_municipality",
+        "belosten_window_sub"
+      ],
+      "crew": 4
+    }
   },
   {
     "id": "course:belosten-kss-bg",
@@ -1198,7 +1617,24 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "BG",
     "routes": [
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "belosten_you",
+      "others": [
+        "belosten_manager",
+        "belosten_municipality",
+        "belosten_window_sub"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:belosten-predavane-bg",
@@ -1261,7 +1697,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/closeout",
       "/defects-liability"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "punchlist",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "contracts",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "closeout",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "defects_liability",
+        "from": 4,
+        "to": 5
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "belosten_you",
+      "others": [
+        "belosten_municipality",
+        "belosten_supervisor",
+        "belosten_manager"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:belosten-zop-bg",
@@ -1325,7 +1793,37 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/rfi",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "bid_management",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "rfi",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "variations",
+        "from": 4,
+        "to": 4
+      }
+    ],
+    "role": "client",
+    "people": {
+      "you": "belosten_commission",
+      "others": [
+        "belosten_municipality"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:belosten-zut-bg",
@@ -1386,7 +1884,38 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/inspections",
       "/schedule",
       "/rfi"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "inspections",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "schedule",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "inspections",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "rfi",
+        "from": 4,
+        "to": 4
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "belosten_you",
+      "others": [
+        "belosten_supervisor",
+        "belosten_municipality"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:brannock-us",
@@ -1447,7 +1976,33 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/boq",
       "/tendering",
       "/bid-management"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "boq",
+        "from": 4,
+        "to": 6
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "brannock_you",
+      "others": [
+        "brannock_tenant_rep",
+        "brannock_sheetmetal_sub"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:brzozowa-pl",
@@ -1512,7 +2067,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "brzozowa_pl_you",
+      "others": [
+        "brzozowa_pl_gmina",
+        "brzozowa_pl_facade",
+        "brzozowa_pl_kierownik"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:corvennick-us",
@@ -1577,7 +2164,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "corvennick_you",
+      "others": [
+        "corvennick_owner_pm",
+        "corvennick_drywall_sub",
+        "corvennick_architect"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:erlengrund-de",
@@ -1642,7 +2261,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "erlengrund_de_you",
+      "others": [
+        "erlengrund_de_pelz",
+        "erlengrund_de_polier",
+        "erlengrund_de_hochbauamt"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:estimate-data-import",
@@ -1699,7 +2350,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "track": "Estimate and buy",
     "routes": [
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "bim",
+    "people": {
+      "you": "kestrel_analyst",
+      "others": [
+        "kestrel_qs",
+        "kestrel_mep"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:haselmoor-de",
@@ -1757,7 +2424,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "DE",
     "routes": [
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 5
+      }
+    ],
+    "role": "client",
+    "people": {
+      "you": "haselmoor_de_you",
+      "others": [
+        "haselmoor_de_tga",
+        "haselmoor_de_client"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:haselmoor-gaeb-de",
@@ -1817,7 +2500,25 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/documents",
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "documents",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "boq",
+        "from": 2,
+        "to": 4
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "haselmoor_gaeb_de_you",
+      "others": [],
+      "crew": 0
+    }
   },
   {
     "id": "course:haselmoor-vob-de",
@@ -1880,7 +2581,35 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/boq",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "documents",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "boq",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "variations",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "boq",
+        "from": 4,
+        "to": 4
+      }
+    ],
+    "role": "site",
+    "people": {
+      "you": "haselmoor_vob_de_you",
+      "others": [],
+      "crew": 0
+    }
   },
   {
     "id": "course:hollisyard-us",
@@ -1944,7 +2673,38 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/takeoff",
       "/dwg-takeoff",
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "documents",
+        "from": 1,
+        "to": 1
+      },
+      {
+        "module": "takeoff",
+        "from": 2,
+        "to": 2
+      },
+      {
+        "module": "dwg_takeoff",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "boq",
+        "from": 4,
+        "to": 6
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "hollisyard_you",
+      "others": [
+        "hollisyard_architect",
+        "hollisyard_framer"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:ids-bcf-model-checking",
@@ -2003,7 +2763,27 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/requirements",
       "/bcf"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "bim_requirements",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bcf",
+        "from": 3,
+        "to": 4
+      }
+    ],
+    "role": "bim",
+    "people": {
+      "you": "kestrel_bim",
+      "others": [
+        "kestrel_architect"
+      ],
+      "crew": 1
+    }
   },
   {
     "id": "course:ifc-quantity-takeoff",
@@ -2062,7 +2842,28 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "routes": [
       "/bim",
       "/boq"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "bim_hub",
+        "from": 1,
+        "to": 4
+      },
+      {
+        "module": "boq",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "bim",
+    "people": {
+      "you": "kestrel_bim",
+      "others": [
+        "kestrel_architect",
+        "kestrel_qs"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:itapare-br",
@@ -2122,7 +2923,29 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/boq",
       "/tendering",
       "/bid-management"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 3
+      },
+      {
+        "module": "bid_management",
+        "from": 4,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "itapare_you",
+      "others": [
+        "itapare_prefeitura",
+        "itapare_mestre",
+        "itapare_licitante"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:jacarandas-mx",
@@ -2183,7 +3006,28 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/boq",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "jacarandas_you",
+      "others": [
+        "jacarandas_maestro",
+        "jacarandas_residente"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:landrevel-fr",
@@ -2248,7 +3092,38 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "landrevel_economiste",
+      "others": [
+        "landrevel_conducteur",
+        "landrevel_moe"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:sidrgrove-ae",
@@ -2306,7 +3181,23 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "AE",
     "routes": [
       "/contracts"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "contracts",
+        "from": 1,
+        "to": 6
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "sidrgrove_qs",
+      "others": [
+        "sidrgrove_cm",
+        "sidrgrove_md"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "course:tallowgate-uk",
@@ -2371,7 +3262,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "qs",
+    "people": {
+      "you": "tallowgate_you",
+      "others": [
+        "tallowgate_estimator",
+        "tallowgate_client",
+        "tallowgate_wraycliffe"
+      ],
+      "crew": 3
+    }
   },
   {
     "id": "course:valcerasa-it",
@@ -2436,7 +3359,39 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "valcerasa_computista",
+      "others": [
+        "valcerasa_dt",
+        "valcerasa_titolare",
+        "valcerasa_capocantiere"
+      ],
+      "crew": 4
+    }
   },
   {
     "id": "course:valdelagua-es",
@@ -2501,7 +3456,38 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "/contracts",
       "/variations",
       "/changeorders"
-    ]
+    ],
+    "steps": [
+      {
+        "module": "boq",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "module": "bid_management",
+        "from": 3,
+        "to": 3
+      },
+      {
+        "module": "contracts",
+        "from": 4,
+        "to": 4
+      },
+      {
+        "module": "variations",
+        "from": 5,
+        "to": 5
+      }
+    ],
+    "role": "est",
+    "people": {
+      "you": "valdelagua_estudios",
+      "others": [
+        "valdelagua_jefa",
+        "valdelagua_jefeobra"
+      ],
+      "crew": 2
+    }
   },
   {
     "id": "checklist:hr01-ugovoreni-troskovnik",

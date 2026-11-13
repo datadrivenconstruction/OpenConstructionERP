@@ -19,7 +19,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { AcademyItemCard } from './AcademyItemLinks';
 import { CourseHive } from './CourseHive';
-import { defaultPath, learningPaths } from './learningPaths';
+import { defaultPath, learningPaths, useCoursesDone } from './learningPaths';
 import {
   DURATION_KEYS,
   ITEMS,
@@ -144,6 +144,8 @@ export function CoursesPage() {
   const ctx = useVideoContext();
   const [params, setParams] = useSearchParams();
   const [panelOpen, setPanelOpen] = useState(false);
+  // One progress for the honeycomb and the cards, so marking a course done shows on both.
+  const progress = useCoursesDone();
   const filters = useMemo(() => filtersFromParams(params), [params]);
 
   const patch = useCallback(
@@ -474,7 +476,7 @@ export function CoursesPage() {
       )}
 
       {!filtered && paths.length > 0 && (
-        <CourseHive paths={paths} initialPath={defaultPath(paths, ctx.market)?.id} />
+        <CourseHive paths={paths} initialPath={defaultPath(paths, ctx.market)?.id} shared={progress} />
       )}
 
       {hits.length === 0 ? (
@@ -488,7 +490,12 @@ export function CoursesPage() {
           {hits.map((item) => (
             <li key={item.id} className="flex">
               <div className="flex w-full flex-col [&>a]:h-full">
-                <AcademyItemCard item={item} media countryName={item.country ?? item.market ? labels.country((item.country ?? item.market)!) : undefined} />
+                <AcademyItemCard
+                  item={item}
+                  media
+                  done={Boolean(progress[0][item.id])}
+                  countryName={item.country ?? item.market ? labels.country((item.country ?? item.market)!) : undefined}
+                />
               </div>
             </li>
           ))}

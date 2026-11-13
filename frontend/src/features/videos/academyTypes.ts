@@ -143,4 +143,18 @@ export interface AcademyItem {
   routes: string[];
   parentCourse?: string;
   relatedVideoIds?: string[];
+  /** The path a course walks: each run of tasks in one ERP module is a step, numbered by its tasks. */
+  steps?: CourseStep[];
+  /** The learner's role group in a course. */
+  role?: CourseRoleGroup;
+  /** Portraits in `public/academy-courses/people`: the learner, up to three others, and how many others there are. */
+  people?: { you: string; others: string[]; crew: number };
+}
+
+export type CourseRoleGroup = 'est' | 'qs' | 'site' | 'bim' | 'client';
+
+export interface CourseStep {
+  module: string;
+  from: number;
+  to: number;
 }

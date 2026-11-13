@@ -839,7 +839,22 @@
   "app_routes": [
    "/takeoff"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "path_steps": [
+   [
+    "takeoff",
+    1,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ai_takeoff_you",
+   "others": [
+    "ai_takeoff_architect"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:ashbrook-bim-clash-detection",
@@ -899,7 +914,27 @@
    "/bim",
    "/clash"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "bim",
+    1,
+    1
+   ],
+   [
+    "clash",
+    2,
+    4
+   ]
+  ],
+  "role_group": "bim",
+  "people": {
+   "you": "ashbrook_bim",
+   "others": [
+    "ashbrook_costconsultant"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:ashbrook-cash-flow",
@@ -958,7 +993,23 @@
    "/cvr"
   ],
   "track": "Contract and commercial control",
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "cvr",
+    1,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [
+    "ashbrook_client",
+    "ashbrook_costconsultant"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-cost-control",
@@ -1019,7 +1070,29 @@
    "/cost-control",
    "/cvr"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "full_evm",
+    1,
+    3
+   ],
+   [
+    "cvr",
+    4,
+    4
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [
+    "ashbrook_planner",
+    "ashbrook_site",
+    "ashbrook_client"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:ashbrook-delay-and-claims",
@@ -1083,7 +1156,39 @@
    "/schedule"
   ],
   "track": "Contract and commercial control",
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "risk",
+    1,
+    1
+   ],
+   [
+    "variations",
+    2,
+    2
+   ],
+   [
+    "schedule",
+    3,
+    3
+   ],
+   [
+    "variations",
+    4,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [
+    "ashbrook_costconsultant",
+    "ashbrook_planner",
+    "ashbrook_client"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:ashbrook-embodied-carbon",
@@ -1141,7 +1246,23 @@
   "app_routes": [
    "/carbon"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "carbon",
+    1,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_carbon",
+   "others": [
+    "ashbrook_site",
+    "ashbrook_client"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-estimate",
@@ -1199,7 +1320,23 @@
   "app_routes": [
    "/boq"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "ashbrook_estimator",
+   "others": [
+    "ashbrook_planner",
+    "ashbrook_client"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-handover-and-defects",
@@ -1263,7 +1400,38 @@
    "/punchlist",
    "/defects-liability"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "closeout",
+    1,
+    1
+   ],
+   [
+    "inspections",
+    2,
+    2
+   ],
+   [
+    "punchlist",
+    3,
+    3
+   ],
+   [
+    "defects_liability",
+    4,
+    5
+   ]
+  ],
+  "role_group": "bim",
+  "people": {
+   "you": "ashbrook_bim",
+   "others": [
+    "ashbrook_client",
+    "ashbrook_costconsultant"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-health-and-safety",
@@ -1321,7 +1489,24 @@
   "app_routes": [
    "/safety"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "safety",
+    1,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "ashbrook_hs",
+   "others": [
+    "ashbrook_client",
+    "ashbrook_architect",
+    "ashbrook_site"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:ashbrook-nec4-compensation-events",
@@ -1380,7 +1565,24 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "variations",
+    1,
+    4
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [
+    "ashbrook_costconsultant",
+    "ashbrook_site",
+    "ashbrook_client"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:ashbrook-payment-applications",
@@ -1438,7 +1640,23 @@
   "app_routes": [
    "/contracts"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "contracts",
+    1,
+    4
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_you_commercial",
+   "others": [
+    "ashbrook_costconsultant",
+    "ashbrook_client"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-programme-critical-path",
@@ -1497,7 +1715,23 @@
    "/schedule"
   ],
   "track": "Plan, build and assure",
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "schedule",
+    1,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "ashbrook_planner",
+   "others": [
+    "ashbrook_costconsultant",
+    "ashbrook_site"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-quality",
@@ -1563,7 +1797,44 @@
    "/punchlist",
    "/closeout"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "inspections",
+    1,
+    1
+   ],
+   [
+    "ncr",
+    2,
+    2
+   ],
+   [
+    "rfi",
+    3,
+    3
+   ],
+   [
+    "punchlist",
+    4,
+    4
+   ],
+   [
+    "closeout",
+    5,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "ashbrook_quality",
+   "others": [
+    "ashbrook_site",
+    "ashbrook_architect",
+    "ashbrook_client"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:ashbrook-risk",
@@ -1621,7 +1892,20 @@
   "app_routes": [
    "/risks"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "risk",
+    1,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [],
+   "crew": 0
+  }
  },
  {
   "id": "course:ashbrook-site-diary",
@@ -1679,7 +1963,23 @@
   "app_routes": [
    "/daily-diary"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "daily_diary",
+    1,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "ashbrook_site",
+   "others": [
+    "ashbrook_costconsultant",
+    "ashbrook_commercial"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ashbrook-takeoff",
@@ -1748,7 +2048,47 @@
    "/costs"
   ],
   "track": "Estimate and buy",
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "documents",
+    1,
+    1
+   ],
+   [
+    "takeoff",
+    2,
+    2
+   ],
+   [
+    "dwg_takeoff",
+    3,
+    3
+   ],
+   [
+    "bim_hub",
+    4,
+    4
+   ],
+   [
+    "boq",
+    5,
+    5
+   ],
+   [
+    "costs",
+    6,
+    6
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "ashbrook_estimator",
+   "others": [
+    "ashbrook_architect"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:ashbrook-tender",
@@ -1807,7 +2147,22 @@
    "/tendering",
    "/bid-management"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "bid_management",
+    1,
+    4
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "ashbrook_commercial",
+   "others": [
+    "ashbrook_masonry"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:belosten-aktove-bg",
@@ -1869,7 +2224,39 @@
    "/inspections",
    "/ncr"
   ],
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "daily_diary",
+    1,
+    1
+   ],
+   [
+    "inspections",
+    2,
+    3
+   ],
+   [
+    "ncr",
+    4,
+    4
+   ],
+   [
+    "daily_diary",
+    5,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "belosten_you",
+   "others": [
+    "belosten_window_sub",
+    "belosten_supervisor",
+    "belosten_manager"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:belosten-bg",
@@ -1935,7 +2322,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "belosten_you",
+   "others": [
+    "belosten_manager",
+    "belosten_municipality",
+    "belosten_window_sub"
+   ],
+   "crew": 4
+  }
  },
  {
   "id": "course:belosten-kss-bg",
@@ -1993,7 +2412,24 @@
   "app_routes": [
    "/boq"
   ],
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "belosten_you",
+   "others": [
+    "belosten_manager",
+    "belosten_municipality",
+    "belosten_window_sub"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:belosten-predavane-bg",
@@ -2057,7 +2493,39 @@
    "/closeout",
    "/defects-liability"
   ],
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "punchlist",
+    1,
+    1
+   ],
+   [
+    "contracts",
+    2,
+    2
+   ],
+   [
+    "closeout",
+    3,
+    3
+   ],
+   [
+    "defects_liability",
+    4,
+    5
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "belosten_you",
+   "others": [
+    "belosten_municipality",
+    "belosten_supervisor",
+    "belosten_manager"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:belosten-zop-bg",
@@ -2122,7 +2590,37 @@
    "/changeorders"
   ],
   "track": "Estimate and buy",
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "bid_management",
+    1,
+    1
+   ],
+   [
+    "rfi",
+    2,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "variations",
+    4,
+    4
+   ]
+  ],
+  "role_group": "client",
+  "people": {
+   "you": "belosten_commission",
+   "others": [
+    "belosten_municipality"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:belosten-zut-bg",
@@ -2184,7 +2682,38 @@
    "/schedule",
    "/rfi"
   ],
-  "country": "BG"
+  "country": "BG",
+  "path_steps": [
+   [
+    "inspections",
+    1,
+    1
+   ],
+   [
+    "schedule",
+    2,
+    2
+   ],
+   [
+    "inspections",
+    3,
+    3
+   ],
+   [
+    "rfi",
+    4,
+    4
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "belosten_you",
+   "others": [
+    "belosten_supervisor",
+    "belosten_municipality"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:brannock-us",
@@ -2246,7 +2775,33 @@
    "/bid-management"
   ],
   "track": "Estimate and buy",
-  "country": "US"
+  "country": "US",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "boq",
+    4,
+    6
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "brannock_you",
+   "others": [
+    "brannock_tenant_rep",
+    "brannock_sheetmetal_sub"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:brzozowa-pl",
@@ -2312,7 +2867,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "PL"
+  "country": "PL",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "brzozowa_pl_you",
+   "others": [
+    "brzozowa_pl_gmina",
+    "brzozowa_pl_facade",
+    "brzozowa_pl_kierownik"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:corvennick-us",
@@ -2378,7 +2965,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "US"
+  "country": "US",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "corvennick_you",
+   "others": [
+    "corvennick_owner_pm",
+    "corvennick_drywall_sub",
+    "corvennick_architect"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:erlengrund-de",
@@ -2444,7 +3063,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "DE"
+  "country": "DE",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "erlengrund_de_you",
+   "others": [
+    "erlengrund_de_pelz",
+    "erlengrund_de_polier",
+    "erlengrund_de_hochbauamt"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:estimate-data-import",
@@ -2502,7 +3153,23 @@
   "app_routes": [
    "/boq"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    5
+   ]
+  ],
+  "role_group": "bim",
+  "people": {
+   "you": "kestrel_analyst",
+   "others": [
+    "kestrel_qs",
+    "kestrel_mep"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:haselmoor-de",
@@ -2561,7 +3228,23 @@
    "/boq"
   ],
   "track": "Estimate and buy",
-  "country": "DE"
+  "country": "DE",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    5
+   ]
+  ],
+  "role_group": "client",
+  "people": {
+   "you": "haselmoor_de_you",
+   "others": [
+    "haselmoor_de_tga",
+    "haselmoor_de_client"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:haselmoor-gaeb-de",
@@ -2622,7 +3305,25 @@
    "/boq"
   ],
   "track": "Estimate and buy",
-  "country": "DE"
+  "country": "DE",
+  "path_steps": [
+   [
+    "documents",
+    1,
+    1
+   ],
+   [
+    "boq",
+    2,
+    4
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "haselmoor_gaeb_de_you",
+   "others": [],
+   "crew": 0
+  }
  },
  {
   "id": "course:haselmoor-vob-de",
@@ -2686,7 +3387,35 @@
    "/changeorders"
   ],
   "track": "Contract and commercial control",
-  "country": "DE"
+  "country": "DE",
+  "path_steps": [
+   [
+    "documents",
+    1,
+    1
+   ],
+   [
+    "boq",
+    2,
+    2
+   ],
+   [
+    "variations",
+    3,
+    3
+   ],
+   [
+    "boq",
+    4,
+    4
+   ]
+  ],
+  "role_group": "site",
+  "people": {
+   "you": "haselmoor_vob_de_you",
+   "others": [],
+   "crew": 0
+  }
  },
  {
   "id": "course:hollisyard-us",
@@ -2751,7 +3480,38 @@
    "/boq"
   ],
   "track": "Estimate and buy",
-  "country": "US"
+  "country": "US",
+  "path_steps": [
+   [
+    "documents",
+    1,
+    1
+   ],
+   [
+    "takeoff",
+    2,
+    2
+   ],
+   [
+    "dwg_takeoff",
+    3,
+    3
+   ],
+   [
+    "boq",
+    4,
+    6
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "hollisyard_you",
+   "others": [
+    "hollisyard_architect",
+    "hollisyard_framer"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:ids-bcf-model-checking",
@@ -2811,7 +3571,27 @@
    "/requirements",
    "/bcf"
   ],
-  "track": "Information, BIM and sustainability"
+  "track": "Information, BIM and sustainability",
+  "path_steps": [
+   [
+    "bim_requirements",
+    1,
+    2
+   ],
+   [
+    "bcf",
+    3,
+    4
+   ]
+  ],
+  "role_group": "bim",
+  "people": {
+   "you": "kestrel_bim",
+   "others": [
+    "kestrel_architect"
+   ],
+   "crew": 1
+  }
  },
  {
   "id": "course:ifc-quantity-takeoff",
@@ -2871,7 +3651,28 @@
    "/bim",
    "/boq"
   ],
-  "track": "Estimate and buy"
+  "track": "Estimate and buy",
+  "path_steps": [
+   [
+    "bim_hub",
+    1,
+    4
+   ],
+   [
+    "boq",
+    5,
+    5
+   ]
+  ],
+  "role_group": "bim",
+  "people": {
+   "you": "kestrel_bim",
+   "others": [
+    "kestrel_architect",
+    "kestrel_qs"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:itapare-br",
@@ -2932,7 +3733,29 @@
    "/tendering",
    "/bid-management"
   ],
-  "country": "BR"
+  "country": "BR",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    3
+   ],
+   [
+    "bid_management",
+    4,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "itapare_you",
+   "others": [
+    "itapare_prefeitura",
+    "itapare_mestre",
+    "itapare_licitante"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:jacarandas-mx",
@@ -2994,7 +3817,28 @@
    "/changeorders"
   ],
   "track": "Estimate and buy",
-  "country": "MX"
+  "country": "MX",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "jacarandas_you",
+   "others": [
+    "jacarandas_maestro",
+    "jacarandas_residente"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:landrevel-fr",
@@ -3060,7 +3904,38 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "FR"
+  "country": "FR",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "landrevel_economiste",
+   "others": [
+    "landrevel_conducteur",
+    "landrevel_moe"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:sidrgrove-ae",
@@ -3119,7 +3994,23 @@
    "/contracts"
   ],
   "track": "Contract and commercial control",
-  "country": "AE"
+  "country": "AE",
+  "path_steps": [
+   [
+    "contracts",
+    1,
+    6
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "sidrgrove_qs",
+   "others": [
+    "sidrgrove_cm",
+    "sidrgrove_md"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "course:tallowgate-uk",
@@ -3185,7 +4076,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "GB"
+  "country": "GB",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "qs",
+  "people": {
+   "you": "tallowgate_you",
+   "others": [
+    "tallowgate_estimator",
+    "tallowgate_client",
+    "tallowgate_wraycliffe"
+   ],
+   "crew": 3
+  }
  },
  {
   "id": "course:valcerasa-it",
@@ -3251,7 +4174,39 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "IT"
+  "country": "IT",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "valcerasa_computista",
+   "others": [
+    "valcerasa_dt",
+    "valcerasa_titolare",
+    "valcerasa_capocantiere"
+   ],
+   "crew": 4
+  }
  },
  {
   "id": "course:valdelagua-es",
@@ -3317,7 +4272,38 @@
    "/variations",
    "/changeorders"
   ],
-  "country": "ES"
+  "country": "ES",
+  "path_steps": [
+   [
+    "boq",
+    1,
+    2
+   ],
+   [
+    "bid_management",
+    3,
+    3
+   ],
+   [
+    "contracts",
+    4,
+    4
+   ],
+   [
+    "variations",
+    5,
+    5
+   ]
+  ],
+  "role_group": "est",
+  "people": {
+   "you": "valdelagua_estudios",
+   "others": [
+    "valdelagua_jefa",
+    "valdelagua_jefeobra"
+   ],
+   "crew": 2
+  }
  },
  {
   "id": "checklist:hr01-ugovoreni-troskovnik",
