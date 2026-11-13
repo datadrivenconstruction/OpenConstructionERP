@@ -161,9 +161,9 @@ function AnchorPlacementBanner({ onCancel }: { onCancel: () => void }) {
       <div
         className={[
           'pointer-events-auto flex items-center gap-3 rounded-full',
-          'border border-emerald-400/30 bg-slate-900/85 px-4 py-2',
-          'text-xs text-slate-100 shadow-lg shadow-black/30 backdrop-blur-md',
-          'ring-1 ring-white/5',
+          'border border-emerald-400/30 bg-surface-elevated/90 px-4 py-2',
+          'text-xs text-content-primary shadow-lg shadow-black/30 backdrop-blur-md',
+          'ring-1 ring-border-light',
         ].join(' ')}
         role="status"
         data-testid="geo-anchor-placement-banner"
@@ -184,7 +184,7 @@ function AnchorPlacementBanner({ onCancel }: { onCancel: () => void }) {
           onClick={onCancel}
           className={[
             'inline-flex items-center gap-1 rounded-full px-2 py-0.5',
-            'text-2xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white',
+            'text-2xs font-semibold text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           data-testid="geo-anchor-placement-cancel"
@@ -209,9 +209,9 @@ function AnchorLocatingHint() {
     <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center px-3">
       <div
         className={[
-          'flex items-center gap-2 rounded-full border border-white/15',
-          'bg-slate-900/85 px-4 py-2 text-xs text-slate-100',
-          'shadow-lg shadow-black/30 backdrop-blur-md ring-1 ring-white/5',
+          'flex items-center gap-2 rounded-full border border-border',
+          'bg-surface-elevated/90 px-4 py-2 text-xs text-content-primary',
+          'shadow-lg shadow-black/30 backdrop-blur-md ring-1 ring-border-light',
         ].join(' ')}
         role="status"
         aria-live="polite"
@@ -832,7 +832,7 @@ export function ProjectGeoPage() {
               onClick={() => setSurveysOpen((v) => !v)}
               aria-pressed={surveysOpen}
               data-testid="geo-surveys-toggle"
-              className="inline-flex items-center gap-1.5 rounded-md border border-black/10 px-3 py-1.5 text-xs font-semibold text-content-primary transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 aria-pressed:border-oe-blue dark:border-white/20 dark:hover:bg-white/10"
+              className="inline-flex items-center gap-1.5 rounded-md border border-black/10 px-3 py-1.5 text-xs font-semibold text-content-primary transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 aria-pressed:border-oe-blue dark:border-white/20 dark:hover:bg-surface-secondary"
             >
               <ScanSearch size={14} strokeWidth={2.25} />
               {t('geo_hub.surveys.tab', { defaultValue: 'Surveys' })}
@@ -849,7 +849,7 @@ export function ProjectGeoPage() {
           (via CesiumViewer's ``overlay`` slot) so the map gets the full
           viewport width. Empty / loading / error states share that slot
           so they also paint above the canvas. */}
-      <main className="relative flex-1 overflow-hidden bg-slate-900">
+      <main className="relative flex-1 overflow-hidden bg-surface-tertiary">
         {error && (
           <div className="absolute inset-0 z-30 flex items-center justify-center p-6">
             {isStaleBackend ? (
@@ -876,7 +876,7 @@ export function ProjectGeoPage() {
         )}
         {!error && isLoading && (
           <div
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-xs text-slate-300"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-xs text-content-secondary"
             role="status"
             aria-live="polite"
           >
@@ -886,14 +886,14 @@ export function ProjectGeoPage() {
                 see — same width + position as the real overlay. */}
             <div
               aria-hidden
-              className="absolute top-3 left-3 hidden w-72 flex-col gap-2 rounded-xl border border-white/10 bg-slate-900/40 p-3 backdrop-blur-md md:flex"
+              className="absolute top-3 left-3 hidden w-72 flex-col gap-2 rounded-xl border border-border bg-surface-elevated/90 p-3 backdrop-blur-md md:flex"
             >
-              <div className="h-3 w-1/2 rounded bg-slate-700/60 animate-pulse" />
-              <div className="h-2 w-2/3 rounded bg-slate-700/50 animate-pulse" />
+              <div className="h-3 w-1/2 rounded bg-surface-tertiary animate-pulse" />
+              <div className="h-2 w-2/3 rounded bg-surface-tertiary animate-pulse" />
               <div className="mt-2 space-y-1.5">
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
-                <div className="h-8 rounded bg-slate-800/60 animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
+                <div className="h-8 rounded bg-surface-secondary animate-pulse" />
               </div>
             </div>
             <Loader2 size={20} className="animate-spin text-emerald-300" />
@@ -907,7 +907,7 @@ export function ProjectGeoPage() {
         {!error && data && engine === '2d' && (
           <Suspense
             fallback={
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-300">
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-content-secondary">
                 <Loader2 size={20} className="animate-spin text-emerald-300" />
                 <span className="font-medium">
                   {t('geo_hub.loading_map_title', { defaultValue: 'Loading map' })}
@@ -949,7 +949,7 @@ export function ProjectGeoPage() {
         {!error && data && engine === '3d' && (
           <Suspense
             fallback={
-              <div className="flex h-full items-center justify-center text-sm text-slate-300">
+              <div className="flex h-full items-center justify-center text-sm text-content-secondary">
                 {t('geo_hub.loading_viewer', {
                   defaultValue: 'Loading Cesium viewer (~3 MB)...',
                 })}

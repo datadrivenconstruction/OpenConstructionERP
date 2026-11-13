@@ -153,9 +153,9 @@ export function OverlayPanel({
         onClick={() => setCollapsed(false)}
         className={[
           'absolute top-3 right-3 z-20 inline-flex items-center gap-2',
-          'rounded-full border border-white/15 bg-slate-900/85 px-3 py-1.5',
-          'text-xs font-medium text-white shadow-lg shadow-black/20 backdrop-blur-md',
-          'ring-1 ring-white/5 transition hover:bg-slate-800/90',
+          'rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5',
+          'text-xs font-medium text-content-primary shadow-lg shadow-black/20 backdrop-blur-md',
+          'ring-1 ring-border-light transition hover:bg-surface-secondary',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400',
         ].join(' ')}
         aria-expanded={false}
@@ -163,7 +163,7 @@ export function OverlayPanel({
       >
         <Layers size={14} strokeWidth={2} className="text-sky-300" />
         <span className="tabular-nums">{overlays.length}</span>
-        <ChevronLeft size={14} strokeWidth={2.25} className="text-white/70" />
+        <ChevronLeft size={14} strokeWidth={2.25} className="text-content-tertiary" />
       </button>
     );
   }
@@ -173,7 +173,7 @@ export function OverlayPanel({
       data-testid="geo-overlay-panel"
       className={[
         'absolute top-3 right-3 z-20 flex w-80 max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95',
+        'rounded-xl border border-border bg-surface-elevated/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         'hidden md:flex',
       ].join(' ')}
@@ -181,7 +181,7 @@ export function OverlayPanel({
         defaultValue: 'Raster overlays',
       })}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
+      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-border">
         <div className="min-w-0">
           <h2 className="oe-overline">
             {t('geo.overlays.title', { defaultValue: 'Overlays' })}

@@ -195,13 +195,13 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
       data-testid="geo-surveys-panel"
       className={[
         'absolute top-3 right-[21rem] z-20 flex max-h-[calc(100%-1.5rem)] w-[26rem] max-w-[calc(100vw-1.5rem)] flex-col',
-        'rounded-xl border border-white/15 bg-white/95',
+        'rounded-xl border border-border bg-surface-elevated/95',
         'shadow-lg shadow-black/20 ring-1 ring-black/5 backdrop-blur-md',
         'hidden md:flex',
       ].join(' ')}
       aria-label={t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-white/10">
+      <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2.5 dark:border-border">
         <h2 className="oe-overline">
           {t('geo_hub.surveys.title', { defaultValue: 'Site surveys' })}
         </h2>
@@ -209,7 +209,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
           type="button"
           onClick={onClose}
           aria-label={t('geo_hub.surveys.close', { defaultValue: 'Close surveys' })}
-          className="rounded-md p-1 text-content-tertiary hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 dark:hover:bg-white/10"
+          className="rounded-md p-1 text-content-tertiary hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 dark:hover:bg-surface-secondary"
         >
           <X size={14} />
         </button>
@@ -217,7 +217,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 text-xs">
         {/* Upload card */}
-        <section data-testid="geo-surveys-upload" className="space-y-2 rounded-lg border border-black/10 p-3 dark:border-white/10">
+        <section data-testid="geo-surveys-upload" className="space-y-2 rounded-lg border border-black/10 p-3 dark:border-border">
           <h3 className="oe-card-title">
             {t('geo_hub.surveys.upload.title', { defaultValue: 'Add a survey' })}
           </h3>
@@ -392,7 +392,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
                     data-testid="geo-survey-row"
                     className={[
                       'flex items-center gap-1.5 rounded-md border px-2 py-1.5',
-                      s.id === selectedId ? 'border-oe-blue bg-oe-blue/5' : 'border-black/10 dark:border-white/10',
+                      s.id === selectedId ? 'border-oe-blue bg-oe-blue/5' : 'border-black/10 dark:border-border',
                     ].join(' ')}
                   >
                     <button type="button" onClick={() => select(s)} className="min-w-0 flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40">
@@ -409,7 +409,7 @@ export function SurveysPanel({ projectId, onClose }: SurveysPanelProps) {
                         onClick={() => toggleOverlay(s)}
                         aria-pressed={visible}
                         aria-label={visible ? t('geo_hub.surveys.list.hide', { defaultValue: 'Hide from globe' }) : t('geo_hub.surveys.list.show', { defaultValue: 'Show on globe' })}
-                        className="rounded-md p-1 text-content-secondary hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 dark:hover:bg-white/10"
+                        className="rounded-md p-1 text-content-secondary hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 dark:hover:bg-surface-secondary"
                       >
                         {visible ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
@@ -561,7 +561,7 @@ function ProgressTable({ title, rows, loading, failed, onSave }: ProgressTablePr
             {rows.map((row) => {
               const badge = varianceBadge(row.status);
               return (
-                <tr key={row.activity_id} data-testid="geo-survey-progress-row" className="border-black/5 dark:border-white/10">
+                <tr key={row.activity_id} data-testid="geo-survey-progress-row" className="border-black/5 dark:border-border">
                   <td className="max-w-[9rem] truncate" title={`${row.code} ${row.name}`}>
                     <span className="text-content-tertiary">{row.code}</span> {row.name}
                   </td>

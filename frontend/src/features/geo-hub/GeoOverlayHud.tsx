@@ -66,9 +66,9 @@ function scaleBarFor(alt: number | null): { label: string; widthPx: number } {
 
 const GLASS_CARD = [
   'pointer-events-auto inline-flex items-center gap-2',
-  'rounded-md border border-white/10 bg-slate-900/65 px-2.5 py-1.5',
-  'text-2xs font-medium text-slate-100 shadow-md backdrop-blur-md',
-  'ring-1 ring-white/5',
+  'rounded-md border border-border bg-surface-elevated/90 px-2.5 py-1.5',
+  'text-2xs font-medium text-content-primary shadow-md backdrop-blur-md',
+  'ring-1 ring-border-light',
 ].join(' ');
 
 export function GeoOverlayHud({
@@ -104,10 +104,10 @@ export function GeoOverlayHud({
           </span>
         </div>
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.altitude', { defaultValue: 'ALT' })}
           </span>
-          <span className="font-mono tabular-nums text-white">
+          <span className="font-mono tabular-nums text-content-primary">
             {active ? formatAltitude(altitudeM ?? NaN) : '—'}
           </span>
         </div>
@@ -119,26 +119,26 @@ export function GeoOverlayHud({
         data-testid="geo-tour-hud"
       >
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.lat', { defaultValue: 'LAT' })}
           </span>
-          <span className="font-mono tabular-nums text-white min-w-[70px]">
+          <span className="font-mono tabular-nums text-content-primary min-w-[70px]">
             {active && cursorLat !== null ? formatDegrees(cursorLat) : '—'}
           </span>
-          <span className="ml-1 text-slate-400 uppercase tracking-wider">
+          <span className="ml-1 text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.lon', { defaultValue: 'LON' })}
           </span>
-          <span className="font-mono tabular-nums text-white min-w-[70px]">
+          <span className="font-mono tabular-nums text-content-primary min-w-[70px]">
             {active && cursorLon !== null ? formatDegrees(cursorLon) : '—'}
           </span>
         </div>
         <div className={GLASS_CARD}>
-          <span className="text-slate-400 uppercase tracking-wider">
+          <span className="text-content-tertiary uppercase tracking-wider">
             {t('geo_hub.hud.scale', { defaultValue: 'SCALE' })}
           </span>
           <div className="flex items-center gap-1.5">
             <div
-              className="h-1.5 rounded-sm border border-white/40"
+              className="h-1.5 rounded-sm border border-border"
               style={{
                 width: `${scale.widthPx}px`,
                 background:
@@ -146,7 +146,7 @@ export function GeoOverlayHud({
               }}
               aria-hidden
             />
-            <span className="font-mono tabular-nums text-white">{scale.label}</span>
+            <span className="font-mono tabular-nums text-content-primary">{scale.label}</span>
           </div>
         </div>
       </div>

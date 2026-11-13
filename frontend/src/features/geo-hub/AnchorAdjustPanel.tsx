@@ -194,9 +194,9 @@ export function AnchorAdjustPanel({
         onClick={() => setCollapsed(false)}
         className={[
           'pointer-events-auto absolute bottom-20 left-3 z-20 inline-flex items-center gap-2',
-          'rounded-full border border-white/15 bg-slate-900/85 px-3 py-1.5',
-          'text-xs font-medium text-white shadow-lg shadow-black/20 backdrop-blur-md',
-          'ring-1 ring-white/5 transition hover:bg-slate-800/90',
+          'rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5',
+          'text-xs font-medium text-content-primary shadow-lg shadow-black/20 backdrop-blur-md',
+          'ring-1 ring-border-light transition hover:bg-surface-secondary',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
         ].join(' ')}
         aria-expanded={false}
@@ -206,7 +206,7 @@ export function AnchorAdjustPanel({
         data-testid="geo-anchor-adjust-pill"
       >
         <MapPinned size={14} strokeWidth={2} className="text-emerald-300" />
-        <ChevronUp size={14} strokeWidth={2.25} className="text-white/70" />
+        <ChevronUp size={14} strokeWidth={2.25} className="text-content-tertiary" />
       </button>
     );
   }
@@ -219,9 +219,9 @@ export function AnchorAdjustPanel({
         // chrome panels stop overlapping (#284 follow-up items 7+8).
         'pointer-events-auto absolute bottom-20 left-3 z-20',
         'flex w-64 max-w-[calc(100vw-1.5rem)] flex-col gap-2',
-        'rounded-lg border border-white/15 bg-slate-900/85 p-3',
-        'text-xs text-slate-100 shadow-lg shadow-black/30 backdrop-blur-md',
-        'ring-1 ring-white/5',
+        'rounded-lg border border-border bg-surface-elevated/90 p-3',
+        'text-xs text-content-primary shadow-lg shadow-black/30 backdrop-blur-md',
+        'ring-1 ring-border-light',
       ].join(' ')}
       aria-label={t('geo_hub.adjust.aria', {
         defaultValue: 'Adjust project anchor',
@@ -238,10 +238,10 @@ export function AnchorAdjustPanel({
           <MapPinned size={14} strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-2xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
             {t('geo_hub.adjust.title', { defaultValue: 'Project anchor' })}
           </div>
-          <div className="font-mono text-2xs text-slate-200 tabular-nums">
+          <div className="font-mono text-2xs text-content-primary tabular-nums">
             {Number(anchor.lat).toFixed(5)}, {Number(anchor.lon).toFixed(5)}
           </div>
         </div>
@@ -250,7 +250,7 @@ export function AnchorAdjustPanel({
           onClick={() => setCollapsed(true)}
           className={[
             'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
-            'text-slate-400 hover:bg-white/10 hover:text-slate-100',
+            'text-content-tertiary hover:bg-surface-secondary hover:text-content-primary',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           aria-expanded
@@ -293,8 +293,8 @@ export function AnchorAdjustPanel({
           disabled={isRegeocoding}
           className={[
             'inline-flex items-center gap-1 rounded-md',
-            'border border-white/15 bg-white/5 px-2 py-1 text-2xs font-medium',
-            'hover:bg-white/10 disabled:cursor-wait disabled:opacity-70',
+            'border border-border bg-surface-secondary px-2 py-1 text-2xs font-medium',
+            'hover:bg-surface-secondary disabled:cursor-wait disabled:opacity-70',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           data-testid="geo-anchor-regeocode"
@@ -315,7 +315,7 @@ export function AnchorAdjustPanel({
             'px-2 py-1 text-2xs font-medium ring-1',
             dragMode
               ? 'bg-semantic-success text-white ring-semantic-success/60'
-              : 'border border-white/15 bg-white/5 hover:bg-white/10 ring-transparent',
+              : 'border border-border bg-surface-secondary hover:bg-surface-secondary ring-transparent',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300',
           ].join(' ')}
           data-testid="geo-anchor-drag-toggle"
@@ -333,9 +333,9 @@ export function AnchorAdjustPanel({
         </button>
       </div>
 
-      <div className="pt-1 text-2xs text-slate-400">
+      <div className="pt-1 text-2xs text-content-tertiary">
         {t('geo_hub.adjust.source_prefix', { defaultValue: 'Source:' })}{' '}
-        <span className="text-slate-300">{sourceLabel}</span>
+        <span className="text-content-secondary">{sourceLabel}</span>
       </div>
 
       {/* Drift indicator — only renders when the typed project address
