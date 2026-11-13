@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { Coins } from 'lucide-react';
 
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { FxPanel } from './FxPanel';
 
@@ -28,7 +29,11 @@ export function FxPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        srTitle={t('nav.fx', { defaultValue: 'Currencies' })}
+        subtitle={t('onboarding.mod_fx_desc', { defaultValue: 'Live ECB exchange rates and PPP conversion for multi-currency estimates' })}
+      />
       <CollapsibleSection
         storageKey="fx.how"
         icon={<Coins size={16} className="text-oe-blue" />}
