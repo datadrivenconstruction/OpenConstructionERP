@@ -214,7 +214,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
       {cost.available ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" data-testid="forecast-insights-cost-tiles">
           {/* CPI */}
-          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light p-3">
             <div className="flex items-center justify-between">
               <h4 className="text-2xs font-medium text-content-secondary">
                 {t('project_intelligence.insights.cpi', { defaultValue: 'CPI' })}
@@ -234,7 +234,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           </div>
 
           {/* SPI */}
-          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light p-3">
             <div className="flex items-center justify-between">
               <h4 className="text-2xs font-medium text-content-secondary">
                 {t('project_intelligence.insights.spi', { defaultValue: 'SPI' })}
@@ -254,7 +254,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           </div>
 
           {/* EAC */}
-          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light p-3">
             <h4 className="text-2xs font-medium text-content-secondary">
               {t('project_intelligence.insights.eac', {
                 defaultValue: 'EAC (forecast)',
@@ -270,7 +270,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           </div>
 
           {/* VAC */}
-          <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-3">
+          <div className="rounded-xl bg-surface-primary border border-border-light p-3">
             <h4 className="text-2xs font-medium text-content-secondary">
               {t('project_intelligence.insights.vac', {
                 defaultValue: 'VAC (variance)',
@@ -309,7 +309,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
       {/* Schedule slip + Risk gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Schedule slip */}
-        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light p-4">
           <h3 className="oe-card-title flex items-center gap-2 mb-3">
             <CalendarClock size={16} className="text-oe-blue" />
             {t('project_intelligence.insights.schedule_title', {
@@ -390,7 +390,7 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
         </div>
 
         {/* Risk gauge */}
-        <div className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4">
+        <div className="rounded-xl bg-surface-primary border border-border-light p-4">
           <h3 className="oe-card-title flex items-center gap-2 mb-3">
             <Gauge size={16} className="text-oe-blue" />
             {t('project_intelligence.insights.risk_title', {

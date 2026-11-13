@@ -137,7 +137,7 @@ function DocumentRow({
   const crs = changeRequests.filter((c) => c.document_id === doc.id);
 
   return (
-    <li className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="area-document">
+    <li className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="area-document">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-content-primary">
           {title}
@@ -167,7 +167,7 @@ function DocumentRow({
       )}
 
       {open && (
-        <div className="mt-2 rounded-md bg-surface-secondary p-2 text-xs">
+        <div className="mt-2 rounded-lg bg-surface-secondary p-2 text-xs">
           {history.isLoading && <p className="text-content-tertiary">{t('governance.project.loading', { defaultValue: 'Loading...' })}</p>}
           {history.isError && (
             <p className="flex flex-wrap items-center gap-2 text-semantic-error" role="alert">
@@ -279,7 +279,7 @@ function DocumentRow({
         />
       )}
       {crOpen && (
-        <div className="mt-2 space-y-2 rounded-md bg-surface-secondary p-2">
+        <div className="mt-2 space-y-2 rounded-lg bg-surface-secondary p-2">
           <textarea
             rows={2}
             className="oe-textarea"
@@ -463,7 +463,7 @@ export function AreaPanel({
 
       <section className="grid gap-4 md:grid-cols-2">
         {(['owner_user_id', 'deputy_user_id'] as const).map((field) => (
-          <div key={field} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+          <div key={field} className="rounded-xl border border-border-light bg-surface-elevated p-3">
             <p className="mb-2 text-xs font-semibold text-content-secondary">
               {field === 'owner_user_id'
                 ? t('governance.project.area.owner', { defaultValue: 'Owner' })
@@ -523,7 +523,7 @@ export function AreaPanel({
         </p>
       )}
 
-      <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+      <section className="rounded-xl border border-border-light bg-surface-elevated p-3">
         <label className="flex items-center gap-2 text-sm font-medium text-content-primary">
           <input
             type="checkbox"

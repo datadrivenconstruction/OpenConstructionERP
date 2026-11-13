@@ -2299,7 +2299,7 @@ function ReportViewerModal({
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
       />
-      <div className="relative flex h-full max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl animate-scale-in">
+      <div className="relative flex h-full max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-xl animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-border-light px-5 py-3">
           <div className="min-w-0">

@@ -55,6 +55,7 @@ import {
   ConfirmDialog,
   ModuleGuideButton,
   SearchableSelect,
+  SideDrawer,
   type SearchableSelectOption,
 } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -3867,38 +3868,13 @@ function ResourceDrawer({
   const loadError = dashQ.isError ? dashQ.error : null;
 
   return (
-    <div className="fixed inset-0 z-drawer flex justify-end" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('resources.resource_detail', {
-          defaultValue: 'Resource detail',
-        })}
-        className="relative h-full w-full max-w-xl overflow-y-auto bg-surface-elevated shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
-          <div>
-            <h2 className="text-base font-semibold">
-              {data?.resource.name ?? t('common.loading', { defaultValue: 'Loading…' })}
-            </h2>
-            {data && (
-              <p className="text-xs text-content-tertiary font-mono">
-                {data.resource.code}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 hover:bg-surface-secondary"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
-
+    <SideDrawer
+      open
+      onClose={onClose}
+      title={data?.resource.name ?? t('common.loading', { defaultValue: 'Loading…' })}
+      subtitle={data ? <span className="font-mono">{data.resource.code}</span> : undefined}
+      widthClass="max-w-xl"
+    >
         <div className="space-y-4 p-5">
           {dashQ.isLoading && <SkeletonTable rows={5} columns={2} />}
           {loadError && !dashQ.isLoading && (
@@ -4066,8 +4042,7 @@ function ResourceDrawer({
             </>
           )}
         </div>
-      </div>
-    </div>
+    </SideDrawer>
   );
 }
 
@@ -4092,7 +4067,7 @@ function Section({
 }
 
 function EmptyHint({ text }: { text: string }) {
-  return <p className="rounded-md bg-surface-secondary/60 p-3 text-xs text-content-tertiary">{text}</p>;
+  return <p className="rounded-lg bg-surface-secondary/60 p-3 text-xs text-content-tertiary">{text}</p>;
 }
 
 function AssignmentTable({

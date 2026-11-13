@@ -811,7 +811,7 @@ function UploadCustomTemplateForm({
             type="file"
             accept={accept}
             onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs file:mr-2 file:rounded-md file:border-0 file:bg-oe-blue/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-oe-blue hover:file:bg-oe-blue/20"
+            className="block w-full text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-oe-blue/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-oe-blue hover:file:bg-oe-blue/20"
             data-testid="custom-upload-file"
           />
         </div>
@@ -1223,7 +1223,7 @@ function TemplateCard({
 
         {/* Per-development override for custom templates */}
         {isCustom && template.id && activeDevId && (
-          <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2 py-1.5">
+          <div className="flex items-center justify-between rounded-lg bg-surface-secondary px-2 py-1.5">
             <span className="text-2xs text-content-secondary">
               {t('property_dev.doc_templates.default_for_dev', {
                 defaultValue:
@@ -1898,7 +1898,7 @@ function VariablesModal({
               {g.vars.map((v) => (
                 <div
                   key={v.key}
-                  className="flex flex-col rounded-md border border-border-light bg-surface-secondary px-2 py-1.5"
+                  className="flex flex-col rounded-lg border border-border-light bg-surface-secondary px-2 py-1.5"
                 >
                   <code className="text-xs text-oe-blue">{v.key}</code>
                   <span className="text-2xs text-content-tertiary">
@@ -2197,7 +2197,7 @@ function LocaleEditorModal({
           </Button>
         </div>
         {activeStatus && (
-          <div className="rounded-md bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
+          <div className="rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
             <div className="font-medium text-content-primary">
               {activeStatus.native_name}{' '}
               <span className="text-content-tertiary">

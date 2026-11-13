@@ -204,7 +204,7 @@ function LinkRow({
           type="button"
           disabled={busy || link.status === 'confirmed'}
           onClick={() => onDecide(link, 'confirmed')}
-          className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check className="h-4 w-4" />
           {pendingDecision === 'confirmed'
@@ -215,7 +215,7 @@ function LinkRow({
           type="button"
           disabled={busy || link.status === 'rejected'}
           onClick={() => onDecide(link, 'rejected')}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <X className="h-4 w-4" />
           {pendingDecision === 'rejected'
@@ -492,7 +492,7 @@ export function ReconciliationPage() {
             type="button"
             disabled={eventInput.trim() === ''}
             onClick={runSearch}
-            className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Search className="h-4 w-4" />
             {t('reconciliation.assemble', { defaultValue: 'Assemble thread' })}

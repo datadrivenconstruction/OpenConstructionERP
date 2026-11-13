@@ -828,7 +828,7 @@ export function PropertyDevPage() {
                   `/property-dev/developments/${selectedDevId}/geo?development=${encodeURIComponent(selectedDevId)}`,
                 )
               }
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
               title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
               aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
               data-testid="propdev-view-on-map"
@@ -840,7 +840,7 @@ export function PropertyDevPage() {
           {selectedDevId && (
             <Link
               to={`/property-dev/developments/${selectedDevId}/inventory-map`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
               title={t('propdev.inventory_map.cta', {
                 defaultValue: 'Inventory Map',
               })}
@@ -861,7 +861,7 @@ export function PropertyDevPage() {
             // from. It carries no sidebar row for the same reason they do not.
             <Link
               to={`/property-dev/developments/${selectedDevId}/compliance`}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
               title={t('propdev.compliance.title', {
                 defaultValue: 'Compliance dashboard',
               })}
@@ -1664,7 +1664,7 @@ function LeadsTab({
                               e.stopPropagation();
                               onConvert(l);
                             }}
-                            className="inline-flex items-center gap-1 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue/10 focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                            className="inline-flex items-center gap-1 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue/10 focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                             data-testid="convert-lead-btn"
                             title={t('propdev.convert_lead_hint', {
                               defaultValue:
@@ -1847,7 +1847,7 @@ function LeadDetailDrawer({
         <button
           type="button"
           onClick={() => onConvert(lead)}
-          className="inline-flex items-center gap-1 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue/10"
+          className="inline-flex items-center gap-1 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2 py-1 text-xs font-medium text-oe-blue hover:bg-oe-blue/10"
           data-testid="drawer-convert-lead-btn"
         >
           <ArrowRightCircle size={12} />
@@ -1858,7 +1858,7 @@ function LeadDetailDrawer({
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
+          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           data-testid="delete-lead-btn"
         >
           <Trash2 size={12} />
@@ -5390,7 +5390,7 @@ function PlotDetailDrawer({
         <button
           type="button"
           onClick={() => setEditOpen(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
+          className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
           data-testid="open-edit-plot"
         >
           <Pencil size={12} />
@@ -5415,7 +5415,7 @@ function PlotDetailDrawer({
             if (!ok) return;
             deleteMu.mutate();
           }}
-          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
+          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           disabled={deleteMu.isPending}
           data-testid="delete-plot"
         >
@@ -5457,7 +5457,7 @@ function PlotDetailDrawer({
                   <button
                     type="button"
                     onClick={() => setStatusMenuOpen((v) => !v)}
-                    className="inline-flex items-center gap-1 rounded-md focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                    className="inline-flex items-center gap-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                     aria-haspopup="menu"
                     aria-expanded={statusMenuOpen}
                     data-testid="plot-status-pill"
@@ -5466,7 +5466,7 @@ function PlotDetailDrawer({
                     <ChevronDown size={12} className="text-content-tertiary" />
                   </button>
                   {statusMenuOpen && (
-                    <div role="menu" className="absolute left-0 z-10 mt-1 min-w-[200px] rounded-md border border-border-light bg-surface-primary shadow-lg">
+                    <div role="menu" className="absolute left-0 z-10 mt-1 min-w-[200px] rounded-lg border border-border-light bg-surface-primary shadow-lg">
                       <div className="border-b border-border-light px-3 py-1.5 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('propdev.move_to', { defaultValue: 'Move to' })}
                       </div>
@@ -5605,19 +5605,19 @@ function PlotHandoverSummary({ plotId }: { plotId: string }) {
         {t('propdev.handover_state', { defaultValue: 'Handover state' })}
       </p>
       <div className="grid grid-cols-3 gap-2 text-xs">
-        <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
+        <div className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-center">
           <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.scheduled', { defaultValue: 'Scheduled' })}
           </p>
           <p className="text-lg font-semibold tabular-nums">{scheduled}</p>
         </div>
-        <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
+        <div className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-center">
           <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.completed', { defaultValue: 'Completed' })}
           </p>
           <p className="text-lg font-semibold tabular-nums">{completed}</p>
         </div>
-        <div className="rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-center">
+        <div className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-center">
           <p className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('propdev.warranty_open_label', {
               defaultValue: 'Warranty open',
@@ -5968,7 +5968,7 @@ export function BuyerDetailDrawer({
         <button
           type="button"
           onClick={() => setEditOpen(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
+          className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
           data-testid="open-edit-buyer"
         >
           <Pencil size={12} />
@@ -5982,7 +5982,7 @@ export function BuyerDetailDrawer({
           <button
             type="button"
             onClick={() => setConfirmCancel(true)}
-            className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg hover:border-semantic-warning/30"
+            className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg hover:border-semantic-warning/30"
             data-testid="cancel-buyer-btn"
             title={t('propdev.cancel_buyer_hint', {
               defaultValue: 'Cancel buyer and compute deposit forfeiture',
@@ -5996,7 +5996,7 @@ export function BuyerDetailDrawer({
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-md border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
+          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
           data-testid="delete-buyer-btn"
         >
           <Trash2 size={12} />
@@ -7024,7 +7024,7 @@ function SyncToContactsToggle({
 }) {
   const { t } = useTranslation();
   return (
-    <label className="flex items-start gap-2 rounded-md border border-border-light bg-surface-secondary/60 p-3 cursor-pointer hover:bg-surface-secondary">
+    <label className="flex items-start gap-2 rounded-xl border border-border-light bg-surface-secondary/60 p-3 cursor-pointer hover:bg-surface-secondary">
       <input
         type="checkbox"
         checked={checked}

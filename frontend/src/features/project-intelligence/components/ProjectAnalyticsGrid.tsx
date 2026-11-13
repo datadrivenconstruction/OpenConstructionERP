@@ -126,7 +126,7 @@ function WidgetCard({
   return (
     <div
       data-testid={testId}
-      className="rounded-xl bg-surface-primary border border-border-light shadow-sm p-4 h-64 flex flex-col"
+      className="rounded-xl bg-surface-primary border border-border-light p-4 h-64 flex flex-col"
     >
       <div className="mb-2">
         <h4 className="text-xs font-semibold text-content-primary">{title}</h4>
@@ -496,7 +496,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
               onClick={() => setBaselineM.mutate()}
               disabled={setBaselineM.isPending}
               data-testid="pi-set-baseline"
-              className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-medium text-oe-blue border border-oe-blue/30 rounded-md hover:bg-oe-blue/5 transition-colors disabled:opacity-50"
+              className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-medium text-oe-blue border border-oe-blue/30 rounded-lg hover:bg-oe-blue/5 transition-colors disabled:opacity-50"
             >
               {setBaselineM.isPending ? (
                 <Loader2 size={12} className="animate-spin" />

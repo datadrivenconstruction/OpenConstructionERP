@@ -44,7 +44,7 @@ export function PortLegend({ defaultOpen = false, testId }: PortLegendProps) {
         aria-expanded={open}
         data-testid="pipeline-port-legend-toggle"
         className={clsx(
-          'flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-start',
+          'flex w-full items-center gap-1.5 rounded-lg px-1.5 py-1 text-start',
           'text-2xs font-semibold uppercase tracking-wide text-content-secondary',
           'hover:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/30',
         )}

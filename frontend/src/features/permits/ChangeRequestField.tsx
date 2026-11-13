@@ -43,7 +43,7 @@ export function ChangeRequestField({ projectId, roadmap, value, onChange, enable
     (r) => r.status === 'approved' && r.document_id === roadmap?.governance_document_id && !consumed.includes(r.id),
   );
   return (
-    <div className="space-y-1 rounded-md border border-border-light bg-surface-secondary p-3" data-testid="change-request-field">
+    <div className="space-y-1 rounded-xl border border-border-light bg-surface-secondary p-3" data-testid="change-request-field">
       <Field
         label={t('permits.ui.change_request.label', { defaultValue: 'Approved change request' })}
         hint={t('permits.ui.change_request.hint', {

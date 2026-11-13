@@ -524,7 +524,7 @@ function PhotoGallery({ photos }: { photos: OverlayPhoto[] }) {
       <ul className="space-y-1.5">
         {photos.map((ph) => (
           <li key={ph.id} className="flex items-start gap-2 text-sm">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
               <Camera size={14} />
             </span>
             <span className="min-w-0 flex-1">

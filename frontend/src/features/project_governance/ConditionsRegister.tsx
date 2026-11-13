@@ -138,7 +138,7 @@ export function ConditionsRegister({
             const active = action?.id === c.id ? action : null;
             const showWaiverError = active?.kind === 'waive' && tried && !!waiverProblem(text);
             return (
-              <li key={c.id} className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="condition-entry">
+              <li key={c.id} className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="condition-entry">
                 <div className="flex flex-wrap items-center gap-2">
                   <ToneBadge tone={CONDITION_TONE[c.status]}>{vocab(t, CONDITION_STATUS, c.status)}</ToneBadge>
                   <span className="text-xs text-content-tertiary">{vocab(t, SEVERITY, c.severity)}</span>
@@ -184,7 +184,7 @@ export function ConditionsRegister({
                   </div>
                 )}
                 {active && (
-                  <div className="mt-2 space-y-2 rounded-md bg-surface-secondary p-2">
+                  <div className="mt-2 space-y-2 rounded-lg bg-surface-secondary p-2">
                     <textarea
                       rows={2}
                       data-testid="condition-action-text"

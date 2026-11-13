@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Download, MapPin, Trash2, X } from 'lucide-react';
-import { AuthImage, ConfirmDialog } from '@/shared/ui';
+import { AuthImage, Button, ConfirmDialog } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { downloadWithAuth, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -157,14 +157,13 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
               onChange={(e) => setCaption(e.target.value)}
               className="min-w-0 flex-1 oe-input"
             />
-            <button
-              type="button"
+            <Button
+              size="sm"
               onClick={() => save.mutate()}
               disabled={save.isPending || caption === (photo.caption ?? '')}
-              className="rounded bg-oe-blue px-2 py-1 text-xs text-white disabled:opacity-50"
             >
               {t('photoArchive.save')}
-            </button>
+            </Button>
           </div>
         </div>
 

@@ -166,7 +166,7 @@ export function ProfileDialog({
             </span>
           </legend>
           {criteria.length === 0 && (
-            <p className="rounded-md bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="profile-no-criteria">
+            <p className="rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="profile-no-criteria">
               {t('procurement_concept.ui.profile.no_criteria', {
                 defaultValue:
                   'The rule catalogue pinned to this project has no prequalification criteria, so a profile cannot be set up. Pin another catalogue on the Concept record tab, or have criteria added to this one.',
@@ -178,7 +178,7 @@ export function ProfileDialog({
               const picked = chosen.get(c.code);
               const name = catalogueName(labels, 'criterion', c);
               return (
-                <li key={c.code} className="flex flex-wrap items-center gap-3 rounded-md border border-border-light bg-surface-elevated px-3 py-1.5" data-testid="profile-criterion">
+                <li key={c.code} className="flex flex-wrap items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-1.5" data-testid="profile-criterion">
                   <label className="flex min-w-0 flex-1 items-center gap-2 text-sm text-content-primary">
                     <input type="checkbox" checked={!!picked} onChange={() => toggle(c)} />
                     {name}

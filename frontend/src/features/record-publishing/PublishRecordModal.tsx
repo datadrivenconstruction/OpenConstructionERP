@@ -505,7 +505,7 @@ function CopyLinkButton({ url, label }: { url: string; label: string }) {
     <button
       type="button"
       onClick={copy}
-      className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-xs font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue"
     >
       {copied ? (
         <Check size={12} className="text-semantic-success" />

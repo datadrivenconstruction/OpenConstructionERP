@@ -147,8 +147,8 @@ export function SalesVelocity({ developmentId }: SalesVelocityProps) {
               onClick={() => setGranularity(g)}
               className={
                 granularity === g
-                  ? 'rounded-md bg-surface-primary px-2.5 py-1 font-medium shadow-sm'
-                  : 'rounded-md px-2.5 py-1 text-content-tertiary hover:text-content-primary'
+                  ? 'rounded-lg bg-surface-primary px-2.5 py-1 font-medium shadow-sm'
+                  : 'rounded-lg px-2.5 py-1 text-content-tertiary hover:text-content-primary'
               }
             >
               {t(`propdev.dashboards.velocity.gran_${g}`, {

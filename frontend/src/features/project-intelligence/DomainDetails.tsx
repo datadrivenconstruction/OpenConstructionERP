@@ -363,7 +363,7 @@ function DomainContent({
             <button
               key={action.id}
               onClick={() => onAction(action.id)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-content-secondary bg-surface-tertiary border border-border-light rounded-md hover:bg-surface-quaternary transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-content-secondary bg-surface-tertiary border border-border-light rounded-lg hover:bg-surface-quaternary transition-colors"
             >
               <Zap size={12} />
               {action.label}

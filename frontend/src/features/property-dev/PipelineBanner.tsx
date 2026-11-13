@@ -50,7 +50,7 @@ export function PipelineBanner({
           const chip = (
             <span
               className={clsx(
-                'inline-flex items-center rounded-md px-2 py-0.5 font-medium ring-1 ring-inset transition-colors',
+                'inline-flex items-center rounded-lg px-2 py-0.5 font-medium ring-1 ring-inset transition-colors',
                 s.current
                   ? 'bg-oe-blue text-white ring-oe-blue'
                   : s.to
@@ -64,7 +64,7 @@ export function PipelineBanner({
           return (
             <div key={s.label} className="flex items-center gap-1.5">
               {s.to && !s.current ? (
-                <Link to={s.to} className="focus:outline-none focus:ring-2 focus:ring-oe-blue/40 rounded-md">
+                <Link to={s.to} className="focus:outline-none focus:ring-2 focus:ring-oe-blue/40 rounded-lg">
                   {chip}
                 </Link>
               ) : (

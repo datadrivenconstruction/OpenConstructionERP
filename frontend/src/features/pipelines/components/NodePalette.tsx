@@ -191,7 +191,7 @@ export function NodePalette({
             defaultValue: 'Expand palette',
           })}
           onClick={onToggleCollapsed}
-          className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-tertiary"
+          className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-tertiary"
         >
           <ChevronRight size={16} aria-hidden="true" className="rtl:scale-x-[-1]" />
         </button>
@@ -281,9 +281,9 @@ export function NodePalette({
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         {loading ? (
           <div className="space-y-2 px-1 pt-1">
-            <Skeleton className="h-12 w-full rounded-md" />
-            <Skeleton className="h-12 w-full rounded-md" />
-            <Skeleton className="h-12 w-full rounded-md" />
+            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
           </div>
         ) : totalItems === 0 ? (
           <p

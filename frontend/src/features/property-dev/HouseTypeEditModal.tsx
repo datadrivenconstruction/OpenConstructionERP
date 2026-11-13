@@ -773,7 +773,7 @@ export function HouseTypeEditModal({
               </li>
             </ul>
             {(form.typical_price_min || form.typical_price_max) && (
-              <div className="mt-3 rounded-md border border-border-light/60 bg-surface-primary px-2 py-1.5 text-2xs text-content-secondary">
+              <div className="mt-3 rounded-lg border border-border-light/60 bg-surface-primary px-2 py-1.5 text-2xs text-content-secondary">
                 {form.typical_price_min || '—'} – {form.typical_price_max || '—'}{' '}
                 {form.currency || ''}
               </div>

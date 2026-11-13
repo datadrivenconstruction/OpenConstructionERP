@@ -288,7 +288,7 @@ export function PlanRoomViewer({
             onClick={() => onPageChange(Math.max(1, page - 1))}
             disabled={page <= 1}
             aria-label={t('plan_room.prev_page', { defaultValue: 'Previous page' })}
-            className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+            className="rounded-lg p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
           >
             <ChevronLeft size={16} />
           </button>
@@ -300,7 +300,7 @@ export function PlanRoomViewer({
             onClick={() => onPageChange(Math.min(numPages || 1, page + 1))}
             disabled={numPages === 0 || page >= numPages}
             aria-label={t('plan_room.next_page', { defaultValue: 'Next page' })}
-            className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+            className="rounded-lg p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
           >
             <ChevronRight size={16} />
           </button>
@@ -313,7 +313,7 @@ export function PlanRoomViewer({
             onClick={() => setZoomIdx((i) => Math.max(0, i - 1))}
             disabled={zoomIdx <= 0}
             aria-label={t('plan_room.zoom_out', { defaultValue: 'Zoom out' })}
-            className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+            className="rounded-lg p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
           >
             <ZoomOut size={16} />
           </button>
@@ -325,7 +325,7 @@ export function PlanRoomViewer({
             onClick={() => setZoomIdx((i) => Math.min(ZOOM_LEVELS.length - 1, i + 1))}
             disabled={zoomIdx >= ZOOM_LEVELS.length - 1}
             aria-label={t('plan_room.zoom_in', { defaultValue: 'Zoom in' })}
-            className="rounded-md p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
+            className="rounded-lg p-1.5 text-content-secondary hover:bg-surface-secondary disabled:opacity-40"
           >
             <ZoomIn size={16} />
           </button>
@@ -336,7 +336,7 @@ export function PlanRoomViewer({
         {canWrite ? (
           <div className="ml-auto flex min-w-0 items-center gap-2">
             {placing ? (
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue/10 px-2 py-1 text-xs font-medium text-oe-blue">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue/10 px-2 py-1 text-xs font-medium text-oe-blue">
                 <Crosshair size={14} />
                 {t('plan_room.click_to_place', { defaultValue: 'Click the drawing to drop a pin' })}
                 <button
@@ -368,7 +368,7 @@ export function PlanRoomViewer({
             )}
           </div>
         ) : (
-          <span className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-surface-secondary px-2 py-1 text-xs text-content-secondary">
             <Lock size={14} className="shrink-0" />
             {t('plan_room.view_only', {
               defaultValue: 'View only. You can look at the drawing but not add pins.',

@@ -46,7 +46,7 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
       parts.push(
         <span
           key={key}
-          className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide ${
+          className={`inline-flex items-center rounded-lg px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide ${
             TAG_STYLES[tag] || TAG_STYLES.INFO
           }`}
         >

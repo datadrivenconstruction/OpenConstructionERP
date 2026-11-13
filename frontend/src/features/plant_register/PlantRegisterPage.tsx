@@ -237,7 +237,7 @@ export function PlantRegisterPage() {
     <div className="space-y-5 animate-fade-in" data-testid="plant-register-page">
       {header}
       {readOnly && (
-        <div role="status" data-testid="plant-read-only" className="rounded-md border border-border bg-surface-secondary p-3 text-sm">
+        <div role="status" data-testid="plant-read-only" className="rounded-xl border border-border bg-surface-secondary p-3 text-sm">
           <p className="font-medium text-content-primary">
             {t('plant.page.read_only', { defaultValue: 'You can read the plant register but not change it.' })}
           </p>

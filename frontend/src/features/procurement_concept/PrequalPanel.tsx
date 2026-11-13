@@ -183,7 +183,7 @@ export function PrequalPanel({
       </div>
 
       {confirmed && (
-        <p className="flex items-center gap-2 rounded-md bg-semantic-success-bg px-3 py-2 text-sm text-content-primary" data-testid="shortlist-confirmed">
+        <p className="flex items-center gap-2 rounded-lg bg-semantic-success-bg px-3 py-2 text-sm text-content-primary" data-testid="shortlist-confirmed">
           <CheckCircle2 size={16} className="text-semantic-success" aria-hidden />
           {t('procurement_concept.ui.prequal.confirmed', { defaultValue: 'The short list of this package is confirmed.' })}
         </p>
@@ -200,7 +200,7 @@ export function PrequalPanel({
         />
       ) : (
         <>
-          <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="profile-summary">
+          <section className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="profile-summary">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="oe-card-title">
@@ -472,7 +472,7 @@ export function PrequalPanel({
           )}
 
           {matrix.items.length > 0 && (
-            <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="shortlist-check">
+            <section className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="shortlist-check">
               <h3 className="oe-card-title mb-1">
                 {t('procurement_concept.ui.prequal.check_title', { defaultValue: 'Is the short list ready?' })}
               </h3>

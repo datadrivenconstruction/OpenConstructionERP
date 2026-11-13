@@ -281,14 +281,14 @@ function SavedTab({
                 type="button"
                 onClick={() => handleDelete(p.id)}
                 disabled={deleteMut.isPending}
-                className="rounded-md bg-semantic-error px-2 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
+                className="rounded-lg bg-semantic-error px-2 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
               >
                 {t('common.delete', { defaultValue: 'Delete' })}
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmId(null)}
-                className="rounded-md border border-border px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary"
+                className="rounded-lg border border-border px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary"
               >
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </button>
@@ -302,7 +302,7 @@ function SavedTab({
                 defaultValue: 'Delete {{name}}',
                 name: p.name,
               })}
-              className="rounded-md p-1.5 text-content-quaternary hover:bg-semantic-error-bg hover:text-semantic-error"
+              className="rounded-lg p-1.5 text-content-quaternary hover:bg-semantic-error-bg hover:text-semantic-error"
             >
               <Trash2 size={16} aria-hidden="true" />
             </button>

@@ -142,7 +142,7 @@ export function InspectorPanel({
             defaultValue: 'Expand inspector',
           })}
           onClick={onToggleCollapsed}
-          className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-tertiary"
+          className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-tertiary"
         >
           <ChevronRight
             size={16}
@@ -339,7 +339,7 @@ export function InspectorPanel({
                 type="button"
                 onClick={duplicate}
                 data-testid="pipeline-inspector-duplicate"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-xs font-medium hover:bg-surface-tertiary"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-2.5 py-1.5 text-xs font-medium hover:bg-surface-tertiary"
               >
                 <Copy size={14} aria-hidden="true" />
                 {t('pipeline.inspector.duplicate', {
@@ -350,7 +350,7 @@ export function InspectorPanel({
                 type="button"
                 onClick={() => setConfirmDeleteOpen(true)}
                 data-testid="pipeline-inspector-delete"
-                className="inline-flex items-center gap-1.5 rounded-md border border-semantic-error/40 bg-semantic-error-bg px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-semantic-error/40 bg-semantic-error-bg px-2.5 py-1.5 text-xs font-medium text-semantic-error hover:opacity-90"
               >
                 <Trash2 size={14} aria-hidden="true" />
                 {t('pipeline.inspector.delete', { defaultValue: 'Delete' })}
@@ -401,7 +401,7 @@ export function InspectorPanel({
             </label>
             <div
               data-testid="pipeline-inspector-summary"
-              className="space-y-1.5 rounded-md border border-border-light bg-surface-primary px-3 py-2.5 text-xs text-content-secondary"
+              className="space-y-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 text-xs text-content-secondary"
             >
               {summary ? (
                 summary.split('\n').map((line, i) => (

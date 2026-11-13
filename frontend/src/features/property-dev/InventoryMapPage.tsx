@@ -1003,7 +1003,7 @@ function PlotTile({
       onClick={handleClick}
       onKeyDown={(e) => onKeyDown(e, plot.id)}
       className={clsx(
-        'h-16 w-16 cursor-pointer rounded-md border-2 text-2xs font-medium text-white',
+        'h-16 w-16 cursor-pointer rounded-lg border-2 text-2xs font-medium text-white',
         'flex flex-col items-center justify-center',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1',
         selected && 'ring-2 ring-oe-blue ring-offset-1',
@@ -1034,7 +1034,7 @@ function InventoryMapSkeleton() {
                   {Array.from({ length: 6 }).map((_, c) => (
                     <div
                       key={c}
-                      className="h-16 w-16 animate-pulse rounded-md bg-surface-secondary"
+                      className="h-16 w-16 animate-pulse rounded-lg bg-surface-secondary"
                     />
                   ))}
                 </div>

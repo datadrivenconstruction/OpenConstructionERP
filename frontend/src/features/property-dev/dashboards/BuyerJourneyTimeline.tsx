@@ -106,7 +106,7 @@ export function BuyerJourneyTimeline({
             <button
               type="button"
               onClick={() => onNodeClick?.(ev)}
-              className="flex w-full flex-col items-start gap-0.5 rounded-md px-2 py-1.5 text-left hover:bg-surface-secondary/60 focus:outline-none focus:ring-2 focus:ring-offset-1"
+              className="flex w-full flex-col items-start gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-surface-secondary/60 focus:outline-none focus:ring-2 focus:ring-offset-1"
               aria-label={t('propdev.dashboards.journey.event_label', {
                 defaultValue: '{{label}} ({{state}}) - {{ts}}',
                 label: ev.label,

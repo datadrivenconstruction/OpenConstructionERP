@@ -187,7 +187,7 @@ export function DecisionDialog({
     >
       <div className="space-y-5">
         {(serverError || serverViolations.length > 0) && (
-          <div role="alert" className="rounded-md border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm">
+          <div role="alert" className="rounded-xl border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm">
             {serverError && <p className="font-medium text-content-primary">{serverError}</p>}
             {serverViolations.length > 0 && (
               <ul className="mt-1 list-disc space-y-0.5 pl-5 text-content-secondary">
@@ -203,7 +203,7 @@ export function DecisionDialog({
         )}
 
         {detail.blockers.length > 0 && (
-          <div className="rounded-md border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm">
+          <div className="rounded-xl border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm">
             <p className="font-medium text-content-primary">
               {t('governance.project.decision.open_blockers', {
                 defaultValue: 'This gate has {{count}} open blockers. A plain go is refused until they are resolved or turned into conditions.',
@@ -304,7 +304,7 @@ export function DecisionDialog({
         )}
 
         {missingDocuments.length > 0 && (
-          <div className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3" data-testid="missing-documents">
+          <div className="rounded-xl border border-border-light bg-surface-elevated p-3" data-testid="missing-documents">
             <h3 className="oe-card-title flex items-center gap-2">
               <FileWarning size={16} className="text-[#b45309]" aria-hidden />
               {t('governance.project.decision.missing_documents', { defaultValue: 'Required documents not ready' })}
@@ -364,7 +364,7 @@ export function DecisionDialog({
               </Button>
             </div>
             {draft.conditions.map((c, idx) => (
-              <div key={c.rowId} data-testid="condition-row" className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+              <div key={c.rowId} data-testid="condition-row" className="rounded-xl border border-border-light bg-surface-elevated p-3">
                 <ConditionFields
                   projectId={projectId}
                   value={c}
@@ -390,7 +390,7 @@ export function DecisionDialog({
               </div>
             ))}
             {riskAreas.length > 0 && (
-              <fieldset className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+              <fieldset className="rounded-xl border border-border-light bg-surface-elevated p-3">
                 <legend className="px-1 text-xs font-semibold text-content-secondary">
                   {t('governance.project.decision.proceed_at_risk', {
                     defaultValue: 'Proceed at risk (only areas whose readiness blocks)',
@@ -459,7 +459,7 @@ export function DecisionDialog({
         )}
 
         {naAreas.length > 0 && (
-          <fieldset className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3">
+          <fieldset className="rounded-xl border border-border-light bg-surface-elevated p-3">
             <legend className="px-1 text-xs font-semibold text-content-secondary">
               {t('governance.project.decision.accept_na', {
                 defaultValue: 'Accept as not applicable',

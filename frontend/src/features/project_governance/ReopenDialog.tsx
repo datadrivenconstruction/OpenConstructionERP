@@ -81,7 +81,7 @@ export function ReopenDialog({
     >
       <div className="space-y-4">
         {serverError && (
-          <div role="alert" className="rounded-md border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-content-primary">
+          <div role="alert" className="rounded-xl border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-content-primary">
             {serverError}
           </div>
         )}
@@ -119,7 +119,7 @@ export function ReopenDialog({
           )}
         </div>
 
-        <div className="rounded-lg border border-border bg-surface-elevated shadow-sm p-3 text-sm" data-testid="reopen-rewind" data-rewind={rewind ? 'forced' : 'none'}>
+        <div className="rounded-xl border border-border-light bg-surface-elevated p-3 text-sm" data-testid="reopen-rewind" data-rewind={rewind ? 'forced' : 'none'}>
           <p className="font-medium text-content-primary">
             {rewind
               ? t('governance.project.reopen.rewind_forced', {
