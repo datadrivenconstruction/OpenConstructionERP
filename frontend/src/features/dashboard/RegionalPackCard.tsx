@@ -52,6 +52,7 @@ import {
 import { SUPPORTED_LANGUAGES, normalizePackLocale } from '@/app/i18n';
 import { CountryFlag, Skeleton } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { packCountryCode, packNameSlug } from '@/shared/lib/regionalPack';
 import { ruleSetLabel } from '@/features/validation/ruleSetLabels';
 
@@ -117,7 +118,10 @@ export function validationSummary(ruleSets: readonly string[]): {
 export function RegionalPackCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isLoading, isError, refetch } = usePartnerPack();
+  // The open project's own market pack: a Riyadh project shows the Saudi pack
+  // even when the install applied another one, or none.
+  const projectId = useProjectContextStore((s) => s.activeProjectId);
+  const { data, isLoading, isError, refetch } = usePartnerPack(projectId);
   const [rulesOpen, setRulesOpen] = useState(false);
 
   // The card's own skeleton, in the card's own frame. Returning null here left

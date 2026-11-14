@@ -10,6 +10,8 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
 import { setActiveUnitsSystem, type UnitsSystem } from '@/features/boq/boqHelpers';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { withProjectMarket } from './logic';
 
 export interface MarketEntry {
   country: string;
@@ -69,6 +71,28 @@ export function useMarketScope(enabled = true, projectId?: string | null) {
     enabled,
     staleTime: 60 * 1000,
   });
+}
+
+/**
+ * The tenant's scope widened by the open project's market (see
+ * `withProjectMarket`). Menus and cards that follow "where am I working" read
+ * this, so a demo or a project abroad shows its own market's screens. A
+ * project the reader cannot open falls back to the tenant scope.
+ */
+export function useWorkspaceMarketScope(enabled = true) {
+  const projectId = useProjectContextStore((s) => s.activeProjectId);
+  const tenant = useMarketScope(enabled);
+  const project = useQuery({
+    queryKey: [...MARKET_QUERY_KEY, projectId ?? null],
+    queryFn: () => fetchMarketScope(projectId),
+    enabled: enabled && !!projectId,
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+  return {
+    data: withProjectMarket(tenant.data, projectId ? project.data : undefined),
+    isLoading: tenant.isLoading,
+  };
 }
 
 /**

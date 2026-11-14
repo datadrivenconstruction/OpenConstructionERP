@@ -59,3 +59,26 @@ export function isCountryInScope(code: string, scope: MarketScope | undefined): 
   if (!Array.isArray(markets) || markets.length === 0 || scope?.all_markets || markets.includes('*')) return true;
   return markets.includes(code.toUpperCase());
 }
+
+/**
+ * The tenant's scope widened by the open project's market. A project abroad
+ * shows its own market's screens (a Riyadh project shows the Saudi ones under a
+ * German profile) without hiding the tenant's: a module is hidden only when
+ * both scopes hide it. Without a project scope the tenant scope is returned.
+ */
+export function withProjectMarket(
+  tenant: MarketScope | undefined,
+  project: MarketScope | undefined,
+): MarketScope | undefined {
+  if (!tenant || !project) return tenant;
+  const union = (a: string[] | undefined, b: string[] | undefined) => [...new Set([...(a ?? []), ...(b ?? [])])];
+  const projectHidden = new Set(project.hidden_modules ?? []);
+  return {
+    ...tenant,
+    markets: union(tenant.markets, project.markets),
+    expanded_markets: union(tenant.expanded_markets, project.expanded_markets),
+    all_markets: tenant.all_markets || project.all_markets,
+    hidden_modules: (tenant.hidden_modules ?? []).filter((m) => projectHidden.has(m)),
+    packs: union(tenant.packs, project.packs),
+  };
+}
