@@ -13,7 +13,8 @@ import { ArrowRight, Check, Globe, SlidersHorizontal, Sparkles } from 'lucide-re
 import { ACCENT_SWATCH, FONT_STACK, type Accent } from '@/shared/lib/appearance';
 import { DEMO_PROFILES, type DemoProfile } from '@/shared/lib/demoProfiles';
 import { fmtNumber } from '@/shared/lib/formatters';
-import { navGroups } from '@/app/layout/navCatalog';
+import { demoSectionCount } from '@/shared/lib/useDemoModules';
+import { canonicalGroupId, navGroups } from '@/app/layout/navCatalog';
 import { DemoMarketSwitch, useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
 import { HexMark, type HexBuildingKind } from '@/shared/ui/HexMark';
 import { companyThumbFor } from '@/features/cases/caseFaces';
@@ -69,7 +70,8 @@ const MAX_CHIPS = 5;
 function SectionChips({ profile }: { profile: DemoProfile }) {
   const { t } = useTranslation();
   if (!profile.groups) return null;
-  const own = profile.groups.filter((g) => !BASE_GROUPS.has(g));
+  // Folded section ids name the group that holds their rows now; list each once.
+  const own = [...new Set(profile.groups.map(canonicalGroupId))].filter((g) => !BASE_GROUPS.has(g));
   const shown = own.slice(0, MAX_CHIPS);
   const rest = own.length - shown.length;
   return (
@@ -98,10 +100,9 @@ function SectionChips({ profile }: { profile: DemoProfile }) {
 function DemoCard({ profile, featured = false }: { profile: DemoProfile; featured?: boolean }) {
   const { t } = useTranslation();
   const { bySlug, open } = useDemoProjects();
-  const allSections = navGroups.length;
   const accent = ACCENT_SWATCH[profile.appearance.accent];
   const ink = { '--demo-ink': accent, '--demo-ink-dark': ACCENT_TEXT_DARK[profile.appearance.accent] } as CSSProperties;
-  const sections = profile.groups ? profile.groups.length : allSections;
+  const { shown: sections, total: allSections } = demoSectionCount(profile);
   const list = [1, 2, 3].map((i) => t(`${profile.stem}.point_${i}`));
   const face = demoFaceFor(profile.slug);
   return (

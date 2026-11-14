@@ -127,9 +127,10 @@ describe('the Learn card', () => {
 
     const firstLinks = within(nav())
       .getAllByRole('link')
-      .slice(0, 5)
+      .slice(0, 6)
       .map((a) => a.getAttribute('href'));
-    expect(firstLinks).toEqual(['/videos', '/courses', '/cases', '/packs', '/boq']);
+    // The assistant entry sits between Learn and Pinned.
+    expect(firstLinks).toEqual(['/videos', '/courses', '/cases', '/packs', '/chat', '/boq']);
   });
 
   it('marks Packs as the current page on a single pack too', () => {

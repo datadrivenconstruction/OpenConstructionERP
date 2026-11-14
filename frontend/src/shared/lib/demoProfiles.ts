@@ -7,6 +7,7 @@
  */
 
 import type { Appearance } from './appearance';
+import { canonicalGroupId } from '@/app/layout/navCatalog';
 
 export type DemoSlug =
   | 'full-showcase-riyadh'
@@ -24,7 +25,8 @@ export type DemoMenuStyle = (typeof MENU_STYLES)[number];
 export interface DemoProfile {
   slug: DemoSlug;
   appearance: Appearance;
-  /** Menu sections shown for this demo; null means every section. */
+  /** Menu sections shown for this demo; null means every section. Folded
+   *  section ids still work (see `canonicalGroupId`). */
   groups: readonly string[] | null;
   /** Sidebar style that sets this demo apart from the others. */
   menuStyle: DemoMenuStyle;
@@ -203,7 +205,7 @@ export function demoModuleRoutes(
   profile: DemoProfile,
   groups: readonly { id: string; items: readonly { to: string }[] }[],
 ): string[] {
-  const keep = profile.groups ? new Set(profile.groups) : null;
+  const keep = profile.groups ? new Set(profile.groups.map(canonicalGroupId)) : null;
   return groups.filter((g) => !keep || keep.has(g.id)).flatMap((g) => g.items.map((i) => i.to));
 }
 
