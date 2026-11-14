@@ -81887,7 +81887,8 @@
           "method": "GET",
           "path": "/categories/",
           "handler": "list_categories",
-          "response_model": "list[str]"
+          "response_model": "list[str]",
+          "request_schema": "CostCatalogService"
         },
         {
           "method": "GET",
@@ -116087,6 +116088,7 @@
       ],
       "import_dependencies": [
         "einvoice",
+        "einvoice_zatca",
         "finance",
         "projects"
       ]
@@ -253711,6 +253713,7 @@
         "constraints.py",
         "diff_engine.py",
         "events.py",
+        "evm_demo.py",
         "evm_math.py",
         "evm_snapshot_math.py",
         "evm_snapshot_models.py",
@@ -257473,6 +257476,7 @@
         "collaboration_locks",
         "contacts",
         "contracts",
+        "costmodel",
         "documents",
         "eac",
         "projects",
@@ -296186,6 +296190,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "service.py",
         "source_owners.py",
         "validators.py"
@@ -296194,7 +296199,7 @@
         "name": "oe_tax_withholding",
         "version": "1.0.0",
         "display_name": "Withholding Tax",
-        "description": "Statutory construction withholding tax and VAT reverse charge. The payer deducts tax from a subcontractor and remits it to the state (UK CIS, German Bauabzugsteuer, Irish RCT, Italian ritenuta d'acconto, US backup withholding), and on a reverse-charge supply the buyer accounts for the VAT so the invoice must carry the statutory wording and no VAT amount.",
+        "description": "Statutory construction withholding tax and VAT reverse charge. The payer deducts tax from a subcontractor and remits it to the state (UK CIS, German Bauabzugsteuer, Irish RCT, Italian ritenuta d'acconto, US backup withholding, Saudi withholding on non-residents), and on a reverse-charge supply the buyer accounts for the VAT so the invoice must carry the statutory wording and no VAT amount.",
         "author": "OpenConstructionERP Core Team",
         "category": "core",
         "depends": [
@@ -298689,7 +298694,9 @@
           ]
         }
       ],
-      "import_dependencies": []
+      "import_dependencies": [
+        "projects"
+      ]
     },
     {
       "module_id": "teams",
@@ -315638,10 +315645,10 @@
     },
     {
       "name": "cases",
-      "ts_files": 386,
+      "ts_files": 385,
       "css_files": 0,
       "test_files": 25,
-      "total_files": 409
+      "total_files": 408
     },
     {
       "name": "catalog",
@@ -315834,10 +315841,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 49,
+      "ts_files": 51,
       "css_files": 0,
-      "test_files": 21,
-      "total_files": 49
+      "test_files": 22,
+      "total_files": 51
     },
     {
       "name": "credentials",
@@ -315918,10 +315925,10 @@
     },
     {
       "name": "demo",
-      "ts_files": 2,
+      "ts_files": 3,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 2
+      "total_files": 3
     },
     {
       "name": "design-options",
@@ -315967,10 +315974,10 @@
     },
     {
       "name": "dwg-takeoff",
-      "ts_files": 56,
+      "ts_files": 58,
       "css_files": 0,
-      "test_files": 20,
-      "total_files": 56
+      "test_files": 21,
+      "total_files": 58
     },
     {
       "name": "eac",
@@ -317066,10 +317073,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 46,
+      "ts_files": 48,
       "css_files": 0,
       "test_files": 13,
-      "total_files": 46
+      "total_files": 48
     },
     {
       "name": "voice",
@@ -317810,6 +317817,7 @@
     "einvoice": [],
     "einvoice_clearance": [
       "einvoice",
+      "einvoice_zatca",
       "finance",
       "projects"
     ],
@@ -318706,6 +318714,7 @@
       "collaboration_locks",
       "contacts",
       "contracts",
+      "costmodel",
       "documents",
       "eac",
       "projects",
@@ -318980,9 +318989,9 @@
     "total_relationships": 261,
     "total_routes": 5218,
     "total_schemas": 4735,
-    "total_python_files": 3357,
+    "total_python_files": 3359,
     "frontend_features": 238,
-    "frontend_ts_files": 4187,
+    "frontend_ts_files": 4193,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
