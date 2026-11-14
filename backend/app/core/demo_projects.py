@@ -24,6 +24,7 @@ from sqlalchemy import delete, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
+from app.core.demo_locale_text import authority_text, generated_text, language_of, localise
 from app.core.demo_resource_names import resource_name
 from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS
 from app.core.demo_tender_scopes import (
@@ -5694,6 +5695,10 @@ def _generate_module_data(
     proj = template.project_name
     months = max(int(template.total_months or 12), 1)
 
+    def _t(key: str, **values: object) -> str:
+        """The generated wording ``key`` in the project's language (English by default)."""
+        return generated_text(template.locale, key, **values)
+
     def _d(days: int) -> str:
         return (base + timedelta(days=days)).strftime("%Y-%m-%d")
 
@@ -5726,33 +5731,33 @@ def _generate_module_data(
     contacts: list[dict] = [
         {
             "contact_type": "client",
-            "company_name": client_name or f"{proj} Client",
-            "first_name": "Project",
-            "last_name": "Owner",
+            "company_name": client_name or _t("contact_client_name", proj=proj),
+            "first_name": _t("contact_client_first"),
+            "last_name": _t("contact_client_last"),
             "primary_email": _email_for(client_name, "contact") if client_name else "owner@client.example",
             "primary_phone": "",
             "country_code": cc,
-            "notes": "Client / employer representative",
+            "notes": _t("contact_client_notes"),
         },
         {
             "contact_type": "consultant",
-            "company_name": architect_name or "Lead Architects",
-            "first_name": "Lead",
-            "last_name": "Architect",
+            "company_name": architect_name or _t("contact_architect_name"),
+            "first_name": _t("contact_architect_first"),
+            "last_name": _t("contact_architect_last"),
             "primary_email": _email_for(architect_name, "architect"),
             "primary_phone": "",
             "country_code": cc,
-            "notes": "Architect of record",
+            "notes": _t("contact_architect_notes"),
         },
         {
             "contact_type": "consultant",
-            "company_name": structural_name or "Structural Engineering Partners",
-            "first_name": "Structural",
-            "last_name": "Engineer",
+            "company_name": structural_name or _t("contact_structural_name"),
+            "first_name": _t("contact_structural_first"),
+            "last_name": _t("contact_structural_last"),
             "primary_email": _email_for(structural_name, "structures"),
             "primary_phone": "",
             "country_code": cc,
-            "notes": "Structural engineer",
+            "notes": _t("contact_structural_notes"),
         },
     ]
     # E-invoice showcase: the client contact doubles as the buyer of the
@@ -5770,12 +5775,12 @@ def _generate_module_data(
             {
                 "contact_type": "consultant",
                 "company_name": mep_name,
-                "first_name": "MEP",
-                "last_name": "Engineer",
+                "first_name": _t("contact_mep_first"),
+                "last_name": _t("contact_mep_last"),
                 "primary_email": _email_for(mep_name, "mep"),
                 "primary_phone": "",
                 "country_code": cc,
-                "notes": "MEP / building services engineer",
+                "notes": _t("contact_mep_notes"),
             }
         )
     if qs_name:
@@ -5783,12 +5788,12 @@ def _generate_module_data(
             {
                 "contact_type": "consultant",
                 "company_name": qs_name,
-                "first_name": "Quantity",
-                "last_name": "Surveyor",
+                "first_name": _t("contact_qs_first"),
+                "last_name": _t("contact_qs_last"),
                 "primary_email": _email_for(qs_name, "qs"),
                 "primary_phone": "",
                 "country_code": cc,
-                "notes": "Cost consultant / quantity surveyor",
+                "notes": _t("contact_qs_notes"),
             }
         )
     # Unconditional, where this used to be written only when the template named
@@ -5798,17 +5803,17 @@ def _generate_module_data(
     # at. Without this row office-frankfurt seeded a main contract with no
     # counterparty and a punch list that read Unassigned on every line, which is
     # how the gap was found. Same reasoning as the authority contact below.
-    contractor_name = main_contractor_name or "Principal Contractor"
+    contractor_name = main_contractor_name or _t("contact_contractor_name")
     contacts.append(
         {
             "contact_type": "contractor",
             "company_name": contractor_name,
-            "first_name": "Project",
-            "last_name": "Director",
+            "first_name": _t("contact_contractor_first"),
+            "last_name": _t("contact_contractor_last"),
             "primary_email": _email_for(contractor_name, "contact"),
             "primary_phone": "",
             "country_code": cc,
-            "notes": "Main contractor",
+            "notes": _t("contact_contractor_notes"),
         }
     )
     for i, (company, email) in enumerate(firms[:3]):
@@ -5816,12 +5821,12 @@ def _generate_module_data(
             {
                 "contact_type": "subcontractor",
                 "company_name": company,
-                "first_name": "Site",
-                "last_name": "Manager",
+                "first_name": _t("contact_sub_first"),
+                "last_name": _t("contact_sub_last"),
                 "primary_email": email or _email_local(company, i),
                 "primary_phone": "",
                 "country_code": cc,
-                "notes": f"{trades[i][1] if i < len(trades) else 'Works'} subcontractor",
+                "notes": _t("contact_sub_notes", trade=trades[i][1] if i < len(trades) else _t("works")),
             }
         )
 
@@ -5837,32 +5842,35 @@ def _generate_module_data(
         {
             "contact_type": "authority",
             "company_name": (
-                f"{authority_city} Building Control Office" if authority_city else "Local Building Control Office"
+                _t("contact_authority_name", city=authority_city)
+                if authority_city
+                else _t("contact_authority_name_default")
             ),
-            "first_name": "Building",
-            "last_name": "Inspector",
+            "first_name": _t("contact_authority_first"),
+            "last_name": _t("contact_authority_last"),
             "primary_email": f"permits@{authority_slug or 'buildingcontrol'}.example",
             "primary_phone": "",
             "country_code": cc,
-            "notes": "Permitting and inspection authority",
+            "notes": _t("contact_authority_notes"),
         }
     )
 
     # ── Tasks (8-12 across the timeline) ─────────────────────────────────
     task_seeds = [
-        ("task", "Mobilise site and establish welfare facilities", "open", "high", 7),
-        ("task", "Confirm building permit / authority approvals", "in_progress", "high", 14),
-        ("task", "Issue procurement schedule for long-lead items", "in_progress", "high", 21),
-        ("task", "Set up document control and CDE structure", "completed", "normal", 5),
-        ("task", "Baseline programme review with main contractor", "open", "normal", 28),
-        ("topic", "Health & safety induction plan", "in_progress", "high", 10),
-        ("task", "Quality control plan and inspection hold-points", "open", "normal", 35),
-        ("task", "Coordinate temporary works design", "open", "normal", 42),
-        ("task", "Submit insurance and bonds to client", "completed", "high", 12),
-        ("task", "Agree progress claim / valuation cycle", "open", "normal", 30),
+        ("task", 0, "open", "high", 7),
+        ("task", 1, "in_progress", "high", 14),
+        ("task", 2, "in_progress", "high", 21),
+        ("task", 3, "completed", "normal", 5),
+        ("task", 4, "open", "normal", 28),
+        ("topic", 5, "in_progress", "high", 10),
+        ("task", 6, "open", "normal", 35),
+        ("task", 7, "open", "normal", 42),
+        ("task", 8, "completed", "high", 12),
+        ("task", 9, "open", "normal", 30),
     ]
     tasks: list[dict] = []
-    for i, (ttype, title, status, prio, day) in enumerate(task_seeds):
+    for i, (ttype, title_n, status, prio, day) in enumerate(task_seeds):
+        title = _t(f"task_{title_n}")
         # Anchor a few tasks to a real trade for project flavour.
         if i < len(trades) and trades[i][1]:
             title = f"{title} ({trades[i][1]})"
@@ -5870,7 +5878,7 @@ def _generate_module_data(
             {
                 "task_type": ttype,
                 "title": title,
-                "description": f"{title} for {proj}.",
+                "description": _t("task_description", title=title, proj=proj),
                 "status": status,
                 "priority": prio,
                 "due_date": _d(day),
@@ -5884,21 +5892,10 @@ def _generate_module_data(
         code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
         firm = firms[i % len(firms)][0]
         answered = i % 2 == 0
-        # A German template gets its RFIs worded in German, as its cost-plan suffix is.
-        if (template.locale or "").lower().startswith("de"):
-            subject = f"{trade} - Klärung zu {item or 'Leistungsumfang'}"
-            question = (
-                f"Bitte das Detail zu '{item or trade}' in Abschnitt {code or trade} klären. "
-                f"Abstimmung mit {firm} vor der Vergabe erforderlich."
-            )
-            response = f"Vorgehen für {trade} bestätigt. Überarbeitetes Detail an {firm} übermittelt."
-        else:
-            subject = f"{trade} - clarification on {item or 'scope'}"
-            question = (
-                f"Please clarify the detail for '{item or trade}' in section {code or trade}. "
-                f"Coordination required with {firm} before procurement."
-            )
-            response = f"Confirmed approach for {trade}. Revised detail issued to {firm}."
+        # Worded in the project's own language, as its cost-plan suffix is.
+        subject = _t("rfi_subject", trade=trade, item=item or _t("rfi_scope"))
+        question = _t("rfi_question", item=item or trade, code=code or trade, firm=firm)
+        response = _t("rfi_response", trade=trade, firm=firm)
         rfis.append(
             {
                 "rfi_number": f"RFI-{i + 1:03d}",
@@ -5914,24 +5911,30 @@ def _generate_module_data(
         )
 
     # ── Meetings (4-5) ───────────────────────────────────────────────────
-    firm_attendees = [{"name": f"{c} rep", "company": c, "status": "present"} for c, _ in firms[:3]]
+    firm_attendees = [
+        {"name": _t("meeting_attendee", company=c), "company": c, "status": "present"} for c, _ in firms[:3]
+    ]
     # First column is the meetings module's own type. It offers kickoff, design,
     # progress, safety, subcontractor, closeout and commercial, so the kick-off,
     # the weeklies and the cost review each say which they are instead of all
     # reading "site".
     meeting_titles = [
-        ("kickoff", "Project kick-off meeting", "completed", 0),
-        ("progress", "Weekly progress meeting #1", "completed", 7),
-        ("design", "Design coordination workshop", "completed", 14),
-        ("progress", "Weekly progress meeting #2", "scheduled", 21),
-        ("commercial", "Commercial / cost review", "scheduled", 35),
+        ("kickoff", 0, "completed", 0),
+        ("progress", 1, "completed", 7),
+        ("design", 2, "completed", 14),
+        ("progress", 3, "scheduled", 21),
+        ("commercial", 4, "scheduled", 35),
     ]
     meetings: list[dict] = []
-    for i, (mtype, title, status, day) in enumerate(meeting_titles):
+    for i, (mtype, title_n, status, day) in enumerate(meeting_titles):
+        title = _t(f"meeting_{title_n}")
         agenda = [
-            {"number": "1", "topic": "Programme and progress review"},
-            {"number": "2", "topic": f"{trades[i % len(trades)][1] if trades else 'Works'} update"},
-            {"number": "3", "topic": "HSE and quality status"},
+            {"number": "1", "topic": _t("meeting_agenda_0")},
+            {
+                "number": "2",
+                "topic": _t("meeting_agenda_1", trade=trades[i % len(trades)][1] if trades else _t("works")),
+            },
+            {"number": "3", "topic": _t("meeting_agenda_2")},
         ]
         meetings.append(
             {
@@ -5939,18 +5942,18 @@ def _generate_module_data(
                 "meeting_type": mtype,
                 "title": title,
                 "meeting_date": _d(day),
-                "location": "Site office",
+                "location": _t("meeting_location"),
                 "status": status,
                 "attendees": firm_attendees,
                 "agenda_items": agenda,
                 "action_items": [
                     {
-                        "description": "Distribute minutes and update action log",
+                        "description": _t("meeting_action"),
                         "due_date": _d(day + 3),
                         "status": "open" if status != "completed" else "completed",
                     }
                 ],
-                "minutes": "Progress on track; actions assigned." if status == "completed" else None,
+                "minutes": _t("meeting_minutes") if status == "completed" else None,
             }
         )
 
@@ -5975,38 +5978,20 @@ def _generate_module_data(
     # so no two projects can collide by construction. Ranking is over the sorted
     # ids, so it does not move when the template literal is reordered, and it is
     # stable across re-seeds of one build.
+    # (type, severity); the title and root cause of entry ``n`` are the table keys ``incident_n`` and
+    # ``incident_cause_n``.
     incident_pool = [
-        ("near_miss", "moderate", "Near miss - material fell from height", "Edge protection gap"),
-        ("injury", "minor", "Minor hand laceration during handling", "Cut-resistant gloves not worn"),
-        ("near_miss", "moderate", "Plant / pedestrian near miss in laydown area", "Segregation not enforced"),
-        ("property_damage", "minor", "Temporary services strike during excavation", "Service scan not refreshed"),
-        (
-            "near_miss",
-            "major",
-            "Load swung outside the exclusion zone during a lift",
-            "Lift plan not re-briefed after the crane moved",
-        ),
-        ("injury", "minor", "Eye irritation from airborne dust", "Water suppression not connected before cutting"),
-        (
-            "property_damage",
-            "moderate",
-            "Stacked materials toppled in high wind",
-            "Stack height above the method statement limit",
-        ),
-        (
-            "environmental",
-            "minor",
-            "Silt-laden runoff reached the site drain",
-            "Bunding not reinstated after the pour",
-        ),
-        ("injury", "moderate", "Slip on a wet access ramp", "Ramp left uncovered after the wash-down"),
-        (
-            "fire",
-            "minor",
-            "Smouldering waste bin beside hot works",
-            "Fire watch stood down before the cooling period ended",
-        ),
-        ("near_miss", "minor", "Scaffold board dislodged underfoot", "Board not clipped after an inspection"),
+        ("near_miss", "moderate"),
+        ("injury", "minor"),
+        ("near_miss", "moderate"),
+        ("property_damage", "minor"),
+        ("near_miss", "major"),
+        ("injury", "minor"),
+        ("property_damage", "moderate"),
+        ("environmental", "minor"),
+        ("injury", "moderate"),
+        ("fire", "minor"),
+        ("near_miss", "minor"),
     ]
     known = sorted(DEMO_TEMPLATES)
     # An id outside the shipped estate still has to land somewhere, so it falls
@@ -6019,7 +6004,8 @@ def _generate_module_data(
     )
     offset = rank % len(incident_pool)
     step = 1 + (rank // len(incident_pool)) % (len(incident_pool) - 1)
-    incident_seeds = [incident_pool[(offset + k * step) % len(incident_pool)] for k in range(4)]
+    incident_picks = [(offset + k * step) % len(incident_pool) for k in range(4)]
+    incident_seeds = [(*incident_pool[n], _t(f"incident_{n}"), _t(f"incident_cause_{n}")) for n in incident_picks]
     safety_incidents: list[dict] = []
     for i, (itype, sev, title, cause) in enumerate(incident_seeds):
         # The most recent incident is still under investigation and the one
@@ -6033,18 +6019,18 @@ def _generate_module_data(
                 "incident_number": f"INC-{i + 1:03d}",
                 "title": title,
                 "incident_date": _d(10 + i * 9),
-                "location": f"{trades[i % len(trades)][1] if trades else 'Site'} area",
+                "location": _t("incident_location", trade=trades[i % len(trades)][1] if trades else _t("site")),
                 "incident_type": itype,
                 "severity": sev,
-                "description": f"{title} during {trades[i % len(trades)][1].lower() if trades else 'works'}.",
+                "description": _t(
+                    "incident_description",
+                    title=title,
+                    trade=trades[i % len(trades)][1].lower() if trades else _t("works").lower(),
+                ),
                 "root_cause": None if last else cause,
                 "corrective_actions": [
                     {
-                        "description": (
-                            "Toolbox talk and re-brief affected crew"
-                            if not last
-                            else "Investigation under way, actions to follow"
-                        ),
+                        "description": _t("incident_action_open" if last else "incident_action_done"),
                         "due_date": _d(13 + i * 9),
                         "status": "completed" if not (last or pending) else "open" if last else "in_progress",
                     }
@@ -6066,15 +6052,16 @@ def _generate_module_data(
     # observation register shows nothing to act on, and the whole point of the
     # register is what is still outstanding.
     obs_seeds = [
-        ("unsafe_condition", 4, 3, "closed", "Scaffold handrail incomplete on working platform"),
-        ("unsafe_act", 3, 4, "closed", "Operative without eye protection during cutting"),
-        ("unsafe_condition", 3, 2, "closed", "Access route partially blocked by stored materials"),
-        ("unsafe_condition", 4, 3, "in_progress", "Unprotected slab edge at leading edge of works"),
-        ("unsafe_condition", 2, 3, "open", "Dust generation during dry cutting"),
-        ("positive", 1, 1, "closed", "Good practice - full PPE and clean work area observed"),
+        ("unsafe_condition", 4, 3, "closed"),
+        ("unsafe_act", 3, 4, "closed"),
+        ("unsafe_condition", 3, 2, "closed"),
+        ("unsafe_condition", 4, 3, "in_progress"),
+        ("unsafe_condition", 2, 3, "open"),
+        ("positive", 1, 1, "closed"),
     ]
     safety_observations: list[dict] = []
-    for i, (otype, sev, lik, ostatus, desc) in enumerate(obs_seeds):
+    for i, (otype, sev, lik, ostatus) in enumerate(obs_seeds):
+        desc = _t(f"observation_{i}")
         positive = otype == "positive"
         done = ostatus == "closed"
         safety_observations.append(
@@ -6082,18 +6069,18 @@ def _generate_module_data(
                 "observation_number": f"OBS-{i + 1:03d}",
                 "observation_type": otype,
                 "description": desc,
-                "location": f"{trades[i % len(trades)][1] if trades else 'Site'} zone",
+                "location": _t("observation_location", trade=trades[i % len(trades)][1] if trades else _t("site")),
                 "severity": sev,
                 "likelihood": lik,
-                "immediate_action": None if positive else "Corrected on the spot",
+                "immediate_action": None if positive else _t("observation_immediate"),
                 # An outstanding observation names what is still to be done
                 # rather than reporting it as already done.
                 "corrective_action": (
                     None
                     if positive
-                    else "Re-brief crew and add to inspection checklist"
+                    else _t("observation_corrective_done")
                     if done
-                    else "Awaiting re-inspection before the entry can be closed"
+                    else _t("observation_corrective_open")
                 ),
                 "status": ostatus,
             }
@@ -6103,22 +6090,26 @@ def _generate_module_data(
     inspections: list[dict] = []
     insp_n = min(max(len(trades), 8), 10)
     for i in range(insp_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
         done = i % 3 != 2
         inspections.append(
             {
                 "inspection_number": f"INS-{i + 1:03d}",
                 "inspection_type": "general",
-                "title": f"{trade} inspection",
-                "description": f"Hold-point inspection for {item or trade} (section {code or trade}).",
-                "location": f"{trade} area",
+                "title": _t("inspection_title", trade=trade),
+                "description": _t("inspection_description", item=item or trade, code=code or trade),
+                "location": _t("inspection_location", trade=trade),
                 "status": "completed" if done else "scheduled",
                 "result": "pass" if done else None,
                 "inspection_date": _d(20 + i * 7),
                 "checklist_data": [
-                    {"id": "1", "category": "Pre-work", "question": "Approved materials on site?", "response": "yes"},
-                    {"id": "2", "category": "Workmanship", "question": "Work to specification?", "response": "yes"},
-                    {"id": "3", "category": "Records", "question": "Test records complete?", "response": "yes"},
+                    {
+                        "id": str(n + 1),
+                        "category": _t(f"inspection_cat_{n}"),
+                        "question": _t(f"inspection_q_{n}"),
+                        "response": "yes",
+                    }
+                    for n in range(3)
                 ],
             }
         )
@@ -6127,7 +6118,7 @@ def _generate_module_data(
     invoices: list[dict] = []
     inv_n = min(max(len(trades), 6), 8)
     for i in range(inv_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
         firm = firms[i % len(firms)][0]
         # Derive a plausible amount from the section's priced items.
         amount = 0.0
@@ -6150,7 +6141,7 @@ def _generate_module_data(
                 "due_date": _d(60 + i * 25),
                 "currency_code": cur,
                 "status": status,
-                "notes": f"{firm} - interim valuation, {trade}",
+                "notes": _t("invoice_notes", firm=firm, trade=trade),
                 "retention_pct": 5,
                 # The issuing firm, so the insert can link the invoice to the
                 # subcontractor contact seeded from the same tender list
@@ -6158,7 +6149,7 @@ def _generate_module_data(
                 "counterparty_company": firm,
                 "line_items": [
                     {
-                        "description": f"{item or trade} - works to date",
+                        "description": _t("invoice_line", item=item or trade),
                         "quantity": "1",
                         "unit": "lsum",
                         "unit_rate": f"{amount:.2f}",
@@ -6198,7 +6189,7 @@ def _generate_module_data(
                     ei_row.get("line_items")
                     or [
                         {
-                            "description": "Interim application for works executed to date",
+                            "description": _t("invoice_receivable_line"),
                             "quantity": "1",
                             "unit": "lsum",
                             "unit_rate": f"{first_amount:.2f}",
@@ -6255,37 +6246,38 @@ def _generate_module_data(
     # generic project hands over with. An empty filter option is a true answer
     # and does not want filling with an invented remark.
     punch_templates = [
-        ("Touch-up required to finished surface", "low", "finishing"),
-        ("Sealant defect at junction to be redone", "medium", "exterior"),
-        ("Minor crack to be monitored / filled", "medium", "structural"),
-        ("Service penetration not fully sealed", "high", "fire_safety"),
-        ("Fixing/bracket missing - to be installed", "medium", "mechanical"),
-        ("Damaged finish to be replaced", "low", "finishing"),
-        ("Snag - door/ironmongery adjustment", "low", "architectural"),
-        ("Leak at connection - retighten and test", "medium", "plumbing"),
-        ("Alignment/level out of tolerance", "medium", "structural"),
-        ("Cleaning required before handover", "low", "general"),
-        ("Paint defect on wall surface", "low", "finishing"),
-        ("Missing label / signage", "low", "general"),
-        ("Tile lippage exceeds tolerance", "medium", "finishing"),
-        ("Loose handrail fixing", "high", "architectural"),
-        ("Incomplete grout to wet area", "medium", "finishing"),
+        ("low", "finishing"),
+        ("medium", "exterior"),
+        ("medium", "structural"),
+        ("high", "fire_safety"),
+        ("medium", "mechanical"),
+        ("low", "finishing"),
+        ("low", "architectural"),
+        ("medium", "plumbing"),
+        ("medium", "structural"),
+        ("low", "general"),
+        ("low", "finishing"),
+        ("low", "general"),
+        ("medium", "finishing"),
+        ("high", "architectural"),
+        ("medium", "finishing"),
     ]
     punchlist: list[dict] = []
-    for i, (title, prio, cat) in enumerate(punch_templates):
-        trade = trades[i % len(trades)][1] if trades else "General"
+    for i, (prio, cat) in enumerate(punch_templates):
+        title = _t(f"punch_{i}")
+        trade = trades[i % len(trades)][1] if trades else _t("general")
         status = ("open", "in_progress", "resolved")[i % 3]
         punchlist.append(
             {
                 "title": title,
-                "description": f"{title} - {trade}.",
+                "description": _t("punch_description", title=title, trade=trade),
                 "priority": prio,
                 "status": status,
                 "category": cat,
                 "trade": trade,
                 "location_x": round(0.1 + (i % 9) * 0.1, 2),
                 "location_y": round(0.15 + (i % 7) * 0.1, 2),
-                "resolution_notes": "Rectified and re-checked" if status == "resolved" else None,
+                "resolution_notes": _t("punch_resolution") if status == "resolved" else None,
             }
         )
 
@@ -6298,7 +6290,7 @@ def _generate_module_data(
     # the same word twice.
     conditions = ["clear", "partly_cloudy", "cloudy", "overcast", "fog", "rain"]
     for i in range(fr_n):
-        trade = trades[i % len(trades)][1] if trades else "General works"
+        trade = trades[i % len(trades)][1] if trades else _t("general_works")
         day = round(i * (months * 30) / fr_n) + 3
         delay = i % 5 == 4
         field_reports.append(
@@ -6307,13 +6299,13 @@ def _generate_module_data(
                 "report_type": "daily",
                 "weather_condition": conditions[i % len(conditions)],
                 "temperature_c": float(12 + (i % 12)),
-                "work_performed": f"{trade} progressing as planned. Materials delivered and inspected.",
+                "work_performed": _t("field_work", trade=trade),
                 "workforce": [
                     {"trade": trade, "headcount": 6 + (i % 6), "hours": "9"},
-                    {"trade": "General labor", "headcount": 4, "hours": "8"},
+                    {"trade": _t("field_labour"), "headcount": 4, "hours": "8"},
                 ],
-                "equipment_on_site": ["Tower crane", "Telehandler", "Excavator"],
-                "delays": "Weather delay - works paused" if delay else None,
+                "equipment_on_site": [_t("field_equipment_0"), _t("field_equipment_1"), _t("field_equipment_2")],
+                "delays": _t("field_delay") if delay else None,
                 "delay_hours": 3.0 if delay else 0.0,
                 "status": "approved",
             }
@@ -6343,28 +6335,29 @@ def _generate_module_data(
     ncrs: list[dict] = []
     ncr_n = min(max(len(trades), 4), 6)
     ncr_causes = [
-        ("workmanship", "workmanship", "Work not executed to specification"),
-        ("material", "material_defect", "Non-conforming material delivered to site"),
-        ("design", "design_error", "Detail clash identified on site"),
-        ("workmanship", "supervision", "Inadequate supervision of subcontracted works"),
-        ("material", "handling", "Damage during handling/storage"),
-        ("workmanship", "workmanship", "Tolerance exceeded at interface"),
+        ("workmanship", "workmanship"),
+        ("material", "material_defect"),
+        ("design", "design_error"),
+        ("workmanship", "supervision"),
+        ("material", "handling"),
+        ("workmanship", "workmanship"),
     ]
     for i in range(ncr_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
-        ntype, ncat, desc = ncr_causes[i % len(ncr_causes)]
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
+        ntype, ncat = ncr_causes[i % len(ncr_causes)]
+        desc = _t(f"ncr_cause_{i % len(ncr_causes)}")
         sev = ("minor", "major", "minor", "major")[i % 4]
         ncrs.append(
             {
                 "ncr_number": f"NCR-{i + 1:03d}",
-                "title": f"{trade} non-conformance - {item or 'workmanship'}",
-                "description": f"{desc} for {item or trade} (section {code or trade}).",
+                "title": _t("ncr_title", trade=trade, item=item or _t("ncr_workmanship")),
+                "description": _t("ncr_description", cause=desc, item=item or trade, code=code or trade),
                 "ncr_type": ntype,
                 "severity": sev,
                 "root_cause": desc,
                 "root_cause_category": ncat,
-                "corrective_action": "Rework affected area and re-inspect",
-                "preventive_action": "Add to hold-point checklist and brief crew",
+                "corrective_action": _t("ncr_corrective"),
+                "preventive_action": _t("ncr_preventive"),
                 "status": "corrective_action",
                 "cost_impact": f"{2500 + i * 1500}",
                 "schedule_impact_days": 2 + (i % 3),
@@ -6390,16 +6383,20 @@ def _generate_module_data(
     # reworded. A parser keyed on the word "Authority" would go on producing
     # rows after a rewording, pointing at the wrong contact or at none, and
     # there is no gate that would notice.
-    authority = _AUTHORITY_BY_COUNTRY.get(cc, "the building authority")
+    authority = (
+        authority_text(template.locale, cc)
+        or (_AUTHORITY_BY_COUNTRY.get(cc) if language_of(template.locale) == "en" else None)
+        or _t("the_building_authority")
+    )
     clause = _NOTICE_CLAUSE_BY_COUNTRY.get(cc, "")
 
     def _trade(i: int) -> str:
         """A trade off this project's own bill, or a neutral stand-in."""
-        return trades[i % len(trades)][1] if trades else "the works"
+        return trades[i % len(trades)][1] if trades else _t("the_works")
 
     def _firm(i: int) -> str:
         """A firm off this project's own tender list, or a neutral stand-in."""
-        return firms[i % len(firms)][0] if firms else "the main contractor"
+        return firms[i % len(firms)][0] if firms else _t("the_main_contractor")
 
     def _at(fraction: float) -> int:
         """A day offset at ``fraction`` of the real programme.
@@ -6414,7 +6411,7 @@ def _generate_module_data(
     corr_seeds: list[dict] = [
         {
             "direction": "outgoing",
-            "subject": f"Notice of commencement to {authority}",
+            "subject": _t("corr_commencement", authority=authority),
             "type": "letter",
             "day": 0,
             "party": "authority",
@@ -6422,7 +6419,7 @@ def _generate_module_data(
         },
         {
             "direction": "incoming",
-            "subject": f"{authority} acknowledgement of commencement",
+            "subject": _t("corr_acknowledgement", authority=authority),
             "type": "letter",
             "day": _at(0.03),
             "party": "authority",
@@ -6430,7 +6427,7 @@ def _generate_module_data(
         },
         {
             "direction": "outgoing",
-            "subject": "Submission of insurance certificates and performance bond",
+            "subject": _t("corr_insurance"),
             "type": "letter",
             "day": _at(0.06),
             "party": "client",
@@ -6438,7 +6435,7 @@ def _generate_module_data(
         },
         {
             "direction": "incoming",
-            "subject": f"Client instruction - scope clarification, {_trade(0)}",
+            "subject": _t("corr_client_instruction", trade=_trade(0)),
             "type": "letter",
             "day": _at(0.14),
             "party": "client",
@@ -6446,7 +6443,7 @@ def _generate_module_data(
         },
         {
             "direction": "incoming",
-            "subject": f"Design clarification from the consultant - {_trade(1)}",
+            "subject": _t("corr_design_clarification", trade=_trade(1)),
             "type": "email",
             "day": _at(0.19),
             "party": "consultant",
@@ -6454,7 +6451,7 @@ def _generate_module_data(
         },
         {
             "direction": "outgoing",
-            "subject": f"Drawing transmittal cover - {_trade(2)} package",
+            "subject": _t("corr_transmittal", trade=_trade(2)),
             "type": "memo",
             "day": _at(0.23),
             "party": "consultant",
@@ -6462,7 +6459,7 @@ def _generate_module_data(
         },
         {
             "direction": "outgoing",
-            "subject": f"Monthly progress report to the client, month {max(1, months // 3)}",
+            "subject": _t("corr_progress_report", month=max(1, months // 3)),
             "type": "report",
             "day": _at(0.30),
             "party": "client",
@@ -6470,7 +6467,7 @@ def _generate_module_data(
         },
         {
             "direction": "outgoing",
-            "subject": f"Interim valuation cover letter ({cur})" if cur else "Interim valuation cover letter",
+            "subject": _t("corr_valuation", currency=cur) if cur else _t("corr_valuation_plain"),
             "type": "letter",
             "day": _at(0.36),
             "party": "client",
@@ -6481,7 +6478,7 @@ def _generate_module_data(
             # notice with a live response window. Without it the status column
             # is the same word ten times over and nothing is ever outstanding.
             "direction": "incoming",
-            "subject": f"Early-warning notice from {_firm(0)} - {_trade(3)}",
+            "subject": _t("corr_early_warning", firm=_firm(0), trade=_trade(3)),
             "type": "notice",
             "day": notice_day,
             "party": "subcontractor",
@@ -6491,7 +6488,7 @@ def _generate_module_data(
         },
         {
             "direction": "incoming",
-            "subject": f"{authority} inspection report",
+            "subject": _t("corr_inspection_report", authority=authority),
             "type": "report",
             "day": _at(0.55),
             "party": "authority",
@@ -6534,12 +6531,11 @@ def _generate_module_data(
     variations: list[dict] = []
     var_n = min(max(len(trades), 3), 5)
     for i in range(var_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
         amount = round(8000.0 + i * 6500.0, 2)
-        if cc == "DE":
-            var_title = f"Nachtrag - {trade}: {item or 'zusätzliche Leistungen'}"
-        else:
-            var_title = f"Variation - {trade}: {item or 'additional works'}"
+        var_title = _t("variation_title", trade=trade, item=item or _t("variation_scope"))
+        if cc == "DE" and not (template.locale or "").lower().startswith(("de", "fr")):
+            var_title = generated_text("de", "variation_title", trade=trade, item=item or "zusätzliche Leistungen")
         variations.append(
             {
                 "code": f"VO-{i + 1:03d}",
@@ -6567,34 +6563,21 @@ def _generate_module_data(
     # fieldreports module's own. Both lists have to move together: the diary
     # note is looked up by the condition, so a word in one and not the other is
     # a KeyError that takes the whole demo install with it.
-    diary_weather_note = {
-        "clear": "Dry and clear, full working day.",
-        "partly_cloudy": "Bright with broken cloud, full working day.",
-        "cloudy": "Cloudy but workable conditions.",
-        "overcast": "Overcast all day, work continued to programme.",
-        "fog": "Morning fog, lifting operations held until visibility improved.",
-        "rain": "Intermittent rain, external works paused in the afternoon.",
-    }
-    diary_activities = [
-        "set out and survey checks completed",
-        "main lift / pour completed to programme",
-        "inspection and sign-off of the previous section",
-        "material deliveries received and checked in",
-        "follow-on trade started behind the leading gang",
-    ]
+    diary_weather_note = {cond: _t(f"diary_weather_{cond}") for cond in conditions}
+    diary_activities = [_t(f"diary_activity_{n}") for n in range(5)]
     for i in range(dd_n):
-        trade = trades[i % len(trades)][1] if trades else "General works"
+        trade = trades[i % len(trades)][1] if trades else _t("general_works")
         day = round(i * (months * 30) / dd_n) + 2
         cond = conditions[i % len(conditions)]
         labour = 12 + (i % 10)
         equip = 3 + (i % 4)
         activity = diary_activities[i % len(diary_activities)]
         delayed = cond == "rain" and i % 3 == 0
-        notes = (
-            f"{diary_weather_note[cond]} {labour} operatives and {equip} items of plant on site. {trade}: {activity}."
+        notes = _t(
+            "diary_notes", weather=diary_weather_note[cond], labour=labour, equip=equip, trade=trade, activity=activity
         )
         if delayed:
-            notes += " Approx. 2 hours lost to weather; recovered against float."
+            notes += _t("diary_delay")
         daily_diary.append(
             {
                 "diary_date": (base + timedelta(days=day)).strftime("%Y-%m-%d"),
@@ -6619,14 +6602,16 @@ def _generate_module_data(
     # family. A bare family word is a document the expiry filter cannot group
     # and the edit form cannot re-select.
     comp_seeds = [
-        ("insurance_umbrella", "Contractor all-risk insurance (CAR)", "Insurer", 5_000_000),
-        ("insurance_general_liability", "Public liability insurance", "Insurer", 10_000_000),
-        ("bond_performance", "Performance bond", "Surety", 1_000_000),
-        ("permit_building", "Building / construction permit", "Local authority", None),
-        ("certification_other", "ISO 9001 quality certification", "Certification body", None),
-        ("permit_other", "Site environmental permit", "Environmental authority", None),
+        ("insurance_umbrella", 5_000_000),
+        ("insurance_general_liability", 10_000_000),
+        ("bond_performance", 1_000_000),
+        ("permit_building", None),
+        ("certification_other", None),
+        ("permit_other", None),
     ]
-    for i, (dtype, name, issuer, cov) in enumerate(comp_seeds):
+    for i, (dtype, cov) in enumerate(comp_seeds):
+        name = _t(f"compliance_name_{i}")
+        issuer = _t(f"compliance_issuer_{i}")
         compliance.append(
             {
                 "doc_type": dtype,
@@ -6638,7 +6623,7 @@ def _generate_module_data(
                 "effective_date": (base - timedelta(days=15)).date(),
                 "expires_at": (base + timedelta(days=365 + i * 10)).date(),
                 "notify_days_before": 30,
-                "notes": f"{name} for {proj}.",
+                "notes": _t("compliance_notes", name=name, proj=proj),
             }
         )
 
@@ -6646,7 +6631,7 @@ def _generate_module_data(
     procurement: list[dict] = []
     po_n = min(max(len(trades), 4), 8)
     for i in range(po_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
         amount = 0.0
         if trades and (i % len(trades)) < len(template.sections):
             for it in template.sections[i % len(trades)][3][:2]:
@@ -6676,12 +6661,12 @@ def _generate_module_data(
                 # ever got a contact. The writer picks the vendor from the
                 # contacts that exist and composes this note from that same
                 # company, so the prose and the link cannot come apart.
-                "notes_subject": f"supply for {trade}",
+                "notes_subject": _t("po_subject", trade=trade),
                 "party": "subcontractor",
                 "party_index": i,
                 "items": [
                     {
-                        "description": f"{item or trade} - supply",
+                        "description": _t("po_line", item=item or trade),
                         "quantity": "1",
                         "unit": "lsum",
                         "unit_rate": f"{amount:.2f}",
@@ -6698,7 +6683,7 @@ def _generate_module_data(
     contracts.append(
         {
             "code": f"{demo_id}-MAIN",
-            "title": f"Main construction contract - {proj}",
+            "title": _t("contract_main_title", proj=proj),
             "contract_type": "lump_sum",
             # client, not contractor. The contracts module records the
             # counterparty as client or subcontractor, which is a statement of
@@ -6727,7 +6712,7 @@ def _generate_module_data(
                     "party_role": "employer",
                     "party": "client",
                     "party_index": 0,
-                    "display_name": client_name or f"{proj} Client",
+                    "display_name": client_name or _t("contact_client_name", proj=proj),
                     "is_primary": True,
                 },
                 {
@@ -6754,7 +6739,7 @@ def _generate_module_data(
     # is with is settled at seed time against the contacts that exist.
     sub_count = min(3, len(firms))
     for i in range(sub_count):
-        trade = trades[i % len(trades)][1] if trades else "Works"
+        trade = trades[i % len(trades)][1] if trades else _t("works")
         sub_value = round((contract_total * 0.15) + i * _demo_blended_rate(50000.0, cur), 2)
         # The last subcontract is still a draft. Every contract being active
         # left the register with nothing standing at the step between agreeing
@@ -6769,7 +6754,7 @@ def _generate_module_data(
                 # order note above: this list is the template's tender firms,
                 # and the contacts a project ends up with can be a different
                 # list. The writer appends the firm it actually linked.
-                "title_subject": f"Subcontract - {trade}",
+                "title_subject": _t("contract_sub_subject", trade=trade),
                 "contract_type": "remeasurement",
                 "counterparty_type": "subcontractor",
                 # The nth subcontract is the nth seeded subcontractor, so three
@@ -6809,30 +6794,30 @@ def _generate_module_data(
     tr_n = min(max(len(trades), 4), 6)
     purposes = ["for_construction", "for_review", "for_approval", "for_information"]
     for i in range(tr_n):
-        code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
+        code, trade, item = trades[i % len(trades)] if trades else ("", _t("general_works"), "")
         transmittals.append(
             {
                 "transmittal_number": f"TR-{base.year}-{i + 1:03d}",
-                "subject": f"{trade} drawings and specifications",
+                "subject": _t("transmittal_subject", trade=trade),
                 "purpose_code": purposes[i % len(purposes)],
                 "issued_date": _d(16 + i * 12),
                 "response_due_date": _d(30 + i * 12),
                 "status": ("issued", "acknowledged", "draft")[i % 3],
-                "cover_note": f"Issue of {item or trade} information for {proj}.",
+                "cover_note": _t("transmittal_cover", item=item or trade, proj=proj),
                 "items": [
-                    {"item_number": 1, "description": f"{trade} general arrangement"},
-                    {"item_number": 2, "description": f"{item or trade} detail"},
+                    {"item_number": 1, "description": _t("transmittal_item_0", trade=trade)},
+                    {"item_number": 2, "description": _t("transmittal_item_1", item=item or trade)},
                 ],
             }
         )
 
     # resources - people / crews / equipment / subcontractors.
     resources: list[dict] = [
-        {"code": f"{demo_id}-PM", "name": "Project Manager", "resource_type": "person", "rate": 95.0},
-        {"code": f"{demo_id}-SM", "name": "Site Manager", "resource_type": "person", "rate": 75.0},
-        {"code": f"{demo_id}-QS", "name": "Quantity Surveyor", "resource_type": "person", "rate": 70.0},
-        {"code": f"{demo_id}-CRANE", "name": "Tower crane", "resource_type": "equipment", "rate": 120.0},
-        {"code": f"{demo_id}-EXC", "name": "Excavator", "resource_type": "equipment", "rate": 85.0},
+        {"code": f"{demo_id}-PM", "name": _t("resource_pm"), "resource_type": "person", "rate": 95.0},
+        {"code": f"{demo_id}-SM", "name": _t("resource_sm"), "resource_type": "person", "rate": 75.0},
+        {"code": f"{demo_id}-QS", "name": _t("resource_qs"), "resource_type": "person", "rate": 70.0},
+        {"code": f"{demo_id}-CRANE", "name": _t("field_equipment_0"), "resource_type": "equipment", "rate": 120.0},
+        {"code": f"{demo_id}-EXC", "name": _t("field_equipment_2"), "resource_type": "equipment", "rate": 85.0},
     ]
     for i, (company, _) in enumerate(firms[:3]):
         resources.append(
@@ -6902,21 +6887,25 @@ def _generate_module_data(
                 # belongs. Nothing is lost by spelling it: the entity is matched
                 # against a model's ``element_type`` and a bill's trade item was
                 # never going to match one either way.
-                "entity": " ".join((item or trade).split())[:120] or "Element",
+                "entity": " ".join((item or trade).split())[:120] or _t("requirement_entity"),
                 "attribute": ("fire_rating", "u_value", "strength_class", "finish")[i % 4],
                 "constraint_type": "equals",
-                "constraint_value": ("F90", "0.24 W/m2K", "C30/37", "as specification")[i % 4],
+                "constraint_value": ("F90", "0.24 W/m2K", "C30/37", _t("requirement_value_spec"))[i % 4],
                 "unit": ("min", "W/m2K", "MPa", "")[i % 4],
-                "category": trade[:100] or "general",
+                "category": trade[:100] or _t("requirement_category"),
                 "priority": "must",
-                "source_ref": f"Section {code or trade}",
+                "source_ref": _t("requirement_source", code=code or trade),
                 "deliverables": _eir_deliverables(i),
             }
         )
     requirements: list[dict] = [
         {
-            "name": f"{template.classification_standard.upper() or 'Project'} requirements - {proj}",
-            "description": f"Employer information and technical requirements for {proj}.",
+            "name": _t(
+                "requirement_set_name",
+                standard=template.classification_standard.upper() or _t("requirement_standard_default"),
+                proj=proj,
+            ),
+            "description": _t("requirement_set_description", proj=proj),
             "source_type": "manual",
             "status": "active",
             "items": req_items,
@@ -6942,13 +6931,13 @@ def _generate_module_data(
         period = _period_label(base, m - 1)
         planned = round(min(100.0, m / months * 100.0), 3)
         actual = round(min(100.0, max(0.0, planned - 5.0)), 3)
-        progress_plan.append({"period_label": period, "planned_pct": planned, "notes": "Planned S-curve"})
+        progress_plan.append({"period_label": period, "planned_pct": planned, "notes": _t("progress_plan_note")})
         if m <= last_actual:
             progress_entries.append(
                 {
                     "period_label": period,
                     "percent_complete": actual,
-                    "notes": f"Cumulative progress at {period}.",
+                    "notes": _t("progress_note", period=period),
                 }
             )
     progress: list[dict] = progress_entries  # primary key the block consumes
@@ -7121,13 +7110,15 @@ def _generate_module_data(
     risk_n = min(max(len(trades), 5), 7)
     for i in range(risk_n):
         cat, base_title, prob, cost_frac, days, sev, mitig, status = risk_seeds[i % len(risk_seeds)]
-        trade = trades[i % len(trades)][1] if trades else "General works"
+        base_title = _t(f"risk_title_{i % len(risk_seeds)}")
+        mitig = _t(f"risk_mitigation_{i % len(risk_seeds)}")
+        trade = trades[i % len(trades)][1] if trades else _t("general_works")
         cost = round(risk_total * cost_frac, 2)
         risks.append(
             (
                 f"R-{i + 1:03d}",
                 f"{base_title} ({trade})",
-                f"{base_title} affecting {trade.lower()} for {proj}.",
+                _t("risk_description", title=base_title, trade=trade.lower(), proj=proj),
                 cat,
                 prob,
                 cost,
@@ -7990,7 +7981,9 @@ async def _seed_module_data(
     contact_companies_by_type: dict[str, list[str]] = {}
 
     try:
-        contact_list = _contacts_for_project(_CONTACTS.get(demo_id), generated.get("contacts", []))
+        contact_list = localise(
+            template.locale, _contacts_for_project(_CONTACTS.get(demo_id), generated.get("contacts", []))
+        )
         for c in contact_list:
             contact_id = _id()
             contact_ids_by_type.setdefault(c["contact_type"], []).append(str(contact_id))
@@ -8301,7 +8294,7 @@ async def _seed_module_data(
     }
 
     try:
-        task_list = _TASKS.get(demo_id) or generated.get("tasks", [])
+        task_list = localise(template.locale, _TASKS.get(demo_id) or generated.get("tasks", []))
         for t in task_list:
             session.add(
                 Task(
@@ -8524,7 +8517,7 @@ async def _seed_module_data(
     }
 
     try:
-        rfi_list = _RFIS.get(demo_id) or generated.get("rfis", [])
+        rfi_list = localise(template.locale, _RFIS.get(demo_id) or generated.get("rfis", []))
         rfi_now = datetime.now(UTC).replace(tzinfo=None)
         answered_seen = 0
         open_seen = 0
@@ -8865,7 +8858,7 @@ async def _seed_module_data(
     }
 
     try:
-        meeting_list = _MEETINGS.get(demo_id) or generated.get("meetings", [])
+        meeting_list = localise(template.locale, _MEETINGS.get(demo_id) or generated.get("meetings", []))
         for m in meeting_list:
             session.add(
                 Meeting(
@@ -9106,7 +9099,9 @@ async def _seed_module_data(
     }
 
     try:
-        incident_list = _SAFETY_INCIDENTS.get(demo_id) or generated.get("safety_incidents", [])
+        incident_list = localise(
+            template.locale, _SAFETY_INCIDENTS.get(demo_id) or generated.get("safety_incidents", [])
+        )
         for inc in incident_list:
             session.add(
                 SafetyIncident(
@@ -9336,7 +9331,7 @@ async def _seed_module_data(
     }
 
     try:
-        obs_list = _OBSERVATIONS.get(demo_id) or generated.get("safety_observations", [])
+        obs_list = localise(template.locale, _OBSERVATIONS.get(demo_id) or generated.get("safety_observations", []))
         for obs in obs_list:
             sev = obs.get("severity", 1)
             lik = obs.get("likelihood", 1)
@@ -9978,7 +9973,7 @@ async def _seed_module_data(
     }
 
     try:
-        insp_list = _INSPECTIONS.get(demo_id) or generated.get("inspections", [])
+        insp_list = localise(template.locale, _INSPECTIONS.get(demo_id) or generated.get("inspections", []))
         for insp in insp_list:
             session.add(
                 QualityInspection(
@@ -10327,7 +10322,7 @@ async def _seed_module_data(
     }
 
     try:
-        inv_list = _INVOICES.get(demo_id) or generated.get("invoices", [])
+        inv_list = localise(template.locale, _INVOICES.get(demo_id) or generated.get("invoices", []))
         for inv in inv_list:
             items_data = inv.pop("line_items", [])
             subtotal = sum(float(li["amount"]) for li in items_data)
@@ -11080,7 +11075,7 @@ async def _seed_module_data(
     }
 
     try:
-        punch_list = _PUNCHLIST.get(demo_id) or generated.get("punchlist", [])
+        punch_list = localise(template.locale, _PUNCHLIST.get(demo_id) or generated.get("punchlist", []))
         for p in punch_list:
             session.add(
                 PunchItem(
@@ -11241,7 +11236,7 @@ async def _seed_module_data(
     }
 
     try:
-        fr_list = _FIELD_REPORTS.get(demo_id) or generated.get("field_reports", [])
+        fr_list = localise(template.locale, _FIELD_REPORTS.get(demo_id) or generated.get("field_reports", []))
         for fr in fr_list:
             session.add(
                 FieldReport(
@@ -11404,7 +11399,7 @@ async def _seed_module_data(
     }
 
     try:
-        sub_list = _SUBMITTALS.get(demo_id) or generated.get("submittals", [])
+        sub_list = localise(template.locale, _SUBMITTALS.get(demo_id) or generated.get("submittals", []))
         for s in sub_list:
             session.add(
                 Submittal(
@@ -11550,7 +11545,7 @@ async def _seed_module_data(
     }
 
     try:
-        ncr_list = _NCRS.get(demo_id) or generated.get("ncrs", [])
+        ncr_list = localise(template.locale, _NCRS.get(demo_id) or generated.get("ncrs", []))
         for n in ncr_list:
             session.add(
                 NCR(
@@ -11697,7 +11692,7 @@ async def _seed_module_data(
         return []
 
     try:
-        corr_list = _CORRESPONDENCE.get(demo_id) or generated.get("correspondence", [])
+        corr_list = localise(template.locale, _CORRESPONDENCE.get(demo_id) or generated.get("correspondence", []))
         for corr_position, c in enumerate(corr_list):
             # Which contact this letter is with. The seed names a role and the
             # id is resolved here, because the ids are minted a few blocks up
