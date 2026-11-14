@@ -53894,7 +53894,7 @@ const resource = {
     "sidebar.tools_collapse": "설정 및 도구 접기",
     "sidebar.tools_expand": "설정 및 도구 펼치기",
     "sidebar.tools_short": "시스템",
-    "sidebar.section.boq": "물량 내역서",
+    "sidebar.section.boq": "내역서",
     "sidebar.section.ai_drafting": "AI 초안",
     "sidebar.section.bids": "입찰 및 고객",
     "sidebar.section.databases": "단가 데이터베이스",
