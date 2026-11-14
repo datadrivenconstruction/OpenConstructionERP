@@ -5,7 +5,7 @@
  * the manual Distance / Area / Count annotations it used to leave out.
  */
 
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import type { DxfEntity } from '../../api';
 import { quantifyByLayer } from '../auto-quantify';
 import { buildQuantifyWorkbook } from '../dwg-quantify-export';
@@ -18,6 +18,12 @@ const entities: DxfEntity[] = [
 ];
 
 describe('buildQuantifyWorkbook', () => {
+  // exceljs (~1 MB) is imported lazily by the code under test; load it once here so
+  // the cold transform cost lands in a hook with its own budget, not in the test.
+  beforeAll(async () => {
+    await import('exceljs');
+  }, 120_000);
+
   it('writes the UI totals and a manual measurements sheet', async () => {
     const rows = quantifyByLayer(entities, 0.001);
     const totals = quantifyTotals(rows);
