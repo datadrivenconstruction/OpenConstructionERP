@@ -3467,8 +3467,10 @@ async def semantic_search(
 @router.get("/categories/", response_model=list[str])
 async def list_categories(
     session: SessionDep,
-    _user_id: CurrentUserId,
+    user: CurrentUserPayload,
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
     region: str | None = Query(default=None, description="Filter by region"),
+    catalog_id: uuid.UUID | None = Query(default=None, description="Filter to one user-owned cost catalog"),
 ) -> list[str]:
     """Return distinct classification.collection values. Cached for 30s."""
     cache_key = f"categories_{region or 'all'}"
@@ -3495,6 +3497,13 @@ async def list_categories(
     if region:
         stmt = stmt.where(CostItem.region == region)
 
+    if catalog_id is not None:
+        owner_id = _parse_user_uuid((user or {}).get("sub"))
+        is_admin = (user or {}).get("role") == "admin"
+        await catalog_service.get_owned_catalog(catalog_id, owner_id=owner_id, is_admin=is_admin)
+        stmt = stmt.where(CostItem.catalog_id == catalog_id).order_by(collection_expr)
+        return sorted({row[0] for row in (await session.execute(stmt)).all() if row[0]})
+
     stmt = stmt.order_by(collection_expr)
 
     # The caller's own catalogues, live; the shared part below is cached.
@@ -3516,8 +3525,13 @@ async def list_categories(
 
 @router.get("/category-tree/", response_model=list[CategoryTreeNode])
 async def get_category_tree(
-    _user_id: CurrentUserId,
+    user: CurrentUserPayload,
     service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
+    catalog_id: uuid.UUID | None = Query(
+        default=None,
+        description="Restrict the aggregation to one user-owned cost catalog.",
+    ),
     region: str | None = Query(
         default=None,
         description="Restrict the aggregation to a single region (e.g. DE_BERLIN).",
@@ -3557,8 +3571,12 @@ async def get_category_tree(
     # cached under their id and for a short time only, so a change of role or
     # of ownership is not outlived by it for long. Everyone else shares the
     # cached tree of the shared rows.
-    own = bool(await _private_row_count(service.session, region))
-    cache_key = f"tree::{region or '__all__'}::d={depth}::p={parent_path or ''}"
+    if catalog_id is not None:
+        owner_id = _parse_user_uuid((user or {}).get("sub"))
+        is_admin = (user or {}).get("role") == "admin"
+        await catalog_service.get_owned_catalog(catalog_id, owner_id=owner_id, is_admin=is_admin)
+    own = catalog_id is not None or bool(await _private_row_count(service.session, region))
+    cache_key = f"tree::{region or '__all__'}::d={depth}::p={parent_path or ''}::c={catalog_id or ''}"
     ttl = _CATEGORY_TREE_CACHE_TTL
     if own:
         cache_key += f"::u={cost_scope.current_caller()}"
@@ -3569,7 +3587,7 @@ async def get_category_tree(
         return cached["nodes"]
 
     if own:
-        raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)
+        raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path, catalog_id=catalog_id)
     else:
         with cost_scope.shared_scope():
             raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)

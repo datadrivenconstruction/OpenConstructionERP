@@ -1981,9 +1981,11 @@ export function fetchCategoryTree(
   region?: string,
   depth?: number,
   parentPath?: string,
+  catalogId?: string,
 ): Promise<CategoryTreeNode[]> {
   const qs = new URLSearchParams();
   if (region) qs.set('region', region);
+  if (catalogId) qs.set('catalog_id', catalogId);
   if (typeof depth === 'number') qs.set('depth', String(depth));
   if (parentPath) qs.set('parent_path', parentPath);
   const suffix = qs.toString();
