@@ -42,7 +42,16 @@ import {
   RotateCcw,
   type LucideIcon,
 } from 'lucide-react';
-import { LEARN_GROUP_ID, navGroups, type NavGroup, type NavItem } from './navCatalog';
+import {
+  ASSISTANT_GROUP_ID,
+  LEARN_GROUP_ID,
+  canonicalGroupId,
+  navGroups,
+  navSectionByRoute,
+  type NavGroup,
+  type NavItem,
+} from './navCatalog';
+import { isRowInDemo, useDemoModules } from '@/shared/lib/useDemoModules';
 import { LEARN_ANCHOR_ATTR, anchorRect, flyLearn } from './learnFlight';
 import { SidebarToolsCollapse } from './SidebarToolsCollapse';
 import { PRESET_WORKSPACES, resolveWorkspace, shownTab, workspaceSectionByRoute } from './workspaces';
@@ -219,16 +228,9 @@ const GROUP_ID_BY_ROUTE: Record<string, string> = (() => {
   return map;
 })();
 
-/** Legacy → current group-id aliases. The ProductTour steps reference the
- *  pre-redesign group ids (`property`, `cad_bim_analytics`) when they fire
- *  `oe:tour-reveal`. The v6.10.0 redesign renamed every group, so the
- *  tour-reveal handler maps any incoming legacy id to its current id before
- *  expanding, keeping the onboarding spotlight working without editing the
- *  tour definition. New code should dispatch the current `grp_*` ids. */
-const LEGACY_GROUP_ID_ALIASES: Record<string, string> = {
-  property: 'grp_real_estate',
-  cad_bim_analytics: 'grp_coordination',
-};
+/** Group ids the catalogue has today; a stored hidden id it no longer has
+ *  (a group folded into another) hides nothing. */
+const KNOWN_GROUP_IDS: ReadonlySet<string> = new Set(navGroups.map((group) => group.id));
 
 /** Minimal shape of a backend module entry returned by `GET /v1/modules/`.
  *  We only read the fields needed to reconcile sidebar visibility with the
@@ -571,7 +573,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // Hidden whole-sections (nav groups) the user has switched off via the
   // "Edit menu". Persisted in useModuleStore alongside module state; here we
   // read the list and the bulk setter the Save action commits to.
-  const hiddenGroups = useModuleStore((s) => s.hiddenGroups);
+  const storedHiddenGroups = useModuleStore((s) => s.hiddenGroups);
+  const hiddenGroups = useMemo(
+    () => storedHiddenGroups.filter((id) => KNOWN_GROUP_IDS.has(id)),
+    [storedHiddenGroups],
+  );
+  // In a demo the menu shows the modules its cards cover, nothing else.
+  const demoModules = useDemoModules();
+  const demoSet = useMemo(() => (demoModules ? new Set(demoModules) : null), [demoModules]);
   const setHiddenGroups = useModuleStore((s) => s.setHiddenGroups);
   // The Learn card at the top hides and comes back in one click, outside the
   // Edit-menu working copy, so it writes straight through to the store.
@@ -909,7 +918,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           (!item.moduleKey || isModuleEnabled(item.moduleKey)) &&
           (!item.advancedOnly || showAdvancedRows) &&
           !isRouteBackendDisabled(item.to) &&
-          !hiddenModules.includes(item.to);
+          !hiddenModules.includes(item.to) &&
+          (!demoSet || isRowInDemo(item, demoSet));
         if (visible) shown += 1;
       }
     }
@@ -917,7 +927,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // `enabledModules` is a dep so the count reacts to enable/disable; it feeds
     // `isModuleEnabled` even though that function reference is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAdvancedRows, userRole, hiddenModules, hiddenGroups, enabledModules, isRouteBackendDisabled]);
+  }, [showAdvancedRows, userRole, hiddenModules, hiddenGroups, enabledModules, isRouteBackendDisabled, demoSet]);
 
   // Custom-module request dialog — opens from the "Request a custom
   // module" CTA at the bottom of the nav (below the "+ Add module"
@@ -952,7 +962,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       const raw = (evt as CustomEvent<{ groupId?: string }>).detail?.groupId;
       if (!raw) return;
       // Translate legacy tour group ids to the current redesigned ids.
-      const groupId = LEGACY_GROUP_ID_ALIASES[raw] ?? raw;
+      const groupId = canonicalGroupId(raw);
       setCollapsed((prev) => ({ ...prev, [groupId]: false }));
       // With a workspace every group already renders under "More modules", so
       // opening that is enough and the user keeps the mode they chose.
@@ -1063,6 +1073,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     .map((route) => PINNABLE_ITEMS[route])
     .filter((item): item is NavItem => Boolean(item))
     .filter((item) => !isRouteBackendDisabled(item.to))
+    .filter((item) => editMode || !demoSet || isRowInDemo(item, demoSet))
     .filter((item) => editMode || !hiddenModules.includes(item.to));
 
   // Pick a single winning route for highlighting. Without this, both
@@ -1141,7 +1152,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       }));
     // Pages of ZIP-installed modules; the server lists only loaded, enabled ones.
     const runtimeItems: NavItem[] = (runtimeUiEntries ?? [])
-      .filter((e) => e.group === group.id)
+      .filter((e) => canonicalGroupId(e.group) === group.id)
       .map((e) => ({
         labelKey: `module_packages.nav.${e.module}`,
         defaultLabel: e.label,
@@ -1180,6 +1191,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // its sidebar route here so we never link to a broken/blank
     // surface. This is an admin control, not the onboarding profile.
     !isRouteBackendDisabled(item.to) &&
+    // An open demo keeps the rows its cards cover; Edit menu still lists all.
+    (editMode || !demoSet || isRowInDemo(item, demoSet)) &&
     // Menu-editor filter — in normal mode, drop user-hidden
     // rows; in edit mode `effectiveHidden` is empty so every
     // row renders (muted via the editingHidden state below).
@@ -1219,8 +1232,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const learnLabel = learnGroup
     ? t(learnGroup.labelKey, { defaultValue: learnGroup.defaultLabel ?? learnGroup.id })
     : '';
+  const assistantGroup = navGroups.find((group) => group.id === ASSISTANT_GROUP_ID);
+  const assistantItems = assistantGroup ? assistantGroup.items.filter(passesRowGates) : [];
   const loopGroups = applyOrder(
-    navGroups.filter((group) => group.id !== LEARN_GROUP_ID),
+    navGroups.filter((group) => group.id !== LEARN_GROUP_ID && group.id !== ASSISTANT_GROUP_ID),
     menuLayout.groupOrder,
     (group) => group.id,
   );
@@ -1231,7 +1246,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const modeRows = (activeModeRoutes ?? [])
     .map((route) => ALL_NAV_ITEMS[route])
     .filter((item): item is NavItem => item != null && passesRowGates(item) && !pinned.includes(item.to));
-  const userGroupRows = menuLayout.userGroups.map((group) => ({
+  // A demo is shown as the demo's menu, so groups made in this browser wait
+  // until the visitor leaves it.
+  const userGroupRows = (demoSet ? [] : menuLayout.userGroups).map((group) => ({
     group,
     rows: group.items
       .map((route) => ALL_NAV_ITEMS[route])
@@ -1294,6 +1311,30 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   const renderRow = (item: NavItem, i: number) => renderRowAs(item, i, iconified);
+  // A group's rows with a caption above the first row of each section, when
+  // more than one section has rows on screen; a lone caption only repeats the
+  // group header.
+  const renderGroupRows = (group: NavGroup, rows: NavItem[]) => {
+    const sectionOf = navSectionByRoute(group);
+    const shownSections = new Set(rows.map((item) => sectionOf.get(item.to)).filter(Boolean));
+    if (iconified || shownSections.size < 2) return rows.map(renderRow);
+    return rows.flatMap((item, i) => {
+      const section = sectionOf.get(item.to);
+      const row = renderRow(item, i);
+      if (!section || (i > 0 && sectionOf.get(rows[i - 1]!.to) === section)) return [row];
+      return [
+        <li
+          key={`section:${group.id}:${section.id}`}
+          role="presentation"
+          data-testid={`sidebar-section-${section.id}`}
+          className="px-2.5 pb-0.5 pt-2 text-2xs font-semibold text-content-quaternary"
+        >
+          {t(section.labelKey, { defaultValue: section.defaultLabel })}
+        </li>,
+        row,
+      ];
+    });
+  };
   const renderRowAs = (item: NavItem, i: number, iconified: boolean) => {
     // In-place project-focus annotation (no reorder):
     //   g === null      → route not profile-constrained →
@@ -1566,6 +1607,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             <ul className="space-y-px">{learnItems.map(renderRow)}</ul>
           </LearnSection>
         )}
+        {/* The assistant: one entry under Learn, above Pinned, not a section. */}
+        {assistantItems.length > 0 && (
+          <ul className="mb-1 mt-1 space-y-px" data-testid="sidebar-assistant">
+            {assistantItems.map(renderRow)}
+          </ul>
+        )}
         {/* Pinned section — appears at the top when the user has
             pinned at least one item. No collapsible chevron; just a
             small label + the pinned items in their stored order. */}
@@ -1821,7 +1868,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               isGroupHidden={editingHiddenGroups.includes(group.id)}
               onToggleGroupHidden={() => toggleGroupHidden(group.id)}
             >
-              <ul className="space-y-px">{visibleItems.map(renderRow)}</ul>
+              <ul className="space-y-px">{renderGroupRows(group, visibleItems)}</ul>
             </NavGroupSection>
             </Fragment>
           );

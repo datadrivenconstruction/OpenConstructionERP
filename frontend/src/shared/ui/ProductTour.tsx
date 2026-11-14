@@ -239,9 +239,9 @@ export const DEFAULT_PRODUCT_TOUR_STEPS: ProductTourStep[] = [
     titleKey: 'tour.step.4.title',
     bodyKey: 'tour.step.4.body',
     preferredPosition: 'right',
-    // BIM viewer moved into the collapsed-by-default "Reality Capture & 3D"
-    // group (grp_reality); reveal it so the spotlight can latch on.
-    revealGroupId: 'grp_reality',
+    // The BIM viewer is a Takeoff row in the Estimating group; reveal it so
+    // the spotlight can latch on.
+    revealGroupId: 'grp_estimating',
   },
   {
     selector: '[data-testid="sidebar-nav-property-dev"]',
@@ -256,9 +256,9 @@ export const DEFAULT_PRODUCT_TOUR_STEPS: ProductTourStep[] = [
     titleKey: 'tour.step.6.title',
     bodyKey: 'tour.step.6.body',
     preferredPosition: 'right',
-    // Geo Hub moved into the collapsed-by-default "Reality Capture & 3D"
-    // group (grp_reality); reveal it so the spotlight can latch on.
-    revealGroupId: 'grp_reality',
+    // Geo Hub sits under Reality capture in the "BIM, data & reports" group;
+    // reveal it so the spotlight can latch on.
+    revealGroupId: 'grp_coordination',
   },
   {
     selector: '[data-testid="header-help-menu"]',

@@ -75,19 +75,18 @@ describe('DemoSwitcherBar', () => {
     expect(sessionStorage.getItem('oe_demo_pick')).toBeNull();
   });
 
-  it('gives the US demo its own look and a shorter menu', async () => {
+  it('gives the US demo its own look and leaves the menu to the demo filter', async () => {
     useAppearanceStore.getState().setAppearance({ accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' });
-    useModuleStore.getState().setHiddenGroups([]);
+    useModuleStore.getState().setHiddenGroups(['grp_real_estate']);
     captureDemoPick('?demo=medical-us');
     apiGet.mockResolvedValue({ demo_mode: true });
     fetchProjectList.mockResolvedValue(PROJECTS);
     renderBar();
     await waitFor(() => expect(sessionStorage.getItem('oe_demo_chosen')).toBe('medical-us'));
     expect(useAppearanceStore.getState().effective.accent).toBe('amber');
-    const hidden = useModuleStore.getState().hiddenGroups;
-    expect(hidden).toContain('grp_real_estate');
-    expect(hidden).not.toContain('grp_estimating');
-    expect(hidden).not.toContain('grp_learn');
+    // Sections hidden by an earlier switcher build are let go; `useDemoModules`
+    // cuts the menu now.
+    expect(useModuleStore.getState().hiddenGroups).toEqual([]);
     expect(document.documentElement.dataset.oeMenu).toBe('dark');
   });
 

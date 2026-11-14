@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEMO_PROFILES, MENU_STYLES, applyDemoMenuStyle, demoModuleRoutes, demoProfile } from './demoProfiles';
-import { navGroups } from '@/app/layout/navCatalog';
+import { canonicalGroupId, navGroups } from '@/app/layout/navCatalog';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 
@@ -70,7 +70,7 @@ describe('demo profiles', () => {
     expect(berlin?.appearance.look).toBe('classic');
     expect(berlin?.groups).toContain('grp_procurement');
     const known = new Set(navGroups.map((g) => g.id));
-    DEMO_PROFILES.forEach((p) => p.groups?.forEach((g) => expect(known.has(g)).toBe(true)));
+    DEMO_PROFILES.forEach((p) => p.groups?.forEach((g) => expect(known.has(canonicalGroupId(g))).toBe(true)));
   });
 
   it('sets the menu style on <html> and removes it again', () => {

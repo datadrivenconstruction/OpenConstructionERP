@@ -24,13 +24,11 @@ import {
   DEMO_PROFILES,
   demoProfile,
   applyDemoMenuStyle,
-  hiddenGroupsFor,
   readChosenDemo,
   writeChosenDemo,
   type DemoSlug,
 } from '@/shared/lib/demoProfiles';
 import { fetchProjectList } from '@/shared/lib/projectList';
-import { navGroups } from '@/app/layout/navCatalog';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -98,12 +96,9 @@ export function useDemoProjects() {
       const profile = demoProfile(slug);
       if (!p || !profile) return;
       setAppearance(profile.appearance);
-      setHiddenGroups(
-        hiddenGroupsFor(
-          profile,
-          navGroups.map((g) => g.id),
-        ),
-      );
+      // The menu follows the demo through `useDemoModules`; sections hidden
+      // by an earlier build of the switcher are let go here.
+      setHiddenGroups([]);
       applyDemoMenuStyle(profile.menuStyle);
       writeChosenDemo(slug);
       setDemo(slug);
