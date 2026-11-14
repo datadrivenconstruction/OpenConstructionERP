@@ -38,6 +38,7 @@ from app.core.demo_tender_scopes import (
     seeded_recipients,
     seeded_submitted_at,
 )
+from app.core.demo_vat import demo_vat_rate
 from app.modules.boq.models import BOQ, BOQMarkup, Position
 from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem
 from app.modules.contacts.models import Contact
@@ -1274,7 +1275,6 @@ _LONDON = DemoTemplate(
         ("Main Contractor's Profit", 5.0, "profit", "direct_cost"),
         ("Design Development Risk", 3.0, "contingency", "cumulative"),
         ("Construction Contingency", 3.0, "contingency", "cumulative"),
-        ("VAT", 20.0, "tax", "cumulative"),
     ],
     total_months=24,
     tender_name="Shell & Core Package",
@@ -1562,7 +1562,7 @@ _DUBAI = DemoTemplate(
         "New-build logistics warehouse with 45,000 m\u00b2 GFA, 12m clear height, "
         "8 loading docks, cold storage zone, automated high-bay racking. "
         "LEED Silver target. Fire suppression ESFR. "
-        "Estimated construction cost 15M AED."
+        "Estimated construction cost 25M AED."
     ),
     region="Middle East",
     classification_standard="masterformat",
@@ -2461,7 +2461,7 @@ DEMO_CATALOG: list[dict] = [
         ),
         "country": "US",
         "currency": "USD",
-        "budget": "$25M",
+        "budget": "$270M",
         "type": "Healthcare",
         "sections": 12,
         "positions": 38,
@@ -2472,7 +2472,7 @@ DEMO_CATALOG: list[dict] = [
         "description": "45,000 m\u00b2 logistics warehouse, high-bay racking, cold storage, 12-month schedule",
         "country": "AE",
         "currency": "AED",
-        "budget": "15M AED",
+        "budget": "25M AED",
         "type": "Industrial",
         "sections": 6,
         "positions": 25,
@@ -2978,6 +2978,19 @@ def _demo_rate(value: float, currency: str, resource_type: str) -> float:
     if scaled >= 100:
         return float(round(scaled))
     return round(scaled, 2)
+
+
+def _demo_round_money(value: float) -> float:
+    """Round a derived demo amount to two significant-looking figures a reader can quote."""
+    if value >= 100000:
+        return float(round(value, -3))
+    if value >= 1000:
+        return float(round(value, -1))
+    return round(value, 2)
+
+
+#: Change-order values as a share of the direct contract total, one per generated order.
+_CO_CONTRACT_SHARE = (0.012, 0.006, 0.018, 0.009, 0.004)
 
 
 def _demo_blended_rate(value: float, currency: str) -> float:
@@ -6064,6 +6077,7 @@ def _generate_module_data(
                 "currency_code": cur,
                 "status": status,
                 "notes": f"{firm} - interim valuation, {trade}",
+                "retention_pct": 5,
                 # The issuing firm, so the insert can link the invoice to the
                 # subcontractor contact seeded from the same tender list
                 # instead of leaving contact_id empty.
@@ -6102,6 +6116,7 @@ def _generate_module_data(
                 "currency_code": cur,
                 "status": "sent",
                 "notes": ei_row.get("notes"),
+                "retention_pct": 5,
                 "counterparty_company": contacts[0].get("company_name"),
                 "contact_ref": "client",
                 "metadata": {"einvoice": dict(ei_showcase["einvoice"])},
@@ -7077,26 +7092,24 @@ def _generate_module_data(
     co_n = min(max(len(trades), 3), 5)
     for i in range(co_n):
         code, trade, item = trades[i % len(trades)] if trades else ("", "General works", "")
-        # Derive a representative unit/rate from the first priced item of the
-        # matching section so the change-order line reads against real pricing.
+        # An order is a share of the contract, priced as one lump sum: one
+        # item's unit rate times a handful of units is a rounding error on a
+        # large project (5 m2 of site clearing on an 880M one).
         unit = "lsum"
-        rate = 12000.0
-        if trades and (i % len(trades)) < len(template.sections):
-            sec_items = template.sections[i % len(trades)][3]
-            if sec_items:
-                first = sec_items[0]
-                try:
-                    unit = str(first[2]) or "lsum"
-                    rate = float(first[4])
-                except (IndexError, TypeError, ValueError):
-                    unit, rate = "lsum", 12000.0
-        add_qty = float(5 + i * 3)
+        add_qty = 1.0
+        rate = float(_demo_round_money(risk_total * _CO_CONTRACT_SHARE[i % len(_CO_CONTRACT_SHARE)]))
         cost_impact = round(add_qty * rate, 2)
         co_reason = co_reasons[i % len(co_reasons)]
         if cc == "DE":
             co_title = f"Nachtrag - {trade}: {item or 'zusätzliche Leistungen'}"
             co_desc = f"{co_reason_labels_de[co_reason]}: Auswirkung auf {trade} - {proj}."
             co_item_desc = f"{item or trade} - Mehrmenge"
+        elif not (template.locale or "en").lower().startswith("en"):
+            # A project whose data is in its own language gets no English
+            # template: the title and note are built from that data alone.
+            co_title = f"{trade}: {item}" if item else trade
+            co_desc = f"{trade} - {proj}"
+            co_item_desc = item or trade
         else:
             co_title = f"Change order - {trade}: {item or 'additional works'}"
             co_desc = f"{co_reason.replace('_', ' ').capitalize()} affecting {trade.lower()} on {proj}."
@@ -10223,12 +10236,16 @@ async def _seed_module_data(
         for inv in inv_list:
             items_data = inv.pop("line_items", [])
             subtotal = sum(float(li["amount"]) for li in items_data)
-            tax_rate = (
-                0.19
-                if template.currency == "EUR"
-                else (0.20 if template.currency == "GBP" else (0.05 if template.currency == "AED" else 0.0))
+            tax = round(subtotal * float(demo_vat_rate(template.currency)), 2)
+            # A progress claim holds back retention; a sent or paid document is
+            # never dated after the day the demo is installed.
+            retention = round(
+                subtotal
+                * float(inv.get("retention_pct") or (5 if str(inv["invoice_number"]).startswith("IPC") else 0))
+                / 100,
+                2,
             )
-            tax = round(subtotal * tax_rate, 2)
+            issued_on = min(str(inv["invoice_date"]), datetime.now(UTC).strftime("%Y-%m-%d"))
             # Link the invoice to its counterparty: an explicit role reference
             # ("contact_ref", used by the e-invoice showcase to bill the
             # client) wins, else the company the row names. Both resolve to
@@ -10244,12 +10261,12 @@ async def _seed_module_data(
                 project_id=project_id,
                 invoice_direction=inv["invoice_direction"],
                 invoice_number=inv["invoice_number"],
-                invoice_date=inv["invoice_date"],
+                invoice_date=issued_on,
                 due_date=inv.get("due_date"),
                 currency_code=inv.get("currency_code", template.currency),
                 amount_subtotal=str(round(subtotal, 2)),
                 tax_amount=str(tax),
-                retention_amount="0",
+                retention_amount=str(retention),
                 amount_total=str(round(subtotal + tax, 2)),
                 status=inv["status"],
                 notes=inv.get("notes"),
@@ -11710,7 +11727,6 @@ async def _seed_module_data(
 
     # ── Procurement (purchase orders + items) ─────────────────────────
     try:
-        from app.core.demo_vat import demo_vat_rate
         from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
 
         po_list = generated.get("procurement", [])
@@ -11724,7 +11740,8 @@ async def _seed_module_data(
             po_subject = str(po.get("notes_subject") or "")
             po_notes = f"{po_vendor} - {po_subject}" if po_vendor and po_subject else (po_subject or None)
             po_items = po.get("items", [])
-            subtotal = sum(float(li.get("amount", 0)) for li in po_items)
+            po_net = sum((Decimal(str(li.get("amount", 0))) for li in po_items), Decimal(0)).quantize(Decimal("0.01"))
+            po_tax = (po_net * demo_vat_rate(template.currency)).quantize(Decimal("0.01"))
             po_obj = PurchaseOrder(
                 id=_id(),
                 project_id=project_id,
@@ -11733,9 +11750,9 @@ async def _seed_module_data(
                 issue_date=po.get("issue_date"),
                 delivery_date=po.get("delivery_date"),
                 currency_code=po.get("currency_code", template.currency),
-                amount_subtotal=f"{round(subtotal, 2)}",
-                tax_amount=f"{round(subtotal * float(demo_vat_rate(template.currency)), 2)}",
-                amount_total=f"{round(subtotal * (1 + float(demo_vat_rate(template.currency))), 2)}",
+                amount_subtotal=str(po_net),
+                tax_amount=str(po_tax),
+                amount_total=str(po_net + po_tax),
                 status=po.get("status", "draft"),
                 notes=po.get("notes") or po_notes,
                 vendor_contact_id=po_vendor_id,
@@ -13134,6 +13151,10 @@ async def install_demo_project(
         summary.progress_pct = str(summary_prog)
         summary.status = summary_status
         summary.description = f"{len(phase_spans)} phases"
+        # The programme header reads off the activities it holds, so the two
+        # never disagree when a template declares its own dates.
+        schedule.start_date = summary.start_date
+        schedule.end_date = summary.end_date
 
     # ── 6. Budget Lines (5D) ──────────────────────────────────────────
     for i, sec in enumerate(sections_list):
