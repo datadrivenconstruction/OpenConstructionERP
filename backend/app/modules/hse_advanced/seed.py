@@ -429,25 +429,39 @@ async def seed_hse_advanced_demo(
     # on a database whose other HSE tables are already full.
     investigations = await _seed_investigations(session, project_pool)
 
-    # Idempotency: if any HSE-Advanced primary table has data, skip everything.
-    sentinel_models = (
-        JobSafetyAnalysis,
-        PermitToWork,
-        ToolboxTalk,
-        ToolboxTopic,
-        SafetyAudit,
-        CorrectiveAction,
-        PPEIssue,
-        SafetyCertification,
-    )
-    for model in sentinel_models:
-        if await _table_has_rows(session, model):
-            logger.info(
-                "HSE Advanced demo seed: bulk tables skipped (table %s already populated), investigations=%d",
-                model.__tablename__,
-                investigations,
+    # Idempotency. With explicit projects the guard is per project: a project that already
+    # carries scoped HSE rows is left alone, one installed later is seeded. The shared
+    # tables (topics, PPE, certifications) are filled once. Without projects the pool is
+    # synthetic and any populated table skips the whole seed.
+    scoped_models = (JobSafetyAnalysis, PermitToWork, ToolboxTalk, SafetyAudit, CorrectiveAction)
+    seed_topics = True
+    seed_shared = True
+    if project_ids:
+        done: set[uuid.UUID] = set()
+        for model in scoped_models:
+            done.update(
+                (await session.execute(select(model.project_id).where(model.project_id.in_(project_pool))))
+                .scalars()
+                .all()
             )
+        project_pool = [pid for pid in project_pool if pid not in done]
+        if not project_pool:
+            logger.info("HSE Advanced demo seed: every project already seeded, investigations=%d", investigations)
             return {"skipped": 1, "investigations": investigations}
+        seed_topics = not await _table_has_rows(session, ToolboxTopic)
+        seed_shared = not (
+            await _table_has_rows(session, PPEIssue) or await _table_has_rows(session, SafetyCertification)
+        )
+    else:
+        sentinel_models = (*scoped_models, ToolboxTopic, PPEIssue, SafetyCertification)
+        for model in sentinel_models:
+            if await _table_has_rows(session, model):
+                logger.info(
+                    "HSE Advanced demo seed: bulk tables skipped (table %s already populated), investigations=%d",
+                    model.__tablename__,
+                    investigations,
+                )
+                return {"skipped": 1, "investigations": investigations}
 
     now = datetime.now(UTC)
     today = date.today()
@@ -455,7 +469,9 @@ async def seed_hse_advanced_demo(
 
     # ── Toolbox topics (30) ──────────────────────────────────────────────
     topics: list[ToolboxTopic] = []
-    for idx in range(30):
+    if not seed_topics:
+        topics = list((await session.execute(select(ToolboxTopic).order_by(ToolboxTopic.code))).scalars().all())
+    for idx in range(30 if seed_topics else 0):
         title = _TOPIC_TITLES[idx % len(_TOPIC_TITLES)]
         topic = ToolboxTopic(
             id=uuid.uuid4(),
@@ -471,7 +487,7 @@ async def seed_hse_advanced_demo(
         session.add(topic)
         topics.append(topic)
     await session.flush()
-    counts["topics"] = len(topics)
+    counts["topics"] = len(topics) if seed_topics else 0
 
     # ── JSAs (50) ────────────────────────────────────────────────────────
     jsas: list[JobSafetyAnalysis] = []
@@ -602,7 +618,7 @@ async def seed_hse_advanced_demo(
 
     # ── PPE issues (80) ──────────────────────────────────────────────────
     ppe_issues: list[PPEIssue] = []
-    for idx in range(_PPE_COUNT):
+    for idx in range(_PPE_COUNT if seed_shared else 0):
         status_choice = _PPE_STATUSES[idx % len(_PPE_STATUSES)]
         ppe = PPEIssue(
             id=uuid.uuid4(),
@@ -717,7 +733,7 @@ async def seed_hse_advanced_demo(
 
     # ── Certifications (30) ──────────────────────────────────────────────
     certs: list[SafetyCertification] = []
-    for idx in range(30):
+    for idx in range(30 if seed_shared else 0):
         status_choice = _CERT_STATUSES[idx % len(_CERT_STATUSES)]
         if status_choice == "valid":
             valid_until = today + timedelta(days=rng.randint(30, 730))

@@ -34,7 +34,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.service.models import (
@@ -290,15 +290,36 @@ async def seed_service_demo(
         "checklists": 0,
     }
 
-    # Short-circuit: bail out if we already have contracts.
-    existing_contracts = (await session.execute(select(ServiceContract).limit(1))).scalar_one_or_none()
-    if existing_contracts is not None:
-        logger.info("Service demo seed: contracts already exist, skipping")
-        return counters
+    # Per project, not table-wide: a demo installed after the first boot still gets its register.
+    if project_ids:
+        already = set(
+            (
+                await session.execute(
+                    select(ServiceContract.project_id).where(ServiceContract.project_id.in_(project_ids))
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if already:
+            logger.info("Service demo seed: %d project(s) already have contracts, skipping them", len(already))
+        todo = [(i, pid) for i, pid in enumerate(project_ids) if pid not in already]
+        if not todo:
+            return counters
+    else:
+        todo = []
+        existing_contracts = (await session.execute(select(ServiceContract).limit(1))).scalar_one_or_none()
+        if existing_contracts is not None:
+            logger.info("Service demo seed: contracts already exist, skipping")
+            return counters
 
     # ── SLA definitions ──────────────────────────────────────────────────
-    slas: list[SLADefinition] = []
-    for tier, response, resolution in _SLA_TIERS:
+    slas: list[SLADefinition] = list(
+        (await session.execute(select(SLADefinition).where(SLADefinition.name.in_([t[0] for t in _SLA_TIERS]))))
+        .scalars()
+        .all()
+    )
+    for tier, response, resolution in _SLA_TIERS if not slas else ():
         sla = SLADefinition(
             name=tier,
             description=_SLA_TEXT[tier],
@@ -317,8 +338,20 @@ async def seed_service_demo(
     await session.flush()
 
     # ── Checklists ───────────────────────────────────────────────────────
-    checklists: list[AssetInspectionChecklist] = []
-    for at in _ASSET_TYPES[:_CHECKLIST_ASSET_TYPES]:
+    checklists: list[AssetInspectionChecklist] = list(
+        (
+            await session.execute(
+                select(AssetInspectionChecklist).where(
+                    AssetInspectionChecklist.name.in_(
+                        [_checklist_name(at) for at in _ASSET_TYPES[:_CHECKLIST_ASSET_TYPES]]
+                    )
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for at in _ASSET_TYPES[:_CHECKLIST_ASSET_TYPES] if not checklists else ():
         cl = AssetInspectionChecklist(
             name=_checklist_name(at),
             description=_checklist_description(at),
@@ -351,9 +384,13 @@ async def seed_service_demo(
     # is a shape rather than a register. The currency list is neither and is
     # read only where no project answers - see the contract body below.
     project_currency = await _project_currencies(session, project_ids)
-    contract_count = len(project_ids) or len(_CUSTOMER_NAMES)
-    for idx in range(contract_count):
-        pid = project_ids[idx] if idx < len(project_ids) else None
+    # Numbers and work-order numbers are unique tenant-wide, so a later run continues after the earlier ones.
+    base = int((await session.execute(select(func.count()).select_from(ServiceContract))).scalar_one() or 0)
+    wo_base = int((await session.execute(select(func.count()).select_from(ServiceWorkOrder))).scalar_one() or 0)
+    plan = [(base + k, pid) for k, (_, pid) in enumerate(todo)] or [
+        (base + k, None) for k in range(len(_CUSTOMER_NAMES))
+    ]
+    for idx, pid in plan:
         customer_id = await _customer_id_for(session, idx)
         status = contract_statuses[idx % len(contract_statuses)]
         # An expired contract whose period runs another six months is a number
@@ -550,7 +587,7 @@ async def seed_service_demo(
 
         wo = ServiceWorkOrder(
             ticket_id=ticket.id,
-            work_order_number=f"WO-{i + 1:06d}",
+            work_order_number=f"WO-{wo_base + i + 1:06d}",
             # The visit is booked shortly before the engineer fixes it, not a
             # flat two hours after the call: on a job that took three days to
             # resolve, a visit scheduled on day one and completed on day three
