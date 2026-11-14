@@ -46218,6 +46218,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Rapport du convertisseur",
   "dwg_takeoff.open_side_panel": "Calques et détails",
   "dwg_takeoff.close_side_panel": "Retour au plan",
+  "dwg_takeoff.conv_missing_dxf_hint": "Pas le temps d'installer ? Enregistrez le dessin en DXF dans votre application CAO et importez-le. Le DXF s'ouvre sans convertisseur.",
     "match_wizard.available_label": "Disponible pour installation ({{n}})",
     "match_wizard.install_aria": "Installer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} est prêt à l'emploi.",

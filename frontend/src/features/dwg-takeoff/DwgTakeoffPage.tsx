@@ -6916,6 +6916,14 @@ function ConversionErrorCard({
                 {converterSays ? ` - ${converterSays}` : ''}
               </p>
             )}
+            {isMissingConverter && (
+              <p className="text-2xs text-content-secondary mt-2 leading-relaxed" data-testid="dwg-dxf-alternative">
+                {t('dwg_takeoff.conv_missing_dxf_hint', {
+                  defaultValue:
+                    'No time to install? Save the drawing as DXF in your CAD application and upload that instead. DXF opens without the converter.',
+                })}
+              </p>
+            )}
             {isMissingConverter && <InstallDwgConverterCTA onInstalled={onRetry} />}
             {(onRetry || onDelete) && (
               <div className="mt-4 flex items-center gap-2">

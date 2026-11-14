@@ -45930,6 +45930,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Meldung des Konverters",
   "dwg_takeoff.open_side_panel": "Ebenen und Details",
   "dwg_takeoff.close_side_panel": "Zurück zur Zeichnung",
+  "dwg_takeoff.conv_missing_dxf_hint": "Keine Zeit für die Installation? Speichern Sie die Zeichnung in Ihrer CAD-Anwendung als DXF und laden Sie diese hoch. DXF lässt sich ohne Konverter öffnen.",
     "match_wizard.available_label": "Verfügbar zur Installation ({{n}})",
     "match_wizard.install_aria": "{{region}} installieren",
     "match_wizard.install_toast_ok_msg": "{{label}} ist einsatzbereit.",

@@ -1623,7 +1623,6 @@ class DwgTakeoffService:
                     "which was not found on this server. Click the "
                     '"Install converter" pill at the top right of /dwg-takeoff, '
                     f"or download it manually from {release_page_url()}. "
-                    "The converter is published for Windows only. "
                     "DXF files work without the converter."
                 ),
             )

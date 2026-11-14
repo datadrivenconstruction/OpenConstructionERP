@@ -45753,6 +45753,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "转换器报告",
   "dwg_takeoff.open_side_panel": "图层与详情",
   "dwg_takeoff.close_side_panel": "返回图纸",
+  "dwg_takeoff.conv_missing_dxf_hint": "没时间安装？请在 CAD 软件中将图纸另存为 DXF 后上传。DXF 无需转换器即可打开。",
     "match_wizard.available_label": "可安装 ({{n}})",
     "match_wizard.install_aria": "安装 {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} 已准备就绪。",
