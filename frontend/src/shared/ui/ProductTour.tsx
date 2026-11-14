@@ -1536,7 +1536,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
                 )}
                 aria-label={resolved.back}
               >
-                <ArrowLeft size={12} />
+                <ArrowLeft size={12} className="rtl:rotate-180" />
                 {resolved.back}
               </button>
             )}
@@ -1554,7 +1554,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
               aria-label={isLast ? resolved.finish : resolved.next}
             >
               {isLast ? resolved.finish : resolved.next}
-              {!isLast && <ArrowRight size={12} />}
+              {!isLast && <ArrowRight size={12} className="rtl:rotate-180" />}
             </button>
           </div>
         </div>

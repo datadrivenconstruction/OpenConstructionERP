@@ -18,6 +18,7 @@ import { canonicalGroupId, navGroups } from '@/app/layout/navCatalog';
 import { DemoMarketSwitch, useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
 import { HexMark, type HexBuildingKind } from '@/shared/ui/HexMark';
 import { companyThumbFor } from '@/features/cases/caseFaces';
+import { EmptyState } from '@/shared/ui';
 import { FeaturedArticle } from './FeaturedArticle';
 
 /**
@@ -44,7 +45,7 @@ export function demoFaceFor(slug: string): { src: string | null; kind: HexBuildi
 const FEATURED_SLUG = 'full-showcase-riyadh';
 
 const FOOTER_LINK =
-  'inline-flex items-center gap-2 rounded-full border border-border bg-surface-primary px-4 py-2 text-sm font-semibold text-content-primary hover:bg-surface-tertiary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+  'inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 text-sm font-medium text-content-primary transition-colors hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2';
 
 /**
  * Accent text on the card surface. The swatches are light-theme inks; on a dark
@@ -111,14 +112,14 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
       onClick={() => open(profile.slug)}
       data-testid={`demo-card-${profile.slug}`}
       data-featured={featured || undefined}
-      className={`group relative flex h-full w-full min-w-0 flex-col rounded-2xl border bg-surface-primary text-start text-content-primary shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-        featured ? 'border-2 shadow-md' : 'border-border-light'
+      className={`group relative flex h-full w-full min-w-0 flex-col rounded-xl border bg-surface-elevated text-start text-content-primary transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none ${
+        featured ? 'border-2' : 'border-border-light'
       }`}
       style={{ ...ink, outlineColor: accent, ...(featured ? { borderColor: accent } : {}) }}
     >
       <HexMark src={face.src} kind={face.kind} accent={accent} size={featured ? 80 : 64} className="-top-4 -start-4" />
-      <div className="h-2 w-full rounded-t-2xl" style={{ backgroundColor: accent }} />
-      <div className={`flex flex-1 flex-col p-6 ${featured ? 'xl:flex-row xl:gap-10' : ''}`}>
+      <div className="h-1.5 w-full rounded-t-xl" style={{ backgroundColor: accent }} />
+      <div className={`flex flex-1 flex-col p-5 ${featured ? 'xl:flex-row xl:gap-8' : ''}`}>
         <div className="flex min-w-0 flex-1 flex-col">
           {featured && (
             <span
@@ -133,7 +134,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
             {t(`${profile.stem}.audience`)}
           </p>
           <h2
-            className="mt-1 ps-12 text-xl font-semibold text-content-primary"
+            className="mt-1 ps-12 text-lg font-semibold text-content-primary"
             style={{ fontFamily: FONT_STACK[profile.appearance.font] }}
           >
             {t(`${profile.stem}.title`)}
@@ -161,7 +162,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
             ))}
           </ul>
           <SectionChips profile={profile} />
-          <div className="mt-auto flex items-center justify-between gap-3 pt-6">
+          <div className="mt-auto flex items-center justify-between gap-3 pt-5">
             <span className="text-xs text-content-tertiary">
               {t('demo_chooser.sections', {
                 defaultValue: 'Menu: {{n}} of {{total}} sections',
@@ -170,7 +171,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
               })}
             </span>
             <span
-              className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition group-hover:gap-2.5"
+              className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-white transition-[gap] group-hover:gap-2.5"
               style={{ backgroundColor: accent }}
             >
               {t('demo_chooser.open', { defaultValue: 'Open this demo' })}
@@ -191,16 +192,15 @@ export function DemoChooserPage() {
   const others = installed.filter((p) => p.slug !== FEATURED_SLUG);
 
   return (
-    <div className="animate-fade-in">
-      <div className="space-y-5 sm:px-4 lg:px-8">
+    <div className="space-y-5 animate-fade-in">
       <header className="text-center">
-        <h1 className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <p className="oe-overline">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
-        </h1>
-        <p className="mt-1 text-2xl font-semibold text-content-primary">
-          {t('demo_chooser.title', { defaultValue: 'Which company do you want to see?' })}
         </p>
-        <p className="mx-auto mt-2 max-w-4xl text-base text-content-secondary">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-content-primary">
+          {t('demo_chooser.title', { defaultValue: 'Which company do you want to see?' })}
+        </h1>
+        <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-content-secondary">
           {t('demo_chooser.subtitle', {
             defaultValue:
               'Each demo is a real-sized project run by a different kind of company, with a menu cut to its work. Switch any time from the bar at the top.',
@@ -220,13 +220,14 @@ export function DemoChooserPage() {
       </header>
 
       {loaded && installed.length === 0 && (
-        <p className="text-center text-content-secondary">
-          {t('demo_chooser.none', { defaultValue: 'No demo project is installed on this server yet.' })}
-        </p>
+        <EmptyState
+          icon={<Sparkles size={20} />}
+          title={t('demo_chooser.none', { defaultValue: 'No demo project is installed on this server yet.' })}
+        />
       )}
 
       {/* The full platform spans two variant columns; the article on the idea behind it fills the third. */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 pt-3 lg:grid-cols-3" data-testid="demo-chooser-lead">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-8 pt-3 lg:grid-cols-3" data-testid="demo-chooser-lead">
         {featured && (
           <div className="min-w-0 lg:col-span-2">
             <DemoCard profile={featured} featured />
@@ -244,7 +245,7 @@ export function DemoChooserPage() {
               defaultValue: 'Or start from a variant cut to one kind of company',
             })}
           </h2>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 pt-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-8 pt-3 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((profile) => (
               <DemoCard key={profile.slug} profile={profile} />
             ))}
@@ -254,7 +255,7 @@ export function DemoChooserPage() {
 
       <section
         data-testid="demo-chooser-footer"
-        className="flex flex-col gap-4 rounded-2xl border border-border-light bg-surface-secondary p-6 md:flex-row md:items-center md:justify-between"
+        className="flex flex-col gap-4 rounded-xl border border-border-light bg-surface-secondary p-5 md:flex-row md:items-center md:justify-between"
       >
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-content-primary">
@@ -267,7 +268,7 @@ export function DemoChooserPage() {
             })}
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-3">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <Link to="/packs" data-testid="demo-footer-packs" className={FOOTER_LINK}>
             <Globe size={16} />
             {t('demo_chooser.footer_packs', { defaultValue: 'Country packs' })}
@@ -278,7 +279,6 @@ export function DemoChooserPage() {
           </Link>
         </div>
       </section>
-      </div>
     </div>
   );
 }
