@@ -34,7 +34,7 @@ pip install --upgrade openconstructionerp && openconstructionerp
 
 <sub><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/device-camera-video-dark.svg"><img src="docs/readme-icons/device-camera-video-light.svg" width="14" align="center" alt=""></picture> <b>1-minute teaser above</b> · for the full 12-minute walkthrough → <a href="https://www.youtube.com/watch?v=X06cIaroAeI"><b>watch on YouTube</b></a> · onboarding → BOQ → BIM → DWG → PDF → AI → dashboard</sub>
 
-<img src="docs/screenshots/banner.png" alt="OpenConstructionERP: a honeycomb of the eight company types and fifteen professional roles the platform is built around, over a second honeycomb of its 190+ backend modules and the two shared libraries drawn beside them, each cell coloured by the category its own manifest declares and shaded by how many of the others it is wired to" width="800" />
+<img src="docs/screenshots/banner.png" alt="OpenConstructionERP: a honeycomb of the eight company types and fifteen professional roles the platform is built around, over a second honeycomb of its 240+ backend modules and the two shared libraries drawn beside them, each cell coloured by the category its own manifest declares and shaded by how many of the others it is wired to" width="800" />
 
 <br/><br/>
 
@@ -54,7 +54,7 @@ pip install --upgrade openconstructionerp && openconstructionerp
 <td align="center" width="16.66%"><b>44</b><br/><sub>languages</sub></td>
 <td align="center" width="16.66%"><b>47</b><br/><sub>countries</sub></td>
 <td align="center" width="16.66%"><b>6</b><br/><sub>CAD&nbsp;formats</sub></td>
-<td align="center" width="16.66%"><b>190+</b><br/><sub>modules</sub></td>
+<td align="center" width="16.66%"><b>240+</b><br/><sub>modules</sub></td>
 <td align="center" width="16.66%"><b>293</b><br/><sub>guided&nbsp;cases</sub></td>
 </tr>
 </table>
@@ -110,7 +110,7 @@ Details for each area are under [Key Features](#key-features).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/shield-check-dark.svg"><img src="docs/readme-icons/shield-check-light.svg" width="14" align="center" alt=""></picture> **Quality & Setup**
 - [Guided Onboarding](#-guided-onboarding)
-- [All 190+ Modules](MODULES.md)
+- [All 240+ Modules](MODULES.md)
 
 </td>
 </tr>
@@ -163,23 +163,14 @@ Details for each area are under [Key Features](#key-features).
 </tr>
 </table>
 
-<details>
-<summary><b>All playlists by country and language</b></summary>
+<table width="100%">
+<tr><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLWgzwe9nHkSc" title="Builder's Playbook USA (10 videos)">🇺🇸&nbsp;English (US)</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLTRtkYLR23qM" title="Builder's Playbook UK (6 videos)">🇬🇧&nbsp;English (UK)</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLPZV4i5ViBm8" title="Builder's Playbook Canada (6 videos)">🇨🇦&nbsp;English (CA)</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLey59QidNON0" title="Builder's Playbook Québec (5 videos)">⚜️&nbsp;Français (QC)</a></td></tr>
+<tr><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLKN9p-CuMMkE" title="Auf Deutsch, Projekt Landshut (12 videos)">🇩🇪&nbsp;Deutsch</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLEvGjPeBbuxQ" title="Kosten nach DIN 276 (8 videos)">🇩🇪&nbsp;DIN 276</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLEhAODe5YAXM" title="En français, gérer un chantier (4 videos)">🇫🇷&nbsp;Français</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLHgtnDPr3Rjg" title="Builder's Playbook España (8 videos)">🇪🇸&nbsp;Español</a></td></tr>
+<tr><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLObqqyP8chDs" title="Builder's Playbook Italia (7 videos)">🇮🇹&nbsp;Italiano</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLfSvz7emI6lQ" title="Builder's Playbook България (9 videos)">🇧🇬&nbsp;Български</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLP4TpwP1yVyI" title="Builder's Playbook Hrvatska (5 videos)">🇭🇷&nbsp;Hrvatski</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLVLOe3pv2_oo" title="Budowa domu: kosztorys i rozliczenie (5 videos)">🇵🇱&nbsp;Polski</a></td></tr>
+<tr><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLL2jqtV6A934" title="Okul ek binası: maliyetten kesin hesaba (5 videos)">🇹🇷&nbsp;Türkçe</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLO8UfCu9nokM" title="عظم فيلا في الرياض (5 videos)">🇸🇦&nbsp;العربية</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLLe-gfSauXTY" title="Builder's Playbook Brasil (5 videos)">🇧🇷&nbsp;Português (BR)</a></td><td align="center" width="25%"><a href="https://www.youtube.com/playlist?list=PLOCZ6EOWyC_A" title="Builder's Playbook 中国 (8 videos)">🇨🇳&nbsp;中文</a></td></tr>
+</table>
 
-| | |
-|---|---|
-| 🇺🇸 [Builder's Playbook USA](https://www.youtube.com/playlist?list=PLWgzwe9nHkSc) (10) | 🇬🇧 [Builder's Playbook UK](https://www.youtube.com/playlist?list=PLTRtkYLR23qM) (6) |
-| 🇨🇦 [Builder's Playbook Canada](https://www.youtube.com/playlist?list=PLPZV4i5ViBm8) (6) | ⚜️ [Builder's Playbook Québec](https://www.youtube.com/playlist?list=PLey59QidNON0) (5) |
-| 🇩🇪 [Auf Deutsch, Projekt Landshut](https://www.youtube.com/playlist?list=PLKN9p-CuMMkE) (12) | 🇩🇪 [Kosten nach DIN 276](https://www.youtube.com/playlist?list=PLEvGjPeBbuxQ) (8) |
-| 🇫🇷 [En français, gérer un chantier](https://www.youtube.com/playlist?list=PLEhAODe5YAXM) (4) | 🇪🇸 [Builder's Playbook España](https://www.youtube.com/playlist?list=PLHgtnDPr3Rjg) (8) |
-| 🇮🇹 [Builder's Playbook Italia](https://www.youtube.com/playlist?list=PLObqqyP8chDs) (7) | 🇧🇬 [Builder's Playbook България](https://www.youtube.com/playlist?list=PLfSvz7emI6lQ) (9) |
-| 🇭🇷 [Builder's Playbook Hrvatska](https://www.youtube.com/playlist?list=PLP4TpwP1yVyI) (5) | 🇵🇱 [Budowa domu: kosztorys i rozliczenie](https://www.youtube.com/playlist?list=PLVLOe3pv2_oo) (5) |
-| 🇹🇷 [Okul ek binası: maliyetten kesin hesaba](https://www.youtube.com/playlist?list=PLL2jqtV6A934) (5) | 🇸🇦 [عظم فيلا في الرياض](https://www.youtube.com/playlist?list=PLO8UfCu9nokM) (5) |
-| 🇧🇷 [Builder's Playbook Brasil](https://www.youtube.com/playlist?list=PLLe-gfSauXTY) (5) | 🇨🇳 [Builder's Playbook 中国](https://www.youtube.com/playlist?list=PLOCZ6EOWyC_A) (8) |
-
-Also: [The uberization of construction (ETH Zürich)](https://www.youtube.com/watch?v=R_PQQHXY-rQ), a 14-minute talk on where construction software is heading.
-
-</details>
+<p align="center"><sub>16 playlists, one real project per country. Also: <a href="https://www.youtube.com/watch?v=R_PQQHXY-rQ">The uberization of construction (ETH Zürich)</a>, a 14-minute talk on where construction software is heading.</sub></p>
 
 ---
 
@@ -374,7 +365,7 @@ Extract quantities from any source - drawings, models, text, or photos:
 - **AI Cost Advisor** - Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
 - **Cost matching** - After AI generates an estimate, match each item against your CWICR database to replace AI-guessed rates with real market prices
 
-The platform also includes 3D globe visualization (Cesium), property development lifecycle, accommodation management, an AI assistant that prepares changes for a person to approve, BIM clash detection, 4D/5D scheduling, tendering and risk management, PDF markups, punch lists, daily diary with HSE tracking, and 30+ regional classification standards. See [MODULES.md](MODULES.md) for the full list of 190+ modules.
+The platform also includes 3D globe visualization (Cesium), property development lifecycle, accommodation management, an AI assistant that prepares changes for a person to approve, BIM clash detection, 4D/5D scheduling, tendering and risk management, PDF markups, punch lists, daily diary with HSE tracking, and 30+ regional classification standards. See [MODULES.md](MODULES.md) for the full list of 240+ modules.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> Guided Onboarding
 
@@ -568,7 +559,7 @@ The right-hand side of the diagram is the **automatic data retrieval** layer tha
                    │ REST + SSE
 ┌──────────────────┴───────────────────────────────┐
 │  Backend (FastAPI)                               │
-│  190+ auto-discovered modules · Plugin system    │
+│  240+ auto-discovered modules · Plugin system    │
 ├──────────────────────────────────────────────────┤
 │  BOQ · Costs · Schedule · 5D · Validation · AI   │
 │  Takeoff · Tendering · Risk · Reports · Catalog  │
