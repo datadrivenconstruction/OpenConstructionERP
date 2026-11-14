@@ -72,7 +72,7 @@ export const FLAGSHIP_DEMOS: FlagshipDemo[] = [
     points: [
       'Six business lines in one project',
       'From design fees to fit-out and FF&E',
-      'Mixed-use hub, about SAR 78 million',
+      'Mixed-use hub, about SAR 121 million',
     ],
   },
 ];

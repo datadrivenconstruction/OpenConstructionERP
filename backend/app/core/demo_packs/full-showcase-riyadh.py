@@ -30,7 +30,7 @@ TEMPLATE = DemoTemplate(
         "runs six business lines: design and supervision consultancy, building construction, site "
         "development, landscaping, architectural and interior fit-out, and FF&E procurement with a "
         "supplier-priced furniture, fixtures and equipment schedule. GFA about 14,200 m2, direct "
-        "cost about SAR 78 million."
+        "cost about SAR 121 million before overheads, profit and VAT."
     ),
     region="SA",
     classification_standard="masterformat",

@@ -6,16 +6,18 @@
  * look and a menu cut to its work.
  */
 
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Globe, SlidersHorizontal, Sparkles } from 'lucide-react';
-import { ACCENT_SWATCH, FONT_STACK } from '@/shared/lib/appearance';
+import { ACCENT_SWATCH, FONT_STACK, type Accent } from '@/shared/lib/appearance';
 import { DEMO_PROFILES, type DemoProfile } from '@/shared/lib/demoProfiles';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { navGroups } from '@/app/layout/navCatalog';
-import { useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
+import { DemoMarketSwitch, useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
 import { HexMark, type HexBuildingKind } from '@/shared/ui/HexMark';
 import { companyThumbFor } from '@/features/cases/caseFaces';
+import { FeaturedArticle } from './FeaturedArticle';
 
 /**
  * The picture in each card's hex: the site scene of the company type the demo
@@ -27,6 +29,8 @@ const DEMO_FACE: Record<string, { companyType: string; kind: HexBuildingKind }> 
   'office-london': { companyType: 'commercial-manager', kind: 'tower' },
   'medical-us': { companyType: 'construction-manager', kind: 'hospital' },
   'condo-toronto': { companyType: 'real_estate_developer', kind: 'tower' },
+  'school-paris': { companyType: 'government-agency', kind: 'residential' },
+  'office-shanghai': { companyType: 'estimator', kind: 'tower' },
 };
 
 export function demoFaceFor(slug: string): { src: string | null; kind: HexBuildingKind } {
@@ -35,17 +39,68 @@ export function demoFaceFor(slug: string): { src: string | null; kind: HexBuildi
   return { src: companyThumbFor(face.companyType), kind: face.kind };
 }
 
-/** The platform with every module on: shown first and larger than the company cuts. */
+/** The platform with every module on: first, two columns wide, beside the featured article. */
 const FEATURED_SLUG = 'full-showcase-riyadh';
 
 const FOOTER_LINK =
   'inline-flex items-center gap-2 rounded-full border border-border bg-surface-primary px-4 py-2 text-sm font-semibold text-content-primary hover:bg-surface-tertiary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+
+/**
+ * Accent text on the card surface. The swatches are light-theme inks; on a dark
+ * card graphite or crimson sink below AA, so dark mode reads the same tints the
+ * app's dark accents use (index.css `--oe-blue-text`).
+ */
+const ACCENT_TEXT_DARK: Record<Accent, string> = {
+  blue: '#93c5fd',
+  teal: '#99f6e4',
+  violet: '#ddd6fe',
+  emerald: '#a7f3d0',
+  amber: '#fde68a',
+  graphite: '#e2e8f0',
+  crimson: '#fecdd3',
+};
+
+const ACCENT_TEXT = 'text-[color:var(--demo-ink)] dark:text-[color:var(--demo-ink-dark)]';
+
+/** Sections every demo keeps (overview, documents, communication): not worth a chip. */
+const BASE_GROUPS = new Set(['grp_overview', 'grp_documents', 'grp_communication']);
+const MAX_CHIPS = 5;
+
+function SectionChips({ profile }: { profile: DemoProfile }) {
+  const { t } = useTranslation();
+  if (!profile.groups) return null;
+  const own = profile.groups.filter((g) => !BASE_GROUPS.has(g));
+  const shown = own.slice(0, MAX_CHIPS);
+  const rest = own.length - shown.length;
+  return (
+    <ul className="mt-4 flex flex-wrap gap-1.5" data-testid={`demo-sections-${profile.slug}`}>
+      {shown.map((id) => {
+        const group = navGroups.find((g) => g.id === id);
+        if (!group) return null;
+        return (
+          <li
+            key={id}
+            className="rounded-full border border-border-light bg-surface-secondary px-2.5 py-0.5 text-xs font-medium text-content-secondary"
+          >
+            {t(group.labelKey, { defaultValue: group.defaultLabel ?? id })}
+          </li>
+        );
+      })}
+      {rest > 0 && (
+        <li className="px-1 py-0.5 text-xs font-medium text-content-tertiary">
+          {t('demo_chooser.more_sections', { defaultValue: '+{{n}} more', n: fmtNumber(rest, 0) })}
+        </li>
+      )}
+    </ul>
+  );
+}
 
 function DemoCard({ profile, featured = false }: { profile: DemoProfile; featured?: boolean }) {
   const { t } = useTranslation();
   const { bySlug, open } = useDemoProjects();
   const allSections = navGroups.length;
   const accent = ACCENT_SWATCH[profile.appearance.accent];
+  const ink = { '--demo-ink': accent, '--demo-ink-dark': ACCENT_TEXT_DARK[profile.appearance.accent] } as CSSProperties;
   const sections = profile.groups ? profile.groups.length : allSections;
   const list = [1, 2, 3].map((i) => t(`${profile.stem}.point_${i}`));
   const face = demoFaceFor(profile.slug);
@@ -55,14 +110,14 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
       onClick={() => open(profile.slug)}
       data-testid={`demo-card-${profile.slug}`}
       data-featured={featured || undefined}
-      className={`group relative flex min-w-0 flex-col rounded-2xl border bg-surface-primary text-start shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+      className={`group relative flex h-full w-full min-w-0 flex-col rounded-2xl border bg-surface-primary text-start text-content-primary shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
         featured ? 'border-2 shadow-md' : 'border-border-light'
       }`}
-      style={{ outlineColor: accent, ...(featured ? { borderColor: accent } : {}) }}
+      style={{ ...ink, outlineColor: accent, ...(featured ? { borderColor: accent } : {}) }}
     >
       <HexMark src={face.src} kind={face.kind} accent={accent} size={featured ? 80 : 64} className="-top-4 -start-4" />
       <div className="h-2 w-full rounded-t-2xl" style={{ backgroundColor: accent }} />
-      <div className={`flex flex-1 flex-col p-6 ${featured ? 'lg:flex-row lg:gap-10' : ''}`}>
+      <div className={`flex flex-1 flex-col p-6 ${featured ? 'xl:flex-row xl:gap-10' : ''}`}>
         <div className="flex min-w-0 flex-1 flex-col">
           {featured && (
             <span
@@ -73,7 +128,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
               {t('demo_chooser.featured_badge', { defaultValue: 'Full platform: every module' })}
             </span>
           )}
-          <p className="ps-12 text-xs font-semibold uppercase tracking-wide" style={{ color: accent }}>
+          <p className={`ps-12 text-xs font-semibold uppercase tracking-wide ${ACCENT_TEXT}`}>
             {t(`${profile.stem}.audience`)}
           </p>
           <h2
@@ -90,17 +145,21 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
             <span aria-hidden="true">·</span>
             <span className="min-w-0 truncate">{bySlug.get(profile.slug)?.name}</span>
           </p>
+          <p className="mt-1 text-xs font-medium text-content-tertiary" data-testid={`demo-standards-${profile.slug}`}>
+            {profile.standards}
+          </p>
           <p className="mt-3 text-sm text-content-secondary">{t(`${profile.stem}.body`)}</p>
         </div>
-        <div className={`flex flex-1 flex-col ${featured ? 'lg:justify-center' : ''}`}>
-          <ul className="mt-4 space-y-1.5 text-sm text-content-primary lg:mt-0">
+        <div className={`flex flex-1 flex-col ${featured ? 'xl:justify-center' : ''}`}>
+          <ul className="mt-4 space-y-1.5 text-sm text-content-primary xl:mt-0">
             {list.map((point) => (
               <li key={point} className="flex gap-2">
-                <Check size={16} className="mt-0.5 shrink-0" style={{ color: accent }} />
+                <Check size={16} className={`mt-0.5 shrink-0 ${ACCENT_TEXT}`} />
                 <span>{point}</span>
               </li>
             ))}
           </ul>
+          <SectionChips profile={profile} />
           <div className="mt-auto flex items-center justify-between gap-3 pt-6">
             <span className="text-xs text-content-tertiary">
               {t('demo_chooser.sections', {
@@ -110,7 +169,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
               })}
             </span>
             <span
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition group-hover:gap-2.5"
+              className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition group-hover:gap-2.5"
               style={{ backgroundColor: accent }}
             >
               {t('demo_chooser.open', { defaultValue: 'Open this demo' })}
@@ -146,6 +205,17 @@ export function DemoChooserPage() {
               'Each demo is a real-sized project run by a different kind of company, with a menu cut to its work. Switch any time from the bar at the top.',
           })}
         </p>
+        {installed.length > 0 && (
+          <div className="mx-auto mt-4 flex max-w-xl flex-col items-center gap-1.5">
+            <DemoMarketSwitch className="w-full" />
+            <p className="text-xs text-content-tertiary">
+              {t('demo_market.hint', {
+                defaultValue:
+                  'Sets the interface language and opens the demo for that country, with its own data and standards.',
+              })}
+            </p>
+          </div>
+        )}
       </header>
 
       {loaded && installed.length === 0 && (
@@ -154,11 +224,17 @@ export function DemoChooserPage() {
         </p>
       )}
 
-      {featured && (
-        <div className="pt-3">
-          <DemoCard profile={featured} featured />
+      {/* The full platform spans two variant columns; the article on the idea behind it fills the third. */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 pt-3 lg:grid-cols-3" data-testid="demo-chooser-lead">
+        {featured && (
+          <div className="min-w-0 lg:col-span-2">
+            <DemoCard profile={featured} featured />
+          </div>
+        )}
+        <div className={`min-w-0 ${featured ? '' : 'lg:col-start-3'}`}>
+          <FeaturedArticle />
         </div>
-      )}
+      </div>
 
       {others.length > 0 && (
         <>

@@ -48183,7 +48183,7 @@ const resource = {
     "onboarding.flagship_full_for": "Quem quer conhecer a plataforma inteira",
     "onboarding.flagship_full_p1": "Seis linhas de negócio em um só projeto",
     "onboarding.flagship_full_p2": "De honorários de projeto a acabamento e FF&E",
-    "onboarding.flagship_full_p3": "Polo de uso misto, cerca de 78 milhões de SAR",
+    "onboarding.flagship_full_p3": "Polo de uso misto, cerca de 121 milhões de SAR",
     "onboarding.ready_pack_company_title": "Seu tipo de empresa",
     "onboarding.ready_pack_company_hint": "Opcional. Combine com um pacote para começar com os módulos e o menu de que o seu ofício precisa.",
     "onboarding.ready_pack_company_chosen": "Tipo de empresa: {{name}}",

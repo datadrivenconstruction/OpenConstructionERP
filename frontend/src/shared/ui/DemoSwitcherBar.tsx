@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * DemoSwitcherBar - tab strip on the public hosted demo that switches between
- * the four showcase demos. Rendered only when the backend reports
+ * the showcase demos. Rendered only when the backend reports
  * `demo_mode: true`. Projects are matched by the `demo_id` marker the demo
  * installer writes into project metadata, so no ids are hardcoded.
  *
@@ -11,12 +11,13 @@
  * `/onboarding/demo`; a `?demo=<slug>` link from the website skips the picker.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { LayoutGrid, Lock } from 'lucide-react';
+import { Languages, LayoutGrid, Lock } from 'lucide-react';
+import { changeLanguage, getLanguageByCode } from '@/app/i18n';
 import { apiGet } from '@/shared/lib/api';
 import { ACCENT_SWATCH } from '@/shared/lib/appearance';
 import {
@@ -31,6 +32,7 @@ import {
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { navGroups } from '@/app/layout/navCatalog';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -64,6 +66,7 @@ export function useDemoProjects() {
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
   const setAppearance = useAppearanceStore((s) => s.setAppearance);
   const setHiddenGroups = useModuleStore((s) => s.setHiddenGroups);
+  const setDemo = useDemoSessionStore((s) => s.setDemo);
 
   const { data: sys } = useQuery<{ demo_mode?: boolean }>({
     queryKey: ['system-status'],
@@ -103,13 +106,82 @@ export function useDemoProjects() {
       );
       applyDemoMenuStyle(profile.menuStyle);
       writeChosenDemo(slug);
+      setDemo(slug);
       setActiveProject(p.id, p.name);
       navigate(`/projects/${p.id}`);
     },
-    [bySlug, navigate, setActiveProject, setAppearance, setHiddenGroups],
+    [bySlug, navigate, setActiveProject, setAppearance, setHiddenGroups, setDemo],
   );
 
   return { demoMode, loaded: projects !== undefined, bySlug, open };
+}
+
+/**
+ * One control for language and market: picking "Deutsch · Deutschland" switches
+ * the interface to German first, then opens the German demo with its DIN 276
+ * data, so the screen never shows German data under a half-switched menu. The
+ * cards and tabs open a demo and leave the visitor's language alone, so the
+ * select names a market only while the screen really is in its language.
+ */
+export function DemoMarketSwitch({ className }: { className?: string }) {
+  const { t, i18n } = useTranslation();
+  const { bySlug, open } = useDemoProjects();
+  const active = useDemoSessionStore((s) => s.slug);
+  const [busy, setBusy] = useState(false);
+  const available = DEMO_PROFILES.filter((p) => bySlug.has(p.slug));
+  if (available.length === 0) return null;
+  const lang = (i18n.language || 'en').split('-')[0];
+  const shown = available.find((p) => p.slug === active);
+  const current = shown && shown.locale.split('-')[0] === lang ? shown.slug : '';
+
+  const choose = async (slug: string) => {
+    const profile = demoProfile(slug);
+    if (!profile) return;
+    setBusy(true);
+    try {
+      await changeLanguage(profile.locale);
+      open(profile.slug);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const label = t('demo_market.label', { defaultValue: 'Language and market' });
+  const hint = t('demo_market.hint', {
+    defaultValue: 'Sets the interface language and opens the demo for that country, with its own data and standards.',
+  });
+  return (
+    <label
+      className={clsx(
+        'flex min-w-0 items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-sm text-content-secondary focus-within:ring-2 focus-within:ring-oe-blue',
+        className,
+      )}
+      title={hint}
+    >
+      <Languages size={16} className="shrink-0" aria-hidden="true" />
+      <span className="hidden shrink-0 font-medium sm:inline">{label}</span>
+      <select
+        data-testid="demo-market-switch"
+        aria-label={label}
+        value={current}
+        disabled={busy}
+        aria-busy={busy || undefined}
+        onChange={(e) => void choose(e.target.value)}
+        className="min-w-0 flex-1 cursor-pointer truncate bg-transparent font-semibold text-content-primary outline-none disabled:cursor-wait disabled:opacity-60"
+      >
+        {current === '' && (
+          <option value="" disabled>
+            {label}
+          </option>
+        )}
+        {available.map((p) => (
+          <option key={p.slug} value={p.slug}>
+            {`${getLanguageByCode(p.locale).name} · ${t(`${p.stem}.country`)} · ${p.standards}`}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 }
 
 export function DemoSwitcherBar() {
@@ -164,6 +236,7 @@ export function DemoSwitcherBar() {
         <LayoutGrid size={16} className="shrink-0" />
         {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
       </button>
+      <DemoMarketSwitch className="max-w-full sm:max-w-sm" />
       <div role="tablist" className="flex flex-wrap gap-1.5">
         {available.map((profile) => {
           const p = bySlug.get(profile.slug);
