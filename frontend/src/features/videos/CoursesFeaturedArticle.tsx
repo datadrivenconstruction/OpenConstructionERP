@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, Newspaper } from 'lucide-react';
-import { FEATURED_ARTICLE_COVER, FEATURED_ARTICLE_URL } from '@/features/cases/FeaturedArticle';
+import { FEATURED_ARTICLE_COVER, FEATURED_ARTICLE_URL } from '@/features/demo/FeaturedArticle';
 
 export function CoursesFeaturedArticle() {
   const { t } = useTranslation();

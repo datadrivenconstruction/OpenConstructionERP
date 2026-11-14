@@ -221,7 +221,7 @@ WITHHOLDING_REGIMES: tuple[dict[str, Any], ...] = (
         "legal_reference": "Income Tax Law, Article 68; Implementing Regulations, Article 63",
         "authority": "Zakat, Tax and Customs Authority",
         "currency_code": "SAR",
-        "default_band_code": "SERVICES",
+        "default_band_code": "MANAGEMENT_FEE",
         # Saudi VAT on such a supply is accounted for by the buyer under the reverse charge and is
         # not part of the income-tax base; goods supplied from abroad are not a withholding payment.
         "materials_excluded": True,
