@@ -376,6 +376,115 @@ _GERMAN_REVISION_CHAIN: tuple[_DocSpec, ...] = (
     ),
 )
 
+#: Name, description and tags of the shared register in the languages whose demo projects would
+#: otherwise read English. Keyed by language prefix of the project locale, then by spec key.
+_LOCALE_TEXT: dict[str, dict[str, tuple[str, str, list[str]]]] = {
+    "de": {
+        "ga-p01": (
+            "Grundriss Ebene 00 (P.01.01).pdf",
+            "Vorentwurf des Grundrisses zur Koordination. Ersetzt.",
+            ["grundriss", "ebene 00", "ersetzt"],
+        ),
+        "ga-c01": (
+            "Grundriss Ebene 00 (C.01).pdf",
+            "Zur Ausführung freigegebener Grundriss. Ersetzt P.01.01.",
+            ["grundriss", "ebene 00", "zur ausführung"],
+        ),
+        "framing": (
+            "Tragwerksplan.pdf",
+            "Tragwerksplan zur Abstimmung mit dem Fachmodell Haustechnik.",
+            ["tragwerk", "bauteilplan", "koordination"],
+        ),
+        "spec-concrete": (
+            "Leistungsbeschreibung - Betonarbeiten.pdf",
+            "Baustoffe, Toleranzen und Prüfumfang für Ortbeton.",
+            ["leistungsbeschreibung", "beton", "prüfung"],
+        ),
+        "spec-mep": (
+            "Leistungsbeschreibung - Technische Gebäudeausrüstung.pdf",
+            "Leistungsanforderungen an die TGA-Installation. In Bearbeitung.",
+            ["leistungsbeschreibung", "tga", "entwurf"],
+        ),
+        "contract-main": (
+            "Hauptvertrag - Leistungsumfang und Bedingungen.pdf",
+            "Unterzeichneter Hauptvertrag: Leistungsumfang, Terminpflichten und Zahlungsbedingungen.",
+            ["vertrag", "hauptvertrag", "unterzeichnet"],
+        ),
+        "contract-groundworks": (
+            "Nachunternehmervertrag - Erdarbeiten.pdf",
+            "Nachunternehmervertrag Erdarbeiten, zur Freigabe der Leistungsphase vorgelegt.",
+            ["vertrag", "nachunternehmer", "erdarbeiten"],
+        ),
+        "letter-instruction": (
+            "Anordnung 014 - geänderte Türliste.pdf",
+            "Anordnung an den Auftragnehmer zur geänderten Türliste.",
+            ["anordnung", "türen", "erteilt"],
+        ),
+        "letter-early-warning": (
+            "Behinderungsanzeige - verspätete Freigabe der Fassadenplanung.pdf",
+            "Anzeige zum Freigabetermin der Fassadenplanung.",
+            ["behinderungsanzeige", "fassade", "terminplan"],
+        ),
+        "method-facade": (
+            "Montageanweisung - Fassadeneinbau.pdf",
+            "Ablauf, Geräte und Schutzmaßnahmen für den Einbau der Fassadenelemente.",
+            ["montageanweisung", "fassade", "arbeitssicherheit"],
+        ),
+    },
+    "fr": {
+        "ga-p01": (
+            "Plan d'ensemble - Niveau 00 (P.01.01).pdf",
+            "Plan d'ensemble préliminaire émis pour la coordination. Remplacé.",
+            ["plan d'ensemble", "niveau 00", "remplacé"],
+        ),
+        "ga-c01": (
+            "Plan d'ensemble - Niveau 00 (C.01).pdf",
+            "Plan d'ensemble approuvé pour exécution. Remplace P.01.01.",
+            ["plan d'ensemble", "niveau 00", "bon pour exécution"],
+        ),
+        "framing": (
+            "Plan de structure.pdf",
+            "Plan de structure émis pour la coordination avec la maquette des lots techniques.",
+            ["structure", "ossature", "coordination"],
+        ),
+        "spec-concrete": (
+            "CCTP - Lot béton.pdf",
+            "Matériaux, tolérances et programme d'essais du béton coulé en place.",
+            ["cctp", "béton", "essais"],
+        ),
+        "spec-mep": (
+            "CCTP - Lots techniques CVC, plomberie et électricité.pdf",
+            "Performances exigées des installations techniques. En cours de rédaction.",
+            ["cctp", "lots techniques", "projet"],
+        ),
+        "contract-main": (
+            "Marché principal - consistance et conditions.pdf",
+            "Marché principal signé : consistance des travaux, obligations de délais et modalités de paiement.",
+            ["marché", "principal", "signé"],
+        ),
+        "contract-groundworks": (
+            "Contrat de sous-traitance - lot terrassement.pdf",
+            "Contrat de sous-traitance du lot terrassement, soumis à l'agrément de la phase.",
+            ["marché", "sous-traitance", "terrassement"],
+        ),
+        "letter-instruction": (
+            "Ordre de service 014 - bordereau de portes révisé.pdf",
+            "Ordre de service adressé à l'entreprise sur le bordereau de portes révisé.",
+            ["ordre de service", "portes", "émis"],
+        ),
+        "letter-early-warning": (
+            "Alerte - remise tardive des études de façade.pdf",
+            "Alerte sur la date de remise des études de façade.",
+            ["alerte", "façade", "planning"],
+        ),
+        "method-facade": (
+            "Mode opératoire - pose de la façade.pdf",
+            "Séquence, matériel et mesures de maîtrise pour la pose des panneaux de façade.",
+            ["mode opératoire", "façade", "sécurité"],
+        ),
+    },
+}
+
 
 def _register_for(project_name: str) -> tuple[_DocSpec, ...]:
     """The register one project gets.
@@ -413,6 +522,15 @@ def _localized(spec: _DocSpec, story: dict[str, Any], locale: str) -> _DocSpec:
         description=description or spec.description,
         tags=tags if tags and all(tags) else spec.tags,
     )
+
+
+def _in_locale(spec: _DocSpec, locale: str | None) -> _DocSpec:
+    """The spec worded in the project's language when the locale table covers it, else unchanged."""
+    row = _LOCALE_TEXT.get((locale or "en").lower()[:2], {}).get(spec.key)
+    if row is None or spec.name != next((s.name for s in _REGISTER if s.key == spec.key), None):
+        return spec
+    name, description, tags = row
+    return replace(spec, name=name, description=description, tags=list(tags))
 
 
 def _safe_name(name: str) -> str:
@@ -653,6 +771,7 @@ async def _seed_project(
     for spec in specs:
         if story:
             spec = _localized(spec, story, locale or "en")
+        spec = _in_locale(spec, locale)
         if not _check_suitability(spec):
             continue
         stored = _store(project_id, spec)

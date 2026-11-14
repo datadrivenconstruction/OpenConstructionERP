@@ -856,6 +856,31 @@ _ORDER_VALUE: dict[str, str] = {
 }
 
 
+async def _project_vendor_id(session: AsyncSession, project_id: uuid.UUID, code: str) -> str | None:
+    """A supplier or subcontractor from the project's own contacts, one per plant code in turn."""
+    from app.modules.contacts.models import Contact
+
+    rows = (
+        (
+            await session.execute(
+                select(Contact).where(
+                    Contact.contact_type.in_(("supplier", "subcontractor")), Contact.is_active.is_(True)
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    own = sorted(
+        (c for c in rows if isinstance(c.metadata_, dict) and c.metadata_.get("project_id") == str(project_id)),
+        key=lambda c: (c.contact_type != "supplier", c.company_name or "", str(c.id)),
+    )
+    if not own:
+        return None
+    digits = "".join(ch for ch in code if ch.isdigit())
+    return str(own[(int(digits) if digits else 0) % len(own)].id)
+
+
 async def _order(session: AsyncSession, project_id: uuid.UUID, code: str, status: str, currency: str) -> uuid.UUID:
     from app.core.demo_vat import demo_vat_rate
     from app.modules.procurement.models import PurchaseOrder
@@ -865,6 +890,7 @@ async def _order(session: AsyncSession, project_id: uuid.UUID, code: str, status
     po = PurchaseOrder(
         project_id=project_id,
         po_number=f"PO-{code}",
+        vendor_contact_id=await _project_vendor_id(session, project_id, code),
         status=status,
         currency_code=currency,
         amount_subtotal=str(net),
