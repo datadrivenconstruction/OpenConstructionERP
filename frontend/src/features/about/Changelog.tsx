@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.5.0',
+    date: '2026-11-14',
+    tag: 'NEW',
+    summary:
+      'Six company demos with a language and market switch, Paris and Shanghai new, a sidebar grouped by job with demo menus cut to their modules, and photo hexagons in the demo menu. Berlin, London, Riyadh and US hospital demo data corrected and filled. The cost category tree follows the selected catalogue, and DWG takeoff offers DXF when the converter is missing.',
+  },
+  {
     version: '19.4.1',
     date: '2026-11-14',
     tag: 'NEW',

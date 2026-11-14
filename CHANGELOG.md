@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.5.0] - 2026-11-14
+
+### Added
+
+- Six company demos in the demo chooser, each with a language and market switch. Paris and Shanghai are new.
+- The sidebar is grouped by the job you do, and each demo shows only the menus for the modules it uses.
+- Photo hexagons in the demo menu, and a translucent project journey that no longer hides the page behind it.
+- An article on the demo chooser and beside the course filters on how construction work is being reorganised around platforms.
+- The Riyadh showcase is filled in: ZATCA e-invoicing, withholding tax, and a schedule with a baseline and earned value.
+- DWG takeoff offers a DXF download when the DWG converter is not installed, and notes linked to a bill position carry a marker in the list.
+- A learning path stage with no video of its own borrows the videos of the other roles.
+
+### Changed
+
+- The US hospital demo is rescaled to US units and sales tax.
+- The cost database category tree follows the selected catalogue, and the page recovers from a stale chunk after an update (#561).
+- The QA reset seeds every demo in the chooser, and the service and HSE demo data is added per project.
+
+### Fixed
+
+- Berlin and London demo data: only the governing bill shows on the dashboard, DIN 276 and NRM codes, VAT, and dates counted from the install day.
+
 ## [19.4.1] - 2026-11-14
 
 ### Changed
