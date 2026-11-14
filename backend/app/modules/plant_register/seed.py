@@ -838,10 +838,39 @@ async def _approve_paper(
     return await svc.reconcile_paper(paper)
 
 
+#: Net order value per plant item, so an issued order never sits at zero.
+_ORDER_VALUE: dict[str, str] = {
+    "PL-001": "640000.00",
+    "PL-002": "520000.00",
+    "PL-003": "780000.00",
+    "PL-004": "1260000.00",
+    "PL-005": "340000.00",
+    "PL-006": "360000.00",
+    "PL-007": "240000.00",
+    "PL-008": "310000.00",
+    "PL-009": "468000.00",
+    "PL-010": "420000.00",
+    "PL-011": "290000.00",
+    "PL-012": "210000.00",
+    "PL-013": "330000.00",
+}
+
+
 async def _order(session: AsyncSession, project_id: uuid.UUID, code: str, status: str, currency: str) -> uuid.UUID:
+    from app.core.demo_vat import demo_vat_rate
     from app.modules.procurement.models import PurchaseOrder
 
-    po = PurchaseOrder(project_id=project_id, po_number=f"PO-{code}", status=status, currency_code=currency)
+    net = Decimal(_ORDER_VALUE.get(code, "150000.00"))
+    tax = (net * demo_vat_rate(currency)).quantize(Decimal("0.01"))
+    po = PurchaseOrder(
+        project_id=project_id,
+        po_number=f"PO-{code}",
+        status=status,
+        currency_code=currency,
+        amount_subtotal=str(net),
+        tax_amount=str(tax),
+        amount_total=str(net + tax),
+    )
     session.add(po)
     await session.flush()
     return po.id
