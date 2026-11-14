@@ -305,6 +305,12 @@ export function pathForRole(
     if (market && video.market && video.market !== market) return;
     out.get(video.stage)?.push(video);
   });
+  // A stage the role has no video for borrows the other roles' ones, so the path never shows a gap.
+  videos.forEach((video) => {
+    if (market && video.market && video.market !== market) return;
+    const list = out.get(video.stage);
+    if (list && !list.some((v) => isForRole(v, role)) && !list.includes(video)) list.push(video);
+  });
   const rank = (v: AcademyVideo) => (v.roles.includes(role) ? 0 : 2) + (v.status === 'published' ? 0 : 1);
   for (const [stage, list] of out) {
     out.set(

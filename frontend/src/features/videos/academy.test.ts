@@ -204,7 +204,13 @@ describe('learning path', () => {
     expect([...path.keys()]).toEqual([...STAGES]);
     expect(ids(path.get('estimate')!)).toEqual(['ca-est', 'qc', 'qc1']);
     expect(ids(path.get('define')!)).toEqual(['all']);
-    expect(path.get('build')).toEqual([]);
+    expect(ids(path.get('build')!)).toEqual(['any-site']);
+  });
+
+  it('lends a stage the other roles\' videos only when the role has none there', () => {
+    const path = pathForRole('estimator', 'CA', STAGES, FIXTURE);
+    expect(ids(path.get('estimate')!)).not.toContain('any-site');
+    expect(ids(path.get('build')!)).toEqual(['any-site']);
   });
 
   it('leaves out another market once the market is known', () => {
