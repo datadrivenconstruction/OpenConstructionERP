@@ -1465,7 +1465,7 @@ function StepStartChoice({
         </button>
       </div>
 
-      <StepNav onBack={onBack} />
+      <StepNav onBack={onBack} className={canInstallPacks ? undefined : 'max-w-3xl'} />
     </div>
   );
 }
@@ -2890,7 +2890,7 @@ function StepModuleConfig({
         )}
       </div>
 
-      <StepNav onBack={onBack}>
+      <StepNav onBack={onBack} className="max-w-2xl">
         <Button
           variant="primary"
           onClick={onNext}
@@ -4299,7 +4299,7 @@ export function StepDataSetup({
               the browser carries its own search across every base. */}
           {!loadedDb &&
             (baseCatalog ? (
-              <div className="max-h-96 overflow-y-auto pr-1 -mr-1 mb-3">
+              <div className="mb-3 max-h-96 overflow-y-auto rounded-lg border border-border-light p-2">
                 <BaseCatalogBrowser
                   catalog={baseCatalog}
                   mode="select"
@@ -4367,7 +4367,13 @@ export function StepDataSetup({
                 </div>
               </div>
             ) : (
-              <Button variant="secondary" size="sm" onClick={handleLoadDb} disabled={!selectedRegion}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleLoadDb}
+                disabled={!selectedRegion}
+                className="w-full justify-center sm:w-auto"
+              >
                 {selectedBaseName
                   ? t('onboarding.load_database_named', { defaultValue: 'Load {{name}}', name: selectedBaseName })
                   : t('onboarding.load_database', { defaultValue: 'Load Database' })}
@@ -4589,7 +4595,7 @@ export function StepDataSetup({
         })}
       </p>
 
-      <StepNav onBack={onBack}>
+      <StepNav onBack={onBack} className="max-w-2xl">
         <Button variant="secondary" onClick={onNext}>
           {t('onboarding.skip', { defaultValue: 'Skip - set up later' })}
         </Button>
@@ -4825,7 +4831,7 @@ export function StepFinish({
         />
       )}
 
-      <StepNav onBack={onBack}>
+      <StepNav onBack={onBack} className="max-w-md">
         <Button
           variant="primary"
           onClick={handleFinish}
@@ -5260,17 +5266,13 @@ export function OnboardingWizard() {
                   {t('onboarding.skip_setup', { defaultValue: 'Skip setup' })}
                 </Button>
               )}
-              {/* Persistent escape hatch on every step: open the app now in
-                  English. A quiet secondary pill so it never competes with the
-                  wizard's primary CTA. */}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleSkipAll}
-                icon={<Globe size={14} strokeWidth={2} />}
-              >
-                {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
-              </Button>
+              {/* One way out per screen: before a language is picked, leave at
+                  once in English; after it, Skip setup jumps to the summary. */}
+              {step === 0 && (
+                <Button variant="ghost" size="sm" onClick={handleSkipAll} icon={<Globe size={14} strokeWidth={2} />}>
+                  {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
+                </Button>
+              )}
             </div>
           </div>
           <OnboardingStepper
