@@ -45854,6 +45854,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Konverter hisoboti",
     "dwg_takeoff.open_side_panel": "Qatlamlar va tafsilotlar",
     "dwg_takeoff.close_side_panel": "Chizmaga qaytish",
+    "dwg_takeoff.conv_missing_dxf_hint": "O'rnatishga vaqt yo'qmi? Chizmani CAD dasturida DXF sifatida saqlang va uni yuklang. DXF konvertersiz ochiladi.",
     "match_wizard.available_label": "Oʻrnatish uchun mavjud ({{n}})",
     "match_wizard.install_aria": "{{region}} ni oʻrnatish",
     "match_wizard.install_toast_ok_msg": "{{label}} foydalanishga tayyor.",

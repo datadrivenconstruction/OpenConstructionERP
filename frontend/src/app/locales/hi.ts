@@ -45977,6 +45977,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "कनवर्टर रिपोर्ट",
   "dwg_takeoff.open_side_panel": "लेयर और विवरण",
   "dwg_takeoff.close_side_panel": "ड्रॉइंग पर वापस जाएँ",
+  "dwg_takeoff.conv_missing_dxf_hint": "इंस्टॉल करने का समय नहीं है? अपने CAD एप्लिकेशन में ड्रॉइंग को DXF के रूप में सहेजें और उसे अपलोड करें। DXF बिना कन्वर्टर के खुल जाता है।",
     "match_wizard.available_label": "स्थापित करने के लिए उपलब्ध ({{n}})",
     "match_wizard.install_aria": "स्थापित करें {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} उपयोग के लिए तैयार है।",

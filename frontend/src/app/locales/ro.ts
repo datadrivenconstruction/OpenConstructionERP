@@ -46208,6 +46208,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Raport al convertorului",
   "dwg_takeoff.open_side_panel": "Straturi și detalii",
   "dwg_takeoff.close_side_panel": "Înapoi la desen",
+  "dwg_takeoff.conv_missing_dxf_hint": "Nu aveți timp să instalați? Salvați desenul ca DXF în aplicația CAD și încărcați-l. DXF se deschide fără convertor.",
     "match_wizard.available_label": "Disponibil pentru instalare ({{n}})",
     "match_wizard.install_aria": "Instalează {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} este gata de utilizare.",

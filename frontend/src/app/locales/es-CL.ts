@@ -44351,6 +44351,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Informe del convertidor",
   "dwg_takeoff.open_side_panel": "Capas y detalles",
   "dwg_takeoff.close_side_panel": "Volver al plano",
+  "dwg_takeoff.conv_missing_dxf_hint": "¿Sin tiempo para instalar? Guarde el plano como DXF en su aplicación CAD y súbalo. El DXF se abre sin el conversor.",
     "match_wizard.available_label": "Disponible para instalar ({{n}})",
     "match_wizard.install_aria": "Instalar {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} está listo para usar.",

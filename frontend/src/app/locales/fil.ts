@@ -44841,6 +44841,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Ulat ng converter",
     "dwg_takeoff.open_side_panel": "Mga layer at detalye",
     "dwg_takeoff.close_side_panel": "Bumalik sa guhit",
+    "dwg_takeoff.conv_missing_dxf_hint": "Walang oras mag-install? I-save ang drawing bilang DXF sa iyong CAD application at i-upload iyon. Nabubuksan ang DXF nang walang converter.",
     "cases.adopt_a_cde_approval_preset.longdesc": "Kasing husay lang ng review flow sa likod nito ang gate ng CDE. Sa halip na bumuo ng approval route mula sa walang laman na porma, magsimula sa handa nang ISO 19650 na preset, adoptahin ito sa proyekto mo bilang na-e-edit na route, at i-tune ito bago dumaan dito ang tunay na trabaho.",
     "cases.classify_the_delivery_route_for_a_work_package.longdesc": "Ang dalawang work package na magkamukha ay maaaring kailanganin ng ganap na magkaibang approval route depende sa scope, gamit, at lokasyon. Ang pag-uri ng route bago mai-lock ang disenyo o programa ang pumipigil sa team na matuklasan ang tunay na route sa kalagitnaan.",
     "cases.get_a_key_document_signed_off.longdesc": "Ang completion certificate o handover statement na walang malinis na bakas ng lagda ay maliit ang halaga sa alitan. Ang pagpapatakbo ng sign-off bilang isang sinusubaybayang session, mula sa pagpili ng dokumento hanggang sa na-download na manifest, ang gumagawang tatatag ito mamaya.",

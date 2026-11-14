@@ -45759,6 +45759,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Báo cáo bộ chuyển đổi",
   "dwg_takeoff.open_side_panel": "Lớp và chi tiết",
   "dwg_takeoff.close_side_panel": "Quay lại bản vẽ",
+  "dwg_takeoff.conv_missing_dxf_hint": "Không có thời gian cài đặt? Hãy lưu bản vẽ dưới dạng DXF trong ứng dụng CAD của bạn rồi tải lên. DXF mở được mà không cần bộ chuyển đổi.",
     "match_wizard.available_label": "Có sẵn để cài đặt ({{n}})",
     "match_wizard.install_aria": "Cài đặt {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} đã sẵn sàng để sử dụng.",

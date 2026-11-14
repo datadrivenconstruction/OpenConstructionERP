@@ -45936,6 +45936,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Konverterrapport",
   "dwg_takeoff.open_side_panel": "Lag og detaljer",
   "dwg_takeoff.close_side_panel": "Tilbage til tegningen",
+  "dwg_takeoff.conv_missing_dxf_hint": "Ingen tid til installation? Gem tegningen som DXF i dit CAD-program, og upload den i stedet. DXF åbner uden konverteren.",
     "match_wizard.available_label": "Tilgængelig til installation ({{n}})",
     "match_wizard.install_aria": "Installer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} er klar til brug.",

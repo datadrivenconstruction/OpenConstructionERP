@@ -46124,6 +46124,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Izvještaj pretvarača",
   "dwg_takeoff.open_side_panel": "Slojevi i detalji",
   "dwg_takeoff.close_side_panel": "Natrag na crtež",
+  "dwg_takeoff.conv_missing_dxf_hint": "Nemate vremena za instalaciju? Spremite crtež kao DXF u svojoj CAD aplikaciji i učitajte ga. DXF se otvara bez konvertera.",
     "match_wizard.available_label": "Dostupno za instalaciju ({{n}})",
     "match_wizard.install_aria": "Instaliraj {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} je spreman za upotrebu.",

@@ -46207,6 +46207,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Relatório do conversor",
   "dwg_takeoff.open_side_panel": "Camadas e detalhes",
   "dwg_takeoff.close_side_panel": "Voltar ao desenho",
+  "dwg_takeoff.conv_missing_dxf_hint": "Sem tempo para instalar? Guarde o desenho como DXF na sua aplicação CAD e carregue-o. O DXF abre sem o conversor.",
     "match_wizard.available_label": "Disponível para instalar ({{n}})",
     "match_wizard.install_aria": "Instalar {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} está pronto a usar.",

@@ -45929,6 +45929,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Converterrapport",
   "dwg_takeoff.open_side_panel": "Lagen en details",
   "dwg_takeoff.close_side_panel": "Terug naar de tekening",
+  "dwg_takeoff.conv_missing_dxf_hint": "Geen tijd om te installeren? Sla de tekening in uw CAD-programma op als DXF en upload die. DXF opent zonder de converter.",
     "match_wizard.available_label": "Beschikbaar om te installeren ({{n}})",
     "match_wizard.install_aria": "Installeer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} is klaar voor gebruik.",

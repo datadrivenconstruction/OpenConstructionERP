@@ -45945,6 +45945,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Доклад от конвертора",
   "dwg_takeoff.open_side_panel": "Слоеве и детайли",
   "dwg_takeoff.close_side_panel": "Обратно към чертежа",
+  "dwg_takeoff.conv_missing_dxf_hint": "Нямате време за инсталиране? Запазете чертежа като DXF в CAD приложението си и го качете. DXF се отваря без конвертор.",
     "match_wizard.available_label": "Налични за инсталиране ({{n}})",
     "match_wizard.install_aria": "Инсталирай {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} е готов за употреба.",

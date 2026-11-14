@@ -219,6 +219,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Converter report",
     "dwg_takeoff.open_side_panel": "Layers and details",
     "dwg_takeoff.close_side_panel": "Back to the drawing",
+    "dwg_takeoff.conv_missing_dxf_hint": "No time to install? Save the drawing as DXF in your CAD application and upload that instead. DXF opens without the converter.",
     "demo_banner.strip_uploads_off": "Uploads are off here: please use the demo data only",
     "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
     "procurement.requisitions.merge_conflict_unit_cost": "unit cost",

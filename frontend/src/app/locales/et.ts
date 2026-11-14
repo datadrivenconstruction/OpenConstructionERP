@@ -45779,6 +45779,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Konverteri aruanne",
     "dwg_takeoff.open_side_panel": "Kihid ja üksikasjad",
     "dwg_takeoff.close_side_panel": "Tagasi joonise juurde",
+    "dwg_takeoff.conv_missing_dxf_hint": "Pole aega paigaldada? Salvesta joonis oma CAD-rakenduses DXF-ina ja laadi see üles. DXF avaneb ilma konverterita.",
     "cases.adopt_a_cde_approval_preset.longdesc": "CDE värav on ainult nii hea kui selle taga olev ülevaatuse töövoog. Selle asemel, et ehitada kinnitusmarsruut tühjalt vormilt, alusta valmis ISO 19650 eelseadest, võta see kasutusele oma projektis muudetava marsruudina ja häälesta see enne, kui tegelik töö selle kaudu jookseb.",
     "cases.classify_the_delivery_route_for_a_work_package.longdesc": "Kaks sarnase väljanägemisega tööpaketti võivad vajada täiesti erinevaid kinnitusmarsruute, olenevalt mahust, kasutusest ja asukohast. Marsruudi klassifitseerimine enne, kui projekt või ajakava on lukku löödud, hoiab ära, et meeskond avastaks tegeliku marsruudi alles poole peal.",
     "cases.get_a_key_document_signed_off.longdesc": "Valminud tõend või üleandmisavaldus ilma puhta allkirjajäljeta on vaidluses vähe väärt. Allkirjastamise läbiviimine ühe jälgitava seansina, dokumendi valikust kuni allalaaditud manifestini, on see, mis paneb selle hiljem vastu pidama.",

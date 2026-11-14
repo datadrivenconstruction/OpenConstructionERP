@@ -46261,6 +46261,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Rapporto del convertitore",
   "dwg_takeoff.open_side_panel": "Livelli e dettagli",
   "dwg_takeoff.close_side_panel": "Torna al disegno",
+  "dwg_takeoff.conv_missing_dxf_hint": "Non hai tempo per installare? Salva il disegno come DXF nella tua applicazione CAD e caricalo. Il DXF si apre senza il convertitore.",
     "match_wizard.available_label": "Disponibile per l'installazione ({{n}})",
     "match_wizard.install_aria": "Installa {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} è pronto per l'uso.",
