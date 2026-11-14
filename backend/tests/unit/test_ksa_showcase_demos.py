@@ -14,7 +14,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import func, select
 
-from app.core.demo_projects import DEMO_CATALOG, DEMO_TEMPLATES, install_demo_project
+from app.core.demo_projects import DEMO_CATALOG, DEMO_TEMPLATES, _demo_anchor, install_demo_project
 
 KSA_SHOWCASE_IDS = [
     "consultancy-riyadh",
@@ -175,7 +175,9 @@ async def test_billing_history_and_requisitions(demo_id: str) -> None:
         assert abs(
             sum((Decimal(str(c.retention_amount)) for c in claims), Decimal(0)) - cumulative * Decimal("0.05")
         ) <= Decimal("0.01")
-        assert [c.period_start.month for c in claims] == [4, 5, 6, 7][: len(claims)]
+        start = _demo_anchor()
+        expected = [(start.month - 1 + i) % 12 + 1 for i in range(len(claims))]
+        assert [c.period_start.month for c in claims] == expected
 
         reqs = (
             (await session.execute(select(MaterialRequisition).where(MaterialRequisition.project_id == pid)))
