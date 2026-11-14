@@ -65,7 +65,7 @@ const ACCENT_TEXT_DARK: Record<Accent, string> = {
 const ACCENT_TEXT = 'text-[color:var(--demo-ink)] dark:text-[color:var(--demo-ink-dark)]';
 
 /** Sections every demo keeps (overview, documents, communication): not worth a chip. */
-const BASE_GROUPS = new Set(['grp_overview', 'grp_documents', 'grp_communication']);
+const BASE_GROUPS = new Set(['grp_overview', 'grp_documents']);
 const MAX_CHIPS = 5;
 
 function SectionChips({ profile }: { profile: DemoProfile }) {

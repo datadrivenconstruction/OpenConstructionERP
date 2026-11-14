@@ -173,9 +173,14 @@ async def test_investigations_land_on_an_already_seeded_database(pg_session) -> 
     counts = await seed_hse_advanced_demo(pg_session, [project_id])
     await pg_session.flush()
 
-    assert counts.get("skipped") == 1, "the bulk seed was expected to short-circuit here"
+    # The shared tables are populated, but the guard is per project: this project is new to the
+    # seeder, so its scoped rows are seeded alongside the investigations.
+    assert counts.get("skipped") is None, "a populated shared table must not lock a new project out"
     assert counts.get("investigations", 0) > 0, "the investigations block was skipped with the bulk tables"
     assert await _reachable(pg_session, project_id), "no investigation is reachable from the project"
+
+    again = await seed_hse_advanced_demo(pg_session, [project_id])
+    assert again.get("skipped") == 1, "a project that already carries scoped HSE rows must short-circuit"
 
 
 async def test_unreachable_rows_do_not_satisfy_the_guard(pg_session) -> None:

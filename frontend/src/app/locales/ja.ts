@@ -54810,7 +54810,7 @@ const resource = {
     "sidebar.tools_collapse": "設定とツールを折りたたむ",
     "sidebar.tools_expand": "設定とツールを展開",
     "sidebar.tools_short": "システム",
-    "sidebar.section.boq": "数量内訳書",
+    "sidebar.section.boq": "内訳書",
     "sidebar.section.ai_drafting": "AI 下書き",
     "sidebar.section.bids": "入札と顧客",
     "sidebar.section.databases": "単価データベース",
