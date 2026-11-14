@@ -429,7 +429,14 @@ async def seed_carbon_demo(
     target_count = 0
     report_count = 0
 
-    project_ids = list(project_ids)
+    # Per project, not table-wide: a demo installed after the first boot must still get its inventories.
+    requested = list(project_ids)
+    already = set(
+        (await session.execute(select(CarbonInventory.project_id).where(CarbonInventory.project_id.in_(requested))))
+        .scalars()
+        .all()
+    )
+    project_ids = [pid for pid in requested if pid not in already]
     for project_id in project_ids:
         # 3 inventories per project.
         first_inventory_id: uuid.UUID | None = None

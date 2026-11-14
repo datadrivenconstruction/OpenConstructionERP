@@ -4134,6 +4134,21 @@ def create_app() -> FastAPI:
             result = await install_demo_project(session, demo_id, force_reinstall=force)
             await session.commit()
 
+        # A demo installed on request gets the same module data a boot-time
+        # demo gets; boot enrichment ran before this project existed. Fail-soft,
+        # and shielded so a slow run finishes in the background instead of being
+        # cancelled with the request.
+        if not result.get("already_installed") and result.get("project_id"):
+            import asyncio
+
+            from app.core.demo_enrichment import enrich_projects
+
+            _job = asyncio.ensure_future(enrich_projects([uuid.UUID(str(result["project_id"]))]))
+            try:
+                await asyncio.wait_for(asyncio.shield(_job), timeout=150)
+            except Exception:  # noqa: BLE001 - enrichment never fails an install
+                logger.warning("demo enrichment after install of %s did not finish in time", demo_id)
+
         return result
 
     @app.get("/api/demo/status", tags=["System"])

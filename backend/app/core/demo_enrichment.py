@@ -63,7 +63,12 @@ _FOCUS_DEMO_IDS: tuple[str, ...] = (
     "medical-us",
     "warehouse-dubai",
     "condo-toronto",
+    "full-showcase-riyadh",
 )
+
+
+# Showcase projects whose money is not the generic cost model's currency and standard.
+_OWN_COST_HISTORY_IDS: tuple[str, ...] = ("full-showcase-riyadh",)
 
 
 async def _demo_cast(session_factory: Any, demo_pids: list[uuid.UUID]) -> dict[str, Any]:
@@ -199,7 +204,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.bid_management.seed import seed_bid_management_demo
         from app.modules.bim_hub.seed import seed_bim_hub
         from app.modules.capital_plan.seed import seed_capital_plan_demo
-        from app.modules.carbon.models import CarbonInventory
         from app.modules.carbon.seed import seed_carbon_demo
         from app.modules.catalog.seed import seed_catalog
         from app.modules.clash.seed import seed_clash
@@ -250,6 +254,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.qms.seed import seed_qms
         from app.modules.quality_concept.seed import seed_quality_concept_demo
         from app.modules.reconciliation.seed import seed_reconciliation_demo
+        from app.modules.schedule.evm_demo import seed_schedule_evm_demo
         from app.modules.schedule_advanced.seed import seed_schedule_advanced_demo
         from app.modules.service.seed import seed_service_demo, seed_service_recurring_schedules
         from app.modules.site_inventory.seed import seed_site_inventory_demo
@@ -260,11 +265,11 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.stakeholders.seed import seed_stakeholders_demo
         from app.modules.supplier_catalogs.seed import seed_supplier_catalogs
         from app.modules.takeoff.seed import seed_takeoff_demo
+        from app.modules.tax_withholding.seed import seed_tax_withholding_demo
         from app.modules.temporary_works.seed import seed_temporary_works_demo
         from app.modules.transmittals.seed import seed_transmittals_demo
         from app.modules.validation.seed import seed_validation_demo
         from app.modules.value.seed import seed_value_demo
-        from app.modules.variations.models import Notice
         from app.modules.variations.seed import seed_variations_demo, seed_variations_showcase_de
         from app.modules.wip_report.demo import seed_wip_report_demo
 
@@ -341,6 +346,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         # should return none is the defect; the empty list is not.
         _curated_pids = [_by_demo_id[_did] for _did in _FOCUS_DEMO_IDS if _did in _by_demo_id]
         _focus_pids: list[uuid.UUID] = [_p for _p in _demo_pids if _p == _FLAGSHIP_ID] + _curated_pids
+        _own_currency_ids = {_by_demo_id[_d] for _d in _OWN_COST_HISTORY_IDS if _d in _by_demo_id}
+        _generic_cost_pids = [_p for _p in _focus_pids if _p not in _own_currency_ids]
 
         # (name, marker model gating a restart-safe skip, coroutine builder).
         # A None marker means the seeder self-guards against duplicates.
@@ -351,13 +358,13 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             ("hse_advanced", None, lambda s: seed_hse_advanced_demo(s, _demo_pids)),
             ("portal", None, lambda s: seed_portal_demo(s, _demo_pids)),
             ("supplier_catalogs", None, lambda s: seed_supplier_catalogs(s, _first_pid)),
-            ("carbon", CarbonInventory, lambda s: seed_carbon_demo(s, _demo_pids)),
+            ("carbon", None, lambda s: seed_carbon_demo(s, _demo_pids)),
             # A None marker rather than MasterSchedule: a table-wide marker
             # skipped the whole seeder as soon as any one project had a board,
             # so a project joining the curated set later was never filled. The
             # seeder guards per project itself now.
             ("schedule_advanced", None, lambda s: seed_schedule_advanced_demo(s, _focus_pids)),
-            ("variations", Notice, lambda s: seed_variations_demo(s, _demo_pids)),
+            ("variations", None, lambda s: seed_variations_demo(s, _demo_pids)),
             # Field time runs after variations so a daywork booking can name an
             # open variation order, and after the equipment seed (which runs at
             # boot before this list) so plant hours price off a real rental.
@@ -389,7 +396,9 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # because several of these (takeoff, markups) legitimately share
             # their table with rows seeded elsewhere or by users, so a
             # table-wide count would skip the projects that are still empty.
-            ("costmodel", None, lambda s: seed_costmodel(s, _focus_pids)),
+            # The generic cost model is priced in one currency and one standard; the showcase projects
+            # outside it get their cost history from the schedule seeder instead.
+            ("costmodel", None, lambda s: seed_costmodel(s, _generic_cost_pids)),
             ("moc", None, lambda s: seed_moc(s, _focus_pids)),
             ("takeoff", None, lambda s: seed_takeoff_demo(s, _demo_pids)),
             ("accommodation", None, lambda s: seed_accommodation(s, _focus_pids)),
@@ -508,6 +517,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # state. Runs after the settings above, so the XRechnung it renders
             # and stores carries the seller a visitor then finds on /settings.
             ("einvoice_clearance", None, lambda s: seed_einvoice_clearance_demo(s, _demo_pids)),
+            ("tax_withholding", None, lambda s: seed_tax_withholding_demo(s, _demo_pids)),
             # German showcase Nachtrag chains: notices, requests and orders in
             # German with contract-clause anchors, custody hand-offs and dated
             # trails, so the claims-evidence panel can grade at least one chain
@@ -609,6 +619,10 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # The handbook reads the stakeholders, positions and milestones seeded above and files the
             # documents seeded earlier into the data room; it has to come after all of them.
             ("project_handbook", None, lambda s: seed_project_handbook_demo(s, _demo_pids)),
+            # Last of the module seeders: it cost-loads the plan, books a year of progress against it
+            # and rewrites the cost-model snapshots from the same figures, so it must follow every
+            # seeder that writes either of them.
+            ("schedule_evm", None, lambda s: seed_schedule_evm_demo(s, _focus_pids)),
         ]
         # Project governance runs first and is the only seeder that pins a phase
         # model: phase model, area owners, a decided first gate, frame documents

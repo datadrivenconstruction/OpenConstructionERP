@@ -214,6 +214,54 @@ WITHHOLDING_REGIMES: tuple[dict[str, Any], ...] = (
             "signed request-for-taxpayer-identification form on file."
         ),
     },
+    {
+        "country_code": "SA",
+        "scheme_code": "SA_NONRESIDENT_WHT",
+        "scheme_name": "Withholding tax on payments to non-residents",
+        "legal_reference": "Income Tax Law, Article 68; Implementing Regulations, Article 63",
+        "authority": "Zakat, Tax and Customs Authority",
+        "currency_code": "SAR",
+        "default_band_code": "SERVICES",
+        # Saudi VAT on such a supply is accounted for by the buyer under the reverse charge and is
+        # not part of the income-tax base; goods supplied from abroad are not a withholding payment.
+        "materials_excluded": True,
+        "vat_excluded": True,
+        "verification_validity_months": 0,
+        "threshold_amount": None,
+        "bands": [
+            {
+                "code": "SERVICES",
+                "label": "Technical, consulting and other services",
+                "rate_pct": "5",
+                "requires_verification": False,
+            },
+            {
+                "code": "RENT",
+                "label": "Rent and equipment hire",
+                "rate_pct": "5",
+                "requires_verification": False,
+            },
+            {
+                "code": "ROYALTY",
+                "label": "Royalties",
+                "rate_pct": "15",
+                "requires_verification": False,
+            },
+            {
+                "code": "MANAGEMENT_FEE",
+                "label": "Management fees to a related party",
+                "rate_pct": "20",
+                "requires_verification": False,
+            },
+        ],
+        "notes": (
+            "Withheld by the Saudi payer on a payment of Saudi-source income to a non-resident and "
+            "paid to the authority by the tenth day of the month after the payment. The rate follows "
+            "the type of payment; a double-tax treaty can lower it, in which case the treaty "
+            "evidence is kept with the party. Rates as published at the time of writing: verify "
+            "them with the authority before filing."
+        ),
+    },
 )
 
 

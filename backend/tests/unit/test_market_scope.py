@@ -52,7 +52,8 @@ def test_saudi_tenant_sees_gcc(tagged, packs) -> None:
     hidden = set(scope["hidden_modules"])
     assert "middle_east_pack" not in hidden
     assert "einvoice_clearance" not in hidden  # ZATCA
-    assert {"dach_pack", "uk_pack", "us_pack", "sa_pack", "tax_withholding"} <= hidden
+    assert {"dach_pack", "uk_pack", "us_pack", "sa_pack"} <= hidden
+    assert "tax_withholding" not in hidden  # Saudi withholding on non-residents
     assert "saudi-vision2030" in scope["packs"]
     assert "germany-de" not in scope["packs"]
     assert any(code.startswith("FIDIC") for code in scope["options"]["contract_forms"])

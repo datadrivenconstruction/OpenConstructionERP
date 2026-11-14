@@ -12,14 +12,14 @@ manifest = ModuleManifest(
         "Statutory construction withholding tax and VAT reverse charge. The "
         "payer deducts tax from a subcontractor and remits it to the state "
         "(UK CIS, German Bauabzugsteuer, Irish RCT, Italian ritenuta "
-        "d'acconto, US backup withholding), and on a reverse-charge supply "
+        "d'acconto, US backup withholding, Saudi withholding on non-residents), and on a reverse-charge supply "
         "the buyer accounts for the VAT so the invoice must carry the "
         "statutory wording and no VAT amount."
     ),
     author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users"],
-    markets=["DE", "ES", "FR", "GB", "HU", "IE", "IT", "US"],
+    markets=["DE", "ES", "FR", "GB", "HU", "IE", "IT", "SA", "US"],
     auto_install=True,
     enabled=True,
 )
