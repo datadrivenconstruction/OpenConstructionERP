@@ -2206,6 +2206,11 @@ html[data-look='classic'] [class*='bg-[radial'],
 html[data-look='classic'] [class*='bg-[linear'] {
   background-image: none !important;
 }
+/* A stripped gradient keeps its first stop as a flat fill, so white hero text,
+   photo scrims and progress bars stay visible instead of landing on the page. */
+html[data-look='classic'] [class*='bg-gradient-'][class*='from-']:not(.bg-clip-text) {
+  background-color: var(--tw-gradient-from) !important;
+}
 html[data-look='classic'] .glass,
 html[data-look='classic'] .glass-strong,
 html[data-look='classic'] [class*='backdrop-blur'] {
