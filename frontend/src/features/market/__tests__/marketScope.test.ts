@@ -8,6 +8,7 @@ import {
   marketOffersAia,
   ruleSetsFromScope,
   showAiaForProject,
+  withProjectMarket,
 } from '../logic';
 import { filterUnitsBySystem, getUnitsForLocale, setActiveUnitsSystem } from '@/features/boq/boqHelpers';
 
@@ -143,5 +144,34 @@ describe('units system hydration', () => {
     client.setQueryData([...MARKET_QUERY_KEY, null], scope({ units_system: 'metric' }));
     expect(getActiveUnitsSystem()).toBe('metric');
     stop();
+  });
+});
+
+describe('withProjectMarket', () => {
+  const tenant = scope({
+    markets: ['DE'],
+    expanded_markets: ['DE', 'EU'],
+    hidden_modules: ['einvoice_zatca', 'tax_withholding', 'uk_pack'],
+    packs: ['germany-de'],
+  });
+  const riyadh = scope({
+    markets: ['SA'],
+    expanded_markets: ['GCC', 'SA'],
+    hidden_modules: ['uk_pack', 'de_pack'],
+    packs: ['saudi-vision2030'],
+  });
+
+  it('shows the project market modules without hiding the tenant ones', () => {
+    const merged = withProjectMarket(tenant, riyadh)!;
+    expect(merged.hidden_modules).toEqual(['uk_pack']);
+    expect(merged.markets).toEqual(['DE', 'SA']);
+    expect(merged.expanded_markets).toEqual(['DE', 'EU', 'GCC', 'SA']);
+    expect(merged.packs).toEqual(['germany-de', 'saudi-vision2030']);
+    expect(isRouteHiddenByMarket('oe_einvoice_zatca', merged)).toBe(false);
+  });
+
+  it('is the tenant scope when no project scope is loaded', () => {
+    expect(withProjectMarket(tenant, undefined)).toBe(tenant);
+    expect(withProjectMarket(undefined, riyadh)).toBeUndefined();
   });
 });

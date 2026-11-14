@@ -53,6 +53,7 @@ import { RegionalPackCard } from '../RegionalPackCard';
 import { isOnboardingCompleted } from '@/features/onboarding';
 import { apiGet } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 // The pack query waits for a session, so every test here starts signed in.
 beforeEach(() => {
@@ -353,6 +354,27 @@ describe('RegionalPackCard, the compact tile layout', () => {
     await screen.findByTestId('regional-pack-none');
     expect(screen.getByText('No regional pack is active')).toBeTruthy();
     expect(screen.queryAllByTestId('regional-pack-tile')).toHaveLength(0);
+  });
+
+  // The applied pack is install-wide; a project abroad has its own market. In
+  // a Riyadh demo the card asks for that project's pack, so it names the Saudi
+  // pack instead of saying none is active.
+  it('asks for the open project pack and shows it', async () => {
+    useProjectContextStore.getState().setActiveProject('p-riyadh', 'Riyadh');
+    vi.mocked(apiGet).mockImplementation(async (path: string) =>
+      path === '/v1/partner-pack/current?project_id=p-riyadh'
+        ? { ...ACTIVE_PACK, source: 'project' }
+        : { active: false },
+    );
+    try {
+      renderApp(<RegionalPackCard />);
+      await screen.findByTestId('regional-pack-active');
+      expect(screen.queryByText('No regional pack is active')).toBeNull();
+      expect(apiGet).toHaveBeenCalledWith('/v1/partner-pack/current?project_id=p-riyadh');
+    } finally {
+      useProjectContextStore.getState().clearProject();
+      vi.mocked(apiGet).mockResolvedValue({ active: false });
+    }
   });
 
   it('holds its frame with a skeleton while the answer is on its way', async () => {
