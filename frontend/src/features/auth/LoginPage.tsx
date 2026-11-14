@@ -485,7 +485,7 @@ export function LoginPage() {
       </div>
 
       {/* Theme + Language - top right (enlarged for /login so discoverable). */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+      <div className="absolute top-4 end-4 z-30 flex items-center gap-2">
         <ThemeSwitch />
         <div className="relative" ref={langRef}>
         <button
@@ -736,7 +736,7 @@ export function LoginPage() {
       {/* Center column removed - tags moved to left panel footer */}
 
       {/* ── Left column on lg+: logo + form (primary action). ── */}
-      <div className="oe-auth-form-col relative flex items-center justify-center p-4 sm:p-6 z-10 lg:order-1 overflow-hidden">
+      <div className="oe-auth-form-col relative flex items-start lg:items-center justify-center px-4 pb-4 pt-16 sm:px-6 sm:pb-6 lg:pt-6 z-10 lg:order-1 overflow-y-auto lg:overflow-hidden">
         {/* Form column backdrop - clean near-white field on lg+ so the
             glass card reads against a calm canvas. The decorative show
             (orbs / mesh) lives on the marketing column on the right. */}

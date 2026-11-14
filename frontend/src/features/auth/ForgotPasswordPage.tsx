@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Mail, CheckCircle2, Globe, ChevronDown } from 'lucide-react';
-import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
+import { AlertCircle, ArrowLeft, Mail, CheckCircle2, Globe, ChevronDown } from 'lucide-react';
+import { Button, Input, BrandLockup, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { AuthBackground } from './AuthBackground';
@@ -64,7 +64,7 @@ export function ForgotPasswordPage() {
       <ClassicAuthFooter />
 
       {/* Language — top right */}
-      <div className="absolute top-3 right-3 z-30" ref={langRef}>
+      <div className="absolute top-3 end-3 z-30" ref={langRef}>
         <button
           onClick={() => setLangOpen(!langOpen)}
           className="flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-elevated/80 backdrop-blur-sm px-2.5 py-1 text-xs text-content-secondary hover:bg-surface-elevated transition-colors shadow-sm"
@@ -75,7 +75,7 @@ export function ForgotPasswordPage() {
           <ChevronDown size={11} className={`text-content-tertiary transition-transform ${langOpen ? 'rotate-180' : ''}`} />
         </button>
         {langOpen && (
-          <div className="absolute right-0 mt-1 w-44 max-h-72 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-0.5 animate-stagger-in">
+          <div className="absolute end-0 mt-1 w-44 max-h-72 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-0.5 animate-stagger-in">
             {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
               const isActive = i18n.language === lang.code;
               return (
@@ -93,24 +93,25 @@ export function ForgotPasswordPage() {
         )}
       </div>
 
-      <div className="relative z-10 w-full max-w-[400px]">
-        {/* Logo — glow entrance */}
-        <div className="mb-8 text-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <div className="mx-auto mb-4 animate-logo-glow rounded-[20px] w-fit">
-            <Logo size="xl" animate className="mx-auto" />
-          </div>
+      <div className="relative z-10 w-full max-w-[380px]">
+        {/* Same brand block as sign-in, so the four auth screens read as one flow. */}
+        <div className="mb-5 flex flex-col items-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
+          <BrandLockup size="lg" animate />
+          <p className="mt-2 text-sm text-content-tertiary">
+            {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
+          </p>
         </div>
 
         {/* Form card — glass morphism + scale-in entrance */}
         <div
-          className="glass-strong rounded-2xl p-7 shadow-lg animate-form-scale-in"
+          className="glass-strong rounded-2xl px-6 py-5 shadow-lg animate-form-scale-in"
           style={{ animationDelay: '150ms' }}
         >
           {submitted ? (
             /* Success state — generic copy avoids leaking whether the email exists */
-            <div className="text-center py-4 animate-stagger-in" role="status" aria-live="polite" style={{ animationDelay: '200ms' }}>
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-success-bg text-semantic-success">
-                <CheckCircle2 size={28} />
+            <div className="text-center py-2 animate-stagger-in" role="status" aria-live="polite" style={{ animationDelay: '200ms' }}>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-semantic-success-bg text-semantic-success">
+                <CheckCircle2 size={24} />
               </div>
               <h2 className="oe-section-title mb-2">
                 {t('auth.check_email', 'Check your email')}
@@ -130,7 +131,7 @@ export function ForgotPasswordPage() {
                 to="/login"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue hover:text-oe-blue-hover transition-colors"
               >
-                <ArrowLeft size={14} />
+                <ArrowLeft size={14} className="rtl:rotate-180" />
                 {t('auth.back_to_login', 'Back to sign in')}
               </Link>
             </div>
@@ -142,19 +143,19 @@ export function ForgotPasswordPage() {
                   to="/login"
                   className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
                 >
-                  <ArrowLeft size={14} />
+                  <ArrowLeft size={14} className="rtl:rotate-180" />
                   {t('auth.back_to_login', 'Back to sign in')}
                 </Link>
 
-                <h2 className="oe-section-title mb-1">
+                <h2 className="oe-section-title mb-0.5">
                   {t('auth.forgot_password', 'Forgot password?')}
                 </h2>
-                <p className="text-sm text-content-secondary mb-6">
+                <p className="text-xs text-content-secondary mb-4">
                   {t('auth.forgot_subtitle', "Enter your email and we'll send you a reset link.")}
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="animate-stagger-in" style={{ animationDelay: '300ms' }}>
                   <Input
                     label={t('auth.email', 'Email')}
@@ -171,7 +172,7 @@ export function ForgotPasswordPage() {
                 {/* Error */}
                 {error && (
                   <div className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3.5 py-2.5 text-sm text-semantic-error animate-stagger-in">
-                    <span className="shrink-0 mt-0.5">!</span>
+                    <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden />
                     <span>{error}</span>
                   </div>
                 )}
