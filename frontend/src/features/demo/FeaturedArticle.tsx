@@ -1,10 +1,9 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The long-form article on the uberization of construction, featured at the
-// top of the Cases hub. It used to be a small card at the foot of the sidebar;
-// it sits here now because it is reading about why the cases exist, next to
-// the cases themselves, rather than one more item in the menu.
+// The long-form article on the uberization of construction, featured on the
+// demo chooser beside the full platform card: the idea behind the platform,
+// read next to the platform itself. One card wide, cover on top.
 //
 // The cover is the article's own social image on our site. When it cannot load
 // (an offline desktop install, a blocked host) the frame falls back to a drawn
@@ -37,11 +36,11 @@ export function FeaturedArticle() {
       href={FEATURED_ARTICLE_URL}
       target="_blank"
       rel="noopener noreferrer"
-      data-testid="cases-featured-article"
+      data-testid="demo-featured-article"
       aria-label={label}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-elevated shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:ring-white/5 sm:flex-row"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div className="relative aspect-[1200/630] w-full shrink-0 overflow-hidden bg-gradient-to-br from-oe-blue/25 via-oe-blue/10 to-sky-400/10 sm:w-64 md:w-80">
+      <div className="relative aspect-[1200/630] w-full shrink-0 overflow-hidden bg-gradient-to-br from-oe-blue/25 via-oe-blue/10 to-sky-400/10">
         {coverFailed ? (
           <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
             <div className="absolute -left-6 -top-8 h-32 w-32 rounded-full bg-oe-blue/20 blur-2xl" />
@@ -63,14 +62,14 @@ export function FeaturedArticle() {
           />
         )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-6">
         <span className="inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-oe-blue dark:text-sky-300">
           <Newspaper size={12} aria-hidden="true" />
           {eyebrow}
         </span>
         <span className="text-lg font-semibold leading-snug tracking-tight text-content-primary">{title}</span>
         <span className="text-sm leading-relaxed text-content-secondary">{subtitle}</span>
-        <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-oe-blue group-hover:underline dark:text-sky-300">
+        <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-oe-blue group-hover:underline dark:text-sky-300">
           {read}
           <ArrowUpRight size={16} className="shrink-0" aria-hidden="true" />
         </span>
