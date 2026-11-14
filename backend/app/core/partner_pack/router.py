@@ -37,7 +37,11 @@ from app.core.partner_pack.full_install import (
     full_install,
     full_install_stream,
 )
-from app.core.partner_pack.project_pack import pick_project_pack, project_preferred_slugs
+from app.core.partner_pack.project_pack import (
+    pick_project_pack,
+    project_country,
+    project_preferred_slugs,
+)
 from app.core.partner_pack.state import PackStateWriteError
 from app.dependencies import (
     CurrentUserId,
@@ -96,7 +100,7 @@ async def _project_pack(session: Any, user_id: str, project_id: uuid.UUID, activ
         flagship.setdefault(demo_id, []).append(slug)
     return pick_project_pack(
         discover_packs(),
-        country=project.country_code,
+        country=project_country(project.country_code, getattr(project, "region", None)),
         active=active,
         subdivision=getattr(project, "subdivision_code", None),
         preferred_slugs=project_preferred_slugs(project.metadata_, flagship),
