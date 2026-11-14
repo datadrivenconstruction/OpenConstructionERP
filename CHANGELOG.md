@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.4.1] - 2026-11-14
+
+### Changed
+
+- Every module page, dialog, drawer and popup follows one design: compact headers with the main actions in one row, one radius scale, calmer info cards and wider cards on laptop screens.
+- The courses page shows each course with a site photo, the role you play and the path of steps you walk, as on the Academy, and the learning honeycomb shows the course photos.
+- The OpenConstructionERP logo kit in the sidebar, sign-in and loading screens, and a full architectural drawing set as the demo plan, also as a DWG original.
+
+### Fixed
+
+- On the desktop app a new account is active at once instead of waiting for an approval email a local install never sends.
+- Settings: Team, Company and Letter panels use the full width.
+- DWG takeoff: the viewer buttons no longer cover the drawing tools.
+- Documents, correspondence, submittals and transmittals skip a remembered project that no longer exists.
+- The delivery booking dialog lists the bill positions again, and the photo archive fits a phone screen.
+- Existing projects get their country from the region, so the right VAT rate applies.
+
 ## [19.4.0] - 2026-11-12
 
 ### Added

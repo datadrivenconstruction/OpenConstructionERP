@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.4.1',
+    date: '2026-11-14',
+    tag: 'NEW',
+    summary:
+      'Every module page and popup in one compact design, and courses shown with a site photo, your role and the path of steps, as on the Academy. Desktop accounts are active at once, and DWG takeoff buttons no longer cover the tools.',
+  },
+  {
     version: '19.4.0',
     date: '2026-11-12',
     tag: 'NEW',
