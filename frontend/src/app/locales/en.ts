@@ -39601,6 +39601,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Converter report",
     "dwg_takeoff.open_side_panel": "Layers and details",
     "dwg_takeoff.close_side_panel": "Back to the drawing",
+    "dwg_takeoff.conv_missing_dxf_hint": "No time to install? Save the drawing as DXF in your CAD application and upload that instead. DXF opens without the converter.",
     "integrations.available": "Available",
     "integrations.calendar_hint": "Subscribe in Google Calendar or Outlook:",
     "integrations.events": "Events to subscribe",

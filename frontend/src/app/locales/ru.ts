@@ -46402,6 +46402,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Сообщение конвертера",
   "dwg_takeoff.open_side_panel": "Слои и детали",
   "dwg_takeoff.close_side_panel": "Назад к чертежу",
+  "dwg_takeoff.conv_missing_dxf_hint": "Нет времени на установку? Сохраните чертёж в CAD-программе как DXF и загрузите его. DXF открывается без конвертера.",
     "match_wizard.available_label": "Доступно для установки ({{n}})",
     "match_wizard.install_aria": "Установить {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} готов к использованию.",
