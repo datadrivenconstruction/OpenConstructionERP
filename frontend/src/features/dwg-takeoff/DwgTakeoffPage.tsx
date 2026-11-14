@@ -107,6 +107,7 @@ import {
   uploadDrawingRevision,
   USER_MARKUP_LAYER,
 } from './api';
+import { AnnotationLinkedBadge } from './AnnotationLinkedBadge';
 import { Undo2, Redo2, Target, Search, ChevronUp, ChevronDown, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import type {
   DxfEntity,
@@ -4669,6 +4670,7 @@ export function DwgTakeoffPage() {
                             );
                           })()}
                         </div>
+                        <AnnotationLinkedBadge linkedBoqPositionId={ann.linked_boq_position_id} />
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
