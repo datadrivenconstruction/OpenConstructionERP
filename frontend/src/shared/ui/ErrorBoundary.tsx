@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { isChunkLoadError, recoverFromStaleChunk } from '@/shared/lib/chunkRecovery';
 import React from 'react';
 import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 import i18n from '@/app/i18n';
@@ -77,34 +78,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
     // than loop. A count-based one-shot guard dead-ended the *second* distinct
     // stale chunk of a session, which is exactly the case active development
     // produces.
-    const msg = String(error?.message ?? '');
-    const isChunkError =
-      msg.includes('Failed to fetch dynamically imported module') ||
-      msg.includes('Importing a module script failed') ||
-      /Loading chunk \d+ failed/i.test(msg);
-    if (isChunkError) {
-      // Reading sessionStorage is not a safe operation: browsers configured to
-      // block site data, and sandboxed frames, throw SecurityError on the
-      // property access itself. A throw from componentDidCatch is re-raised to
-      // the PARENT boundary, and the outermost boundary has no parent — React
-      // unmounts the whole tree and the user gets the blank document this class
-      // exists to prevent. So the storage that only tunes the reload heuristic
-      // must never be able to take the recovery UI down with it: on failure we
-      // skip the auto-reload and render the fallback, which is the safe branch.
-      try {
-        const KEY = 'oe_chunk_reload_at';
-        const last = Number(sessionStorage.getItem(KEY) ?? '0');
-        if (Date.now() - last > 10_000) {
-          sessionStorage.setItem(KEY, String(Date.now()));
-          window.location.reload();
-          return;
-        }
-        // Reloaded moments ago for the same reason → the new build is broken;
-        // fall through and render the recovery UI instead of looping.
-      } catch {
-        // Storage unavailable — fall through to the recovery UI.
-      }
-    }
+    // Storage trouble inside the helper returns false: render the fallback.
+    if (isChunkLoadError(String(error?.message ?? ''))) recoverFromStaleChunk();
   }
 
   handleReset = () => {

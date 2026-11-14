@@ -727,6 +727,7 @@ class CostItemRepository:
         region: str | None = None,
         depth: int = 4,
         parent_path: str | None = None,
+        catalog_id: uuid.UUID | None = None,
     ) -> list[dict[str, Any]]:
         """Aggregate cost items into a classification tree.
 
@@ -782,6 +783,8 @@ class CostItemRepository:
         stmt = select(*active_cols, cnt).where(CostItem.is_active.is_(True)).group_by(*active_exprs)
         if region:
             stmt = stmt.where(CostItem.region == region)
+        if catalog_id is not None:
+            stmt = stmt.where(CostItem.catalog_id == catalog_id)
 
         # When a parent prefix is supplied, AND in equality filters at the
         # appropriate depths so we only aggregate the sub-branch.

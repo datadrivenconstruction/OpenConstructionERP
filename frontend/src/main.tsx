@@ -1,3 +1,4 @@
+import { recoverFromStaleChunk } from '@/shared/lib/chunkRecovery';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from '@tanstack/react-query';
@@ -95,12 +96,7 @@ __rootEl.setAttribute(
 // index.html and the current chunk graph. The timestamp guard caps auto-reloads
 // so a genuine outage cannot turn into a reload loop.
 window.addEventListener('vite:preloadError', () => {
-  const KEY = 'oe_chunk_reload_at';
-  const last = Number(sessionStorage.getItem(KEY) || 0);
-  if (Date.now() - last > 10_000) {
-    sessionStorage.setItem(KEY, String(Date.now()));
-    window.location.reload();
-  }
+  recoverFromStaleChunk();
 });
 
 // Earlier builds let the service worker cache cross-origin images, failures

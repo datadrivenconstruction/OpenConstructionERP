@@ -403,3 +403,44 @@ async def test_category_tree_no_region_aggregates_all(http_client, auth_headers)
     total_rows = sum(n["count"] for n in tree)
     # All 20 seeded rows.
     assert total_rows == 20
+
+
+@pytest.mark.asyncio
+async def test_category_tree_and_categories_follow_catalog_scope(http_client, auth_headers):
+    """With catalog_id the tree and the flat list hold only that catalogue's rows."""
+    created = await http_client.post(
+        "/api/v1/costs/catalogs/",
+        json={"name": "Scoped tree catalogue", "currency": "EUR"},
+        headers=auth_headers,
+    )
+    assert created.status_code == 201, created.text
+    catalog_id = created.json()["id"]
+    item = await http_client.post(
+        "/api/v1/costs/",
+        json={
+            "code": "SCOPED-1",
+            "description": "scoped",
+            "unit": "m2",
+            "rate": 5,
+            "currency": "EUR",
+            "region": "SCOPED_REGION",
+            "catalog_id": catalog_id,
+            "classification": {"collection": "OnlyHere"},
+        },
+        headers=auth_headers,
+    )
+    assert item.status_code == 201, item.text
+
+    tree = await http_client.get(
+        "/api/v1/costs/category-tree/", params={"catalog_id": catalog_id}, headers=auth_headers
+    )
+    assert tree.status_code == 200, tree.text
+    assert {n["name"] for n in tree.json()} == {"OnlyHere"}
+
+    cats = await http_client.get("/api/v1/costs/categories/", params={"catalog_id": catalog_id}, headers=auth_headers)
+    assert cats.status_code == 200, cats.text
+    assert cats.json() == ["OnlyHere"]
+
+    # No catalog: the tree is the unscoped one and still holds the seeded rows.
+    full = await http_client.get("/api/v1/costs/category-tree/", headers=auth_headers)
+    assert "Buildings" in {n["name"] for n in full.json()}

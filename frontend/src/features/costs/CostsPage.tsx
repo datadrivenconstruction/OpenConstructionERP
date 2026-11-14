@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { healScope, isCatalogueRegionTag, scopeKey } from './scopeSync';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -748,6 +749,18 @@ export function CostsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadedRegions, userCatalogs, catalogId, activeRegion, region]);
 
+  // A persisted or deep-linked region that merely repeats a catalogue name is
+  // not a region: it would filter the tree and list to that one catalogue while
+  // the "All" tab claims the whole base. Fall back to the explicit All view.
+  useEffect(() => {
+    if (!userCatalogs || hadRegionDeepLink.current) return;
+    const healed = healScope({ region, catalogId }, userCatalogs.map((c) => c.name));
+    if (healed.region !== region) {
+      setRegion(healed.region);
+      if (isCatalogueRegionTag(activeRegion, userCatalogs.map((c) => c.name))) setActiveRegion('');
+    }
+  }, [userCatalogs, region, catalogId, activeRegion, setActiveRegion]);
+
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
@@ -758,10 +771,11 @@ export function CostsPage() {
 
   // Fetch distinct categories (classification.collection values)
   const { data: categories } = useQuery({
-    queryKey: ['costs', 'categories', region],
+    queryKey: ['costs', 'categories', ...scopeKey({ region, catalogId })],
     queryFn: () => {
       const params = new URLSearchParams();
       if (region) params.set('region', region);
+      if (catalogId) params.set('catalog_id', catalogId);
       return apiGet<string[]>(`/v1/costs/categories/?${params.toString()}`);
     },
     retry: false,
@@ -791,8 +805,8 @@ export function CostsPage() {
   // endpoint has a 5-min cache so this is cheap on hot calls.
   const { data: categoryTree, isLoading: categoryTreeLoading, isFetching: categoryTreeFetching } =
     useQuery<CategoryTreeNode[]>({
-      queryKey: ['costs', 'category-tree', region],
-      queryFn: () => fetchCategoryTree(region || undefined, 4),
+      queryKey: ['costs', 'category-tree', ...scopeKey({ region, catalogId })],
+      queryFn: () => fetchCategoryTree(region || undefined, 4, undefined, catalogId || undefined),
       retry: false,
       staleTime: 5 * 60_000,
     });

@@ -849,8 +849,9 @@ class CostItemService:
         region: str | None = None,
         depth: int = 4,
         parent_path: str | None = None,
+        catalog_id: uuid.UUID | None = None,
     ) -> list[dict[str, Any]]:
-        """Return the classification tree, optionally filtered by region.
+        """Return the classification tree, optionally filtered by region or catalog.
 
         ``depth`` (1..4) limits how many classification levels to return -
         callers asking for a fast first paint pass ``depth=2`` and lazily
@@ -859,7 +860,7 @@ class CostItemService:
         background callers (e.g. event handlers) don't share a stale
         snapshot with HTTP clients.
         """
-        return await self.repo.category_tree(region=region, depth=depth, parent_path=parent_path)
+        return await self.repo.category_tree(region=region, depth=depth, parent_path=parent_path, catalog_id=catalog_id)
 
     # ── Update ────────────────────────────────────────────────────────────
 
