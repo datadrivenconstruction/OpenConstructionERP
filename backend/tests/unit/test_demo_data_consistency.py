@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from app.core.demo_projects import DEMO_TEMPLATES, _demo_anchor
+from app.core.demo_projects import DEMO_TEMPLATES, _demo_anchor, _generate_module_data
 from app.core.demo_vat import demo_vat_rate
 from app.modules.plant_register.seed import _ITEMS, _ORDER_VALUE
 from app.modules.projects.router import governing_boq_id_set
@@ -84,7 +85,58 @@ def test_london_cost_plan_reconciles_with_the_catalogue_headline() -> None:
 def test_vat_follows_the_currency() -> None:
     assert demo_vat_rate("EUR") == Decimal("0.19")
     assert demo_vat_rate("gbp") == Decimal("0.20")
-    assert demo_vat_rate("USD") == Decimal("0")
+    assert demo_vat_rate("USD") == Decimal("0.04125")
+
+
+def test_vat_is_set_for_every_demo_currency_that_taxes_construction() -> None:
+    assert demo_vat_rate("CNY") == Decimal("0.09")
+    assert demo_vat_rate("CAD") == Decimal("0.13")
+    assert demo_vat_rate("SAR") == Decimal("0.15")
+    assert demo_vat_rate("AED") == Decimal("0.05")
+    assert demo_vat_rate("GBP") == Decimal("0.20")
+
+
+def test_london_cost_plan_is_quoted_without_vat() -> None:
+    template = DEMO_TEMPLATES["office-london"]
+    assert not [m for m in template.markups if m[2] == "tax"]
+
+
+def _generated(demo_id: str) -> dict:
+    return _generate_module_data(DEMO_TEMPLATES[demo_id], uuid.uuid4(), uuid.uuid4(), demo_id, datetime(2026, 8, 1))
+
+
+def test_generated_change_orders_scale_with_the_project() -> None:
+    for demo_id in ("office-shanghai", "residential-berlin", "office-tokyo"):
+        template = DEMO_TEMPLATES[demo_id]
+        direct = _direct_total(template)
+        orders = _generated(demo_id)["change_orders"]
+        assert orders
+        for order in orders:
+            assert 0.003 * direct <= order[5] <= 0.02 * direct, (demo_id, order[0], order[5])
+
+
+_SHANGHAI_ENGLISH_WORD = re.compile(r"[a-z]{3,}")
+
+
+def _shanghai_names() -> list[str]:
+    t = DEMO_TEMPLATES["office-shanghai"]
+    names = [t.project_name, t.boq_name, t.budget_boq_name, t.tender_name, t.project_description, t.boq_description]
+    names += [str(v) for v in t.boq_metadata.values()]
+    names += [str(v) for v in t.project_metadata.values()]
+    for section in t.sections:
+        names.append(section[1])
+        names += [item[1] for item in section[3]]
+    names += [m[0] for m in t.markups]
+    names += [c[0] for c in t.tender_companies]
+    for package in t.tender_packages:
+        names += [package[0], package[1]] + [c[0] for c in package[3]]
+    return names
+
+
+def test_shanghai_demo_carries_no_english_glosses() -> None:
+    # Standard codes and designations (GB 50500, LEED, Low-E, C40, kVA) stay; words do not.
+    for name in _shanghai_names():
+        assert not _SHANGHAI_ENGLISH_WORD.search(name), name
 
 
 def test_every_plant_order_has_a_value() -> None:

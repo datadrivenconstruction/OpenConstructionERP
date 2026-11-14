@@ -24,7 +24,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.costmodel.cashflow_forecast import month_end, q2
 
 MARKER = "cashflow_forecast_demo"
+#: Contract value of a project that has no priced bill of quantities to scale from.
 CONTRACT_VALUE = Decimal("2400000")
+#: Contact roles a purchase order can name as its vendor, most specific first.
+_VENDOR_ROLES = ("supplier", "subcontractor")
 
 #: (months from start, share of the contract) of the payment plan.
 _EVEN_PLAN = [(m, Decimal(1) / Decimal(12)) for m in range(5, 13)]
@@ -54,8 +57,59 @@ async def _number_sequence(session: AsyncSession, project_id: uuid.UUID, model: 
     return next_number
 
 
+async def project_contract_value(session: AsyncSession, project_id: uuid.UUID) -> Decimal:
+    """Direct cost of the project's largest priced bill, or :data:`CONTRACT_VALUE` when it has none.
+
+    Every demo document derived from the contract (payment plan, invoices, order) scales
+    with this, so a 45M office and an 880M tower do not carry the same amounts.
+    """
+    from app.modules.boq.models import BOQ, Position
+
+    rows = (
+        await session.execute(
+            select(Position.boq_id, Position.total, Position.unit_rate)
+            .join(BOQ, BOQ.id == Position.boq_id)
+            .where(BOQ.project_id == project_id)
+        )
+    ).all()
+    per_bill: dict[object, Decimal] = {}
+    for boq_id, total, rate in rows:
+        try:
+            if Decimal(str(rate or "0")) == 0:
+                continue
+            per_bill[boq_id] = per_bill.get(boq_id, Decimal(0)) + Decimal(str(total or "0"))
+        except ArithmeticError:
+            continue
+    best = max(per_bill.values(), default=Decimal(0))
+    return q2(best) if best > 0 else CONTRACT_VALUE
+
+
+async def _vendor_of_project(session: AsyncSession, project: object) -> tuple[str | None, str | None]:
+    """Contact id and company of one vendor seeded for ``project``, or ``(None, None)``."""
+    from app.modules.contacts.models import Contact
+
+    rows = (
+        await session.execute(
+            select(Contact.id, Contact.contact_type, Contact.company_name, Contact.metadata_)
+            .where(Contact.created_by == str(project.owner_id), Contact.contact_type.in_(_VENDOR_ROLES))
+            .order_by(Contact.created_at, Contact.id)
+        )
+    ).all()
+    own = [r for r in rows if str((r.metadata_ or {}).get("project_id")) == str(project.id) and r.company_name]
+    for role in _VENDOR_ROLES:
+        for row in own:
+            if row.contact_type == role:
+                return str(row.id), str(row.company_name)
+    return None, None
+
+
 async def seed_cashflow_forecast_demo(
-    session: AsyncSession, project_id: uuid.UUID, *, dip: bool, today: date | None = None
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    *,
+    dip: bool,
+    today: date | None = None,
+    contract_value: Decimal | None = None,
 ) -> int:
     """Write the demo rows for one project; returns the number of rows written (0 when already seeded)."""
     from app.core.demo_vat import demo_vat_rate
@@ -77,7 +131,8 @@ async def seed_cashflow_forecast_demo(
     currency = (project.currency or "EUR").upper()[:3]
     start = _shift(today, -4)
     end = _shift(today, 8)
-    value = CONTRACT_VALUE
+    value = contract_value if contract_value is not None else await project_contract_value(session, project_id)
+    vendor_id, vendor_name = await _vendor_of_project(session, project)
     meta = {"demo_seed": MARKER}
     tag = project_id.hex[:8].upper()
     rows: list[object] = []
@@ -154,6 +209,8 @@ async def seed_cashflow_forecast_demo(
             issue_date=today.isoformat(),
             delivery_date=_shift(today, 1).isoformat(),
             payment_terms="Net 30",
+            vendor_contact_id=vendor_id,
+            notes=f"{vendor_name} - supply" if vendor_name else None,
         )
     )
 

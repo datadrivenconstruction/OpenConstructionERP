@@ -8,6 +8,15 @@ _RATE_BY_CURRENCY: dict[str, Decimal] = {
     "EUR": Decimal("0.19"),
     "GBP": Decimal("0.20"),
     "AED": Decimal("0.05"),
+    # China construction VAT.
+    "CNY": Decimal("0.09"),
+    # Ontario HST.
+    "CAD": Decimal("0.13"),
+    "SAR": Decimal("0.15"),
+    # Simplification: Texas sales tax (8.25 %) falls on the materials share of a
+    # job only, and demo documents carry about half of their value as materials,
+    # so one effective rate stands in for the split.
+    "USD": Decimal("0.04125"),
 }
 
 
