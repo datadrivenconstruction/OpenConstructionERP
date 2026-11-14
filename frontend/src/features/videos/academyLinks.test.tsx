@@ -189,6 +189,19 @@ describe('the hub page', () => {
     expect(screen.getAllByTestId('academy-item-card').length).toBeGreaterThan(20);
   });
 
+  it('puts the featured article beside the filters, opening in a new tab', () => {
+    renderAt('/courses', <CoursesPage />);
+    const card = screen.getByTestId('courses-featured-article');
+    const panel = screen.getByTestId('courses-filter-panel');
+    expect(card.parentElement).toBe(panel.parentElement);
+    expect(panel.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(card.getAttribute('href')).toContain('uberization-of-construction');
+    expect(card.getAttribute('target')).toBe('_blank');
+    expect(card.textContent).toContain('Uberization of Construction');
+    fireEvent.error(card.querySelector('img')!);
+    expect(card.querySelector('img')).toBeNull();
+  });
+
   it('narrows to one screen from the URL and says which', () => {
     renderAt(`/courses?route=${encodeURIComponent(bothRoute)}`, <CoursesPage />);
     expect(screen.getByTestId('courses-route-chip').textContent).toContain('This screen only');

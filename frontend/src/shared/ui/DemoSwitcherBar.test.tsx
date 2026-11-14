@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -55,6 +55,27 @@ describe('DemoSwitcherBar', () => {
     expect(tabs).toHaveLength(2);
     tabs.forEach((tab) => expect(tab).not.toBeDisabled());
     expect(tabs.map((tab) => tab.getAttribute('title'))).toEqual(['Consultancy', 'Contractor']);
+  });
+
+  it('marks each demo with its photo in a hexagon, and a drawing when the photo fails', async () => {
+    // A chosen demo keeps the bar from sending a first visit to the chooser.
+    sessionStorage.setItem('oe_demo_chosen', 'office-london');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    const tabs = await screen.findAllByRole('tab');
+    for (const tab of tabs) {
+      const hex = tab.querySelector('[data-testid="hex-mark"]')!;
+      expect(hex).not.toBeNull();
+      expect(hex.getAttribute('data-hex-photo')).toBe('true');
+      expect(hex.querySelector('img')!.getAttribute('src')).toMatch(/cmt-.+\.webp$/);
+    }
+    fireEvent.error(tabs[0]!.querySelector('[data-testid="hex-mark"] img')!);
+    await waitFor(() => {
+      const first = screen.getAllByRole('tab')[0]!.querySelector('[data-testid="hex-mark"]')!;
+      expect(first.getAttribute('data-hex-photo')).toBe('false');
+      expect(first.querySelector('svg')).not.toBeNull();
+    });
   });
 
   it('renders nothing when no demo project is visible', async () => {
