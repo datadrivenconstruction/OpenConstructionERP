@@ -787,9 +787,32 @@ def build(args: argparse.Namespace) -> None:
 ITEM_KINDS = {"course", "lesson", "checklist", "article"}
 # ERP modules a course task works in; each consecutive run of one module is a step of the course path.
 STEP_MODULES = {
-    "bcf", "bid_management", "bim", "bim_hub", "bim_requirements", "boq", "carbon", "clash", "closeout", "contracts",
-    "costs", "cvr", "daily_diary", "defects_liability", "documents", "dwg_takeoff", "full_evm", "inspections", "ncr",
-    "punchlist", "rfi", "risk", "safety", "schedule", "takeoff", "variations",
+    "bcf",
+    "bid_management",
+    "bim",
+    "bim_hub",
+    "bim_requirements",
+    "boq",
+    "carbon",
+    "clash",
+    "closeout",
+    "contracts",
+    "costs",
+    "cvr",
+    "daily_diary",
+    "defects_liability",
+    "documents",
+    "dwg_takeoff",
+    "full_evm",
+    "inspections",
+    "ncr",
+    "punchlist",
+    "rfi",
+    "risk",
+    "safety",
+    "schedule",
+    "takeoff",
+    "variations",
 }
 ROLE_GROUPS = {"est", "qs", "site", "bim", "client"}
 # The site names the language of a course's case content in that language.

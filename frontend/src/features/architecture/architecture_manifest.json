@@ -317066,10 +317066,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 45,
+      "ts_files": 46,
       "css_files": 0,
       "test_files": 13,
-      "total_files": 45
+      "total_files": 46
     },
     {
       "name": "voice",
@@ -318982,7 +318982,7 @@
     "total_schemas": 4735,
     "total_python_files": 3357,
     "frontend_features": 238,
-    "frontend_ts_files": 4186,
+    "frontend_ts_files": 4187,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {

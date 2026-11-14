@@ -434,6 +434,11 @@
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated); identical in every locale including ru (bn locale addition)",
     "reason_category": "standard_code"
   },
+  "learn.cover.stage.rfi": {
+    "en_value": "RFI",
+    "note": "bare short acronym/initialism, course cover step label",
+    "reason_category": "abbreviation"
+  },
   "notifications.submittal.approved_as_noted.body": {
     "en_value": "{{code}} - {{title}}",
     "note": "entirely template variables and a separator, no literal word to translate",

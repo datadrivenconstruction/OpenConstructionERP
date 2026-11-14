@@ -2246,5 +2246,21 @@
     ],
     "key_count_at_seed": 8,
     "note": "site sensors units and frequency bands, 19.3.0"
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fil"
+    ],
+    "key_count_at_seed": 7,
+    "note": "Filipino keeps English trade terms (Estimator, Billing, DWG takeoff); en-GB has no British spelling for them"
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "nl"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Dutch spells Project and Water the same and uses clashes as the BIM term"
   }
 ]
