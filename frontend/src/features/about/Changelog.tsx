@@ -68,17 +68,10 @@ const UNRELEASED: ChangelogEntry | null = null;
 const CHANGELOG: ChangelogEntry[] = [
   {
     version: '19.5.0',
-    date: '2026-11-14',
+    date: '2026-11-15',
     tag: 'NEW',
     summary:
-      'Six company demos with a language and market switch, Paris and Shanghai new, a sidebar grouped by job with demo menus cut to their modules, and photo hexagons in the demo menu. Berlin, London, Riyadh and US hospital demo data corrected and filled. The cost category tree follows the selected catalogue, and DWG takeoff offers DXF when the converter is missing.',
-  },
-  {
-    version: '19.4.1',
-    date: '2026-11-14',
-    tag: 'NEW',
-    summary:
-      'Every module page and popup in one compact design, and courses shown with a site photo, your role and the path of steps, as on the Academy. Desktop accounts are active at once. DWG takeoff buttons no longer cover the tools, the Link to BOQ panel is readable in the light theme, demo measurements show their real size, and the CSV export writes m² the same way everywhere.',
+      'Six company demos with a language and market switch, Paris and Shanghai new, a sidebar grouped by job with demo menus cut to their modules, and photo hexagons in the demo menu. German and French demos speak their language, and the Berlin, Paris, Toronto, London, Riyadh and US demo data is corrected and filled. A calmer onboarding, every module page and popup in one compact design, and courses shown with a site photo and the path of steps. The cost category tree follows the selected catalogue, and DWG takeoff offers DXF when the converter is missing.',
   },
   {
     version: '19.4.0',
