@@ -81,6 +81,19 @@ def pick_project_pack(
     return min(candidates, key=key), "project"
 
 
+def project_country(country_code: Any, region: Any = None) -> str | None:
+    """The project's market: ``country_code``, else a ``region`` that is itself an alpha-2 code.
+
+    ``region`` is free text in older rows ("Middle East", "DACH", "UK"), so it
+    only counts when it is a clean two-letter code; anything else names no market.
+    """
+    for value in (country_code, region):
+        code = str(value or "").strip().upper()
+        if len(code) == 2 and code.isascii() and code.isalpha():
+            return code
+    return None
+
+
 def project_preferred_slugs(metadata: Any, flagship_by_demo: dict[str, list[str]]) -> list[list[str]]:
     """Tiers of packs a project names itself: its pack tag, then its demo's flagship packs."""
     md = metadata if isinstance(metadata, dict) else {}

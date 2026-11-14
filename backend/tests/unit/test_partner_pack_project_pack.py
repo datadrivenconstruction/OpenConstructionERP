@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from app.core.partner_pack.project_pack import pick_project_pack, project_preferred_slugs
+from app.core.partner_pack.project_pack import pick_project_pack, project_country, project_preferred_slugs
 
 
 @dataclass
@@ -170,3 +170,29 @@ async def test_current_endpoint_answers_with_the_project_pack(monkeypatch: pytes
     assert install["manifest"] == {"slug": "hungary-hu"}
     with pytest.raises(HTTPException):
         await pack_router.current_pack(_Session(None), "u1", pid)
+
+
+@pytest.mark.parametrize(
+    ("country_code", "region", "expected"),
+    [
+        ("AE", "Middle East", "AE"),
+        ("sa", "SA", "SA"),
+        (None, "SA", "SA"),
+        ("", "Middle East", None),
+        (None, "DACH", None),
+        (None, None, None),
+    ],
+)
+def test_project_country_keys_on_country_code_then_a_coded_region(
+    country_code: str | None, region: str | None, expected: str | None
+) -> None:
+    assert project_country(country_code, region) == expected
+
+
+def test_every_demo_template_names_its_country() -> None:
+    """The seed writes ``_country_code_for(template) or "DE"``; a gap would read as Germany."""
+    from app.core.demo_projects import DEMO_TEMPLATES, _country_code_for
+
+    missing = sorted(d for d, t in DEMO_TEMPLATES.items() if len(_country_code_for(t)) != 2)
+    assert missing == []
+    assert _country_code_for(DEMO_TEMPLATES["warehouse-dubai"]) == "AE"
