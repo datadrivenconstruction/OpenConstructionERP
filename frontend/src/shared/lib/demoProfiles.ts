@@ -28,6 +28,16 @@ export interface DemoProfile {
   menuStyle: DemoMenuStyle;
   /** i18n key stem: `<stem>.country`, `.title`, `.audience`, `.body`, `.point_1..3`. */
   stem: string;
+  /** Picture for the demo's hexagon: the company type whose site scene it wears, and the drawing used without a photo. */
+  face?: DemoFace;
+}
+
+export type DemoFaceKind = 'tower' | 'residential' | 'hospital' | 'bridge' | 'warehouse';
+
+export interface DemoFace {
+  /** Company-type id whose Cases thumb is the photo (either id scheme). */
+  companyType: string;
+  kind: DemoFaceKind;
 }
 
 // Always present so the visitor can find help, settings and the projects list.
@@ -45,6 +55,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     appearance: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
     groups: null,
     stem: 'demo_profiles.full_showcase',
+    face: { companyType: 'full_enterprise', kind: 'hospital' },
   },
   {
     slug: 'residential-berlin',
@@ -64,6 +75,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
       'grp_finance',
     ],
     stem: 'demo_profiles.dach_contractor',
+    face: { companyType: 'general_contractor', kind: 'residential' },
   },
   {
     slug: 'office-london',
@@ -82,6 +94,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
       'grp_finance',
     ],
     stem: 'demo_profiles.uk_consultancy',
+    face: { companyType: 'commercial-manager', kind: 'tower' },
   },
   {
     slug: 'medical-us',
@@ -101,6 +114,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
       'grp_finance',
     ],
     stem: 'demo_profiles.us_owners_rep',
+    face: { companyType: 'construction-manager', kind: 'hospital' },
   },
   {
     slug: 'condo-toronto',
@@ -121,6 +135,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
       'grp_finance',
     ],
     stem: 'demo_profiles.ca_developer',
+    face: { companyType: 'real_estate_developer', kind: 'tower' },
   },
 ];
 
