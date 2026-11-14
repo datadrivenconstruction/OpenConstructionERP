@@ -45705,6 +45705,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "コンバーターのレポート",
   "dwg_takeoff.open_side_panel": "レイヤーと詳細",
   "dwg_takeoff.close_side_panel": "図面に戻る",
+  "dwg_takeoff.conv_missing_dxf_hint": "インストールする時間がありませんか。CAD アプリケーションで図面を DXF として保存し、そのファイルをアップロードしてください。DXF はコンバーターなしで開けます。",
     "match_wizard.available_label": "インストール可能 ({{n}})",
     "match_wizard.install_aria": "{{region}} をインストール",
     "match_wizard.install_toast_ok_msg": "{{label}} を使用する準備ができました。",

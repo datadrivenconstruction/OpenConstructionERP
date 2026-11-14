@@ -45972,6 +45972,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Konverterarrapport",
   "dwg_takeoff.open_side_panel": "Lager och detaljer",
   "dwg_takeoff.close_side_panel": "Tillbaka till ritningen",
+  "dwg_takeoff.conv_missing_dxf_hint": "Ingen tid att installera? Spara ritningen som DXF i ditt CAD-program och ladda upp den i stället. DXF öppnas utan konverteraren.",
     "match_wizard.available_label": "Tillgänglig för installation ({{n}})",
     "match_wizard.install_aria": "Installera {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} är redo att användas.",

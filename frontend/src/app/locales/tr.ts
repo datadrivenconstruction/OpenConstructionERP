@@ -46347,6 +46347,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Dönüştürücü raporu",
   "dwg_takeoff.open_side_panel": "Katmanlar ve ayrıntılar",
   "dwg_takeoff.close_side_panel": "Çizime dön",
+  "dwg_takeoff.conv_missing_dxf_hint": "Kurmaya vaktiniz yok mu? Çizimi CAD uygulamanızda DXF olarak kaydedip yükleyin. DXF dönüştürücü olmadan açılır.",
     "match_wizard.available_label": "Yüklemeye hazır ({{n}})",
     "match_wizard.install_aria": "Yükle {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} kullanıma hazır.",

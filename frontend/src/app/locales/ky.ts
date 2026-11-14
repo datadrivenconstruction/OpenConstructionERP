@@ -40864,6 +40864,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Конвертер отчету",
   "dwg_takeoff.open_side_panel": "Катмарлар жана маалымат",
   "dwg_takeoff.close_side_panel": "Чиймеге кайтуу",
+  "dwg_takeoff.conv_missing_dxf_hint": "Орнотууга убакыт жокпу? Чийменди CAD колдонмосунда DXF катары сактап, ошону жүктөңүз. DXF конвертерсиз ачылат.",
     "integrations.available": "Жеткиликтүү",
     "integrations.calendar_hint": "Google Календар же Outlook'ка жазылыңыз:",
     "integrations.events": "Жазыла турган окуялар",

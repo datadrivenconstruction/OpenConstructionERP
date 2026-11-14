@@ -1226,6 +1226,7 @@ const resource = {
     "dwg_takeoff.scale_explainer": "Raw DXF units are treated as meters. A scale of 1:50 divides displayed measurements so a 50-meter raw span reads as 1 meter.",
     "dwg_takeoff.link_n_to_boq": "Link {{count}} to Bid Schedule",
     "dwg_takeoff.link_to_boq": "Link to Bid Schedule",
+    "dwg_takeoff.conv_missing_dxf_hint": "No time to install? Save the drawing as DXF in your CAD application and upload that instead. DXF opens without the converter.",
     "equipment.flow_2_desc": "Record hour-meter, odometer and fuel readings to track real utilization.",
     "equipment.flow_5_desc": "Assign active equipment to crews; its running cost flows through to Finance.",
     "equipment.flow_intro": "The register keeps every machine safe, serviced and costed. Only active equipment with a valid inspection can be assigned to a crew.",

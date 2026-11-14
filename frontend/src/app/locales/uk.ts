@@ -46643,6 +46643,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Звіт конвертера",
     "dwg_takeoff.open_side_panel": "Шари та деталі",
     "dwg_takeoff.close_side_panel": "Назад до креслення",
+    "dwg_takeoff.conv_missing_dxf_hint": "Немає часу на встановлення? Збережіть креслення в CAD-програмі як DXF і завантажте його. DXF відкривається без конвертера.",
     "match_wizard.available_label": "Доступно для встановлення ({{n}})",
     "match_wizard.install_aria": "Встановити {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} готовий до використання.",

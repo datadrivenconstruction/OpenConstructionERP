@@ -45822,6 +45822,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Muuntimen raportti",
   "dwg_takeoff.open_side_panel": "Tasot ja tiedot",
   "dwg_takeoff.close_side_panel": "Takaisin piirustukseen",
+  "dwg_takeoff.conv_missing_dxf_hint": "Ei aikaa asentaa? Tallenna piirustus CAD-ohjelmassasi DXF-muodossa ja lataa se. DXF aukeaa ilman muunninta.",
     "match_wizard.available_label": "Asennettavissa ({{n}})",
     "match_wizard.install_aria": "Asenna {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} on käyttövalmis.",

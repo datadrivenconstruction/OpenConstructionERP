@@ -45972,6 +45972,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Konverterrapport",
   "dwg_takeoff.open_side_panel": "Lag og detaljer",
   "dwg_takeoff.close_side_panel": "Tilbake til tegningen",
+  "dwg_takeoff.conv_missing_dxf_hint": "Har du ikke tid til å installere? Lagre tegningen som DXF i CAD-programmet ditt og last opp den i stedet. DXF åpnes uten konverteren.",
     "match_wizard.available_label": "Tilgjengelig for installasjon ({{n}})",
     "match_wizard.install_aria": "Installer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} er klar til bruk.",

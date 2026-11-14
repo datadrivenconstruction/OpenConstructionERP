@@ -45705,6 +45705,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "변환기 보고서",
   "dwg_takeoff.open_side_panel": "레이어 및 상세",
   "dwg_takeoff.close_side_panel": "도면으로 돌아가기",
+  "dwg_takeoff.conv_missing_dxf_hint": "설치할 시간이 없으신가요? CAD 프로그램에서 도면을 DXF로 저장한 뒤 업로드하세요. DXF는 변환기 없이 열립니다.",
     "match_wizard.available_label": "설치 가능 ({{n}})",
     "match_wizard.install_aria": "설치 {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} 사용 준비가 되었습니다.",

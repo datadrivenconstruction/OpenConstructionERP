@@ -45708,6 +45708,7 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Konverter jelentés",
     "dwg_takeoff.open_side_panel": "Rétegek és részletek",
     "dwg_takeoff.close_side_panel": "Vissza a rajzhoz",
+    "dwg_takeoff.conv_missing_dxf_hint": "Nincs ideje telepíteni? Mentse a rajzot DXF-ként a CAD-alkalmazásában, és töltse fel azt. A DXF konverter nélkül megnyílik.",
     "match_wizard.available_label": "Telepíthető ({{n}})",
     "match_wizard.install_aria": "{{region}} telepítése",
     "match_wizard.install_toast_ok_msg": "A(z) {{label}} használatra kész.",

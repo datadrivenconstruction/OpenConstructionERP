@@ -46845,6 +46845,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Raport konwertera",
   "dwg_takeoff.open_side_panel": "Warstwy i szczegóły",
   "dwg_takeoff.close_side_panel": "Wróć do rysunku",
+  "dwg_takeoff.conv_missing_dxf_hint": "Nie masz czasu na instalację? Zapisz rysunek jako DXF w swoim programie CAD i wgraj go. Plik DXF otwiera się bez konwertera.",
     "match_wizard.available_label": "Dostępne do instalacji ({{n}})",
     "match_wizard.install_aria": "Zainstaluj {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} jest gotowy do użycia.",

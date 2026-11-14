@@ -45663,6 +45663,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Хөрвүүлэгчийн тайлан",
   "dwg_takeoff.open_side_panel": "Давхарга ба дэлгэрэнгүй",
   "dwg_takeoff.close_side_panel": "Зураг руу буцах",
+  "dwg_takeoff.conv_missing_dxf_hint": "Суулгах цаг алга уу? Зургаа CAD програмдаа DXF болгон хадгалаад байршуулна уу. DXF хөрвүүлэгчгүйгээр нээгдэнэ.",
     "match_wizard.available_label": "Суулгахад бэлэн ({{n}})",
     "match_wizard.install_aria": "{{region}} суулгах",
     "match_wizard.install_toast_ok_msg": "{{label}} ашиглахад бэлэн боллоо.",

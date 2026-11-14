@@ -45607,6 +45607,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Laporan konverter",
   "dwg_takeoff.open_side_panel": "Lapisan dan detail",
   "dwg_takeoff.close_side_panel": "Kembali ke gambar",
+  "dwg_takeoff.conv_missing_dxf_hint": "Tidak sempat menginstal? Simpan gambar sebagai DXF di aplikasi CAD Anda lalu unggah. DXF terbuka tanpa konverter.",
     "match_wizard.available_label": "Tersedia untuk diinstal ({{n}})",
     "match_wizard.install_aria": "Instal {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} siap digunakan.",

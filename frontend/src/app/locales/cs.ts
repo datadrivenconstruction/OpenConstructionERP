@@ -46404,6 +46404,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "Protokol převodníku",
   "dwg_takeoff.open_side_panel": "Vrstvy a podrobnosti",
   "dwg_takeoff.close_side_panel": "Zpět na výkres",
+  "dwg_takeoff.conv_missing_dxf_hint": "Není čas instalovat? Uložte výkres v CAD aplikaci jako DXF a nahrajte jej. DXF se otevře bez konvertoru.",
     "match_wizard.available_label": "K dispozici k instalaci ({{n}})",
     "match_wizard.install_aria": "Nainstalovat {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} je připraven k použití.",

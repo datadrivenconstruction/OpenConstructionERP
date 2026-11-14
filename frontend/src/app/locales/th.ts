@@ -45751,6 +45751,7 @@ const resource = {
   "dwg_takeoff.conv_converter_said": "รายงานตัวแปลง",
   "dwg_takeoff.open_side_panel": "เลเยอร์และรายละเอียด",
   "dwg_takeoff.close_side_panel": "กลับไปที่แบบ",
+  "dwg_takeoff.conv_missing_dxf_hint": "ไม่มีเวลาติดตั้งใช่ไหม บันทึกแบบเป็น DXF ในโปรแกรม CAD ของคุณแล้วอัปโหลดไฟล์นั้นแทน DXF เปิดได้โดยไม่ต้องใช้ตัวแปลง",
     "match_wizard.available_label": "พร้อมสำหรับการติดตั้ง ({{n}})",
     "match_wizard.install_aria": "ติดตั้ง {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} พร้อมใช้งานแล้ว",
