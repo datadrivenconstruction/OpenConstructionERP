@@ -324,7 +324,7 @@ TEMPLATE = DemoTemplate(
         ("General Conditions", 8.5, "overhead", "direct_cost"),
         ("Overhead & Profit", 8.0, "profit", "direct_cost"),
         ("Design and Construction Contingency", 7.5, "contingency", "direct_cost"),
-        ("HST (13%)", 13.0, "tax", "direct_cost"),
+        ("HST (13%)", 13.0, "tax", "cumulative"),
     ],
     total_months=36,
     tender_name="Concrete Superstructure",

@@ -46,7 +46,7 @@ from app.modules.correspondence.models import Correspondence
 from app.modules.costmodel.models import BudgetLine, CashFlow, CostSnapshot
 from app.modules.documents.models import Document
 from app.modules.fieldreports.models import FieldReport
-from app.modules.finance.models import Invoice, InvoiceLineItem, ProjectBudget
+from app.modules.finance.models import Invoice, InvoiceLineItem, Payment, ProjectBudget
 from app.modules.inspections.models import QualityInspection
 from app.modules.meetings.models import Meeting
 from app.modules.ncr.models import NCR
@@ -1695,10 +1695,10 @@ _PARIS = DemoTemplate(
     demo_id="school-paris",
     project_name="École Primaire Belleville",
     project_description=(
-        "Construction d'une ecole primaire de 15 classes, gymnase, cantine, "
-        "preau, et aires de jeux. Surface de plancher 4.200 m2. "
-        "Batiment passif RE 2020, structure bois-beton (CLT). "
-        "Cout estime 12M EUR."
+        "Construction d'une école primaire de 15 classes, gymnase, cantine, "
+        "préau, et aires de jeux. Surface de plancher 4.200 m2. "
+        "Bâtiment passif RE 2020, structure bois-béton (CLT). "
+        "Coût estimé 10,5 M EUR HT."
     ),
     region="France",
     classification_standard="dpgf",
@@ -1722,24 +1722,24 @@ _PARIS = DemoTemplate(
         "price_level": "Paris 2026",
     },
     sections=[
-        # ── 01 Fondations (Foundations) ───────────────────────────────
+        # ── 01 Fondations ───────────────────────────────
         (
             "01",
-            "Fondations (Foundations)",
+            "Fondations",
             {"dpgf": "01"},
             [
                 (
                     "01.1",
-                    "Debroussaillage et decapage terre vegetale (Site clearance)",
+                    "Débroussaillage et décapage terre végétale",
                     "m2",
                     4500,
                     4.50,
                     {"dpgf": "01"},
                 ),
-                ("01.2", "Terrassement general en deblai (Excavation)", "m3", 4200, 16.50, {"dpgf": "01"}),
+                ("01.2", "Terrassement général en déblai", "m3", 4200, 16.50, {"dpgf": "01"}),
                 (
                     "01.3",
-                    "Beton de proprete C12/15, ep. 10cm (Concrete blinding)",
+                    "Béton de propreté C12/15, ep. 10cm",
                     "m2",
                     1800,
                     14.00,
@@ -1747,27 +1747,27 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "01.4",
-                    "Semelles filantes beton arme C25/30 (Reinforced strip foundations)",
+                    "Semelles filantes béton armé C25/30",
                     "m3",
                     380,
                     295.00,
                     {"dpgf": "01"},
                 ),
-                ("01.5", "Longrines beton arme (Ground beams)", "m3", 145, 310.00, {"dpgf": "01"}),
+                ("01.5", "Longrines béton armé", "m3", 145, 310.00, {"dpgf": "01"}),
                 (
                     "01.6",
-                    "Etancheite fondations membrane bitumineuse (Waterproofing)",
+                    "Étanchéité fondations membrane bitumineuse",
                     "m2",
                     1800,
                     38.00,
                     {"dpgf": "01"},
                 ),
-                ("01.7", "Drain peripherique PVC DN160 (French drain)", "m", 320, 55.00, {"dpgf": "01"}),
-                ("01.8", "Remblaiement et compactage (Backfill compaction)", "m3", 1400, 18.00, {"dpgf": "01"}),
-                ("01.9", "Traitement anti-termites sol (Anti-termite treatment)", "m2", 2100, 12.00, {"dpgf": "01"}),
+                ("01.7", "Drain périphérique PVC DN160", "m", 320, 55.00, {"dpgf": "01"}),
+                ("01.8", "Remblaiement et compactage", "m3", 1400, 18.00, {"dpgf": "01"}),
+                ("01.9", "Traitement anti-termites sol", "m2", 2100, 12.00, {"dpgf": "01"}),
                 (
                     "01.10",
-                    "Micropieux gymnase d=250mm (Pile foundations gymnasium)",
+                    "Micropieux gymnase d=250mm",
                     "m",
                     640,
                     135.00,
@@ -1775,7 +1775,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "01.11",
-                    "Dallage sur terre-plein beton arme 180mm (Ground slab)",
+                    "Dallage sur terre-plein béton armé 180mm",
                     "m2",
                     2800,
                     62.00,
@@ -1783,7 +1783,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "01.12",
-                    "Caniveaux de collecte eaux pluviales (Stormwater channels)",
+                    "Caniveaux de collecte eaux pluviales",
                     "m",
                     180,
                     85.00,
@@ -1791,26 +1791,26 @@ _PARIS = DemoTemplate(
                 ),
             ],
         ),
-        # ── 02 Structure Bois-Beton (Timber-Concrete Structure) ──────
+        # ── 02 Structure Bois-Beton ──────
         (
             "02",
-            "Structure Bois-Beton (Timber-Concrete Structure)",
+            "Structure Bois-Béton",
             {"dpgf": "02"},
             [
-                ("02.1", "Panneaux muraux CLT ep. 120mm (CLT wall panels)", "m2", 3200, 175.00, {"dpgf": "02"}),
+                ("02.1", "Panneaux muraux CLT ep. 120mm", "m2", 3200, 175.00, {"dpgf": "02"}),
                 (
                     "02.2",
-                    "Planchers CLT bois-beton ep. 200mm (CLT floor panels)",
+                    "Planchers CLT bois-béton ep. 200mm",
                     "m2",
                     4200,
                     198.00,
                     {"dpgf": "02"},
                 ),
-                ("02.3", "Poutres lamelle-colle GL28h (Glulam beams)", "m3", 85, 1350.00, {"dpgf": "02"}),
-                ("02.4", "Connecteurs acier bois-beton SBB (Steel connectors)", "pcs", 4800, 12.50, {"dpgf": "02"}),
+                ("02.3", "Poutres lamellé-collé GL28h", "m3", 85, 1350.00, {"dpgf": "02"}),
+                ("02.4", "Connecteurs acier bois-béton SBB", "pcs", 4800, 12.50, {"dpgf": "02"}),
                 (
                     "02.5",
-                    "Noyau escalier beton arme C30/37 (Concrete staircase cores)",
+                    "Noyau escalier béton armé C30/37",
                     "m3",
                     220,
                     395.00,
@@ -1818,7 +1818,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "02.6",
-                    "Protection incendie peinture intumescente (Fire protection)",
+                    "Protection incendie peinture intumescente",
                     "m2",
                     3200,
                     32.00,
@@ -1826,7 +1826,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "02.7",
-                    "Charpente metallique gymnase portee 18m (Structural steelwork gymnasium)",
+                    "Charpente métallique gymnase portée 18m",
                     "t",
                     55,
                     4500.00,
@@ -1834,37 +1834,37 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "02.8",
-                    "Linteaux beton precontraint prefabriques (Precast concrete lintels)",
+                    "Linteaux béton précontraint préfabriqués",
                     "m",
                     280,
                     65.00,
                     {"dpgf": "02"},
                 ),
-                ("02.9", "Joints de dilatation (Expansion joints)", "m", 120, 85.00, {"dpgf": "02"}),
+                ("02.9", "Joints de dilatation", "m", 120, 85.00, {"dpgf": "02"}),
                 (
                     "02.10",
-                    "Dalles prefabriquees beton preau (Precast canopy slabs)",
+                    "Dalles préfabriquées béton préau",
                     "m2",
                     600,
                     185.00,
                     {"dpgf": "02"},
                 ),
-                ("02.11", "Ancrage metallique bois-beton (Metal anchoring)", "pcs", 1200, 8.50, {"dpgf": "02"}),
+                ("02.11", "Ancrage métallique bois-béton", "pcs", 1200, 8.50, {"dpgf": "02"}),
             ],
         ),
-        # ── 03 Couverture (Roofing) ──────────────────────────────────
+        # ── 03 Couverture ──────────────────────────────────
         (
             "03",
-            "Couverture (Roofing)",
+            "Couverture",
             {"dpgf": "03"},
             [
-                ("03.1", "Support CLT toiture ep. 140mm (CLT roof deck)", "m2", 2800, 145.00, {"dpgf": "03"}),
-                ("03.2", "Pare-vapeur Sd>100m (Vapour barrier)", "m2", 2200, 8.50, {"dpgf": "03"}),
-                ("03.3", "Isolation PIR 220mm lambda 0,022 (PIR insulation)", "m2", 2800, 55.00, {"dpgf": "03"}),
-                ("03.4", "Membrane EPDM 1,5mm (EPDM membrane)", "m2", 2800, 52.00, {"dpgf": "03"}),
+                ("03.1", "Support CLT toiture ep. 140mm", "m2", 2800, 145.00, {"dpgf": "03"}),
+                ("03.2", "Pare-vapeur Sd>100m", "m2", 2200, 8.50, {"dpgf": "03"}),
+                ("03.3", "Isolation PIR 220mm lambda 0,022", "m2", 2800, 55.00, {"dpgf": "03"}),
+                ("03.4", "Membrane EPDM 1,5mm", "m2", 2800, 52.00, {"dpgf": "03"}),
                 (
                     "03.5",
-                    "Toiture vegetalisee semi-intensive substrat 15cm (Green roof)",
+                    "Toiture végétalisée semi-intensive substrat 15cm",
                     "m2",
                     1200,
                     105.00,
@@ -1872,7 +1872,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "03.6",
-                    "Lanterneaux salles de classe 1,2x1,8m (Skylights classrooms)",
+                    "Lanterneaux salles de classe 1,2x1,8m",
                     "pcs",
                     15,
                     2800.00,
@@ -1880,7 +1880,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "03.7",
-                    "Couverture zinc joint debout gymnase (Zinc standing seam)",
+                    "Couverture zinc joint debout gymnase",
                     "m2",
                     650,
                     110.00,
@@ -1888,17 +1888,17 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "03.8",
-                    "Cuve de recuperation eaux pluviales 10m3 (Rainwater harvesting)",
+                    "Cuve de récupération eaux pluviales 10m3",
                     "pcs",
                     1,
                     8500.00,
                     {"dpgf": "03"},
                 ),
-                ("03.9", "Trappes d'acces toiture (Roof access hatches)", "pcs", 4, 1200.00, {"dpgf": "03"}),
-                ("03.10", "Panneaux photovoltaiques 120 kWc (PV panels)", "kW", 120, 1150.00, {"dpgf": "03"}),
+                ("03.9", "Trappes d'accès toiture", "pcs", 4, 1200.00, {"dpgf": "03"}),
+                ("03.10", "Panneaux photovoltaïques 120 kWc", "kW", 120, 1150.00, {"dpgf": "03"}),
                 (
                     "03.11",
-                    "Paratonnerre et mise a la terre (Lightning protection)",
+                    "Paratonnerre et mise a la terre",
                     "lsum",
                     1,
                     18000.00,
@@ -1906,24 +1906,24 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "03.12",
-                    "Cheneaux zinc et descentes EP (Zinc gutters and downpipes)",
+                    "Chéneaux zinc et descentes EP",
                     "m",
                     280,
                     65.00,
                     {"dpgf": "03"},
                 ),
-                ("03.13", "Habillage sous-face debords de toit (Soffit cladding)", "m2", 320, 48.00, {"dpgf": "03"}),
+                ("03.13", "Habillage sous-face débords de toit", "m2", 320, 48.00, {"dpgf": "03"}),
             ],
         ),
-        # ── 04 Menuiseries Exterieures (External Joinery) ────────────
+        # ── 04 Menuiseries Exterieures ────────────
         (
             "04",
-            "Menuiseries Exterieures (External Joinery)",
+            "Menuiseries Extérieures",
             {"dpgf": "04"},
             [
                 (
                     "04.1",
-                    "Fenetres bois-alu triple vitrage Uw<0,9 (Timber-alu windows)",
+                    "Fenêtres bois-alu triple vitrage Uw<0,9",
                     "m2",
                     920,
                     650.00,
@@ -1931,25 +1931,25 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "04.2",
-                    "Portes d'entree automatiques coulissantes (Entrance doors)",
+                    "Portes d'entrée automatiques coulissantes",
                     "pcs",
                     3,
                     8500.00,
                     {"dpgf": "04"},
                 ),
-                ("04.3", "Portes issues de secours (Fire exit doors)", "pcs", 12, 1800.00, {"dpgf": "04"}),
+                ("04.3", "Portes issues de secours", "pcs", 12, 1800.00, {"dpgf": "04"}),
                 (
                     "04.4",
-                    "Brise-soleil lames aluminium orientables (Sun shading)",
+                    "Brise-soleil lames aluminium orientables",
                     "m2",
                     520,
                     215.00,
                     {"dpgf": "04"},
                 ),
-                ("04.5", "Mur rideau hall d'entree vitrage VEC (Curtain wall)", "m2", 85, 950.00, {"dpgf": "04"}),
+                ("04.5", "Mur rideau hall d'entrée vitrage VEC", "m2", 85, 950.00, {"dpgf": "04"}),
                 (
                     "04.6",
-                    "Grilles aluminium ventilation haute/basse (Aluminium louvres)",
+                    "Grilles aluminium ventilation haute/basse",
                     "m2",
                     85,
                     145.00,
@@ -1957,18 +1957,18 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "04.7",
-                    "Tablettes interieures bois massif (Window boards interior)",
+                    "Tablettes intérieures bois massif",
                     "m",
                     340,
                     42.00,
                     {"dpgf": "04"},
                 ),
-                ("04.8", "Quincaillerie PMR et antipanique (Ironmongery)", "lsum", 1, 18000.00, {"dpgf": "04"}),
-                ("04.9", "Ferme-portes hydrauliques (Door closers)", "pcs", 48, 85.00, {"dpgf": "04"}),
-                ("04.10", "Cloison vitree hall securit (Glass partition hall)", "m2", 35, 420.00, {"dpgf": "04"}),
+                ("04.8", "Quincaillerie PMR et antipanique", "lsum", 1, 18000.00, {"dpgf": "04"}),
+                ("04.9", "Ferme-portes hydrauliques", "pcs", 48, 85.00, {"dpgf": "04"}),
+                ("04.10", "Cloison vitrée hall sécurit", "m2", 35, 420.00, {"dpgf": "04"}),
                 (
                     "04.11",
-                    "Volets roulants electriques RDC (Electric roller shutters ground floor)",
+                    "Volets roulants électriques RDC",
                     "pcs",
                     12,
                     680.00,
@@ -1976,15 +1976,15 @@ _PARIS = DemoTemplate(
                 ),
             ],
         ),
-        # ── 05 CVC (HVAC) ────────────────────────────────────────────
+        # ── 05 CVC ────────────────────────────────────────────
         (
             "05",
-            "CVC - Chauffage, Ventilation, Climatisation (HVAC)",
+            "CVC - Chauffage, Ventilation, Climatisation",
             {"dpgf": "05"},
             [
                 (
                     "05.1",
-                    "PAC geothermique eau-eau 2x120kW (Ground-source heat pump)",
+                    "PAC géothermique eau-eau 2x120kW",
                     "pcs",
                     2,
                     95000.00,
@@ -1992,7 +1992,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "05.2",
-                    "Plancher chauffant basse temperature toutes salles (Underfloor heating)",
+                    "Plancher chauffant basse température toutes salles",
                     "m2",
                     4200,
                     62.00,
@@ -2000,36 +2000,36 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "05.3",
-                    "Ventilo-convecteurs gymnase 4 tubes (Fan coil units gymnasium)",
+                    "Ventilo-convecteurs gymnase 4 tubes",
                     "pcs",
                     8,
                     2200.00,
                     {"dpgf": "05"},
                 ),
-                ("05.4", "CTA double flux haut rendement >90% (MVHR units)", "pcs", 6, 35000.00, {"dpgf": "05"}),
+                ("05.4", "CTA double flux haut rendement >90%", "pcs", 6, 35000.00, {"dpgf": "05"}),
                 (
                     "05.5",
-                    "Extraction cuisine professionnelle hotte (Kitchen extract)",
+                    "Extraction cuisine professionnelle hotte",
                     "lsum",
                     1,
                     58000.00,
                     {"dpgf": "05"},
                 ),
-                ("05.6", "Regulation GTB protocole BACnet (BMS controls)", "lsum", 1, 72000.00, {"dpgf": "05"}),
+                ("05.6", "Régulation GTB protocole BACnet", "lsum", 1, 72000.00, {"dpgf": "05"}),
                 (
                     "05.7",
-                    "Silencieux acoustiques circulaires (Acoustic attenuators)",
+                    "Silencieux acoustiques circulaires",
                     "pcs",
                     24,
                     280.00,
                     {"dpgf": "05"},
                 ),
-                ("05.8", "Calorifugeage reseau chauffage (Insulated pipework)", "m", 2400, 38.00, {"dpgf": "05"}),
-                ("05.9", "Vases d'expansion et soupapes (Expansion vessels)", "pcs", 6, 450.00, {"dpgf": "05"}),
-                ("05.10", "Mise en service et equilibrage (Commissioning)", "lsum", 1, 25000.00, {"dpgf": "05"}),
+                ("05.8", "Calorifugeage réseau chauffage", "m", 2400, 38.00, {"dpgf": "05"}),
+                ("05.9", "Vases d'expansion et soupapes", "pcs", 6, 450.00, {"dpgf": "05"}),
+                ("05.10", "Mise en service et équilibrage", "lsum", 1, 25000.00, {"dpgf": "05"}),
                 (
                     "05.11",
-                    "Sondes geothermiques verticales 100m (Ground loop boreholes)",
+                    "Sondes géothermiques verticales 100m",
                     "m",
                     1200,
                     62.00,
@@ -2037,7 +2037,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "05.12",
-                    "Robinetterie sanitaire mitigeuse (Mixer taps sanitary)",
+                    "Robinetterie sanitaire mitigeuse",
                     "pcs",
                     64,
                     185.00,
@@ -2045,63 +2045,63 @@ _PARIS = DemoTemplate(
                 ),
             ],
         ),
-        # ── 06 Electricite (Electrical) ──────────────────────────────
+        # ── 06 Electricite ──────────────────────────────
         (
             "06",
-            "Electricite et Courants Faibles (Electrical)",
+            "Électricité et Courants Faibles",
             {"dpgf": "06"},
             [
-                ("06.1", "TGBT principal 630A (Main switchboard)", "pcs", 1, 28000.00, {"dpgf": "06"}),
+                ("06.1", "TGBT principal 630A", "pcs", 1, 28000.00, {"dpgf": "06"}),
                 (
                     "06.2",
-                    "Tableaux divisionnaires par niveau (Sub-distribution per floor)",
+                    "Tableaux divisionnaires par niveau",
                     "pcs",
                     6,
                     5500.00,
                     {"dpgf": "06"},
                 ),
-                ("06.3", "Chemins de cables et goulottes (Cable containment)", "m", 3200, 32.00, {"dpgf": "06"}),
+                ("06.3", "Chemins de cables et goulottes", "m", 3200, 32.00, {"dpgf": "06"}),
                 (
                     "06.4",
-                    "Eclairage LED encastre 600x600 salles (LED panels classrooms)",
+                    "Éclairage LED encastré 600x600 salles",
                     "pcs",
                     420,
                     195.00,
                     {"dpgf": "06"},
                 ),
-                ("06.5", "Eclairage de securite BAES/BAEH (Emergency lighting)", "pcs", 120, 145.00, {"dpgf": "06"}),
+                ("06.5", "Éclairage de sécurité BAES/BAEH", "pcs", 120, 145.00, {"dpgf": "06"}),
                 (
                     "06.6",
-                    "SSI categorie A - detection + alarme (Fire alarm system)",
+                    "SSI catégorie A - détection + alarme",
                     "lsum",
                     1,
                     85000.00,
                     {"dpgf": "06"},
                 ),
-                ("06.7", "Videosurveillance IP 8 cameras (CCTV cameras)", "pcs", 8, 1200.00, {"dpgf": "06"}),
-                ("06.8", "Reseau VDI Cat6A 180 prises (Data network)", "pcs", 180, 295.00, {"dpgf": "06"}),
+                ("06.7", "Vidéosurveillance IP 8 caméras", "pcs", 8, 1200.00, {"dpgf": "06"}),
+                ("06.8", "Réseau VDI Cat6A 180 prises", "pcs", 180, 295.00, {"dpgf": "06"}),
                 (
                     "06.9",
-                    "Alimentation TBI salles de classe (Interactive whiteboards power)",
+                    "Alimentation TBI salles de classe",
                     "pcs",
                     15,
                     450.00,
                     {"dpgf": "06"},
                 ),
-                ("06.10", "Onduleurs PV et raccordement ENEDIS (PV inverters)", "pcs", 6, 8500.00, {"dpgf": "06"}),
-                ("06.11", "Controle d'acces badges proximite (Access control)", "pcs", 8, 950.00, {"dpgf": "06"}),
+                ("06.10", "Onduleurs PV et raccordement ENEDIS", "pcs", 6, 8500.00, {"dpgf": "06"}),
+                ("06.11", "Contrôle d'accès badges proximité", "pcs", 8, 950.00, {"dpgf": "06"}),
                 (
                     "06.12",
-                    "Sonorisation et appel general (Public address system)",
+                    "Sonorisation et appel général",
                     "lsum",
                     1,
                     15000.00,
                     {"dpgf": "06"},
                 ),
-                ("06.13", "Bornes de recharge VE 7kW (EV charging 4 points)", "pcs", 4, 2200.00, {"dpgf": "06"}),
+                ("06.13", "Bornes de recharge VE 7kW", "pcs", 4, 2200.00, {"dpgf": "06"}),
                 (
                     "06.14",
-                    "Parafoudre et protection surtension (Surge protection)",
+                    "Parafoudre et protection surtension",
                     "pcs",
                     4,
                     450.00,
@@ -2109,7 +2109,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "06.15",
-                    "Horloge et sonnerie ecole (School bell and clock system)",
+                    "Horloge et sonnerie école",
                     "lsum",
                     1,
                     8500.00,
@@ -2117,15 +2117,15 @@ _PARIS = DemoTemplate(
                 ),
             ],
         ),
-        # ── 07 Amenagements Interieurs (Interior Finishes) ───────────
+        # ── 07 Amenagements Interieurs ───────────
         (
             "07",
-            "Amenagements Interieurs (Interior Finishes)",
+            "Aménagements Intérieurs",
             {"dpgf": "07"},
             [
                 (
                     "07.1",
-                    "Revetement sol linoleum salles de classe (Linoleum flooring)",
+                    "Revêtement sol linoleum salles de classe",
                     "m2",
                     3200,
                     58.00,
@@ -2133,7 +2133,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.2",
-                    "Carrelage antiderapant sanitaires R11 (Anti-slip tiles)",
+                    "Carrelage antidérapant sanitaires R11",
                     "m2",
                     650,
                     78.00,
@@ -2141,7 +2141,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.3",
-                    "Plafonds acoustiques fibres minerales 600x600 (Acoustic ceiling panels)",
+                    "Plafonds acoustiques fibres minérales 600x600",
                     "m2",
                     4200,
                     55.00,
@@ -2149,7 +2149,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.4",
-                    "Portes interieures chene plaque avec oculus (Internal doors oak veneer)",
+                    "Portes intérieures chêne plaque avec oculus",
                     "pcs",
                     110,
                     720.00,
@@ -2157,7 +2157,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.5",
-                    "Cloisons de distribution placo BA13 (Internal partitions plasterboard)",
+                    "Cloisons de distribution placo BA13",
                     "m2",
                     3600,
                     55.00,
@@ -2165,7 +2165,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.6",
-                    "Protection murale bois soubassement h=1,2m (Wall protection dado rails)",
+                    "Protection murale bois soubassement h=1,2m",
                     "m",
                     880,
                     52.00,
@@ -2173,7 +2173,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.7",
-                    "Rangements integres bois salles de classe (Built-in storage units)",
+                    "Rangements intégrés bois salles de classe",
                     "pcs",
                     15,
                     4500.00,
@@ -2181,7 +2181,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.8",
-                    "Equipement cuisine collective 200 couverts (Kitchen equipment cantine)",
+                    "Équipement cuisine collective 200 couverts",
                     "lsum",
                     1,
                     265000.00,
@@ -2189,7 +2189,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.9",
-                    "Cabines sanitaires et appareils (Toilet partitions/sanitaryware)",
+                    "Cabines sanitaires et appareils",
                     "pcs",
                     48,
                     1450.00,
@@ -2197,43 +2197,43 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "07.10",
-                    "Signaletique et orientation PMR (Signage/wayfinding)",
+                    "Signalétique et orientation PMR",
                     "lsum",
                     1,
                     28000.00,
                     {"dpgf": "07"},
                 ),
-                ("07.11", "Peinture toutes surfaces (Painting all surfaces)", "m2", 12000, 14.00, {"dpgf": "07"}),
+                ("07.11", "Peinture toutes surfaces", "m2", 12000, 14.00, {"dpgf": "07"}),
                 (
                     "07.12",
-                    "Stores interieurs occultants salles (Interior blinds classrooms)",
+                    "Stores intérieurs occultants salles",
                     "pcs",
                     45,
                     320.00,
                     {"dpgf": "07"},
                 ),
-                ("07.13", "Main courante bois escaliers (Timber handrails stairs)", "m", 120, 95.00, {"dpgf": "07"}),
+                ("07.13", "Main courante bois escaliers", "m", 120, 95.00, {"dpgf": "07"}),
             ],
         ),
-        # ── 08 Amenagements Exterieurs (External Works) ──────────────
+        # ── 08 Amenagements Exterieurs ──────────────
         (
             "08",
-            "Amenagements Exterieurs (External Works)",
+            "Aménagements Extérieurs",
             {"dpgf": "08"},
             [
                 (
                     "08.1",
-                    "Sol souple EPDM cour de recreation ep. 40mm (Playground surface)",
+                    "Sol souple EPDM cour de récréation ep. 40mm",
                     "m2",
                     2400,
                     95.00,
                     {"dpgf": "08"},
                 ),
-                ("08.2", "Marquage terrain de sport (Sports court marking)", "lsum", 1, 12000.00, {"dpgf": "08"}),
-                ("08.3", "Cloture perimetrique acier h=2,4m (Perimeter fencing)", "m", 420, 135.00, {"dpgf": "08"}),
+                ("08.2", "Marquage terrain de sport", "lsum", 1, 12000.00, {"dpgf": "08"}),
+                ("08.3", "Clôture périmétrique acier h=2,4m", "m", 420, 135.00, {"dpgf": "08"}),
                 (
                     "08.4",
-                    "Portail automatique coulissant (Entrance gates automatic)",
+                    "Portail automatique coulissant",
                     "pcs",
                     3,
                     8500.00,
@@ -2241,16 +2241,16 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "08.5",
-                    "Abris velos couverts 48 places (Bicycle parking covered)",
+                    "Abris vélos couverts 48 places",
                     "pcs",
                     3,
                     6200.00,
                     {"dpgf": "08"},
                 ),
-                ("08.6", "Plantation arbres haute tige (Tree planting)", "pcs", 35, 750.00, {"dpgf": "08"}),
+                ("08.6", "Plantation arbres haute tige", "pcs", 35, 750.00, {"dpgf": "08"}),
                 (
                     "08.7",
-                    "Amenagement espaces verts et engazonnement (Soft landscaping)",
+                    "Aménagement espaces verts et engazonnement",
                     "m2",
                     3200,
                     32.00,
@@ -2258,17 +2258,17 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "08.8",
-                    "Eclairage exterieur LED sur mats (External lighting LED)",
+                    "Éclairage extérieur LED sur mats",
                     "pcs",
                     24,
                     2200.00,
                     {"dpgf": "08"},
                 ),
-                ("08.9", "Mats de drapeaux aluminium (Flag poles)", "pcs", 3, 950.00, {"dpgf": "08"}),
-                ("08.10", "Refection voirie acces (Access road resurfacing)", "m2", 800, 48.00, {"dpgf": "08"}),
+                ("08.9", "Mats de drapeaux aluminium", "pcs", 3, 950.00, {"dpgf": "08"}),
+                ("08.10", "Réfection voirie accès", "m2", 800, 48.00, {"dpgf": "08"}),
                 (
                     "08.11",
-                    "Mobilier exterieur bancs et poubelles (Outdoor furniture benches)",
+                    "Mobilier extérieur bancs et poubelles",
                     "pcs",
                     12,
                     650.00,
@@ -2276,7 +2276,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "08.12",
-                    "Bac a sable et jeux petite enfance (Sandpit and infant play equipment)",
+                    "Bac a sable et jeux petite enfance",
                     "lsum",
                     1,
                     12000.00,
@@ -2284,7 +2284,7 @@ _PARIS = DemoTemplate(
                 ),
                 (
                     "08.13",
-                    "Caniveau a grille acier galvanise (Steel grated drainage channel)",
+                    "Caniveau a grille acier galvanisé",
                     "m",
                     120,
                     95.00,
@@ -2294,15 +2294,15 @@ _PARIS = DemoTemplate(
         ),
     ],
     markups=[
-        ("Frais de chantier (FC)", 10.0, "overhead", "direct_cost"),
-        ("Frais generaux (FG)", 15.0, "overhead", "direct_cost"),
-        ("Benefice et aleas (B&A)", 8.0, "profit", "direct_cost"),
+        ("Frais de chantier (FC)", 8.0, "overhead", "direct_cost"),
+        ("Frais généraux (FG)", 11.0, "overhead", "direct_cost"),
+        ("Bénéfice et aléas (B&A)", 5.5, "profit", "direct_cost"),
         ("TVA", 20.0, "tax", "cumulative"),
     ],
     total_months=18,
-    tender_name="Lot Gros Oeuvre (Structural/Foundations)",
+    tender_name="Lot Gros œuvre",
     tender_companies=[
-        ("Vaurenne Batiment", "appels@vaurenne.example", 0.98),
+        ("Vaurenne Bâtiment", "appels@vaurenne.example", 0.98),
         ("Tholmery Construction", "marches@tholmery.example", 1.05),
         ("Vercelin Construction", "offres@vercelin-construction.example", 1.01),
     ],
@@ -2315,22 +2315,22 @@ _PARIS = DemoTemplate(
         "gymnasium_m2": 600,
         "canteen_capacity": 200,
         "energy_standard": "RE 2020 (passif)",
-        "structure_type": "bois-beton",
+        "structure_type": "bois-béton",
     },
     tender_packages=[
         (
-            "Gros Oeuvre (Structural/Foundations)",
-            "Terrassement, fondations, beton arme, maconnerie",
+            "Gros œuvre",
+            "Terrassement, fondations, béton armé, maçonnerie",
             "evaluating",
             [
-                ("Vaurenne Batiment", "appels@vaurenne.example", 0.98),
+                ("Vaurenne Bâtiment", "appels@vaurenne.example", 0.98),
                 ("Tholmery Construction", "marches@tholmery.example", 1.05),
                 ("Vercelin Construction", "offres@vercelin-construction.example", 1.01),
             ],
         ),
         (
-            "Charpente Bois / Couverture (Timber Structure/Roofing)",
-            "Structure CLT, lamelle-colle, toiture, etancheite, photovoltaique",
+            "Charpente Bois / Couverture",
+            "Structure CLT, lamellé-collé, toiture, étanchéité, photovoltaïque",
             "evaluating",
             [
                 ("Charnay (Groupe Vireval)", "appels@charnay-bois.example", 0.97),
@@ -2339,33 +2339,33 @@ _PARIS = DemoTemplate(
             ],
         ),
         (
-            "CVC Plomberie (HVAC/Plumbing)",
-            "Geothermie, plancher chauffant, ventilation, plomberie sanitaire",
+            "CVC Plomberie",
+            "Géothermie, plancher chauffant, ventilation, plomberie sanitaire",
             "evaluating",
             [
                 ("Calorna (Groupe Enervia)", "appels@calorna.example", 0.99),
                 ("Solvenar Solutions", "marches@solvenar.example", 1.06),
-                ("Novarem Energies", "offres@novarem.example", 1.03),
+                ("Novarem Énergies", "offres@novarem.example", 1.03),
             ],
         ),
         (
-            "Electricite (Electrical)",
-            "Courant fort, courant faible, SSI, photovoltaique raccordement",
+            "Électricité",
+            "Courant fort, courant faible, SSI, photovoltaïque raccordement",
             "evaluating",
             [
-                ("Elvenau (Vercelin Energies)", "appels@elvenau.example", 0.97),
+                ("Elvenau (Vercelin Énergies)", "appels@elvenau.example", 0.97),
                 ("Alvenor France", "marches@alvenor.example", 1.05),
-                ("Tholmery Energie Systemes", "offres@tholmery-energie.example", 1.02),
+                ("Tholmery Énergie Systèmes", "offres@tholmery-energie.example", 1.02),
             ],
         ),
         (
-            "Second Oeuvre / Finitions (Interior Finishes + External)",
-            "Cloisons, revetements sols/murs, menuiseries interieures, amenagements exterieurs",
+            "Second œuvre / Finitions",
+            "Cloisons, revêtements sols/murs, menuiseries intérieures, aménagements extérieurs",
             "evaluating",
             [
                 ("Ravineau (Groupe Tolbiac)", "appels@ravineau.example", 0.98),
                 ("Bregat (Groupe Vercelin)", "marches@bregat.example", 1.04),
-                ("Vaudrey Ile-de-France", "offres@vaudrey-idf.example", 1.01),
+                ("Vaudrey Île-de-France", "offres@vaudrey-idf.example", 1.01),
             ],
         ),
     ],
@@ -2483,7 +2483,7 @@ DEMO_CATALOG: list[dict] = [
         "description": "15-classroom school, gymnasium, canteen, timber-concrete CLT, RE 2020, 18-month schedule",
         "country": "FR",
         "currency": "EUR",
-        "budget": "\u20ac12M",
+        "budget": "\u20ac10.5M",
         "type": "Education",
         "sections": 8,
         "positions": 100,
@@ -3068,6 +3068,80 @@ def _template_total(template: DemoTemplate) -> float:
                 continue
             total += qty * rate
     return total
+
+
+#: Wording the install writes around a template's own data (bill, programme, budget), by language of the
+#: project locale. English is the default; a template in another language never reads English here.
+_SEED_TEXT: dict[str, dict[str, str]] = {
+    "en": {
+        "budget_suffix": "- Budget",
+        "budget_description": "Budget-level estimate for {project}",
+        "lump_sum": "{section} - Lump Sum",
+        "schedule_name": "Programme — {project}",
+        "schedule_description": "{months}-month construction programme",
+        "phase_description": "Phase {n}: {name}",
+        "phase_default": "Phase {n}",
+        "phase_summary": "{count} pos, {total} {currency}",
+        "phases": "{count} phases",
+        "budget_line": "From BOQ section {ordinal}",
+    },
+    "de": {
+        "budget_suffix": "(Budgetstand)",
+        "budget_description": "Kostenschätzung auf Budgetebene für {project}",
+        "lump_sum": "{section} - Pauschale",
+        "schedule_name": "Terminplan — {project}",
+        "schedule_description": "Bauzeitenplan ({months} Monate)",
+        "phase_description": "Phase {n}: {name}",
+        "phase_default": "Phase {n}",
+        "phase_summary": "{count} Pos., {total} {currency}",
+        "phases": "{count} Phasen",
+        "budget_line": "Aus LV-Abschnitt {ordinal}",
+    },
+    "fr": {
+        "budget_suffix": "- Budget",
+        "budget_description": "Estimation budgétaire pour {project}",
+        "lump_sum": "{section} - Forfait",
+        "schedule_name": "Planning — {project}",
+        "schedule_description": "Planning de travaux sur {months} mois",
+        "phase_description": "Phase {n} : {name}",
+        "phase_default": "Phase {n}",
+        "phase_summary": "{count} postes, {total} {currency}",
+        "phases": "{count} phases",
+        "budget_line": "Issu du lot {ordinal}",
+    },
+}
+
+
+def _seed_text(template: DemoTemplate, key: str, **values: object) -> str:
+    """The wording ``key`` in the template's language (English when the language has no table), filled in."""
+    table = _SEED_TEXT.get((template.locale or "en").lower()[:2], _SEED_TEXT["en"])
+    return table.get(key, _SEED_TEXT["en"][key]).format(**values)
+
+
+def _tie_budget_lines(lines: list[dict], target: float) -> list[dict]:
+    """Scale hand-written budget lines so their original budgets add up to ``target``, the bill's direct cost.
+
+    Every money field of a line moves by the same factor, so the shape of each line (what is committed, spent and
+    forecast against its budget) is kept; the rounding remainder goes to the last line's original budget.
+    """
+    money = ("original_budget", "revised_budget", "committed", "actual", "forecast_final")
+    total = sum((Decimal(str(line["original_budget"])) for line in lines), Decimal(0))
+    goal = Decimal(str(round(target, 2)))
+    # A line set that is already tied, or one sized to a different scope on purpose (far off), stays as written.
+    gap = abs(total - goal) / goal if goal > 0 else Decimal(1)
+    if total <= 0 or gap < Decimal("0.005") or gap > Decimal("0.25"):
+        return lines
+    factor = goal / total
+    tied: list[dict] = []
+    for line in lines:
+        row = dict(line)
+        for key in money:
+            if key in row:
+                row[key] = str((Decimal(str(row[key])) * factor).quantize(Decimal("0.01"), ROUND_HALF_UP))
+        tied.append(row)
+    drift = goal - sum((Decimal(row["original_budget"]) for row in tied), Decimal(0))
+    tied[-1]["original_budget"] = str(Decimal(tied[-1]["original_budget"]) + drift)
+    return tied
 
 
 def _seed_risk_score(probability: float, severity: str) -> str:
@@ -7621,7 +7695,7 @@ async def _seed_module_data(
                 "primary_email": "p.moreau@tholmery.example",
                 "primary_phone": "+33 1 49 29 60 00",
                 "country_code": "FR",
-                "notes": "Gros oeuvre contractor",
+                "notes": "Gros œuvre contractor",
             },
             {
                 "contact_type": "consultant",
@@ -8134,7 +8208,7 @@ async def _seed_module_data(
             },
             {
                 "task_type": "decision",
-                "title": "Structure bois CLT vs beton",
+                "title": "Structure bois CLT vs béton",
                 "description": "Final decision on CLT timber vs reinforced concrete for superstructure",
                 "status": "completed",
                 "priority": "high",
@@ -8142,7 +8216,7 @@ async def _seed_module_data(
             },
             {
                 "task_type": "topic",
-                "title": "Reunion mairie - planning site",
+                "title": "Réunion mairie - planning site",
                 "description": "Meeting with Mairie to discuss construction phase site logistics",
                 "status": "in_progress",
                 "priority": "normal",
@@ -8158,7 +8232,7 @@ async def _seed_module_data(
             },
             {
                 "task_type": "task",
-                "title": "Etude acoustique gymnase",
+                "title": "Étude acoustique gymnase",
                 "description": "Acoustic study for gymnasium - ensure NRA compliance",
                 "status": "in_progress",
                 "priority": "normal",
@@ -8166,7 +8240,7 @@ async def _seed_module_data(
             },
             {
                 "task_type": "task",
-                "title": "Photovoltaique dimensionnement",
+                "title": "Photovoltaïque dimensionnement",
                 "description": "Size rooftop PV array for 120 kWc target",
                 "status": "completed",
                 "priority": "normal",
@@ -8253,22 +8327,23 @@ async def _seed_module_data(
         "residential-berlin": [
             {
                 "rfi_number": "RFI-001",
-                "subject": "Foundation drainage detail at elevator pit",
-                "question": "Drawing S-102 shows drainage channel around elevator pit but does not specify "
-                "pump capacity or sump pit dimensions. Please clarify.",
+                "subject": "Fundamententwässerung an der Aufzugsunterfahrt",
+                "question": "Zeichnung S-102 zeigt eine Entwässerungsrinne um die Aufzugsunterfahrt, gibt aber "
+                "weder Pumpenleistung noch Maße des Pumpensumpfs an. Bitte klären.",
                 "status": "answered",
-                "official_response": "Sump pit 800x800x600mm deep with 2.5 l/s submersible pump. "
-                "See revised detail S-102A.",
+                "official_response": "Pumpensumpf 800x800x600 mm tief mit Tauchpumpe 2,5 l/s. "
+                "Siehe überarbeitetes Detail S-102A.",
                 "cost_impact": False,
                 "schedule_impact": False,
             },
             {
                 "rfi_number": "RFI-002",
-                "subject": "Fire protection upgrade - stairwell pressurisation",
-                "question": "Fire authority comments require smoke pressurisation in stairwells 2 and 3. "
-                "Current design shows natural ventilation only. Is redesign required?",
+                "subject": "Brandschutznachrüstung - Druckbelüftung der Treppenräume",
+                "question": "Die Brandschutzauflagen der Behörde verlangen eine Rauchschutz-Druckbelüftung in den "
+                "Treppenräumen 2 und 3. Die Planung sieht nur natürliche Lüftung vor. Ist eine Umplanung erforderlich?",
                 "status": "answered",
-                "official_response": "Yes, mechanical pressurisation required. CO-002 raised for cost impact.",
+                "official_response": "Ja, mechanische Druckbelüftung erforderlich. Für die Kostenfolge wurde "
+                "Nachtrag CO-002 angelegt.",
                 "cost_impact": True,
                 "cost_impact_value": "35000",
                 "schedule_impact": True,
@@ -8276,18 +8351,18 @@ async def _seed_module_data(
             },
             {
                 "rfi_number": "RFI-003",
-                "subject": "Balcony railing design - glass vs steel",
-                "question": "Architect's drawing shows frameless glass balustrade but specification "
-                "section calls for steel railings. Which applies?",
+                "subject": "Balkongeländer - Glas oder Stahl",
+                "question": "Die Zeichnung des Architekten zeigt eine rahmenlose Glasbrüstung, die "
+                "Leistungsbeschreibung nennt jedoch Stahlgeländer. Was gilt?",
                 "status": "open",
                 "cost_impact": False,
                 "schedule_impact": False,
             },
             {
                 "rfi_number": "RFI-004",
-                "subject": "WDVS junction detail at window reveal",
-                "question": "Window reveal width of 80mm conflicts with 160mm WDVS thickness. "
-                "Please provide revised detail for thermal bridge-free junction.",
+                "subject": "WDVS-Anschluss an der Fensterleibung",
+                "question": "Die Leibungsbreite von 80 mm kollidiert mit der WDVS-Dicke von 160 mm. "
+                "Bitte überarbeitetes Detail für einen wärmebrückenfreien Anschluss liefern.",
                 "status": "open",
                 "cost_impact": False,
                 "schedule_impact": False,
@@ -8375,30 +8450,30 @@ async def _seed_module_data(
         "school-paris": [
             {
                 "rfi_number": "RFI-001",
-                "subject": "CLT panel junction - fire compartmentation detail",
-                "question": "Connection detail between CLT floor panels and concrete core wall "
-                "not shown. Clarify fire stopping requirement at junction.",
+                "subject": "Jonction des panneaux CLT - détail de compartimentage coupe-feu",
+                "question": "Le détail de liaison entre les planchers CLT et le voile du noyau béton n'est pas "
+                "représenté. Préciser l'exigence de calfeutrement coupe-feu à la jonction.",
                 "status": "answered",
-                "official_response": "Intumescent strip + mineral wool packing required. Detail DC-15 issued.",
+                "official_response": "Bande intumescente et garnissage en laine minérale requis. Détail DC-15 émis.",
                 "cost_impact": False,
                 "schedule_impact": False,
             },
             {
                 "rfi_number": "RFI-002",
-                "subject": "Playground surfacing material",
-                "question": "Specification references EPDM safety surfacing but landscape drawing "
-                "shows gravel. Which material applies for EN 1177 compliance?",
+                "subject": "Revêtement de la cour de récréation",
+                "question": "Le CCTP prévoit un sol souple EPDM, mais le plan paysager montre du gravier. "
+                "Quel matériau retenir pour la conformité à la norme EN 1177 ?",
                 "status": "open",
                 "cost_impact": False,
                 "schedule_impact": False,
             },
             {
                 "rfi_number": "RFI-003",
-                "subject": "Canteen kitchen ventilation - grease extract",
-                "question": "Kitchen extract ductwork route conflicts with CLT beams at roof level. "
-                "Alternative routing required.",
+                "subject": "Ventilation de la cuisine de la cantine - extraction des graisses",
+                "question": "Le tracé de la gaine d'extraction de la cuisine entre en conflit avec les poutres CLT "
+                "en toiture. Un autre cheminement est nécessaire.",
                 "status": "answered",
-                "official_response": "Route duct through service corridor. See revised drawing V-205B.",
+                "official_response": "Faire passer la gaine par la circulation technique. Voir plan révisé V-205B.",
                 "cost_impact": True,
                 "cost_impact_value": "8500",
                 "schedule_impact": False,
@@ -8689,7 +8764,7 @@ async def _seed_module_data(
             {
                 "meeting_number": "MTG-001",
                 "meeting_type": "progress",
-                "title": "Reunion de chantier hebdomadaire #1",
+                "title": "Réunion de chantier hebdomadaire #1",
                 "meeting_date": base.strftime("%Y-%m-%d"),
                 "location": "Base vie, Rue de Belleville",
                 "status": "completed",
@@ -9182,7 +9257,7 @@ async def _seed_module_data(
                 "observation_type": "unsafe_condition",
                 "description": "Tranchee ouverte sans protection - open trench without barrier "
                 "near school entrance area.",
-                "location": "Acces principal, cote rue",
+                "location": "Accès principal, côté rue",
                 "severity": 4,
                 "likelihood": 4,
                 "immediate_action": "Barriers and warning signs installed",
@@ -9293,129 +9368,144 @@ async def _seed_module_data(
             {
                 "inspection_number": "INS-001",
                 "inspection_type": "concrete",
-                "title": "Bodenplatte Betonage - Slab Pour Inspection",
-                "description": "Inspection of foundation slab concrete pour C30/37",
-                "location": "Foundation zone, full area",
+                "title": "Bodenplatte Betonage - Abnahme der Betonierung",
+                "description": "Abnahme der Betonage der Bodenplatte C30/37",
+                "location": "Gründungsbereich, gesamte Fläche",
                 "status": "completed",
                 "result": "pass",
                 "inspection_date": (base + timedelta(days=28)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Pre-pour",
-                        "question": "Formwork clean and oiled?",
+                        "category": "Vor der Betonage",
+                        "question": "Schalung sauber und eingeölt?",
                         "response": "yes",
                         "critical": True,
                     },
                     {
                         "id": "2",
-                        "category": "Pre-pour",
-                        "question": "Rebar as per drawing?",
+                        "category": "Vor der Betonage",
+                        "question": "Bewehrung laut Zeichnung?",
                         "response": "yes",
                         "critical": True,
                     },
                     {
                         "id": "3",
-                        "category": "Concrete",
-                        "question": "Slump test within spec?",
+                        "category": "Beton",
+                        "question": "Setzmaß innerhalb der Vorgabe?",
                         "response": "yes",
-                        "notes": "S4 class, 180mm",
+                        "notes": "Setzmaßklasse S4, 180 mm",
                     },
                     {
                         "id": "4",
-                        "category": "Concrete",
-                        "question": "Cube samples taken?",
+                        "category": "Beton",
+                        "question": "Würfelproben entnommen?",
                         "response": "yes",
-                        "notes": "6 cubes taken",
+                        "notes": "6 Würfel entnommen",
                     },
-                    {"id": "5", "category": "Curing", "question": "Curing compound applied?", "response": "yes"},
+                    {
+                        "id": "5",
+                        "category": "Nachbehandlung",
+                        "question": "Nachbehandlungsmittel aufgebracht?",
+                        "response": "yes",
+                    },
                 ],
             },
             {
                 "inspection_number": "INS-002",
                 "inspection_type": "waterproofing",
-                "title": "Kellerabdichtung - Basement Waterproofing",
-                "description": "Inspection of KMB waterproofing membrane to basement walls",
-                "location": "Basement walls, south and east",
+                "title": "Kellerabdichtung - Abnahme der Abdichtung",
+                "description": "Abnahme der KMB-Abdichtung an den Kellerwänden",
+                "location": "Kellerwände, Süd- und Ostseite",
                 "status": "completed",
                 "result": "pass",
                 "inspection_date": (base + timedelta(days=42)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Surface",
-                        "question": "Substrate clean and dry?",
+                        "category": "Oberfläche",
+                        "question": "Untergrund sauber und trocken?",
                         "response": "yes",
                         "critical": True,
                     },
                     {
                         "id": "2",
-                        "category": "Application",
-                        "question": "Correct thickness applied?",
+                        "category": "Verarbeitung",
+                        "question": "Richtige Schichtdicke aufgebracht?",
                         "response": "yes",
-                        "notes": "4mm DFT verified",
+                        "notes": "Trockenschichtdicke 4 mm nachgewiesen",
                     },
-                    {"id": "3", "category": "Details", "question": "Pipe penetrations sealed?", "response": "yes"},
-                    {"id": "4", "category": "Protection", "question": "Protection board installed?", "response": "yes"},
+                    {
+                        "id": "3",
+                        "category": "Details",
+                        "question": "Rohrdurchführungen abgedichtet?",
+                        "response": "yes",
+                    },
+                    {"id": "4", "category": "Schutz", "question": "Schutzschicht eingebaut?", "response": "yes"},
                 ],
             },
             {
                 "inspection_number": "INS-003",
                 "inspection_type": "fire_stopping",
-                "title": "Brandschutz Durchführungen - Fire Stopping",
-                "description": "Inspection of fire stopping at service penetrations Level 1-2",
-                "location": "Levels 1-2, all risers",
+                "title": "Brandschutz Durchführungen - Abschottungen",
+                "description": "Abnahme der Brandabschottungen an Leitungsdurchführungen, Ebenen 1-2",
+                "location": "Ebenen 1-2, alle Steigschächte",
                 "status": "completed",
                 "result": "fail",
                 "inspection_date": (base + timedelta(days=90)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Penetrations",
-                        "question": "All penetrations fire stopped?",
+                        "category": "Durchführungen",
+                        "question": "Alle Durchführungen abgeschottet?",
                         "response": "no",
                         "critical": True,
-                        "notes": "3 penetrations in riser R2 missing fire collars",
+                        "notes": "3 Durchführungen in Steigschacht R2 ohne Brandschutzmanschetten",
                     },
                     {
                         "id": "2",
-                        "category": "Documentation",
-                        "question": "Product datasheets available?",
+                        "category": "Dokumentation",
+                        "question": "Produktdatenblätter vorhanden?",
                         "response": "yes",
                     },
                     {
                         "id": "3",
-                        "category": "Installation",
-                        "question": "Installation per manufacturer spec?",
+                        "category": "Einbau",
+                        "question": "Einbau nach Herstellervorgabe?",
                         "response": "partial",
-                        "notes": "Some intumescent strips incorrectly oriented",
+                        "notes": "Einige Brandschutzstreifen falsch ausgerichtet",
                     },
                 ],
             },
             {
                 "inspection_number": "INS-004",
                 "inspection_type": "structural",
-                "title": "Rohbau Abnahme OG 2 - Structural Inspection Level 2",
-                "description": "Structural inspection of completed RC frame Level 2",
-                "location": "Level 2, full floor",
+                "title": "Rohbauabnahme 2. OG",
+                "description": "Abnahme des fertiggestellten Stahlbetonrohbaus im 2. OG",
+                "location": "2. OG, gesamte Geschossfläche",
                 "status": "completed",
                 "result": "pass",
                 "inspection_date": (base + timedelta(days=65)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Geometry",
-                        "question": "Column positions within tolerance?",
+                        "category": "Geometrie",
+                        "question": "Stützenlagen innerhalb der Toleranz?",
                         "response": "yes",
                     },
-                    {"id": "2", "category": "Geometry", "question": "Slab level within ±5mm?", "response": "yes"},
-                    {"id": "3", "category": "Quality", "question": "No honeycombing visible?", "response": "yes"},
+                    {
+                        "id": "2",
+                        "category": "Geometrie",
+                        "question": "Höhenlage der Platte innerhalb ±5 mm?",
+                        "response": "yes",
+                    },
+                    {"id": "3", "category": "Qualität", "question": "Keine Kiesnester sichtbar?", "response": "yes"},
                     {
                         "id": "4",
-                        "category": "Cover",
-                        "question": "Concrete cover verified?",
+                        "category": "Deckung",
+                        "question": "Betondeckung geprüft?",
                         "response": "yes",
-                        "notes": "Covermeter readings all >30mm",
+                        "notes": "Alle Messwerte des Deckungsmessgeräts > 30 mm",
                     },
                 ],
             },
@@ -9594,55 +9684,60 @@ async def _seed_module_data(
             {
                 "inspection_number": "INS-001",
                 "inspection_type": "structural",
-                "title": "CLT Panel Installation - Level 1",
-                "description": "Inspection of CLT panel erection and connections",
-                "location": "Level 1, full floor",
+                "title": "Pose des panneaux CLT - Niveau 1",
+                "description": "Contrôle du montage et des liaisons des panneaux CLT",
+                "location": "Niveau 1, plancher complet",
                 "status": "completed",
                 "result": "pass",
                 "inspection_date": (base + timedelta(days=60)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Panels",
-                        "question": "Panel grade GL28h verified?",
+                        "category": "Panneaux",
+                        "question": "Classe des panneaux GL28h vérifiée ?",
                         "response": "yes",
                         "critical": True,
                     },
                     {
                         "id": "2",
-                        "category": "Connections",
-                        "question": "Steel angle connectors torqued?",
+                        "category": "Liaisons",
+                        "question": "Équerres métalliques serrées au couple ?",
                         "response": "yes",
                     },
-                    {"id": "3", "category": "Tolerance", "question": "Panel alignment within 3mm?", "response": "yes"},
+                    {
+                        "id": "3",
+                        "category": "Tolérance",
+                        "question": "Alignement des panneaux à 3 mm près ?",
+                        "response": "yes",
+                    },
                 ],
             },
             {
                 "inspection_number": "INS-002",
                 "inspection_type": "general",
-                "title": "Gymnase Isolation Acoustique",
-                "description": "Acoustic testing of gymnasium wall and ceiling treatment",
-                "location": "Gymnasium",
+                "title": "Isolation acoustique du gymnase",
+                "description": "Essais acoustiques du traitement des murs et du plafond du gymnase",
+                "location": "Gymnase",
                 "status": "scheduled",
                 "result": None,
                 "inspection_date": (base + timedelta(days=150)).strftime("%Y-%m-%d"),
                 "checklist_data": [
                     {
                         "id": "1",
-                        "category": "Walls",
-                        "question": "Acoustic panels installed per spec?",
+                        "category": "Murs",
+                        "question": "Panneaux acoustiques posés conformément au CCTP ?",
                         "critical": True,
                     },
                     {
                         "id": "2",
-                        "category": "Ceiling",
-                        "question": "Suspended baffles at correct spacing?",
+                        "category": "Plafond",
+                        "question": "Baffles suspendus à l'entraxe prescrit ?",
                         "critical": True,
                     },
                     {
                         "id": "3",
-                        "category": "Testing",
-                        "question": "Reverberation time < 1.2s at 500Hz?",
+                        "category": "Essais",
+                        "question": "Temps de réverbération < 1,2 s à 500 Hz ?",
                         "critical": True,
                     },
                 ],
@@ -9651,8 +9746,8 @@ async def _seed_module_data(
                 "inspection_number": "INS-003",
                 "inspection_type": "fire_stopping",
                 "title": "Recoupement coupe-feu CLT",
-                "description": "Fire compartmentation inspection at CLT junctions",
-                "location": "All CLT junctions, Levels 0-2",
+                "description": "Contrôle du recoupement coupe-feu aux jonctions CLT",
+                "location": "Toutes les jonctions CLT, niveaux 0 à 2",
                 "status": "completed",
                 "result": "pass",
                 "inspection_date": (base + timedelta(days=85)).strftime("%Y-%m-%d"),
@@ -9660,14 +9755,14 @@ async def _seed_module_data(
                     {
                         "id": "1",
                         "category": "Joints",
-                        "question": "Intumescent strips at all CLT joints?",
+                        "question": "Bandes intumescentes à tous les joints CLT ?",
                         "response": "yes",
                         "critical": True,
                     },
                     {
                         "id": "2",
-                        "category": "Penetrations",
-                        "question": "Service penetrations fire stopped?",
+                        "category": "Traversées",
+                        "question": "Traversées de réseaux calfeutrées coupe-feu ?",
                         "response": "yes",
                     },
                 ],
@@ -10132,14 +10227,14 @@ async def _seed_module_data(
                 "notes": "Tholmery - Situation 1 - Terrassement et fondations",
                 "line_items": [
                     {
-                        "description": "Terrassement general 1200 m3",
+                        "description": "Terrassement général 1200 m3",
                         "quantity": "1200",
                         "unit": "m3",
                         "unit_rate": "18.00",
                         "amount": "21600.00",
                     },
                     {
-                        "description": "Fondations beton 85 m3",
+                        "description": "Fondations béton 85 m3",
                         "quantity": "85",
                         "unit": "m3",
                         "unit_rate": "285.00",
@@ -10276,6 +10371,20 @@ async def _seed_module_data(
             )
             session.add(inv_obj)
             await session.flush()
+            if inv["status"] == "paid":
+                # One payment settles each paid invoice, dated no earlier than
+                # the invoice and never after the install day.
+                today_iso = datetime.now(UTC).strftime("%Y-%m-%d")
+                paid_on = max(issued_on, min(str(inv.get("due_date") or issued_on), today_iso))
+                session.add(
+                    Payment(
+                        id=_id(),
+                        invoice_id=inv_obj.id,
+                        payment_date=paid_on,
+                        amount=Decimal(inv_obj.amount_total),
+                        currency_code=inv_obj.currency_code,
+                    )
+                )
             for li_idx, li in enumerate(items_data):
                 session.add(
                     InvoiceLineItem(
@@ -10451,7 +10560,7 @@ async def _seed_module_data(
                 "forecast_final": "840000",
             },
             {
-                "category": "Structure CLT/Beton",
+                "category": "Structure CLT/Béton",
                 "original_budget": "3200000",
                 "revised_budget": "3200000",
                 "committed": "2800000",
@@ -10467,7 +10576,7 @@ async def _seed_module_data(
                 "forecast_final": "1820000",
             },
             {
-                "category": "Equipements techniques",
+                "category": "Équipements techniques",
                 "original_budget": "2400000",
                 "revised_budget": "2400000",
                 "committed": "800000",
@@ -10593,7 +10702,11 @@ async def _seed_module_data(
     }
 
     try:
-        budget_list = _BUDGETS.get(demo_id) or generated.get("finance_budgets", [])
+        budget_list = _BUDGETS.get(demo_id)
+        if budget_list:
+            budget_list = _tie_budget_lines(budget_list, _template_total(template))
+        else:
+            budget_list = generated.get("finance_budgets", [])
         # ProjectBudget.currency_code carries no DB default - the model
         # requires the writer to supply it from the project context. Neither
         # the hand-authored _BUDGETS dicts nor the generated ones carry one,
@@ -10812,7 +10925,7 @@ async def _seed_module_data(
                 "trade": "Doors",
             },
             {
-                "title": "Peinture ecaillee hall entree",
+                "title": "Peinture écaillée hall d'entrée",
                 "description": "Paint peeling in entrance hall near external door - moisture ingress suspected.",
                 "priority": "medium",
                 "status": "open",
@@ -11325,13 +11438,13 @@ async def _seed_module_data(
             {
                 "ncr_number": "NCR-001",
                 "title": "Brandschutz Durchführungen fehlend",
-                "description": "3 fire stopping penetrations missing in riser R2 (identified in INS-003).",
+                "description": "3 Brandabschottungen im Steigschacht R2 fehlen (festgestellt in INS-003).",
                 "ncr_type": "workmanship",
                 "severity": "major",
-                "root_cause": "Subcontractor skipped fire collar installation on small-diameter pipes",
+                "root_cause": "Der Nachunternehmer hat den Einbau der Brandschutzmanschetten an Rohren kleinen Durchmessers ausgelassen",
                 "root_cause_category": "workmanship",
-                "corrective_action": "Install missing fire collars, re-inspect all risers",
-                "preventive_action": "Add fire stopping to mandatory hold-point inspection list",
+                "corrective_action": "Fehlende Brandschutzmanschetten einbauen, alle Steigschächte erneut prüfen",
+                "preventive_action": "Brandabschottung in die verbindliche Haltepunktliste der Abnahmen aufnehmen",
                 "status": "corrective_action",
                 "cost_impact": "4500",
                 "schedule_impact_days": 3,
@@ -11372,13 +11485,13 @@ async def _seed_module_data(
         "school-paris": [
             {
                 "ncr_number": "NCR-001",
-                "title": "CLT panel surface defect - salle 1.02",
-                "description": "Visible joint gap in CLT panel in classroom 1.02. Not meeting exposed finish spec.",
+                "title": "Défaut d'aspect d'un panneau CLT - salle 1.02",
+                "description": "Joint ouvert visible sur un panneau CLT de la salle de classe 1.02. Non conforme au CCTP pour la finition apparente.",
                 "ncr_type": "material",
                 "severity": "minor",
-                "root_cause": "Panel manufactured with visible knot at junction",
+                "root_cause": "Panneau fabriqué avec un nœud apparent à la jonction",
                 "root_cause_category": "material_defect",
-                "corrective_action": "Fill and sand joint, apply matching finish",
+                "corrective_action": "Reboucher et poncer le joint, appliquer une finition assortie",
                 "status": "corrective_action",
                 "cost_impact": "800",
                 "schedule_impact_days": 1,
@@ -12880,17 +12993,13 @@ async def install_demo_project(
         # in the template's own language: a German cost plan gets "(Budgetstand)"
         # rather than an English tail one dash away from its sibling's name.
         budget_boq_id = _id()
-        budget_suffix = "(Budgetstand)" if (template.locale or "").lower().startswith("de") else "- Budget"
+        budget_suffix = _seed_text(template, "budget_suffix")
         budget_boq_name = template.budget_boq_name or f"{template.boq_name} {budget_suffix}"
         budget_boq = BOQ(
             id=budget_boq_id,
             project_id=project.id,
             name=budget_boq_name,
-            description=(
-                f"Kostenschätzung auf Budgetebene für {template.project_name}"
-                if (template.locale or "").lower().startswith("de")
-                else f"Budget-level estimate for {template.project_name}"
-            ),
+            description=_seed_text(template, "budget_description", project=template.project_name),
             # "final", not "approved". The seeder writes this column directly and
             # so is the one writer that never meets ``BOQUpdate``'s pattern, which
             # permits draft / final / archived. "approved" was a fourth spelling
@@ -12947,7 +13056,7 @@ async def install_demo_project(
                     boq_id=budget_boq_id,
                     parent_id=b_sec.id,
                     ordinal=f"{sec.ordinal}.01",
-                    description=f"{sec.description} - Lump Sum",
+                    description=_seed_text(template, "lump_sum", section=sec.description),
                     unit="LS",
                     quantity=1.0,
                     unit_rate=b_rate,
@@ -12957,7 +13066,9 @@ async def install_demo_project(
                 )
                 session.add(b_pos)
 
-        for idx, (m_name, m_pct, m_cat, m_apply) in enumerate(template.budget_markups):
+        # The budget bill is the approved version of the detailed one, so it carries the same markups
+        # unless the template words its own.
+        for idx, (m_name, m_pct, m_cat, m_apply) in enumerate(template.budget_markups or template.markups):
             session.add(
                 _make_markup(
                     boq_id=budget_boq_id,
@@ -13000,16 +13111,8 @@ async def install_demo_project(
     schedule = Schedule(
         id=_id(),
         project_id=project.id,
-        name=(
-            f"Terminplan \u2014 {template.project_name}"
-            if (template.locale or "").lower().startswith("de")
-            else f"Programme \u2014 {template.project_name}"
-        ),
-        description=(
-            f"Bauzeitenplan ({total_months} Monate)"
-            if (template.locale or "").lower().startswith("de")
-            else f"{total_months}-month construction programme"
-        ),
+        name=_seed_text(template, "schedule_name", project=template.project_name),
+        description=_seed_text(template, "schedule_description", months=total_months),
         start_date=start.strftime("%Y-%m-%d"),
         end_date=(start + timedelta(days=total_months * 30)).strftime("%Y-%m-%d"),
         status="active",
@@ -13071,7 +13174,7 @@ async def install_demo_project(
                 parent_id=summary.id,
                 sort_order=i + 1,
                 name=act_name,
-                description=f"Phase {i + 1}: {act_name}",
+                description=_seed_text(template, "phase_description", n=i + 1, name=act_name),
                 wbs_code=f"1.{i + 1}",
                 start_date=act_start,
                 end_date=act_end,
@@ -13099,13 +13202,13 @@ async def install_demo_project(
             sec_items = [p for p in items_list if str(p.parent_id) == str(sec.id)]
             sec_total = sum(float(p.total or 0) for p in sec_items)
             pct = sec_total / grand_total if grand_total else 1 / max(len(sections_list), 1)
-            dur = max(14, int(total_months * 30 * pct))
+            # Each phase depends on the previous one finish-to-start with a one-day
+            # lag, so the lags come off the nominal length instead of stretching it.
+            lag_days = 1
+            dur = max(14, int((total_months * 30 - lag_days * max(len(sections_list) - 1, 0)) * pct))
 
             if i > 0:
-                # Overlap with the previous phase but never start before the
-                # programme window opens. A large phase after a short one could
-                # otherwise be backdated and pick up a false "delayed" status.
-                current_start = max(start, current_start - timedelta(days=int(dur * 0.35)))
+                current_start = current_start + timedelta(days=lag_days)
 
             end_date = current_start + timedelta(days=dur)
             # Progress relative to the current date so finished phases read
@@ -13117,8 +13220,14 @@ async def install_demo_project(
                 schedule_id=schedule.id,
                 parent_id=summary.id,
                 sort_order=i + 1,
-                name=sec.description or f"Phase {i + 1}",
-                description=f"{len(sec_items)} pos, {sec_total:,.0f} {template.currency}",
+                name=sec.description or _seed_text(template, "phase_default", n=i + 1),
+                description=_seed_text(
+                    template,
+                    "phase_summary",
+                    count=len(sec_items),
+                    total=f"{sec_total:,.0f}",
+                    currency=template.currency,
+                ),
                 # Numbered under the summary; the BOQ section the phase was
                 # built from stays readable in the metadata and the links.
                 wbs_code=f"1.{i + 1}",
@@ -13150,7 +13259,7 @@ async def install_demo_project(
         summary.duration_days = (span_end - span_start).days
         summary.progress_pct = str(summary_prog)
         summary.status = summary_status
-        summary.description = f"{len(phase_spans)} phases"
+        summary.description = _seed_text(template, "phases", count=len(phase_spans))
         # The programme header reads off the activities it holds, so the two
         # never disagree when a template declares its own dates.
         schedule.start_date = summary.start_date
@@ -13172,7 +13281,7 @@ async def install_demo_project(
             # StringDataRightTruncation on PostgreSQL and poison the whole
             # install transaction, so clamp defensively.
             category=(sec.description or f"Category {i + 1}")[:100],
-            description=f"From BOQ section {sec.ordinal}",
+            description=_seed_text(template, "budget_line", ordinal=sec.ordinal),
             planned_amount=str(round(planned, 2)),
             committed_amount=str(round(committed, 2)),
             actual_amount=str(round(actual, 2)),
@@ -13509,38 +13618,38 @@ async def install_demo_project(
         "school-paris": [
             (
                 "R-001",
-                "Archaeological findings",
-                "Potential archaeological remains in Belleville area",
+                "Découvertes archéologiques",
+                "Vestiges archéologiques possibles dans le quartier de Belleville",
                 "regulatory",
                 0.2,
                 120000,
                 90,
                 "high",
-                "Commission pre-excavation archaeological survey",
+                "Commander un diagnostic archéologique préalable aux terrassements",
                 "open",
             ),
             (
                 "R-002",
-                "Asbestos in adjacent buildings",
-                "Demolition of existing structure may expose asbestos",
+                "Amiante dans les bâtiments voisins",
+                "La démolition de l'existant peut mettre à nu de l'amiante",
                 "safety",
                 0.4,
                 85000,
                 30,
                 "medium",
-                "Pre-demolition asbestos survey mandatory",
+                "Repérage amiante avant démolition obligatoire",
                 "mitigated",
             ),
             (
                 "R-003",
-                "School year deadline",
-                "Must be operational by September 2027 for school year",
+                "Échéance de la rentrée scolaire",
+                "L'école doit être opérationnelle pour la rentrée de septembre 2027",
                 "schedule",
                 0.3,
                 0,
                 0,
                 "critical",
-                "Build 4-week float into master schedule",
+                "Prévoir 4 semaines de marge dans le planning directeur",
                 "monitoring",
             ),
         ],
@@ -13904,15 +14013,15 @@ async def install_demo_project(
         "residential-berlin": [
             (
                 "CO-001",
-                "Additional balcony waterproofing",
-                "Client requested upgraded waterproofing system for all balconies after design review",
+                "Zusätzliche Balkonabdichtung",
+                "Der Bauherr beauftragte nach der Planungsprüfung ein höherwertiges Abdichtungssystem für alle Balkone",
                 "client_request",
                 "approved",
                 48500,
                 10,
                 [
                     (
-                        "Upgrade balcony membrane from PVC to liquid applied",
+                        "Balkonabdichtung von PVC-Bahn auf Flüssigabdichtung umstellen",
                         "modified",
                         "960",
                         "960",
@@ -13920,21 +14029,29 @@ async def install_demo_project(
                         "85.00",
                         "m2",
                     ),
-                    ("Additional edge detail flashings", "added", "0", "480", "0", "32.00", "m"),
+                    ("Zusätzliche Randanschlussbleche", "added", "0", "480", "0", "32.00", "m"),
                 ],
             ),
             (
                 "CO-002",
-                "Underground parking ventilation upgrade",
-                "Fire authority required enhanced CO detection and ventilation capacity",
+                "Lüftung der Tiefgarage - Leistungserhöhung",
+                "Die Brandschutzbehörde forderte eine erweiterte CO-Erkennung und höhere Lüftungsleistung",
                 "regulatory",
                 "approved",
                 62000,
                 5,
                 [
-                    ("CO detection sensors additional", "added", "0", "24", "0", "850.00", "pcs"),
-                    ("Jet fan upgrade to higher capacity", "modified", "6", "6", "4800.00", "7200.00", "pcs"),
-                    ("BMS integration for CO monitoring", "added", "0", "1", "0", "18400.00", "lsum"),
+                    ("Zusätzliche CO-Sensoren", "added", "0", "24", "0", "850.00", "pcs"),
+                    (
+                        "Strahlventilatoren auf höhere Leistung umrüsten",
+                        "modified",
+                        "6",
+                        "6",
+                        "4800.00",
+                        "7200.00",
+                        "pcs",
+                    ),
+                    ("GLT-Anbindung der CO-Überwachung", "added", "0", "1", "0", "18400.00", "lsum"),
                 ],
             ),
         ],
@@ -14018,27 +14135,27 @@ async def install_demo_project(
         "school-paris": [
             (
                 "CO-001",
-                "Photovoltaic array expansion",
-                "Municipality increased renewable energy target from 80 to 120 kWc",
+                "Extension de la centrale photovoltaïque",
+                "La municipalité a relevé l'objectif d'énergie renouvelable de 80 à 120 kWc",
                 "client_request",
                 "approved",
                 46000,
                 5,
                 [
-                    ("Additional PV panels 40 kWc", "added", "0", "40", "0", "1150.00", "kW"),
+                    ("Panneaux photovoltaïques supplémentaires 40 kWc", "added", "0", "40", "0", "1150.00", "kW"),
                 ],
             ),
             (
                 "CO-002",
-                "Acoustic upgrade gymnasium",
-                "Acoustic consultant recommended enhanced wall treatment",
+                "Renforcement acoustique du gymnase",
+                "L'acousticien a recommandé un traitement mural renforcé",
                 "design_change",
                 "approved",
                 28500,
                 0,
                 [
-                    ("Acoustic wall panels timber slat", "added", "0", "350", "0", "65.00", "m2"),
-                    ("Suspended acoustic baffles", "added", "0", "24", "0", "220.00", "pcs"),
+                    ("Panneaux acoustiques muraux à lamelles bois", "added", "0", "350", "0", "65.00", "m2"),
+                    ("Baffles acoustiques suspendus", "added", "0", "24", "0", "220.00", "pcs"),
                 ],
             ),
         ],
@@ -14231,7 +14348,7 @@ async def install_demo_project(
         "residential-berlin": [
             (
                 "Bauantrag_Berlin-Mitte.pdf",
-                "Building permit application with all annexes",
+                "Bauantrag mit allen Anlagen",
                 "permit",
                 "application/pdf",
                 4_500_000,
@@ -14239,7 +14356,7 @@ async def install_demo_project(
             ),
             (
                 "Statik_Berechnung_v2.pdf",
-                "Structural calculation report",
+                "Statische Berechnung",
                 "engineering",
                 "application/pdf",
                 8_200_000,
@@ -14247,7 +14364,7 @@ async def install_demo_project(
             ),
             (
                 "Energieausweis_KfW55.pdf",
-                "Energy performance certificate KfW 55",
+                "Energieausweis KfW 55",
                 "certificate",
                 "application/pdf",
                 1_200_000,
@@ -14317,7 +14434,7 @@ async def install_demo_project(
         "school-paris": [
             (
                 "Permis_Construire_Belleville.pdf",
-                "Permis de construire with annexes",
+                "Permis de construire avec ses annexes",
                 "permit",
                 "application/pdf",
                 5_200_000,
@@ -14325,7 +14442,7 @@ async def install_demo_project(
             ),
             (
                 "Etude_Thermique_RE2020.pdf",
-                "RE 2020 thermal study report",
+                "Rapport de l'étude thermique RE 2020",
                 "engineering",
                 "application/pdf",
                 3_800_000,
@@ -14333,7 +14450,7 @@ async def install_demo_project(
             ),
             (
                 "Rapport_Geotechnique.pdf",
-                "Geotechnical investigation report",
+                "Rapport de l'étude géotechnique",
                 "engineering",
                 "application/pdf",
                 2_600_000,
