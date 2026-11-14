@@ -130,7 +130,7 @@ function CardMedia({ item, done }: { item: AcademyItem; done: boolean }) {
         className="relative block aspect-[16/9] overflow-hidden border-b border-border-light bg-surface-secondary"
         data-testid="academy-item-media"
       >
-        <CourseCardCover item={item} done={done} />
+        <CourseCardCover item={item} />
       </span>
       {steps.length > 0 && <CoursePathStrip steps={steps} done={done} className="relative z-[1] mx-3 -mt-12" />}
     </>

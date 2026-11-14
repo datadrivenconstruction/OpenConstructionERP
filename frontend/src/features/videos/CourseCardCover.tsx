@@ -181,13 +181,12 @@ function Face({ img, className }: { img: string; className: string }) {
 }
 
 /** Photo with the learner's role and the people met; the drawn cover when the item has no photo. */
-export function CourseCardCover({ item, done }: { item: AcademyItem; done: boolean }) {
+export function CourseCardCover({ item }: { item: AcademyItem }) {
   const { t } = useTranslation();
   const src = coursePhotoUrl(item);
   const [failed, setFailed] = useState(false);
   const people = item.people;
   const role = item.role;
-  const steps = item.steps ?? [];
   return (
     <>
       {src && !failed ? (
