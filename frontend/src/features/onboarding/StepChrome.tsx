@@ -51,9 +51,10 @@ export function StepNav({
     <ButtonSizeOverrideContext.Provider value="lg">
     <div
       className={clsx(
-        // Sticky so the primary action stays in reach on long steps; the negative
-        // margins match the step body padding so the bar spans the whole column.
-        'sticky bottom-0 z-sticky -mx-4 mt-6 flex w-[calc(100%+2rem)] flex-wrap items-center justify-between gap-3 border-t border-border-light bg-surface-primary/90 px-4 py-4 backdrop-blur sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 lg:-mx-10 lg:w-[calc(100%+5rem)] lg:px-10',
+        // Sticky so the primary action stays in reach on long steps. It spans the
+        // step's own column and fades in from the page, so on a short step it
+        // simply sits under the content with no band of its own.
+        'sticky bottom-0 z-sticky mt-4 flex w-full flex-wrap items-center justify-between gap-3 bg-gradient-to-t from-surface-primary from-60% to-transparent pb-4 pt-6',
         className,
       )}
     >

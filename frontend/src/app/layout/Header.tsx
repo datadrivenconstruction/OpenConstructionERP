@@ -454,7 +454,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <button
             onClick={onMenuClick}
             aria-label={t('common.open_menu', { defaultValue: 'Open menu' })}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary lg:hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary lg:hidden"
           >
             <Menu size={20} />
           </button>
@@ -547,7 +547,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           centred across the header but that created awkward visual
           tension with the project switcher on the left; planted next
           to Support/Help, the two CTAs read as a coherent cluster. */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* ── Journey (orientation) ─────────────────────────────────
             Names the lifecycle phase the current screen belongs to and
             opens the whole-platform journey map. First in the cluster so it
