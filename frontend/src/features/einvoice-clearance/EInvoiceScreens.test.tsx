@@ -59,9 +59,8 @@ vi.mock('./api', async (importOriginal) => ({
   fetchDocumentPayload: mocks.fetchDocumentPayload,
 }));
 
-vi.mock('@/features/market/api', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/features/market/api')>()),
-  useMarketScope: () => ({
+vi.mock('@/features/market/api', async (importOriginal) => {
+  const scope = () => ({
     isLoading: false,
     data: {
       markets: ['DE', 'SA', 'MY', 'PL'],
@@ -70,8 +69,13 @@ vi.mock('@/features/market/api', async (importOriginal) => ({
       hidden_modules: [],
       module_markets: { einvoice_clearance: ['DE', 'SA', 'MY', 'PL', 'IT'] },
     },
-  }),
-}));
+  });
+  return {
+    ...(await importOriginal<typeof import('@/features/market/api')>()),
+    useMarketScope: scope,
+    useWorkspaceMarketScope: scope,
+  };
+});
 
 function market(country: string, platform: string, over: Partial<EInvoiceSetupRow> = {}): EInvoiceSetupRow {
   return {

@@ -64,6 +64,9 @@ export interface PartnerPackManifest {
 export interface PartnerPackResponse {
   active: boolean;
   manifest?: PartnerPackManifest;
+  /** `project` when the pack was resolved from a project's country, `install`
+   *  for the applied pack. Absent on older backends. */
+  source?: 'project' | 'install';
 }
 
 /** ``GET /api/v1/partner-pack/installed`` — every pack this deployment holds. */
@@ -72,12 +75,23 @@ export interface InstalledPacksResponse {
   installed: PartnerPackManifest[];
 }
 
-export function usePartnerPack() {
+/**
+ * With `projectId` the answer is that project's pack: the installed country
+ * pack of the project's country, else the applied one. The co-brand, theme and
+ * locale readers call it without a project, because the applied pack is the
+ * one that brands the install.
+ */
+export function usePartnerPack(projectId?: string | null) {
   // The endpoint needs a session; asking before sign-in only logs a 401.
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   return useQuery<PartnerPackResponse>({
-    queryKey: ['partner-pack', 'current'],
-    queryFn: () => apiGet<PartnerPackResponse>('/v1/partner-pack/current'),
+    queryKey: projectId ? ['partner-pack', 'current', projectId] : ['partner-pack', 'current'],
+    queryFn: () =>
+      apiGet<PartnerPackResponse>(
+        projectId
+          ? `/v1/partner-pack/current?project_id=${encodeURIComponent(projectId)}`
+          : '/v1/partner-pack/current',
+      ),
     enabled: isAuthenticated,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,

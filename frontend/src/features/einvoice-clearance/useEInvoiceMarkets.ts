@@ -7,7 +7,7 @@
  * setup rows then list the registrations within those markets.
  */
 import { useQuery } from '@tanstack/react-query';
-import { useMarketScope, type MarketScope } from '@/features/market/api';
+import { useWorkspaceMarketScope, type MarketScope } from '@/features/market/api';
 import { getEInvoiceSetup, type EInvoiceSetupRow } from './lifecycleApi';
 import { einvoiceVisible } from './lifecycleView';
 
@@ -31,7 +31,7 @@ export function useEInvoiceMarkets(): {
   isVisibleFor: (country?: string | null) => boolean;
   isLoading: boolean;
 } {
-  const scopeQuery = useMarketScope();
+  const scopeQuery = useWorkspaceMarketScope();
   const scopeMarkets = einvoiceScopeMarkets(scopeQuery.data);
   const inScope = scopeMarkets.length > 0;
   const { data, isLoading } = useQuery({

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from collections.abc import AsyncIterator
 from importlib import resources
 from typing import Any
@@ -36,8 +37,15 @@ from app.core.partner_pack.full_install import (
     full_install,
     full_install_stream,
 )
+from app.core.partner_pack.project_pack import pick_project_pack, project_preferred_slugs
 from app.core.partner_pack.state import PackStateWriteError
-from app.dependencies import RequireRole, get_current_user_payload
+from app.dependencies import (
+    CurrentUserId,
+    RequireRole,
+    SessionDep,
+    get_current_user_payload,
+    verify_project_access,
+)
 
 _IMAGE_MEDIA_TYPES = {
     "svg": "image/svg+xml",
@@ -53,16 +61,46 @@ router = APIRouter(prefix="/api/v1/partner-pack", tags=["partner-pack"])
 
 
 @router.get("/current", summary="Active partner pack manifest", dependencies=[Depends(get_current_user_payload)])
-def current_pack() -> dict[str, Any]:
+async def current_pack(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = None,
+) -> dict[str, Any]:
     """Return the active pack's public manifest, or ``{"active": false}``.
 
     Frontend calls this on app boot to decide whether to mount the
-    PartnerLogoBadge + adjust theme colours + load extra locales.
+    PartnerLogoBadge + adjust theme colours + load extra locales. With
+    ``project_id`` the answer is that project's pack: the installed country
+    pack for the project's country, else the applied one (see
+    :mod:`app.core.partner_pack.project_pack`). ``source`` says which.
     """
     active = get_active_pack()
+    source = "install"
+    if project_id is not None:
+        active, source = await _project_pack(session, user_id, project_id, active)
     if not active:
-        return {"active": False}
-    return {"active": True, "manifest": active.to_public_dict()}
+        return {"active": False, "source": source}
+    return {"active": True, "source": source, "manifest": active.to_public_dict()}
+
+
+async def _project_pack(session: Any, user_id: str, project_id: uuid.UUID, active: Any) -> tuple[Any, str]:
+    from app.core.demo_projects import PACK_DEMO_PROJECT
+    from app.modules.projects.models import Project
+
+    await verify_project_access(project_id, str(user_id), session)
+    project = await session.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    flagship: dict[str, list[str]] = {}
+    for slug, demo_id in PACK_DEMO_PROJECT.items():
+        flagship.setdefault(demo_id, []).append(slug)
+    return pick_project_pack(
+        discover_packs(),
+        country=project.country_code,
+        active=active,
+        subdivision=getattr(project, "subdivision_code", None),
+        preferred_slugs=project_preferred_slugs(project.metadata_, flagship),
+    )
 
 
 @router.get(

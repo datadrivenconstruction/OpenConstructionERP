@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useSolutionPackages } from '@/features/solution_packages/api';
 import { isRouteHiddenByPackages } from '@/features/solution_packages/logic';
-import { useMarketScope } from '@/features/market/api';
+import { useWorkspaceMarketScope } from '@/features/market/api';
 import { isRouteHiddenByMarket } from '@/features/market/logic';
 import { useState, useCallback, useEffect, useMemo, useRef, Fragment, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
@@ -676,7 +676,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // Modules the tenant's solution packages switched off (fail-open while loading).
   const { data: packageListing } = useSolutionPackages(isAuthenticated);
   const packageState = packageListing?.state;
-  const { data: marketScope } = useMarketScope(isAuthenticated);
+  const { data: marketScope } = useWorkspaceMarketScope(isAuthenticated);
 
   // True when the sidebar route's backing backend module is disabled, on the
   // server or by the tenant's solution packages.
