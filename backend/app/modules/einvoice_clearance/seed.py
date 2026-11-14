@@ -144,6 +144,87 @@ async def _resolve_actor(session: AsyncSession, project_id: uuid.UUID) -> uuid.U
     return (await session.execute(select(Project.owner_id).where(Project.id == project_id))).scalar_one_or_none()
 
 
+def _registration_settings(regime: CountryRegime, seller: dict[str, Any]) -> dict[str, Any]:
+    """Settings a country's document builder reads off the registration.
+
+    Saudi Arabia builds its own UBL document from the registration, so the
+    seller's commercial register number and national address live here. Every
+    other country builds from the invoice alone and needs nothing.
+    """
+    if regime.document_format != "zatca_phase2":
+        return {}
+    return {
+        "zatca": {
+            "seller": {
+                "name": str(seller.get("name") or "").strip(),
+                "id_scheme": "CRN",
+                "id_value": str(seller.get("commercial_register") or "").strip(),
+                "address": {
+                    "street": str(seller.get("line1") or "").strip(),
+                    "building_number": str(seller.get("building_number") or "").strip(),
+                    "additional_number": str(seller.get("additional_number") or "").strip(),
+                    "district": str(seller.get("district") or "").strip(),
+                    "city": str(seller.get("city") or "").strip(),
+                    "postal_zone": str(seller.get("postcode") or "").strip(),
+                    "country": regime.country,
+                },
+            }
+        }
+    }
+
+
+async def _prepare_registration(session: AsyncSession, regime: CountryRegime, profile: EInvoiceProfile) -> None:
+    """Give a registration what it needs before it can build a document.
+
+    A Saudi registration stamps documents from an EGS unit, which a real
+    taxpayer onboards against the authority. The demo registration is a
+    sandbox one, so its unit signs with the throwaway test key the module
+    provides for exactly this, and says so in the document trail.
+    """
+    if regime.document_format != "zatca_phase2":
+        return
+    from app.modules.einvoice_clearance.service import register_payload_builder
+    from app.modules.einvoice_zatca import service as zatca
+    from app.modules.einvoice_zatca.signing import SIGNER_TEST
+    from app.modules.einvoice_zatca.validators import ZATCA_FORMAT
+
+    # The builder is registered when the module starts; a seed that runs outside that path needs it too.
+    register_payload_builder(ZATCA_FORMAT, zatca.build_from_invoice)
+
+    if await zatca.list_units(session, profile.id):
+        return
+    await zatca.create_unit(
+        session,
+        profile=profile,
+        unit_key="EGS-RUH-01",
+        csr_fields={"organization_name": profile.company_key, "branch_name": "Head office"},
+        signer_kind=SIGNER_TEST,
+    )
+
+
+async def _load_vat_onto_lines(session: AsyncSession, invoice: Invoice, ei: dict[str, Any]) -> None:
+    """Carry the document's VAT rate onto lines that state none.
+
+    The demo installer writes lines without a rate; a document built from the
+    lines (not from the invoice header) needs one per line, and the rate the
+    pack declares for the invoice is the honest source.
+    """
+    from decimal import Decimal, InvalidOperation
+
+    from app.modules.finance.models import InvoiceLineItem
+
+    try:
+        rate = Decimal(str(ei.get("vat_rate") or "").strip())
+    except (InvalidOperation, ValueError):
+        return
+    rows = (await session.execute(select(InvoiceLineItem).where(InvoiceLineItem.invoice_id == invoice.id))).scalars()
+    for row in rows:
+        if row.vat_rate is None:
+            row.vat_rate = rate
+            row.vat_category = "S" if rate > 0 else "Z"
+    await session.flush()
+
+
 async def _profile_for(
     session: AsyncSession,
     regime: CountryRegime,
@@ -168,6 +249,8 @@ async def _profile_for(
         tax_registration_id=str(seller.get("vat_id") or seller.get("tax_number") or "").strip(),
         network_participant_id=_network_participant_id(regime.country, seller),
         adapter_key=REFERENCE_ADAPTER_KEY,
+        certificate_reference=str(seller.get("certificate_reference") or "").strip(),
+        settings=_registration_settings(regime, seller),
         # See the module docstring: the offline adapter refuses a live
         # registration outright, so a "live" demo registration would produce a
         # rejection rather than a submission.
@@ -233,6 +316,9 @@ async def _seed_one(
     _ensure_reference_adapter()
     actor_id = await _resolve_actor(session, project_id)
     profile, profile_created = await _profile_for(session, regime, seller)
+    if not regime.en16931_profile:
+        await _load_vat_onto_lines(session, invoice, ei)
+    await _prepare_registration(session, regime, profile)
 
     body = DocumentCreateRequest(
         project_id=project_id,

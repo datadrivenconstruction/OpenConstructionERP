@@ -515,6 +515,11 @@ class DemoTemplate:
     # client contact, complete enough to pass an XRechnung dry-run out of
     # the box.
     einvoice_showcase: dict | None = None
+    # Optional: the withholding-tax records the demo opens with, read by
+    # ``app.modules.tax_withholding.seed``. Keys: ``scheme`` (the shipped
+    # scheme code), ``parties`` (payees with their band and verification) and
+    # ``payments`` (deductions, dated in months before the seed day).
+    withholding_showcase: dict | None = None
     # Optional: an explicit cost build-up for chosen positions, keyed by the
     # position ordinal. Replaces the generated material / labour / equipment
     # split with real rows (quantity per unit x unit rate). The rows must add
@@ -1300,7 +1305,8 @@ _US_MEDICAL = DemoTemplate(
     project_name="Downtown Medical Center",
     project_description=(
         "New 200-bed medical center with emergency department, surgical suites, "
-        "and diagnostic imaging. 5-story steel frame with concrete podium."
+        "and diagnostic imaging. 5-story steel frame with concrete podium, "
+        "269,100 ft2 gross, about USD 1,000 per ft2."
     ),
     region="United States",
     classification_standard="masterformat",
@@ -1319,7 +1325,7 @@ _US_MEDICAL = DemoTemplate(
         "lng": -95.3973,
     },
     validation_rule_sets=["masterformat", "boq_quality"],
-    project_metadata={"building_type": "hospital", "area_m2": 25000, "stories": 5},
+    project_metadata={"building_type": "hospital", "area_m2": 25000, "area_ft2": 269100, "stories": 5},
     boq_name="Downtown Medical Center \u2014 Full Estimate",
     boq_description="Detailed cost estimate for 200-bed medical center, standard divisions",
     budget_boq_name="Downtown Medical Center - Budget Estimate",
@@ -1328,140 +1334,161 @@ _US_MEDICAL = DemoTemplate(
         "phase": "Detailed Estimate",
         "base_date": "2026-Q3",
         "price_level": "US National Average 2026",
+        "sales_tax_note": (
+            "Texas state 6.25% plus local 2.0% sales and use tax (8.25%) applies to materials and equipment "
+            "installed in the work, about 40% of direct cost, so the markup is 3.3% of direct cost. "
+            "Labour and the contractor's fee are not taxed. Hospitals owned by a tax-exempt entity may "
+            "claim an exemption certificate; this estimate assumes the tax is paid."
+        ),
+        "units": "US customary (ft2, cy, ton, lsum)",
     },
     sections=[
-        # -- 01 General Requirements -------------------------------------------
+        # -- 01 — General Requirements --
         (
             "01",
-            "01 \u2014 General Requirements",
+            "01 — General Requirements",
             {"masterformat": "01"},
             [
-                ("01.001", "General conditions and supervision", "lsum", 1, 850000.00, {"masterformat": "01 00 00"}),
-                ("01.002", "Temporary facilities and controls", "lsum", 1, 425000.00, {"masterformat": "01 50 00"}),
-                ("01.003", "Construction waste management", "lsum", 1, 175000.00, {"masterformat": "01 74 00"}),
+                ("01.001", "General conditions and supervision", "lsum", 1, 11200000.00, {"masterformat": "01 00 00"}),
+                ("01.002", "Temporary facilities and controls", "lsum", 1, 4300000.00, {"masterformat": "01 50 00"}),
+                ("01.003", "Construction waste management", "lsum", 1, 1350000.00, {"masterformat": "01 74 00"}),
             ],
         ),
-        # -- 03 Concrete -------------------------------------------------------
+        # -- 03 — Concrete --
         (
             "03",
-            "03 \u2014 Concrete",
+            "03 — Concrete",
             {"masterformat": "03"},
             [
-                ("03.001", "Foundation mat slab 600mm", "m3", 1200, 385.00, {"masterformat": "03 30 00"}),
-                ("03.002", "Concrete columns and beams", "m3", 850, 425.00, {"masterformat": "03 30 00"}),
-                ("03.003", "Elevated slabs 250mm", "m3", 2400, 365.00, {"masterformat": "03 30 00"}),
-                ("03.004", "Formwork for elevated structures", "m2", 9600, 48.00, {"masterformat": "03 10 00"}),
-                ("03.005", "Reinforcement #4-#8 bars", "kg", 480000, 2.85, {"masterformat": "03 20 00"}),
+                ("03.001", "Foundation mat slab 24 in", "cy", 5200, 620.00, {"masterformat": "03 30 00"}),
+                ("03.002", "Concrete columns and beams", "cy", 4100, 890.00, {"masterformat": "03 30 00"}),
+                ("03.003", "Elevated slabs 10 in", "cy", 7700, 680.00, {"masterformat": "03 30 00"}),
+                ("03.004", "Formwork for elevated structures", "ft2", 290000, 16.50, {"masterformat": "03 10 00"}),
+                ("03.005", "Reinforcement #4-#8 bars", "ton_us", 2400, 2150.00, {"masterformat": "03 20 00"}),
             ],
         ),
-        # -- 05 Metals ---------------------------------------------------------
+        # -- 05 — Metals --
         (
             "05",
-            "05 \u2014 Metals",
+            "05 — Metals",
             {"masterformat": "05"},
             [
-                ("05.001", "Structural steel frame W-shapes", "kg", 620000, 4.25, {"masterformat": "05 12 00"}),
-                ("05.002", 'Steel deck composite 3" 20 ga', "m2", 12000, 68.00, {"masterformat": "05 31 00"}),
-                ("05.003", "Miscellaneous metals and handrails", "lsum", 1, 285000.00, {"masterformat": "05 50 00"}),
-                ("05.004", "Steel stairways 5 flights", "pcs", 5, 42000.00, {"masterformat": "05 51 00"}),
+                ("05.001", "Structural steel frame W-shapes", "ton_us", 3200, 6400.00, {"masterformat": "05 12 00"}),
+                ("05.002", "Steel deck composite 3 in 20 ga", "ft2", 130000, 9.50, {"masterformat": "05 31 00"}),
+                ("05.003", "Miscellaneous metals and handrails", "lsum", 1, 2950000.00, {"masterformat": "05 50 00"}),
+                ("05.004", "Steel stairways 5 flights", "ea", 5, 285000.00, {"masterformat": "05 51 00"}),
             ],
         ),
-        # -- 07 Thermal & Moisture Protection ----------------------------------
+        # -- 07 — Thermal & Moisture Protection --
         (
             "07",
-            "07 \u2014 Thermal & Moisture Protection",
+            "07 — Thermal & Moisture Protection",
             {"masterformat": "07"},
             [
-                ("07.001", "Below-grade waterproofing", "m2", 3200, 45.00, {"masterformat": "07 10 00"}),
-                ("07.002", "Roof membrane TPO single-ply", "m2", 5000, 85.00, {"masterformat": "07 54 00"}),
-                ("07.003", "Exterior insulation system EIFS", "m2", 8500, 95.00, {"masterformat": "07 24 00"}),
+                ("07.001", "Below-grade waterproofing", "ft2", 38000, 14.00, {"masterformat": "07 10 00"}),
+                ("07.002", "Roof membrane TPO single-ply", "ft2", 54000, 22.00, {"masterformat": "07 54 00"}),
+                ("07.003", "Exterior insulation system EIFS", "ft2", 91500, 38.00, {"masterformat": "07 24 00"}),
             ],
         ),
-        # -- 08 Openings -------------------------------------------------------
+        # -- 08 — Openings --
         (
             "08",
-            "08 \u2014 Openings",
+            "08 — Openings",
             {"masterformat": "08"},
             [
-                ("08.001", "Aluminum curtain wall system", "m2", 4200, 380.00, {"masterformat": "08 44 00"}),
-                ("08.002", "Interior hollow metal doors and frames", "pcs", 450, 1250.00, {"masterformat": "08 11 00"}),
-                ("08.003", "Automatic sliding entrance doors", "pcs", 8, 18500.00, {"masterformat": "08 42 00"}),
+                ("08.001", "Aluminum curtain wall system", "ft2", 45000, 142.00, {"masterformat": "08 44 00"}),
+                ("08.002", "Interior hollow metal doors and frames", "ea", 1150, 2650.00, {"masterformat": "08 11 00"}),
+                ("08.003", "Automatic sliding entrance doors", "ea", 14, 38000.00, {"masterformat": "08 42 00"}),
             ],
         ),
-        # -- 09 Finishes -------------------------------------------------------
+        # -- 09 — Finishes --
         (
             "09",
-            "09 \u2014 Finishes",
+            "09 — Finishes",
             {"masterformat": "09"},
             [
-                ("09.001", "Gypsum board partitions", "m2", 18000, 55.00, {"masterformat": "09 21 00"}),
-                ("09.002", "Ceramic tile floor and wall (wet areas)", "m2", 3500, 125.00, {"masterformat": "09 30 00"}),
-                ("09.003", "Vinyl sheet flooring (patient rooms)", "m2", 8000, 75.00, {"masterformat": "09 65 00"}),
-                ("09.004", "Acoustic ceiling tiles 600x600", "m2", 12000, 42.00, {"masterformat": "09 51 00"}),
+                ("09.001", "Gypsum board partitions", "ft2", 600000, 13.50, {"masterformat": "09 21 00"}),
+                (
+                    "09.002",
+                    "Ceramic tile floor and wall (wet areas)",
+                    "ft2",
+                    60000,
+                    32.00,
+                    {"masterformat": "09 30 00"},
+                ),
+                ("09.003", "Vinyl sheet flooring (patient rooms)", "ft2", 140000, 14.50, {"masterformat": "09 65 00"}),
+                ("09.004", "Acoustic ceiling tiles 2x2 ft", "ft2", 230000, 9.00, {"masterformat": "09 51 00"}),
             ],
         ),
-        # -- 14 Conveying Equipment --------------------------------------------
+        # -- 14 — Conveying Equipment --
         (
             "14",
-            "14 \u2014 Conveying Equipment",
+            "14 — Conveying Equipment",
             {"masterformat": "14"},
             [
-                ("14.001", "Passenger elevators 4500 lb", "pcs", 6, 185000.00, {"masterformat": "14 21 00"}),
-                ("14.002", "Service/bed elevators 6000 lb", "pcs", 3, 225000.00, {"masterformat": "14 21 00"}),
+                ("14.001", "Passenger elevators 4500 lb", "ea", 8, 420000.00, {"masterformat": "14 21 00"}),
+                ("14.002", "Service/bed elevators 6000 lb", "ea", 5, 560000.00, {"masterformat": "14 21 00"}),
             ],
         ),
-        # -- 21 Fire Suppression -----------------------------------------------
+        # -- 21 — Fire Suppression --
         (
             "21",
-            "21 \u2014 Fire Suppression",
+            "21 — Fire Suppression",
             {"masterformat": "21"},
             [
-                ("21.001", "Wet sprinkler system complete", "m2", 25000, 35.00, {"masterformat": "21 13 00"}),
-                ("21.002", "Fire pump assembly", "pcs", 2, 95000.00, {"masterformat": "21 12 00"}),
+                ("21.001", "Wet sprinkler system complete", "ft2", 269100, 5.20, {"masterformat": "21 13 00"}),
+                ("21.002", "Fire pump assembly", "ea", 2, 210000.00, {"masterformat": "21 12 00"}),
             ],
         ),
-        # -- 22 Plumbing -------------------------------------------------------
+        # -- 22 — Plumbing --
         (
             "22",
-            "22 \u2014 Plumbing",
+            "22 — Plumbing",
             {"masterformat": "22"},
             [
-                ("22.001", "Domestic water distribution", "lsum", 1, 1250000.00, {"masterformat": "22 10 00"}),
-                ("22.002", "Sanitary drainage system", "lsum", 1, 875000.00, {"masterformat": "22 13 00"}),
-                ("22.003", "Medical gas systems (O2, N2O, vacuum)", "lsum", 1, 650000.00, {"masterformat": "22 63 00"}),
+                ("22.001", "Domestic water distribution", "lsum", 1, 5200000.00, {"masterformat": "22 10 00"}),
+                ("22.002", "Sanitary drainage system", "lsum", 1, 4100000.00, {"masterformat": "22 13 00"}),
+                (
+                    "22.003",
+                    "Medical gas systems (O2, N2O, vacuum)",
+                    "lsum",
+                    1,
+                    5600000.00,
+                    {"masterformat": "22 63 00"},
+                ),
             ],
         ),
-        # -- 23 HVAC -----------------------------------------------------------
+        # -- 23 — HVAC --
         (
             "23",
-            "23 \u2014 HVAC",
+            "23 — HVAC",
             {"masterformat": "23"},
             [
-                ("23.001", "Central plant (chillers, boilers)", "lsum", 1, 2800000.00, {"masterformat": "23 64 00"}),
-                ("23.002", "Air handling units and ductwork", "lsum", 1, 3200000.00, {"masterformat": "23 74 00"}),
-                ("23.003", "Building automation system", "lsum", 1, 850000.00, {"masterformat": "23 09 00"}),
+                ("23.001", "Central plant (chillers, boilers)", "lsum", 1, 17500000.00, {"masterformat": "23 64 00"}),
+                ("23.002", "Air handling units and ductwork", "lsum", 1, 31500000.00, {"masterformat": "23 74 00"}),
+                ("23.003", "Building automation system", "lsum", 1, 5800000.00, {"masterformat": "23 09 00"}),
             ],
         ),
-        # -- 26 Electrical -----------------------------------------------------
+        # -- 26 — Electrical --
         (
             "26",
-            "26 \u2014 Electrical",
+            "26 — Electrical",
             {"masterformat": "26"},
             [
-                ("26.001", "Main electrical distribution", "lsum", 1, 1500000.00, {"masterformat": "26 24 00"}),
-                ("26.002", "Emergency generator 2000kW", "pcs", 2, 425000.00, {"masterformat": "26 32 00"}),
-                ("26.003", "Lighting systems LED", "m2", 25000, 65.00, {"masterformat": "26 51 00"}),
-                ("26.004", "Fire alarm and mass notification", "lsum", 1, 485000.00, {"masterformat": "26 00 00"}),
+                ("26.001", "Main electrical distribution", "lsum", 1, 11500000.00, {"masterformat": "26 24 00"}),
+                ("26.002", "Emergency generator 2000kW", "ea", 4, 1350000.00, {"masterformat": "26 32 00"}),
+                ("26.003", "Lighting systems LED", "ft2", 269100, 28.00, {"masterformat": "26 51 00"}),
+                ("26.004", "Fire alarm and mass notification", "lsum", 1, 3900000.00, {"masterformat": "26 00 00"}),
             ],
         ),
-        # -- 31 Earthwork ------------------------------------------------------
+        # -- 31 — Earthwork --
         (
             "31",
-            "31 \u2014 Earthwork",
+            "31 — Earthwork",
             {"masterformat": "31"},
             [
-                ("31.001", "Excavation and grading", "m3", 18000, 28.00, {"masterformat": "31 23 00"}),
-                ("31.002", "Site utilities (water, sewer, storm)", "lsum", 1, 1450000.00, {"masterformat": "31 00 00"}),
+                ("31.001", "Excavation and grading", "cy", 95000, 24.00, {"masterformat": "31 23 00"}),
+                ("31.002", "Site utilities (water, sewer, storm)", "lsum", 1, 9200000.00, {"masterformat": "31 00 00"}),
             ],
         ),
     ],
@@ -1469,6 +1496,7 @@ _US_MEDICAL = DemoTemplate(
         ("General Overhead", 8.0, "overhead", "direct_cost"),
         ("Profit", 6.0, "profit", "direct_cost"),
         ("Contingency", 10.0, "contingency", "direct_cost"),
+        ("Texas State and Local Sales & Use Tax on Materials (8.25%)", 3.3, "tax", "direct_cost"),
         ("Performance Bond", 1.5, "insurance", "cumulative"),
     ],
     total_months=22,
@@ -1517,10 +1545,10 @@ _US_MEDICAL = DemoTemplate(
         ("Commissioning & Testing", "2028-01-01", "2028-04-30"),
         ("Substantial Completion", "2028-03-15", "2028-05-31"),
     ],
-    planned_budget=25_000_000,
+    planned_budget=252_000_000,
     actual_spend_ratio=0.42,
     spi_override=1.02,
-    cpi_override=0.95,
+    cpi_override=0.98,
 )
 
 # ---------------------------------------------------------------------------
@@ -13158,7 +13186,14 @@ async def install_demo_project(
         cpi = template.cpi_override if template.cpi_override else 1.0
         ev = pv * spi
         ac = round(ev / cpi, 2) if cpi else ev
-        if template.actual_spend_ratio:
+        if template.actual_spend_ratio and template.spi_override and template.cpi_override:
+            # All three given: the booked actual is the anchor and the earned and planned values follow
+            # from the two indices, so SPI = EV/PV and CPI = EV/AC hold at the stated values and the
+            # three figures are shares of the budget at completion rather than the whole of it.
+            ac = planned * template.actual_spend_ratio
+            ev = ac * cpi
+            pv = ev / spi
+        elif template.actual_spend_ratio:
             # Prefer the explicit booked-actual ratio; keep CPI consistent (EV/AC).
             ac = planned * template.actual_spend_ratio
             cpi = round(ev / ac, 2) if ac else 1.0

@@ -289,7 +289,11 @@ async def seed_variations_demo(
     # pass used to abort on ``NOT-0001`` instead of doing nothing. Callers
     # carried this check externally; holding it here means a direct call is
     # safe too, which is what a re-seed of the demo box actually does.
-    already_seeded = (await session.execute(select(Notice.id).where(Notice.project_id.in_(projects)).limit(1))).first()
+    seeded_projects = set(
+        (await session.execute(select(Notice.project_id).where(Notice.project_id.in_(projects)))).scalars().all()
+    )
+    projects = [pid for pid in projects if pid not in seeded_projects]
+    already_seeded = None if projects else True
     if already_seeded is not None:
         logger.info("seed_variations_demo: variations already present, skipping")
         return {
