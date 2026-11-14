@@ -194,12 +194,12 @@ export function DemoChooserPage() {
   return (
     <div className="space-y-5 animate-fade-in">
       <header className="text-center">
-        <p className="oe-overline">
+        <h1 className="text-2xl font-semibold tracking-tight text-content-primary">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-content-primary">
-          {t('demo_chooser.title', { defaultValue: 'Which company do you want to see?' })}
         </h1>
+        <p className="mt-1 text-base font-medium text-content-primary">
+          {t('demo_chooser.title', { defaultValue: 'Which company do you want to see?' })}
+        </p>
         <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-content-secondary">
           {t('demo_chooser.subtitle', {
             defaultValue:
