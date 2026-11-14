@@ -28,7 +28,9 @@ import {
   writeChosenDemo,
   type DemoSlug,
 } from '@/shared/lib/demoProfiles';
+import { demoFaceFor } from '@/shared/lib/demoFaces';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { HexMark } from '@/shared/ui/HexMark';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -236,6 +238,7 @@ export function DemoSwitcherBar() {
         {available.map((profile) => {
           const p = bySlug.get(profile.slug);
           const active = !!p && p.id === activeProjectId;
+          const face = demoFaceFor(profile.slug);
           return (
             <button
               key={profile.slug}
@@ -251,10 +254,14 @@ export function DemoSwitcherBar() {
                   : 'border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
               )}
             >
-              <span
-                aria-hidden="true"
-                className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white/70"
-                style={{ backgroundColor: ACCENT_SWATCH[profile.appearance.accent] }}
+              <HexMark
+                inline
+                src={face.src}
+                kind={face.kind}
+                accent={active ? 'rgba(255,255,255,0.92)' : ACCENT_SWATCH[profile.appearance.accent]}
+                active={active}
+                size={24}
+                className="-my-1 -ms-2"
               />
               {t(`demo_switcher.tab_${profile.slug.replace(/-/g, '_')}`)}
             </button>

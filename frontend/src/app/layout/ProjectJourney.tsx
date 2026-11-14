@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import {
   Sparkles,
   MapPin,
   GraduationCap,
+  PlayCircle,
   type LucideIcon,
 } from 'lucide-react';
 import {
@@ -23,8 +24,10 @@ import {
   journeyRouteCandidate,
   type JourneyArcKey,
   type JourneyModule,
+  type JourneyPhase,
 } from './projectJourneyData';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { videoCountForRoute, videoRouteFor } from '@/features/videos/videoRoutes';
 import type { Playbook } from '@/features/cases/types';
 
 // The case registry eagerly bundles ~85 playbook data files, so it is loaded
@@ -38,6 +41,17 @@ type CaseModuleIndex = typeof import('@/features/cases/playbookModules');
 // Pipelines is a default-disabled plugin module with no hardcoded route, so
 // clicking it would fall through to the catch-all and 404. Routes absent from
 // this map are plain app routes and are always shown.
+// The player and the academy catalogue load only when a step's video is opened.
+const JourneyStepVideo = lazy(() => import('@/features/videos/JourneyStepVideo'));
+
+/** True when the academy catalogue has a video walking any of the step's module routes. */
+function phaseHasVideo(phase: JourneyPhase): boolean {
+  return phase.modules.some((m) => {
+    const route = videoRouteFor(m.to.split('?')[0]!);
+    return route !== null && videoCountForRoute(route) > 0;
+  });
+}
+
 const CHIP_MODULE_ID: Record<string, string> = {
   '/pipelines': 'pipelines',
   '/collaboration': 'collaboration',
@@ -157,10 +171,16 @@ function ProjectJourneyPanel({
   const isModuleEnabled = useModuleStore((s) => s.isModuleEnabled);
   const closeRef = useRef<HTMLButtonElement>(null);
 
+  // Routes of the step whose video is playing; the player owns Escape while it is up.
+  const [videoRoutes, setVideoRoutes] = useState<readonly string[] | null>(null);
+  const videoOpenRef = useRef(false);
+  videoOpenRef.current = videoRoutes !== null;
+  const closeVideo = useCallback(() => setVideoRoutes(null), []);
+
   // Close on Escape; focus the close button on open for keyboard users.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !videoOpenRef.current) onClose();
     };
     document.addEventListener('keydown', handler);
     closeRef.current?.focus();
@@ -209,9 +229,20 @@ function ProjectJourneyPanel({
     [isModuleEnabled],
   );
 
-  const currentPhase = JOURNEY_PHASES.find((p) => p.key === currentPhaseKey);
+  const currentIndex = JOURNEY_PHASES.findIndex((p) => p.key === currentPhaseKey);
+  const currentPhase = currentIndex >= 0 ? JOURNEY_PHASES[currentIndex] : undefined;
+  const nextPhase = currentIndex >= 0 ? JOURNEY_PHASES[currentIndex + 1] : JOURNEY_PHASES[0];
+  const total = JOURNEY_PHASES.length;
   // Global 1-based number for each phase, in lifecycle order.
   const phaseNumber = (key: string) => JOURNEY_PHASES.findIndex((p) => p.key === key) + 1;
+  const phaseName = (p: JourneyPhase) => t(p.nameKey, { defaultValue: p.name });
+
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const showPhase = useCallback((key: string) => {
+    const el = cardRefs.current[key];
+    el?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    el?.focus({ preventScroll: true });
+  }, []);
 
   // Render through a portal on document.body. The header and several page
   // shells create their own stacking contexts (sticky + isolate/transform),
@@ -219,80 +250,185 @@ function ProjectJourneyPanel({
   // a high z-index. A body-level portal escapes all of them, so the map always
   // paints on top of everything.
   return createPortal(
-    <div className="fixed inset-0 z-modal flex items-center justify-center p-3 sm:p-6">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-2 sm:p-6">
+      {/* Light veil: the platform stays visible around the panel. */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-black/25 backdrop-blur-[3px] animate-fade-in dark:bg-black/45"
         onClick={onClose}
         aria-hidden
+        data-testid="project-journey-backdrop"
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={t('journey.title', { defaultValue: 'Your project journey' })}
-        className="relative my-2 flex max-h-[calc(100vh-1.5rem)] w-full max-w-6xl flex-col rounded-2xl border border-border-light bg-surface-elevated shadow-2xl animate-scale-in sm:max-h-[calc(100vh-3rem)]"
+        data-testid="project-journey-panel"
+        className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in sm:max-h-[calc(100dvh-3rem)]"
       >
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className="z-10 flex shrink-0 items-start justify-between gap-3 rounded-t-2xl border-b border-border-light bg-surface-elevated px-5 py-4">
-          <div className="flex items-start gap-3 min-w-0">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue">
-              <RouteIcon size={20} strokeWidth={1.75} />
-            </span>
-            <div className="min-w-0">
-              <h2 className="oe-section-title">
-                {t('journey.title', { defaultValue: 'Your project journey' })}
-              </h2>
-              <p className="mt-0.5 text-xs leading-relaxed text-content-secondary">
-                {t('journey.subtitle', {
-                  defaultValue:
-                    'Every stage of a construction project, from first lead to handover, and where you are right now. Pick any step to jump there.',
-                })}
-              </p>
+        <div className="shrink-0 border-b border-border-light px-4 pb-3 pt-4 sm:px-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="mt-0.5 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue sm:flex">
+                <RouteIcon size={20} strokeWidth={1.75} />
+              </span>
+              <div className="min-w-0">
+                <h2 className="oe-section-title">{t('journey.title', { defaultValue: 'Your project journey' })}</h2>
+                <p className="mt-0.5 text-xs leading-relaxed text-content-secondary">
+                  {t('journey.subtitle', {
+                    defaultValue:
+                      'Every stage of a construction project, from first lead to handover, and where you are right now. Pick any step to jump there.',
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {/* One clear route from the map into the guided case library. */}
+              <button
+                type="button"
+                onClick={() => go('/cases')}
+                className="hidden h-8 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 text-xs font-medium text-content-primary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 sm:inline-flex"
+              >
+                <GraduationCap size={14} strokeWidth={2} className="text-oe-blue" aria-hidden />
+                {t('journey.browse_cases', { defaultValue: 'Browse cases' })}
+              </button>
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={onClose}
+                aria-label={t('common.close', { defaultValue: 'Close' })}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+              >
+                <X size={20} />
+              </button>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {currentPhase && (
-              <span className="hidden items-center gap-1.5 rounded-full bg-oe-blue/10 px-2.5 py-1 text-2xs font-medium text-oe-blue sm:inline-flex">
-                <MapPin size={12} aria-hidden />
-                {t('journey.you_are_here_named', {
-                  defaultValue: 'You are here: {{phase}}',
-                  phase: t(currentPhase.nameKey, { defaultValue: currentPhase.name }),
-                })}
+
+          {/* ── Progress: every step on one line, the current one ringed ── */}
+          <div className="mt-3">
+            <div className="mb-1.5 flex items-center justify-between gap-2 text-2xs">
+              <span className="font-semibold uppercase tracking-wide text-content-tertiary" data-testid="project-journey-progress">
+                {currentPhase
+                  ? t('journey.progress', { defaultValue: 'Step {{n}} of {{total}}', n: currentIndex + 1, total })
+                  : t('journey.pick_a_step', { defaultValue: 'This screen sits outside the line. Pick a step to start.' })}
               </span>
-            )}
-            {/* One clear route from the map into the guided case library. */}
-            <button
-              type="button"
-              onClick={() => go('/cases')}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-oe-blue/30 bg-oe-blue/5 px-2.5 py-1 text-2xs font-semibold text-oe-blue transition-colors hover:border-oe-blue/50 hover:bg-oe-blue/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-            >
-              <GraduationCap size={12} strokeWidth={2} aria-hidden />
-              {t('journey.browse_cases', { defaultValue: 'Browse cases' })}
-            </button>
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={onClose}
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-            >
-              <X size={20} />
-            </button>
+              {currentPhase && (
+                <span className="inline-flex min-w-0 items-center gap-1 font-medium text-oe-blue-text">
+                  <MapPin size={12} className="shrink-0" aria-hidden />
+                  <span className="truncate">{phaseName(currentPhase)}</span>
+                </span>
+              )}
+            </div>
+            <ol className="flex items-center gap-1 overflow-x-auto pb-1" aria-label={t('journey.title', { defaultValue: 'Your project journey' })}>
+              {JOURNEY_PHASES.map((phase, i) => {
+                const isCurrent = i === currentIndex;
+                const isBehind = currentIndex >= 0 && i < currentIndex;
+                const accent = ARC_ACCENT[phase.arc];
+                return (
+                  <li key={phase.key} className="flex min-w-[1.75rem] flex-1 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => showPhase(phase.key)}
+                      aria-current={isCurrent ? 'step' : undefined}
+                      aria-label={t('journey.step_aria', {
+                        defaultValue: 'Step {{n}}: {{phase}}',
+                        n: i + 1,
+                        phase: phaseName(phase),
+                      })}
+                      title={phaseName(phase)}
+                      data-testid={`project-journey-node-${phase.key}`}
+                      className={clsx(
+                        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold tabular-nums transition-colors',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-1',
+                        isCurrent
+                          ? 'bg-oe-blue text-white ring-4 ring-oe-blue/20'
+                          : isBehind
+                            ? clsx(accent.bar, 'text-white opacity-70 hover:opacity-100')
+                            : 'border border-border bg-surface-primary text-content-secondary hover:border-oe-blue/50 hover:text-content-primary',
+                      )}
+                    >
+                      {i + 1}
+                    </button>
+                    {i < total - 1 && (
+                      <span
+                        aria-hidden
+                        className={clsx(
+                          'h-0.5 min-w-[0.25rem] flex-1 rounded-full',
+                          isBehind || isCurrent ? accent.bar : 'bg-border-light',
+                          isCurrent && 'opacity-40',
+                        )}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </div>
 
-        {/* ── Arcs and phases ────────────────────────────────────────── */}
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-5">
+          {/* ── You are here: the current step, what it is for, what is next ── */}
+          {currentPhase && (
+            <section
+              data-testid="project-journey-current"
+              className="flex flex-col gap-3 rounded-xl border border-oe-blue/40 bg-gradient-to-br from-oe-blue/[0.08] to-transparent p-4 sm:flex-row sm:items-center"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue text-white">
+                <currentPhase.icon size={20} strokeWidth={1.75} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-2xs font-semibold uppercase tracking-wide text-oe-blue-text">
+                  {t('journey.you_are_here_named', {
+                    defaultValue: 'You are here: {{phase}}',
+                    phase: t('journey.progress', { defaultValue: 'Step {{n}} of {{total}}', n: currentIndex + 1, total }),
+                  })}
+                </p>
+                <h3 className="text-base font-semibold text-content-primary">{phaseName(currentPhase)}</h3>
+                <p className="mt-0.5 text-xs leading-relaxed text-content-secondary">
+                  {t(currentPhase.descKey, { defaultValue: currentPhase.desc })}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                {phaseHasVideo(currentPhase) && (
+                  <button
+                    type="button"
+                    onClick={() => setVideoRoutes(currentPhase.modules.map((m) => m.to))}
+                    data-testid="project-journey-video"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 text-xs font-medium text-content-primary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60"
+                  >
+                    <PlayCircle size={16} className="text-oe-blue" aria-hidden />
+                    {t('journey.watch_video', { defaultValue: 'Watch a short video' })}
+                  </button>
+                )}
+                {nextPhase && (
+                  <button
+                    type="button"
+                    onClick={() => showPhase(nextPhase.key)}
+                    data-testid="project-journey-next"
+                    className="inline-flex h-8 min-w-0 items-center gap-1.5 rounded-lg bg-oe-blue px-3 text-xs font-medium text-white transition-colors hover:bg-oe-blue-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-1"
+                  >
+                    <span className="truncate">
+                      {t('journey.next_step', { defaultValue: 'Next: {{phase}}', phase: phaseName(nextPhase) })}
+                    </span>
+                    <ArrowRight size={14} className="shrink-0 rtl:rotate-180" aria-hidden />
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ── Arcs and phases ────────────────────────────────────────── */}
           {JOURNEY_ARCS.map((arc) => {
             const accent = ARC_ACCENT[arc.key];
             const phases = JOURNEY_PHASES.filter((p) => p.arc === arc.key);
             return (
               <section key={arc.key} aria-label={t(arc.nameKey, { defaultValue: arc.name })}>
-                <div className="mb-2.5 flex items-center gap-2">
+                <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span className={clsx('h-2 w-2 shrink-0 rounded-full', accent.dot)} aria-hidden />
                   <h3 className={clsx('text-xs font-semibold uppercase tracking-wider', accent.text)}>
                     {t(arc.nameKey, { defaultValue: arc.name })}
                   </h3>
-                  <span className="truncate text-2xs text-content-tertiary">
+                  <span className="text-2xs text-content-tertiary">
                     {t(arc.descKey, { defaultValue: arc.desc })}
                   </span>
                 </div>
@@ -301,29 +437,32 @@ function ProjectJourneyPanel({
                     const Icon: LucideIcon = phase.icon;
                     const isCurrent = phase.key === currentPhaseKey;
                     const num = phaseNumber(phase.key);
+                    const hasVideo = phaseHasVideo(phase);
                     return (
                       <div
                         key={phase.key}
+                        ref={(el) => {
+                          cardRefs.current[phase.key] = el;
+                        }}
+                        tabIndex={-1}
+                        data-testid={`project-journey-phase-${phase.key}`}
                         className={clsx(
-                          'relative flex flex-col overflow-hidden rounded-xl border p-3',
+                          'relative flex scroll-m-4 flex-col overflow-hidden rounded-xl border p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60',
                           'bg-gradient-to-br to-surface-primary transition-shadow',
                           isCurrent
-                            ? 'border-oe-blue from-oe-blue/[0.12] shadow-sm ring-1 ring-oe-blue/30'
+                            ? 'border-oe-blue from-oe-blue/[0.12] ring-1 ring-oe-blue/30'
                             : clsx('border-border-light hover:shadow-sm', accent.wash),
                         )}
                       >
                         {/* Themed watermark: the phase's own icon, oversized and
-                            barely-there, clipped to the card corner so each stage
-                            quietly "feels like" itself. */}
+                            barely-there, clipped to the card corner. */}
                         <Icon
                           size={104}
                           strokeWidth={1}
                           aria-hidden
                           className={clsx(
-                            'pointer-events-none absolute -bottom-6 -right-5 z-0',
-                            isCurrent
-                              ? 'text-oe-blue opacity-[0.10]'
-                              : clsx(accent.glyph, 'opacity-[0.07]'),
+                            'pointer-events-none absolute -bottom-6 -end-5 z-0',
+                            isCurrent ? 'text-oe-blue opacity-[0.10]' : clsx(accent.glyph, 'opacity-[0.07]'),
                           )}
                         />
                         <div className="relative z-10 flex flex-1 flex-col">
@@ -331,30 +470,41 @@ function ProjectJourneyPanel({
                             <span
                               className={clsx(
                                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                                isCurrent
-                                  ? 'bg-oe-blue text-white'
-                                  : 'bg-surface-tertiary text-content-secondary',
+                                isCurrent ? 'bg-oe-blue text-white' : 'bg-surface-tertiary text-content-secondary',
                               )}
                             >
                               <Icon size={16} strokeWidth={1.75} />
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-2xs font-semibold text-content-quaternary">
-                                  {num}
-                                </span>
+                                <span className="text-2xs font-semibold tabular-nums text-content-tertiary">{num}</span>
                                 <h4
                                   className={clsx(
                                     'truncate text-sm font-semibold',
-                                    isCurrent ? 'text-oe-blue' : 'text-content-primary',
+                                    isCurrent ? 'text-oe-blue-text' : 'text-content-primary',
                                   )}
                                 >
-                                  {t(phase.nameKey, { defaultValue: phase.name })}
+                                  {phaseName(phase)}
                                 </h4>
                               </div>
                             </div>
+                            {hasVideo && (
+                              <button
+                                type="button"
+                                onClick={() => setVideoRoutes(phase.modules.map((m) => m.to))}
+                                aria-label={t('journey.watch_video_for', {
+                                  defaultValue: 'Watch a short video: {{phase}}',
+                                  phase: phaseName(phase),
+                                })}
+                                title={t('journey.watch_video', { defaultValue: 'Watch a short video' })}
+                                data-testid={`project-journey-video-${phase.key}`}
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-oe-blue transition-colors hover:bg-oe-blue/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60"
+                              >
+                                <PlayCircle size={16} aria-hidden />
+                              </button>
+                            )}
                             {isCurrent && (
-                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-oe-blue/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-oe-blue">
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-oe-blue/10 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-oe-blue-text">
                                 {t('journey.here', { defaultValue: 'Here' })}
                               </span>
                             )}
@@ -427,8 +577,23 @@ function ProjectJourneyPanel({
               })}
             </div>
           </section>
+
+          {/* The cases link moves into the scroll on a phone, where the header has no room. */}
+          <button
+            type="button"
+            onClick={() => go('/cases')}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 text-xs font-medium text-content-primary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 sm:hidden"
+          >
+            <GraduationCap size={14} strokeWidth={2} className="text-oe-blue" aria-hidden />
+            {t('journey.browse_cases', { defaultValue: 'Browse cases' })}
+          </button>
         </div>
       </div>
+      {videoRoutes && (
+        <Suspense fallback={null}>
+          <JourneyStepVideo routes={videoRoutes} onClose={closeVideo} />
+        </Suspense>
+      )}
     </div>,
     document.body,
   );

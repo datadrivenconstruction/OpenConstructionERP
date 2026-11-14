@@ -19,6 +19,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { AcademyItemCard } from './AcademyItemLinks';
 import { CourseHive } from './CourseHive';
+import { CoursesFeaturedArticle } from './CoursesFeaturedArticle';
 import { defaultPath, learningPaths, useCoursesDone } from './learningPaths';
 import {
   DURATION_KEYS,
@@ -273,11 +274,12 @@ export function CoursesPage() {
         }
       />
 
+      <div className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_minmax(13rem,20%)] md:items-stretch">
       <div
         id="courses-filter-panel"
         data-testid="courses-filter-panel"
         className={clsx(
-          'space-y-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-xs md:block',
+          'min-w-0 space-y-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-xs md:block',
           !panelOpen && 'hidden',
         )}
       >
@@ -404,6 +406,8 @@ export function CoursesPage() {
               ))}
           </select>
         </Row>
+      </div>
+      <CoursesFeaturedArticle />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">

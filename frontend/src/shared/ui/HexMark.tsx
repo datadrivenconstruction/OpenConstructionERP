@@ -5,7 +5,7 @@
 // over its edge. Shows a photo cropped to the hexagon, a building drawing when
 // there is no photo, or an icon. Always decorative (alt=""): the card names it.
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import clsx from 'clsx';
 import type { LucideIcon } from 'lucide-react';
 
@@ -85,6 +85,8 @@ export interface HexMarkProps {
   size?: number;
   /** Position classes; defaults to `-top-3 -start-3`. */
   className?: string;
+  /** Sit in the text flow (tabs, menu rows) instead of pinned to a card corner. */
+  inline?: boolean;
 }
 
 /**
@@ -99,18 +101,28 @@ export function HexMark({
   accent,
   size = 56,
   className,
+  inline = false,
 }: HexMarkProps) {
   const height = Math.round(size * 0.9);
+  // A photo that fails to load (offline install, blocked host) falls back to the drawing.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const photo = src && src !== failedSrc ? src : null;
   return (
     <span
       aria-hidden="true"
       data-testid="hex-mark"
+      data-hex-photo={photo ? 'true' : 'false'}
       className={clsx(
-        'pointer-events-none absolute z-10 block',
-        'drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] dark:drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]',
-        'transition-transform duration-300 ease-oe group-hover:-translate-y-0.5 group-hover:scale-105',
-        'motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:scale-100',
-        className ?? '-top-3 -start-3',
+        'pointer-events-none block',
+        inline
+          ? 'relative shrink-0 drop-shadow-[0_1px_2px_rgba(15,23,42,0.25)] dark:drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]'
+          : clsx(
+              'absolute z-10',
+              'drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] dark:drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]',
+              'transition-transform duration-300 ease-oe group-hover:-translate-y-0.5 group-hover:scale-105',
+              'motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:scale-100',
+            ),
+        inline ? className : (className ?? '-top-3 -start-3'),
       )}
       style={{ width: size, height }}
     >
@@ -124,12 +136,16 @@ export function HexMark({
         style={{ clipPath: HEX, backgroundColor: accent }}
       />
       <span
-        className="absolute inset-[2.5px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-oe-blue-subtle to-surface-elevated text-oe-blue dark:from-oe-blue/25 dark:to-surface-secondary"
+        className={clsx(
+          'absolute flex items-center justify-center overflow-hidden bg-gradient-to-br from-oe-blue-subtle to-surface-elevated text-oe-blue dark:from-oe-blue/25 dark:to-surface-secondary',
+          inline ? 'inset-[1.5px]' : 'inset-[2.5px]',
+        )}
         style={{ clipPath: HEX }}
       >
-        {src ? (
+        {photo ? (
           <img
-            src={src}
+            src={photo}
+            onError={() => setFailedSrc(photo)}
             alt=""
             loading="lazy"
             decoding="async"
