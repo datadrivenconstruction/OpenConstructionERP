@@ -165,17 +165,20 @@ async def reset_demo_data(session: AsyncSession) -> dict:
         deleted_projects = result.rowcount or 0
         await session.flush()
 
-    # Re-seed the canonical 5 demo projects under demo@openconstructionerp.com.
+    # Re-seed every demo the chooser offers, plus the Dubai warehouse the crawler walks.
     seeded = 0
     seeded_demo_ids: list[str] = []
     try:
         from app.core.demo_projects import install_demo_project
 
         for demo_id in (
+            "full-showcase-riyadh",
             "residential-berlin",
             "office-london",
             "medical-us",
+            "condo-toronto",
             "school-paris",
+            "office-shanghai",
             "warehouse-dubai",
         ):
             try:
