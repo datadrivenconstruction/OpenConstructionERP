@@ -88,8 +88,8 @@ function renderWizard() {
 /** Welcome -> start choice -> packages -> the profile step. */
 async function openProfileStep() {
   renderWizard();
-  fireEvent.click(await screen.findByRole('button', { name: /Get Started/ }));
-  fireEvent.click(await screen.findByRole('button', { name: /Choose Your Profile/ }));
+  fireEvent.click(await screen.findByRole('button', { name: /Get started/ }));
+  fireEvent.click(await screen.findByRole('button', { name: /Choose your profile/ }));
   await screen.findByRole('heading', { name: 'What does your company do?' });
   // The catalogue arrives after the first paint.
   await screen.findByTestId('profile-card-general_contractor');
@@ -199,7 +199,7 @@ describe('the profile step', () => {
 
     fireEvent.click(screen.getByTestId('profile-card-subcontractor'));
     fireEvent.click(screen.getByRole('button', { name: /Continue/ }));
-    await screen.findByRole('heading', { name: 'Your Modules' });
+    await screen.findByRole('heading', { name: 'Review your modules' });
 
     expect(moduleSwitch('payroll').getAttribute('aria-checked')).toBe('true');
     expect(moduleSwitch('bim_hub').getAttribute('aria-checked')).toBe('false');
@@ -211,7 +211,7 @@ describe('the profile step', () => {
 
     fireEvent.click(screen.getByTestId('profile-card-mep_contractor'));
     fireEvent.click(screen.getByRole('button', { name: /Continue/ }));
-    await screen.findByRole('heading', { name: 'Your Modules' });
+    await screen.findByRole('heading', { name: 'Review your modules' });
 
     expect(moduleSwitch('bim_hub').getAttribute('aria-checked')).toBe('true');
     expect(moduleSwitch('payroll').getAttribute('aria-checked')).toBe('false');
@@ -223,7 +223,7 @@ describe('the profile step', () => {
     fireEvent.click(screen.getByRole('button', { name: /Or pick by your role/ }));
     fireEvent.click(screen.getByTestId('profile-card-scheduler_planner'));
     fireEvent.click(screen.getByRole('button', { name: /Continue/ }));
-    await screen.findByRole('heading', { name: 'Your Modules' });
+    await screen.findByRole('heading', { name: 'Review your modules' });
     expect(moduleSwitch('schedule_advanced').getAttribute('aria-checked')).toBe('true');
 
     fireEvent.click(screen.getByRole('button', { name: /Back/ }));

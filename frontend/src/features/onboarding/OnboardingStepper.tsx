@@ -107,9 +107,10 @@ export function OnboardingStepper({
   };
 
   const current = reach.current;
-  // Percent of the track filled, independent of how the dots are laid out so
-  // the line stays continuous on narrow screens where the labels are hidden.
-  const pct = STEP_COUNT > 1 ? (current / (STEP_COUNT - 1)) * 100 : 0;
+  // Each dot sits in the centre of an equal cell, so the track spans half a
+  // cell in from each edge and the fill is the same share of that span.
+  const inset = 100 / (STEP_COUNT * 2);
+  const fill = STEP_COUNT > 1 ? (current / (STEP_COUNT - 1)) * (100 - inset * 2) : 0;
 
   return (
     <nav
@@ -119,11 +120,15 @@ export function OnboardingStepper({
     >
       <div className="relative">
         {/* Track behind everything: continuous line. */}
-        <div className="absolute top-[14px] start-[14px] end-[14px] h-[3px] rounded-full bg-border-light dark:bg-white/10" />
+        <div
+          className="absolute top-[13px] h-0.5 rounded-full bg-border-light"
+          style={{ insetInlineStart: `${inset}%`, insetInlineEnd: `${inset}%` }}
+          aria-hidden
+        />
         {/* Filled portion: animates on step change. */}
         <div
-          className="absolute top-[14px] start-[14px] h-[3px] rounded-full bg-gradient-to-r from-oe-blue via-blue-500 to-purple-500 transition-[width] duration-500 ease-oe"
-          style={{ width: `calc(${pct}% - ${pct === 0 ? 0 : 14}px)` }}
+          className="absolute top-[13px] h-0.5 rounded-full bg-oe-blue transition-[width] duration-500 ease-oe"
+          style={{ insetInlineStart: `${inset}%`, width: `${fill}%` }}
           aria-hidden
         />
         <ol className="relative flex items-start justify-between">
@@ -154,10 +159,10 @@ export function OnboardingStepper({
                     className={clsx(
                       'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-semibold transition-all duration-500 ease-oe',
                       here
-                        ? 'bg-white dark:bg-surface-elevated text-oe-blue ring-2 ring-oe-blue shadow-[0_0_0_4px_rgba(37,99,235,0.18)] scale-110'
+                        ? 'bg-surface-elevated text-oe-blue ring-2 ring-oe-blue ring-offset-2 ring-offset-surface-primary'
                         : enabled
-                          ? 'bg-oe-blue text-white shadow-sm group-hover:ring-2 group-hover:ring-oe-blue/40'
-                          : 'bg-surface-secondary text-content-tertiary opacity-60',
+                          ? 'bg-oe-blue text-white group-hover:ring-2 group-hover:ring-oe-blue/40'
+                          : 'border border-border-light bg-surface-primary text-content-tertiary',
                     )}
                   >
                     {done && enabled ? <Check size={14} strokeWidth={3} /> : i + 1}
@@ -169,7 +174,7 @@ export function OnboardingStepper({
                         ? 'text-oe-blue'
                         : enabled
                           ? 'text-content-secondary group-hover:text-content-primary'
-                          : 'text-content-quaternary opacity-70',
+                          : 'text-content-tertiary',
                     )}
                   >
                     {label}

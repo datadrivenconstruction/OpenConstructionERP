@@ -147,9 +147,9 @@ function moduleSwitch(key: string): HTMLElement {
 /** Welcome -> start choice -> the profile step, catalogue loaded. */
 async function toProfileStep() {
   await heading('Welcome to OpenConstructionERP');
-  click(/Get Started/);
+  click(/Get started/);
   await heading('How would you like to start?');
-  click(/Choose Your Profile/);
+  click(/Choose your profile/);
   await heading('What does your company do?');
   await screen.findByTestId('profile-card-general_contractor');
 }
@@ -159,13 +159,13 @@ async function fromModulesToSummary() {
   click('Continue');
   await heading('How your platform will look');
   click('Skip');
-  await heading('Data Setup');
+  await heading('Data setup');
   click('Skip - set up later');
-  await heading("You're All Set!");
+  await heading("You're all set");
 }
 
 async function startWorking() {
-  click(/Start Working/);
+  click(/Start working/);
   await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
 }
 
@@ -229,10 +229,10 @@ describe('the onboarding wizard, first screen to the app', () => {
 
     await heading('Welcome to OpenConstructionERP');
     expect(stepLabel()).toBe('Step 1 of 7');
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
     expect(stepLabel()).toBe('Step 2 of 7');
-    click(/Choose Your Profile/);
+    click(/Choose your profile/);
     await heading('What does your company do?');
     expect(stepLabel()).toBe('Step 3 of 7');
 
@@ -245,7 +245,7 @@ describe('the onboarding wizard, first screen to the app', () => {
     fireEvent.click(card);
     click('Continue');
 
-    await heading('Your Modules');
+    await heading('Review your modules');
     expect(stepLabel()).toBe('Step 4 of 7');
     expect(screen.getByText(new RegExp(`^${expected} / ${ALL_MODULES.length}`))).toBeTruthy();
     expect(moduleSwitch('contracts').getAttribute('aria-checked')).toBe('true');
@@ -255,11 +255,11 @@ describe('the onboarding wizard, first screen to the app', () => {
     await heading('How your platform will look');
     expect(stepLabel()).toBe('Step 5 of 7');
     click('Skip');
-    await heading('Data Setup');
+    await heading('Data setup');
     expect(stepLabel()).toBe('Step 6 of 7');
     click('Skip - set up later');
 
-    await heading("You're All Set!");
+    await heading("You're all set");
     expect(stepLabel()).toBe('Step 7 of 7');
     expect(summaryProfile()).toBe(`General Contractor · ${expected} modules`);
     // Nothing is saved before the last click.
@@ -296,7 +296,7 @@ describe('the onboarding wizard, first screen to the app', () => {
     renderWizard();
     const welcome = await heading('Welcome to OpenConstructionERP');
     expect(document.activeElement).not.toBe(welcome);
-    click(/Get Started/);
+    click(/Get started/);
     const start = await heading('How would you like to start?');
     await waitFor(() => expect(document.activeElement).toBe(start));
     click('Back');
@@ -309,15 +309,15 @@ describe('the onboarding wizard, first screen to the app', () => {
     await toProfileStep();
     fireEvent.click(screen.getByTestId('profile-card-subcontractor'));
     click('Continue');
-    await heading('Your Modules');
+    await heading('Review your modules');
     await fromModulesToSummary();
 
     click('Back');
-    await heading('Data Setup');
+    await heading('Data setup');
     click('Back');
     await heading('How your platform will look');
     click('Back');
-    await heading('Your Modules');
+    await heading('Review your modules');
     expect(moduleSwitch('payroll').getAttribute('aria-checked')).toBe('true');
     click('Back');
     await heading('What does your company do?');
@@ -328,14 +328,14 @@ describe('the onboarding wizard, first screen to the app', () => {
     await heading('Welcome to OpenConstructionERP');
 
     // And forward again to the end, where the pick made at the start is saved.
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
     // The wizard remembers that profiles were chosen over packages.
-    click(/Choose Your Profile/);
+    click(/Choose your profile/);
     await heading('What does your company do?');
     expect(screen.getByTestId('profile-card-subcontractor').getAttribute('aria-pressed')).toBe('true');
     click('Continue');
-    await heading('Your Modules');
+    await heading('Review your modules');
     await fromModulesToSummary();
     await startWorking();
     expect(onboardingPost().company_type).toBe('subcontractor');
@@ -347,7 +347,7 @@ describe('the onboarding wizard, first screen to the app', () => {
     click(/Or pick by your role/);
     fireEvent.click(screen.getByTestId('profile-card-scheduler_planner'));
     click('Continue');
-    await heading('Your Modules');
+    await heading('Review your modules');
     await fromModulesToSummary();
     expect(summaryProfile()).toContain('Planner / Scheduler');
     await startWorking();
@@ -364,11 +364,11 @@ describe('the ways out of the wizard', () => {
     await heading('Welcome to OpenConstructionERP');
     // Not offered on the first screen, where there is nothing to skip past.
     expect(screen.queryByRole('button', { name: 'Skip setup' })).toBeNull();
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
     click('Skip setup');
 
-    await heading("You're All Set!");
+    await heading("You're all set");
     expect(screen.queryByRole('button', { name: 'Skip setup' })).toBeNull();
     await startWorking();
 
@@ -404,19 +404,19 @@ describe('the ways out of the wizard', () => {
   it('Quick Start skips the profile and module steps, Back returns to the start', async () => {
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
-    click(/Quick Start/);
+    click(/Quick start/);
 
-    await heading('Data Setup');
+    await heading('Data setup');
     expect(stepLabel()).toBe('Step 6 of 7');
     click('Back');
     await heading('How would you like to start?');
 
-    click(/Quick Start/);
-    await heading('Data Setup');
+    click(/Quick start/);
+    await heading('Data setup');
     click('Skip - set up later');
-    await heading("You're All Set!");
+    await heading("You're all set");
     // The summary names the profile that is about to be saved, although none
     // was picked on the way here.
     expect(summaryProfile()).toContain('Full Enterprise');
@@ -461,7 +461,7 @@ describe('module choices the user makes by hand survive Finish', () => {
     renderWizard();
     await toProfileStep();
     click('Configure individually');
-    await heading('Your Modules');
+    await heading('Review your modules');
     // Nothing was picked, so everything starts on.
     expect(screen.getByText(new RegExp(`^${ALL_MODULES.length} / ${ALL_MODULES.length}`))).toBeTruthy();
 
@@ -488,7 +488,7 @@ describe('module choices the user makes by hand survive Finish', () => {
     await toProfileStep();
     fireEvent.click(screen.getByTestId('profile-card-full_enterprise'));
     click('Continue');
-    await heading('Your Modules');
+    await heading('Review your modules');
     fireEvent.click(moduleSwitch('crm'));
 
     await fromModulesToSummary();
@@ -505,7 +505,7 @@ describe('module choices the user makes by hand survive Finish', () => {
     await toProfileStep();
     fireEvent.click(screen.getByTestId('profile-card-general_contractor'));
     click('Continue');
-    await heading('Your Modules');
+    await heading('Review your modules');
     fireEvent.click(moduleSwitch('payroll'));
 
     await fromModulesToSummary();
@@ -528,13 +528,13 @@ describe('the ready-made pack is offered to those who can install it', () => {
   it('an editor sees no Ready-made Pack card and no pack installer', async () => {
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
-    expect(screen.getByRole('button', { name: /Quick Start/ })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /Ready-made Pack/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Quick start/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Ready-made pack/ })).toBeNull();
 
-    click(/Quick Start/);
-    await heading('Data Setup');
+    click(/Quick start/);
+    await heading('Data setup');
     expect(askedForPacks()).toBe(false);
   });
 
@@ -542,12 +542,12 @@ describe('the ready-made pack is offered to those who can install it', () => {
     useAuthStore.setState({ userRole: 'admin' });
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
-    expect(screen.getByRole('button', { name: /Ready-made Pack/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Ready-made pack/ })).toBeTruthy();
 
-    click(/Quick Start/);
-    await heading('Data Setup');
+    click(/Quick start/);
+    await heading('Data setup');
     await waitFor(() => expect(askedForPacks()).toBe(true));
   });
 });
@@ -598,10 +598,10 @@ describe('loading a cost base by hand on the data step', () => {
     try {
       renderWizard();
       await heading('Welcome to OpenConstructionERP');
-      click(/Get Started/);
+      click(/Get started/);
       await heading('How would you like to start?');
-      click(/Quick Start/);
-      await heading('Data Setup');
+      click(/Quick start/);
+      await heading('Data setup');
       // Named after the base it loads, here the one the UI language suggests.
       click(/^Load (?!Database)/);
 
@@ -658,10 +658,10 @@ describe('installing a country pack on the data step', () => {
 
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
-    click(/Get Started/);
+    click(/Get started/);
     await heading('How would you like to start?');
-    click(/Quick Start/);
-    await heading('Data Setup');
+    click(/Quick start/);
+    await heading('Data setup');
     click(/^Install .* pack$/);
 
     const demoPosts = () => api.apiPost.mock.calls.filter(([p]) => String(p).startsWith('/demo/install/'));

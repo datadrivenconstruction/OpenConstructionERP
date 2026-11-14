@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { apiPut } from '@/shared/lib/api';
 import {
@@ -27,6 +27,7 @@ import { useBrandingStore } from '@/stores/useBrandingStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { BrandDraftSection, type BrandDraft } from './BrandDraft';
+import { StepHeader, StepNav } from './StepChrome';
 
 const RADIUS_PX: Record<Appearance['radius'], number> = { sharp: 2, standard: 6, round: 12 };
 
@@ -328,14 +329,12 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-content-primary">
-        {t('onboarding.look_title', { defaultValue: 'How your platform will look' })}
-      </h2>
-      <p className="mt-1 text-sm text-content-secondary">
-        {t('onboarding.look_subtitle', {
+      <StepHeader
+        title={t('onboarding.look_title', { defaultValue: 'How your platform will look' })}
+        subtitle={t('onboarding.look_subtitle', {
           defaultValue: 'Pick a style and a menu. The preview shows the result before anything is applied. This step is optional.',
         })}
-      </p>
+      />
 
       <div className="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
         <div className="min-w-0 space-y-5">
@@ -438,10 +437,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
         )}
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} className="rtl:rotate-180" />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
+      <StepNav onBack={onBack}>
         <Button variant="secondary" onClick={onNext} disabled={saving}>
           {t('onboarding.look_skip', { defaultValue: 'Skip' })}
         </Button>
@@ -454,7 +450,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
         >
           {t('onboarding.look_apply', { defaultValue: 'Apply' })}
         </Button>
-      </div>
+      </StepNav>
     </div>
   );
 }

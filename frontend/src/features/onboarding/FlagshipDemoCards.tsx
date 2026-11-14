@@ -48,7 +48,7 @@ export function FlagshipDemoCards({ country }: { country: string | null }) {
   return (
     <section
       data-testid="flagship-demos"
-      className="rounded-2xl bg-surface-elevated p-6 shadow-sm shadow-black/[0.04]"
+      className="rounded-xl border border-border-light bg-surface-elevated p-5"
     >
       <h3 className="oe-card-title">
         {t('onboarding.flagship_title', { defaultValue: 'Start from a ready-made project' })}
