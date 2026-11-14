@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 from app.modules.einvoice.bank import (
     InvalidBankDetail,
@@ -29,6 +29,9 @@ _COUNTRY = re.compile(r"^[A-Z]{2}$")
 # formats differ too much to check further without a table per country, and a
 # table that is wrong refuses a valid registration.
 _VAT_ID = re.compile(r"^[A-Z]{2}[A-Z0-9 .\-]{2,18}$")
+# Some national registrations carry no country prefix (a 15-digit KSA VAT number,
+# for one); they are accepted when the seller's country is stated separately.
+_BARE_VAT_ID = re.compile(r"^[0-9][A-Z0-9]{7,19}$")
 # ISO 6523 scheme identifier for BT-34, e.g. 0204 for the German Leitweg-ID.
 _EAS_SCHEME = re.compile(r"^[0-9]{4}$")
 
@@ -90,14 +93,16 @@ class EInvoiceSettingsUpdate(_StoredFields):
     @field_validator("seller_vat_id")
     @classmethod
     def _check_vat_id(cls, v: str) -> str:
-        if not v:
-            return ""
-        vat = v.strip().upper()
-        if not _VAT_ID.match(vat):
-            raise ValueError(
-                f"a VAT identifier starts with the two-letter country code and its registration, got {v!r}"
-            )
-        return vat
+        return v.strip().upper() if v else ""
+
+    @model_validator(mode="after")
+    def _check_vat_id_shape(self) -> EInvoiceSettingsUpdate:
+        vat = self.seller_vat_id
+        if not vat or _VAT_ID.match(vat):
+            return self
+        if self.seller_country_code and _BARE_VAT_ID.match(vat):
+            return self
+        raise ValueError(f"a VAT identifier starts with the two-letter country code and its registration, got {vat!r}")
 
     @field_validator("payee_iban")
     @classmethod
