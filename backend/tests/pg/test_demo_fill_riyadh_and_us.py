@@ -63,6 +63,22 @@ async def test_riyadh_gets_a_zatca_document_and_a_withholding_register(pg_sessio
     assert await seed_tax_withholding_demo(pg_session, [pid]) == {}
 
 
+async def test_riyadh_seeds_the_einvoice_settings_from_its_showcase_invoice(pg_session) -> None:
+    from app.modules.finance.einvoice_settings_seed import seed_einvoice_settings_demo
+    from app.modules.finance.einvoice_settings_service import get_settings
+
+    pid = await _install(pg_session, "full-showcase-riyadh")
+    seller = DEMO_TEMPLATES["full-showcase-riyadh"].einvoice_showcase["einvoice"]["seller"]
+
+    assert await seed_einvoice_settings_demo(pg_session, [pid]) == {"einvoice_settings": 1}
+    row = await get_settings(pg_session)
+    assert row.seller_name == seller["name"]
+    assert row.seller_vat_id == seller["vat_id"]
+    assert row.seller_country_code == "SA"
+    # Re-running fills nothing.
+    assert await seed_einvoice_settings_demo(pg_session, [pid]) == {}
+
+
 @pytest.mark.parametrize("demo_id", ["full-showcase-riyadh", "medical-us"])
 async def test_schedule_history_is_written_and_indices_are_credible(pg_session, demo_id: str) -> None:
     pid = await _install(pg_session, demo_id)

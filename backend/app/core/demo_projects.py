@@ -90,6 +90,29 @@ def _demo_anchor(now: datetime | None = None) -> datetime:
     return datetime(idx // 12, idx % 12 + 1, 1)
 
 
+def _anchored_schedule_spans(
+    activities: list[tuple[str, str, str]],
+    anchor: datetime,
+) -> list[tuple[str, datetime, datetime]]:
+    """Hand-written programme dates, moved forward so none start before the project start.
+
+    The dates a template declares are literal calendar days, while the rest of
+    the demo (invoices, progress, actuals) hangs off the rolling anchor. A
+    programme that begins before the anchor would show its first phases
+    finished ahead of the project's own start, so such a programme is shifted
+    as a block, which keeps every gap and duration. One that already starts on
+    or after the anchor is left exactly as written.
+    """
+    spans = [(name, datetime.strptime(s, "%Y-%m-%d"), datetime.strptime(e, "%Y-%m-%d")) for name, s, e in activities]
+    if not spans:
+        return spans
+    earliest = min(s for _n, s, _e in spans)
+    if earliest >= anchor:
+        return spans
+    shift = anchor - earliest
+    return [(n, s + shift, e + shift) for n, s, e in spans]
+
+
 def _id() -> uuid.UUID:
     return uuid.uuid4()
 
@@ -13150,9 +13173,9 @@ async def install_demo_project(
     if template.schedule_activities:
         # Explicit schedule activities defined in template
         prev_id = None
-        for i, (act_name, act_start, act_end) in enumerate(template.schedule_activities):
-            s_start = datetime.strptime(act_start, "%Y-%m-%d")
-            s_end = datetime.strptime(act_end, "%Y-%m-%d")
+        for i, (act_name, s_start, s_end) in enumerate(_anchored_schedule_spans(template.schedule_activities, start)):
+            act_start = s_start.strftime("%Y-%m-%d")
+            act_end = s_end.strftime("%Y-%m-%d")
             dur = (s_end - s_start).days
             # Read off the phase's own dates, the same way the generated branch
             # below does. Computing it from the row index instead put every
