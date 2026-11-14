@@ -3755,6 +3755,9 @@ _SUPPLIED_PLANT_KEYWORDS = (
     "mammograph",
 )
 
+# The shielding of a machine's room is building work in any language the demo packs are written in.
+_SHIELDING_WORDS = ("shield", "plomb", "blindage", "abschirm", "strahlenschutz", "bleiverkleidung")
+
 
 def _enrich_position_metadata(
     description: str,
@@ -5420,7 +5423,7 @@ def _enrich_position_metadata(
             ],
             currency=currency,
         )
-    elif any(k in desc_lower for k in _SUPPLIED_PLANT_KEYWORDS) and "shield" not in desc_lower:
+    elif any(k in desc_lower for k in _SUPPLIED_PLANT_KEYWORDS) and not any(w in desc_lower for w in _SHIELDING_WORDS):
         # Equipment bought in and installed by its maker: a scanner or a
         # prefabricated theatre is priced in millions per piece, almost all of
         # it the machine. The generic split read 45 % of an MRI scanner as
@@ -10722,7 +10725,8 @@ async def _seed_module_data(
     try:
         budget_list = _BUDGETS.get(demo_id)
         if budget_list:
-            budget_list = _tie_budget_lines(budget_list, _template_total(template))
+            # A template that states its approved budget owns that figure; only the others follow the bill.
+            budget_list = _tie_budget_lines(budget_list, template.planned_budget or _template_total(template))
         else:
             budget_list = generated.get("finance_budgets", [])
         # ProjectBudget.currency_code carries no DB default - the model

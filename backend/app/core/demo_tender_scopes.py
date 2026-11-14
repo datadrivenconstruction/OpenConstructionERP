@@ -442,6 +442,11 @@ _WORDS: dict[str, tuple[str, ...]] = {
     "fitout": (
         "fit-out",
         "fitout",
+        "salles propres",
+        "equipements medicaux",
+        "équipements medicaux",
+        "équipements médicaux",
+        "blindage",
         "fit out",
         "innenausbau",
         "ausbau",

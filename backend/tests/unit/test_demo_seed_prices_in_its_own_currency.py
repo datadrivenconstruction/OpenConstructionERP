@@ -50,8 +50,8 @@ def _recipe_total(currency: str) -> float:
 
 
 def _module_rows(currency: str) -> dict[str, float]:
-    """Run the real generator on one template and return its resource rates."""
-    template = replace(DEMO_TEMPLATES["residential-berlin"], currency=currency)
+    """Run the real generator on one template and return its resource rates, named in English."""
+    template = replace(DEMO_TEMPLATES["residential-berlin"], currency=currency, locale="en")
     generated = _generate_module_data(
         template,
         uuid.UUID("00000000-0000-0000-0000-0000000000aa"),
