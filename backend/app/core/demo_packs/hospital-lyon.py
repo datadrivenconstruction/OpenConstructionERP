@@ -91,12 +91,12 @@ TEMPLATE = DemoTemplate(
         # ── 01 Terrassement et Fondations (Earthworks & Foundations) ─────
         (
             "01",
-            "Terrassement et Fondations (Earthworks & Foundations)",
+            "Terrassement et Fondations",
             {"dpgf": "01"},
             [
                 (
                     "01.1",
-                    "Installation de chantier hopital en site contraint (Site setup)",
+                    "Installation de chantier hopital en site contraint",
                     "lsum",
                     1,
                     685000.00,
@@ -104,26 +104,26 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "01.2",
-                    "Démolition existant et desamiantage (Démolition/asbestos removal)",
+                    "Démolition existant et desamiantage",
                     "lsum",
                     1,
                     420000.00,
                     {"dpgf": "01"},
                 ),
-                ("01.3", "Terrassement general en deblai (Mass excavation)", "m3", 62000, 18.50, {"dpgf": "01"}),
+                ("01.3", "Terrassement general en deblai", "m3", 62000, 18.50, {"dpgf": "01"}),
                 (
                     "01.4",
-                    "Paroi moulee soutenement sous-sol (Diaphragm wall shoring)",
+                    "Paroi moulee soutenement sous-sol",
                     "m2",
                     4800,
                     295.00,
                     {"dpgf": "01"},
                 ),
-                ("01.5", "Pieux fores béton armé d=800mm (Bored RC piles)", "m", 5400, 165.00, {"dpgf": "01"}),
-                ("01.6", "Rabattement de nappe phreatique (Dewatering)", "lsum", 1, 245000.00, {"dpgf": "01"}),
+                ("01.5", "Pieux fores béton armé d=800mm", "m", 5400, 165.00, {"dpgf": "01"}),
+                ("01.6", "Rabattement de nappe phreatique", "lsum", 1, 245000.00, {"dpgf": "01"}),
                 (
                     "01.7",
-                    "Radier general béton armé C30/37 ep. 700mm (Mat foundation)",
+                    "Radier general béton armé C30/37 ep. 700mm",
                     "m3",
                     4350,
                     285.00,
@@ -131,16 +131,16 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "01.8",
-                    "Semelles, massifs et longrines béton armé (Footings/pile caps)",
+                    "Semelles, massifs et longrines béton armé",
                     "m3",
                     1850,
                     295.00,
                     {"dpgf": "01"},
                 ),
-                ("01.9", "Étanchéité cuvelage sous-sol type C (Basement tanking)", "m2", 9800, 52.00, {"dpgf": "01"}),
+                ("01.9", "Étanchéité cuvelage sous-sol type C", "m2", 9800, 52.00, {"dpgf": "01"}),
                 (
                     "01.10",
-                    "Remblaiement, compactage et évacuation des terres (Backfill/soil disposal)",
+                    "Remblaiement, compactage et évacuation des terres",
                     "m3",
                     48000,
                     24.00,
@@ -151,32 +151,32 @@ TEMPLATE = DemoTemplate(
         # ── 02 Gros Oeuvre / Structure Beton (Concrete Superstructure) ───
         (
             "02",
-            "Gros Oeuvre / Structure Béton (Concrete Superstructure)",
+            "Gros Oeuvre / Structure Béton",
             {"dpgf": "02"},
             [
                 (
                     "02.1",
-                    "Voiles béton armé C35/45 contreventement (RC shear walls)",
+                    "Voiles béton armé C35/45 contreventement",
                     "m3",
                     8600,
                     345.00,
                     {"dpgf": "02"},
                 ),
-                ("02.2", "Poteaux béton armé C40/50 (RC columns)", "m3", 2400, 425.00, {"dpgf": "02"}),
-                ("02.3", "Planchers-dalles béton armé C30/37 (RC flat slabs)", "m3", 11200, 295.00, {"dpgf": "02"}),
+                ("02.2", "Poteaux béton armé C40/50", "m3", 2400, 425.00, {"dpgf": "02"}),
+                ("02.3", "Planchers-dalles béton armé C30/37", "m3", 11200, 295.00, {"dpgf": "02"}),
                 (
                     "02.4",
-                    "Planchers techniques interstitiels surcharges (Interstitial floors)",
+                    "Planchers techniques interstitiels surcharges",
                     "m3",
                     1850,
                     320.00,
                     {"dpgf": "02"},
                 ),
-                ("02.5", "Noyaux ascenseurs et escaliers C40/50 (Core walls)", "m3", 3200, 410.00, {"dpgf": "02"}),
-                ("02.6", "Poutres et longrines béton armé (RC beams/ground beams)", "m3", 2100, 350.00, {"dpgf": "02"}),
+                ("02.5", "Noyaux ascenseurs et escaliers C40/50", "m3", 3200, 410.00, {"dpgf": "02"}),
+                ("02.6", "Poutres et longrines béton armé", "m3", 2100, 350.00, {"dpgf": "02"}),
                 (
                     "02.7",
-                    "Coffrage voiles, noyaux et planchers (Wall/core/slab formwork)",
+                    "Coffrage voiles, noyaux et planchers",
                     "m2",
                     132000,
                     54.00,
@@ -184,7 +184,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "02.8",
-                    "Armatures HA Fe E500 faconnees posees (Reinforcement placed)",
+                    "Armatures HA Fe E500 faconnees posees",
                     "t",
                     6400,
                     1850.00,
@@ -192,7 +192,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "02.9",
-                    "Appuis et joints parasismiques Eurocode 8 (Seismic joints/bearings)",
+                    "Appuis et joints parasismiques Eurocode 8",
                     "m",
                     480,
                     285.00,
@@ -200,7 +200,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "02.10",
-                    "Maçonnerie agglomere béton et reservations techniques (Masonry/builders work)",
+                    "Maçonnerie agglomere béton et reservations techniques",
                     "m2",
                     7800,
                     115.00,
@@ -211,41 +211,41 @@ TEMPLATE = DemoTemplate(
         # ── 03 Charpente et Couverture (Roof Structure & Roofing) ────────
         (
             "03",
-            "Charpente et Couverture (Roof Structure & Roofing)",
+            "Charpente et Couverture",
             {"dpgf": "03"},
             [
                 (
                     "03.1",
-                    "Charpente métallique heliport et plant rooms (Steel roof framing)",
+                    "Charpente métallique heliport et plant rooms",
                     "t",
                     285,
                     4600.00,
                     {"dpgf": "03"},
                 ),
-                ("03.2", "Bac acier support de couverture (Steel roof deck)", "m2", 6800, 42.00, {"dpgf": "03"}),
-                ("03.3", "Pare-vapeur toiture (Roof vapour barrier)", "m2", 6800, 8.50, {"dpgf": "03"}),
-                ("03.4", "Isolation thermique toiture PIR 200mm (Roof insulation)", "m2", 6800, 56.00, {"dpgf": "03"}),
+                ("03.2", "Bac acier support de couverture", "m2", 6800, 42.00, {"dpgf": "03"}),
+                ("03.3", "Pare-vapeur toiture", "m2", 6800, 8.50, {"dpgf": "03"}),
+                ("03.4", "Isolation thermique toiture PIR 200mm", "m2", 6800, 56.00, {"dpgf": "03"}),
                 (
                     "03.5",
-                    "Étanchéité membrane bi-couche autoprotegee (Bituminous roofing)",
+                    "Étanchéité membrane bi-couche autoprotegee",
                     "m2",
                     6800,
                     62.00,
                     {"dpgf": "03"},
                 ),
-                ("03.6", "Toiture vegetalisee extensive (Extensive green roof)", "m2", 1400, 105.00, {"dpgf": "03"}),
+                ("03.6", "Toiture vegetalisee extensive", "m2", 1400, 105.00, {"dpgf": "03"}),
                 (
                     "03.7",
-                    "Heliport en toiture structure et balisage (Rooftop helipad)",
+                    "Heliport en toiture structure et balisage",
                     "lsum",
                     1,
                     685000.00,
                     {"dpgf": "03"},
                 ),
-                ("03.8", "Lanterneaux de desenfumage (Smoke vents/skylights)", "pcs", 36, 2850.00, {"dpgf": "03"}),
+                ("03.8", "Lanterneaux de desenfumage", "pcs", 36, 2850.00, {"dpgf": "03"}),
                 (
                     "03.9",
-                    "Releves, solins et évacuation eaux pluviales (Flashings/roof drainage)",
+                    "Releves, solins et évacuation eaux pluviales",
                     "m",
                     1850,
                     62.00,
@@ -256,12 +256,12 @@ TEMPLATE = DemoTemplate(
         # ── 04 Facades et Menuiseries Exterieures (Envelope) ─────────────
         (
             "04",
-            "Facades et Menuiseries Exterieures (Facade & External Joinery)",
+            "Facades et Menuiseries Exterieures",
             {"dpgf": "04"},
             [
                 (
                     "04.1",
-                    "Mur-rideau aluminium VEC double peau (Aluminium curtain wall)",
+                    "Mur-rideau aluminium VEC double peau",
                     "m2",
                     9200,
                     685.00,
@@ -269,7 +269,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "04.2",
-                    "Vetage isolation thermique exterieure (ETICS rendered facade)",
+                    "Vetage isolation thermique exterieure",
                     "m2",
                     7600,
                     165.00,
@@ -277,7 +277,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "04.3",
-                    "Bardage panneaux composites ventiles (Ventilated cladding)",
+                    "Bardage panneaux composites ventiles",
                     "m2",
                     4200,
                     245.00,
@@ -285,16 +285,16 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "04.4",
-                    "Menuiseries aluminium a rupture de pont thermique (Aluminium windows)",
+                    "Menuiseries aluminium a rupture de pont thermique",
                     "m2",
                     3800,
                     480.00,
                     {"dpgf": "04"},
                 ),
-                ("04.5", "Brise-soleil orientables (Solar shading louvres)", "m2", 2400, 215.00, {"dpgf": "04"}),
+                ("04.5", "Brise-soleil orientables", "m2", 2400, 215.00, {"dpgf": "04"}),
                 (
                     "04.6",
-                    "Portes d'entrée automatiques sas (Automatic entrance airlocks)",
+                    "Portes d'entrée automatiques sas",
                     "pcs",
                     8,
                     18500.00,
@@ -302,7 +302,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "04.7",
-                    "Membrane d'étanchéité a l'air et isolation laine minerale (Air-barrier/insulation)",
+                    "Membrane d'étanchéité a l'air et isolation laine minerale",
                     "m2",
                     21000,
                     56.00,
@@ -310,7 +310,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "04.8",
-                    "Habillage acrotere et couronnement (Parapet coping/cladding)",
+                    "Habillage acrotere et couronnement",
                     "m",
                     1850,
                     95.00,
@@ -321,21 +321,21 @@ TEMPLATE = DemoTemplate(
         # ── 05 Cloisonnement et Doublages (Partitions & Linings) ─────────
         (
             "05",
-            "Cloisonnement et Doublages (Partitions & Drylining)",
+            "Cloisonnement et Doublages",
             {"dpgf": "05"},
             [
                 (
                     "05.1",
-                    "Cloisons placo standard 98/48 (Standard partition walls)",
+                    "Cloisons placo standard 98/48",
                     "m2",
                     42000,
                     48.00,
                     {"dpgf": "05"},
                 ),
-                ("05.2", "Cloisons coupe-feu EI 60 chambres (Fire partition EI60)", "m2", 18500, 72.00, {"dpgf": "05"}),
+                ("05.2", "Cloisons coupe-feu EI 60 chambres", "m2", 18500, 72.00, {"dpgf": "05"}),
                 (
                     "05.3",
-                    "Cloisons acoustiques 60 dB locaux sensibles (Acoustic partition)",
+                    "Cloisons acoustiques 60 dB locaux sensibles",
                     "m2",
                     9800,
                     88.00,
@@ -343,7 +343,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "05.4",
-                    "Cloisons plombees salles d'imagerie (Lead-lined X-ray partition)",
+                    "Cloisons plombees salles d'imagerie",
                     "m2",
                     1850,
                     385.00,
@@ -351,7 +351,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "05.5",
-                    "Doublages thermo-acoustiques et habillage gaines (Wall linings/risers)",
+                    "Doublages thermo-acoustiques et habillage gaines",
                     "m2",
                     24000,
                     46.00,
@@ -359,7 +359,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "05.6",
-                    "Cloisons modulaires blocs operatoires (OR modular wall panels)",
+                    "Cloisons modulaires blocs operatoires",
                     "m2",
                     3200,
                     295.00,
@@ -367,7 +367,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "05.7",
-                    "Cloisons vitrées coupe-feu circulations (Glazed fire screens)",
+                    "Cloisons vitrées coupe-feu circulations",
                     "m2",
                     2800,
                     320.00,
@@ -375,7 +375,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "05.8",
-                    "Protection chocs angles et lisses (Wall protection/crash rails)",
+                    "Protection chocs angles et lisses",
                     "m",
                     8600,
                     32.00,
@@ -386,12 +386,12 @@ TEMPLATE = DemoTemplate(
         # ── 06 CVC - Chauffage Ventilation Climatisation (HVAC) ──────────
         (
             "06",
-            "CVC - Chauffage Ventilation Climatisation (HVAC)",
+            "CVC - Chauffage Ventilation Climatisation",
             {"dpgf": "06"},
             [
                 (
                     "06.1",
-                    "Centrales de traitement d'air double flux (AHU dual-flow)",
+                    "Centrales de traitement d'air double flux",
                     "pcs",
                     14,
                     165000.00,
@@ -399,7 +399,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.2",
-                    "CTA blocs operatoires haute efficacite filtration (OR clean-room AHU)",
+                    "CTA blocs operatoires haute efficacite filtration",
                     "pcs",
                     9,
                     245000.00,
@@ -407,7 +407,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.3",
-                    "Groupes froids a condensation a eau 800 kW (Water-cooled chillers)",
+                    "Groupes froids a condensation a eau 800 kW",
                     "pcs",
                     4,
                     285000.00,
@@ -415,7 +415,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.4",
-                    "Tours de refroidissement fermees (Closed-circuit cooling towers)",
+                    "Tours de refroidissement fermees",
                     "pcs",
                     4,
                     95000.00,
@@ -423,7 +423,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.5",
-                    "Chaufferie gaz a condensation et sous-station réseau de chaleur (Boilers/DH sub-station)",
+                    "Chaufferie gaz a condensation et sous-station réseau de chaleur",
                     "lsum",
                     1,
                     549000.00,
@@ -431,7 +431,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.6",
-                    "Réseau de gaines aerauliques tôle galvanisée (Galvanised ductwork)",
+                    "Réseau de gaines aerauliques tôle galvanisée",
                     "kg",
                     168000,
                     12.50,
@@ -439,7 +439,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.7",
-                    "Tuyauterie hydraulique acier calorifugee (Insulated hydronic piping)",
+                    "Tuyauterie hydraulique acier calorifugee",
                     "m",
                     9800,
                     95.00,
@@ -447,7 +447,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.8",
-                    "Plafonds filtrants flux laminaire bloc operatoire (Laminar-flow ceilings)",
+                    "Plafonds filtrants flux laminaire bloc operatoire",
                     "pcs",
                     9,
                     78000.00,
@@ -455,7 +455,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.9",
-                    "Caissons filtration HEPA H14 (HEPA H14 filter housings)",
+                    "Caissons filtration HEPA H14",
                     "pcs",
                     480,
                     1850.00,
@@ -463,16 +463,16 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "06.10",
-                    "Diffuseurs, grilles et clapets coupe-feu/coupe-fumée (Diffusers/dampers)",
+                    "Diffuseurs, grilles et clapets coupe-feu/coupe-fumée",
                     "pcs",
                     4200,
                     215.00,
                     {"dpgf": "06"},
                 ),
-                ("06.11", "GTB / régulation et supervision (BMS/DDC controls)", "lsum", 1, 1250000.00, {"dpgf": "06"}),
+                ("06.11", "GTB / régulation et supervision", "lsum", 1, 1250000.00, {"dpgf": "06"}),
                 (
                     "06.12",
-                    "Équilibrage aeraulique et mise en service (Commissioning/TAB)",
+                    "Équilibrage aeraulique et mise en service",
                     "lsum",
                     1,
                     285000.00,
@@ -483,12 +483,12 @@ TEMPLATE = DemoTemplate(
         # ── 07 Fluides Medicaux (Medical Gas Systems) ────────────────────
         (
             "07",
-            "Fluides Medicaux (Medical Gas Systems EN ISO 7396-1)",
+            "Fluides Medicaux",
             {"dpgf": "07"},
             [
                 (
                     "07.1",
-                    "Centrale oxygene liquide et secours (Liquid oxygen plant/backup)",
+                    "Centrale oxygene liquide et secours",
                     "lsum",
                     1,
                     385000.00,
@@ -496,7 +496,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.2",
-                    "Centrale air medical comprime redondante (Medical air plant)",
+                    "Centrale air medical comprime redondante",
                     "lsum",
                     1,
                     245000.00,
@@ -504,7 +504,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.3",
-                    "Centrale vide medical et SEGA (Medical vacuum/AGSS plant)",
+                    "Centrale vide medical et SEGA",
                     "lsum",
                     1,
                     215000.00,
@@ -512,7 +512,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.4",
-                    "Réseau cuivre fluides medicaux degraisse (Copper medical gas pipework)",
+                    "Réseau cuivre fluides medicaux degraisse",
                     "m",
                     12500,
                     78.00,
@@ -520,7 +520,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.5",
-                    "Prises murales fluides medicaux normalisées (Medical gas terminal units)",
+                    "Prises murales fluides medicaux normalisées",
                     "pcs",
                     2400,
                     185.00,
@@ -528,7 +528,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.6",
-                    "Bras et poutres techniques de soins (Medical pendants/booms)",
+                    "Bras et poutres techniques de soins",
                     "pcs",
                     96,
                     18500.00,
@@ -536,7 +536,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.7",
-                    "Coffrets de detente et de coupure de zone (Zone valve/pressure boxes)",
+                    "Coffrets de detente et de coupure de zone",
                     "pcs",
                     120,
                     2850.00,
@@ -544,7 +544,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.8",
-                    "Centrale de surveillance et alarmes fluides (Gas alarm/monitoring system)",
+                    "Centrale de surveillance et alarmes fluides",
                     "lsum",
                     1,
                     165000.00,
@@ -552,7 +552,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.9",
-                    "Distribution protoxyde d'azote et CO2 (N2O/CO2 distribution)",
+                    "Distribution protoxyde d'azote et CO2",
                     "m",
                     2800,
                     72.00,
@@ -560,7 +560,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "07.10",
-                    "Essais, certification et reception fluides (Testing/certification)",
+                    "Essais, certification et reception fluides",
                     "lsum",
                     1,
                     95000.00,
@@ -571,12 +571,12 @@ TEMPLATE = DemoTemplate(
         # ── 08 Plomberie et Sanitaire (Plumbing & Sanitary) ──────────────
         (
             "08",
-            "Plomberie et Sanitaire (Plumbing & Sanitary)",
+            "Plomberie et Sanitaire",
             {"dpgf": "08"},
             [
                 (
                     "08.1",
-                    "Réseau évacuation EU/EV fonte et PVC (Soil/waste drainage)",
+                    "Réseau évacuation EU/EV fonte et PVC",
                     "m",
                     8600,
                     72.00,
@@ -584,7 +584,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.2",
-                    "Réseau alimentation eau froide/chaude multicouche (Domestic water piping)",
+                    "Réseau alimentation eau froide/chaude multicouche",
                     "m",
                     11200,
                     58.00,
@@ -592,7 +592,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.3",
-                    "Traitement legionelle et bouclage ECS (Legionella control/DHW loop)",
+                    "Traitement legionelle et bouclage ECS",
                     "lsum",
                     1,
                     245000.00,
@@ -600,7 +600,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.4",
-                    "Production ECS solaire thermique + ballons (Solar DHW + tanks)",
+                    "Production ECS solaire thermique + ballons",
                     "lsum",
                     1,
                     185000.00,
@@ -608,7 +608,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.5",
-                    "Appareils sanitaires hospitaliers complets (Sanitary fixtures hospital)",
+                    "Appareils sanitaires hospitaliers complets",
                     "pcs",
                     1850,
                     1250.00,
@@ -616,7 +616,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.6",
-                    "Robinetterie electronique et hygiene (Touch-free/hygiene taps)",
+                    "Robinetterie electronique et hygiene",
                     "pcs",
                     1450,
                     385.00,
@@ -624,7 +624,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.7",
-                    "Vidoirs et appareils de service (Sluice/clinical sinks)",
+                    "Vidoirs et appareils de service",
                     "pcs",
                     220,
                     1850.00,
@@ -632,7 +632,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "08.8",
-                    "Neutralisation effluents laboratoires (Lab effluent neutralisation)",
+                    "Neutralisation effluents laboratoires",
                     "lsum",
                     1,
                     145000.00,
@@ -643,12 +643,12 @@ TEMPLATE = DemoTemplate(
         # ── 09 Electricite CFO/CFA et Securite (Electrical / IT / Safety) ─
         (
             "09",
-            "Électricité CFO/CFA et Sécurité (Electrical, IT & Life Safety)",
+            "Électricité CFO/CFA et Sécurité",
             {"dpgf": "09"},
             [
                 (
                     "09.1",
-                    "Poste de livraison HTA et transformateurs (HV intake/transformers)",
+                    "Poste de livraison HTA et transformateurs",
                     "lsum",
                     1,
                     685000.00,
@@ -656,16 +656,16 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.2",
-                    "Groupes electrogenes 2000 kVA redondants (Standby generators 2000kVA)",
+                    "Groupes electrogenes 2000 kVA redondants",
                     "pcs",
                     3,
                     385000.00,
                     {"dpgf": "09"},
                 ),
-                ("09.3", "Onduleurs ASI medicaux 15 min (Medical UPS systems)", "pcs", 12, 65000.00, {"dpgf": "09"}),
+                ("09.3", "Onduleurs ASI medicaux 15 min", "pcs", 12, 65000.00, {"dpgf": "09"}),
                 (
                     "09.4",
-                    "Transformateurs d'isolement medical IT (Medical IT isolation transformers)",
+                    "Transformateurs d'isolement medical IT",
                     "pcs",
                     120,
                     4200.00,
@@ -673,7 +673,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.5",
-                    "TGBT et tableaux divisionnaires (Main/sub distribution boards)",
+                    "TGBT et tableaux divisionnaires",
                     "pcs",
                     85,
                     8500.00,
@@ -681,7 +681,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.6",
-                    "Chemins de câbles, câblage force et liaisons equipotentielles (Wiring/earthing)",
+                    "Chemins de câbles, câblage force et liaisons equipotentielles",
                     "m",
                     185000,
                     10.80,
@@ -689,7 +689,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.7",
-                    "Luminaires LED dont salles de soins (LED luminaires incl. clinical)",
+                    "Luminaires LED dont salles de soins",
                     "pcs",
                     14500,
                     165.00,
@@ -697,25 +697,25 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.8",
-                    "Éclairage operatoire scialytique (Surgical operating lights)",
+                    "Éclairage operatoire scialytique",
                     "pcs",
                     18,
                     28500.00,
                     {"dpgf": "09"},
                 ),
-                ("09.9", "Éclairage de sécurité BAES (Emergency/exit lighting)", "pcs", 2200, 145.00, {"dpgf": "09"}),
+                ("09.9", "Éclairage de sécurité BAES", "pcs", 2200, 145.00, {"dpgf": "09"}),
                 (
                     "09.10",
-                    "SSI catégorie A type U et desenfumage (Fire detection/smoke control)",
+                    "SSI catégorie A type U et desenfumage",
                     "lsum",
                     1,
                     1070000.00,
                     {"dpgf": "09"},
                 ),
-                ("09.11", "Câblage VDI catégorie 6A (Structured cabling cat.6A)", "m", 145000, 4.80, {"dpgf": "09"}),
+                ("09.11", "Câblage VDI catégorie 6A", "m", 145000, 4.80, {"dpgf": "09"}),
                 (
                     "09.12",
-                    "Appel malade et signalisation chambres (Nurse-call system)",
+                    "Appel malade et signalisation chambres",
                     "pcs",
                     320,
                     2850.00,
@@ -723,7 +723,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "09.13",
-                    "Contrôle d'accès, videosurveillance et GTC sécurité (Access control/CCTV)",
+                    "Contrôle d'accès, videosurveillance et GTC sécurité",
                     "lsum",
                     1,
                     685000.00,
@@ -734,12 +734,12 @@ TEMPLATE = DemoTemplate(
         # ── 10 Equipements Medicaux et Locaux Techniques (Medical Fit-out) ─
         (
             "10",
-            "Équipements Medicaux et Locaux Techniques (Medical Rooms & Equipment)",
+            "Équipements Medicaux et Locaux Techniques",
             {"dpgf": "10"},
             [
                 (
                     "10.1",
-                    "Salles propres blocs operatoires ISO 5 (ISO 5 clean operating rooms)",
+                    "Salles propres blocs operatoires ISO 5",
                     "pcs",
                     9,
                     285000.00,
@@ -747,7 +747,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.2",
-                    "Protection plombee salle scanner (CT room lead shielding)",
+                    "Protection plombee salle scanner",
                     "lsum",
                     1,
                     165000.00,
@@ -755,7 +755,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.3",
-                    "Cage de Faraday et blindage IRM (MRI Faraday cage/RF shielding)",
+                    "Cage de Faraday et blindage IRM",
                     "lsum",
                     1,
                     385000.00,
@@ -763,7 +763,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.4",
-                    "Protection radiologique radiologie conventionnelle (X-ray room shielding)",
+                    "Protection radiologique radiologie conventionnelle",
                     "pcs",
                     6,
                     65000.00,
@@ -771,7 +771,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.5",
-                    "Portes plombees automatiques imagerie (Lead automatic doors)",
+                    "Portes plombees automatiques imagerie",
                     "pcs",
                     14,
                     18500.00,
@@ -779,7 +779,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.6",
-                    "Sterilisation centrale laveurs et autoclaves (CSSD washers/autoclaves)",
+                    "Sterilisation centrale laveurs et autoclaves",
                     "lsum",
                     1,
                     685000.00,
@@ -787,7 +787,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.7",
-                    "Chambres mortuaires et cellules refrigerees (Mortuary cold storage)",
+                    "Chambres mortuaires et cellules refrigerees",
                     "lsum",
                     1,
                     245000.00,
@@ -795,7 +795,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.8",
-                    "Chambres a flux d'air contrôle isolement (Isolation rooms ventilation)",
+                    "Chambres a flux d'air contrôle isolement",
                     "pcs",
                     24,
                     38500.00,
@@ -803,7 +803,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.9",
-                    "Tables d'operation et équipement de bloc (OR tables/equipment)",
+                    "Tables d'operation et équipement de bloc",
                     "pcs",
                     9,
                     95000.00,
@@ -811,7 +811,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.10",
-                    "Pneumatique de transport echantillons (Pneumatic tube system)",
+                    "Pneumatique de transport echantillons",
                     "lsum",
                     1,
                     385000.00,
@@ -819,7 +819,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "10.11",
-                    "Chambre froide pharmacie et stockage (Pharmacy cold rooms)",
+                    "Chambre froide pharmacie et stockage",
                     "pcs",
                     6,
                     28500.00,
@@ -830,12 +830,12 @@ TEMPLATE = DemoTemplate(
         # ── 11 Revetements et Finitions (Floor/Wall Finishes & Joinery) ──
         (
             "11",
-            "Revetements et Finitions (Finishes & Internal Joinery)",
+            "Revetements et Finitions",
             {"dpgf": "11"},
             [
                 (
                     "11.1",
-                    "Chape liquide anhydrite et sol PVC hospitalier soudé (Screed + welded vinyl)",
+                    "Chape liquide anhydrite et sol PVC hospitalier soudé",
                     "m2",
                     28500,
                     82.00,
@@ -843,7 +843,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.2",
-                    "Sol conducteur blocs operatoires (Conductive OR flooring)",
+                    "Sol conducteur blocs operatoires",
                     "m2",
                     2400,
                     95.00,
@@ -851,7 +851,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.3",
-                    "Carrelage gres cerame locaux humides (Porcelain tiling wet areas)",
+                    "Carrelage gres cerame locaux humides",
                     "m2",
                     6800,
                     88.00,
@@ -859,7 +859,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.4",
-                    "Revetement mural lessivable hygienique (Hygienic wall sheet)",
+                    "Revetement mural lessivable hygienique",
                     "m2",
                     18500,
                     62.00,
@@ -867,7 +867,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.5",
-                    "Faux plafonds demontables hydrofuges (Demountable ceilings)",
+                    "Faux plafonds demontables hydrofuges",
                     "m2",
                     24000,
                     52.00,
@@ -875,25 +875,25 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.6",
-                    "Faux plafonds coupe-feu et étanches bloc (Sealed/fire ceilings OR)",
+                    "Faux plafonds coupe-feu et étanches bloc",
                     "m2",
                     4200,
                     145.00,
                     {"dpgf": "11"},
                 ),
-                ("11.7", "Peinture acrylique lessivable (Washable acrylic paint)", "m2", 96000, 12.50, {"dpgf": "11"}),
+                ("11.7", "Peinture acrylique lessivable", "m2", 96000, 12.50, {"dpgf": "11"}),
                 (
                     "11.8",
-                    "Menuiseries intérieures portes hospitalieres (Hospital door sets)",
+                    "Menuiseries intérieures portes hospitalieres",
                     "pcs",
                     2400,
                     1250.00,
                     {"dpgf": "11"},
                 ),
-                ("11.9", "Portes coupe-feu EI 60/EI 30 (Fire doors EI60/EI30)", "pcs", 980, 1850.00, {"dpgf": "11"}),
+                ("11.9", "Portes coupe-feu EI 60/EI 30", "pcs", 980, 1850.00, {"dpgf": "11"}),
                 (
                     "11.10",
-                    "Signaletique directionnelle et reglementaire (Wayfinding signage)",
+                    "Signaletique directionnelle et reglementaire",
                     "lsum",
                     1,
                     285000.00,
@@ -901,7 +901,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "11.11",
-                    "Ascenseurs lits 2500 kg et monte-charges (Bed lifts/goods lifts)",
+                    "Ascenseurs lits 2500 kg et monte-charges",
                     "pcs",
                     16,
                     185000.00,
@@ -912,12 +912,12 @@ TEMPLATE = DemoTemplate(
         # ── 12 VRD et Amenagements Exterieurs (External Works & Landscape) ─
         (
             "12",
-            "VRD et Amenagements Exterieurs (External Works & Landscape)",
+            "VRD et Amenagements Exterieurs",
             {"dpgf": "12"},
             [
                 (
                     "12.1",
-                    "Voirie lourde accès urgences et logistique (Heavy-duty roads)",
+                    "Voirie lourde accès urgences et logistique",
                     "m2",
                     9800,
                     78.00,
@@ -925,7 +925,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.2",
-                    "Parvis et cheminements pietons béton desactive (Plaza/footpaths)",
+                    "Parvis et cheminements pietons béton desactive",
                     "m2",
                     6200,
                     95.00,
@@ -933,7 +933,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.3",
-                    "Réseaux humides EU/EP/AEP exterieurs (External wet utilities)",
+                    "Réseaux humides EU/EP/AEP exterieurs",
                     "m",
                     3400,
                     165.00,
@@ -941,7 +941,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.4",
-                    "Bassin de rétention et régulation pluviale (Stormwater rétention basin)",
+                    "Bassin de rétention et régulation pluviale",
                     "lsum",
                     1,
                     385000.00,
@@ -949,7 +949,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.5",
-                    "Réseaux secs et raccordements concessionnaires (Dry utilities/connections)",
+                    "Réseaux secs et raccordements concessionnaires",
                     "m",
                     2800,
                     95.00,
@@ -957,7 +957,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.6",
-                    "Helistation au sol balisage et clotures (Ground helipad/markings)",
+                    "Helistation au sol balisage et clotures",
                     "lsum",
                     1,
                     245000.00,
@@ -965,7 +965,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.7",
-                    "Espaces verts therapeutiques et plantations (Therapeutic gardens)",
+                    "Espaces verts therapeutiques et plantations",
                     "m2",
                     8500,
                     48.00,
@@ -973,7 +973,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.8",
-                    "Stationnement et bornes de recharge VE (Parking/EV chargers)",
+                    "Stationnement et bornes de recharge VE",
                     "lsum",
                     1,
                     685000.00,
@@ -981,7 +981,7 @@ TEMPLATE = DemoTemplate(
                 ),
                 (
                     "12.9",
-                    "Éclairage extérieur LED sur mats et cloture site (External lighting/fencing)",
+                    "Éclairage extérieur LED sur mats et cloture site",
                     "pcs",
                     145,
                     2200.00,
@@ -994,7 +994,7 @@ TEMPLATE = DemoTemplate(
     # demo and a new French bill are priced the same way.
     markups=_french_markups(),
     total_months=32,
-    tender_name="Lot Gros Oeuvre (Structural/Foundations)",
+    tender_name="Lot Gros Oeuvre",
     tender_companies=[
         ("Maurenne Bâtiment Sud-Est", "appels@maurenne.example", 0.98),
         ("Ferlac Construction Rhone-Alpes", "marches@ferlac.example", 1.05),
@@ -1041,7 +1041,7 @@ TEMPLATE = DemoTemplate(
     },
     tender_packages=[
         (
-            "Gros Oeuvre (Structural/Foundations)",
+            "Gros Oeuvre",
             "Terrassement, fondations profondes, béton armé parasismique, maçonnerie",
             "evaluating",
             [
@@ -1051,7 +1051,7 @@ TEMPLATE = DemoTemplate(
             ],
         ),
         (
-            "Enveloppe / Couverture (Facade & Roofing)",
+            "Enveloppe / Couverture",
             "Mur-rideau, ITE, bardage, menuiseries exterieures, étanchéité, heliport",
             "evaluating",
             [
@@ -1061,17 +1061,17 @@ TEMPLATE = DemoTemplate(
             ],
         ),
         (
-            "CVC et Fluides Medicaux (HVAC & Medical Gas)",
+            "CVC et Fluides Medicaux",
             "Centrales de traitement d'air, salles propres, fluides medicaux EN ISO 7396-1, GTB",
             "evaluating",
             [
                 ("Navelis Solutions", "appels@navelis.example", 0.99),
                 ("Oxyverne Medical Systems", "marches@oxyverne.example", 1.06),
-                ("Calorine (Groupe Enerlys)", "offres@calorine.example", 1.03),
+                ("Calorine", "offres@calorine.example", 1.03),
             ],
         ),
         (
-            "Électricité CFO/CFA et Sécurité (Electrical & Life Safety)",
+            "Électricité CFO/CFA et Sécurité",
             "Poste HTA, groupes electrogenes, IT medical, SSI, desenfumage, appel malade, VDI",
             "evaluating",
             [
@@ -1081,7 +1081,7 @@ TEMPLATE = DemoTemplate(
             ],
         ),
         (
-            "Équipements Medicaux et Salles Propres (Medical Fit-out)",
+            "Équipements Medicaux et Salles Propres",
             "Blocs operatoires ISO 5, blindage imagerie, sterilisation, isolement",
             "evaluating",
             [
@@ -1091,7 +1091,7 @@ TEMPLATE = DemoTemplate(
             ],
         ),
         (
-            "Second Oeuvre et Finitions (Interior Finishes & Joinery)",
+            "Second Oeuvre et Finitions",
             "Cloisons, doublages, revetements, faux plafonds, menuiseries, ascenseurs",
             "evaluating",
             [
@@ -1101,7 +1101,7 @@ TEMPLATE = DemoTemplate(
             ],
         ),
         (
-            "VRD et Amenagements Exterieurs (External Works)",
+            "VRD et Amenagements Exterieurs",
             "Voirie, réseaux humides et secs, bassin de rétention, espaces verts, helistation",
             "evaluating",
             [

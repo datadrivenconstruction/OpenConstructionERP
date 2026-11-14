@@ -78,6 +78,7 @@ from app.modules.construction_control.repository import (
     TestResultRepository,
 )
 from app.modules.construction_control.schemas import HandoverPackageCreate
+from app.modules.construction_control.seed_text import control_text, package_text
 
 logger = logging.getLogger(__name__)
 
@@ -1053,6 +1054,7 @@ async def _seed_work_package(
     elements: Sequence[tuple],
     attest_records: bool,
     counts: dict[str, int],
+    locale: str | None = None,
 ) -> None:
     """Write every control record one work package produces, cross-linked."""
     criteria = CriterionRepository(session)
@@ -1107,9 +1109,8 @@ async def _seed_work_package(
         inspection.status = _INSPECTION_STATUS_BY_RESULT["fail"]
         inspection.result = "fail"
         inspection.measured_value = spec.breach_value
-        inspection.result_notes = (
-            f"Measured {spec.breach_value} {spec.unit} against {spec.code}. "
-            "Work rejected; rework instructed and a re-inspection booked."
+        inspection.result_notes = control_text(
+            locale, "failed_notes", value=spec.breach_value, unit=spec.unit, code=spec.code
         )
         inspection.scheduled_at = _iso(anchor + timedelta(days=1, hours=9))
         inspection.performed_at = _iso(anchor + timedelta(days=1, hours=11))
@@ -1128,17 +1129,30 @@ async def _seed_work_package(
     counts["inspections"] += 1
 
     if outcome == _FAILED_INSPECTION:
+        local_location, local_title, local_criterion, _ = package_text(
+            locale,
+            package.key,
+            location=package.location,
+            inspection_title=package.inspection_title,
+            criterion_title=spec.title,
+            lab_title="",
+        )
         ncr_id = await _raise_ncr(
             session,
             project_id=project_id,
-            title=f"Failed inspection {inspection.inspection_number}: {package.inspection_title}",
-            description=(
-                f"Raised from inspection {inspection.inspection_number} ({package.inspection_type}). "
-                f"{inspection.result_notes} Judged against criterion {spec.code} ({spec.title}), "
-                f"standard {spec.standard_ref}."
+            title=control_text(locale, "failed_inspection", number=inspection.inspection_number, title=local_title),
+            description=control_text(
+                locale,
+                "from_inspection",
+                number=inspection.inspection_number,
+                kind=package.inspection_type,
+                notes=inspection.result_notes,
+                code=spec.code,
+                title=local_criterion,
+                standard=spec.standard_ref,
             ),
             ncr_type="material" if package.inspection_type == "mir" else "workmanship",
-            location=package.location,
+            location=local_location,
             user_id=inspector,
             linked_inspection_id=str(inspection.id),
         )
@@ -1265,17 +1279,31 @@ async def _seed_work_package(
         test = await tests.create(test)
         counts["tests"] += 1
         if result == "fail":
+            local_location, _, local_criterion, local_lab = package_text(
+                locale,
+                package.key,
+                location=package.location,
+                inspection_title=package.inspection_title,
+                criterion_title=spec.title,
+                lab_title=lab.title,
+            )
             ncr_id = await _raise_ncr(
                 session,
                 project_id=project_id,
-                title=f"Out-of-specification test result {test.result_number}: {lab.title}",
-                description=(
-                    f"Raised from lab result {test.result_number}. Measured {measured} {spec.unit} "
-                    f"against criterion {spec.code} ({spec.title}), standard {spec.standard_ref}, "
-                    f"tested to {lab.test_method}."
+                title=control_text(locale, "failed_test", number=test.result_number, title=local_lab),
+                description=control_text(
+                    locale,
+                    "from_test",
+                    number=test.result_number,
+                    value=measured,
+                    unit=spec.unit,
+                    code=spec.code,
+                    title=local_criterion,
+                    standard=spec.standard_ref,
+                    method=lab.test_method,
                 ),
                 ncr_type="material",
-                location=package.location,
+                location=local_location,
                 user_id=inspector,
                 linked_inspection_id=None,
             )
@@ -1491,6 +1519,7 @@ async def _seed_project(
     project_id: uuid.UUID,
     owner_id: uuid.UUID,
     ordinal: int,
+    locale: str | None = None,
 ) -> dict[str, int]:
     """Seed one project's control register. Returns per-entity counts."""
     empty = {
@@ -1547,6 +1576,7 @@ async def _seed_project(
             elements=elements,
             attest_records=attest_records,
             counts=counts,
+            locale=locale,
         )
 
     await _seed_handover_packages(session, project_id, ordinal=ordinal, approver=approver, counts=counts)
@@ -1600,7 +1630,9 @@ async def seed_construction_control_demo(
     from app.modules.projects.models import Project
 
     rows = (
-        await session.execute(select(Project.id, Project.owner_id, Project.metadata_).where(Project.id.in_(ids)))
+        await session.execute(
+            select(Project.id, Project.owner_id, Project.metadata_, Project.locale).where(Project.id.in_(ids))
+        )
     ).all()
     # ``enrich_all`` hands this seeder every project in the database, which on a
     # real installation means a customer's own work. Only the demo estate is
@@ -1611,13 +1643,14 @@ async def seed_construction_control_demo(
     # baked fixture and carries only ``demo_id``, so a gate on ``is_demo`` skips
     # the one project users actually land on.
     demo = {
-        pid: owner for pid, owner, meta in rows if isinstance(meta, dict) and str(meta.get("demo_id") or "").strip()
+        pid: owner for pid, owner, meta, _ in rows if isinstance(meta, dict) and str(meta.get("demo_id") or "").strip()
     }
     # Numbered within the demo estate, not within the caller's list. The list is
     # every project in the database, so on an installation that also carries a
     # customer's own work the same demo project would otherwise land on a
     # different position - and a different sized register - than on a fresh one.
     demo_ids = [pid for pid in ids if pid in demo]
+    locales = {pid: locale for pid, _, _, locale in rows}
 
     for ordinal, project_id in enumerate(demo_ids):
         owner_id = demo[project_id]
@@ -1628,7 +1661,7 @@ async def seed_construction_control_demo(
             # every later project would then fail on a poisoned session rather
             # than on anything wrong with itself.
             async with session.begin_nested():
-                counts = await _seed_project(session, project_id, owner_id, ordinal)
+                counts = await _seed_project(session, project_id, owner_id, ordinal, locales.get(project_id))
         except Exception:
             logger.warning(
                 "Construction control demo seed skipped for project=%s (non-fatal)", project_id, exc_info=True
