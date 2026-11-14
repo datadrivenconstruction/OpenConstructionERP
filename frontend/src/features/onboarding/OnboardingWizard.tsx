@@ -8,7 +8,6 @@ import i18n, { type TFunction } from 'i18next';
 import clsx from 'clsx';
 import {
   ArrowRight,
-  ArrowLeft,
   Check,
   Sparkles,
   Eye,
@@ -73,6 +72,7 @@ import { FlagshipDemoCards } from './FlagshipDemoCards';
 import { StepSolutionPackages } from '@/features/solution_packages/StepSolutionPackages';
 import { ReadyPackBrowser } from './ReadyPackBrowser';
 import { OnboardingStepper, STEP, nextStep, previousStep, STEP_COUNT } from './OnboardingStepper';
+import { StepHeader, StepNav, choiceCard } from './StepChrome';
 import { foldText } from '@/features/modules/packs/packCatalog';
 import { useCompanyProfiles, type CompanyPresetAPI } from '@/features/modules/companyProfiles';
 import {
@@ -1264,25 +1264,21 @@ function StepWelcome({
         {t('onboarding.welcome_eyebrow', { defaultValue: 'Construction estimation, reimagined' })}
       </Badge>
 
-      <h1 className="text-2xl sm:text-3xl font-semibold text-content-primary tracking-tight">
-        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
-      </h1>
-
-      <p className="mt-2 max-w-md text-sm sm:text-base text-content-secondary leading-relaxed">
-        {t('onboarding.welcome_subtitle', {
+      <StepHeader
+        as="h1"
+        title={t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
+        subtitle={t('onboarding.welcome_subtitle', {
           defaultValue:
             'The professional construction cost estimation platform. Set up your workspace in a few simple steps.',
         })}
-      </p>
+      />
 
-      {/* Language grid — 24 languages, flag + native name. */}
-      <div className="mt-5 w-full">
-        <div className="mb-2 flex items-center justify-center gap-2 text-xs font-medium text-content-tertiary uppercase tracking-wider">
-          <span className="h-px w-8 bg-border-light" aria-hidden />
+      {/* Language grid: flag + native name. */}
+      <div className="mt-6 w-full">
+        <p className="oe-overline mb-2 text-center">
           {t('onboarding.welcome_pick_language', { defaultValue: 'Pick your language' })}
-          <span className="h-px w-8 bg-border-light" aria-hidden />
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
             const isSelected = selected === lang.code;
             return (
@@ -1292,16 +1288,13 @@ function StepWelcome({
                 aria-pressed={isSelected}
                 aria-busy={loadingLang === lang.code}
                 className={clsx(
-                  'relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-start',
-                  'backdrop-blur-md transition-all duration-normal ease-oe',
-                  isSelected
-                    ? 'bg-oe-blue-subtle/70 ring-2 ring-oe-blue/50 shadow-sm shadow-oe-blue/15'
-                    : 'bg-surface-elevated/50 ring-1 ring-white/50 dark:ring-white/10 shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/[0.06] active:scale-[0.98]',
+                  'relative flex items-center gap-2.5 px-3 py-2 text-start active:scale-[0.98]',
+                  choiceCard(isSelected),
                 )}
               >
-                <CountryFlag code={lang.country} size={24} className="shrink-0" />
+                <CountryFlag code={lang.country} size={20} className="shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-content-primary truncate">
+                  <div className="text-sm font-medium text-content-primary truncate">
                     {lang.name}
                   </div>
                   <div className="text-2xs text-content-tertiary uppercase tracking-wide">
@@ -1319,27 +1312,27 @@ function StepWelcome({
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={() => {
-          // BUG-LANG-AUTODETECT — record that the user explicitly committed
-          // to a language via the wizard. The auto-detect useEffect above
-          // checks this flag to distinguish "real choice" from "stale
-          // ``i18nextLng`` left over from a previous tester or demo
-          // session". Without this set, an English-Windows browser whose
-          // ``i18nextLng`` happens to read ``pl`` (because someone else
-          // demoed the build in Polish) would silently switch back to
-          // Polish on the next page load.
-          localStorage.setItem('oe_lang_explicit', '1');
-          onNext();
-        }}
-        icon={<ArrowRight size={20} />}
-        iconPosition="right"
-        className="mt-5"
-      >
-        {t('onboarding.get_started', { defaultValue: 'Get Started' })}
-      </Button>
+      <StepNav>
+        <Button
+          variant="primary"
+          onClick={() => {
+            // BUG-LANG-AUTODETECT — record that the user explicitly committed
+            // to a language via the wizard. The auto-detect useEffect above
+            // checks this flag to distinguish "real choice" from "stale
+            // ``i18nextLng`` left over from a previous tester or demo
+            // session". Without this set, an English-Windows browser whose
+            // ``i18nextLng`` happens to read ``pl`` (because someone else
+            // demoed the build in Polish) would silently switch back to
+            // Polish on the next page load.
+            localStorage.setItem('oe_lang_explicit', '1');
+            onNext();
+          }}
+          icon={<ArrowRight size={16} className="rtl:rotate-180" />}
+          iconPosition="right"
+        >
+          {t('onboarding.get_started', { defaultValue: 'Get started' })}
+        </Button>
+      </StepNav>
     </div>
   );
 }
@@ -1373,18 +1366,16 @@ function StepStartChoice({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-semibold text-content-primary">
-        {t('onboarding.start_choice_title', { defaultValue: 'How would you like to start?' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.start_choice_subtitle', {
+      <StepHeader
+        title={t('onboarding.start_choice_title', { defaultValue: 'How would you like to start?' })}
+        subtitle={t('onboarding.start_choice_subtitle', {
           defaultValue: 'Choose a quick setup or customize your experience.',
         })}
-      </p>
+      />
 
       <div
         className={clsx(
-          'mt-8 w-full grid grid-cols-1 gap-4',
+          'mt-6 w-full grid grid-cols-1 gap-3',
           canInstallPacks ? 'max-w-5xl sm:grid-cols-3' : 'max-w-3xl sm:grid-cols-2',
         )}
       >
@@ -1392,22 +1383,24 @@ function StepStartChoice({
         <button
           onClick={onQuickStart}
           className={clsx(
-            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-5 text-start',
             'bg-surface-elevated',
-            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
-            'transition-all duration-300 ease-oe active:scale-[0.98]',
+            'hover:border-oe-blue/40 hover:shadow-sm',
+            'transition-[border-color,box-shadow] duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <Badge variant="blue" size="sm" className="mb-4">
-            {t('onboarding.recommended', { defaultValue: 'Recommended' })}
-          </Badge>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
-            <Sparkles size={26} />
+          <div className="mb-4 flex w-full items-start justify-between gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-colors group-hover:bg-oe-blue group-hover:text-white">
+              <Sparkles size={20} />
+            </div>
+            <Badge variant="blue" size="sm">
+              {t('onboarding.recommended', { defaultValue: 'Recommended' })}
+            </Badge>
           </div>
-          <h3 className="text-xl font-semibold text-content-primary">
-            {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
+          <h3 className="text-lg font-semibold text-content-primary">
+            {t('onboarding.quick_start', { defaultValue: 'Quick start' })}
           </h3>
-          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+          <p className="mt-1.5 text-sm text-content-secondary leading-relaxed">
             {t('onboarding.quick_start_desc', {
               defaultValue: 'All essential modules pre-activated. Start working immediately.',
             })}
@@ -1422,22 +1415,24 @@ function StepStartChoice({
         <button
           onClick={onReadyPack}
           className={clsx(
-            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-5 text-start',
             'bg-surface-elevated',
-            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
-            'transition-all duration-300 ease-oe active:scale-[0.98]',
+            'hover:border-oe-blue/40 hover:shadow-sm',
+            'transition-[border-color,box-shadow] duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <Badge variant="blue" size="sm" className="mb-4">
-            {t('onboarding.turnkey', { defaultValue: 'Turnkey' })}
-          </Badge>
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
-            <Boxes size={26} />
+          <div className="mb-4 flex w-full items-start justify-between gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-colors group-hover:bg-oe-blue group-hover:text-white">
+              <Boxes size={20} />
+            </div>
+            <Badge variant="blue" size="sm">
+              {t('onboarding.turnkey', { defaultValue: 'Turnkey' })}
+            </Badge>
           </div>
-          <h3 className="text-xl font-semibold text-content-primary">
-            {t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })}
+          <h3 className="text-lg font-semibold text-content-primary">
+            {t('onboarding.ready_pack', { defaultValue: 'Ready-made pack' })}
           </h3>
-          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+          <p className="mt-1.5 text-sm text-content-secondary leading-relaxed">
             {t('onboarding.ready_pack_desc', {
               defaultValue:
                 'Pick a country starter pack. It installs the language, cost databases, modules and sample projects for you.',
@@ -1450,20 +1445,19 @@ function StepStartChoice({
         <button
           onClick={onChooseProfile}
           className={clsx(
-            'group relative flex flex-col items-start rounded-xl border border-border-light p-6 text-left min-h-[240px]',
+            'group relative flex flex-col items-start rounded-xl border border-border-light p-5 text-start',
             'bg-surface-elevated',
-            'hover:bg-oe-blue-subtle/30 hover:border-oe-blue/40 hover:shadow-sm',
-            'transition-all duration-300 ease-oe active:scale-[0.98]',
+            'hover:border-oe-blue/40 hover:shadow-sm',
+            'transition-[border-color,box-shadow] duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <div className="h-[22px] mb-4" aria-hidden />
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-4 transition-colors group-hover:bg-oe-blue group-hover:text-white">
-            <Settings2 size={26} />
+          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-colors group-hover:bg-oe-blue group-hover:text-white">
+            <Settings2 size={20} />
           </div>
-          <h3 className="text-xl font-semibold text-content-primary">
-            {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
+          <h3 className="text-lg font-semibold text-content-primary">
+            {t('onboarding.choose_profile', { defaultValue: 'Choose your profile' })}
           </h3>
-          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+          <p className="mt-1.5 text-sm text-content-secondary leading-relaxed">
             {t('onboarding.choose_profile_company_desc', {
               defaultValue: 'Tell us what your company does and review the modules it needs.',
             })}
@@ -1471,11 +1465,7 @@ function StepStartChoice({
         </button>
       </div>
 
-      <div className="mt-5">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-      </div>
+      <StepNav onBack={onBack} />
     </div>
   );
 }
@@ -1792,7 +1782,7 @@ export function ReadyPackPicker({
         onClick={() => handleInstallCountry(pack, withCompany)}
         title={label}
         data-testid={`ready-pack-preset-${pack.id}`}
-        className="group relative flex min-w-0 flex-col items-center gap-2 rounded-xl bg-surface-secondary/70 p-3 text-center ring-1 ring-transparent transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-secondary hover:shadow-sm"
+        className="group relative flex min-w-0 flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-elevated p-3 text-center transition-[border-color,box-shadow] duration-200 hover:border-oe-blue/40 hover:shadow-sm"
       >
         <CountryFlag code={pack.flagId} size={30} className="rounded-sm shadow-sm" />
         <span className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary">{label}</span>
@@ -1812,18 +1802,13 @@ export function ReadyPackPicker({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-4">
-        <Boxes size={24} />
-      </div>
-      <h2 className="text-2xl font-semibold text-content-primary">
-        {t('onboarding.ready_pack_title', { defaultValue: 'Pick a ready-made pack' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.ready_pack_subtitle', {
+      <StepHeader
+        title={t('onboarding.ready_pack_title', { defaultValue: 'Pick a ready-made pack' })}
+        subtitle={t('onboarding.ready_pack_subtitle', {
           defaultValue:
             'One click sets up the language, cost databases, modules and sample projects. You can change anything later.',
         })}
-      </p>
+      />
 
       {isLoading && (
         <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-content-tertiary">
@@ -1965,14 +1950,16 @@ export function ReadyPackPicker({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {presetsWithoutPack.map((pack) => renderPresetTile(pack, null))}
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-              {t('common.back', { defaultValue: 'Back' })}
-            </Button>
-            <Button variant="ghost" onClick={onFallback} icon={<ArrowRight size={16} />} iconPosition="right">
+          <StepNav onBack={onBack}>
+            <Button
+              variant="secondary"
+              onClick={onFallback}
+              icon={<ArrowRight size={16} className="rtl:rotate-180" />}
+              iconPosition="right"
+            >
               {t('onboarding.ready_pack_continue_steps', { defaultValue: 'Set up step by step' })}
             </Button>
-          </div>
+          </StepNav>
         </div>
       )}
 
@@ -2108,13 +2095,7 @@ export function ReadyPackPicker({
         </p>
       )}
 
-      {(packs.length > 0 || installing) && (
-        <div className="mt-5">
-          <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-            {t('common.back', { defaultValue: 'Back' })}
-          </Button>
-        </div>
-      )}
+      {(packs.length > 0 || installing) && <StepNav onBack={onBack} />}
     </div>
   );
 }
@@ -2169,7 +2150,7 @@ function ReadyPackProgressPanel({
   const runningStep = steps.find((s) => s.status === 'running');
 
   return (
-    <div className="mb-5 rounded-2xl border border-border-light/70 bg-surface-secondary/40 p-5 dark:border-white/10">
+    <div className="mb-5 rounded-xl border border-border-light bg-surface-secondary/40 p-4">
       {/* Big status headline + prominent percent. */}
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -2329,7 +2310,7 @@ function ProfileMark({
         'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300',
         thumb && 'overflow-hidden',
         selected
-          ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+          ? 'bg-oe-blue text-white'
           : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary',
       )}
     >
@@ -2376,11 +2357,8 @@ function ProfileCard({
       aria-pressed={selected}
       data-testid={`profile-card-${preset.key}`}
       className={clsx(
-        'group relative flex min-w-0 flex-col items-start rounded-2xl p-5 text-start',
-        'transition-all duration-300 ease-oe',
-        selected
-          ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
-          : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
+        'group relative flex min-w-0 flex-col items-start p-4 text-start active:scale-[0.99]',
+        choiceCard(selected),
       )}
     >
       <div className="mb-3 flex w-full items-center gap-2">
@@ -2478,15 +2456,13 @@ function StepCompanyProfile({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-center text-2xl font-semibold text-content-primary">
-        {t('onboarding.bizprofile_title', { defaultValue: 'What does your company do?' })}
-      </h2>
-      <p className="mt-2 max-w-lg text-center text-sm text-content-secondary">
-        {t('onboarding.bizprofile_subtitle', {
+      <StepHeader
+        title={t('onboarding.bizprofile_title', { defaultValue: 'What does your company do?' })}
+        subtitle={t('onboarding.bizprofile_subtitle', {
           defaultValue:
             'Pick the profile closest to your business. We switch on the modules it works with, and you review them on the next step.',
         })}
-      </p>
+      />
 
       {/* Businesses: three columns on desktop, two on tablet, one on mobile. */}
       <div
@@ -2515,11 +2491,8 @@ function StepCompanyProfile({
             aria-pressed={isSelected}
             data-testid={`profile-card-${everything.key}`}
             className={clsx(
-              'group relative mt-3 flex w-full max-w-2xl items-center gap-4 rounded-2xl p-5 text-start',
-              'transition-all duration-300 ease-oe',
-              isSelected
-                ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
-                : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
+              'group relative mt-3 flex w-full max-w-2xl items-center gap-4 p-4 text-start active:scale-[0.99]',
+              choiceCard(isSelected),
             )}
           >
             <ProfileMark presetKey={everything.key} icon={Icon} selected={isSelected} />
@@ -2601,7 +2574,7 @@ function StepCompanyProfile({
       {/* What the picked profile switches on, in module names. */}
       {selectedPreset && previewShown.length > 0 && (
         <div
-          className="mt-6 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-secondary/40 p-5 text-start"
+          className="mt-6 w-full max-w-3xl rounded-xl border border-border-light bg-surface-secondary/40 p-4 text-start"
           data-testid="profile-preview"
         >
           <div className="flex items-center gap-2">
@@ -2663,20 +2636,17 @@ function StepCompanyProfile({
         })}
       </p>
 
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
+      <StepNav onBack={onBack}>
         <Button
           variant="primary"
           onClick={onNext}
           disabled={!selectedType}
-          icon={<ArrowRight size={16} />}
+          icon={<ArrowRight size={16} className="rtl:rotate-180" />}
           iconPosition="right"
         >
           {t('common.continue', { defaultValue: 'Continue' })}
         </Button>
-      </div>
+      </StepNav>
     </div>
   );
 }
@@ -2745,23 +2715,17 @@ function StepModuleConfig({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Package size={24} className="text-oe-blue" />
-      </div>
-
-      <h2 className="text-2xl font-semibold text-content-primary">
-        {t('onboarding.modules_title', { defaultValue: 'Your Modules' })}
-      </h2>
       {/* Say what this step actually changes. These toggles set which entries
           appear in YOUR menu; installing and removing modules for the whole
           instance is Settings -> Modules, and conflating the two is what made
           a module look "off" here and still be running. */}
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.modules_subtitle_switch', {
+      <StepHeader
+        title={t('onboarding.modules_title', { defaultValue: 'Review your modules' })}
+        subtitle={t('onboarding.modules_subtitle_switch', {
           defaultValue:
             'We picked a set that matches your profile. It decides which modules are switched on for you - nothing is deleted, and you can change it any time in Settings.',
         })}
-      </p>
+      />
 
       <div className="mt-2 text-sm font-medium text-oe-blue">
         {enabledCount} / {totalCount}{' '}
@@ -2926,19 +2890,16 @@ function StepModuleConfig({
         )}
       </div>
 
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
+      <StepNav onBack={onBack}>
         <Button
           variant="primary"
           onClick={onNext}
-          icon={<ArrowRight size={16} />}
+          icon={<ArrowRight size={16} className="rtl:rotate-180" />}
           iconPosition="right"
         >
           {t('common.continue', { defaultValue: 'Continue' })}
         </Button>
-      </div>
+      </StepNav>
     </div>
   );
 }
@@ -3265,7 +3226,7 @@ function PartnerPackInstaller({
   const showChecklist = installing || installedSlug !== null || installFailed;
 
   return (
-    <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+    <div className="rounded-xl border border-border-light bg-surface-elevated p-5">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
           <Globe size={20} />
@@ -3588,7 +3549,7 @@ function CountryPackCard({
   const allDone = localeState === 'done' && dbState === 'done' && demoState === 'done';
 
   return (
-    <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+    <div className="rounded-xl border border-border-light bg-surface-elevated p-5">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary">
           <Globe size={20} />
@@ -4305,14 +4266,12 @@ export function StepDataSetup({
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-semibold text-content-primary">
-        {t('onboarding.data_setup_title', { defaultValue: 'Data Setup' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.data_setup_subtitle', {
+      <StepHeader
+        title={t('onboarding.data_setup_title', { defaultValue: 'Data setup' })}
+        subtitle={t('onboarding.data_setup_subtitle', {
           defaultValue: 'Optional setup steps. You can skip any or all of these.',
         })}
-      </p>
+      />
 
       <div className="mt-6 w-full max-w-2xl space-y-4">
         {/* Cost base first: pick the regional pricing base(s) you estimate
@@ -4320,7 +4279,7 @@ export function StepDataSetup({
             anything else; the ready-made country packs just below can set the
             same thing up in one click once the region is known. */}
         {/* Card 1: Cost Database - full width */}
-        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+        <div className="rounded-xl border border-border-light bg-surface-elevated p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
               <Database size={20} />
@@ -4444,7 +4403,7 @@ export function StepDataSetup({
 
         {/* Advanced: optional demo project and AI provider. The cost-base
             picker used to live here; it now leads the step above. */}
-        <details className="group rounded-2xl bg-surface-elevated/60 shadow-sm shadow-black/[0.04]">
+        <details className="group rounded-xl border border-border-light bg-surface-elevated">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-medium text-content-secondary hover:text-content-primary transition-colors">
             <span className="flex items-center gap-2">
               <Settings2 size={16} className="text-content-tertiary" />
@@ -4460,7 +4419,7 @@ export function StepDataSetup({
 
           <div className="space-y-4 p-4 pt-0">
         {/* Card 2: Demo Project - full width, simple toggle */}
-        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+        <div className="rounded-xl border border-border-light bg-surface-elevated p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
@@ -4508,7 +4467,7 @@ export function StepDataSetup({
         />
 
         {/* Card 3: AI Provider — collapsible */}
-        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04]">
+        <div className="rounded-xl border border-border-light bg-surface-elevated">
           <button
             type="button"
             onClick={() => setAiExpanded(!aiExpanded)}
@@ -4630,10 +4589,7 @@ export function StepDataSetup({
         })}
       </p>
 
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
+      <StepNav onBack={onBack}>
         <Button variant="secondary" onClick={onNext}>
           {t('onboarding.skip', { defaultValue: 'Skip - set up later' })}
         </Button>
@@ -4641,12 +4597,12 @@ export function StepDataSetup({
           variant="primary"
           onClick={handleContinue}
           loading={saveMutation.isPending || installingDemo || packInstalling}
-          icon={<ArrowRight size={16} />}
+          icon={<ArrowRight size={16} className="rtl:rotate-180" />}
           iconPosition="right"
         >
           {t('common.continue', { defaultValue: 'Continue' })}
         </Button>
-      </div>
+      </StepNav>
     </div>
   );
 }
@@ -4821,30 +4777,23 @@ export function StepFinish({
 
   return (
     <div className="flex flex-col items-center justify-center text-center">
-      {/* Confetti-like animation via pulsing rings */}
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-24 w-24 rounded-full bg-semantic-success/5 animate-ping" />
-        </div>
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-semantic-success-bg/60 ring-4 ring-semantic-success/10">
-          <Rocket size={32} className="text-semantic-success" />
-        </div>
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-semantic-success-bg ring-4 ring-semantic-success/10">
+        <Rocket size={28} className="text-semantic-success" />
       </div>
 
-      <h2 className="text-3xl font-semibold text-content-primary">
-        {t('onboarding.finish_title', { defaultValue: "You're All Set!" })}
-      </h2>
-
-      <p className="mt-3 max-w-md text-base text-content-secondary leading-relaxed">
-        {packInstalled
-          ? t('onboarding.finish_subtitle_pack', {
-              defaultValue:
-                'Your ready-made pack is installed. Language, cost databases, modules and sample projects are all set up.',
-            })
-          : t('onboarding.finish_subtitle', {
-              defaultValue: 'Your workspace is configured and ready to use.',
-            })}
-      </p>
+      <StepHeader
+        title={t('onboarding.finish_title', { defaultValue: "You're all set" })}
+        subtitle={
+          packInstalled
+            ? t('onboarding.finish_subtitle_pack', {
+                defaultValue:
+                  'Your ready-made pack is installed. Language, cost databases, modules and sample projects are all set up.',
+              })
+            : t('onboarding.finish_subtitle', {
+                defaultValue: 'Your workspace is configured and ready to use.',
+              })
+        }
+      />
 
       {workspace && (
         <p
@@ -4876,21 +4825,17 @@ export function StepFinish({
         />
       )}
 
-      <div className="mt-8 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
+      <StepNav onBack={onBack}>
         <Button
           variant="primary"
-          size="lg"
           onClick={handleFinish}
           loading={saving}
-          icon={<ArrowRight size={20} />}
+          icon={<ArrowRight size={16} className="rtl:rotate-180" />}
           iconPosition="right"
         >
-          {t('onboarding.start_working', { defaultValue: 'Start Working' })}
+          {t('onboarding.start_working', { defaultValue: 'Start working' })}
         </Button>
-      </div>
+      </StepNav>
 
       {installedPackSlug && !installedPackSlug.startsWith('country:') && (
         <PackModulesLeftOnNote slug={installedPackSlug} onLeave={markOnboardingCompleted} />
@@ -5248,7 +5193,7 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-surface-primary overflow-hidden">
+    <div className="relative flex min-h-screen flex-col bg-surface-primary overflow-x-clip">
       {/* ── Decorative background: soft mesh + subtle grid ──────────────
           Pure decoration, no interaction. Respects prefers-reduced-motion
           because the gradients are static: this block runs no keyframe
@@ -5294,8 +5239,8 @@ export function OnboardingWizard() {
 
       {/* ── Sticky glass header with progress + skip ────────────────── */}
       <div className="sticky top-0 z-10 bg-surface-primary/85 backdrop-blur-xl">
-        <div className="max-w-3xl mx-auto w-full px-6 sm:px-8 py-4">
-          <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="max-w-[960px] mx-auto w-full px-4 sm:px-6 lg:px-10 pt-4 pb-3">
+          <div className="flex items-center justify-between gap-3 mb-5">
             <div className="flex items-center gap-2 shrink-0">
               <Logo size="sm" />
               <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
@@ -5311,25 +5256,21 @@ export function OnboardingWizard() {
                 })}
               </span>
               {step > 0 && step < TOTAL_STEPS - 1 && (!packFlow || packReady) && (
-                <button
-                  type="button"
-                  onClick={() => setStep(TOTAL_STEPS - 1)}
-                  className="text-xs font-medium text-content-tertiary hover:text-content-secondary transition-colors"
-                >
+                <Button variant="ghost" size="sm" onClick={() => setStep(TOTAL_STEPS - 1)}>
                   {t('onboarding.skip_setup', { defaultValue: 'Skip setup' })}
-                </button>
+                </Button>
               )}
               {/* Persistent escape hatch on every step: open the app now in
                   English. A quiet secondary pill so it never competes with the
                   wizard's primary CTA. */}
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleSkipAll}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated/70 px-3 py-1 text-xs font-medium text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-surface-elevated hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                icon={<Globe size={14} strokeWidth={2} />}
               >
-                <Globe size={14} strokeWidth={2} />
                 {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
-              </button>
+              </Button>
             </div>
           </div>
           <OnboardingStepper
@@ -5343,9 +5284,9 @@ export function OnboardingWizard() {
           Tight vertical padding so a 6-step wizard fits without scroll
           on ~768-viewport laptops. Previously ``pt-10 pb-24`` + card
           ``py-8 sm:py-12`` added ~150px of shell chrome alone. */}
-      <div className="relative flex flex-1 items-start justify-center px-4 sm:px-6 pt-4 pb-8">
+      <div className="relative flex flex-1 items-start justify-center pt-2 pb-8">
         <div className="w-full max-w-[960px]">
-          <div ref={stepBodyRef} className="px-6 sm:px-10 py-6 sm:py-8">
+          <div ref={stepBodyRef} className="px-4 sm:px-6 lg:px-10 py-6">
             <StepTransition stepKey={step}>
               {step === 0 && (
                 <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
@@ -5394,7 +5335,7 @@ export function OnboardingWizard() {
                     <button
                       type="button"
                       onClick={() => setUsePackages(true)}
-                      className="text-sm font-semibold text-oe-blue"
+                      className="text-sm font-medium text-oe-blue hover:text-oe-blue-hover hover:underline"
                     >
                       {t('packages.use_packages', { defaultValue: 'Start from solution packages instead' })}
                     </button>

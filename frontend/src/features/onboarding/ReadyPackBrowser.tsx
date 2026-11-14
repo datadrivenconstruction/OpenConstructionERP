@@ -15,6 +15,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import { choiceCard } from './StepChrome';
 import { Briefcase, Check, Package, Search, SearchX, X } from 'lucide-react';
 import { detectCountry } from '@/app/i18n';
 import { packNameSlug } from '@/shared/lib/regionalPack';
@@ -178,10 +179,8 @@ export function ReadyPackBrowser({
         title={entry.name}
         data-testid={`ready-pack-tile-${entry.slug}`}
         className={clsx(
-          'group relative flex min-w-0 flex-col items-center gap-2 rounded-xl p-3 text-center transition-all duration-200',
-          selected
-            ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/45 shadow-sm'
-            : 'bg-surface-secondary/70 ring-1 ring-transparent hover:bg-surface-secondary hover:shadow-sm hover:-translate-y-0.5',
+          'group relative flex min-w-0 flex-col items-center gap-2 p-3 text-center',
+          choiceCard(selected),
           disabled && 'opacity-60 cursor-not-allowed',
         )}
       >
@@ -356,7 +355,7 @@ export function ReadyPackBrowser({
           <section
             aria-labelledby="ready-pack-company-title"
             data-testid="ready-pack-company-types"
-            className="rounded-2xl bg-surface-secondary/40 p-3 ring-1 ring-border-light sm:p-4"
+            className="rounded-xl border border-border-light bg-surface-secondary/40 p-3 sm:p-4"
           >
             <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
               <h3 id="ready-pack-company-title" className={headingClass}>
@@ -383,10 +382,8 @@ export function ReadyPackBrowser({
                     title={e.name}
                     data-testid={`ready-pack-company-${e.key}`}
                     className={clsx(
-                      'relative flex min-w-0 flex-col items-start gap-1.5 rounded-xl p-3 text-start transition-all duration-200',
-                      selected
-                        ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/45 shadow-sm'
-                        : 'bg-surface-primary ring-1 ring-border-light hover:shadow-sm hover:-translate-y-0.5',
+                      'relative flex min-w-0 flex-col items-start gap-1.5 p-3 text-start',
+                      choiceCard(selected),
                       disabled && 'opacity-60 cursor-not-allowed',
                     )}
                   >

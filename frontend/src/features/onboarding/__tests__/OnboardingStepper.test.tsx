@@ -176,9 +176,9 @@ const locked = (i) => step(i).getAttribute('aria-disabled') === 'true';
 
 async function startPackInstall() {
   await heading('Welcome to OpenConstructionERP');
-  fireEvent.click(screen.getByRole('button', { name: /Get Started/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Get started/ }));
   await heading('How would you like to start?');
-  fireEvent.click(screen.getByRole('button', { name: /Ready-made Pack/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Ready-made pack/ }));
   fireEvent.click(await screen.findByTestId('ready-pack-tile-germany-de'));
   fireEvent.click(screen.getByTestId('ready-pack-install'));
   await waitFor(() => expect(fullInstallPackStream).toHaveBeenCalledTimes(1));
@@ -197,7 +197,7 @@ describe('the stepper in the wizard', () => {
     fireEvent.click(step(3));
     expect(screen.getByRole('heading', { name: 'Welcome to OpenConstructionERP' })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: /Get Started/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Get started/ }));
     await heading('How would you like to start?');
     expect(step(1).getAttribute('aria-current')).toBe('step');
     expect(locked(0)).toBe(false);
@@ -254,7 +254,7 @@ describe('the stepper in the wizard', () => {
     await heading('How your platform will look');
     // Next after a pack skips Data and goes to Finish; Back returns to the look.
     fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
-    await heading("You're All Set!");
+    await heading("You're all set");
     expect(step(6).getAttribute('aria-current')).toBe('step');
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     await heading('How your platform will look');
@@ -267,7 +267,7 @@ describe('the stepper in the wizard', () => {
     languageReady();
     await waitFor(() => expect(screen.getByTestId('ready-pack-finish').disabled).toBe(false));
     fireEvent.click(screen.getByTestId('ready-pack-finish'));
-    await heading("You're All Set!");
+    await heading("You're all set");
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     await screen.findByTestId('ready-pack-confirm');
   });

@@ -102,7 +102,7 @@ export function SetupSummary({
       </h3>
       <ul
         data-testid="setup-summary"
-        className="divide-y divide-border-light overflow-hidden rounded-2xl border border-border-light bg-surface-elevated/70 shadow-sm"
+        className="divide-y divide-border-light overflow-hidden rounded-xl border border-border-light bg-surface-elevated"
       >
         <Row
           id="language"
@@ -117,7 +117,7 @@ export function SetupSummary({
           label={labels.profile}
           value={
             packInstalled
-              ? t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })
+              ? t('onboarding.ready_pack', { defaultValue: 'Ready-made pack' })
               : presetLabel
                 ? `${presetLabel} · ${modules}`
                 : modules

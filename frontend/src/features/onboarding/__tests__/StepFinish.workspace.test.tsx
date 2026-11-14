@@ -192,7 +192,7 @@ describe('finishing the wizard as a general contractor', () => {
     expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
     await waitFor(() => expect(onboardingReads()).toBe(1));
 
-    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
     expect(useViewModeStore.getState().mode).toBe('simple');
@@ -235,7 +235,7 @@ describe('finishing the wizard with a profile that has no workspace', () => {
     // above; a late answer would otherwise overwrite the saved profile.
     await waitFor(() => expect(onboardingReads()).toBe(1));
 
-    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
     await waitFor(() => expect(useViewModeStore.getState().mode).toBe('advanced'));
@@ -252,7 +252,7 @@ describe('finishing the wizard after picking a mode', () => {
     renderFinish('general_contractor');
     await waitFor(() => expect(onboardingReads()).toBe(1));
 
-    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
     expect(useViewModeStore.getState().mode).toBe('advanced');
@@ -309,7 +309,7 @@ describe('finishing the wizard after installing a ready-made pack', () => {
     packNames('mep_contractor');
     const client = renderPackFinish();
 
-    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/projects'));
     expect(onboardingPost()).toEqual({
@@ -328,7 +328,7 @@ describe('finishing the wizard after installing a ready-made pack', () => {
     packNames(null);
     renderPackFinish();
 
-    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Start working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/projects'));
     expect(api.apiPost.mock.calls.filter(([path]) => path === '/v1/users/me/onboarding/')).toEqual([]);

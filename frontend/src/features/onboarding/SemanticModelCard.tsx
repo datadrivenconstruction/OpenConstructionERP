@@ -83,7 +83,7 @@ export function SemanticModelCard({
   }, [onRetry]);
 
   return (
-    <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+    <div className="rounded-xl border border-border-light bg-surface-elevated p-5">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">

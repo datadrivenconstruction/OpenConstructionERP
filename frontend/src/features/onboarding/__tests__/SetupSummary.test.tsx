@@ -77,7 +77,7 @@ describe('<SetupSummary>', () => {
 
   it('after a ready-made pack, the profile row says so and goes back to the pack', () => {
     const { onEdit } = renderSummary({ packInstalled: true });
-    expect(row('profile').textContent).toContain('Ready-made Pack');
+    expect(row('profile').textContent).toContain('Ready-made pack');
     fireEvent.click(within(row('profile')).getByRole('button'));
     expect(onEdit).toHaveBeenCalledWith(STEP.start);
   });
