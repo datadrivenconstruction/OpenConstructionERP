@@ -17,6 +17,7 @@ import uuid
 from decimal import Decimal
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.accounting_sync.models import AccountingConnection, ExternalRef, SyncLogEntry
@@ -36,8 +37,16 @@ async def _connection(
         await svc.session.execute(select(AccountingConnection).where(AccountingConnection.name == name))
     ).scalar_one_or_none()
     if row is None:
-        row = await svc.create_connection({"name": name, **data, "project_ids": [project_id]}, created_by)
-    elif str(project_id) not in (row.project_ids or []):
+        try:
+            # Savepoint: a concurrent seeder winning the unique name must not poison the session.
+            async with svc.session.begin_nested():
+                row = await svc.create_connection({"name": name, **data, "project_ids": [project_id]}, created_by)
+            return row
+        except IntegrityError:
+            row = (
+                await svc.session.execute(select(AccountingConnection).where(AccountingConnection.name == name))
+            ).scalar_one()
+    if str(project_id) not in (row.project_ids or []):
         row.project_ids = [*(row.project_ids or []), str(project_id)]
     return row
 

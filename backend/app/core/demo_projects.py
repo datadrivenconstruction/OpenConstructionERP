@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
-from sqlalchemy import delete, func, or_, select
+from sqlalchemy import delete, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
@@ -12628,6 +12628,17 @@ async def _seed_requisitions(
     return created
 
 
+# Arbitrary constant key for the PostgreSQL advisory lock that serialises demo installs.
+_DEMO_INSTALL_LOCK_KEY = 726_104_113
+
+
+async def _lock_demo_installs(session: AsyncSession) -> None:
+    """Take a transaction-scoped advisory lock, released on commit or rollback (PostgreSQL only)."""
+    bind = session.get_bind()
+    if bind.dialect.name == "postgresql":
+        await session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _DEMO_INSTALL_LOCK_KEY})
+
+
 async def install_demo_project(
     session: AsyncSession,
     demo_id: str,
@@ -12672,6 +12683,10 @@ async def install_demo_project(
         return {"demo_id": demo_id, "retired": True, "already_installed": False}
 
     # ── 0. Duplicate check ────────────────────────────────────────────
+    # Serialise installs: the boot seed and an API call can run in separate
+    # sessions, and the loser's existence check cannot see the winner's
+    # uncommitted rows, so both inserted the same project and shared rows.
+    await _lock_demo_installs(session)
     existing_rows = (await session.execute(select(Project))).scalars().all()
     existing_demo = [
         p for p in existing_rows if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
