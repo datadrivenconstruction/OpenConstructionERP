@@ -77,6 +77,17 @@ def _total(qty: float, rate: float) -> str:
     return _money(qty * rate)
 
 
+def _demo_anchor(now: datetime | None = None) -> datetime:
+    """Project start the demo data hangs off: the first of the month, three months back.
+
+    Relative to today so a demo installed at any time shows a project that is
+    a few months in, with its invoices, progress and actuals up to date.
+    """
+    now = now or datetime.now()
+    idx = now.year * 12 + now.month - 1 - 3
+    return datetime(idx // 12, idx % 12 + 1, 1)
+
+
 def _id() -> uuid.UUID:
     return uuid.uuid4()
 
@@ -565,7 +576,7 @@ _BERLIN = DemoTemplate(
     },
     validation_rule_sets=["din276", "gaeb", "boq_quality"],
     boq_name="Kostenberechnung nach DIN 276",
-    boq_description="Detaillierte Kostenberechnung gem. DIN 276, alle Kostengruppen 300-540",
+    boq_description="Detaillierte Kostenberechnung gem. DIN 276, alle Kostengruppen 300-500",
     boq_metadata={
         "standard": "DIN 276:2018-12",
         "phase": "Kostenberechnung (LP 3)",
@@ -573,29 +584,29 @@ _BERLIN = DemoTemplate(
         "price_level": "Berlin 2026",
     },
     sections=[
-        # ── KG 300 Baugrube (Earthworks) ──────────────────────────────
+        # ── KG 310 Baugrube (Earthworks) ──────────────────────────────
         (
-            "300",
-            "KG 300 - Baugrube / Erdbau",
-            {"din276": "300"},
+            "310",
+            "KG 310 - Baugrube / Erdbau",
+            {"din276": "310"},
             [
-                ("300.1", "Spundwandverbau Larssen 603", "m2", 1400, 95.00, {"din276": "300"}),
-                ("300.2", "Grundwasserabsenkung / Wasserhaltung", "lsum", 1, 85000.00, {"din276": "300"}),
-                ("300.3", "Aushub Baugrube", "m3", 6500, 14.50, {"din276": "300"}),
-                ("300.4", "Bodenabtransport und Entsorgung", "m3", 5800, 22.00, {"din276": "300"}),
+                ("310.1", "Spundwandverbau Larssen 603", "m2", 1400, 95.00, {"din276": "310"}),
+                ("310.2", "Grundwasserabsenkung / Wasserhaltung", "lsum", 1, 85000.00, {"din276": "310"}),
+                ("310.3", "Aushub Baugrube", "m3", 6500, 14.50, {"din276": "310"}),
+                ("310.4", "Bodenabtransport und Entsorgung", "m3", 5800, 22.00, {"din276": "310"}),
                 (
-                    "300.5",
+                    "310.5",
                     "Baugrundgutachten / Baugrundsondierung",
                     "lsum",
                     1,
                     18000.00,
-                    {"din276": "300"},
+                    {"din276": "310"},
                 ),
-                ("300.6", "Verfüllung und Hinterfüllung", "m3", 1200, 16.50, {"din276": "300"}),
-                ("300.7", "Verdichtung Planum", "m2", 2800, 4.80, {"din276": "300"}),
-                ("300.8", "Böschungssicherung", "m2", 650, 38.00, {"din276": "300"}),
-                ("300.9", "Kampfmittelsondierung", "m2", 4200, 3.20, {"din276": "300"}),
-                ("300.10", "Baustraße Schottertragschicht", "m2", 800, 28.00, {"din276": "300"}),
+                ("310.6", "Verfüllung und Hinterfüllung", "m3", 1200, 16.50, {"din276": "310"}),
+                ("310.7", "Verdichtung Planum", "m2", 2800, 4.80, {"din276": "310"}),
+                ("310.8", "Böschungssicherung", "m2", 650, 38.00, {"din276": "310"}),
+                ("310.9", "Kampfmittelsondierung", "m2", 4200, 3.20, {"din276": "310"}),
+                ("310.10", "Baustraße Schottertragschicht", "m2", 800, 28.00, {"din276": "310"}),
             ],
         ),
         # ── KG 320 Gruendung (Foundation) ─────────────────────────────
@@ -849,7 +860,7 @@ _BERLIN = DemoTemplate(
         # ── KG 430 Lueftung (Ventilation) ────────────────────────────
         (
             "430",
-            "KG 430 - Lüftungsanlagen",
+            "KG 430 - Lufttechnische Anlagen",
             {"din276": "430"},
             [
                 ("430.1", "Wohnraumlüftung KWL mit WRG je WE", "pcs", 48, 3200.00, {"din276": "430"}),
@@ -881,7 +892,7 @@ _BERLIN = DemoTemplate(
         # ── KG 440 Elektro (Electrical) ──────────────────────────────
         (
             "440",
-            "KG 440 - Elektrotechnik",
+            "KG 440 - Elektrische Anlagen",
             {"din276": "440"},
             [
                 ("440.1", "Hauptverteilung NSHV 400A", "pcs", 1, 12500.00, {"din276": "440"}),
@@ -920,42 +931,42 @@ _BERLIN = DemoTemplate(
                 ("440.13", "Tiefgarage Beleuchtung LED", "m2", 1200, 28.00, {"din276": "440"}),
             ],
         ),
-        # ── KG 500 Aufzuege (Elevators) ──────────────────────────────
+        # ── KG 460 Aufzuege (Elevators) ──────────────────────────────
         (
-            "500",
-            "KG 500 - Aufzugsanlagen",
-            {"din276": "500"},
+            "460",
+            "KG 460 - Förderanlagen (Aufzüge)",
+            {"din276": "460"},
             [
-                ("500.1", "Personenaufzug 630kg / 8 Personen", "pcs", 3, 85000.00, {"din276": "500"}),
-                ("500.2", "Schachttüren Edelstahl", "pcs", 18, 1200.00, {"din276": "500"}),
-                ("500.3", "Maschinenraumausstattung", "pcs", 3, 4500.00, {"din276": "500"}),
-                ("500.4", "Aufzugssteuerung und Notruf", "pcs", 3, 6800.00, {"din276": "500"}),
+                ("460.1", "Personenaufzug 630kg / 8 Personen", "pcs", 3, 85000.00, {"din276": "460"}),
+                ("460.2", "Schachttüren Edelstahl", "pcs", 18, 1200.00, {"din276": "460"}),
+                ("460.3", "Maschinenraumausstattung", "pcs", 3, 4500.00, {"din276": "460"}),
+                ("460.4", "Aufzugssteuerung und Notruf", "pcs", 3, 6800.00, {"din276": "460"}),
             ],
         ),
-        # ── KG 540 Aussenanlagen (External Works) ────────────────────
+        # ── KG 500 Aussenanlagen (External Works) ────────────────────
         (
-            "540",
-            "KG 540 - Außenanlagen",
-            {"din276": "540"},
+            "500",
+            "KG 500 - Außenanlagen und Freiflächen",
+            {"din276": "500"},
             [
                 (
-                    "540.1",
+                    "500.1",
                     "Asphaltzufahrt und Stellplätze",
                     "m2",
                     1200,
                     48.00,
-                    {"din276": "540"},
+                    {"din276": "500"},
                 ),
-                ("540.2", "Betonpflaster Gehwege 200x100", "m2", 1600, 68.00, {"din276": "540"}),
-                ("540.3", "Bepflanzung und Rasen", "m2", 2400, 28.00, {"din276": "540"}),
-                ("540.4", "Kinderspielplatz EN 1176", "lsum", 1, 48000.00, {"din276": "540"}),
-                ("540.5", "Fahrradabstellanlage überdacht", "pcs", 96, 120.00, {"din276": "540"}),
-                ("540.6", "Müllstandplatz mit Einhausung", "pcs", 2, 9500.00, {"din276": "540"}),
-                ("540.7", "Außenbeleuchtung Pollerleuchten", "pcs", 45, 850.00, {"din276": "540"}),
-                ("540.8", "Grundstückseinfriedung Zaun", "m", 280, 95.00, {"din276": "540"}),
-                ("540.9", "Tiefgarage Zufahrtsrampe Beton", "m2", 180, 185.00, {"din276": "540"}),
-                ("540.10", "Briefkastenanlage Edelstahl", "pcs", 48, 95.00, {"din276": "540"}),
-                ("540.11", "Schmutzfangmatte Eingangsbereich", "m2", 24, 145.00, {"din276": "540"}),
+                ("500.2", "Betonpflaster Gehwege 200x100", "m2", 1600, 68.00, {"din276": "500"}),
+                ("500.3", "Bepflanzung und Rasen", "m2", 2400, 28.00, {"din276": "500"}),
+                ("500.4", "Kinderspielplatz EN 1176", "lsum", 1, 48000.00, {"din276": "500"}),
+                ("500.5", "Fahrradabstellanlage überdacht", "pcs", 96, 120.00, {"din276": "500"}),
+                ("500.6", "Müllstandplatz mit Einhausung", "pcs", 2, 9500.00, {"din276": "500"}),
+                ("500.7", "Außenbeleuchtung Pollerleuchten", "pcs", 45, 850.00, {"din276": "500"}),
+                ("500.8", "Grundstückseinfriedung Zaun", "m", 280, 95.00, {"din276": "500"}),
+                ("500.9", "Tiefgarage Zufahrtsrampe Beton", "m2", 180, 185.00, {"din276": "500"}),
+                ("500.10", "Briefkastenanlage Edelstahl", "pcs", 48, 95.00, {"din276": "500"}),
+                ("500.11", "Schmutzfangmatte Eingangsbereich", "m2", 24, 145.00, {"din276": "500"}),
             ],
         ),
     ],
@@ -1072,8 +1083,8 @@ _LONDON = DemoTemplate(
         "lng": -0.0195,
     },
     validation_rule_sets=["nrm", "boq_quality"],
-    boq_name="Cost Plan NRM 1 \u2014 Shell & Core",
-    boq_description="Elemental cost plan per NRM 1 (3rd Edition), shell & core only",
+    boq_name="Cost Plan NRM 1 \u2014 Shell, Core & Cat A",
+    boq_description="Elemental cost plan per NRM 1 (3rd Edition): shell and core, Cat A finishes, services, preliminaries and fees",
     boq_metadata={
         "standard": "NRM 1 (3rd Edition, 2021)",
         "phase": "RIBA Stage 3 Cost Plan",
@@ -1087,9 +1098,9 @@ _LONDON = DemoTemplate(
             "0 \u2014 Facilitating Works",
             {"nrm": "0"},
             [
-                ("0.1", "Site clearance", "m2", 3200, 15.00, {"nrm": "0.1"}),
-                ("0.2", "Demolition existing structures", "lsum", 1, 280000.00, {"nrm": "0.2"}),
-                ("0.3", "Ground investigation", "lsum", 1, 85000.00, {"nrm": "0.3"}),
+                ("0.1", "Site clearance", "m2", 3200, 15.00, {"nrm": "0"}),
+                ("0.2", "Demolition existing structures", "lsum", 1, 280000.00, {"nrm": "0"}),
+                ("0.3", "Ground investigation", "lsum", 1, 85000.00, {"nrm": "0"}),
             ],
         ),
         (
@@ -1097,105 +1108,163 @@ _LONDON = DemoTemplate(
             "1 \u2014 Substructure",
             {"nrm": "1"},
             [
-                ("1.1", "Piled foundations CFA 600mm", "m", 4800, 125.00, {"nrm": "1.1"}),
-                ("1.2", "Pile caps and ground beams", "m3", 1200, 320.00, {"nrm": "1.2"}),
-                ("1.3", "Basement slab 300mm RC", "m2", 2800, 185.00, {"nrm": "1.3"}),
-                ("1.4", "Basement walls 250mm RC", "m2", 2400, 195.00, {"nrm": "1.4"}),
-                ("1.5", "Waterproofing Type A cavity drain", "m2", 5200, 85.00, {"nrm": "1.5"}),
+                ("1.1", "Piled foundations CFA 600mm", "m", 4800, 125.00, {"nrm": "1"}),
+                ("1.2", "Pile caps and ground beams", "m3", 1200, 320.00, {"nrm": "1"}),
+                ("1.3", "Basement slab 300mm RC", "m2", 2800, 185.00, {"nrm": "1"}),
+                ("1.4", "Basement walls 250mm RC", "m2", 2400, 195.00, {"nrm": "1"}),
+                ("1.5", "Waterproofing Type A cavity drain", "m2", 5200, 85.00, {"nrm": "1"}),
             ],
         ),
         (
-            "2",
-            "2 \u2014 Superstructure \u2014 Frame",
-            {"nrm": "2"},
+            "2.1",
+            "2.1 \u2014 Superstructure \u2014 Frame",
+            {"nrm": "2.1"},
             [
-                ("2.1", "Steel frame columns", "t", 480, 3200.00, {"nrm": "2.1"}),
-                ("2.2", "Steel frame beams", "t", 720, 2950.00, {"nrm": "2.2"}),
-                ("2.3", "Connections and fixings", "t", 85, 4500.00, {"nrm": "2.3"}),
-                ("2.4", "Fire protection intumescent paint", "m2", 18000, 28.00, {"nrm": "2.4"}),
-                ("2.5", "Metal decking Comflor 60", "m2", 12800, 42.00, {"nrm": "2.5"}),
+                ("2.1.1", "Steel frame columns", "t", 480, 3200.00, {"nrm": "2.1"}),
+                ("2.1.2", "Steel frame beams", "t", 720, 2950.00, {"nrm": "2.1"}),
+                ("2.1.3", "Connections and fixings", "t", 85, 4500.00, {"nrm": "2.1"}),
+                ("2.1.4", "Fire protection intumescent paint", "m2", 18000, 28.00, {"nrm": "2.1"}),
+                ("2.1.5", "Metal decking Comflor 60", "m2", 12800, 42.00, {"nrm": "2.1"}),
+            ],
+        ),
+        (
+            "2.2",
+            "2.2 \u2014 Superstructure \u2014 Upper Floors",
+            {"nrm": "2.2"},
+            [
+                ("2.2.1", "Composite concrete slab 150mm", "m2", 12800, 68.00, {"nrm": "2.2"}),
+                ("2.2.2", "Raised access floor 150mm", "m2", 11200, 85.00, {"nrm": "2.2"}),
+                ("2.2.3", "Stair cores RC", "pcs", 4, 45000.00, {"nrm": "2.2"}),
+            ],
+        ),
+        (
+            "2.3",
+            "2.3 \u2014 Superstructure \u2014 Roof",
+            {"nrm": "2.3"},
+            [
+                ("2.3.1", "Roof waterproofing single ply", "m2", 1600, 95.00, {"nrm": "2.3"}),
+                ("2.3.2", "Insulation 200mm PIR", "m2", 1600, 48.00, {"nrm": "2.3"}),
+                ("2.3.3", "Plant deck structural", "m2", 400, 185.00, {"nrm": "2.3"}),
+                ("2.3.4", "Lightning protection", "lsum", 1, 35000.00, {"nrm": "2.3"}),
+            ],
+        ),
+        (
+            "2.5",
+            "2.5 \u2014 External Walls",
+            {"nrm": "2.5"},
+            [
+                ("2.5.1", "Curtain walling unitised", "m2", 8800, 650.00, {"nrm": "2.5"}),
+                ("2.5.2", "Feature entrance glazing", "m2", 480, 1200.00, {"nrm": "2.5"}),
+                ("2.5.3", "Louvres and ventilation panels", "m2", 320, 420.00, {"nrm": "2.5"}),
+                ("2.5.4", "External cladding ground floor", "m2", 600, 380.00, {"nrm": "2.5"}),
+            ],
+        ),
+        (
+            "2.6",
+            "2.6 \u2014 Windows and External Doors",
+            {"nrm": "2.6"},
+            [
+                ("2.6.1", "Opening vents and access doors, curtain wall", "pcs", 48, 1850.00, {"nrm": "2.6"}),
+                ("2.6.2", "Entrance doors revolving", "pcs", 2, 28000.00, {"nrm": "2.6"}),
+                ("2.6.3", "Fire escape doors", "pcs", 16, 2800.00, {"nrm": "2.6"}),
+                ("2.6.4", "Loading bay doors", "pcs", 4, 8500.00, {"nrm": "2.6"}),
+            ],
+        ),
+        (
+            "2.7",
+            "2.7 \u2014 Internal Walls and Partitions",
+            {"nrm": "2.7"},
+            [
+                ("2.7.1", "Drylining to cores", "m2", 4800, 65.00, {"nrm": "2.7"}),
+                ("2.7.2", "Toilet partitions", "m2", 1200, 145.00, {"nrm": "2.7"}),
+                ("2.7.3", "Core fire rated walls", "m2", 2400, 125.00, {"nrm": "2.7"}),
+            ],
+        ),
+        (
+            "2.8",
+            "2.8 \u2014 Internal Doors",
+            {"nrm": "2.8"},
+            [
+                ("2.8.1", "Fire-rated timber doorsets FD30", "pcs", 420, 1350.00, {"nrm": "2.8"}),
+                ("2.8.2", "Fire-rated doorsets FD60 to cores", "pcs", 96, 2100.00, {"nrm": "2.8"}),
+                ("2.8.3", "Ironmongery and door closers", "pcs", 516, 260.00, {"nrm": "2.8"}),
             ],
         ),
         (
             "3",
-            "3 \u2014 Superstructure \u2014 Upper Floors",
+            "3 \u2014 Internal Finishes",
             {"nrm": "3"},
             [
-                ("3.1", "Composite concrete slab 150mm", "m2", 12800, 68.00, {"nrm": "3.1"}),
-                ("3.2", "Raised access floor 150mm", "m2", 11200, 85.00, {"nrm": "3.2"}),
-                ("3.3", "Stair cores RC", "pcs", 4, 45000.00, {"nrm": "3.3"}),
+                ("3.1", "Wall finishes: paint to plaster and drylining", "m2", 38000, 14.50, {"nrm": "3"}),
+                ("3.2", "Floor finishes: tiling to cores and WCs", "m2", 2600, 110.00, {"nrm": "3"}),
+                ("3.3", "Floor finishes: carpet tiles to open floors", "m2", 11200, 38.00, {"nrm": "3"}),
+                ("3.4", "Floor finishes: natural stone to entrance lobby", "m2", 650, 420.00, {"nrm": "3"}),
+                ("3.5", "Ceilings: suspended metal tile", "m2", 12800, 62.00, {"nrm": "3"}),
+                ("3.6", "Ceilings: plasterboard to cores", "m2", 2400, 48.00, {"nrm": "3"}),
             ],
         ),
         (
             "4",
-            "4 \u2014 Superstructure \u2014 Roof",
+            "4 \u2014 Fittings, Furnishings and Equipment",
             {"nrm": "4"},
             [
-                ("4.1", "Roof waterproofing single ply", "m2", 1600, 95.00, {"nrm": "4.1"}),
-                ("4.2", "Insulation 200mm PIR", "m2", 1600, 48.00, {"nrm": "4.2"}),
-                ("4.3", "Plant deck structural", "m2", 400, 185.00, {"nrm": "4.3"}),
-                ("4.4", "Lightning protection", "lsum", 1, 35000.00, {"nrm": "4.4"}),
+                ("4.1", "Reception desk and feature joinery", "lsum", 1, 185000.00, {"nrm": "4"}),
+                ("4.2", "Signage and wayfinding", "lsum", 1, 95000.00, {"nrm": "4"}),
+                ("4.3", "Solar control blinds to facade", "m2", 8800, 45.00, {"nrm": "4"}),
+                ("4.4", "Cycle store and shower fit-out", "lsum", 1, 320000.00, {"nrm": "4"}),
+                ("4.5", "Building maintenance unit (window cleaning cradle)", "lsum", 1, 300000.00, {"nrm": "4"}),
             ],
         ),
         (
             "5",
-            "5 \u2014 External Walls",
+            "5 \u2014 Services (MEP)",
             {"nrm": "5"},
             [
-                ("5.1", "Curtain walling unitised", "m2", 8800, 650.00, {"nrm": "5.1"}),
-                ("5.2", "Feature entrance glazing", "m2", 480, 1200.00, {"nrm": "5.2"}),
-                ("5.3", "Louvres and ventilation panels", "m2", 320, 420.00, {"nrm": "5.3"}),
-                ("5.4", "External cladding ground floor", "m2", 600, 380.00, {"nrm": "5.4"}),
-            ],
-        ),
-        (
-            "6",
-            "6 \u2014 Windows and External Doors",
-            {"nrm": "6"},
-            [
-                ("6.1", "Windows (included within curtain wall)", "lsum", 0, 0.00, {"nrm": "6.1"}),
-                ("6.2", "Entrance doors revolving", "pcs", 2, 28000.00, {"nrm": "6.2"}),
-                ("6.3", "Fire escape doors", "pcs", 16, 2800.00, {"nrm": "6.3"}),
-                ("6.4", "Loading bay doors", "pcs", 4, 8500.00, {"nrm": "6.4"}),
-            ],
-        ),
-        (
-            "7",
-            "7 \u2014 Internal Walls and Partitions",
-            {"nrm": "7"},
-            [
-                ("7.1", "Drylining to cores", "m2", 4800, 65.00, {"nrm": "7.1"}),
-                ("7.2", "Toilet partitions", "m2", 1200, 145.00, {"nrm": "7.2"}),
-                ("7.3", "Core fire rated walls", "m2", 2400, 125.00, {"nrm": "7.3"}),
+                ("5.1", "Mechanical services allowance", "m2", 12800, 280.00, {"nrm": "5"}),
+                ("5.2", "Electrical services allowance", "m2", 12800, 220.00, {"nrm": "5"}),
+                ("5.3", "Lift installations 21-person", "pcs", 6, 185000.00, {"nrm": "5"}),
+                ("5.4", "Fire detection and alarm", "m2", 12800, 35.00, {"nrm": "5"}),
+                ("5.5", "BMS controls", "lsum", 1, 420000.00, {"nrm": "5"}),
+                ("5.6", "Sprinkler installation", "m2", 12800, 45.00, {"nrm": "5"}),
+                ("5.7", "Public health: plumbing and drainage", "m2", 12800, 58.00, {"nrm": "5"}),
+                ("5.8", "Security and access control", "lsum", 1, 380000.00, {"nrm": "5"}),
             ],
         ),
         (
             "8",
-            "8 \u2014 Services (MEP)",
+            "8 \u2014 External Works",
             {"nrm": "8"},
             [
-                ("8.1", "Mechanical services allowance", "m2", 12800, 280.00, {"nrm": "8.1"}),
-                ("8.2", "Electrical services allowance", "m2", 12800, 220.00, {"nrm": "8.2"}),
-                ("8.3", "Lift installations 21-person", "pcs", 6, 185000.00, {"nrm": "8.3"}),
-                ("8.4", "Fire detection and alarm", "m2", 12800, 35.00, {"nrm": "8.4"}),
-                ("8.5", "BMS controls", "lsum", 1, 420000.00, {"nrm": "8.5"}),
-                ("8.6", "Sprinkler installation", "m2", 12800, 45.00, {"nrm": "8.6"}),
+                ("8.1", "Hard landscaping", "m2", 2400, 95.00, {"nrm": "8"}),
+                ("8.2", "Soft landscaping", "m2", 800, 45.00, {"nrm": "8"}),
+                ("8.3", "External drainage", "m", 480, 125.00, {"nrm": "8"}),
+                ("8.4", "External services connections", "lsum", 1, 180000.00, {"nrm": "8"}),
             ],
         ),
         (
             "9",
-            "9 \u2014 External Works",
+            "9 \u2014 Main Contractor's Preliminaries",
             {"nrm": "9"},
             [
-                ("9.1", "Hard landscaping", "m2", 2400, 95.00, {"nrm": "9.1"}),
-                ("9.2", "Soft landscaping", "m2", 800, 45.00, {"nrm": "9.2"}),
-                ("9.3", "External drainage", "m", 480, 125.00, {"nrm": "9.3"}),
-                ("9.4", "External services connections", "lsum", 1, 180000.00, {"nrm": "9.4"}),
+                ("9.1", "Site management and staff", "month", 24, 62000.00, {"nrm": "9"}),
+                ("9.2", "Tower crane hire and operation", "month", 20, 28000.00, {"nrm": "9"}),
+                ("9.3", "Hoists, scaffolding and temporary works", "lsum", 1, 780000.00, {"nrm": "9"}),
+                ("9.4", "Welfare, site security and utilities", "month", 24, 14500.00, {"nrm": "9"}),
+                ("9.5", "Insurances and bonds", "lsum", 1, 520000.00, {"nrm": "9"}),
+            ],
+        ),
+        (
+            "11",
+            "11 \u2014 Project and Design Team Fees",
+            {"nrm": "11"},
+            [
+                ("11.1", "Architect and design team", "lsum", 1, 1100000.00, {"nrm": "11"}),
+                ("11.2", "Project management and cost consultancy", "lsum", 1, 520000.00, {"nrm": "11"}),
+                ("11.3", "Planning, building control and CDM", "lsum", 1, 230000.00, {"nrm": "11"}),
             ],
         ),
     ],
     markups=[
-        ("Main Contractor's Preliminaries", 13.0, "overhead", "direct_cost"),
         ("Main Contractor's Overheads", 5.0, "overhead", "direct_cost"),
         ("Main Contractor's Profit", 5.0, "profit", "direct_cost"),
         ("Design Development Risk", 3.0, "contingency", "cumulative"),
@@ -7272,7 +7341,7 @@ async def _seed_module_data(
     """
     results: dict[str, int] = {}
     owner_str = str(owner_id)
-    base = datetime(2026, 4, 1)  # project start
+    base = _demo_anchor()  # project start
 
     # Template-derived rows for EVERY module key. The 5 built-ins keep their
     # hand-authored dicts (they win on demo_id match); every other demo (the
@@ -11613,6 +11682,7 @@ async def _seed_module_data(
 
     # ── Procurement (purchase orders + items) ─────────────────────────
     try:
+        from app.core.demo_vat import demo_vat_rate
         from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
 
         po_list = generated.get("procurement", [])
@@ -11636,8 +11706,8 @@ async def _seed_module_data(
                 delivery_date=po.get("delivery_date"),
                 currency_code=po.get("currency_code", template.currency),
                 amount_subtotal=f"{round(subtotal, 2)}",
-                tax_amount="0",
-                amount_total=f"{round(subtotal, 2)}",
+                tax_amount=f"{round(subtotal * float(demo_vat_rate(template.currency)), 2)}",
+                amount_total=f"{round(subtotal * (1 + float(demo_vat_rate(template.currency))), 2)}",
                 status=po.get("status", "draft"),
                 notes=po.get("notes") or po_notes,
                 vendor_contact_id=po_vendor_id,
@@ -12448,7 +12518,7 @@ async def _seed_requisitions(
         PurchaseOrder,
     )
 
-    base = datetime(2026, 4, 1)
+    base = _demo_anchor()
     scopes = _package_scopes(template.tender_packages, items)
     orders = (
         (
@@ -12702,7 +12772,7 @@ async def install_demo_project(
             )
             pos_meta.update(copy.deepcopy(template.position_metadata))
             # Every 8th position gets a warning status for visual variety
-            v_status = "warning" if pos_counter % 8 == 0 else "valid"
+            v_status = "warnings" if pos_counter % 8 == 0 else "passed"
             pos = _make_position(
                 boq_id=boq_id,
                 parent_id=section.id,
@@ -12865,13 +12935,21 @@ async def install_demo_project(
 
     # ── 5. Schedule (4D) ──────────────────────────────────────────────
     total_months = template.total_months
-    start = datetime(2026, 4, 1)
+    start = _demo_anchor()
 
     schedule = Schedule(
         id=_id(),
         project_id=project.id,
-        name=f"Programme \u2014 {template.project_name}",
-        description=f"{total_months}-month construction programme",
+        name=(
+            f"Terminplan \u2014 {template.project_name}"
+            if (template.locale or "").lower().startswith("de")
+            else f"Programme \u2014 {template.project_name}"
+        ),
+        description=(
+            f"Bauzeitenplan ({total_months} Monate)"
+            if (template.locale or "").lower().startswith("de")
+            else f"{total_months}-month construction programme"
+        ),
         start_date=start.strftime("%Y-%m-%d"),
         end_date=(start + timedelta(days=total_months * 30)).strftime("%Y-%m-%d"),
         status="active",
@@ -13234,38 +13312,38 @@ async def install_demo_project(
         "residential-berlin": [
             (
                 "R-001",
-                "Ground contamination",
-                "Potential soil contamination from former industrial use requiring remediation",
+                "Bodenkontamination",
+                "Mögliche Bodenverunreinigung durch frühere gewerbliche Nutzung, Sanierung erforderlich",
                 "technical",
                 0.3,
                 150000,
                 30,
                 "high",
-                "Conduct additional soil testing before foundation work",
+                "Zusätzliche Bodenuntersuchung vor Beginn der Gründungsarbeiten durchführen",
                 "open",
             ),
             (
                 "R-002",
-                "Material price escalation",
-                "Steel and concrete prices volatile due to supply chain disruptions",
+                "Materialpreissteigerung",
+                "Stahl- und Betonpreise schwanken wegen gestörter Lieferketten",
                 "financial",
                 0.6,
                 280000,
                 0,
                 "medium",
-                "Lock in prices with early procurement contracts",
+                "Preise durch frühzeitige Beschaffungsverträge sichern",
                 "monitoring",
             ),
             (
                 "R-003",
-                "Winter weather delays",
-                "Foundation work may be delayed by frost conditions Nov-Feb",
+                "Verzögerungen durch Winterwetter",
+                "Gründungsarbeiten können durch Frost von November bis Februar verzögert werden",
                 "schedule",
                 0.4,
                 0,
                 45,
                 "medium",
-                "Plan critical concrete pours before November",
+                "Kritische Betonierabschnitte vor November einplanen",
                 "monitoring",
             ),
         ],

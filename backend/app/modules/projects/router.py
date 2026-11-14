@@ -1044,10 +1044,17 @@ async def dashboard_cards(
             boq_counts[str(pid)] = cnt
 
         # Get all BOQ IDs grouped by project
-        boq_rows = (await session.execute(select(BOQ.id, BOQ.project_id).where(BOQ.project_id.in_(project_ids)))).all()
+        boq_rows = (
+            await session.execute(
+                select(BOQ.id, BOQ.project_id, BOQ.status, BOQ.approved_at, BOQ.created_at).where(
+                    BOQ.project_id.in_(project_ids)
+                )
+            )
+        ).all()
         boq_id_to_project: dict[str, str] = {}
-        for bid, pid in boq_rows:
+        for bid, pid, *_rest in boq_rows:
             boq_id_to_project[str(bid)] = str(pid)
+        governing_boq_ids = {str(bid) for bid in governing_boq_id_set(boq_rows)}
 
         if boq_id_to_project:
             all_boq_ids = [uuid.UUID(bid) for bid in boq_id_to_project]
@@ -1064,6 +1071,8 @@ async def dashboard_cards(
                 if not pid:
                     continue
                 position_counts[pid] = position_counts.get(pid, 0) + 1
+                if str(boq_id) not in governing_boq_ids:
+                    continue
                 code = _position_currency(SimpleNamespace(metadata_=metadata))
                 converted = _position_total_in_base(
                     total,
@@ -1208,6 +1217,44 @@ async def dashboard_cards(
     return result
 
 
+def governing_boq_id_set(rows: list) -> list[uuid.UUID]:
+    """Pick the bill that defines each project's budget from ``(id, project_id, status, approved_at, created_at)`` rows.
+
+    Per project, the latest approved (``final``) bill governs, ordered by
+    approval time and then creation time. A project with no approved bill
+    falls back to every bill that is not archived (the pre-approval working
+    state). Archived bills never count.
+    """
+    by_project: dict[str, list] = {}
+    for row in rows:
+        if row[2] == "archived":
+            continue
+        by_project.setdefault(str(row[1]), []).append(row)
+    chosen: list[uuid.UUID] = []
+    for group in by_project.values():
+        finals = [r for r in group if r[2] == "final"]
+        if finals:
+            finals.sort(key=lambda r: (str(r[3] or ""), str(r[4] or "")), reverse=True)
+            chosen.append(finals[0][0])
+        else:
+            chosen.extend(r[0] for r in group)
+    return chosen
+
+
+async def _governing_boq_ids(session: AsyncSession, project_id: uuid.UUID) -> list[uuid.UUID]:
+    """Return the ids of the bill(s) that define one project's budget."""
+    from app.modules.boq.models import BOQ
+
+    rows = (
+        await session.execute(
+            select(BOQ.id, BOQ.project_id, BOQ.status, BOQ.approved_at, BOQ.created_at).where(
+                BOQ.project_id == project_id
+            )
+        )
+    ).all()
+    return governing_boq_id_set(rows)
+
+
 # ── Project Dashboard (cross-module aggregation) ───────────────────────
 
 
@@ -1311,9 +1358,13 @@ async def project_dashboard(
                 )
             ).scalar_one()
 
+            # The budget is what the governing bill says, not the sum of every
+            # bill: a project routinely holds a detailed bill and its approved
+            # budget copy, and adding them double-counts the same scope.
+            governing_ids = await _governing_boq_ids(session, project_id)
             total_result = (
                 await session.execute(
-                    select(func.sum(numeric_value(Position.total))).where(Position.boq_id.in_(boq_ids))
+                    select(func.sum(numeric_value(Position.total))).where(Position.boq_id.in_(governing_ids or boq_ids))
                 )
             ).scalar_one()
             boq_total_value = round(total_result or 0.0, 2)

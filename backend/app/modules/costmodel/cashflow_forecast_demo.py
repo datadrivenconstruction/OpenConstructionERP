@@ -13,6 +13,7 @@ a project that already has it is left alone.
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import date, timedelta
 from decimal import Decimal
@@ -35,10 +36,29 @@ def _shift(day: date, months: int) -> date:
     return date(idx // 12, idx % 12 + 1, min(day.day, 28))
 
 
+async def _number_sequence(session: AsyncSession, project_id: uuid.UUID, model: type, column: str, prefix: str):
+    """Return a function that hands out the next ``<prefix>-<year>-<nnn>`` number of the project's own series."""
+    pattern = re.compile(rf"^{prefix}-(\d{{4}})-(\d+)$")
+    used: dict[int, int] = {}
+    existing = (await session.execute(select(getattr(model, column)).where(model.project_id == project_id))).scalars()
+    for number in existing:
+        match = pattern.match(str(number or ""))
+        if match:
+            year = int(match.group(1))
+            used[year] = max(used.get(year, 0), int(match.group(2)))
+
+    def next_number(year: int) -> str:
+        used[year] = used.get(year, 0) + 1
+        return f"{prefix}-{year}-{used[year]:03d}"
+
+    return next_number
+
+
 async def seed_cashflow_forecast_demo(
     session: AsyncSession, project_id: uuid.UUID, *, dip: bool, today: date | None = None
 ) -> int:
     """Write the demo rows for one project; returns the number of rows written (0 when already seeded)."""
+    from app.core.demo_vat import demo_vat_rate
     from app.modules.contracts.models import Contract, ContractMilestone
     from app.modules.finance.models import Invoice, Payment
     from app.modules.procurement.models import PurchaseOrder
@@ -118,14 +138,18 @@ async def seed_cashflow_forecast_demo(
             metadata_={**meta, "payment_terms_days": 30},
         )
     )
+    vat = demo_vat_rate(currency)
+    next_invoice = await _number_sequence(session, project_id, Invoice, "invoice_number", "INV")
+    next_order = await _number_sequence(session, project_id, PurchaseOrder, "po_number", "PO")
     po_value = q2(value * Decimal("0.12"))
     rows.append(
         PurchaseOrder(
             project_id=project_id,
-            po_number=f"CF-{tag}-PO1",
+            po_number=next_order(today.year),
             currency_code=currency,
             amount_subtotal=str(po_value),
-            amount_total=str(po_value),
+            tax_amount=str(q2(po_value * vat)),
+            amount_total=str(q2(po_value * (1 + vat))),
             status="issued",
             issue_date=today.isoformat(),
             delivery_date=_shift(today, 1).isoformat(),
@@ -139,16 +163,17 @@ async def seed_cashflow_forecast_demo(
     for back in (3, 2, 1):
         issued = month_end(_shift(today, -back - 1))
         paid_on = issued + timedelta(days=30)
-        for direction, amount, prefix in (("receivable", month_in, "CF-AR"), ("payable", month_out, "CF-AP")):
+        for direction, amount in (("receivable", month_in), ("payable", month_out)):
             inv = Invoice(
                 project_id=project_id,
                 invoice_direction=direction,
-                invoice_number=f"{prefix}-{tag}-{back:02d}",
+                invoice_number=next_invoice(issued.year),
                 invoice_date=issued.isoformat(),
                 due_date=paid_on.isoformat(),
                 currency_code=currency,
                 amount_subtotal=amount,
-                amount_total=amount,
+                tax_amount=q2(amount * vat),
+                amount_total=q2(amount * (1 + vat)),
                 status="paid",
                 payment_terms_days="30",
                 metadata_=meta,
@@ -157,12 +182,13 @@ async def seed_cashflow_forecast_demo(
     overdue = Invoice(
         project_id=project_id,
         invoice_direction="receivable",
-        invoice_number=f"CF-AR-{tag}-OD",
+        invoice_number=next_invoice(today.year),
         invoice_date=(today - timedelta(days=50)).isoformat(),
         due_date=(today - timedelta(days=20)).isoformat(),
         currency_code=currency,
         amount_subtotal=q2(value * Decimal("0.02")),
-        amount_total=q2(value * Decimal("0.02")),
+        tax_amount=q2(value * Decimal("0.02") * vat),
+        amount_total=q2(value * Decimal("0.02") * (1 + vat)),
         status="sent",
         payment_terms_days="30",
         metadata_=meta,
