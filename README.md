@@ -2,18 +2,26 @@
 
 # OpenConstructionERP
 
-### A leading open-source workspace for construction project management
+### Estimate, plan and build on open data.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP - open-source construction ERP for BOQ, BIM takeoff, DWG/PDF quantification and 5D cost modeling" width="900" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM 3D takeoff, 4D schedule, project dashboard, BOQ editor, cost databases, DWG takeoff and validation in one workspace" width="880" />
 </picture>
 
-Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tendering - all in one self-hosted platform.
+**The open-source construction ERP.** BOQ, BIM and CAD takeoff, 4D scheduling, 5D cost and tendering in one self-hosted platform. Free under AGPL-3.0, no per-seat fees, your data stays on your server.
 
-**Like WordPress for construction companies** - pick modules from the marketplace, drop in your own, or replace ours with custom-built ones. Same plug-and-play model, but for BOQ, scheduling, cost control, BIM, and tendering.
+<a href="https://openconstructionerp.com/download"><b>Download the desktop app</b></a> · <a href="https://openconstructionerp.com">Live demo</a> · <a href="https://openconstructionerp.com/docs">Documentation</a> · <a href="https://www.youtube.com/watch?v=X06cIaroAeI">12-min walkthrough</a>
 
-[▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Build on it](DEVELOPING.md) · [Community chat (Telegram)](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
+```bash
+pip install --upgrade openconstructionerp && openconstructionerp
+```
+
+<sub>Opens at http://localhost:8080 with demo data. No Docker, no database to set up. More options in <a href="#quick-start">Quick Start</a>.</sub>
+
+**Modular like a plugin system.** Pick modules from the marketplace, drop in your own, or replace ours. Same idea for BOQ, scheduling, cost control, BIM and tendering.
+
+[Deutsch](README.de.md) · [Русский](README.ru.md) · [Build on it](DEVELOPING.md) · [Community chat (Telegram)](https://t.me/datadrivenconstruction) · [Report a bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 <!-- Each badge row is one source line on purpose. A newline between two badges
      renders as a line break here, which stacks them into a single column. -->
@@ -52,6 +60,21 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 </table>
 
 </div>
+
+---
+
+## What you can do
+
+| | |
+|---|---|
+| **Take off from models and drawings** | Pull quantities from IFC and Revit models in the 3D viewer, and from DWG and PDF drawings, with every quantity linked to the element it came from. |
+| **Price it from open cost data** | Cost databases for 40+ markets with rates and resources, plus assemblies, so a quantity becomes a priced position in one step. |
+| **Build the BOQ** | A spreadsheet-fast editor with live totals, markups and export to GAEB XML, Excel and PDF. |
+| **Plan in 4D** | A Gantt programme tied to the model, so you see what gets built and when. |
+| **Validate before you issue** | Rule sets (DIN 276, NRM, MasterFormat and more) check every estimate and give it a quality score. |
+| **Run the project** | Dashboards, a common data environment, finance and tendering on the same data. |
+
+Details for each area are under [Key Features](#key-features).
 
 ---
 
