@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - On the desktop app a new account is active at once instead of waiting for an approval email a local install never sends.
 - Settings: Team, Company and Letter panels use the full width.
-- DWG takeoff: the viewer buttons no longer cover the drawing tools.
+- DWG takeoff: the viewer buttons no longer cover the drawing tools, the Link to BOQ panel is readable in the light theme, demo measurements show their real size, and the CSV export writes m² the same way everywhere.
 - Documents, correspondence, submittals and transmittals skip a remembered project that no longer exists.
 - The delivery booking dialog lists the bill positions again, and the photo archive fits a phone screen.
 - Existing projects get their country from the region, so the right VAT rate applies.

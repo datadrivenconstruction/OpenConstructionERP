@@ -71,7 +71,7 @@ const CHANGELOG: ChangelogEntry[] = [
     date: '2026-11-14',
     tag: 'NEW',
     summary:
-      'Every module page and popup in one compact design, and courses shown with a site photo, your role and the path of steps, as on the Academy. Desktop accounts are active at once, and DWG takeoff buttons no longer cover the tools.',
+      'Every module page and popup in one compact design, and courses shown with a site photo, your role and the path of steps, as on the Academy. Desktop accounts are active at once. DWG takeoff buttons no longer cover the tools, the Link to BOQ panel is readable in the light theme, demo measurements show their real size, and the CSV export writes m² the same way everywhere.',
   },
   {
     version: '19.4.0',

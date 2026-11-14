@@ -859,9 +859,8 @@ async def test_dwg_measurements_are_recomputable_from_their_own_geometry(pg_sess
     assert len(rows) == counts["annotations"]
     assert {row.annotation_type for row in rows} >= {"area", "distance"}
 
-    # The demo plan is authored in millimetres, so a value in metres is the raw
-    # geometry times 0.001 (squared for an area). Read the factor off the
-    # version rather than restating it.
+    # The demo plan is authored in millimetres. Values are stored in raw drawing
+    # units, like a freshly drawn measurement; the viewer applies the unit factor.
     from app.modules.dwg_takeoff.models import DwgDrawingVersion
 
     units = (
@@ -870,7 +869,6 @@ async def test_dwg_measurements_are_recomputable_from_their_own_geometry(pg_sess
         .first()
     )
     assert units == "mm", f"the demo plan reports units {units!r}; this check assumes millimetres"
-    factor = 0.001
 
     for row in rows:
         points = (row.geometry or {}).get("points") or []
@@ -880,8 +878,8 @@ async def test_dwg_measurements_are_recomputable_from_their_own_geometry(pg_sess
 
         if row.annotation_type == "area":
             assert len(points) >= 3
-            expected = _shoelace(points) * factor * factor
-            assert row.measurement_unit == "m2"
+            expected = _shoelace(points)
+            assert row.measurement_unit == "m²"
             assert math.isclose(float(row.measurement_value), expected, rel_tol=1e-6), (
                 f"area reads {row.measurement_value}, geometry gives {expected}"
             )
@@ -889,7 +887,7 @@ async def test_dwg_measurements_are_recomputable_from_their_own_geometry(pg_sess
             assert len(points) == 2
             dx = float(points[1]["x"]) - float(points[0]["x"])
             dy = float(points[1]["y"]) - float(points[0]["y"])
-            expected = math.hypot(dx, dy) * factor
+            expected = math.hypot(dx, dy)
             assert row.measurement_unit == "m"
             assert math.isclose(float(row.measurement_value), expected, rel_tol=1e-6), (
                 f"distance reads {row.measurement_value}, geometry gives {expected}"

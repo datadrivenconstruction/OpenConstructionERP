@@ -40,6 +40,12 @@ export function isAreaUnit(unit: string | null | undefined): boolean {
   return u === 'm2' || u.includes('²');
 }
 
+/** Unit label as exported: the areal ``m2`` spelling becomes ``m²``. */
+export function exportUnitLabel(unit: string | null | undefined): string {
+  const u = (unit ?? '').trim();
+  return u === 'm2' ? 'm²' : u;
+}
+
 /** Scale a raw drawing-unit value: linear x scale, areal x scale². */
 export function scaleRawMeasurement(
   value: number,

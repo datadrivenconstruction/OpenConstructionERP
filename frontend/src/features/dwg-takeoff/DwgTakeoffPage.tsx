@@ -134,7 +134,7 @@ import {
   type QuantifyMeasure,
 } from './lib/auto-quantify';
 import { exportQuantifyToExcel } from './lib/dwg-quantify-export';
-import { annotationRealValue, annotationTotals, quantifyTotals } from './lib/takeoff-totals';
+import { annotationRealValue, annotationTotals, exportUnitLabel, quantifyTotals } from './lib/takeoff-totals';
 import { conversionErrorText } from './lib/conversion-error';
 import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { ConversionStages } from '@/shared/ui/ConversionStages';
@@ -2293,7 +2293,7 @@ export function DwgTakeoffPage() {
           type: a.type,
           text: a.text ?? '',
           value: annotationRealValue(a, effectiveScale, calibrationScale),
-          unit: a.type === 'count' ? 'nr' : (a.measurement_unit ?? ''),
+          unit: a.type === 'count' ? 'nr' : exportUnitLabel(a.measurement_unit),
         }))
         .filter((r): r is { type: DwgAnnotation['type']; text: string; value: number; unit: string } => r.value != null),
     [annotations, effectiveScale, calibrationScale],
@@ -4093,11 +4093,11 @@ export function DwgTakeoffPage() {
                     && a.linked_boq_position_id,
                 );
                 return (
-                  <div className="absolute top-3 right-3 z-20 flex flex-col w-80 max-h-[calc(100%-1.5rem)] rounded-lg border border-[#3a3a3a] bg-[#2f2f2f] text-content-quaternary shadow-2xl">
+                  <div className="absolute top-3 right-3 z-20 flex flex-col w-80 max-h-[calc(100%-1.5rem)] rounded-lg border border-border-light bg-surface-primary text-content-secondary shadow-2xl">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-3 py-2 border-b border-[#3a3a3a]">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-content-quaternary">
-                        <Link2 size={14} className="text-blue-400" />
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-border-light">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-content-secondary">
+                        <Link2 size={14} className="text-oe-blue" />
                         {alreadyLinked
                           ? t('dwg_takeoff.relink_title', { defaultValue: 'Linked - pick new' })
                           : t('dwg_takeoff.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
@@ -4106,7 +4106,7 @@ export function DwgTakeoffPage() {
                         onClick={() => setLinkingEntityId(null)}
                         aria-label={t('common.close', { defaultValue: 'Close' })}
                         title={t('common.close', { defaultValue: 'Close' })}
-                        className="text-content-quaternary hover:text-content-quaternary transition-colors"
+                        className="text-content-secondary hover:text-content-primary transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -4124,25 +4124,25 @@ export function DwgTakeoffPage() {
                       )}
 
                       {/* Entity summary */}
-                      <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-2xs space-y-0.5">
+                      <div className="rounded-sm bg-surface-secondary border border-border-light p-2 text-2xs space-y-0.5">
                         <div className="flex justify-between">
-                          <span className="text-content-quaternary">{t('dwg_takeoff.prop_type', 'Type')}</span>
-                          <span className="font-mono text-content-quaternary">{selectedEntity.type}</span>
+                          <span className="text-content-secondary">{t('dwg_takeoff.prop_type', 'Type')}</span>
+                          <span className="font-mono text-content-secondary">{selectedEntity.type}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-content-quaternary">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
-                          <span className="font-mono text-content-quaternary truncate ml-2">{selectedEntity.layer}</span>
+                          <span className="text-content-secondary">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
+                          <span className="font-mono text-content-secondary truncate ml-2">{selectedEntity.layer}</span>
                         </div>
                         {measurement && (
                           <div className="flex justify-between">
-                            <span className="text-content-quaternary">
+                            <span className="text-content-secondary">
                               {measurement.kind === 'area'
                                 ? t('dwg_takeoff.area', 'Area')
                                 : measurement.kind === 'radius'
                                   ? t('dwg_takeoff.prop_radius', 'Radius')
                                   : t('dwg_takeoff.length', { defaultValue: 'Length' })}
                             </span>
-                            <span className="font-mono font-semibold text-blue-300">
+                            <span className="font-mono font-semibold text-oe-blue">
                               {measurement.value} {measurement.unit}
                             </span>
                           </div>
@@ -4154,7 +4154,7 @@ export function DwgTakeoffPage() {
                         <select
                           value={linkPickerProjectId}
                           onChange={(e) => handlePickerProjectChange(e.target.value)}
-                          className="oe-select-sm bg-[#262626]"
+                          className="oe-select-sm"
                         >
                           <option value="">
                             {t('dwg_takeoff.pick_project', { defaultValue: '- project -' })}
@@ -4167,7 +4167,7 @@ export function DwgTakeoffPage() {
                           value={linkPickerBoqId}
                           onChange={(e) => handlePickerBoqChange(e.target.value)}
                           disabled={!linkPickerProjectId || linkBoqsLoading}
-                          className="oe-select-sm bg-[#262626]"
+                          className="oe-select-sm"
                         >
                           <option value="">
                             {linkBoqsLoading
@@ -4189,7 +4189,7 @@ export function DwgTakeoffPage() {
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors',
                             linkPickerMode === 'pick'
                               ? 'bg-oe-blue text-white'
-                              : 'bg-[#363636] text-content-quaternary hover:bg-[#404040]',
+                              : 'bg-surface-tertiary text-content-secondary hover:bg-surface-secondary',
                           )}
                         >
                           {t('dwg_takeoff.mode_pick', { defaultValue: 'Pick existing' })}
@@ -4202,7 +4202,7 @@ export function DwgTakeoffPage() {
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors disabled:opacity-50',
                             linkPickerMode === 'create'
                               ? 'bg-oe-blue text-white'
-                              : 'bg-[#363636] text-content-quaternary hover:bg-[#404040]',
+                              : 'bg-surface-tertiary text-content-secondary hover:bg-surface-secondary',
                           )}
                         >
                           {t('dwg_takeoff.mode_create', { defaultValue: '+ Create new' })}
@@ -4211,20 +4211,20 @@ export function DwgTakeoffPage() {
 
                       {linkPickerMode === 'pick' ? (
                         !linkPickerBoqId ? (
-                          <p className="text-2xs text-content-quaternary py-2 text-center">
+                          <p className="text-2xs text-content-secondary py-2 text-center">
                             {t('dwg_takeoff.link_need_project_boq', {
                               defaultValue: 'Pick a project and BOQ above.',
                             })}
                           </p>
                         ) : linkPositionsLoading ? (
                           <div className="flex items-center justify-center gap-1.5 py-3">
-                            <Loader2 size={12} className="animate-spin text-blue-400" />
-                            <span className="text-2xs text-content-quaternary">
+                            <Loader2 size={12} className="animate-spin text-oe-blue" />
+                            <span className="text-2xs text-content-secondary">
                               {t('common.loading', 'Loading...')}
                             </span>
                           </div>
                         ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
-                          <p className="text-2xs text-content-quaternary py-2 text-center">
+                          <p className="text-2xs text-content-secondary py-2 text-center">
                             {t('dwg_takeoff.link_boq_empty', {
                               defaultValue: 'BOQ is empty - switch to "Create new".',
                             })}
@@ -4238,7 +4238,7 @@ export function DwgTakeoffPage() {
                               placeholder={t('dwg_takeoff.link_search_placeholder', {
                                 defaultValue: 'Search ordinal or description...',
                               })}
-                              className="oe-input-sm w-full bg-[#262626]"
+                              className="oe-input-sm w-full"
                             />
                             <div className="max-h-56 overflow-y-auto space-y-0.5">
                               {linkBoqPositions
@@ -4264,15 +4264,15 @@ export function DwgTakeoffPage() {
                                       }
                                     }}
                                     disabled={linkingInProgress}
-                                    className="w-full text-left px-2 py-1 rounded-sm text-2xs hover:bg-blue-900/40 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                    className="w-full text-left px-2 py-1 rounded-sm text-2xs hover:bg-oe-blue/10 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                                   >
-                                    <span className="font-mono text-blue-300 shrink-0">
+                                    <span className="font-mono text-oe-blue shrink-0">
                                       {pos.ordinal}
                                     </span>
-                                    <span className="text-content-quaternary truncate flex-1">
+                                    <span className="text-content-secondary truncate flex-1">
                                       {pos.description}
                                     </span>
-                                    <span className="text-content-quaternary shrink-0 text-2xs">
+                                    <span className="text-content-secondary shrink-0 text-2xs">
                                       {pos.unit}
                                     </span>
                                   </button>
@@ -4282,21 +4282,21 @@ export function DwgTakeoffPage() {
                         )
                       ) : (
                         /* Create new position */
-                        <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 space-y-1.5">
+                        <div className="rounded-sm bg-surface-secondary border border-border-light p-2 space-y-1.5">
                           <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-2xs">
-                            <span className="text-content-quaternary">
+                            <span className="text-content-secondary">
                               {t('dwg_takeoff.description', { defaultValue: 'Description' })}:
                             </span>
-                            <span className="text-content-quaternary truncate">
+                            <span className="text-content-secondary truncate">
                               {t('dwg_takeoff.position_default_desc', {
                                 defaultValue: 'From DWG: {{layer}}',
                                 layer: selectedEntity.layer,
                               })}
                             </span>
-                            <span className="text-content-quaternary">
+                            <span className="text-content-secondary">
                               {t('dwg_takeoff.quantity', { defaultValue: 'Quantity' })}:
                             </span>
-                            <span className="text-content-quaternary font-mono">
+                            <span className="text-content-secondary font-mono">
                               {measurement
                                 ? `${measurement.value} ${measurement.unit}`
                                 : `0 ${normalizeUnit('pcs')}`}
@@ -4509,7 +4509,7 @@ export function DwgTakeoffPage() {
                       a.type,
                       JSON.stringify(a.text ?? ''),
                       scaled,
-                      a.measurement_unit ?? '',
+                      exportUnitLabel(a.measurement_unit),
                       a.linked_boq_position_id ?? '',
                     ].join(',');
                   }),
@@ -4630,11 +4630,20 @@ export function DwgTakeoffPage() {
                     </p>
                   ) : (
                     annotations.map((ann) => (
-                      <button
+                      <div
                         key={ann.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedAnnotationId(ann.id)}
+                        onKeyDown={(e) => {
+                          if (e.target !== e.currentTarget) return;
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedAnnotationId(ann.id);
+                          }
+                        }}
                         className={clsx(
-                          'flex items-center gap-2 rounded px-2 py-1.5 text-xs text-left transition-colors',
+                          'flex items-center gap-2 rounded px-2 py-1.5 text-xs text-left transition-colors cursor-pointer',
                           selectedAnnotationId === ann.id
                             ? 'bg-oe-blue/10 text-oe-blue'
                             : 'text-foreground hover:bg-surface-secondary',
@@ -4682,7 +4691,7 @@ export function DwgTakeoffPage() {
                         >
                           <Trash2 size={12} />
                         </button>
-                      </button>
+                      </div>
                     ))
                   )}
                 </div>

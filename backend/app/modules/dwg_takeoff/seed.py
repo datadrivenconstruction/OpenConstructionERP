@@ -14,7 +14,9 @@ a distance measurement whose value is the length between its endpoints; a text
 label becomes a pin at its own insertion point carrying its own string. Raw
 drawing units are converted to metres with the factor the parse recorded on the
 version, and when the units are unknown the measurement is left empty rather than
-stated wrongly. Nothing is placed at coordinates the drawing does not have.
+stated wrongly. The stored value stays in raw drawing units, exactly as a freshly
+drawn measurement is stored: the viewer applies the drawing's unit factor when it
+reads the value back, so a pre-converted value would be scaled twice. Nothing is placed at coordinates the drawing does not have.
 
 What this seeder deliberately does not do
 -----------------------------------------
@@ -161,10 +163,8 @@ def _plan_annotations(entities: Sequence[dict[str, Any]], factor: float | None) 
                         "geometry": {"points": ring},
                         "text": f"Enclosed area on {layer}" if layer else "Enclosed area",
                         "color": _COLOR_AREA,
-                        "measurement_value": (
-                            Decimal(str(round(raw_area * factor * factor, 6))) if factor is not None else None
-                        ),
-                        "measurement_unit": "m2" if factor is not None else None,
+                        "measurement_value": (Decimal(str(round(raw_area, 6))) if factor is not None else None),
+                        "measurement_unit": "m²" if factor is not None else None,
                         "metadata_": {
                             "source": _SEED_SOURCE,
                             "derived_from": {"entity_type": etype, "layer": layer},
@@ -192,9 +192,7 @@ def _plan_annotations(entities: Sequence[dict[str, Any]], factor: float | None) 
                         "geometry": {"points": [start, end]},
                         "text": f"Run measured on {layer}" if layer else "Measured run",
                         "color": _COLOR_DISTANCE,
-                        "measurement_value": (
-                            Decimal(str(round(raw_length * factor, 6))) if factor is not None else None
-                        ),
+                        "measurement_value": (Decimal(str(round(raw_length, 6))) if factor is not None else None),
                         "measurement_unit": "m" if factor is not None else None,
                         "metadata_": {
                             "source": _SEED_SOURCE,
