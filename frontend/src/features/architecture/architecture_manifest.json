@@ -28651,8 +28651,11 @@
         "service.py",
         "supplier_suggestion.py",
         "supplier_suggestion_router.py",
+        "template_schemas.py",
+        "template_service.py",
         "templates.py",
         "units.py",
+        "user_templates.py",
         "validators.py",
         "vector_adapter.py"
       ],
@@ -29522,6 +29525,68 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "BOQTemplate",
+          "tablename": "oe_boq_template",
+          "docstring": "A user-owned, editable estimate template.\n\nThe built-in templates live in code (``templates.py``) and are never\nmutated; a user edits a copy, which is a row here. ``sections`` holds the\nwhole structure as JSON in the shape of the built-ins, so one expander\nserves both. The row carries no project, BOQ or position reference, so a\ntemplate cannot leak the estimate it was taken from.",
+          "columns": [
+            {
+              "name": "owner_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "icon",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "classification_standard",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "origin",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "copied_from",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "sections",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "markups",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -29565,6 +29630,51 @@
           "handler": "create_boq_from_template",
           "response_model": "BOQResponse",
           "request_schema": "BOQFromTemplateRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/boqs/templates/validate/",
+          "handler": "validate_template_body",
+          "response_model": "list[TemplateIssue]",
+          "request_schema": "TemplateWrite"
+        },
+        {
+          "method": "POST",
+          "path": "/boqs/templates/from-boq/",
+          "handler": "create_template_from_boq",
+          "response_model": "TemplateDetail",
+          "request_schema": "TemplateFromBOQRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/boqs/templates/",
+          "handler": "create_template",
+          "response_model": "TemplateDetail",
+          "request_schema": "TemplateWrite"
+        },
+        {
+          "method": "GET",
+          "path": "/boqs/templates/{template_id}/",
+          "handler": "get_template",
+          "response_model": "TemplateDetail"
+        },
+        {
+          "method": "PUT",
+          "path": "/boqs/templates/{template_id}/",
+          "handler": "update_template",
+          "response_model": "TemplateDetail",
+          "request_schema": "TemplateWrite"
+        },
+        {
+          "method": "DELETE",
+          "path": "/boqs/templates/{template_id}/",
+          "handler": "delete_template"
+        },
+        {
+          "method": "POST",
+          "path": "/boqs/templates/{template_id}/duplicate/",
+          "handler": "duplicate_template",
+          "response_model": "TemplateDetail"
         },
         {
           "method": "POST",
@@ -31701,6 +31811,21 @@
               "name": "currency",
               "type": "str",
               "description": "ISO 4217 currency of the template rates"
+            },
+            {
+              "name": "builtin",
+              "type": "bool",
+              "description": "False for a template the user owns and can edit"
+            },
+            {
+              "name": "classification_standard",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "origin",
+              "type": "str",
+              "default": "'builtin'"
             }
           ]
         },
@@ -31721,8 +31846,8 @@
             },
             {
               "name": "area_m2",
-              "type": "float",
-              "description": "Gross floor area in m2"
+              "type": "float | None",
+              "description": "Gross floor area in m2. Required for built-in templates; optional for your own."
             },
             {
               "name": "boq_name",
@@ -315613,10 +315738,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 140,
+      "ts_files": 141,
       "css_files": 0,
       "test_files": 51,
-      "total_files": 141
+      "total_files": 142
     },
     {
       "name": "bim_requirements",
@@ -315634,10 +315759,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 274,
+      "ts_files": 279,
       "css_files": 0,
-      "test_files": 135,
-      "total_files": 274
+      "test_files": 137,
+      "total_files": 279
     },
     {
       "name": "buyer-portal",
@@ -319011,14 +319136,14 @@
   "statistics": {
     "backend_modules": 245,
     "modules_with_manifests": 245,
-    "total_models": 908,
-    "total_columns": 10659,
+    "total_models": 909,
+    "total_columns": 10668,
     "total_relationships": 261,
-    "total_routes": 5218,
+    "total_routes": 5225,
     "total_schemas": 4735,
-    "total_python_files": 3370,
+    "total_python_files": 3373,
     "frontend_features": 239,
-    "frontend_ts_files": 4198,
+    "frontend_ts_files": 4204,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
