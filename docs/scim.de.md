@@ -17,12 +17,12 @@ Verbinden Sie Ihren Identity Provider (IdP) einmal. Danach erscheinen Personen i
 
 - Benutzer und Gruppen anlegen, ändern, entfernen und Mitgliedschaften ändern. Wiederholtes Anlegen ist unschädlich: Es wird über `externalId`, dann über die E-Mail zugeordnet und ein vorhandenes lokales Konto übernommen.
 - Entfernen (DELETE oder `active=false`) deaktiviert das Konto. Die Zeile bleibt erhalten. Sitzungen werden widerrufen und API-Schlüssel im selben Schritt abgeschaltet; das Audit-Log enthält `scim.user.deactivate`. Bei erneuter Aktivierung kehrt der Zugang zurück, API-Schlüssel bleiben aus und müssen neu ausgestellt werden.
-- Der IdP kann nie eine Rolle senden. Die Rolle kommt nur aus einer Gruppe, die ein Admin in der Oberfläche zugeordnet hat. Bei mehreren Gruppen gilt die höchste Rolle; nach der letzten zugeordneten Gruppe gilt wieder `OIDC_DEFAULT_ROLE`.
+- Der IdP kann nie eine Rolle senden. Die Rolle kommt nur aus einer Gruppe, die ein Admin in der Oberfläche zugeordnet hat. Bei mehreren Gruppen gilt die höchste Rolle; nach der letzten zugeordneten Gruppe gilt wieder der Standardrolle des SSO-Anbieters.
 - Eine Gruppe auf **admin** abzubilden ist nur mit `SCIM_ALLOW_ADMIN_GROUPS=true` möglich. Der letzte aktive Admin kann über SCIM nie deaktiviert oder herabgestuft werden.
 
 ## Single Sign-on erzwingen
 
-`SSO_ENFORCED_DOMAINS=firma.example,tochter.example` lässt Passwort-Anmeldung, Selbstregistrierung und Passwort-Reset für diese E-Mail-Domains mit 403 `auth.sso_required` antworten. Ein Admin mit `metadata.break_glass = true` ist ausgenommen, damit ein ausgefallener IdP niemanden aussperrt. Zusammen mit `OIDC_ENABLED=true` verwenden; sonst warnt der Server beim Start.
+`SSO_ENFORCED_DOMAINS=firma.example,tochter.example` lässt Passwort-Anmeldung, Selbstregistrierung und Passwort-Reset für diese E-Mail-Domains mit 403 `auth.sso_required` antworten. Ein Admin mit `metadata.break_glass = true` ist ausgenommen, damit ein ausgefallener IdP niemanden aussperrt. Nutzen Sie es zusammen mit mindestens einem aktiven Anbieter unter Einstellungen > Single Sign-on, sonst können sich nur Break-Glass-Admins anmelden.
 
 ## Unterstützt und nicht unterstützt
 
