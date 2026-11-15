@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Voce {ordinal}: le righe delle risorse hanno perso il rendimento di catalogo e riportano invece la quantità della voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
       "whole_position_quantities": "Voce {ordinal}: le righe delle risorse riportano le quantità dell'intera voce invece dei rendimenti per unità, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
       "suggestion": "Verificare l'analisi di prezzo - ricalcolare la voce a partire dal suo elemento di catalogo tramite la revisione dei rendimenti delle risorse, oppure correggere manualmente le righe"
+    },
+    "rate_currency_missing": {
+      "fail": "Voce {ordinal}: {count} prezzo/i di risorsa senza valuta, conteggiati nella valuta base del progetto",
+      "suggestion": "Imposti la valuta di ogni prezzo di risorsa se non è la valuta base del progetto"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} è stato deciso e non può più essere modificato o eliminato.",
       "suggestion": "Inserisci un nuovo trasferimento o una variazione di budget che lo corregga."
+    },
+    "self_approval": {
+      "fail": "{code} è stato richiesto da lei, quindi non può approvarlo (la separazione dei compiti è attiva per questo progetto).",
+      "suggestion": "Chieda a un altro approvatore di decidere, oppure disattivi la separazione dei compiti nelle impostazioni del registro."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "La pagina {page} non ha un numero di tavola leggibile",
-      "suggestion": "Inserire il numero di tavola dal cartiglio"
-    },
-    "number_unique_in_set": {
-      "fail": "Il numero di tavola {sheet} compare su {count} pagine di questo caricamento",
-      "suggestion": "Controllare il set di disegni: pagina duplicata o numerata male"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "La revisione {revision} della tavola {sheet} è inferiore alla revisione corrente {current}",
-      "suggestion": "Confermare che si tratta di un'emissione precedente prima di aggiungerla allo storico"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "La tavola {sheet} è stata letta con riconoscimento del testo al {confidence} e non è confermata",
-      "suggestion": "Controllare i campi del cartiglio e confermare la lettura"
     }
   },
   "spec_import": {

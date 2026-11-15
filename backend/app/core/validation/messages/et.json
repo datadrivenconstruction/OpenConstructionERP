@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Rida {ordinal}: ressursiread kaotasid katalooginormi ja sisaldavad selle asemel rea kogust, seega ühikuhinda neist uuesti ei tuletatud",
       "whole_position_quantities": "Rida {ordinal}: ressursiread sisaldavad kogu rea koguseid ühikupõhiste normide asemel, seega ühikuhinda neist uuesti ei tuletatud",
       "suggestion": "Vaadake analüüs üle; tuletage rida uuesti kataloogireast ressursinormide ülevaatuse kaudu või parandage read käsitsi"
+    },
+    "rate_currency_missing": {
+      "fail": "Positsioon {ordinal}: {count} ressursihinnal puudub valuuta ja need arvestatakse projekti põhivaluutas",
+      "suggestion": "Määrake igale ressursihinnale valuuta, kui see pole projekti põhivaluuta"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} on otsustatud ning seda ei saa enam muuta ega kustutada.",
       "suggestion": "Sisesta uus ümbertõstmine või eelarve muudatus, mis seda parandab."
+    },
+    "self_approval": {
+      "fail": "{code} esitati teie, seega te ei saa seda kinnitada (selle projekti ülesannete lahusus on sisse lülitatud).",
+      "suggestion": "Paluge otsustada mõnel teisel kinnitajal või lülitage ülesannete lahusus pearaamatu seadetes välja."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Objektil oli {headcount} liikmeline brigaad, kuid tööd, kontrolli ega viivitust pole kirjendatud.",
       "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Lehel {page} puudub loetav joonise number",
-      "suggestion": "Sisestage joonise number joonisepäisest"
-    },
-    "number_unique_in_set": {
-      "fail": "Joonise number {sheet} esineb selles üleslaadimises {count} lehel",
-      "suggestion": "Kontrollige joonistekomplekti: leht võib olla dubleeritud või valesti nummerdatud"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Joonise {sheet} redaktsioon {revision} on madalam kui kehtiv redaktsioon {current}",
-      "suggestion": "Kinnitage, et tegu on varasema väljaandega, enne kui see ajalukku lisatakse"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Joonis {sheet} loeti tekstituvastusega täpsusega {confidence} ja seda pole kinnitatud",
-      "suggestion": "Kontrollige joonisepäise välju ja kinnitage lugemistulemus"
     }
   },
   "spec_import": {

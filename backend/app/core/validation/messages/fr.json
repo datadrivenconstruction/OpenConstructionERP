@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Poste {ordinal} : les lignes de ressources ont perdu leur norme de consommation du catalogue et portent à la place la quantité du poste ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
       "whole_position_quantities": "Poste {ordinal} : les lignes de ressources portent les quantités du poste entier au lieu des normes de consommation par unité ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
       "suggestion": "Vérifiez la décomposition : recalculez le poste à partir de son article de catalogue via l'examen des normes de ressources, ou corrigez les lignes manuellement"
+    },
+    "rate_currency_missing": {
+      "fail": "Poste {ordinal} : {count} prix de ressource sans devise, comptés dans la devise de base du projet",
+      "suggestion": "Indiquez la devise de chaque prix de ressource s'il n'est pas dans la devise de base du projet"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} a fait l'objet d'une décision et ne peut plus être modifié ni supprimé.",
       "suggestion": "Saisissez un nouveau transfert ou une modification de budget qui le corrige."
+    },
+    "self_approval": {
+      "fail": "{code} a été demandé par vous, vous ne pouvez donc pas l'approuver (la séparation des tâches est activée pour ce projet).",
+      "suggestion": "Demandez à un autre approbateur de statuer, ou désactivez la séparation des tâches dans les réglages du registre."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
       "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "La page {page} n'a pas de numéro de planche lisible",
-      "suggestion": "Saisissez le numéro de planche indiqué dans le cartouche"
-    },
-    "number_unique_in_set": {
-      "fail": "Le numéro de planche {sheet} apparaît sur {count} pages de ce dépôt",
-      "suggestion": "Vérifiez le jeu de plans : page en double ou mal numérotée"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "L'indice {revision} de la planche {sheet} est inférieur à l'indice actuel {current}",
-      "suggestion": "Confirmez qu'il s'agit d'une version antérieure avant de l'ajouter à l'historique"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "La planche {sheet} a été lue par reconnaissance de texte à {confidence} et n'est pas confirmée",
-      "suggestion": "Vérifiez les champs du cartouche et confirmez la lecture"
     }
   },
   "spec_import": {

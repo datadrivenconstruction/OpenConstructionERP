@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Poziția {ordinal}: rândurile de resurse și-au pierdut norma de catalog și conțin în schimb cantitatea poziției, deci prețul unitar nu a fost recalculat din ele",
       "whole_position_quantities": "Poziția {ordinal}: rândurile de resurse conțin cantități pentru întreaga poziție în loc de norme pe unitate, deci prețul unitar nu a fost recalculat din ele",
       "suggestion": "Verificați analiza – recalculați poziția din articolul său de catalog prin verificarea normelor de resurse sau corectați rândurile manual"
+    },
+    "rate_currency_missing": {
+      "fail": "Poziția {ordinal}: {count} preț(uri) de resurse fără monedă, calculate în moneda de bază a proiectului",
+      "suggestion": "Setați moneda fiecărui preț de resursă dacă nu este moneda de bază a proiectului"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "Pentru {code} s-a luat o decizie și nu mai poate fi modificat sau șters.",
       "suggestion": "Introduceți un nou transfer sau o modificare de buget care să îl corecteze."
+    },
+    "self_approval": {
+      "fail": "{code} a fost solicitat de dumneavoastră, deci nu îl puteți aproba (separarea atribuțiilor este activă pentru acest proiect).",
+      "suggestion": "Cereți altui aprobator să decidă sau dezactivați separarea atribuțiilor în setările registrului."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "O echipă de {headcount} persoane era pe șantier, dar nu sunt consemnate lucrări, inspecții sau întârzieri.",
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Pagina {page} nu are un număr de plansă lizibil",
-      "suggestion": "Introduceți numărul planșei din cartuș"
-    },
-    "number_unique_in_set": {
-      "fail": "Numărul de plansă {sheet} apare pe {count} pagini din această încărcare",
-      "suggestion": "Verificați setul de planșe: pagină duplicată sau numerotată greșit"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revizia {revision} a planșei {sheet} este mai mică decât revizia curentă {current}",
-      "suggestion": "Confirmați că este o ediție mai veche înainte de a fi adăugată în istoric"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Planșa {sheet} a fost citită prin recunoaștere de text cu {confidence} și nu este confirmată",
-      "suggestion": "Verificați câmpurile din cartuș și confirmați citirea"
     }
   },
   "spec_import": {

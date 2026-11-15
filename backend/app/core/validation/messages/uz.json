@@ -1202,6 +1202,10 @@
       "norm_collapsed": "{ordinal} pozitsiya: resurs satrlari katalog meʼyorini yoʻqotib, uning oʻrniga pozitsiya miqdorini saqlamoqda, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
       "whole_position_quantities": "{ordinal} pozitsiya: resurs satrlarida birlik meʼyorlari oʻrniga butun pozitsiya miqdorlari bor, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
       "suggestion": "Narx tarkibini tekshiring: resurs meʼyorlarini koʻrib chiqish orqali pozitsiyani uning katalog bandidan qayta hisoblang yoki satrlarni qoʻlda tuzating"
+    },
+    "rate_currency_missing": {
+      "fail": "{ordinal}-pozitsiya: {count} ta resurs narxida valyuta yoʻq va ular loyihaning asosiy valyutasida hisoblanadi",
+      "suggestion": "Resurs narxi loyihaning asosiy valyutasida boʻlmasa, har bir narxga valyutani belgilang"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} bo'yicha qaror qabul qilingan, uni endi o'zgartirib yoki o'chirib bo'lmaydi.",
       "suggestion": "Uni tuzatadigan yangi o'tkazma yoki byudjet o'zgarishini kiriting."
+    },
+    "self_approval": {
+      "fail": "{code} soʻrovini oʻzingiz yuborgansiz, shuning uchun uni tasdiqlay olmaysiz (bu loyihada vazifalarni ajratish yoqilgan).",
+      "suggestion": "Qarorni boshqa tasdiqlovchidan soʻrang yoki kitob sozlamalarida vazifalarni ajratishni oʻchiring."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "{page}-sahifada o'qiladigan chizma raqami yo'q",
-      "suggestion": "Chizma raqamini asosiy yozuvdan kiriting"
-    },
-    "number_unique_in_set": {
-      "fail": "{sheet} chizma raqami ushbu yuklashning {count} sahifasida uchraydi",
-      "suggestion": "Chizmalar to'plamida takrorlangan yoki noto'g'ri raqamlangan sahifa bor-yo'qligini tekshiring"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "{sheet} chizmasining {revision} tahriri joriy {current} tahridan past",
-      "suggestion": "Tarixga qo'shishdan oldin bu eski nashr ekanini tasdiqlang"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "{sheet} chizmasi matnni tanish orqali {confidence} aniqlikda o'qildi va tasdiqlanmagan",
-      "suggestion": "Asosiy yozuv maydonlarini tekshirib, o'qilganini tasdiqlang"
     }
   },
   "spec_import": {
