@@ -42,3 +42,6 @@ You do not have to read them in order. The order below follows one common path: 
 ## A note on AI features
 
 Several workflows offer AI help: drafting an estimate from a description or a photo, suggesting a cost match, ranking clashes, answering questions about your project data, preparing changes you describe to the [AI assistant](./ai-assistant.md). In every case the platform shows a confidence score and asks a person to confirm before anything lands in your estimate. Treat AI output as a fast first draft that a qualified estimator checks, not as a final answer. You connect your own model provider with an API key, and the AI features degrade gracefully when no key is set, so the rest of the platform works without them.
+
+12. [Rules and warnings](./rules-and-warnings.md)
+   Equipment rentals, budget ledger segregation of duties, data-quality warnings, share links and the optional extras. Also in [DE](./rules-and-warnings.de.md) and [RU](./rules-and-warnings.ru.md).

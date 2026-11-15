@@ -28,4 +28,6 @@ Verbinden Sie Ihren Identity Provider (IdP) einmal. Danach erscheinen Personen i
 
 Unterstützt: Users und Groups, GET/POST/PUT/PATCH/DELETE, `filter` mit `eq` auf `userName`, `externalId` (Benutzer) und `displayName` (Gruppen), seitenweiser Abruf mit `startIndex` und `count` (höchstens 100), PatchOp `add`, `replace`, `remove` einschließlich des Entra-Wertobjekts ohne Pfad.
 
-Nicht unterstützt: SAML (die SAML-zu-OIDC-Brücke des IdP davorschalten und OIDC-Anmeldung nutzen), Bulk, ETag, Sortierung, Passwortabgleich (`changePassword`), das Enterprise-Erweiterungsschema, verschachtelte Gruppen und weitere Filteroperatoren (Antwort 400 `invalidFilter`).
+Nicht unterstützt: Bulk, ETag, Sortierung, Passwortabgleich (`changePassword`), das Enterprise-Erweiterungsschema, verschachtelte Gruppen und weitere Filteroperatoren (Antwort 400 `invalidFilter`).
+
+SAML- und OIDC-Anmeldung: siehe [SSO](sso.de.md).
