@@ -143,6 +143,9 @@ class ComplianceDocResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    #: Non-blocking findings, e.g. an insurance or bond document without a coverage amount.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
+
     # Computed convenience field
     days_until_expiry: int = Field(
         default=0,

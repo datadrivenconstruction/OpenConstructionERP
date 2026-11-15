@@ -652,6 +652,10 @@ class CostControlSettings(Base):
     # A move must exceed the amount (when above zero) and the percentage (when set) to need evidence.
     evidence_threshold_amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, server_default="0")
     evidence_threshold_pct: Mapped[Decimal | None] = mapped_column(Numeric(7, 2), nullable=True, server_default="10")
+    # Budget ledger: the requester of a transfer or modification may not approve it themselves.
+    segregation_of_duties: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default=text("true")
+    )
     updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     def __repr__(self) -> str:

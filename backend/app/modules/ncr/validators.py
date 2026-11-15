@@ -23,12 +23,12 @@ OPEN_STATUSES = frozenset({"identified", "under_review", "corrective_action", "v
 
 
 class NcrClosureDocumentedRule(QualityRule):
-    """A closed NCR records its root cause and corrective action."""
+    """A closed NCR records a corrective action (error) and its root cause (warning only)."""
 
     rule_id = "ncr.closure_documented"
     name = "Closed NCR has root cause and corrective action"
     standard = NCR_RULE_SET
-    description = "status closed requires root_cause and corrective_action"
+    description = "status closed requires corrective_action; a missing root_cause is a warning"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         ncr = section(context, "ncr")
@@ -36,7 +36,14 @@ class NcrClosureDocumentedRule(QualityRule):
         if ncr.get("status") != "closed":
             return [self.ok(ref)]
         out = [
-            self.fail(context, "field_required_for_state", ref=ref, state="closed", field=field)
+            self.fail(
+                context,
+                "field_required_for_state",
+                ref=ref,
+                state="closed",
+                field=field,
+                severity=Severity.WARNING if field == "root_cause" else None,
+            )
             for field in ("root_cause", "corrective_action")
             if blank(ncr.get(field))
         ]

@@ -20,3 +20,7 @@ async def on_startup() -> None:
     )
 
     register_compliance_docs_permissions()
+
+    from app.modules.compliance_docs.validators import register_compliance_docs_rules
+
+    register_compliance_docs_rules()
