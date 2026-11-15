@@ -315,8 +315,9 @@ async def seed_variations_demo(
 
     # ── Notices ───────────────────────────────────────────────────────────
     notices: list[Notice] = []
+    # Round-robin, not random: a random draw left some demo projects with no register at all.
     for i in range(_NOTICE_COUNT):
-        pid = rng.choice(projects)
+        pid = projects[i % len(projects)]
         recipient = rng.choice(_NOTICE_RECIPIENTS)
         notice = Notice(
             project_id=pid,
@@ -337,7 +338,7 @@ async def seed_variations_demo(
     # ── Variation Requests ────────────────────────────────────────────────
     vrs: list[VariationRequest] = []
     for i in range(_VR_COUNT):
-        pid = rng.choice(projects)
+        pid = projects[i % len(projects)]
         notice_id = rng.choice(notices).id if notices and rng.random() < 0.4 else None
         classification = rng.choice(_VR_CLASSIFICATIONS)
         vr = VariationRequest(
@@ -361,7 +362,7 @@ async def seed_variations_demo(
     # ── Variation Orders ──────────────────────────────────────────────────
     vos: list[VariationOrder] = []
     for i in range(_VO_COUNT):
-        pid = rng.choice(projects)
+        pid = projects[i % len(projects)]
         source_vr = (
             rng.choice([v for v in vrs if v.project_id == pid]) if any(v.project_id == pid for v in vrs) else None
         )
@@ -419,7 +420,7 @@ async def seed_variations_demo(
 
     # ── Site Measurements (50) ────────────────────────────────────────────
     for i in range(_SM_COUNT):
-        pid = rng.choice(projects)
+        pid = projects[i % len(projects)]
         sm = SiteMeasurement(
             project_id=pid,
             recorded_at=_date_offset(rng),
@@ -440,7 +441,7 @@ async def seed_variations_demo(
     # ── Daywork Sheets (80) ───────────────────────────────────────────────
     sheets: list[DayworkSheet] = []
     for i in range(_DW_COUNT):
-        pid = rng.choice(projects)
+        pid = projects[i % len(projects)]
         ds = DayworkSheet(
             project_id=pid,
             sheet_number=_dw_number(i),
