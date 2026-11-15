@@ -10,10 +10,15 @@ const profile = (over: Partial<DemoProfile>): DemoProfile => ({ ...base, ...over
 const routesOf = (id: string) => navGroups.find((g) => g.id === id)!.items.map((i) => i.to);
 
 describe('demo module list', () => {
-  it('is every row of the listed groups, old ids included', () => {
-    const list = demoModulesFor(profile({ groups: ['grp_takeoff', 'grp_handover'] }))!;
-    // Both old groups were folded: their rows are in Estimating and Quality & safety now.
-    expect(list).toEqual([...routesOf('grp_estimating'), ...routesOf('grp_quality')]);
+  it('is every row of the listed groups, in menu order', () => {
+    const list = demoModulesFor(profile({ groups: ['grp_handover', 'grp_takeoff'] }))!;
+    expect(list).toEqual([...routesOf('grp_takeoff'), ...routesOf('grp_handover')]);
+  });
+
+  it('reads an alias id as the group that holds its rows', () => {
+    const list = demoModulesFor(profile({ groups: ['grp_assistant'] }))!;
+    expect(list).toEqual(routesOf('grp_automation_ai'));
+    expect(list).toContain('/chat');
   });
 
   it('shows the whole menu when neither list is given', () => {
@@ -32,11 +37,12 @@ describe('a row in a demo', () => {
     expect(isRowInDemo({ to: '/safety' }, set)).toBe(false);
   });
 
-  it('always keeps home, projects, the assistant and the Learn card', () => {
-    for (const route of ['/', '/projects', '/chat', '/videos']) {
+  it('always keeps home, projects and the Learn card', () => {
+    for (const route of ['/', '/projects', '/packs', '/videos']) {
       expect(DEMO_ALWAYS_ROUTES.has(route), route).toBe(true);
       expect(isRowInDemo({ to: route }, new Set()), route).toBe(true);
     }
+    expect(DEMO_ALWAYS_ROUTES.has('/chat')).toBe(false);
   });
 });
 
@@ -45,11 +51,11 @@ describe('menu sections a demo card advertises', () => {
     const p = profile({ groups: ['grp_overview', 'grp_takeoff', 'grp_safety'] });
     const rows = new Set(demoModulesFor(p)!);
     const expected = navGroups
-      .filter((g) => g.id !== 'grp_learn' && g.id !== 'grp_assistant')
+      .filter((g) => g.id !== 'grp_learn')
       .filter((g) => g.items.some((i) => !DEMO_ALWAYS_ROUTES.has(i.to.split('?')[0]!) && isRowInDemo(i, rows))).length;
-    // Old Takeoff and Safety land in Estimating and Quality; a row listed in two groups lights both.
+    // A row listed in two groups lights both.
     expect(expected).toBeGreaterThanOrEqual(3);
-    expect(demoSectionCount(p)).toEqual({ shown: expected, total: navGroups.length - 2 });
+    expect(demoSectionCount(p)).toEqual({ shown: expected, total: navGroups.length - 1 });
   });
 
   it('counts every group for the full platform', () => {

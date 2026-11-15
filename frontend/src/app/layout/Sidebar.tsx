@@ -43,11 +43,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {
-  ASSISTANT_GROUP_ID,
   LEARN_GROUP_ID,
   canonicalGroupId,
   navGroups,
-  navSectionByRoute,
   type NavGroup,
   type NavItem,
 } from './navCatalog';
@@ -1233,10 +1231,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const learnLabel = learnGroup
     ? t(learnGroup.labelKey, { defaultValue: learnGroup.defaultLabel ?? learnGroup.id })
     : '';
-  const assistantGroup = navGroups.find((group) => group.id === ASSISTANT_GROUP_ID);
-  const assistantItems = assistantGroup ? assistantGroup.items.filter(passesRowGates) : [];
   const loopGroups = applyOrder(
-    navGroups.filter((group) => group.id !== LEARN_GROUP_ID && group.id !== ASSISTANT_GROUP_ID),
+    navGroups.filter((group) => group.id !== LEARN_GROUP_ID),
     menuLayout.groupOrder,
     (group) => group.id,
   );
@@ -1312,30 +1308,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   const renderRow = (item: NavItem, i: number) => renderRowAs(item, i, iconified);
-  // A group's rows with a caption above the first row of each section, when
-  // more than one section has rows on screen; a lone caption only repeats the
-  // group header.
-  const renderGroupRows = (group: NavGroup, rows: NavItem[]) => {
-    const sectionOf = navSectionByRoute(group);
-    const shownSections = new Set(rows.map((item) => sectionOf.get(item.to)).filter(Boolean));
-    if (iconified || shownSections.size < 2) return rows.map(renderRow);
-    return rows.flatMap((item, i) => {
-      const section = sectionOf.get(item.to);
-      const row = renderRow(item, i);
-      if (!section || (i > 0 && sectionOf.get(rows[i - 1]!.to) === section)) return [row];
-      return [
-        <li
-          key={`section:${group.id}:${section.id}`}
-          role="presentation"
-          data-testid={`sidebar-section-${section.id}`}
-          className="px-2.5 pb-0.5 pt-2 text-2xs font-semibold text-content-quaternary"
-        >
-          {t(section.labelKey, { defaultValue: section.defaultLabel })}
-        </li>,
-        row,
-      ];
-    });
-  };
   const renderRowAs = (item: NavItem, i: number, iconified: boolean) => {
     // In-place project-focus annotation (no reorder):
     //   g === null      → route not profile-constrained →
@@ -1608,12 +1580,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             <ul className="space-y-px">{learnItems.map(renderRow)}</ul>
           </LearnSection>
         )}
-        {/* The assistant: one entry under Learn, above Pinned, not a section. */}
-        {assistantItems.length > 0 && (
-          <ul className="mb-1 mt-1 space-y-px" data-testid="sidebar-assistant">
-            {assistantItems.map(renderRow)}
-          </ul>
-        )}
         {/* Pinned section — appears at the top when the user has
             pinned at least one item. No collapsible chevron; just a
             small label + the pinned items in their stored order. */}
@@ -1869,7 +1835,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               isGroupHidden={editingHiddenGroups.includes(group.id)}
               onToggleGroupHidden={() => toggleGroupHidden(group.id)}
             >
-              <ul className="space-y-px">{renderGroupRows(group, visibleItems)}</ul>
+              <ul className="space-y-px">{visibleItems.map(renderRow)}</ul>
             </NavGroupSection>
             </Fragment>
           );

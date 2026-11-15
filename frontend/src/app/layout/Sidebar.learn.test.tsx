@@ -115,7 +115,7 @@ describe('the featured article', () => {
 });
 
 describe('the Learn card', () => {
-  it('opens the menu, above Pinned, with Videos, Cases and Packs', () => {
+  it('opens the menu, above Pinned, with Packs, Cases, Videos and Courses', () => {
     localStorage.setItem('oce-pinned-routes', JSON.stringify(['/boq']));
     renderSidebar();
 
@@ -123,14 +123,13 @@ describe('the Learn card', () => {
     const hrefs = within(learn)
       .getAllByRole('link')
       .map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/videos', '/courses', '/cases', '/packs']);
+    expect(hrefs).toEqual(['/packs', '/cases', '/videos', '/courses']);
 
     const firstLinks = within(nav())
       .getAllByRole('link')
-      .slice(0, 6)
+      .slice(0, 5)
       .map((a) => a.getAttribute('href'));
-    // The assistant entry sits between Learn and Pinned.
-    expect(firstLinks).toEqual(['/videos', '/courses', '/cases', '/packs', '/chat', '/boq']);
+    expect(firstLinks).toEqual(['/packs', '/cases', '/videos', '/courses', '/boq']);
   });
 
   it('marks Packs as the current page on a single pack too', () => {

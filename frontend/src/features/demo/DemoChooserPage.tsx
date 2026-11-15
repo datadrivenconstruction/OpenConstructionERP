@@ -65,13 +65,13 @@ const ACCENT_TEXT_DARK: Record<Accent, string> = {
 const ACCENT_TEXT = 'text-[color:var(--demo-ink)] dark:text-[color:var(--demo-ink-dark)]';
 
 /** Sections every demo keeps (overview, documents, communication): not worth a chip. */
-const BASE_GROUPS = new Set(['grp_overview', 'grp_documents']);
+const BASE_GROUPS = new Set(['grp_overview', 'grp_documents', 'grp_communication']);
 const MAX_CHIPS = 5;
 
 function SectionChips({ profile }: { profile: DemoProfile }) {
   const { t } = useTranslation();
   if (!profile.groups) return null;
-  // Folded section ids name the group that holds their rows now; list each once.
+  // An alias id names the group that holds its rows; list each once.
   const own = [...new Set(profile.groups.map(canonicalGroupId))].filter((g) => !BASE_GROUPS.has(g));
   const shown = own.slice(0, MAX_CHIPS);
   const rest = own.length - shown.length;
