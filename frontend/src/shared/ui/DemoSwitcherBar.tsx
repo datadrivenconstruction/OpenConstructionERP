@@ -148,7 +148,7 @@ export function useDemoProjects() {
  * cards and tabs open a demo and leave the visitor's language alone, so the
  * select names a market only while the screen really is in its language.
  */
-export function DemoMarketSwitch({ className }: { className?: string }) {
+export function DemoMarketSwitch({ className, compact = false }: { className?: string; compact?: boolean }) {
   const { t, i18n } = useTranslation();
   const { bySlug, open } = useDemoProjects();
   const active = useDemoSessionStore((s) => s.slug);
@@ -182,7 +182,7 @@ export function DemoMarketSwitch({ className }: { className?: string }) {
       title={hint}
     >
       <Languages size={16} className="shrink-0" aria-hidden="true" />
-      <span className="hidden shrink-0 font-medium sm:inline">{label}</span>
+      {!compact && <span className="hidden shrink-0 font-medium sm:inline">{label}</span>}
       <select
         data-testid="demo-market-switch"
         aria-label={label}
@@ -256,12 +256,12 @@ export function DemoSwitcherBar() {
   return (
     <nav
       aria-label={t('demo_switcher.label', { defaultValue: 'Demo projects' })}
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border-light bg-surface-primary/90 px-4 py-2 text-sm backdrop-blur"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border-light bg-surface-primary/90 px-4 py-1.5 text-sm backdrop-blur lg:flex-nowrap"
     >
       <button
         type="button"
         onClick={() => navigate(DEMO_CHOOSER_PATH)}
-        className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-semibold text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
+        className="flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 font-semibold text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
       >
         <LayoutGrid size={16} className="shrink-0" />
         {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
@@ -286,11 +286,14 @@ export function DemoSwitcherBar() {
         data-testid="demo-switcher-body"
         className={clsx(
           expanded ? 'flex' : 'hidden',
-          'w-full flex-wrap items-center gap-x-3 gap-y-2 sm:flex sm:w-auto sm:flex-1',
+          'w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-2 sm:flex sm:w-auto sm:flex-1 lg:flex-nowrap',
         )}
       >
-        <DemoMarketSwitch className="max-w-full sm:max-w-sm" />
-        <div role="tablist" className="flex flex-wrap gap-1.5">
+        {/* One line on a desktop: the tabs scroll sideways rather than wrap under the switch. */}
+        <div
+          role="tablist"
+          className="flex min-w-0 flex-wrap gap-1.5 lg:flex-1 lg:flex-nowrap lg:overflow-x-auto lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
+        >
           {available.map((profile) => {
             const p = bySlug.get(profile.slug);
             const active = !!p && p.id === activeProjectId;
@@ -307,7 +310,7 @@ export function DemoSwitcherBar() {
                   open(profile.slug);
                 }}
                 className={clsx(
-                  'flex items-center gap-2 rounded-full border px-4 py-1.5 font-medium transition-colors',
+                  'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border py-1 pe-3.5 ps-3 text-[13px] font-medium transition-colors',
                   active
                     ? 'border-transparent bg-oe-blue text-white shadow-sm'
                     : 'border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
@@ -319,21 +322,34 @@ export function DemoSwitcherBar() {
                   kind={face.kind}
                   accent={active ? 'rgba(255,255,255,0.92)' : ACCENT_SWATCH[profile.appearance.accent]}
                   active={active}
-                  size={24}
-                  className="-my-1 -ms-2"
+                  size={22}
+                  className="-my-1 -ms-1.5"
                 />
                 {t(`demo_switcher.tab_${profile.slug.replace(/-/g, '_')}`)}
               </button>
             );
           })}
         </div>
-        <span className="ms-auto flex items-center gap-1 text-xs text-content-tertiary">
-          <Lock size={12} className="shrink-0" />
-          {t('demo_switcher.read_only', {
-            defaultValue: 'Read-only demo: many functions are limited. Use demo data only, uploads are off.',
-          })}
-        </span>
+        <DemoMarketSwitch compact className="max-w-full shrink-0 sm:max-w-[15rem]" />
+        <ReadOnlyNote />
       </div>
     </nav>
+  );
+}
+
+/** The read-only notice: a full sentence on a phone, a lock with the sentence on hover on a desktop. */
+function ReadOnlyNote() {
+  const { t } = useTranslation();
+  const text = t('demo_switcher.read_only', {
+    defaultValue: 'Read-only demo: many functions are limited. Use demo data only, uploads are off.',
+  });
+  return (
+    <span
+      title={text}
+      className="flex shrink-0 items-center gap-1 rounded-full text-xs text-content-tertiary lg:h-7 lg:w-7 lg:justify-center lg:border lg:border-border-light"
+    >
+      <Lock size={12} className="shrink-0" aria-hidden="true" />
+      <span className="lg:sr-only">{text}</span>
+    </span>
   );
 }
