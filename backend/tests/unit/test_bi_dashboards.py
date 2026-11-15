@@ -2426,22 +2426,26 @@ async def test_safety_trir_computes_the_rate_when_exposure_hours_are_recorded(
 
 
 async def test_equipment_utilization_reads_the_daily_log() -> None:
-    from types import SimpleNamespace
+    from datetime import date
 
     from app.modules.bi_dashboards import kpis
 
-    days = [
-        SimpleNamespace(worked_hours=Decimal("6"), idle_hours=Decimal("2")),
-        SimpleNamespace(worked_hours=Decimal("3"), idle_hours=Decimal("1")),
-    ]
+    seen: list[str] = []
     result_proxy = MagicMock()
-    result_proxy.scalars.return_value.all.return_value = days
+    # Two days of 6+2 and 3+1 hours, summed by the database.
+    result_proxy.one.return_value = (Decimal("9"), Decimal("3"), 2)
     fake = MagicMock()
 
-    async def execute(_stmt: Any) -> Any:
+    async def execute(stmt: Any) -> Any:
+        seen.append(str(stmt.compile(compile_kwargs={"literal_binds": False})))
         return result_proxy
 
     fake.execute = execute
-    result = await kpis.equipment_utilization_kpi(fake, project_id=uuid.uuid4())
+    result = await kpis.equipment_utilization_kpi(
+        fake, project_id=uuid.uuid4(), period_start=date(2026, 1, 1), period_end=date(2026, 1, 31)
+    )
     assert result.source_record_count == 2
     assert result.value == Decimal("75")
+    sql = seen[0].lower()
+    assert "sum(" in sql and "count(" in sql
+    assert sql.count("oe_equipment") >= 1 and ".day >=" in sql and ".day <=" in sql
