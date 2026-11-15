@@ -19,23 +19,23 @@ function base64Url(buf: Uint8Array): string {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-export async function beginOidcLogin(): Promise<{ state: string; nonce: string; codeChallenge: string }> {
+export async function beginOidcLogin(provider?: string): Promise<{ state: string; nonce: string; codeChallenge: string }> {
   const state = randomString();
   const nonce = randomString();
   const verifier = randomString(48);
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ state, nonce, verifier }));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ state, nonce, verifier, provider }));
   return { state, nonce, codeChallenge: base64Url(new Uint8Array(digest)) };
 }
 
 /** Returns the pending login if *state* matches, and clears it either way. */
-export function takeOidcLogin(state: string | null): { nonce: string; verifier: string } | null {
+export function takeOidcLogin(state: string | null): { nonce: string; verifier: string; provider?: string } | null {
   const raw = sessionStorage.getItem(STORAGE_KEY);
   sessionStorage.removeItem(STORAGE_KEY);
   if (!raw || !state) return null;
   try {
-    const pending = JSON.parse(raw) as { state: string; nonce: string; verifier: string };
-    return pending.state === state ? { nonce: pending.nonce, verifier: pending.verifier } : null;
+    const pending = JSON.parse(raw) as { state: string; nonce: string; verifier: string; provider?: string };
+    return pending.state === state ? { nonce: pending.nonce, verifier: pending.verifier, provider: pending.provider } : null;
   } catch {
     return null;
   }
