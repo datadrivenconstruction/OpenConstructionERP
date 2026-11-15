@@ -312,7 +312,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
               version,
             })}
           </h2>
-          <span className="hidden md:inline truncate text-xs text-content-secondary">
+          <span className="hidden 2xl:inline truncate text-xs text-content-secondary">
             {t('whatsnew.tagline', {
               defaultValue: 'Tap a chip for details.',
             })}
@@ -326,7 +326,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
          *  inside that context cannot escape it via z-index — it always
          *  paints below sibling widgets on the dashboard. Portaling to
          *  document.body removes that constraint. */}
-        <div className="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:flex-1 sm:basis-0">
+        <div className="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:min-w-[36rem] sm:flex-1 sm:basis-0">
           {sections.map((s) => {
             const Icon = s.icon;
             const expanded = openChipId === s.id;
