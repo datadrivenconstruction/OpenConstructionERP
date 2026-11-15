@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} do chính bạn yêu cầu nên bạn không thể phê duyệt (dự án này đang bật phân tách nhiệm vụ).",
       "suggestion": "Nhờ người phê duyệt khác quyết định, hoặc tắt phân tách nhiệm vụ trong cài đặt sổ cái."
+    },
+    "sod_prepared": {
+      "fail": "{code} do chính bạn chỉnh sửa hoặc gửi lần cuối nên bạn không thể phê duyệt (dự án này đang bật phân tách nhiệm vụ).",
+      "suggestion": "Nhờ người phê duyệt khác quyết định."
+    },
+    "sod_unattributed": {
+      "fail": "{code} chưa có người yêu cầu được ghi nhận nên không thể phê duyệt khi đang bật phân tách nhiệm vụ.",
+      "suggestion": "Từ chối và nhập lại để ghi nhận người yêu cầu."
     }
   },
   "schedule": {

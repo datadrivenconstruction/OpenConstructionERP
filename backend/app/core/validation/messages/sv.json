@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} begärdes av dig, så du kan inte godkänna den (funktionsuppdelning är påslagen för projektet).",
       "suggestion": "Be en annan godkännare avgöra den, eller stäng av funktionsuppdelning i inställningarna för huvudboken."
+    },
+    "sod_prepared": {
+      "fail": "{code} redigerades eller skickades senast av dig, så du kan inte godkänna den (funktionsuppdelning är påslagen för projektet).",
+      "suggestion": "Be en annan godkännare avgöra den."
+    },
+    "sod_unattributed": {
+      "fail": "{code} har ingen registrerad begärare, så den kan inte godkännas medan funktionsuppdelning är påslagen.",
+      "suggestion": "Avslå den och registrera den på nytt så att begäraren registreras."
     }
   },
   "schedule": {

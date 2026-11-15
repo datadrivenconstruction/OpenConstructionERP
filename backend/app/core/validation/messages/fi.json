@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "Pyysit koodin {code} itse, joten et voi hyväksyä sitä (tehtävien erottelu on päällä tässä hankkeessa).",
       "suggestion": "Pyydä toista hyväksyjää päättämään tai poista tehtävien erottelu käytöstä kirjan asetuksissa."
+    },
+    "sod_prepared": {
+      "fail": "Viimeksi muokkasit tai lähetit {code} itse, joten et voi hyväksyä sitä (tehtävien erottelu on päällä tässä hankkeessa).",
+      "suggestion": "Pyydä toista hyväksyjää päättämään."
+    },
+    "sod_unattributed": {
+      "fail": "Kohteelle {code} ei ole kirjattu pyytäjää, joten sitä ei voi hyväksyä tehtävien erottelun ollessa päällä.",
+      "suggestion": "Hylkää se ja syötä uudelleen, jotta pyytäjä kirjautuu."
     }
   },
   "schedule": {

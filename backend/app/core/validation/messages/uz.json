@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} soʻrovini oʻzingiz yuborgansiz, shuning uchun uni tasdiqlay olmaysiz (bu loyihada vazifalarni ajratish yoqilgan).",
       "suggestion": "Qarorni boshqa tasdiqlovchidan soʻrang yoki kitob sozlamalarida vazifalarni ajratishni oʻchiring."
+    },
+    "sod_prepared": {
+      "fail": "{code} ni oxirgi marta siz tahrirlagan yoki topshirgansiz, shuning uchun uni tasdiqlay olmaysiz (bu loyihada vazifalarni ajratish yoqilgan).",
+      "suggestion": "Qarorni boshqa tasdiqlovchidan soʻrang."
+    },
+    "sod_unattributed": {
+      "fail": "{code} uchun soʻrovchi qayd etilmagan, shuning uchun vazifalarni ajratish yoqilgan paytda uni tasdiqlab boʻlmaydi.",
+      "suggestion": "Uni rad eting va qayta kiriting, shunda soʻrovchi qayd etiladi."
     }
   },
   "schedule": {

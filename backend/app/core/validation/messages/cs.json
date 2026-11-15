@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} jste požadovali vy, proto jej nemůžete schválit (u tohoto projektu je zapnuto oddělení povinností).",
       "suggestion": "Požádejte o rozhodnutí jiného schvalovatele, nebo oddělení povinností vypněte v nastavení knihy."
+    },
+    "sod_prepared": {
+      "fail": "{code} naposledy upravili nebo odeslali jste vy, proto jej nemůžete schválit (u tohoto projektu je zapnuto oddělení povinností).",
+      "suggestion": "Požádejte o rozhodnutí jiného schvalovatele."
+    },
+    "sod_unattributed": {
+      "fail": "U {code} není zaznamenán žadatel, proto jej nelze schválit, dokud je zapnuto oddělení povinností.",
+      "suggestion": "Zamítněte jej a zadejte znovu, aby se žadatel zaznamenal."
     }
   },
   "schedule": {

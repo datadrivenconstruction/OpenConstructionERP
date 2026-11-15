@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} foi solicitado por si, por isso não o pode aprovar (a segregação de funções está ativa neste projeto).",
       "suggestion": "Peça a outro aprovador que decida, ou desative a segregação de funções nas definições do livro."
+    },
+    "sod_prepared": {
+      "fail": "{code} foi editado ou submetido por si por último, por isso não o pode aprovar (a segregação de funções está ativa neste projeto).",
+      "suggestion": "Peça a outro aprovador que decida."
+    },
+    "sod_unattributed": {
+      "fail": "{code} não tem um solicitante registado, por isso não pode ser aprovado enquanto a segregação de funções estiver ativa.",
+      "suggestion": "Rejeite-o e introduza-o novamente para que o solicitante fique registado."
     }
   },
   "schedule": {

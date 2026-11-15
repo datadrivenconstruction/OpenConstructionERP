@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} ste zatražili vi, pa ga ne možete odobriti (razdvajanje dužnosti uključeno je za ovaj projekt).",
       "suggestion": "Zamolite drugog odobravatelja da odluči ili isključite razdvajanje dužnosti u postavkama knjige."
+    },
+    "sod_prepared": {
+      "fail": "{code} ste zadnji put uredili ili poslali vi, pa ga ne možete odobriti (razdvajanje dužnosti uključeno je za ovaj projekt).",
+      "suggestion": "Zamolite drugog odobravatelja da odluči."
+    },
+    "sod_unattributed": {
+      "fail": "Za {code} nema zabilježenog podnositelja, pa se ne može odobriti dok je razdvajanje dužnosti uključeno.",
+      "suggestion": "Odbijte ga i unesite ponovno kako bi se zabilježio podnositelj."
     }
   },
   "schedule": {

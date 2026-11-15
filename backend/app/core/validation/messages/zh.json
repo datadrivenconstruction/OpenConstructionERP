@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} 由您本人提出，因此您不能批准它（本项目已启用职责分离）。",
       "suggestion": "请另一位审批人决定，或在账簿设置中关闭职责分离。"
+    },
+    "sod_prepared": {
+      "fail": "{code} 最后一次由您本人编辑或提交，因此您不能批准它（本项目已启用职责分离）。",
+      "suggestion": "请另一位审批人决定。"
+    },
+    "sod_unattributed": {
+      "fail": "{code} 没有记录提出人，因此在职责分离开启期间无法批准。",
+      "suggestion": "请驳回后重新录入，以记录提出人。"
     }
   },
   "schedule": {

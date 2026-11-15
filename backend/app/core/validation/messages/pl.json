@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "Wniosek {code} złożył(a) Pan(i), więc nie można go zatwierdzić (rozdział obowiązków jest włączony w tym projekcie).",
       "suggestion": "Poproś innego zatwierdzającego o decyzję lub wyłącz rozdział obowiązków w ustawieniach księgi."
+    },
+    "sod_prepared": {
+      "fail": "{code} ostatnio edytował(a) lub złożył(a) Pan(i), więc nie można go zatwierdzić (rozdział obowiązków jest włączony w tym projekcie).",
+      "suggestion": "Poproś innego zatwierdzającego o decyzję."
+    },
+    "sod_unattributed": {
+      "fail": "Dla {code} nie zapisano wnioskodawcy, dlatego nie można go zatwierdzić, dopóki rozdział obowiązków jest włączony.",
+      "suggestion": "Odrzuć go i wprowadź ponownie, aby zapisał się wnioskodawca."
     }
   },
   "schedule": {

@@ -1627,6 +1627,7 @@ const resource = {
     "accountingSync.category.payroll_cost": "Payroll cost",
     "accountingSync.category.payroll_liability": "Wages payable",
     "api_errors.auth.sso_required": "Your organisation requires single sign-on. Use the SSO button to sign in.",
+    "api_errors.budget_ledger_sod_admin_only": "Only an administrator can switch segregation of duties off.",
     "bi_feed.col_columns": "Columns",
     "bi_feed.col_feed": "Feed",
     "bi_feed.col_rows": "Rows",

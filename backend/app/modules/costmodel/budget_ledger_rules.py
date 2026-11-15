@@ -6,7 +6,8 @@
 * ``budget_ledger.below_committed``: a transfer or modification would take a line's budget below what is
   already committed on it.
 * ``budget_ledger.approved_immutable``: an approved or rejected entry is edited or deleted.
-* ``budget_ledger.self_approval``: the requester approves their own entry while segregation of duties is on.
+* ``budget_ledger.self_approval``: while segregation of duties is on, the requester, last editor or submitter
+  approves the entry, or the entry has no recorded requester.
 
 Each rule reads ``context.data["budget_ledger"]`` and is silent on any other payload.
 """
@@ -149,23 +150,30 @@ class ApprovedImmutableRule(_LedgerRule):
 class SelfApprovalRule(_LedgerRule):
     rule_id = "budget_ledger.self_approval"
     name = "Requester does not approve own entry"
-    description = "With segregation of duties on, whoever requested a transfer or modification cannot approve it."
+    description = (
+        "With segregation of duties on, whoever requested, last edited or submitted a transfer or modification"
+        " cannot approve it, and an entry with no recorded requester cannot be approved."
+    )
 
     def check(self, context: ValidationContext, payload: dict[str, Any]) -> list[RuleResult]:
-        if (
-            payload.get("action") == "approve"
-            and payload.get("segregation_of_duties", True)
-            and payload.get("self_approval")
-        ):
-            return [
-                self._fail(
-                    context,
-                    "self_approval",
-                    element_ref=str(payload.get("code") or ""),
-                    code=str(payload.get("code") or ""),
+        if payload.get("action") != "approve" or not payload.get("segregation_of_duties", True):
+            return []
+        key = next(
+            (
+                k
+                for flag, k in (
+                    ("unattributed", "sod_unattributed"),
+                    ("self_approval", "self_approval"),
+                    ("prepared_by_approver", "sod_prepared"),
                 )
-            ]
-        return []
+                if payload.get(flag)
+            ),
+            None,
+        )
+        if key is None:
+            return []
+        code = str(payload.get("code") or "")
+        return [self._fail(context, key, element_ref=code, code=code)]
 
 
 LEDGER_RULES: tuple[type[_LedgerRule], ...] = (

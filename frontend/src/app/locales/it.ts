@@ -62818,6 +62818,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "L'ordine {{po_number}} non può ancora essere fatturato: si può fatturare solo un ordine emesso.",
     "api_errors.invoice_capture_invoice_read_only": "Una fattura approvata o registrata è di sola lettura. Riportala prima in bozza.",
     "api_errors.module_disabled": "Il modulo {{module}} è disattivato per questo spazio di lavoro. Un amministratore può attivarlo in Moduli > Pacchetti di soluzioni.",
+    "api_errors.budget_ledger_sod_admin_only": "Solo un amministratore può disattivare la separazione dei compiti.",
     "conv.stage_upload": "Caricamento del file",
     "conv.stage_upload_hint": "Invio del file al server. Tieni aperta questa scheda finché non termina.",
     "conv.stage_converter": "Preparazione del convertitore",

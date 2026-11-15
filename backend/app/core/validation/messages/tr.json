@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} talebini siz yaptınız, bu yüzden onaylayamazsınız (bu projede görev ayrılığı açık).",
       "suggestion": "Kararı başka bir onaylayıcıya bırakın veya defter ayarlarında görev ayrılığını kapatın."
+    },
+    "sod_prepared": {
+      "fail": "{code} en son sizin tarafınızdan düzenlendi veya gönderildi, bu yüzden onaylayamazsınız (bu projede görev ayrılığı açık).",
+      "suggestion": "Kararı başka bir onaylayıcıya bırakın."
+    },
+    "sod_unattributed": {
+      "fail": "{code} için kayıtlı bir talep sahibi yok, bu yüzden görev ayrılığı açıkken onaylanamaz.",
+      "suggestion": "Reddedip yeniden girin, talep sahibi kaydedilsin."
     }
   },
   "schedule": {

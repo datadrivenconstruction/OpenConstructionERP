@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} a fost solicitat de dumneavoastră, deci nu îl puteți aproba (separarea atribuțiilor este activă pentru acest proiect).",
       "suggestion": "Cereți altui aprobator să decidă sau dezactivați separarea atribuțiilor în setările registrului."
+    },
+    "sod_prepared": {
+      "fail": "{code} a fost ultima dată modificat sau trimis de dumneavoastră, deci nu îl puteți aproba (separarea atribuțiilor este activă pentru acest proiect).",
+      "suggestion": "Cereți altui aprobator să decidă."
+    },
+    "sod_unattributed": {
+      "fail": "{code} nu are un solicitant înregistrat, deci nu poate fi aprobat cât timp separarea atribuțiilor este activă.",
+      "suggestion": "Respingeți-l și introduceți-l din nou, pentru ca solicitantul să fie înregistrat."
     }
   },
   "schedule": {

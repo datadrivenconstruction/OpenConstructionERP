@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} esitati teie, seega te ei saa seda kinnitada (selle projekti ülesannete lahusus on sisse lülitatud).",
       "suggestion": "Paluge otsustada mõnel teisel kinnitajal või lülitage ülesannete lahusus pearaamatu seadetes välja."
+    },
+    "sod_prepared": {
+      "fail": "{code} muutis või esitas viimasena teie, seega te ei saa seda kinnitada (selle projekti ülesannete lahusus on sisse lülitatud).",
+      "suggestion": "Paluge otsustada mõnel teisel kinnitajal."
+    },
+    "sod_unattributed": {
+      "fail": "Kirjas ei ole {code} taotlejat, seega seda ei saa kinnitada, kui ülesannete lahusus on sisse lülitatud.",
+      "suggestion": "Lükake see tagasi ja sisestage uuesti, et taotleja salvestuks."
     }
   },
   "schedule": {

@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} is door u aangevraagd, dus u kunt het niet goedkeuren (functiescheiding staat aan voor dit project).",
       "suggestion": "Vraag een andere goedkeurder om te beslissen, of zet functiescheiding uit in de instellingen van het grootboek."
+    },
+    "sod_prepared": {
+      "fail": "{code} is het laatst door u bewerkt of ingediend, dus u kunt het niet goedkeuren (functiescheiding staat aan voor dit project).",
+      "suggestion": "Vraag een andere goedkeurder om te beslissen."
+    },
+    "sod_unattributed": {
+      "fail": "Bij {code} is geen aanvrager vastgelegd, dus het kan niet worden goedgekeurd zolang functiescheiding aan staat.",
+      "suggestion": "Wijs het af en voer het opnieuw in, zodat de aanvrager wordt vastgelegd."
     }
   },
   "schedule": {

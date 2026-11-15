@@ -62535,6 +62535,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "{{po_number}} buyurtmasiga hozircha hisob-faktura chiqarib boʻlmaydi: faqat berilgan buyurtmaga chiqariladi.",
     "api_errors.invoice_capture_invoice_read_only": "Tasdiqlangan yoki oʻtkazilgan hisob-faktura faqat oʻqish uchun. Avval uni qoralamaga qaytaring.",
     "api_errors.module_disabled": "{{module}} moduli ushbu ish maydoni uchun oʻchirilgan. Administrator uni Modullar > Yechim paketlari boʻlimida yoqishi mumkin.",
+    "api_errors.budget_ledger_sod_admin_only": "Vazifalarni ajratishni faqat administrator oʻchira oladi.",
     "conv.stage_upload": "Fayl yuklanmoqda",
     "conv.stage_upload_hint": "Fayl serverga yuborilmoqda. Tugaguncha bu varaqni ochiq qoldiring.",
     "conv.stage_converter": "Konvertor tayyorlanmoqda",

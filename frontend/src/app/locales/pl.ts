@@ -63141,6 +63141,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "Zamówienia {{po_number}} nie można jeszcze zafakturować: fakturować można tylko wystawione zamówienie.",
     "api_errors.invoice_capture_invoice_read_only": "Zatwierdzona lub zaksięgowana faktura jest tylko do odczytu. Najpierw cofnij ją do szkicu.",
     "api_errors.module_disabled": "Moduł {{module}} jest wyłączony w tym obszarze roboczym. Administrator może go włączyć w Moduły > Pakiety rozwiązań.",
+    "api_errors.budget_ledger_sod_admin_only": "Tylko administrator może wyłączyć rozdział obowiązków.",
     "conv.stage_upload": "Przesyłanie pliku",
     "conv.stage_upload_hint": "Plik jest wysyłany na serwer. Nie zamykaj tej karty, dopóki się nie skończy.",
     "conv.stage_converter": "Przygotowanie konwertera",

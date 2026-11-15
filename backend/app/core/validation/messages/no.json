@@ -1787,6 +1787,14 @@
     "self_approval": {
       "fail": "{code} ble bedt om av deg, så du kan ikke godkjenne den (funksjonsskille er slått på for dette prosjektet).",
       "suggestion": "Be en annen godkjenner om å avgjøre den, eller slå av funksjonsskille i innstillingene for hovedboken."
+    },
+    "sod_prepared": {
+      "fail": "{code} ble sist redigert eller sendt inn av deg, så du kan ikke godkjenne den (funksjonsskille er slått på for dette prosjektet).",
+      "suggestion": "Be en annen godkjenner om å avgjøre den."
+    },
+    "sod_unattributed": {
+      "fail": "{code} har ingen registrert forespørsel, så den kan ikke godkjennes mens funksjonsskille er slått på.",
+      "suggestion": "Avvis den og registrer den på nytt, slik at forespørselen blir registrert."
     }
   },
   "schedule": {
