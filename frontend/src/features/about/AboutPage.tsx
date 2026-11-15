@@ -23,9 +23,10 @@ import { CheckForUpdatesButton, UpdateInlineNotice } from '@/shared/ui/UpdateChe
 import { Changelog, getRecentReleases } from './Changelog';
 import { ThirdPartyLicenses } from './ThirdPartyLicenses';
 import { publicAsset } from '@/shared/lib/publicAsset';
-import { CONTRIBUTORS, SPONSORS, acknowledgedUrl, type Acknowledged } from './acknowledgments';
+import { CONTRIBUTORS, acknowledgedUrl, type Acknowledged } from './acknowledgments';
 
 const REPO_URL = 'https://github.com/datadrivenconstruction/OpenConstructionERP';
+const ACKNOWLEDGMENTS_URL = `${REPO_URL}/blob/main/docs/legal/ACKNOWLEDGMENTS.md`;
 // Clean product URL - "?source=search" is G2's search-result tracking.
 const G2_REVIEWS_URL = 'https://www.g2.com/products/openconstructionerp/reviews';
 const PAYPAL_DONATE_URL = 'https://www.paypal.com/donate/?hosted_button_id=DWBCLNLY2VWAA';
@@ -1299,77 +1300,24 @@ export function AboutPage() {
             })}
           </p>
 
-          {/* Sponsors and donors lead the wall when we have any; otherwise a
-              single inviting line stands in for an empty group. */}
-          {SPONSORS.length > 0 ? (
-            <div className="mb-6">
-              <p className="oe-overline mb-3">
-                {t('about.thanks_sponsors_label', { defaultValue: 'Sponsors and donors' })}
-              </p>
-              {/* Text-only nickname chips - no avatars or remote images, so the
-                  wall stays self-contained and reads cleanly offline. When a
-                  sponsor supplies a handle or url the chip links to it. */}
-              <div className="flex flex-wrap items-center gap-2">
-                {SPONSORS.map(s => {
-                  const url = acknowledgedUrl(s);
-                  const chipCls =
-                    'inline-flex items-center gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success/10 px-4 py-2 text-sm font-semibold text-content-primary';
-                  const label = (
-                    <>
-                      <HandCoins size={20} className="shrink-0 text-semantic-success" />
-                      <span>{s.name}</span>
-                    </>
-                  );
-                  return url ? (
-                    <a
-                      key={s.handle ?? s.name}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={s.name}
-                      className={clsx(chipCls, 'transition-colors hover:border-semantic-success/70 hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1')}
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <span key={s.handle ?? s.name} title={s.name} className={chipCls}>
-                      {label}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-semantic-success/30 bg-semantic-success/10 px-3.5 py-2.5">
-              <span className="text-xs text-content-secondary">
-                {t('about.thanks_be_first', { defaultValue: 'No sponsors yet - be the first to back the project.' })}
-              </span>
-              <a
-                href={GITHUB_SPONSORS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-semantic-success hover:underline"
-              >
-                <Github size={12} />
-                {t('about.thanks_be_first_github', { defaultValue: 'Sponsor on GitHub' })}
-              </a>
-              <span aria-hidden className="text-content-quaternary">&middot;</span>
-              <a
-                href={PAYPAL_DONATE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-semantic-success hover:underline"
-              >
-                <HandCoins size={12} />
-                {t('about.thanks_be_first_paypal', { defaultValue: 'Donate via PayPal' })}
-              </a>
-            </div>
-          )}
-
           {/* Contributors and reporters - everyone tracked in ACKNOWLEDGMENTS.md. */}
-          <p className="oe-overline mb-3">
-            {t('about.thanks_contributors_label', { defaultValue: 'Contributors and reporters' })}
-          </p>
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <p className="oe-overline">
+              {t('about.thanks_contributors_label', { defaultValue: 'Contributors and reporters' })}
+              <span className="ms-2 rounded-full bg-surface-secondary px-2 py-0.5 tabular-nums text-content-secondary">
+                {CONTRIBUTORS.length}
+              </span>
+            </p>
+            <a
+              href={ACKNOWLEDGMENTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-oe-blue hover:underline"
+            >
+              {t('dashboard.view_all', { defaultValue: 'View all' })}
+              <ExternalLink size={12} aria-hidden="true" />
+            </a>
+          </div>
           <div className="flex flex-wrap gap-3">
             {CONTRIBUTORS.map(c => (
               <AckAvatar key={c.handle ?? c.name} entry={c} />
