@@ -76,16 +76,14 @@ export interface TemplateFromBoqBody {
   renumber: boolean;
 }
 
-const BASE = '/v1/boq/boqs/templates';
-
 export const templatesApi = {
-  get: (id: string) => apiGet<TemplateDetail>(`${BASE}/${id}/`),
-  create: (body: TemplateWriteBody) => apiPost<TemplateDetail>(`${BASE}/`, body),
-  update: (id: string, body: TemplateWriteBody) => apiPut<TemplateDetail>(`${BASE}/${id}/`, body),
-  remove: (id: string) => apiDelete(`${BASE}/${id}/`),
-  duplicate: (id: string) => apiPost<TemplateDetail>(`${BASE}/${id}/duplicate/`, {}),
-  validate: (body: TemplateWriteBody) => apiPost<TemplateIssue[]>(`${BASE}/validate/`, body),
-  fromBoq: (body: TemplateFromBoqBody) => apiPost<TemplateDetail>(`${BASE}/from-boq/`, body),
+  get: (id: string) => apiGet<TemplateDetail>(`/v1/boq/boqs/templates/${id}/`),
+  create: (body: TemplateWriteBody) => apiPost<TemplateDetail>(`/v1/boq/boqs/templates/`, body),
+  update: (id: string, body: TemplateWriteBody) => apiPut<TemplateDetail>(`/v1/boq/boqs/templates/${id}/`, body),
+  remove: (id: string) => apiDelete(`/v1/boq/boqs/templates/${id}/`),
+  duplicate: (id: string) => apiPost<TemplateDetail>(`/v1/boq/boqs/templates/${id}/duplicate/`, {}),
+  validate: (body: TemplateWriteBody) => apiPost<TemplateIssue[]>(`/v1/boq/boqs/templates/validate/`, body),
+  fromBoq: (body: TemplateFromBoqBody) => apiPost<TemplateDetail>(`/v1/boq/boqs/templates/from-boq/`, body),
 };
 
 export function toWriteBody(t: TemplateDetail | TemplateWriteBody): TemplateWriteBody {
