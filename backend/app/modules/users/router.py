@@ -587,12 +587,16 @@ async def saml_login(request: Request) -> RedirectResponse:
     return RedirectResponse(saml.login_url(s, request.url.netloc, request.url.path), status_code=302)
 
 
-@router.post("/auth/saml/acs/", response_model=TokenResponse)
+@router.post("/auth/saml/acs/", response_model=None)
 async def saml_acs(
     request: Request,
     service: UserService = Depends(_get_service),
-) -> TokenResponse:
-    """Assertion consumer service: verify the SAML response and issue local JWT tokens."""
+) -> TokenResponse | RedirectResponse:
+    """Assertion consumer service: verify the SAML response and issue local JWT tokens.
+
+    A browser form post (the identity provider's redirect) is sent on to the SPA callback page with
+    the tokens in the URL fragment; any other client gets the token pair as JSON.
+    """
     from app.config import get_settings
     from app.modules.users import oidc, saml
 
@@ -603,7 +607,7 @@ async def saml_acs(
     info = saml.read_response(s, request.url.netloc, request.url.path, form)
     if not info["sub"] or not info["email"]:
         raise oidc.oidc_error(400, "missing_claims", "SAML response did not carry a subject or email.")
-    return await service.oidc_login(
+    tokens = await service.oidc_login(
         oidc_sub=info["sub"],
         oidc_issuer=s.saml_idp_entity_id,
         email=info["email"],
@@ -612,6 +616,12 @@ async def saml_acs(
         role_from_groups=oidc.resolve_role(info["groups"], s.oidc_group_role_map),
         default_role=s.oidc_default_role,
     )
+    if "text/html" in request.headers.get("accept", ""):
+        from urllib.parse import urlencode
+
+        fragment = urlencode({"access_token": tokens.access_token, "refresh_token": tokens.refresh_token})
+        return RedirectResponse(f"/auth/saml/callback#{fragment}", status_code=303)
+    return tokens
 
 
 # ── Desktop first-run / bootstrap ───────────────────────────────────────────
