@@ -200,6 +200,7 @@ def test_every_registered_repair_can_be_imported() -> None:
     of that check.
     """
     import importlib
+    import importlib.util
     import inspect
 
     from app.core.data_repairs import discover_data_repairs
@@ -213,4 +214,6 @@ def test_every_registered_repair_can_be_imported() -> None:
                 names = stripped.split(" import ", 1)[1]
                 imported = importlib.import_module(module)
                 for name in (n.strip() for n in names.split(",")):
-                    assert hasattr(imported, name), f"{repair.repair_id}: {module} has no {name!r}"
+                    # ``from pkg import submodule`` is valid before the submodule is first imported.
+                    found = hasattr(imported, name) or importlib.util.find_spec(f"{module}.{name}") is not None
+                    assert found, f"{repair.repair_id}: {module} has no {name!r}"
