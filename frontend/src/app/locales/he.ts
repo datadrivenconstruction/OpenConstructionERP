@@ -61255,6 +61255,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "לא ניתן עדיין לחייב את ההזמנה {{po_number}}: ניתן לחייב רק הזמנה שהונפקה.",
     "api_errors.invoice_capture_invoice_read_only": "חשבונית מאושרת או מנוקדת היא לקריאה בלבד. החזר אותה קודם לטיוטה.",
     "api_errors.module_disabled": "המודול {{module}} כבוי בסביבת עבודה זו. מנהל מערכת יכול להפעיל אותו תחת מודולים > חבילות פתרונות.",
+    "api_errors.budget_ledger_sod_admin_only": "רק מנהל יכול לכבות את הפרדת התפקידים.",
     "conv.stage_upload": "מעלה את הקובץ",
     "conv.stage_upload_hint": "הקובץ נשלח לשרת. השאירו את הלשונית פתוחה עד לסיום.",
     "conv.stage_converter": "מכין את הממיר",

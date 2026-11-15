@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} è stato richiesto da lei, quindi non può approvarlo (la separazione dei compiti è attiva per questo progetto).",
       "suggestion": "Chieda a un altro approvatore di decidere, oppure disattivi la separazione dei compiti nelle impostazioni del registro."
+    },
+    "sod_prepared": {
+      "fail": "{code} è stato modificato o inviato per ultimo da lei, quindi non può approvarlo (la separazione dei compiti è attiva per questo progetto).",
+      "suggestion": "Chieda a un altro approvatore di decidere."
+    },
+    "sod_unattributed": {
+      "fail": "Per {code} non risulta registrato alcun richiedente, quindi non può essere approvato finché la separazione dei compiti è attiva.",
+      "suggestion": "Lo rifiuti e lo inserisca di nuovo, in modo che venga registrato il richiedente."
     }
   },
   "schedule": {

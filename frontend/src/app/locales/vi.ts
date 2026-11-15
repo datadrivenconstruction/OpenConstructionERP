@@ -60725,6 +60725,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "Đơn hàng {{po_number}} chưa thể lập hóa đơn: chỉ đơn hàng đã phát hành mới lập được hóa đơn.",
     "api_errors.invoice_capture_invoice_read_only": "Hóa đơn đã duyệt hoặc đã ghi sổ chỉ được xem. Hãy chuyển về bản nháp trước.",
     "api_errors.module_disabled": "Mô-đun {{module}} đang tắt cho không gian làm việc này. Quản trị viên có thể bật nó trong Mô-đun > Gói giải pháp.",
+    "api_errors.budget_ledger_sod_admin_only": "Chỉ quản trị viên mới có thể tắt phân tách nhiệm vụ.",
     "conv.stage_upload": "Đang tải tệp lên",
     "conv.stage_upload_hint": "Tệp đang được gửi lên máy chủ. Vui lòng giữ thẻ này mở cho đến khi xong.",
     "conv.stage_converter": "Đang chuẩn bị bộ chuyển đổi",

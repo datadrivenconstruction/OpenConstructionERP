@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "A(z) {code} kérelmét Ön adta be, ezért nem hagyhatja jóvá (ennél a projektnél be van kapcsolva a feladatok szétválasztása).",
       "suggestion": "Kérjen meg egy másik jóváhagyót a döntésre, vagy kapcsolja ki a feladatok szétválasztását a főkönyv beállításaiban."
+    },
+    "sod_prepared": {
+      "fail": "A(z) {code} utolsó szerkesztése vagy beküldése Öntől származik, ezért nem hagyhatja jóvá (ennél a projektnél be van kapcsolva a feladatok szétválasztása).",
+      "suggestion": "Kérjen meg egy másik jóváhagyót a döntésre."
+    },
+    "sod_unattributed": {
+      "fail": "A(z) {code} esetében nincs rögzített kérelmező, ezért a feladatok szétválasztásának bekapcsolt állapotában nem hagyható jóvá.",
+      "suggestion": "Utasítsa el, és vigye fel újra, hogy a kérelmező rögzítésre kerüljön."
     }
   },
   "schedule": {

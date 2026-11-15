@@ -60969,6 +60969,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "Поръчка {{po_number}} още не може да се фактурира: фактурира се само издадена поръчка.",
     "api_errors.invoice_capture_invoice_read_only": "Одобрена или осчетоводена фактура е само за четене. Първо я върнете към чернова.",
     "api_errors.module_disabled": "Модулът {{module}} е изключен за това работно пространство. Администратор може да го включи от Модули > Пакети с решения.",
+    "api_errors.budget_ledger_sod_admin_only": "Само администратор може да изключи разделението на задълженията.",
     "conv.stage_upload": "Качване на файла",
     "conv.stage_upload_hint": "Файлът се изпраща към сървъра. Оставете раздела отворен, докато приключи.",
     "conv.stage_converter": "Подготовка на конвертора",
