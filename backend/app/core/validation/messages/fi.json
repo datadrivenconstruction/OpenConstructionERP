@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Nimike {ordinal}: resurssirivit ovat menettäneet luettelon normin ja sisältävät sen sijaan nimikkeen määrän, joten yksikköhintaa ei johdettu niistä uudelleen",
       "whole_position_quantities": "Nimike {ordinal}: resurssirivit sisältävät koko nimikkeen määrät yksikkökohtaisten normien sijaan, joten yksikköhintaa ei johdettu niistä uudelleen",
       "suggestion": "Tarkista analyysi; johda nimike uudelleen luettelon nimikkeestä resurssinormien tarkastuksen kautta tai korjaa rivit käsin"
+    },
+    "rate_currency_missing": {
+      "fail": "Positio {ordinal}: {count} resurssihinnalta puuttuu valuutta, ja ne lasketaan hankkeen perusvaluutassa",
+      "suggestion": "Aseta valuutta jokaiselle resurssihinnalle, jos se ei ole hankkeen perusvaluutta"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} on päätetty, eikä sitä voi enää muuttaa tai poistaa.",
       "suggestion": "Tee uusi siirto tai budjettimuutos, joka korjaa sen."
+    },
+    "self_approval": {
+      "fail": "Pyysit koodin {code} itse, joten et voi hyväksyä sitä (tehtävien erottelu on päällä tässä hankkeessa).",
+      "suggestion": "Pyydä toista hyväksyjää päättämään tai poista tehtävien erottelu käytöstä kirjan asetuksissa."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Työmaalla oli {headcount} hengen ryhmä, mutta työtä, tarkastusta tai viivästystä ei ole kirjattu.",
       "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Sivulla {page} ei ole luettavaa piirustusnumeroa",
-      "suggestion": "Syötä piirustusnumero piirustusotsikosta"
-    },
-    "number_unique_in_set": {
-      "fail": "Piirustusnumero {sheet} esiintyy {count} sivulla tässä latauksessa",
-      "suggestion": "Tarkista piirustussarja: sivu voi olla kaksinkertainen tai väärin numeroitu"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Piirustuksen {sheet} versio {revision} on pienempi kuin nykyinen versio {current}",
-      "suggestion": "Vahvista, että kyseessä on vanhempi versio, ennen kuin se lisätään historiaan"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Piirustus {sheet} luettiin tekstintunnistuksella tarkkuudella {confidence}, eikä sitä ole vahvistettu",
-      "suggestion": "Tarkista piirustusotsikon kentät ja vahvista luenta"
     }
   },
   "spec_import": {
