@@ -63171,6 +63171,8 @@ const resource = {
     "menu_layout.mode_finance": "Фінанси",
     "menu_layout.mode_manager": "Керівник",
     "menu_layout.mode_all": "Усе",
+    "menu_layout.show_all_modules": "Показати всі модулі",
+    "menu_layout.back_to_view": "Назад до вигляду «{{view}}»",
     "guarantees.timeline_empty": "Подій ще немає",
     "guarantees.error": "Помилка",
     "guarantees.transition_done": "Гарантію оновлено",

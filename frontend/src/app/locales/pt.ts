@@ -63993,6 +63993,8 @@ const resource = {
     "menu_layout.mode_finance": "Finanças",
     "menu_layout.mode_manager": "Gestor",
     "menu_layout.mode_all": "Tudo",
+    "menu_layout.show_all_modules": "Mostrar todos os módulos",
+    "menu_layout.back_to_view": "Voltar à vista {{view}}",
     "guarantees.timeline_empty": "Ainda não há eventos",
     "guarantees.error": "Erro",
     "guarantees.transition_done": "Garantia atualizada",

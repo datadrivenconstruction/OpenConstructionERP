@@ -60846,6 +60846,8 @@ const resource = {
     "menu_layout.mode_finance": "Tài chính",
     "menu_layout.mode_manager": "Quản lý",
     "menu_layout.mode_all": "Tất cả",
+    "menu_layout.show_all_modules": "Hiện tất cả mô-đun",
+    "menu_layout.back_to_view": "Quay lại chế độ xem {{view}}",
     "guarantees.timeline_empty": "Chưa có sự kiện nào",
     "guarantees.error": "Lỗi",
     "guarantees.transition_done": "Đã cập nhật bảo lãnh",

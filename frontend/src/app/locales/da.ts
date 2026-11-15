@@ -61086,6 +61086,8 @@ const resource = {
     "menu_layout.mode_finance": "Økonomi",
     "menu_layout.mode_manager": "Leder",
     "menu_layout.mode_all": "Alle",
+    "menu_layout.show_all_modules": "Vis alle moduler",
+    "menu_layout.back_to_view": "Tilbage til visningen {{view}}",
     "guarantees.timeline_empty": "Ingen hændelser endnu",
     "guarantees.error": "Fejl",
     "guarantees.transition_done": "Garanti opdateret",

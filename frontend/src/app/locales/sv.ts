@@ -61701,6 +61701,8 @@ const resource = {
     "menu_layout.mode_finance": "Ekonomi",
     "menu_layout.mode_manager": "Chef",
     "menu_layout.mode_all": "Alla",
+    "menu_layout.show_all_modules": "Visa alla moduler",
+    "menu_layout.back_to_view": "Tillbaka till vyn {{view}}",
     "guarantees.timeline_empty": "Inga händelser ännu",
     "guarantees.error": "Fel",
     "guarantees.transition_done": "Garantin uppdaterad",

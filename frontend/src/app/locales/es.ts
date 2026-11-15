@@ -64005,6 +64005,8 @@ const resource = {
     "menu_layout.mode_finance": "Finanzas",
     "menu_layout.mode_manager": "Dirección",
     "menu_layout.mode_all": "Todo",
+    "menu_layout.show_all_modules": "Mostrar todos los módulos",
+    "menu_layout.back_to_view": "Volver a la vista {{view}}",
     "guarantees.timeline_empty": "Todavía no hay eventos",
     "guarantees.error": "Error",
     "guarantees.transition_done": "Garantía actualizada",

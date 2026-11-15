@@ -64168,6 +64168,8 @@ const resource = {
     "menu_layout.mode_finance": "المالية",
     "menu_layout.mode_manager": "المدير",
     "menu_layout.mode_all": "الكل",
+    "menu_layout.show_all_modules": "عرض كل الوحدات",
+    "menu_layout.back_to_view": "العودة إلى عرض {{view}}",
     "guarantees.timeline_empty": "لا توجد أحداث بعد",
     "guarantees.error": "خطأ",
     "guarantees.transition_done": "تم تحديث الضمان",

@@ -64000,6 +64000,8 @@ const resource = {
     "menu_layout.mode_finance": "Finances",
     "menu_layout.mode_manager": "Direction",
     "menu_layout.mode_all": "Tout",
+    "menu_layout.show_all_modules": "Afficher tous les modules",
+    "menu_layout.back_to_view": "Retour à la vue {{view}}",
     "guarantees.timeline_empty": "Aucun événement pour le moment",
     "guarantees.error": "Erreur",
     "guarantees.transition_done": "Garantie mise à jour",

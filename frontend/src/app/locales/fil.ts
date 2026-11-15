@@ -61044,6 +61044,8 @@ const resource = {
     "menu_layout.mode_finance": "Pananalapi",
     "menu_layout.mode_manager": "Manager",
     "menu_layout.mode_all": "Lahat",
+    "menu_layout.show_all_modules": "Ipakita ang lahat ng module",
+    "menu_layout.back_to_view": "Bumalik sa view na {{view}}",
     "guarantees.timeline_empty": "Wala pang mga pangyayari",
     "guarantees.error": "Error",
     "guarantees.transition_done": "Na-update ang garantiya",

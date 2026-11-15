@@ -61967,6 +61967,8 @@ const resource = {
     "menu_layout.mode_finance": "Finans",
     "menu_layout.mode_manager": "Yönetici",
     "menu_layout.mode_all": "Tümü",
+    "menu_layout.show_all_modules": "Tüm modülleri göster",
+    "menu_layout.back_to_view": "{{view}} görünümüne dön",
     "guarantees.timeline_empty": "Henüz olay yok",
     "guarantees.error": "Hata",
     "guarantees.transition_done": "Teminat güncellendi",

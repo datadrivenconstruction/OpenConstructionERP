@@ -3,11 +3,14 @@
 /** Work-mode switcher, adaptive suggestion card and rail flyout for the sidebar. */
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lightbulb, SlidersHorizontal, X } from 'lucide-react';
+import { Lightbulb, Layers, SlidersHorizontal, Undo2, X } from 'lucide-react';
 import clsx from 'clsx';
 import { MENU_MODE_IDS, type MenuModeId } from './menuLayout';
 import { MODE_DEFAULT_LABELS, modeLabelKey } from './MenuOrganizer';
 import type { MenuSuggestion } from './menuUsage';
+import { backToView, showAllModules } from './menuShowAll';
+import { demoProfile } from '@/shared/lib/demoProfiles';
+import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 
 export function MenuModeBar({
   mode,
@@ -19,8 +22,18 @@ export function MenuModeBar({
   onArrange: () => void;
 }) {
   const { t } = useTranslation();
+  const restoreMode = useDemoSessionStore((st) => st.restoreMode);
+  const slug = useDemoSessionStore((st) => st.slug);
+  const trimmed = demoProfile(slug)?.groups != null;
+  const showAllVisible = restoreMode === null && (mode !== 'all' || trimmed);
+  const viewName = slug
+    ? t(`demo_switcher.tab_${slug.replace(/-/g, '_')}`, { defaultValue: slug })
+    : restoreMode
+      ? t(modeLabelKey(restoreMode), { defaultValue: MODE_DEFAULT_LABELS[restoreMode] })
+      : '';
   return (
-    <div className="flex items-center gap-1.5 px-3 pb-1" data-testid="menu-mode-bar">
+    <div className="px-3 pb-1" data-testid="menu-mode-bar">
+      <div className="flex items-center gap-1.5">
       <label className="sr-only" htmlFor="oe-menu-mode">
         {t('menu_layout.mode_label', { defaultValue: 'Work mode' })}
       </label>
@@ -48,6 +61,29 @@ export function MenuModeBar({
       >
         <SlidersHorizontal size={14} />
       </button>
+      </div>
+      {showAllVisible && (
+        <button
+          type="button"
+          onClick={showAllModules}
+          data-testid="menu-show-all"
+          className="mt-1 flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-oe-blue hover:bg-surface-secondary"
+        >
+          <Layers size={13} />
+          {t('menu_layout.show_all_modules', { defaultValue: 'Show all modules' })}
+        </button>
+      )}
+      {restoreMode !== null && (
+        <button
+          type="button"
+          onClick={backToView}
+          data-testid="menu-back-to-view"
+          className="mt-1 flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-oe-blue hover:bg-surface-secondary"
+        >
+          <Undo2 size={13} />
+          {t('menu_layout.back_to_view', { defaultValue: 'Back to {{view}} view', view: viewName })}
+        </button>
+      )}
     </div>
   );
 }

@@ -61046,6 +61046,8 @@ const resource = {
     "menu_layout.mode_finance": "Οικονομικά",
     "menu_layout.mode_manager": "Διευθυντής",
     "menu_layout.mode_all": "Όλα",
+    "menu_layout.show_all_modules": "Εμφάνιση όλων των ενοτήτων",
+    "menu_layout.back_to_view": "Επιστροφή στην προβολή {{view}}",
     "guarantees.timeline_empty": "Δεν υπάρχουν γεγονότα ακόμη",
     "guarantees.error": "Σφάλμα",
     "guarantees.transition_done": "Η εγγυητική επιστολή ενημερώθηκε",

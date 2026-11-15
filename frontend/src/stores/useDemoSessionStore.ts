@@ -9,6 +9,7 @@
  */
 
 import { create } from 'zustand';
+import { MENU_MODE_IDS, type MenuModeId } from '@/app/layout/menuLayout';
 import { navGroups } from '@/app/layout/navCatalog';
 import {
   demoModuleRoutes,
@@ -27,11 +28,33 @@ export interface DemoSessionState {
   modules: readonly string[] | null;
   /** The visitor asked list pages to show every demo project, not only this demo's. */
   showAll: boolean;
+  /** "Show all modules" is on: the demo's section trimming is lifted; holds the menu mode to go back to. */
+  restoreMode: MenuModeId | null;
+  setRestoreMode: (mode: MenuModeId | null) => void;
   setDemo: (slug: DemoSlug | null) => void;
   setShowAll: (showAll: boolean) => void;
 }
 
 const SHOW_ALL_KEY = 'oe_demo_show_all';
+const RESTORE_KEY = 'oe_menu_restore_mode';
+
+function readRestoreMode(): MenuModeId | null {
+  try {
+    const v = sessionStorage.getItem(RESTORE_KEY);
+    return v && MENU_MODE_IDS.includes(v as MenuModeId) ? (v as MenuModeId) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeRestoreMode(mode: MenuModeId | null): void {
+  try {
+    if (mode) sessionStorage.setItem(RESTORE_KEY, mode);
+    else sessionStorage.removeItem(RESTORE_KEY);
+  } catch {
+    // Storage blocked: the choice lasts until the next reload.
+  }
+}
 
 function readShowAll(): boolean {
   try {
@@ -50,7 +73,7 @@ function writeShowAll(showAll: boolean): void {
   }
 }
 
-type DemoSessionData = Omit<DemoSessionState, 'setDemo' | 'setShowAll' | 'showAll'>;
+type DemoSessionData = Omit<DemoSessionState, 'setDemo' | 'setShowAll' | 'showAll' | 'restoreMode' | 'setRestoreMode'>;
 
 function sessionFor(slug: DemoSlug | null): DemoSessionData {
   const profile = demoProfile(slug);
@@ -66,10 +89,16 @@ function sessionFor(slug: DemoSlug | null): DemoSessionData {
 export const useDemoSessionStore = create<DemoSessionState>((set) => ({
   ...sessionFor(readChosenDemo()),
   showAll: readShowAll(),
+  restoreMode: readRestoreMode(),
+  setRestoreMode: (mode) => {
+    writeRestoreMode(mode);
+    set({ restoreMode: mode });
+  },
   // Opening a demo puts the lists back on that demo's own project.
   setDemo: (slug) => {
     writeShowAll(false);
-    set({ ...sessionFor(slug), showAll: false });
+    writeRestoreMode(null);
+    set({ ...sessionFor(slug), showAll: false, restoreMode: null });
   },
   setShowAll: (showAll) => {
     writeShowAll(showAll);

@@ -67,5 +67,6 @@ export function useDemoModules(): readonly string[] | null {
   });
   const groups = useDemoSessionStore((s) => s.groups);
   const modules = useDemoSessionStore((s) => s.modules);
-  return sys?.demo_mode === true && groups ? modules : null;
+  const lifted = useDemoSessionStore((s) => s.restoreMode !== null);
+  return sys?.demo_mode === true && groups && !lifted ? modules : null;
 }

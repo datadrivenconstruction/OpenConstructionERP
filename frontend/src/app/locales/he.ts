@@ -61376,6 +61376,8 @@ const resource = {
     "menu_layout.mode_finance": "כספים",
     "menu_layout.mode_manager": "מנהל",
     "menu_layout.mode_all": "הכול",
+    "menu_layout.show_all_modules": "הצג את כל המודולים",
+    "menu_layout.back_to_view": "חזרה לתצוגת {{view}}",
     "guarantees.timeline_empty": "אין אירועים עדיין",
     "guarantees.error": "שגיאה",
     "guarantees.transition_done": "הערבות עודכנה",

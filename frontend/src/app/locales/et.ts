@@ -61036,6 +61036,8 @@ const resource = {
     "menu_layout.mode_finance": "Rahandus",
     "menu_layout.mode_manager": "Juht",
     "menu_layout.mode_all": "Kõik",
+    "menu_layout.show_all_modules": "Näita kõiki mooduleid",
+    "menu_layout.back_to_view": "Tagasi vaatesse {{view}}",
     "guarantees.timeline_empty": "Sündmusi pole veel",
     "guarantees.error": "Viga",
     "guarantees.transition_done": "Tagatis uuendatud",
