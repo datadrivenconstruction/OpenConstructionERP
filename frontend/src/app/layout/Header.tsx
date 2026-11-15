@@ -88,6 +88,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Bill of Quantities': 'boq.title',
   'BOQ Editor': 'boq.editor',
   'BOQ Templates': 'nav.templates',
+  'BOQ Template': 'nav.templates',
   // Catalogues
   'Cost Database': 'costs.title',
   'Cost Explorer': 'nav.cost_explorer',
