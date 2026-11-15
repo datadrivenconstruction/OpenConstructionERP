@@ -52,6 +52,8 @@ class _MeasurementStub:
         measurement_value: float | None = None,
     ) -> None:
         self.id = uuid.uuid4()
+        self.project_id = uuid.uuid4()
+        self.review_status = "confirmed"
         self.type = mtype
         self.points = points or [{"x": 0.0, "y": 0.0}, {"x": 300.0, "y": 0.0}]
         self.scale_pixels_per_unit = scale
