@@ -59,6 +59,8 @@ import {
   Palette,
   Footprints,
 } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { HeaderMoreMenu, MoreItem, moreItemClass } from './BIMHeaderMenu';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog, ModuleHelpButton, ModuleGuideButton, DismissibleInfo, IntroRichText, ProjectFilePicker, pickedProjectFileToFile, type PickedProjectFile } from '@/shared/ui';
 import { BIM_VIEWER_FORMATS } from '@/shared/lib/projectFileFormats';
 import type { FileKind } from '@/features/file-manager/types';
@@ -217,6 +219,8 @@ function formatFileSize(bytes: number): string {
 }
 
 /* ── Stat Pill ───────────────────────────────────────────────────────── */
+
+const ACTIVE_TOGGLE = '!border-oe-blue/30 !bg-oe-blue/10 !text-oe-blue';
 
 function StatPill({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
@@ -3630,17 +3634,17 @@ export function BIMPage() {
   return (
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       {/* ── Header ── */}
-      <div className="relative z-20 px-3 py-2.5 flex items-center justify-between border-b border-border-light bg-surface-primary">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:to-blue-950/20 border border-oe-blue/15 flex items-center justify-center">
-              <Cuboid size={20} className="text-oe-blue" />
+      <div className="relative z-20 flex min-h-12 items-center justify-between gap-3 border-b border-border-light bg-surface-primary px-3 py-2">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-oe-blue/15 bg-oe-blue/10">
+              <Cuboid size={16} className="text-oe-blue" />
             </div>
-            <div>
-              <h1 className="text-sm font-semibold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
+            <div className="min-w-0">
+              <h1 className="text-sm font-semibold leading-tight text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
               {activeModel && (
                 <p
-                  className="text-2xs text-content-tertiary truncate max-w-[160px] lg:max-w-[280px] cursor-help"
+                  className="text-2xs text-content-tertiary truncate max-w-[140px] lg:max-w-[240px] cursor-help"
                   title={(() => {
                     // Disk-usage info now surfaces here on hover instead of as
                     // an always-visible chip in the header - chip ate space and
@@ -3680,95 +3684,50 @@ export function BIMPage() {
               )}
             </div>
           </div>
-          {/* Stat pills yield below ~1360px so the two toolbar rows never
-              wrap onto a third line; the same counts live in Summary. */}
+          {/* The same counts live in Summary; the pills only show where the row has room. */}
           {elements.length > 0 && (
-            <div className="hidden min-[1360px]:flex items-center gap-2 ms-2">
+            <div className="hidden min-[1700px]:flex items-center gap-2">
               <StatPill icon={Box} label={t('bim.stat_elements', { defaultValue: 'Elements' })} value={elements.length} />
               {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Levels' })} value={storeys.size} />}
               {discips.size > 0 && <StatPill icon={Sparkles} label={t('bim.stat_disciplines', { defaultValue: 'Disciplines' })} value={discips.size} />}
             </div>
           )}
         </div>
-        {/* Two deliberate toolbar rows (founder ask 2026-06-06): one big
-            flex-wrap broke unevenly onto a third line at common widths.
-            Row 1 = model workflow + cross-module jumps, Row 2 = view
-            controls. Label budget keeps each row to ONE line from 1280px
-            up (verified 1280/1440/1680/1920): the longest labels show only
-            at min-[1900px], medium ones at 2xl; icon + tooltip + aria-label
-            always remain. Header stat pills yield below 1360px. */}
-        <div className="flex min-w-0 flex-col items-end gap-1.5">
-          <div className="flex flex-wrap items-center justify-end gap-2">
-          <button
+        {/* One toolbar row, h-8 controls only: the everyday toggles stay in the
+            row, panels and cross-module jumps live in the "More" menu. */}
+        <div className="flex shrink-0 items-center justify-end gap-2">
+          <Button
+            variant="primary"
+            icon={<Plus size={16} />}
             onClick={() => setUploadOpen((p) => !p)}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
             data-testid="bim-add-model-top"
           >
-            <Plus size={14} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
-          </button>
-          <ModuleHelpButton tourId="bim" />
-          <ModuleGuideButton
-            content={bimGuide}
-            onCta={() => setUploadOpen(true)}
-          />
-          {/* Quantity Rules, in this tab and for this project and model. It
-              used to open the compliance requirements in a new tab, which
-              hid the quantity rules and, in the desktop app, opened nothing.
-              Shown for any loaded model; disabled until it has elements. */}
-          {activeModelId && (
-            <span
-              title={
-                elements.length > 0
-                  ? t('bim.rules_button_hint', {
-                      defaultValue:
-                        'Quantity rules pick model elements by category and properties and send their quantities to BOQ positions.',
-                    })
-                  : t('bim.rules_button_no_elements', {
-                      defaultValue: 'Quantity rules need model elements. They become available once the model has loaded.',
-                    })
-              }
-            >
-              <button
-                type="button"
-                onClick={() => navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId }))}
-                disabled={elements.length === 0}
-                data-testid="bim-rules-link-top"
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <SlidersHorizontal size={14} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
-              </button>
-            </span>
-          )}
+            {t('bim.add_model', { defaultValue: 'Add Model' })}
+          </Button>
           {elements.length > 0 && (
             <>
-              <button
+              <Button
+                variant="secondary"
+                icon={<Filter size={16} />}
                 onClick={() => setFilterPanelOpen((p) => !p)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  filterPanelOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
+                className={filterPanelOpen ? ACTIVE_TOGGLE : undefined}
                 title={t('bim.filter_toggle', { defaultValue: 'Toggle filter panel' })}
                 aria-label={t('bim.filter_toggle', { defaultValue: 'Toggle filter panel' })}
                 aria-pressed={filterPanelOpen}
                 data-testid="bim-tour-filter-button"
               >
-                <Filter size={14} />
                 {t('bim.filter_button', { defaultValue: 'Filter' })}
                 {visibleElementCount !== null && visibleElementCount < elements.length && (
-                  <span className="text-2xs bg-oe-blue text-white rounded-full px-1.5 py-0 tabular-nums">
+                  <span className="ms-1.5 rounded-full bg-oe-blue px-1.5 text-2xs tabular-nums text-white">
                     {visibleElementCount}
                   </span>
                 )}
-              </button>
-
-              <button
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<LayoutGrid size={16} />}
                 onClick={() => setSummaryPanelOpen(!summaryPanelOpen)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  summaryPanelOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
+                className={summaryPanelOpen ? ACTIVE_TOGGLE : undefined}
                 title={
                   summaryPanelOpen
                     ? t('bim.summary_hide', { defaultValue: 'Hide summary panel' })
@@ -3778,224 +3737,12 @@ export function BIMPage() {
                 aria-pressed={summaryPanelOpen}
                 data-guide="bim-summary-button"
               >
-                <LayoutGrid size={14} />
                 {t('bim.summary_button', { defaultValue: 'Summary' })}
-              </button>
+              </Button>
 
-              {/* Property search - opens a small popover with a column /
-                  operator / value query builder hitting the Parquet via
-                  DuckDB. Matches are piped into the isolation set so the
-                  user sees only the queried elements (v3.12.0 / Stream D). */}
-              <button
-                onClick={() => setPropertySearchOpen((p) => !p)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  propertySearchOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={t('bim.property_search_toggle', {
-                  defaultValue: 'Search element properties',
-                })}
-                aria-label={t('bim.property_search_toggle', {
-                  defaultValue: 'Search element properties',
-                })}
-                aria-pressed={propertySearchOpen}
-                data-testid="bim-property-search-toggle"
-              >
-                <Search size={14} />
-                <span className="hidden min-[1900px]:inline">
-                  {t('bim.property_search_button', { defaultValue: 'Property search' })}
-                </span>
-              </button>
-
-              {projectId && (
-                <button
-                  onClick={() => setSnapshotsOpen((p) => !p)}
-                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                    snapshotsOpen
-                      ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                      : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                  }`}
-                  title={t('bim.snapshots_button_title', {
-                    defaultValue: 'Data snapshots for this project',
-                  })}
-                  aria-label={t('bim.snapshots_toggle', {
-                    defaultValue: 'Toggle snapshots popover',
-                  })}
-                  aria-pressed={snapshotsOpen}
-                  data-testid="bim-snapshots-toggle"
-                >
-                  <Layers size={14} />
-                  <span className="hidden 2xl:inline">{t('bim.snapshots_button', { defaultValue: 'Snapshots' })}</span>
-                </button>
-              )}
-
-              {projectId && (
-                <button
-                  onClick={() => {
-                    // Carry the currently-loaded BIM model id forward so
-                    // the geo page can flyTo() the matching tileset
-                    // instead of leaving the camera at the project anchor.
-                    const url = activeModelId
-                      ? `/projects/${projectId}/geo?model=${encodeURIComponent(activeModelId)}`
-                      : `/projects/${projectId}/geo`;
-                    navigate(url);
-                  }}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
-                  title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
-                  aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
-                  data-testid="bim-view-on-map"
-                >
-                  <Globe2 size={14} />
-                  <span className="hidden min-[1900px]:inline">
-                    {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
-                  </span>
-                </button>
-              )}
-
-              {/* Round-trip with /data-explorer. The `?bimModel=<id>` deeplink
-                  is already handled by CadDataExplorerPage which calls
-                  `sessionFromBimModel` server-side (idempotent — reuses an
-                  existing session for the same model). */}
-              {activeModelId && (
-                <button
-                  onClick={() => {
-                    navigate(`/data-explorer?bimModel=${encodeURIComponent(activeModelId)}`);
-                  }}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
-                  title={t('bim.open_in_data_explorer_title', {
-                    defaultValue: 'Explore extracted data tables',
-                  })}
-                  aria-label={t('bim.open_in_data_explorer', {
-                    defaultValue: 'Open in Data Explorer',
-                  })}
-                  data-testid="bim-open-in-data-explorer"
-                >
-                  <Database size={14} />
-                  <span className="hidden min-[1900px]:inline">
-                    {t('bim.open_in_data_explorer', {
-                      defaultValue: 'Open in Data Explorer',
-                    })}
-                  </span>
-                </button>
-              )}
-            </>
-          )}
-          </div>
-
-          {/* Row 2: view controls - only meaningful with a loaded model. */}
-          {elements.length > 0 && (
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <button
-                onClick={() => setDimensionsVisible(!dimensionsVisible)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  dimensionsVisible
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={
-                  dimensionsVisible
-                    ? t('bim.dimensions_hide', {
-                        defaultValue: 'Hide bounding-box dimensions on selection',
-                      })
-                    : t('bim.dimensions_show', {
-                        defaultValue: 'Show bounding-box dimensions on selection',
-                      })
-                }
-                aria-label={t('bim.dimensions_toggle', {
-                  defaultValue: 'Toggle bounding-box dimensions',
-                })}
-                aria-pressed={dimensionsVisible}
-              >
-                <Maximize2 size={14} />
-                <span className="hidden min-[1900px]:inline">
-                  {t('bim.dimensions_button', { defaultValue: 'BBox Dimensions' })}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setAssetCardEnabled(!assetCardEnabled)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  assetCardEnabled
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={
-                  assetCardEnabled
-                    ? t('bim.asset_card_hide', {
-                        defaultValue: 'Hide asset-info card on selection',
-                      })
-                    : t('bim.asset_card_show', {
-                        defaultValue: 'Show asset-info card on selection',
-                      })
-                }
-                aria-label={t('bim.asset_card_toggle', {
-                  defaultValue: 'Toggle asset register card',
-                })}
-                aria-pressed={assetCardEnabled}
-                data-testid="bim-asset-card-toggle"
-              >
-                <Package size={14} />
-                <span className="hidden 2xl:inline">{t('bim.asset_card_button', { defaultValue: 'Asset Card' })}</span>
-              </button>
-
-              <button
-                onClick={() => setBoqPanelOpen(!boqPanelOpen)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  boqPanelOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
-                aria-label={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
-                aria-pressed={boqPanelOpen}
-                data-testid="bim-tour-linked-boq-button"
-              >
-                <ClipboardList size={14} />
-                <span className="hidden 2xl:inline">{t('bim.linked_boq_button', { defaultValue: 'Linked BOQ' })}</span>
-              </button>
-
-              <button
-                onClick={() => setDiffPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  diffPanelOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={t('bim.diff_toggle', {
-                  defaultValue: 'Compare model versions',
-                })}
-                aria-label={t('bim.diff_toggle', {
-                  defaultValue: 'Compare model versions',
-                })}
-                aria-pressed={diffPanelOpen}
-                data-testid="bim-diff-toggle"
-              >
-                <GitCompare size={14} />
-                {t('bim.diff_button', { defaultValue: 'Compare' })}
-              </button>
-
-              <button
-                onClick={() => setSmartViewsPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                  smartViewsPanelOpen
-                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
-                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                }`}
-                title={t('smartViews.title', { defaultValue: 'Smart Views' })}
-                aria-label={t('smartViews.title', { defaultValue: 'Smart Views' })}
-                aria-pressed={smartViewsPanelOpen}
-                data-testid="bim-smart-views-toggle"
-              >
-                <Sparkles size={14} />
-                <span className="hidden 2xl:inline">{t('smartViews.title', { defaultValue: 'Smart Views' })}</span>
-              </button>
-
-              {/* Color-by selector - three families:
-                  · Field-based (Storey / Type) use the hash-to-hue palette
-                  · Compliance-based (Validation / BOQ / Documents) use a
-                    fixed red/amber/green palette and turn the 3D viewer
-                    into a live compliance dashboard. */}
+              {/* Color-by selector - field-based (Storey / Type) use the
+                  hash-to-hue palette; compliance, cost and schedule modes use
+                  fixed palettes and turn the viewer into a live dashboard. */}
               <select
                 value={colorByMode}
                 onChange={(e) =>
@@ -4016,7 +3763,7 @@ export function BIMPage() {
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 aria-label={t('bim.color_by', { defaultValue: 'Color by' })}
                 data-testid="bim-color-mode-select"
-                className="oe-select"
+                className="oe-select w-auto max-w-40"
               >
                 <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
                   <option value="default">{t('bim.color_default', { defaultValue: 'Default' })}</option>
@@ -4052,15 +3799,12 @@ export function BIMPage() {
                 </optgroup>
               </select>
 
-              {/* Render-quality segment - 4 presets controlling pixelRatio,
-                  lighting and per-material transparency. Persisted in
-                  localStorage via useBIMViewerStore. Fast/Walk strip
-                  alpha-blending; Visual keeps glass translucent but flips
-                  walls/slabs opaque (cleaner *and* faster than Default). */}
+              {/* Render-quality segment: 4 presets for pixel ratio, lighting and
+                  transparency, persisted by useBIMViewerStore. */}
               <div
                 role="radiogroup"
                 aria-label={t('bim.quality_mode', { defaultValue: 'Render quality' })}
-                className="inline-flex items-center rounded-lg border border-border-light bg-surface-secondary p-0.5 gap-0.5"
+                className="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border bg-surface-primary p-0.5"
                 data-testid="bim-quality-mode"
               >
                 {(
@@ -4110,40 +3854,169 @@ export function BIMPage() {
                       title={tooltip}
                       onClick={() => setQualityMode(mode)}
                       data-testid={`bim-quality-${mode}`}
+                      data-oe-segment
                       className={clsx(
-                        'flex items-center gap-1 px-2 py-1 rounded-md text-2xs font-medium transition-colors',
+                        'flex h-full items-center gap-1 rounded-sm px-2 text-xs font-medium transition-colors',
                         isActive
-                          ? 'bg-oe-blue text-white shadow-sm'
-                          : 'text-content-secondary hover:bg-surface-tertiary',
+                          ? 'bg-oe-blue text-white'
+                          : 'text-content-secondary hover:bg-surface-secondary',
                       )}
                     >
-                      <Icon size={12} />
-                      <span className="hidden 2xl:inline">{label}</span>
+                      <Icon size={14} />
+                      <span className="hidden min-[1600px]:inline">{label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Isolate toggle (when an element is selected) */}
               {selectedElementId && (
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() =>
                     setIsolatedIds((cur) => (cur ? null : [selectedElementId]))
                   }
-                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                    isolatedIds
-                      ? 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30'
-                      : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
-                  }`}
+                  className={isolatedIds ? '!border-semantic-warning/30 !bg-semantic-warning-bg !text-semantic-warning' : undefined}
                   title={t('bim.isolate_selection', { defaultValue: 'Isolate selection' })}
                 >
                   {isolatedIds
                     ? t('bim.show_all', { defaultValue: 'Show all' })
                     : t('bim.isolate', { defaultValue: 'Isolate' })}
-                </button>
+                </Button>
               )}
-            </div>
+            </>
           )}
+          <HeaderMoreMenu
+            activeCount={
+              [propertySearchOpen, snapshotsOpen, diffPanelOpen, smartViewsPanelOpen, dimensionsVisible, assetCardEnabled, boqPanelOpen].filter(Boolean).length
+            }
+          >
+            {/* Quantity Rules, in this tab and for this project and model.
+                Shown for any loaded model; disabled until it has elements. */}
+            {activeModelId && (
+              <button
+                type="button"
+                role="menuitem"
+                title={
+                  elements.length > 0
+                    ? t('bim.rules_button_hint', {
+                        defaultValue:
+                          'Quantity rules pick model elements by category and properties and send their quantities to BOQ positions.',
+                      })
+                    : t('bim.rules_button_no_elements', {
+                        defaultValue: 'Quantity rules need model elements. They become available once the model has loaded.',
+                      })
+                }
+                onClick={() => navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId }))}
+                disabled={elements.length === 0}
+                data-testid="bim-rules-link-top"
+                className={moreItemClass()}
+              >
+                <SlidersHorizontal size={16} className="shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{t('bim.rules_button', { defaultValue: 'Rules' })}</span>
+              </button>
+            )}
+            {elements.length > 0 && (
+              <>
+                <MoreItem
+                  icon={<GitCompare size={16} />}
+                  label={t('bim.diff_button', { defaultValue: 'Compare' })}
+                  title={t('bim.diff_toggle', { defaultValue: 'Compare model versions' })}
+                  active={diffPanelOpen}
+                  onClick={() => setDiffPanelOpen((o) => !o)}
+                  testId="bim-diff-toggle"
+                />
+                <MoreItem
+                  icon={<Sparkles size={16} />}
+                  label={t('smartViews.title', { defaultValue: 'Smart Views' })}
+                  active={smartViewsPanelOpen}
+                  onClick={() => setSmartViewsPanelOpen((o) => !o)}
+                  testId="bim-smart-views-toggle"
+                />
+                <MoreItem
+                  icon={<ClipboardList size={16} />}
+                  label={t('bim.linked_boq_button', { defaultValue: 'Linked BOQ' })}
+                  title={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
+                  active={boqPanelOpen}
+                  onClick={() => setBoqPanelOpen(!boqPanelOpen)}
+                  testId="bim-tour-linked-boq-button"
+                />
+                {/* Property search: column / operator / value query over the
+                    Parquet via DuckDB; matches feed the isolation set. */}
+                <MoreItem
+                  icon={<Search size={16} />}
+                  label={t('bim.property_search_button', { defaultValue: 'Property search' })}
+                  title={t('bim.property_search_toggle', { defaultValue: 'Search element properties' })}
+                  active={propertySearchOpen}
+                  onClick={() => setPropertySearchOpen((p) => !p)}
+                  testId="bim-property-search-toggle"
+                />
+                <MoreItem
+                  icon={<Maximize2 size={16} />}
+                  label={t('bim.dimensions_button', { defaultValue: 'BBox Dimensions' })}
+                  title={
+                    dimensionsVisible
+                      ? t('bim.dimensions_hide', { defaultValue: 'Hide bounding-box dimensions on selection' })
+                      : t('bim.dimensions_show', { defaultValue: 'Show bounding-box dimensions on selection' })
+                  }
+                  active={dimensionsVisible}
+                  onClick={() => setDimensionsVisible(!dimensionsVisible)}
+                />
+                <MoreItem
+                  icon={<Package size={16} />}
+                  label={t('bim.asset_card_button', { defaultValue: 'Asset Card' })}
+                  title={
+                    assetCardEnabled
+                      ? t('bim.asset_card_hide', { defaultValue: 'Hide asset-info card on selection' })
+                      : t('bim.asset_card_show', { defaultValue: 'Show asset-info card on selection' })
+                  }
+                  active={assetCardEnabled}
+                  onClick={() => setAssetCardEnabled(!assetCardEnabled)}
+                  testId="bim-asset-card-toggle"
+                />
+              </>
+            )}
+            {projectId && (
+              <MoreItem
+                icon={<Layers size={16} />}
+                label={t('bim.snapshots_button', { defaultValue: 'Snapshots' })}
+                title={t('bim.snapshots_button_title', { defaultValue: 'Data snapshots for this project' })}
+                active={snapshotsOpen}
+                onClick={() => setSnapshotsOpen((p) => !p)}
+                testId="bim-snapshots-toggle"
+              />
+            )}
+            {projectId && (
+              <MoreItem
+                icon={<Globe2 size={16} />}
+                label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
+                onClick={() => {
+                  // Carry the loaded model id so the geo page can flyTo() its tileset.
+                  navigate(
+                    activeModelId
+                      ? `/projects/${projectId}/geo?model=${encodeURIComponent(activeModelId)}`
+                      : `/projects/${projectId}/geo`,
+                  );
+                }}
+                testId="bim-view-on-map"
+              />
+            )}
+            {/* Round-trip with /data-explorer: `?bimModel=<id>` is resolved
+                server-side by `sessionFromBimModel` (idempotent). */}
+            {activeModelId && (
+              <MoreItem
+                icon={<Database size={16} />}
+                label={t('bim.open_in_data_explorer', { defaultValue: 'Open in Data Explorer' })}
+                title={t('bim.open_in_data_explorer_title', { defaultValue: 'Explore extracted data tables' })}
+                onClick={() => navigate(`/data-explorer?bimModel=${encodeURIComponent(activeModelId)}`)}
+                testId="bim-open-in-data-explorer"
+              />
+            )}
+          </HeaderMoreMenu>
+          <ModuleHelpButton tourId="bim" />
+          <ModuleGuideButton
+            content={bimGuide}
+            onCta={() => setUploadOpen(true)}
+          />
         </div>
       </div>
 
