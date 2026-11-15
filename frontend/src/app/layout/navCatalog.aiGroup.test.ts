@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 //
-// The AI chat is the assistant entry at the top; the agents live in one
-// clearly named group. A sidebar that shows them under any other heading is a
+// The AI chat and the agents live in one clearly named group; the AI
+// estimating drafts have their own. A sidebar that shows them under any other heading is a
 // user-made group (menu editor, stored in the browser), never the catalogue.
 
 import { describe, expect, it } from 'vitest';
@@ -9,9 +9,10 @@ import { canonicalGroupId, navGroups } from './navCatalog';
 import { DEMO_PROFILES } from '@/shared/lib/demoProfiles';
 
 const OWNER: Record<string, string> = {
-  '/chat': 'grp_assistant',
+  '/chat': 'grp_automation_ai',
   '/ai-agents': 'grp_automation_ai',
-  '/advisor': 'grp_estimating',
+  '/advisor': 'grp_automation_ai',
+  '/ai-estimate': 'grp_estimating_ai',
 };
 
 describe('AI screens in the menu catalogue', () => {
@@ -24,7 +25,7 @@ describe('AI screens in the menu catalogue', () => {
 
   it('name the agents group through a translated key with an AI label', () => {
     const group = navGroups.find((g) => g.id === 'grp_automation_ai')!;
-    expect(group.labelKey).toBe('sidebar.group.automation_admin');
+    expect(group.labelKey).toBe('sidebar.group.automation_ai');
     expect(group.defaultLabel).toMatch(/AI/);
   });
 

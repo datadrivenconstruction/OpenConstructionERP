@@ -1,8 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The assistant is one entry under the Learn card, long groups are read by captions, and
-// an open demo shows only the modules its cards cover.
+// The AI chat stays in its thematic group, groups carry no captions, and an open
+// demo shows only the modules its cards cover.
 import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, within, cleanup, act, waitFor } from '@testing-library/react';
@@ -90,38 +90,30 @@ describe('sidebar structure and demo menu', () => {
   });
   afterEach(() => cleanup());
 
-  it('puts the AI chat in one assistant entry under Learn, not a section', async () => {
+  it('keeps the AI chat in Automation & AI, with no entry of its own on top', async () => {
     renderSidebar();
-    const assistant = await screen.findByTestId('sidebar-assistant');
-    expect(within(assistant).getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual(['/chat']);
-    // Right under the Learn card, before any working group.
+    await waitFor(() => expect(hrefs()).toContain('/chat'));
+    expect(screen.queryByTestId('sidebar-assistant')).toBeNull();
     const all = hrefs();
-    expect(all.indexOf('/chat')).toBe(all.indexOf('/packs') + 1);
-    expect(hrefs().filter((h) => h === '/chat')).toHaveLength(1);
+    expect(all.filter((h) => h === '/chat')).toHaveLength(1);
+    expect(all.indexOf('/chat')).toBeGreaterThan(all.indexOf('/ai-agents'));
+    expect(all.indexOf('/chat')).toBeGreaterThan(all.indexOf('/boq'));
   });
 
-  it('reads a long group by its section captions', async () => {
-    renderSidebar();
-    expect(await screen.findByTestId('sidebar-section-takeoff')).toBeTruthy();
-    expect(screen.getByTestId('sidebar-section-boq')).toBeTruthy();
-  });
-
-  it('drops a caption that would only repeat its group header', async () => {
-    useViewModeStore.setState({ mode: 'simple' } as never);
-    renderSidebar();
-    await screen.findByTestId('sidebar-assistant');
-    // In Simple mode Cost Data shows only its databases, so no caption.
-    expect(hrefs()).toContain('/costs');
-    expect(screen.queryByTestId('sidebar-section-databases')).toBeNull();
+  it('draws groups without section captions', async () => {
+    const view = renderSidebar();
+    await waitFor(() => expect(hrefs()).toContain('/boq'));
+    expect(view.container.querySelector('[data-testid^="sidebar-section-"]')).toBeNull();
   });
 
   it('shows only the modules the open demo covers', async () => {
-    // Both rows sit in Estimating, which is open by default; collapsed groups render no links.
+    // Takeoff and Estimating are open by default; collapsed groups render no links.
     demo.modules = ['/boq', '/dwg-takeoff'];
     renderSidebar();
-    await screen.findByTestId('sidebar-assistant');
+    await waitFor(() => expect(hrefs()).toContain('/boq'));
     const shown = hrefs();
-    for (const route of ['/chat', '/', '/projects', '/boq', '/dwg-takeoff']) expect(shown).toContain(route);
+    expect(shown).not.toContain('/chat');
+    for (const route of ['/', '/projects', '/boq', '/dwg-takeoff']) expect(shown).toContain(route);
     const catalogue = new Set(navGroups.flatMap((g) => g.items.map((i) => i.to)));
     for (const route of shown.filter((r) => catalogue.has(r!))) {
       expect(DEMO_ALWAYS_ROUTES.has(route!) || ['/boq', '/dwg-takeoff'].includes(route!), route!).toBe(true);
@@ -136,7 +128,7 @@ describe('sidebar structure and demo menu', () => {
     });
     demo.modules = ['/boq'];
     const view = renderSidebar();
-    await screen.findByTestId('sidebar-assistant');
+    await waitFor(() => expect(hrefs()).toContain('/boq'));
     expect(screen.queryByTestId('sidebar-user-group')).toBeNull();
     view.unmount();
     demo.modules = null;

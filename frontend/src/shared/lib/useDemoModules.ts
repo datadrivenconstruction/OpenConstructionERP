@@ -8,17 +8,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from './api';
-import { ASSISTANT_GROUP_ID, LEARN_GROUP_ID, navGroups } from '@/app/layout/navCatalog';
+import { LEARN_GROUP_ID, navGroups } from '@/app/layout/navCatalog';
 import { demoModuleRoutes, type DemoProfile } from './demoProfiles';
 import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 
 /** Rows every demo keeps, whatever its cards cover: the way home, the project
- *  list, the assistant and the Learn card. */
+ *  list and the Learn card. */
 export const DEMO_ALWAYS_ROUTES: ReadonlySet<string> = new Set([
   '/',
   '/projects',
   ...navGroups
-    .filter((group) => group.id === LEARN_GROUP_ID || group.id === ASSISTANT_GROUP_ID)
+    .filter((group) => group.id === LEARN_GROUP_ID)
     .flatMap((group) => group.items.map((item) => item.to)),
 ]);
 
@@ -29,9 +29,9 @@ export function demoModulesFor(profile: DemoProfile | null | undefined): readonl
 }
 
 /** The menu groups a demo opens with at least one row, and how many the
- *  whole menu has; Learn and the assistant are not counted. */
+ *  whole menu has; Learn is not counted. */
 export function demoSectionCount(profile: DemoProfile): { shown: number; total: number } {
-  const groups = navGroups.filter((group) => group.id !== LEARN_GROUP_ID && group.id !== ASSISTANT_GROUP_ID);
+  const groups = navGroups.filter((group) => group.id !== LEARN_GROUP_ID);
   const modules = demoModulesFor(profile);
   if (!modules) return { shown: groups.length, total: groups.length };
   const set = new Set(modules);

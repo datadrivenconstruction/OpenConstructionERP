@@ -131,8 +131,8 @@ describe('DemoChooserPage', () => {
     renderPage();
     const chips = await screen.findByTestId('demo-sections-residential-berlin');
     expect(chips.querySelectorAll('li').length).toBe(6);
-    // Ten listed sections fold into eight menu groups: five chips and "+3 more".
-    expect(chips.textContent).toContain('+3 more');
+    // Ten own sections besides the base ones: five chips and "+5 more".
+    expect(chips.textContent).toContain('+5 more');
     expect(screen.queryByTestId('demo-sections-full-showcase-riyadh')).toBeNull();
   });
 
