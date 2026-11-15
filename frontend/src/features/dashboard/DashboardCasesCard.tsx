@@ -236,7 +236,7 @@ export function DashboardCasesCard() {
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue/10 text-oe-blue ring-1 ring-inset ring-oe-blue/20">
           <GraduationCap size={20} strokeWidth={1.9} />
         </span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[12rem] flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-content-primary">
               {t('cases.dashboard_card.title', { defaultValue: 'Start here - learn by example' })}

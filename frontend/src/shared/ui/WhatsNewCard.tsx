@@ -326,7 +326,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
          *  inside that context cannot escape it via z-index — it always
          *  paints below sibling widgets on the dashboard. Portaling to
          *  document.body removes that constraint. */}
-        <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+        <div className="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:flex-1 sm:basis-0">
           {sections.map((s) => {
             const Icon = s.icon;
             const expanded = openChipId === s.id;

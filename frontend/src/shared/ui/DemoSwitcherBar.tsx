@@ -168,7 +168,7 @@ export function DemoMarketSwitch({ className }: { className?: string }) {
       >
         {current === '' && (
           <option value="" disabled>
-            {label}
+            {t('common.select', { defaultValue: 'Select' })}
           </option>
         )}
         {available.map((p) => (
