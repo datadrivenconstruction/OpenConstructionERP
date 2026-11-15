@@ -67,10 +67,10 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '19.6.1',
-    date: '2026-11-15',
-    tag: 'FIX',
-    summary: 'The sign-in and registration pages are back to the fuller 19.4 layout, and the README shows its previous hero image.',
+    version: '19.7.0',
+    date: '2026-11-16',
+    tag: 'NEW',
+    summary: 'Editable estimate templates made from finished estimates, the 19.4 sidebar and sign-in page, videos that open at the right minute, and a calmer, more consistent interface.',
   },
   {
     version: '19.6.0',

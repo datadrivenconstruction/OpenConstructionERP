@@ -7,12 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
-## [19.6.1] - 2026-11-15
+## [19.7.0] - 2026-11-16
+
+### Added
+
+- Estimate templates can be edited. Built-in templates are copied first, and a template can be made from any finished estimate, keeping or clearing quantities and rates, with checks before saving.
+- Videos under "Learn this step" open at the minute where the current screen is explained.
 
 ### Changed
 
-- The sign-in, registration and password pages are back to the fuller layout of 19.4, with the logo edit control on the sign-in card.
+- The sidebar is back to the thematic groups of 19.4, with Packs, Cases, Videos and Courses at the top.
+- The sign-in, registration and password pages are back to the fuller 19.4 layout.
+- The demo bar fits on one line, and the full platform card on the demo chooser matches the other cards in height.
+- "Learn this step" sits in the top bar instead of floating over viewers.
+- Every onboarding step uses one content width and one navigation row.
+- The BIM header is one row with secondary actions in a More menu; tab strips keep their labels whole and fade at a cut edge.
+- The sidebar logo is smaller with a lighter name; the About page shows every community contributor with a count and a link to the full list.
 - The README hero is back to the previous image.
+
+### Fixed
+
+- Dialogs dim the page again in the classic look instead of turning it white.
+- The task board no longer paints every overdue card red; overdue shows on the due date.
+- Menu groups saved in a browser no longer appear inside the public demo.
+- Floating assistant and recent buttons no longer cover the last controls on a page.
+- Filtering contacts by project checks access to that project.
 
 ## [19.6.0] - 2026-11-15
 
