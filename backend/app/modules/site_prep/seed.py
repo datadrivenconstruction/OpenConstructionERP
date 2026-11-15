@@ -63,6 +63,7 @@ from app.modules.site_prep.schemas import (
     SitePrepItemCreate,
     SitePrepPlanCreate,
 )
+from app.modules.site_prep.seed_text import site_prep_text
 from app.modules.site_prep.service import SitePrepService
 
 logger = logging.getLogger(__name__)
@@ -609,6 +610,7 @@ async def _seed_project(
     project_id: uuid.UUID,
     owner_id: uuid.UUID,
     ordinal: int,
+    locale: str | None = None,
 ) -> dict[str, int]:
     """Seed one project's mobilisation plan and readiness register."""
     empty = {"projects": 0, "plans": 0, "items": 0, "gates": 0}
@@ -631,10 +633,11 @@ async def _seed_project(
         SitePrepPlanCreate(
             target_start_date=target,
             status=stage["plan_status"],
-            notes=(
+            notes=site_prep_text(
+                locale,
                 "Mobilisation plan for the works. Readiness is measured against the "
                 "target start date; the commencement gates must all be closed before "
-                "anyone breaks ground."
+                "anyone breaks ground.",
             ),
         ),
         created_by,
@@ -650,10 +653,10 @@ async def _seed_project(
 
         note: str | None = None
         if status == _BLOCKED:
-            note = _BLOCKED_REASONS[blocked_seen % len(_BLOCKED_REASONS)]
+            note = site_prep_text(locale, _BLOCKED_REASONS[blocked_seen % len(_BLOCKED_REASONS)])
             blocked_seen += 1
         elif status == _NOT_APPLICABLE:
-            note = _NOT_APPLICABLE_REASONS[na_seen % len(_NOT_APPLICABLE_REASONS)]
+            note = site_prep_text(locale, _NOT_APPLICABLE_REASONS[na_seen % len(_NOT_APPLICABLE_REASONS)])
             na_seen += 1
 
         await service.create_item(
@@ -664,10 +667,10 @@ async def _seed_project(
                 # rather than to nothing.
                 plan_id=plan.id,
                 category=entry["category"],
-                title=entry["title"],
-                description=entry["description"],
+                title=site_prep_text(locale, entry["title"]),
+                description=site_prep_text(locale, entry["description"]),
                 status=status,
-                responsible_party=entry["responsible_party"],
+                responsible_party=site_prep_text(locale, entry["responsible_party"]),
                 due_date=due_date,
                 completed_date=completed_date,
                 is_gate=entry["is_gate"],
@@ -704,8 +707,11 @@ async def seed_site_prep_demo(
 
     from app.modules.projects.models import Project
 
-    rows = (await session.execute(select(Project.id, Project.owner_id).where(Project.id.in_(ids)))).all()
-    owners = {pid: owner for pid, owner in rows}
+    rows = (
+        await session.execute(select(Project.id, Project.owner_id, Project.locale).where(Project.id.in_(ids)))
+    ).all()
+    owners = {pid: owner for pid, owner, _locale in rows}
+    locales = {pid: locale for pid, _owner, locale in rows}
 
     for ordinal, project_id in enumerate(ids):
         owner_id = owners.get(project_id)
@@ -718,7 +724,7 @@ async def seed_site_prep_demo(
             # every later project would then fail on a poisoned session rather
             # than on anything wrong with itself.
             async with session.begin_nested():
-                counts = await _seed_project(session, project_id, owner_id, ordinal)
+                counts = await _seed_project(session, project_id, owner_id, ordinal, locales.get(project_id))
         except Exception:
             logger.warning("Site prep demo seed skipped for project=%s (non-fatal)", project_id, exc_info=True)
             continue

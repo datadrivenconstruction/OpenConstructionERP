@@ -36,6 +36,7 @@ from app.modules.qms.models import (
     QMSInspection,
     QMSPunchItem,
 )
+from app.modules.qms.seed_text import LANGUAGES, qms_text
 
 
 def _now_iso() -> str:
@@ -104,11 +105,17 @@ async def seed_qms(
     or roll back.
     """
     project_id = project_id or uuid.uuid4()
+    from app.modules.projects.models import Project
+
+    locale = (await session.execute(select(Project.locale).where(Project.id == project_id))).scalars().first()
+
+    def t(text: str) -> str:
+        return qms_text(locale, text)
 
     # 1) ITP plan + items
     plan = ITPPlan(
         project_id=project_id,
-        name=_PLAN["name"],
+        name=t(_PLAN["name"]),
         work_type=_PLAN["work_type"],
         wbs_ref=_PLAN["wbs_ref"],
         status="active",
@@ -123,11 +130,11 @@ async def seed_qms(
         item = ITPItem(
             itp_plan_id=plan.id,
             sequence=seq,
-            control_point_name=name,
-            criteria=_ITP_ITEM_CRITERIA,
-            frequency="per pour",
-            method="visual / measurement",
-            acceptance_criteria="No defects observed",
+            control_point_name=t(name),
+            criteria=t(_ITP_ITEM_CRITERIA),
+            frequency=t("per pour"),
+            method=t("visual / measurement"),
+            acceptance_criteria=t("No defects observed"),
             hold_witness_point=kind,
             responsible_role=role,
             signatories_required=sigs,
@@ -141,12 +148,12 @@ async def seed_qms(
         QMSInspection(
             itp_item_id=items[item_index].id,
             project_id=project_id,
-            location_ref=_INSPECTION_LOCATION,
+            location_ref=t(_INSPECTION_LOCATION),
             inspector_user_id=None,
             scheduled_at=_now_iso(),
             performed_at=_now_iso() if performed else None,
             status=status,
-            notes=notes,
+            notes=t(notes),
             photos_json=[],
         )
         for item_index, status, notes, performed in _INSPECTIONS
@@ -159,8 +166,8 @@ async def seed_qms(
     ncr_open = QMSNCR(
         project_id=project_id,
         raised_at=_now_iso(),
-        title=_NCR_OPEN[0],
-        description=_NCR_OPEN[1],
+        title=t(_NCR_OPEN[0]),
+        description=t(_NCR_OPEN[1]),
         severity=_NCR_OPEN[2],
         root_cause=None,
         status="open",
@@ -171,10 +178,10 @@ async def seed_qms(
     ncr_var = QMSNCR(
         project_id=project_id,
         raised_at=_now_iso(),
-        title=_NCR_VARIATION[0],
-        description=_NCR_VARIATION[1],
+        title=t(_NCR_VARIATION[0]),
+        description=t(_NCR_VARIATION[1]),
         severity=_NCR_VARIATION[2],
-        root_cause=_NCR_VARIATION_ROOT_CAUSE,
+        root_cause=t(_NCR_VARIATION_ROOT_CAUSE),
         status="action_pending",
         cost_impact_currency="EUR",
         cost_impact_amount=_NCR_VARIATION_AMOUNT,
@@ -190,7 +197,7 @@ async def seed_qms(
             QMSPunchItem(
                 project_id=project_id,
                 raised_at=_now_iso(),
-                title=title,
+                title=t(title),
                 description=None,
                 room_ref=None,
                 drawing_ref=None,
@@ -215,7 +222,7 @@ async def seed_qms(
         planned_date=_now_iso(),
         performed_at=_now_iso(),
         auditor_user_id=None,
-        audit_scope=_AUDIT["audit_scope"],
+        audit_scope=t(_AUDIT["audit_scope"]),
         standard_ref=_AUDIT["standard_ref"],
         status="completed",
         overall_rating=4,
@@ -229,9 +236,9 @@ async def seed_qms(
             QMSAuditFinding(
                 audit_id=audit.id,
                 finding_type=ft,
-                description=desc,
+                description=t(desc),
                 clause_ref=clause,
-                corrective_action_required="See CAPA register",
+                corrective_action_required=t("See CAPA register"),
                 status="open",
                 due_date=None,
             )
@@ -270,7 +277,8 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
     if not project_ids:
         return []
 
-    item_names = sorted(name for name, _kind, _role, _sigs in _ITP_ITEMS)
+    item_name_sets = [sorted(qms_text(lang, name) for name, _kind, _role, _sigs in _ITP_ITEMS) for lang in LANGUAGES]
+    criteria_texts = {qms_text(lang, _ITP_ITEM_CRITERIA) for lang in LANGUAGES}
     plan_ids: list[uuid.UUID] = []
     item_ids: set[uuid.UUID] = set()
     candidate_plans = (
@@ -278,7 +286,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
             await session.execute(
                 select(ITPPlan.id).where(
                     ITPPlan.project_id.in_(project_ids),
-                    ITPPlan.name == _PLAN["name"],
+                    ITPPlan.name.in_({qms_text(lang, _PLAN["name"]) for lang in LANGUAGES}),
                     ITPPlan.work_type == _PLAN["work_type"],
                     ITPPlan.wbs_ref == _PLAN["wbs_ref"],
                     ITPPlan.created_by.is_(None),
@@ -294,15 +302,19 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
                 select(ITPItem.id, ITPItem.control_point_name, ITPItem.criteria).where(ITPItem.itp_plan_id == plan_id)
             )
         ).all()
-        if sorted(r.control_point_name for r in rows) == item_names and all(
-            r.criteria == _ITP_ITEM_CRITERIA for r in rows
+        if sorted(r.control_point_name for r in rows) in item_name_sets and all(
+            r.criteria in criteria_texts for r in rows
         ):
             plan_ids.append(plan_id)
             item_ids.update(r.id for r in rows)
 
     # Status is left out on purpose: a seeded inspection a person then moved
     # on is still the seed's row, and the plan it hangs off is removed too.
-    inspection_specs = {(_INSPECTION_LOCATION, notes) for _i, _status, notes, _p in _INSPECTIONS}
+    inspection_specs = {
+        (qms_text(lang, _INSPECTION_LOCATION), qms_text(lang, notes))
+        for lang in LANGUAGES
+        for _i, _status, notes, _p in _INSPECTIONS
+    }
     inspection_rows = (
         await session.execute(
             select(
@@ -320,7 +332,11 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
         if (r.location_ref, r.notes) in inspection_specs and r.itp_item_id in item_ids and r.inspector_user_id is None
     ]
 
-    ncr_specs = {_NCR_OPEN, _NCR_VARIATION}
+    ncr_specs = {
+        (qms_text(lang, title), qms_text(lang, desc), severity)
+        for lang in LANGUAGES
+        for title, desc, severity in (_NCR_OPEN, _NCR_VARIATION)
+    }
     ncr_rows = (
         await session.execute(
             select(QMSNCR.id, QMSNCR.title, QMSNCR.description, QMSNCR.severity).where(
@@ -330,7 +346,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
     ).all()
     ncrs = [r.id for r in ncr_rows if (r.title, r.description, r.severity) in ncr_specs]
 
-    punch_specs = {(title, sev, cat) for title, _st, sev, cat in _PUNCH_ITEMS}
+    punch_specs = {(qms_text(lang, title), sev, cat) for lang in LANGUAGES for title, _st, sev, cat in _PUNCH_ITEMS}
     punch_rows = (
         await session.execute(
             select(
@@ -353,7 +369,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
         and r.assigned_to is None
     ]
 
-    finding_descs = sorted(desc for _t, _c, desc in _AUDIT_FINDINGS)
+    finding_desc_sets = [sorted(qms_text(lang, desc) for _t, _c, desc in _AUDIT_FINDINGS) for lang in LANGUAGES]
     audits: list[uuid.UUID] = []
     candidate_audits = (
         (
@@ -361,7 +377,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
                 select(QMSAudit.id).where(
                     QMSAudit.project_id.in_(project_ids),
                     QMSAudit.audit_type == _AUDIT["audit_type"],
-                    QMSAudit.audit_scope == _AUDIT["audit_scope"],
+                    QMSAudit.audit_scope.in_({qms_text(lang, _AUDIT["audit_scope"]) for lang in LANGUAGES}),
                     QMSAudit.standard_ref == _AUDIT["standard_ref"],
                     QMSAudit.auditor_user_id.is_(None),
                 )
@@ -376,7 +392,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
             .scalars()
             .all()
         )
-        if sorted(descs) == finding_descs:
+        if sorted(descs) in finding_desc_sets:
             audits.append(audit_id)
 
     return [
