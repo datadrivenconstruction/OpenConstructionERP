@@ -356,4 +356,52 @@ TEMPLATE = DemoTemplate(
     actual_spend_ratio=0.45,
     spi_override=0.98,
     cpi_override=1.02,
+    # China issues fapiao, which no profile writes; closest is EN 16931 UBL, USCC as tax number.
+    einvoice_showcase={
+        "profile": "ubl",
+        "buyer_contact": {
+            "legal_name": "上海珩沅置业发展股份有限公司",
+            "address": {"street": "陆家嘴环路 1000 号", "city": "上海", "postcode": "200120"},
+        },
+        "invoice": {
+            "invoice_number": "FP-2026-0074",
+            "notes": "第 6 期工程进度款 - 地下结构及核心筒",
+            "line_items": [
+                {
+                    "description": "第 6 期进度款 - 地下室结构",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "28460000.00",
+                    "amount": "28460000.00",
+                },
+                {
+                    "description": "第 6 期进度款 - 核心筒及裙楼框架",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "17935000.00",
+                    "amount": "17935000.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "9",
+            "buyer_reference": "HY-HT-2026-006",
+            "seller": {
+                "name": "沅拓建设集团有限公司",
+                "tax_number": "91310115MA1K4X7Q2P",
+                "legal_id": "91310115MA1K4X7Q2P",
+                "country_code": "CN",
+                "line1": "浦东新区张杨路 500 号",
+                "postcode": "200122",
+                "city": "上海",
+                "contact_name": "财务部",
+                "contact_phone": "+86 21 5558 0126",
+                "contact_email": "fapiao@yuantuo.example",
+            },
+            "payee_iban": "6222021001234567890",
+            "payee_account_name": "沅拓建设集团有限公司",
+            "payment_means_code": "30",
+            "payment_terms": "审核后 30 日内支付，质保金 5%",
+        },
+    },
 )
