@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from tests._pg import isolated_engine
 
 import app.config as app_config
+import app.core.data_repairs  # noqa: F401  (registers the delivery ledger table)
 import app.dependencies as deps
 from app.modules.sso.router import router as sso_router
 from app.modules.users.models import User
