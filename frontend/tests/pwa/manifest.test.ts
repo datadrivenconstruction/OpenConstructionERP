@@ -52,11 +52,17 @@ describe('PWA manifest', () => {
     expect(manifest.background_color).toBe('#F0EEEB');
   });
 
-  it('declares display=standalone and the root scope', () => {
+  it('declares display=standalone and a scope that resolves to the app root', () => {
     const manifest = manifestJson();
     expect(manifest.display).toBe('standalone');
-    expect(manifest.start_url).toBe('/');
-    expect(manifest.scope).toBe('/');
+    // Relative on purpose so the same manifest works under /demo; resolved against its own URL.
+    expect(manifest.start_url).toBe('./');
+    expect(manifest.scope).toBe('./');
+    for (const base of ['https://example.test/manifest.webmanifest', 'https://example.test/demo/manifest.webmanifest']) {
+      const root = new URL('.', base).href;
+      expect(new URL(manifest.start_url as string, base).href).toBe(root);
+      expect(new URL(manifest.scope as string, base).href).toBe(root);
+    }
   });
 
   it('ships icons in 192/256/384/512 + a maskable variant', () => {
@@ -72,9 +78,10 @@ describe('PWA manifest', () => {
     const maskable = icons.find((i) => (i.purpose ?? '').includes('maskable'));
     expect(maskable, 'manifest must include a maskable icon for adaptive launchers').toBeTruthy();
 
-    // Raster icons live under /pwa/, the scalable brand mark under /brand/erp/.
+    // Relative srcs (resolved against the manifest URL): rasters under pwa/, the scalable mark under brand/erp/.
     for (const icon of icons) {
-      expect(icon.src.startsWith('/pwa/') || icon.src.startsWith('/brand/erp/')).toBe(true);
+      expect(icon.src.startsWith('pwa/') || icon.src.startsWith('brand/erp/')).toBe(true);
+      expect(existsSync(resolve(__dirname, '..', '..', 'public', icon.src)), icon.src).toBe(true);
     }
   });
 });

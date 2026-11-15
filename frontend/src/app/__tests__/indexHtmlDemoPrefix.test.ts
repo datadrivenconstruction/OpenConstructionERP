@@ -9,7 +9,7 @@ describe('index.html under the /demo sub-path', () => {
     const script = html.match(/<script>\s*\(function \(\) \{\s*var p = location\.pathname;[\s\S]*?<\/script>/);
     expect(script).not.toBeNull();
     const body = script![0];
-    const hrefs = [...html.matchAll(/<link[^>]*href="(\/[^"]+)"/g)].map((m) => m[1]);
+    const hrefs = [...html.matchAll(/<link[^>]*href="(\/[^"]+)"/g)].map((m) => m[1] as string);
     const rooted = hrefs.filter((h) => /^\/(favicon|apple-touch|brand\/|assets\/vendor\/)/.test(h));
     expect(rooted.length).toBeGreaterThan(0);
     for (const sel of ['/favicon', '/apple-touch', '/brand/', '/assets/vendor/', 'rel="manifest"']) {
