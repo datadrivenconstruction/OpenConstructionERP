@@ -46,6 +46,7 @@ from app.modules.hse_advanced.models import (
     ToolboxTalk,
     ToolboxTopic,
 )
+from app.modules.hse_advanced.seed_text import investigation_notes
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +349,11 @@ async def _seed_investigations(
     if not incidents:
         return 0
 
+    from app.modules.projects.models import Project
+
+    locales = dict(
+        (await session.execute(select(Project.id, Project.locale).where(Project.id.in_(list(project_ids))))).all()
+    )
     now = datetime.now(UTC)
     written = 0
     seen: set[uuid.UUID] = set()
@@ -380,7 +386,9 @@ async def _seed_investigations(
         for idx, incident_id in enumerate(incident_ids[:wanted]):
             method = _INVESTIGATION_METHODS[idx % len(_INVESTIGATION_METHODS)]
             status_choice = _INVESTIGATION_STATUSES[(written + idx) % len(_INVESTIGATION_STATUSES)]
-            findings, recommendations = _INVESTIGATION_NOTES[method]
+            findings, recommendations = investigation_notes(
+                locales.get(project_id), method, _INVESTIGATION_NOTES[method]
+            )
             started_at = now - timedelta(days=14 + idx * 9)
             session.add(
                 HSEIncidentInvestigation(
