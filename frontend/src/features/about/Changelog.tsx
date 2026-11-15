@@ -67,6 +67,12 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.5.1',
+    date: '2026-11-15',
+    tag: 'FIX',
+    summary: 'The home screen and installed-app icons ship with the app, so the pip package installs again.',
+  },
+  {
     version: '19.5.0',
     date: '2026-11-15',
     tag: 'NEW',

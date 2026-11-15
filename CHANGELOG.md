@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.5.1] - 2026-11-15
+
+### Fixed
+
+- The home screen and installed-app icons ship with the app, so the pip package for this release installs again.
+
 ## [19.5.0] - 2026-11-15
 
 ### Added
