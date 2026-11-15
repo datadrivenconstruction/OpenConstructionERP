@@ -415,3 +415,24 @@ async def test_env_oidc_becomes_one_provider_row_once(env):
     async with env.factory() as s:
         assert await migrate_env_oidc(s) == 0  # deleted by an admin: never delivered again
         assert (await s.execute(select(SsoProvider))).first() is None
+
+
+@pytest.mark.parametrize(
+    ("url", "ok"),
+    [
+        ("https://idp.example/realms/x", True),
+        ("http://localhost:8080/realms/x", True),
+        ("http://127.0.0.1/realms/x", True),
+        ("http://[::1]:8080/realms/x", True),
+        ("http://idp.example/realms/x", False),
+        ("http://localhost.evil.example/x", False),
+        ("http://localhost@evil.example/x", False),
+        ("ftp://localhost/x", False),
+        ("https://", False),
+        (None, False),
+    ],
+)
+def test_http_issuer_allowed_only_for_loopback(url, ok):
+    from app.modules.sso.validators import _https
+
+    assert _https(url) is ok
