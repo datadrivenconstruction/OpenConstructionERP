@@ -420,7 +420,6 @@
     "backend/app/core/solution_packages_router.py::POST /{package_id}/demo/",
     "backend/app/core/solution_packages_router.py::POST /{package_id}/remove/",
     "backend/app/core/solution_packages_router.py::PUT /modules/{module}/",
-    "backend/app/main.py::POST /api/demo/install/{demo_id}",
     "backend/app/modules/accommodation/router.py::DELETE /charges/{charge_id}",
     "backend/app/modules/accommodation/router.py::DELETE /{accommodation_id}",
     "backend/app/modules/accommodation/router.py::GET /",

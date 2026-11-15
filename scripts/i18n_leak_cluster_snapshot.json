@@ -2262,5 +2262,17 @@
     ],
     "key_count_at_seed": 3,
     "note": "Dutch spells Project and Water the same and uses clashes as the BIM term"
+  },
+  {
+    "locale_set": [
+      "da",
+      "fil",
+      "hu",
+      "id",
+      "nl",
+      "tr"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Platform is the same word in Danish, Filipino, Hungarian, Indonesian, Dutch and Turkish"
   }
 ]
