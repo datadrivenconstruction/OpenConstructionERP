@@ -21,7 +21,7 @@ Downgrade drops the column and restores the global unique code; it fails on a
 database where two tenants already use one code, which is intended.
 
 Revision ID: veq01_equipment_tenant
-Revises: vpc01_project_country_from_region
+Revises: vsb01_spec_submittals
 Create Date: 2026-11-15
 """
 
@@ -33,7 +33,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "veq01_equipment_tenant"
-down_revision: str | Sequence[str] | None = "vpc01_project_country_from_region"
+down_revision: str | Sequence[str] | None = "vsb01_spec_submittals"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
