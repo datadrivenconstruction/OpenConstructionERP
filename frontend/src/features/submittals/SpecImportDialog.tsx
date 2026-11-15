@@ -194,7 +194,7 @@ export function SpecImportDialog({ projectId, onClose }: { projectId: string; on
       {groups.map(([section, items]) => (
         <section key={section} className="mb-4">
           <h3 className="mb-1 text-sm font-semibold text-content-primary">
-            {section} <span className="font-normal text-content-secondary">{items[0].section_title}</span>
+            {section} <span className="font-normal text-content-secondary">{items[0]?.section_title}</span>
           </h3>
           <ul className="divide-y divide-border-light rounded-lg border border-border-light">
             {items.map((it) => (
