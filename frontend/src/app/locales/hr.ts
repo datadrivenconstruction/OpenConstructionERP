@@ -61427,6 +61427,8 @@ const resource = {
     "menu_layout.mode_finance": "Financije",
     "menu_layout.mode_manager": "Menadžer",
     "menu_layout.mode_all": "Sve",
+    "menu_layout.show_all_modules": "Prikaži sve module",
+    "menu_layout.back_to_view": "Natrag na prikaz {{view}}",
     "guarantees.timeline_empty": "Još nema događaja",
     "guarantees.error": "Greška",
     "guarantees.transition_done": "Jamstvo je ažurirano",

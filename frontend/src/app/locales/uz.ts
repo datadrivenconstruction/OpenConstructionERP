@@ -62018,6 +62018,8 @@ const resource = {
     "menu_layout.mode_finance": "Moliya",
     "menu_layout.mode_manager": "Rahbar",
     "menu_layout.mode_all": "Hammasi",
+    "menu_layout.show_all_modules": "Barcha modullarni ko‘rsatish",
+    "menu_layout.back_to_view": "{{view}} ko‘rinishiga qaytish",
     "guarantees.timeline_empty": "Hali voqealar yʻq",
     "guarantees.error": "Xatolik",
     "guarantees.transition_done": "Kafolat yangilandi",

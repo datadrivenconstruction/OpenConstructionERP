@@ -61090,6 +61090,8 @@ const resource = {
     "menu_layout.mode_finance": "Финанси",
     "menu_layout.mode_manager": "Мениджър",
     "menu_layout.mode_all": "Всички",
+    "menu_layout.show_all_modules": "Покажи всички модули",
+    "menu_layout.back_to_view": "Назад към изглед {{view}}",
     "guarantees.timeline_empty": "Все още няма събития",
     "guarantees.error": "Грешка",
     "guarantees.transition_done": "Гаранцията е актуализирана",

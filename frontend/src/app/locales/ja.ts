@@ -62370,6 +62370,8 @@ const resource = {
     "menu_layout.mode_finance": "財務",
     "menu_layout.mode_manager": "管理者",
     "menu_layout.mode_all": "すべて",
+    "menu_layout.show_all_modules": "すべてのモジュールを表示",
+    "menu_layout.back_to_view": "{{view}}ビューに戻る",
     "guarantees.timeline_empty": "まだイベントはありません",
     "guarantees.error": "エラー",
     "guarantees.transition_done": "保証を更新しました",

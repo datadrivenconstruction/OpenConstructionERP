@@ -64298,6 +64298,8 @@ const resource = {
     "menu_layout.mode_finance": "Финансы",
     "menu_layout.mode_manager": "Руководитель",
     "menu_layout.mode_all": "Все",
+    "menu_layout.show_all_modules": "Показать все модули",
+    "menu_layout.back_to_view": "Назад к виду «{{view}}»",
     "guarantees.timeline_empty": "Событий пока нет",
     "guarantees.error": "Ошибка",
     "guarantees.transition_done": "Гарантия обновлена",

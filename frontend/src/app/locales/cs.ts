@@ -62363,6 +62363,8 @@ const resource = {
     "menu_layout.mode_finance": "Finance",
     "menu_layout.mode_manager": "Manažer",
     "menu_layout.mode_all": "Vše",
+    "menu_layout.show_all_modules": "Zobrazit všechny moduly",
+    "menu_layout.back_to_view": "Zpět na pohled {{view}}",
     "guarantees.timeline_empty": "Zatím žádné události",
     "guarantees.error": "Chyba",
     "guarantees.transition_done": "Záruka byla aktualizována",

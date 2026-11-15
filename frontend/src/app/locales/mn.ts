@@ -60764,6 +60764,8 @@ const resource = {
     "menu_layout.mode_finance": "Санхүү",
     "menu_layout.mode_manager": "Менежер",
     "menu_layout.mode_all": "Бүгд",
+    "menu_layout.show_all_modules": "Бүх модулийг харуулах",
+    "menu_layout.back_to_view": "{{view}} харагдац руу буцах",
     "guarantees.timeline_empty": "Одоогоор үйл явдал алга",
     "guarantees.error": "Алдаа",
     "guarantees.transition_done": "Баталгаа шинэчлэгдлээ",

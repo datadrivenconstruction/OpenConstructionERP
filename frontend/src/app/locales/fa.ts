@@ -61046,6 +61046,8 @@ const resource = {
     "menu_layout.mode_finance": "مالی",
     "menu_layout.mode_manager": "مدیر",
     "menu_layout.mode_all": "همه",
+    "menu_layout.show_all_modules": "نمایش همه ماژول‌ها",
+    "menu_layout.back_to_view": "بازگشت به نمای {{view}}",
     "guarantees.timeline_empty": "هنوز رویدادی ثبت نشده است",
     "guarantees.error": "خطا",
     "guarantees.transition_done": "ضمانت‌نامه به‌روز شد",

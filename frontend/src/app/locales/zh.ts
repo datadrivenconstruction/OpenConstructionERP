@@ -63307,6 +63307,8 @@ const resource = {
     "menu_layout.mode_finance": "财务",
     "menu_layout.mode_manager": "管理者",
     "menu_layout.mode_all": "全部",
+    "menu_layout.show_all_modules": "显示所有模块",
+    "menu_layout.back_to_view": "返回{{view}}视图",
     "guarantees.timeline_empty": "暂无记录",
     "guarantees.error": "错误",
     "guarantees.transition_done": "保函已更新",

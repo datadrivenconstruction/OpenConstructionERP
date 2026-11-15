@@ -63651,6 +63651,8 @@ const resource = {
     "menu_layout.mode_finance": "Pénzügy",
     "menu_layout.mode_manager": "Vezető",
     "menu_layout.mode_all": "Összes",
+    "menu_layout.show_all_modules": "Összes modul megjelenítése",
+    "menu_layout.back_to_view": "Vissza a(z) {{view}} nézethez",
     "guarantees.timeline_empty": "Még nincs esemény",
     "guarantees.error": "Hiba",
     "guarantees.transition_done": "A garancia frissítve",

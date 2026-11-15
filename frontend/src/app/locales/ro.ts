@@ -61417,6 +61417,8 @@ const resource = {
     "menu_layout.mode_finance": "Finanțe",
     "menu_layout.mode_manager": "Manager",
     "menu_layout.mode_all": "Toate",
+    "menu_layout.show_all_modules": "Afișează toate modulele",
+    "menu_layout.back_to_view": "Înapoi la vizualizarea {{view}}",
     "guarantees.timeline_empty": "Niciun eveniment încă",
     "guarantees.error": "Eroare",
     "guarantees.transition_done": "Garanția a fost actualizată",

@@ -61967,6 +61967,8 @@ const resource = {
     "menu_layout.mode_finance": "Financiën",
     "menu_layout.mode_manager": "Management",
     "menu_layout.mode_all": "Alles",
+    "menu_layout.show_all_modules": "Alle modules tonen",
+    "menu_layout.back_to_view": "Terug naar de weergave {{view}}",
     "guarantees.timeline_empty": "Nog geen gebeurtenissen",
     "guarantees.error": "Fout",
     "guarantees.transition_done": "Garantie bijgewerkt",

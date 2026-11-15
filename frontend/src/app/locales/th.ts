@@ -60838,6 +60838,8 @@ const resource = {
     "menu_layout.mode_finance": "การเงิน",
     "menu_layout.mode_manager": "ผู้บริหาร",
     "menu_layout.mode_all": "ทั้งหมด",
+    "menu_layout.show_all_modules": "แสดงโมดูลทั้งหมด",
+    "menu_layout.back_to_view": "กลับไปที่มุมมอง {{view}}",
     "guarantees.timeline_empty": "ยังไม่มีเหตุการณ์",
     "guarantees.error": "เกิดข้อผิดพลาด",
     "guarantees.transition_done": "อัปเดตหนังสือค้ำประกันแล้ว",

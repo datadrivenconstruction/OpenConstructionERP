@@ -61052,6 +61052,8 @@ const resource = {
     "menu_layout.mode_finance": "مالیات",
     "menu_layout.mode_manager": "مینیجر",
     "menu_layout.mode_all": "سب",
+    "menu_layout.show_all_modules": "تمام ماڈیولز دکھائیں",
+    "menu_layout.back_to_view": "{{view}} منظر پر واپس جائیں",
     "guarantees.timeline_empty": "ابھی تک کوئی واقعہ درج نہیں",
     "guarantees.error": "خرابی",
     "guarantees.transition_done": "ضمانت اپ ڈیٹ ہو گئی",

@@ -61047,6 +61047,8 @@ const resource = {
     "menu_layout.mode_finance": "Қаржы",
     "menu_layout.mode_manager": "Басшы",
     "menu_layout.mode_all": "Барлығы",
+    "menu_layout.show_all_modules": "Барлық модульдерді көрсету",
+    "menu_layout.back_to_view": "{{view}} көрінісіне оралу",
     "guarantees.timeline_empty": "Әзірге оқиғалар жоқ",
     "guarantees.error": "Қате",
     "guarantees.transition_done": "Кепілдік жаңартылды",

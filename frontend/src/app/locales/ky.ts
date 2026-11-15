@@ -61203,6 +61203,8 @@ const resource = {
     "menu_layout.mode_finance": "Каржы",
     "menu_layout.mode_manager": "Жетекчи",
     "menu_layout.mode_all": "Баары",
+    "menu_layout.show_all_modules": "Бардык модулдарды көрсөтүү",
+    "menu_layout.back_to_view": "{{view}} көрүнүшүнө кайтуу",
     "guarantees.timeline_empty": "Азырынча окуялар жок",
     "guarantees.error": "Ката",
     "guarantees.transition_done": "Кепилдик жаңыртылды",

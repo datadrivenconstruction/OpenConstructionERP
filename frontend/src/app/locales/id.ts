@@ -60837,6 +60837,8 @@ const resource = {
     "menu_layout.mode_finance": "Keuangan",
     "menu_layout.mode_manager": "Manajer",
     "menu_layout.mode_all": "Semua",
+    "menu_layout.show_all_modules": "Tampilkan semua modul",
+    "menu_layout.back_to_view": "Kembali ke tampilan {{view}}",
     "guarantees.timeline_empty": "Belum ada kejadian",
     "guarantees.error": "Galat",
     "guarantees.transition_done": "Jaminan diperbarui",

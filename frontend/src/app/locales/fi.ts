@@ -61090,6 +61090,8 @@ const resource = {
     "menu_layout.mode_finance": "Talous",
     "menu_layout.mode_manager": "Johto",
     "menu_layout.mode_all": "Kaikki",
+    "menu_layout.show_all_modules": "Näytä kaikki moduulit",
+    "menu_layout.back_to_view": "Takaisin näkymään {{view}}",
     "guarantees.timeline_empty": "Ei tapahtumia vielä",
     "guarantees.error": "Virhe",
     "guarantees.transition_done": "Takuu päivitetty",

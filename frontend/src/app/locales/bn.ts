@@ -61356,6 +61356,8 @@ const resource = {
     "menu_layout.mode_finance": "অর্থ",
     "menu_layout.mode_manager": "ম্যানেজার",
     "menu_layout.mode_all": "সব",
+    "menu_layout.show_all_modules": "সব মডিউল দেখান",
+    "menu_layout.back_to_view": "{{view}} ভিউতে ফিরুন",
     "guarantees.timeline_empty": "এখনও কোনো ঘটনা নেই",
     "guarantees.error": "ত্রুটি",
     "guarantees.transition_done": "গ্যারান্টি আপডেট করা হয়েছে",

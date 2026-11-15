@@ -61089,6 +61089,8 @@ const resource = {
     "menu_layout.mode_finance": "वित्त",
     "menu_layout.mode_manager": "प्रबंधक",
     "menu_layout.mode_all": "सभी",
+    "menu_layout.show_all_modules": "सभी मॉड्यूल दिखाएं",
+    "menu_layout.back_to_view": "{{view}} व्यू पर वापस जाएं",
     "guarantees.timeline_empty": "अभी तक कोई घटना नहीं है",
     "guarantees.error": "त्रुटि",
     "guarantees.transition_done": "गारंटी अपडेट की गई",

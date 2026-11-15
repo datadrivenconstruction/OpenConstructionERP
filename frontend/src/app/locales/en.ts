@@ -55311,6 +55311,8 @@ const resource = {
     "menu_layout.mode_finance": "Finance",
     "menu_layout.mode_manager": "Manager",
     "menu_layout.mode_all": "All",
+    "menu_layout.show_all_modules": "Show all modules",
+    "menu_layout.back_to_view": "Back to {{view}} view",
     "guarantees.timeline_empty": "No events yet",
     "guarantees.error": "Error",
     "guarantees.transition_done": "Guarantee updated",

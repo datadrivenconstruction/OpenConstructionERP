@@ -61454,6 +61454,8 @@ const resource = {
     "menu_layout.mode_finance": "재무",
     "menu_layout.mode_manager": "관리자",
     "menu_layout.mode_all": "전체",
+    "menu_layout.show_all_modules": "모든 모듈 표시",
+    "menu_layout.back_to_view": "{{view}} 보기로 돌아가기",
     "guarantees.timeline_empty": "아직 이벤트가 없습니다",
     "guarantees.error": "오류",
     "guarantees.transition_done": "보증이 업데이트되었습니다",
