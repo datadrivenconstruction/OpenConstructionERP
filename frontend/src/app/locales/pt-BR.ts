@@ -59140,6 +59140,19 @@ const resource = {
     "offers.items_summary_many": "{{count}} itens · líquido {{net}}",
     "offers.to_fix_many": "{{count}} por corrigir",
     "offers.valid_days_many": "{{count}} dias",
+    "boot.starting_title": "Configurando o OpenConstructionERP",
+    "boot.starting_body": "A primeira inicialização prepara o banco de dados e carrega os módulos, o que pode levar alguns minutos. Esta página abre sozinha quando o servidor estiver pronto; os projetos de demonstração e os dados de custo continuam carregando em segundo plano depois disso.",
+    "boot.failed_title": "O servidor não conseguiu iniciar",
+    "boot.failed_body": "A inicialização parou por causa de um erro. O log do servidor indica a causa; inicie a aplicação novamente após corrigi-la.",
+    "boot.step_of": "Etapa {{step}} de {{steps}}",
+    "boot.phase.starting": "Iniciando o servidor",
+    "boot.phase.translations": "Carregando traduções",
+    "boot.phase.database": "Preparando o banco de dados",
+    "boot.phase.modules": "Carregando módulos",
+    "boot.phase.validation": "Registrando regras de validação",
+    "boot.phase.demo_data": "Criando contas de demonstração e dados de referência",
+    "boot.phase.services": "Preparando serviços em segundo plano",
+    "boot.phase.finishing": "Finalizando",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

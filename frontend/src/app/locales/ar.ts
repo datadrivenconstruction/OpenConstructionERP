@@ -67455,6 +67455,19 @@ const resource = {
     "letter_templates.download": "تنزيل PDF",
     "demo_market.label": "اللغة والسوق",
     "demo_market.hint": "يغيّر لغة الواجهة ويفتح العرض التوضيحي لذلك البلد ببياناته ومعاييره الخاصة.",
+    "boot.starting_title": "جارٍ إعداد OpenConstructionERP",
+    "boot.starting_body": "يُجهّز التشغيل الأول قاعدة البيانات ويحمّل الوحدات، وقد يستغرق ذلك بضع دقائق. تُفتح هذه الصفحة تلقائيًا عند جهوزية الخادم، ويستمر تحميل مشاريع العرض وبيانات التكلفة في الخلفية بعد ذلك.",
+    "boot.failed_title": "تعذّر تشغيل الخادم",
+    "boot.failed_body": "توقف التشغيل بسبب خطأ. يذكر سجل الخادم السبب؛ أعد تشغيل التطبيق بعد إصلاحه.",
+    "boot.step_of": "الخطوة {{step}} من {{steps}}",
+    "boot.phase.starting": "جارٍ تشغيل الخادم",
+    "boot.phase.translations": "جارٍ تحميل الترجمات",
+    "boot.phase.database": "جارٍ تجهيز قاعدة البيانات",
+    "boot.phase.modules": "جارٍ تحميل الوحدات",
+    "boot.phase.validation": "جارٍ تسجيل قواعد التحقق",
+    "boot.phase.demo_data": "جارٍ إنشاء حسابات العرض وبيانات المرجع",
+    "boot.phase.services": "جارٍ تجهيز الخدمات الخلفية",
+    "boot.phase.finishing": "إنهاء",
   }
 } as { translation: Record<string, string> };
 

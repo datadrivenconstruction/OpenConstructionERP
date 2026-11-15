@@ -64199,6 +64199,19 @@ const resource = {
     "letter_templates.download": "Laadi PDF alla",
     "demo_market.label": "Keel ja turg",
     "demo_market.hint": "Vahetab liidese keele ja avab selle riigi demo koos tema enda andmete ja standarditega.",
+    "boot.starting_title": "OpenConstructionERP seadistamine",
+    "boot.starting_body": "Esmakäivitus ette valmistab andmebaasi ja laadib moodulid, mis võib võtta mitu minutit. Leht avaneb iseenesest, kui server on valmis; demoprojektid ja kulude andmed laaditakse pärast seda taustal.",
+    "boot.failed_title": "Serveri käivitamine ebaõnnestus",
+    "boot.failed_body": "Käivitamine peatus veateate tõttu. Serveri logist näed põhjust; pärast parandamist käivita rakendus uuesti.",
+    "boot.step_of": "Samm {{step}} / {{steps}}",
+    "boot.phase.starting": "Serveri käivitamine",
+    "boot.phase.translations": "Tõlgete laadimine",
+    "boot.phase.database": "Andmebaasi ettevalmistamine",
+    "boot.phase.modules": "Moodulite laadimine",
+    "boot.phase.validation": "Valideerimisreeglite registreerimine",
+    "boot.phase.demo_data": "Demokontode ja viitandmete loomine",
+    "boot.phase.services": "Taustateenuste ettevalmistamine",
+    "boot.phase.finishing": "Lõpetamine",
   }
 } as { translation: Record<string, string> };
 

@@ -64621,6 +64621,19 @@ const resource = {
     "letter_templates.download": "Preuzmi PDF",
     "demo_market.label": "Jezik i tržište",
     "demo_market.hint": "Mijenja jezik sučelja i otvara demo te zemlje s njezinim podacima i normama.",
+    "boot.starting_title": "Postavljanje OpenConstructionERP-a",
+    "boot.starting_body": "Prvo pokretanje priprema bazu podataka i učitava module, što može potrajati nekoliko minuta. Stranica se sama otvara kad je server spreman; demo projekti i podaci o troškovima nastavljaju se učitavati u pozadini.",
+    "boot.failed_title": "Server nije mogao pokrenuti",
+    "boot.failed_body": "Pokretanje je zaustavljeno zbog pogreške. Dnevnik servera navodi uzrok; pokrenite aplikaciju ponovo kad se pogreška ispravi.",
+    "boot.step_of": "Korak {{step}} od {{steps}}",
+    "boot.phase.starting": "Pokretanje servera",
+    "boot.phase.translations": "Učitavanje prijevoda",
+    "boot.phase.database": "Priprema baze podataka",
+    "boot.phase.modules": "Učitavanje modula",
+    "boot.phase.validation": "Registriranje pravila validacije",
+    "boot.phase.demo_data": "Stvaranje demo računa i referentnih podataka",
+    "boot.phase.services": "Priprema pozadinskih servisa",
+    "boot.phase.finishing": "Završavanje",
   }
 } as { translation: Record<string, string> };
 

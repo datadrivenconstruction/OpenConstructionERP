@@ -66890,6 +66890,19 @@ const resource = {
     "letter_templates.download": "PDF herunterladen",
     "demo_market.label": "Sprache und Markt",
     "demo_market.hint": "Stellt die Sprache der Oberfläche um und öffnet die Demo dieses Landes mit eigenen Daten und Normen.",
+    "boot.starting_title": "OpenConstructionERP wird eingerichtet",
+    "boot.starting_body": "Der erste Start bereitet die Datenbank vor und lädt die Module, das kann einige Minuten dauern. Diese Seite öffnet sich von selbst, sobald der Server bereit ist. Demo-Projekte und Kostendaten werden danach im Hintergrund weiter geladen.",
+    "boot.failed_title": "Der Server konnte nicht starten",
+    "boot.failed_body": "Der Start wurde mit einem Fehler abgebrochen. Das Server-Protokoll nennt die Ursache; starten Sie die Anwendung neu, sobald der Fehler behoben ist.",
+    "boot.step_of": "Schritt {{step}} von {{steps}}",
+    "boot.phase.starting": "Server wird gestartet",
+    "boot.phase.translations": "Übersetzungen werden geladen",
+    "boot.phase.database": "Datenbank wird vorbereitet",
+    "boot.phase.modules": "Module werden geladen",
+    "boot.phase.validation": "Validierungsregeln werden registriert",
+    "boot.phase.demo_data": "Demo-Konten und Referenzdaten werden angelegt",
+    "boot.phase.services": "Hintergrunddienste werden vorbereitet",
+    "boot.phase.finishing": "Abschluss",
   }
 } as { translation: Record<string, string> };
 

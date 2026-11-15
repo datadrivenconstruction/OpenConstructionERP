@@ -64600,6 +64600,19 @@ const resource = {
     "letter_templates.download": "PDF 다운로드",
     "demo_market.label": "언어와 시장",
     "demo_market.hint": "화면 언어를 바꾸고 해당 국가의 데이터와 기준이 담긴 데모를 엽니다.",
+    "boot.starting_title": "OpenConstructionERP 설정 중",
+    "boot.starting_body": "처음 시작할 때는 데이터베이스를 준비하고 모듈을 불러오느라 몇 분 걸릴 수 있습니다. 서버가 준비되면 이 페이지가 자동으로 열리며, 데모 프로젝트와 원가 데이터는 그 뒤에도 백그라운드에서 계속 불러옵니다.",
+    "boot.failed_title": "서버를 시작할 수 없습니다",
+    "boot.failed_body": "오류로 시작이 중단되었습니다. 원인은 서버 로그에 기록되어 있으니, 문제를 해결한 뒤 애플리케이션을 다시 시작하세요.",
+    "boot.step_of": "{{steps}}단계 중 {{step}}단계",
+    "boot.phase.starting": "서버 시작 중",
+    "boot.phase.translations": "번역 불러오는 중",
+    "boot.phase.database": "데이터베이스 준비 중",
+    "boot.phase.modules": "모듈 불러오는 중",
+    "boot.phase.validation": "검증 규칙 등록 중",
+    "boot.phase.demo_data": "데모 계정과 기준 데이터 생성 중",
+    "boot.phase.services": "백그라운드 서비스 준비 중",
+    "boot.phase.finishing": "마무리 중",
   }
 } as { translation: Record<string, string> };
 

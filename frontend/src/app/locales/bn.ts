@@ -64519,6 +64519,19 @@ const resource = {
     "letter_templates.download": "PDF ডাউনলোড",
     "demo_market.label": "ভাষা ও বাজার",
     "demo_market.hint": "ইন্টারফেসের ভাষা বদলায় এবং সেই দেশের ডেমো তার নিজস্ব ডেটা ও মান সহ খোলে।",
+    "boot.starting_title": "OpenConstructionERP সেট আপ হচ্ছে",
+    "boot.starting_body": "প্রথমবার চালুর সময় ডেটাবেস প্রস্তুত হয় ও মডিউল লোড হয়, যাতে কয়েক মিনিট লাগতে পারে। সার্ভার তৈরি হলে এই পাতা নিজে থেকে খুলবে; এরপর ডেমো প্রকল্প ও খরচের ডেটা পটভূমিতে লোড হতে থাকবে।",
+    "boot.failed_title": "সার্ভার চালু করা যায়নি",
+    "boot.failed_body": "একটি ত্রুটির কারণে চালু বন্ধ হয়েছে। সার্ভার লগে কারণ লেখা আছে; ত্রুটি ঠিক হলে অ্যাপ্লিকেশনটি আবার চালু করুন।",
+    "boot.step_of": "ধাপ {{step}} / {{steps}}",
+    "boot.phase.starting": "সার্ভার চালু হচ্ছে",
+    "boot.phase.translations": "অনুবাদ লোড হচ্ছে",
+    "boot.phase.database": "ডেটাবেস প্রস্তুত হচ্ছে",
+    "boot.phase.modules": "মডিউল লোড হচ্ছে",
+    "boot.phase.validation": "ভ্যালিডেশন নিয়ম নিবন্ধন হচ্ছে",
+    "boot.phase.demo_data": "ডেমো অ্যাকাউন্ট ও রেফারেন্স ডেটা তৈরি হচ্ছে",
+    "boot.phase.services": "ব্যাকগ্রাউন্ড সার্ভিস প্রস্তুত হচ্ছে",
+    "boot.phase.finishing": "শেষ করা হচ্ছে",
   }
 } as { translation: Record<string, string> };
 

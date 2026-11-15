@@ -66453,6 +66453,19 @@ const resource = {
     "letter_templates.download": "下载 PDF",
     "demo_market.label": "语言与市场",
     "demo_market.hint": "切换界面语言，并打开该国家的演示，使用其自己的数据和标准。",
+    "boot.starting_title": "正在设置 OpenConstructionERP",
+    "boot.starting_body": "首次启动需要准备数据库并加载模块，可能需要几分钟。服务器就绪后本页会自动打开；演示项目和成本数据之后会在后台继续加载。",
+    "boot.failed_title": "服务器无法启动",
+    "boot.failed_body": "启动因错误而中止。服务器日志中有具体原因，修复后请重新启动应用。",
+    "boot.step_of": "第 {{step}} 步，共 {{steps}} 步",
+    "boot.phase.starting": "正在启动服务器",
+    "boot.phase.translations": "正在加载翻译",
+    "boot.phase.database": "正在准备数据库",
+    "boot.phase.modules": "正在加载模块",
+    "boot.phase.validation": "正在注册验证规则",
+    "boot.phase.demo_data": "正在创建演示账户和参考数据",
+    "boot.phase.services": "正在准备后台服务",
+    "boot.phase.finishing": "正在完成",
   }
 } as { translation: Record<string, string> };
 

@@ -63992,6 +63992,19 @@ const resource = {
     "letter_templates.download": "Tải PDF",
     "demo_market.label": "Ngôn ngữ và thị trường",
     "demo_market.hint": "Đổi ngôn ngữ giao diện và mở bản demo của quốc gia đó với dữ liệu và tiêu chuẩn riêng.",
+    "boot.starting_title": "Đang thiết lập OpenConstructionERP",
+    "boot.starting_body": "Lần khởi động đầu tiên sẽ chuẩn bị cơ sở dữ liệu và tải các mô-đun, có thể mất vài phút. Trang này sẽ tự mở khi máy chủ sẵn sàng; sau đó, các dự án mẫu và dữ liệu chi phí tiếp tục được tải ở nền.",
+    "boot.failed_title": "Không thể khởi động máy chủ",
+    "boot.failed_body": "Quá trình khởi động đã dừng do lỗi. Nhật ký máy chủ ghi rõ nguyên nhân; hãy khởi động lại ứng dụng sau khi đã khắc phục.",
+    "boot.step_of": "Bước {{step}} / {{steps}}",
+    "boot.phase.starting": "Đang khởi động máy chủ",
+    "boot.phase.translations": "Đang tải bản dịch",
+    "boot.phase.database": "Đang chuẩn bị cơ sở dữ liệu",
+    "boot.phase.modules": "Đang tải mô-đun",
+    "boot.phase.validation": "Đang đăng ký quy tắc xác thực",
+    "boot.phase.demo_data": "Đang tạo tài khoản demo và dữ liệu tham chiếu",
+    "boot.phase.services": "Đang chuẩn bị dịch vụ nền",
+    "boot.phase.finishing": "Đang hoàn tất",
   }
 } as { translation: Record<string, string> };
 

@@ -64209,6 +64209,19 @@ const resource = {
     "letter_templates.download": "دانلود PDF",
     "demo_market.label": "زبان و بازار",
     "demo_market.hint": "زبان رابط را تغییر می‌دهد و دموی آن کشور را با داده‌ها و استانداردهای خودش باز می‌کند.",
+    "boot.starting_title": "در حال راه‌اندازی OpenConstructionERP",
+    "boot.starting_body": "اولین اجرا پایگاه داده را آماده و ماژول‌ها را بارگذاری می‌کند که ممکن است چند دقیقه طول بکشد. وقتی سرور آماده شد این صفحه خودبه‌خود باز می‌شود؛ پروژه‌های نمونه و داده‌های هزینه پس از آن در پس‌زمینه بارگذاری می‌شوند.",
+    "boot.failed_title": "سرور راه‌اندازی نشد",
+    "boot.failed_body": "راه‌اندازی با خطا متوقف شد. گزارش سرور علت را نشان می‌دهد؛ پس از رفع آن، برنامه را دوباره اجرا کنید.",
+    "boot.step_of": "مرحله {{step}} از {{steps}}",
+    "boot.phase.starting": "در حال راه‌اندازی سرور",
+    "boot.phase.translations": "در حال بارگذاری ترجمه‌ها",
+    "boot.phase.database": "در حال آماده‌سازی پایگاه داده",
+    "boot.phase.modules": "در حال بارگذاری ماژول‌ها",
+    "boot.phase.validation": "در حال ثبت قواعد اعتبارسنجی",
+    "boot.phase.demo_data": "در حال ساخت حساب‌های نمونه و داده‌های مرجع",
+    "boot.phase.services": "در حال آماده‌سازی سرویس‌های پس‌زمینه",
+    "boot.phase.finishing": "در حال پایان",
   }
 } as { translation: Record<string, string> };
 
