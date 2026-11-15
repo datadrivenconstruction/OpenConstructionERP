@@ -177,7 +177,8 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           title={title}
           onMenuClick={openSidebar}
         />
-        <main className="px-4 pt-4 pb-6 sm:px-7">
+        {/* Bottom room for the floating assistant and recent buttons, so they never sit on the last controls. */}
+        <main className="px-4 pt-4 pb-24 sm:px-7">
           {children}
         </main>
         <MenuBottomNav onMore={openSidebar} />
