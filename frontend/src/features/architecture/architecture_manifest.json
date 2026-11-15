@@ -278113,6 +278113,696 @@
       "import_dependencies": []
     },
     {
+      "module_id": "sso",
+      "module_label": "Single Sign-On",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "repairs.py",
+        "repository.py",
+        "router.py",
+        "saml.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_sso",
+        "version": "1.0.0",
+        "display_name": "Single Sign-On",
+        "description": "Company sign-in through OpenID Connect or SAML 2.0 identity providers, configured per tenant. Accounts are created on first sign-in, roles follow IdP groups and SCIM-provisioned people are linked, not duplicated. SAML needs the optional [saml] extra.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_users"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "SsoProvider",
+          "tablename": "oe_sso_provider",
+          "docstring": "An identity provider. Secrets are stored encrypted (app.core.crypto).",
+          "columns": [
+            {
+              "name": "slug",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "display_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "protocol",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "email_domains",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "auto_create_users",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "default_role",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "group_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "group_role_map",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "allow_admin_mapping",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "clock_skew_seconds",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "link_by_email",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "oidc_issuer",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "oidc_client_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "oidc_client_secret_enc",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "oidc_scopes",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_idp_cert",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_email_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_name_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SsoOneTime",
+          "tablename": "oe_sso_one_time",
+          "docstring": "A single-use value; the unique key makes a second consume fail.",
+          "columns": [
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "provider_slug",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "data",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/capabilities/",
+          "handler": "capabilities",
+          "response_model": "sch.Capabilities"
+        },
+        {
+          "method": "GET",
+          "path": "/providers/",
+          "handler": "public_providers",
+          "response_model": "sch.PublicProviders",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "GET",
+          "path": "/saml/{slug}/metadata/",
+          "handler": "saml_metadata",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "GET",
+          "path": "/saml/{slug}/login/",
+          "handler": "saml_login",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/saml/{slug}/acs/",
+          "handler": "saml_acs",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/handoff/",
+          "handler": "handoff",
+          "response_model": "TokenResponse",
+          "request_schema": "sch.HandoffIn"
+        },
+        {
+          "method": "GET",
+          "path": "/oidc/{slug}/start/",
+          "handler": "oidc_start",
+          "response_model": "sch.OidcStart",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/oidc/{slug}/callback/",
+          "handler": "oidc_callback",
+          "response_model": "TokenResponse",
+          "request_schema": "sch.OidcCallback"
+        },
+        {
+          "method": "GET",
+          "path": "/providers/admin/",
+          "handler": "list_providers",
+          "response_model": "list[sch.ProviderOut]",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/providers/admin/",
+          "handler": "create_provider",
+          "response_model": "sch.ProviderOut",
+          "request_schema": "sch.ProviderCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/providers/admin/{provider_id}",
+          "handler": "update_provider",
+          "response_model": "sch.ProviderOut",
+          "request_schema": "sch.ProviderUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/providers/admin/{provider_id}",
+          "handler": "delete_provider",
+          "request_schema": "SsoService"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ProviderBase",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "display_name",
+              "type": "str"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "email_domains",
+              "type": "list[str]"
+            },
+            {
+              "name": "auto_create_users",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "default_role",
+              "type": "Role",
+              "default": "'viewer'"
+            },
+            {
+              "name": "group_attribute",
+              "type": "str"
+            },
+            {
+              "name": "group_role_map",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "allow_admin_mapping",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "clock_skew_seconds",
+              "type": "int",
+              "default": "120"
+            },
+            {
+              "name": "link_by_email",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "oidc_issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_scopes",
+              "type": "str"
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_cert",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_email_attribute",
+              "type": "str"
+            },
+            {
+              "name": "saml_name_attribute",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderCreate",
+          "bases": [
+            "ProviderBase"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "Literal['oidc', 'saml']"
+            },
+            {
+              "name": "oidc_client_secret",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every field optional; ``oidc_client_secret`` empty string clears it, absent keeps it.",
+          "fields": [
+            {
+              "name": "display_name",
+              "type": "str | None"
+            },
+            {
+              "name": "enabled",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "email_domains",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "auto_create_users",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "default_role",
+              "type": "Role | None",
+              "default": "None"
+            },
+            {
+              "name": "group_attribute",
+              "type": "str | None"
+            },
+            {
+              "name": "group_role_map",
+              "type": "dict[str, str] | None",
+              "default": "None"
+            },
+            {
+              "name": "allow_admin_mapping",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "clock_skew_seconds",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "link_by_email",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "oidc_issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_secret",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_scopes",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_cert",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_email_attribute",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_name_attribute",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderOut",
+          "bases": [
+            "ProviderBase"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "str"
+            },
+            {
+              "name": "has_client_secret",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "sp_entity_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "acs_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata_url",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PublicProvider",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the login page may see: no secrets, no mapping.",
+          "fields": [
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "display_name",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "str"
+            },
+            {
+              "name": "login_url",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PublicProviders",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "saml_available",
+              "type": "bool"
+            },
+            {
+              "name": "providers",
+              "type": "list[PublicProvider]"
+            }
+          ]
+        },
+        {
+          "class_name": "OidcStart",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "authorization_endpoint",
+              "type": "str"
+            },
+            {
+              "name": "client_id",
+              "type": "str"
+            },
+            {
+              "name": "scopes",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "OidcCallback",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "code_verifier",
+              "type": "str"
+            },
+            {
+              "name": "nonce",
+              "type": "str"
+            },
+            {
+              "name": "redirect_uri",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "HandoffIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "Capabilities",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "saml_available",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "users"
+      ]
+    },
+    {
       "module_id": "staffing",
       "module_label": "Staffing",
       "module_category": "core",
@@ -305761,7 +306451,6 @@
         "permissions.py",
         "repository.py",
         "router.py",
-        "saml.py",
         "schemas.py",
         "service.py",
         "sso_enforce.py",
@@ -306112,36 +306801,6 @@
           "path": "/auth/registration/",
           "handler": "registration_status",
           "request_schema": "UserService"
-        },
-        {
-          "method": "GET",
-          "path": "/auth/oidc/config/",
-          "handler": "oidc_config"
-        },
-        {
-          "method": "POST",
-          "path": "/auth/oidc/callback/",
-          "handler": "oidc_callback",
-          "response_model": "TokenResponse",
-          "request_schema": "Request"
-        },
-        {
-          "method": "GET",
-          "path": "/auth/saml/config/",
-          "handler": "saml_config"
-        },
-        {
-          "method": "GET",
-          "path": "/auth/saml/login/",
-          "handler": "saml_login",
-          "request_schema": "Request"
-        },
-        {
-          "method": "POST",
-          "path": "/auth/saml/acs/",
-          "handler": "saml_acs",
-          "response_model": "None",
-          "request_schema": "Request"
         },
         {
           "method": "GET",
@@ -316008,10 +316667,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 25,
+      "ts_files": 24,
       "css_files": 0,
       "test_files": 8,
-      "total_files": 25
+      "total_files": 24
     },
     {
       "name": "authority-submission",
@@ -317324,10 +317983,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 73,
+      "ts_files": 74,
       "css_files": 0,
       "test_files": 26,
-      "total_files": 73
+      "total_files": 74
     },
     {
       "name": "setup",
@@ -319292,6 +319951,9 @@
       "projects",
       "users"
     ],
+    "sso": [
+      "users"
+    ],
     "staffing": [
       "accommodation",
       "credentials",
@@ -319460,14 +320122,14 @@
     ]
   },
   "statistics": {
-    "backend_modules": 245,
-    "modules_with_manifests": 245,
-    "total_models": 910,
-    "total_columns": 10683,
+    "backend_modules": 246,
+    "modules_with_manifests": 246,
+    "total_models": 912,
+    "total_columns": 10712,
     "total_relationships": 261,
-    "total_routes": 5221,
-    "total_schemas": 4735,
-    "total_python_files": 3406,
+    "total_routes": 5228,
+    "total_schemas": 4745,
+    "total_python_files": 3415,
     "frontend_features": 238,
     "frontend_ts_files": 4209,
     "frontend_backend_mapped": 214
