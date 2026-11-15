@@ -74,3 +74,25 @@ def test_showcase_invoice_is_complete(demo_id: str) -> None:
     # A seller VAT id, when present, carries its country prefix (BR-CO-9).
     vat = ei["seller"].get("vat_id")
     assert not vat or vat[:2].isalpha()
+
+
+@pytest.mark.parametrize("demo_id", sorted(_DEMOS))
+def test_header_vat_equals_showcase_invoice_vat(demo_id: str) -> None:
+    """The seeded header tax and the e-invoice document must be priced at one rate."""
+    from decimal import Decimal
+
+    from app.core.demo_vat import demo_vat_rate
+
+    template = demo_projects.DEMO_TEMPLATES[demo_id]
+    header = demo_vat_rate(template.currency, demo_projects._country_code_for(template))
+    assert header * 100 == Decimal(template.einvoice_showcase["einvoice"]["vat_rate"])
+
+
+def test_euro_demos_take_their_countrys_rate() -> None:
+    from decimal import Decimal
+
+    from app.core.demo_vat import demo_vat_rate
+
+    assert demo_vat_rate("EUR", "FR") == Decimal("0.20")
+    assert demo_vat_rate("EUR", "DE") == Decimal("0.19")
+    assert demo_vat_rate("EUR", "ES") == Decimal("0.21")

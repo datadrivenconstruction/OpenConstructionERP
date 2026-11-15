@@ -177,6 +177,26 @@ def seed_rate_percent(country: str, tax_code: str, on: date) -> Decimal | None:
     return None
 
 
+def default_vat_rate_percent(country: str, on: date) -> Decimal | None:
+    """The standard (default) VAT rate the tax seed holds for ``country`` on ``on``, or ``None``.
+
+    The tax code differs per country (VAT, TVA, MwSt), so the row is found by its
+    ``is_default`` flag and ``tax_type`` rather than by code.
+    """
+    cc = str(country or "").strip().upper()
+    for row in _seed_rows():
+        if row.get("country_code") != cc or row.get("tax_type") != "vat" or not row.get("is_default"):
+            continue
+        start = _day(row.get("effective_from"))
+        end = _day(row.get("effective_to"))
+        if (start is None or on >= start) and (end is None or on <= end):
+            try:
+                return Decimal(str(row.get("rate_pct")))
+            except InvalidOperation:
+                return None
+    return None
+
+
 # ── Split payment ─────────────────────────────────────────────────────────────
 
 
