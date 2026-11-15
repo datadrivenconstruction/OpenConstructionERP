@@ -411,7 +411,7 @@ export function ProjectWeather({
                           ? 'text-sky-400'
                           : d.weatherCode >= 95
                             ? 'text-violet-500'
-                            : 'text-slate-500',
+                            : 'text-content-tertiary',
                   )}
                 />
                 <div className="flex flex-col items-center leading-tight">
