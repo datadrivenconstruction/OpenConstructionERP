@@ -1,2299 +1,2295 @@
 [
-  {
-    "locale_set": [
-      "cs"
-    ],
-    "key_count_at_seed": 29
-  },
-  {
-    "locale_set": [
-      "da"
-    ],
-    "key_count_at_seed": 77
-  },
-  {
-    "locale_set": [
-      "de"
-    ],
-    "key_count_at_seed": 115
-  },
-  {
-    "locale_set": [
-      "en-US"
-    ],
-    "key_count_at_seed": 79,
-    "note": "en-US is a delta locale over en and carries only overrides, so every key it does not override is identical to en by construction. This set grows with any wave that adds keys en-US has no American spelling for."
-  },
-  {
-    "locale_set": [
-      "es-MX"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "fi"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "fil"
-    ],
-    "key_count_at_seed": 59
-  },
-  {
-    "locale_set": [
-      "fr"
-    ],
-    "key_count_at_seed": 520
-  },
-  {
-    "locale_set": [
-      "hi"
-    ],
-    "key_count_at_seed": 33
-  },
-  {
-    "locale_set": [
-      "hr"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "id"
-    ],
-    "key_count_at_seed": 123
-  },
-  {
-    "locale_set": [
-      "it"
-    ],
-    "key_count_at_seed": 29
-  },
-  {
-    "locale_set": [
-      "ky"
-    ],
-    "key_count_at_seed": 69
-  },
-  {
-    "locale_set": [
-      "mn"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "nl"
-    ],
-    "key_count_at_seed": 260
-  },
-  {
-    "locale_set": [
-      "no"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "pl"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "ro"
-    ],
-    "key_count_at_seed": 107
-  },
-  {
-    "locale_set": [
-      "sv"
-    ],
-    "key_count_at_seed": 41
-  },
-  {
-    "locale_set": [
-      "th"
-    ],
-    "key_count_at_seed": 57
-  },
-  {
-    "locale_set": [
-      "tr"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "vi"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "zh"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da"
-    ],
-    "key_count_at_seed": 12
-  },
-  {
-    "locale_set": [
-      "cs",
-      "fr"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "cs",
-      "hr"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "cs",
-      "id"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "cs",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "fr"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "da",
-      "id"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "nl"
-    ],
-    "key_count_at_seed": 23
-  },
-  {
-    "locale_set": [
-      "da",
-      "no"
-    ],
-    "key_count_at_seed": 16
-  },
-  {
-    "locale_set": [
-      "da",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "sv"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "de",
-      "fr"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "de",
-      "hi"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "id"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "de",
-      "it"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "nl"
-    ],
-    "key_count_at_seed": 21
-  },
-  {
-    "locale_set": [
-      "en-US",
-      "fr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "French words spelled identically in English: Description, Verdict. en-US rides along for the delta-locale reason above."
-  },
-  {
-    "locale_set": [
-      "et",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "fil",
-      "fr"
-    ],
-    "key_count_at_seed": 11
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id"
-    ],
-    "key_count_at_seed": 11
-  },
-  {
-    "locale_set": [
-      "fil",
-      "nl"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "fil",
-      "ro"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "fr",
-      "id"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "fr",
-      "ky"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 36
-  },
-  {
-    "locale_set": [
-      "fr",
-      "ro"
-    ],
-    "key_count_at_seed": 12
-  },
-  {
-    "locale_set": [
-      "hi",
-      "th"
-    ],
-    "key_count_at_seed": 7
-  },
-  {
-    "locale_set": [
-      "id",
-      "it"
-    ],
-    "key_count_at_seed": 10
-  },
-  {
-    "locale_set": [
-      "id",
-      "ky"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "id",
-      "nl"
-    ],
-    "key_count_at_seed": 13
-  },
-  {
-    "locale_set": [
-      "id",
-      "no"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "id",
-      "ro"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "id",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "id",
-      "th"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "id",
-      "vi"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "it",
-      "nl"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "it",
-      "sv"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "nl",
-      "no"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 24
-  },
-  {
-    "locale_set": [
-      "nl",
-      "sv"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 13
-  },
-  {
-    "locale_set": [
-      "sv",
-      "tr"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "hr"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "nl"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "sv"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 10
-  },
-  {
-    "locale_set": [
-      "da",
-      "fr",
-      "sv"
-    ],
-    "key_count_at_seed": 7
-  },
-  {
-    "locale_set": [
-      "da",
-      "id",
-      "it"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "id",
-      "no"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "it",
-      "nl"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "nl",
-      "no"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "da",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 44
-  },
-  {
-    "locale_set": [
-      "de",
-      "id",
-      "it"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "id",
-      "nl"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "de",
-      "it",
-      "nl"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "de",
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "nl",
-      "th"
-    ],
-    "key_count_at_seed": 17
-  },
-  {
-    "locale_set": [
-      "de",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "et",
-      "id",
-      "ky"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "et",
-      "sv",
-      "tr"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id",
-      "vi"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "fr",
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 30
-  },
-  {
-    "locale_set": [
-      "fr",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "fr",
-      "ro",
-      "tr"
-    ],
-    "key_count_at_seed": 7
-  },
-  {
-    "locale_set": [
-      "id",
-      "pl",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "id",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "nl",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "cs",
-      "de",
-      "nl",
-      "th"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "cs",
-      "de",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "sv"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "it",
-      "nl"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "da",
-      "fr",
-      "nl",
-      "no"
-    ],
-    "key_count_at_seed": 97
-  },
-  {
-    "locale_set": [
-      "da",
-      "id",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "de",
-      "fr",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX"
-    ],
-    "key_count_at_seed": 32
-  },
-  {
-    "locale_set": [
-      "et",
-      "hi",
-      "id",
-      "uk"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "id",
-      "nl",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "id",
-      "it",
-      "nl"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "id",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 11
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 12
-  },
-  {
-    "locale_set": [
-      "da",
-      "et",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "da",
-      "id",
-      "it",
-      "nl",
-      "no"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "it"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "ro"
-    ],
-    "key_count_at_seed": 16
-  },
-  {
-    "locale_set": [
-      "id",
-      "it",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "de",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 10
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "it",
-      "nl",
-      "sv"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "id",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "it",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "English loanwords that are the ordinary business word in Germanic and Italian: live, Lead, Team. Checked each value rather than the count."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "nl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 13
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 5
-  },
-  {
-    "locale_set": [
-      "fr",
-      "id",
-      "it",
-      "nl",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 8
-  },
-  {
-    "locale_set": [
-      "cs",
-      "de",
-      "fr",
-      "it",
-      "nl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "da",
-      "fr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "hr",
-      "id",
-      "nl",
-      "pl",
-      "ro",
-      "tr"
-    ],
-    "key_count_at_seed": 11
-  },
-  {
-    "locale_set": [
-      "cs",
-      "de",
-      "fil",
-      "fr",
-      "it",
-      "nl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 71
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "it",
-      "nl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 12
-  },
-  {
-    "locale_set": [
-      "da",
-      "et",
-      "fr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "id",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "id",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "et",
-      "hr",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 12
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "hr",
-      "id",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 9
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 15
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 14
-  },
-  {
-    "locale_set": [
-      "da",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "id",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 6
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "id",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 49
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 34
-  },
-  {
-    "locale_set": [
-      "da",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "id",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "id",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 18
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "id",
-      "no",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 7
-  },
-  {
-    "locale_set": [
-      "da",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "id",
-      "no",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 4
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "de",
-      "fr",
-      "hr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "de",
-      "et",
-      "fr",
-      "hr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "de",
-      "et",
-      "fil",
-      "fr",
-      "hr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bg",
-      "cs",
-      "da",
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "hi",
-      "hr",
-      "id",
-      "it",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "ru",
-      "sv",
-      "th",
-      "tr",
-      "vi"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "it",
-      "sv"
-    ],
-    "key_count_at_seed": 10,
-    "note": "'Budget' is spelled identically in Danish, German, French, Italian and Swedish (French is the word's origin; the others adopted it unchanged as a loanword). Every other locale in the repo renders its own distinct spelling (Presupuesto, Eelarve, Budjetti, Begroting, Budsjett, Budzet, Orcamento, Buget, Byudjet, Byudzhet...), confirming this 5-locale set is a genuine cognate, not a leak."
-  },
-  {
-    "locale_set": [
-      "cs",
-      "fr",
-      "it",
-      "nl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 7,
-    "note": "'Max' as the abbreviation for maximum is spelled identically in Czech, French, Italian, Dutch, Romanian and Swedish. Every other locale spells its own abbreviation differently (Maks, Maksimum, Maximo, Enimmaismaara, Maks., Makс...), including locales one letter away (hr 'Maks.', id 'Maks', pl 'Maks')."
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "et",
-      "fr",
-      "hr",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Same cognate as the Max cluster above, for 'Min': identical spelling in these 12 locales, every other locale spells its own version differently (Mín., Min., Ελάχ., न्यूनतम...)."
-  },
-  {
-    "locale_set": [
-      "da",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 5,
-    "note": "Two unrelated cognates share this exact 4-locale set: 'Start' (identical spelling in Danish, Norwegian, Polish, Swedish; every other locale differs, e.g. cs Zacatek, fr Debut, it Inizio, id Awal) and 'system' (identical in the same four; other locales differ, e.g. fr systeme, it/es/pt sistema, nl systeem). Verified both terms against the full 42-locale set, not just the cluster members."
-  },
-  {
-    "locale_set": [
-      "id",
-      "nl",
-      "pl",
-      "ro"
-    ],
-    "key_count_at_seed": 3,
-    "note": "'Operator' spelled identically in Indonesian, Dutch, Polish, Romanian. Every other Latin-script locale differs (Operator, Operador, Operatore, Operatör, Operateur, Operatør...); Cyrillic locales render Cyrillic transliteration and are a different script, not a byte match, so correctly excluded from the set."
-  },
-  {
-    "locale_set": [
-      "da",
-      "nl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "'Leads' (CRM/sales pipeline noun) kept as an adopted English loanword in Danish, Dutch, Portuguese, Brazilian Portuguese and Swedish. Confirmed deliberate, not missed, by each locale's own fully-translated prose elsewhere in the same file explicitly naming the UI tab in English, e.g. da 'Nye henvendelser starter paa Leads-fanen', nl 'Nieuwe aanvragen beginnen op het tabblad Leads', sv 'Nya foerfraagningar startar paa fliken Leads', pt/pt-BR 'Os novos contactos comecam no separador Leads'."
-  },
-  {
-    "locale_set": [
-      "da",
-      "hr",
-      "it",
-      "nl",
-      "pt",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Singular 'Lead', same adopted-loanword pattern as the Leads cluster above. Each locale grammatically integrates 'lead' as a native noun elsewhere in the same file, which a copy-paste leak would not produce: da 'et lead'/'leadet markeres' (definite suffix), sv 'leaden' (definite suffix), it 'il lead'/'un lead' (gendered article), nl 'een lead'/'deze lead', pt/pt-BR 'este lead esta qualificado', hr 'od leada' (genitive case ending). Lower confidence on hr specifically: hr.ts also uses several different native translations for the same concept elsewhere (Potencijalni klijenti, Vodilja, Voditi) with visibly uneven quality, so a native Croatian reviewer re-checking this one locale would be worthwhile."
-  },
-  {
-    "locale_set": [
-      "da",
-      "it",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Three unrelated keys share this set. boq.scenario_default_name: 'scenario' is an identical Latin-root cognate in all five. fieldreports.equiptype_dumper: 'dumper' (site dump truck) is the standard construction-equipment term in all five, not a translation gap. propdev.dashboards.funnel.stage_lead: same adopted-loanword 'Lead' as the two clusters above; no also grammatically integrates it elsewhere ('Dette leadet er kvalifisert') even though it prefers other native words (Prospekt, Interessent) for sibling keys - two valid renderings coexisting, not evidence of a miss."
-  },
-  {
-    "locale_set": [
-      "fr",
-      "it"
-    ],
-    "key_count_at_seed": 3,
-    "note": "costs.classification 'Class.', resources.alloc 'Alloc', tendering.tab_addenda 'Addenda' are genuine French/Italian cognates, not leaks. Both languages inherit the Latin roots directly (fr classification/allocation are spelled identically to English; it classificazione/allocazione share the same 5-letter prefix), and both files demonstrate they know and use the full native words correctly elsewhere in the same section: it.ts/fr.ts write out 'Allocazione %'/'Allocation %' on the very next key after 'Alloc', and the whole tendering.addendum.* key family (create, draft, published, revision...) is meticulously translated except for the one title key where French/Italian addendum/addenda is the same word as English by inheritance, not by omission. Contrast with Hindi and Indonesian, which also render tendering.addendum.title as literal Latin-script 'Addenda' (not part of this 13-cluster job, left for a separate pass) - that is a real leak, because Hindi has no Latin cognate to fall back on; French and Italian do."
-  },
-  {
-    "locale_set": [
-      "en-GB"
-    ],
-    "key_count_at_seed": 26
-  },
-  {
-    "locale_set": [
-      "en-GB",
-      "en-US"
-    ],
-    "key_count_at_seed": 8,
-    "note": "BOQ review workflow labels (submit, in-review, request-changes, returned-to-draft, scope-to-section, submit-tooltip, submitted) added in the aa9200fbb wave. British and American English have no distinct spelling for these construction workflow verbs, so en-GB and en-US carry the same value as en by construction. Every other locale (ar, de, fr, ru, zh ...) has a real translation."
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "ru",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "vi",
-      "zh"
-    ],
-    "key_count_at_seed": 3
-  },
-  {
-    "locale_set": [
-      "pl",
-      "tr"
-    ],
-    "key_count_at_seed": 10,
-    "note": "Short English loanwords and UI verbs (Active, Approve, Cancel, Reject, Awards) that Polish and Turkish keep unchanged. Each locale translates longer prose correctly elsewhere in the same modules."
-  },
-  {
-    "locale_set": [
-      "pt"
-    ],
-    "key_count_at_seed": 3,
-    "note": "RFIs, the module name. Portuguese calls the module RFI throughout since the RFI wording pass replaced SDI; pt-BR inherits these keys from pt."
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "pt",
-      "pt-BR",
-      "ro"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Total and Local, spelled the same in the Romance locales (erp_chat.action.field.total, login.mod.local, takeoff_viewer.local_only). Each of these locales translates the surrounding prose."
-  },
-  {
-    "locale_set": [
-      "es",
-      "fil"
-    ],
-    "key_count_at_seed": 6,
-    "note": "The singular of a counted error label, '{{count}} error': Spanish spells the noun the same as English and Filipino uses the English loanword, as its own error strings already do. Their plural forms (errores, and the unchanged Filipino) are translated."
-  },
-  {
-    "locale_set": [
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Videos is the German and the Spanish word as well (nav.videos, videos.stat_videos, videos.view_videos). Checked in de and es; ru, fr and pt translate it."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "fr",
-      "ro",
-      "tr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Net is the ordinary accounting word for the net amount in French, Romanian, Turkish and Filipino (finance.line_net, finance.total_net, certified_payroll.col.net). Checked in each; German reads Netto, so it is translated where the language differs."
-  },
-  {
-    "locale_set": [
-      "de",
-      "fil",
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Code is the ordinary word for a code column in German, French, Dutch and Filipino (bi.kpi_code, cost_plan.col_code, boq.import_preview.col_ordinal as Pos. / Code). Checked in each; Spanish, Italian and Russian write their own word, so it is translated where the language differs."
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fil"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Error, spelled the same in all four Spanish locales and borrowed as-is into Filipino: the bare noun (jobs.error = 'Error'), and the singular of a counted label, '{{count}} error', in dashboard.validation_portfolio.errors_count_one and schedule.tabular_import.count_errors_one. Their plural forms (errores, and the unchanged Filipino) are translated."
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fr",
-      "it",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Base, the ordinary word for a cost base or basis in Spanish, French, Italian and Portuguese, spelled the same as English: boq.display_base, hakedis.basis.base, propdev.pricing.base_price. Checked each value rather than the count; the three Spanish regional locales copy es."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "id",
-      "no",
-      "pt",
-      "pt-BR",
-      "sv",
-      "tr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Normal, the ordinary word for a priority level in Danish, German, Spanish, Indonesian, Norwegian, Portuguese, Swedish and Turkish, spelled the same as English: rfi.priority_normal, takeoff_crosslink.priority_normal, tasks.priority_normal. Checked each value rather than the count."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "it"
-    ],
-    "key_count_at_seed": 6,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "fr",
-      "nl"
-    ],
-    "key_count_at_seed": 5,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "de",
-      "fr",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "cs",
-      "da",
-      "de",
-      "et",
-      "id",
-      "no"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "it",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "ru",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "vi"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fil",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "ru",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "vi"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
-  },
-  {
-    "locale_set": [
-      "et"
-    ],
-    "key_count_at_seed": 6,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Number is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.catalogue.de_planschluessel.field.number, design.catalogue.iso19650_generic.field.number, design.catalogue.iso19650_uk_na.field.number, design.catalogue.simple_sequential.field.number, design.ui.drawings.number, permits.ui.condition.number."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "pt-BR",
-      "sv"
-    ],
-    "key_count_at_seed": 5,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Status is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: commitment.export.col_status, design.ui.drawings.status, postcalc.qc.col_status, qualityConcept.expert.state, staffing.position.status."
-  },
-  {
-    "locale_set": [
-      "de",
-      "fil",
-      "fr"
-    ],
-    "key_count_at_seed": 5,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Phase is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.field.phase, design.ui.wbs_kind.phase, quality_concept.export.col.phase, quality_concept.export.col_phase, staffing.position.phase."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "fr",
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 4,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Concept, Contact is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.team.contact, module_builder.target.contact, qualityConcept.tabs.concept, tasks.assignee_kind_contact."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "hr",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Status is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.ui.ofi.col_status, delivery_model.ui.packages.col_status, permits.ui.roadmap.col_state, runtime_module.status."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "fr",
-      "hr",
-      "id",
-      "no",
-      "pl",
-      "ro",
-      "sv",
-      "uz"
-    ],
-    "key_count_at_seed": 2,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Format is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.issue.format, finance.einvoice.formatSection."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "fr",
-      "hr",
-      "id",
-      "no",
-      "pl",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 1,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Format is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: stakeholders.ui.plan.format."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id",
-      "pl",
-      "ro",
-      "uz"
-    ],
-    "key_count_at_seed": 2,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator, operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.catalogue.neutral.party.operator, price_index.ri.operator_line."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id",
-      "pl",
-      "ro"
-    ],
-    "key_count_at_seed": 1,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: plant.catalogue.party.operator."
-  },
-  {
-    "locale_set": [
-      "da",
-      "fil"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Reference, {{count}} overlap is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: qualityConcept.packages.ref, resources.overlap_count_n_one, site_logistics.plan.f.reference."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id",
-      "nl"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Spreadsheet, Spreadsheet (.xlsx) is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.ui.export.xlsx, permits.ui.export_xlsx, qualityConcept.export.xlsx."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "id",
-      "ro"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: permits.enum.applicant_role.operator, stakeholders.catalogue.category.operator, stakeholders.catalogue.role.operator."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the translation of the eleven modules: System is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.wbs_kind.system, qualityConcept.stages.system, quality_concept.export.col_system."
-  },
-  {
-    "locale_set": [
-      "id",
-      "tr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the second translation wave: No. and Ref is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: engineeringBrief.programme.code, interface_management.col_reference, permits.ui.conditions.number."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fil",
-      "fr",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "nl",
-      "no",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "tr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the second translation wave: Gate (the project stage-gate loanword) is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: commitment.item_form.gate, engineeringBrief.schedule.gate, engineering_brief.milestone_kind.gate."
-  },
-  {
-    "locale_set": [
-      "fil",
-      "fr",
-      "it",
-      "nl",
-      "ro"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed 2026-10-14 with the second translation wave: Concept is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: engineeringBrief.phase.concept, engineeringBrief.requirements.answered, engineeringBrief.tabs.concept."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fil",
-      "id",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Reviewed: analytics.perf.median, analytics.perf.stat.median and analytics.hist.cost_median read 'Median' because the statistical term is spelled Median in Danish, German, Norwegian, Swedish, Indonesian and Filipino; the non-member locales carry their own word (ru Медиана, fr Médiane, nl Mediaan)."
-  },
-  {
-    "locale_set": [
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Bind/Full are the native Norwegian and Swedish words"
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "fr",
-      "it",
-      "no",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Standard is the native word in each of these languages"
-  },
-  {
-    "locale_set": [
-      "es",
-      "fr",
-      "id",
-      "pt",
-      "ro"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Total is the native word in each of these languages"
-  },
-  {
-    "locale_set": [
-      "hr",
-      "it"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Formula is the native word in Croatian and Italian (boq.apply_tab_formula, boq.column_formula, boq.measurement.formula); a shared word, not a leak."
-  },
-  {
-    "locale_set": [
-      "en-GB",
-      "fr"
-    ],
-    "key_count_at_seed": 6,
-    "note": "Description, Notes, Active, inactive and page are the native French words (field_clock.fence_*, offline_sync.field_*, supplier_catalogs.f_notes, boq.drawing_ref.page_n); en-GB is a delta over en."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "et",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
-  },
-  {
-    "locale_set": [
-      "de",
-      "en-GB"
-    ],
-    "key_count_at_seed": 3,
-    "note": "German and British English share the words Position and Name; identical by language, not by leak."
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "en-GB",
-      "fr",
-      "it",
-      "no",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
-  },
-  {
-    "locale_set": [
-      "de",
-      "es",
-      "id",
-      "pt",
-      "ro",
-      "sv"
-    ],
-    "key_count_at_seed": 4,
-    "note": "Material is the native word in each of these languages; reviewed 2026-11-05"
-  },
-  {
-    "locale_set": [
-      "id",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Item and Van are the words used in Indonesian and Brazilian Portuguese; reviewed 2026-11-05"
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "et",
-      "id",
-      "nl",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Register and Filter are the native words in each of these languages; reviewed 2026-11-05"
-  },
-  {
-    "locale_set": [
-      "da",
-      "de",
-      "hu",
-      "id",
-      "nl",
-      "no",
-      "pl",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Bank is the native word in each of these languages; reviewed 2026-11-05"
-  },
-  {
-    "locale_set": [
-      "de",
-      "fr",
-      "no",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Journal is the accounting term in each of these languages; reviewed 2026-11-05"
-  },
-  {
-    "locale_set": [
-      "fr",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Position, Guide and Session are the native words in French and Swedish; reviewed 2026-11-06"
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "ro",
-      "ru",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ],
-    "key_count_at_seed": 14,
-    "note": "site sensors units and frequency bands, 19.3.0"
-  },
-  {
-    "locale_set": [
-      "ar",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "ko",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ],
-    "key_count_at_seed": 8,
-    "note": "site sensors units and frequency bands, 19.3.0"
-  },
-  {
-    "locale_set": [
-      "en-GB",
-      "fil"
-    ],
-    "key_count_at_seed": 7,
-    "note": "Filipino keeps English trade terms (Estimator, Billing, DWG takeoff); en-GB has no British spelling for them"
-  },
-  {
-    "locale_set": [
-      "en-GB",
-      "nl"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Dutch spells Project and Water the same and uses clashes as the BIM term"
-  },
-  {
-    "locale_set": [
-      "da",
-      "fil",
-      "hu",
-      "id",
-      "nl",
-      "tr"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Platform is the same word in Danish, Filipino, Hungarian, Indonesian, Dutch and Turkish"
-  },
-  {
-    "locale_set": [
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "it",
-      "pt",
-      "pt-BR"
-    ],
-    "key_count_at_seed": 3,
-    "note": "Delta sign with base, Extra and base are correct words in Spanish, Italian and Portuguese (boq.compare_col_delta, framework.order.extra_chip, safety.baseline_short)"
-  },
-  {
-    "locale_set": [
-      "de",
-      "sv"
-    ],
-    "key_count_at_seed": 3,
-    "note": "GAEB XML 3.3 Import / Export, Block and Material are the same word in German and Swedish."
-  }
+    {
+        "locale_set": [
+            "cs"
+        ],
+        "key_count_at_seed": 29
+    },
+    {
+        "locale_set": [
+            "da"
+        ],
+        "key_count_at_seed": 77
+    },
+    {
+        "locale_set": [
+            "de"
+        ],
+        "key_count_at_seed": 115
+    },
+    {
+        "locale_set": [
+            "en-US"
+        ],
+        "key_count_at_seed": 79,
+        "note": "en-US is a delta locale over en and carries only overrides, so every key it does not override is identical to en by construction. This set grows with any wave that adds keys en-US has no American spelling for."
+    },
+    {
+        "locale_set": [
+            "es-MX"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "fi"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "fil"
+        ],
+        "key_count_at_seed": 59
+    },
+    {
+        "locale_set": [
+            "fr"
+        ],
+        "key_count_at_seed": 520
+    },
+    {
+        "locale_set": [
+            "hi"
+        ],
+        "key_count_at_seed": 33
+    },
+    {
+        "locale_set": [
+            "hr"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "id"
+        ],
+        "key_count_at_seed": 123
+    },
+    {
+        "locale_set": [
+            "it"
+        ],
+        "key_count_at_seed": 29
+    },
+    {
+        "locale_set": [
+            "ky"
+        ],
+        "key_count_at_seed": 69
+    },
+    {
+        "locale_set": [
+            "mn"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "nl"
+        ],
+        "key_count_at_seed": 260
+    },
+    {
+        "locale_set": [
+            "no"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "pl"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "ro"
+        ],
+        "key_count_at_seed": 107
+    },
+    {
+        "locale_set": [
+            "sv"
+        ],
+        "key_count_at_seed": 41
+    },
+    {
+        "locale_set": [
+            "th"
+        ],
+        "key_count_at_seed": 57
+    },
+    {
+        "locale_set": [
+            "tr"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "vi"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "zh"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da"
+        ],
+        "key_count_at_seed": 12
+    },
+    {
+        "locale_set": [
+            "cs",
+            "fr"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "cs",
+            "hr"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "cs",
+            "id"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "cs",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "fr"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "da",
+            "id"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "nl"
+        ],
+        "key_count_at_seed": 23
+    },
+    {
+        "locale_set": [
+            "da",
+            "no"
+        ],
+        "key_count_at_seed": 16
+    },
+    {
+        "locale_set": [
+            "da",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "sv"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "de",
+            "fr"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "de",
+            "hi"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "id"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "de",
+            "it"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "nl"
+        ],
+        "key_count_at_seed": 21
+    },
+    {
+        "locale_set": [
+            "en-US",
+            "fr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "French words spelled identically in English: Description, Verdict. en-US rides along for the delta-locale reason above."
+    },
+    {
+        "locale_set": [
+            "et",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "fil",
+            "fr"
+        ],
+        "key_count_at_seed": 11
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id"
+        ],
+        "key_count_at_seed": 11
+    },
+    {
+        "locale_set": [
+            "fil",
+            "nl"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "fil",
+            "ro"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "fr",
+            "id"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "fr",
+            "ky"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 36
+    },
+    {
+        "locale_set": [
+            "fr",
+            "ro"
+        ],
+        "key_count_at_seed": 12
+    },
+    {
+        "locale_set": [
+            "hi",
+            "th"
+        ],
+        "key_count_at_seed": 7
+    },
+    {
+        "locale_set": [
+            "id",
+            "it"
+        ],
+        "key_count_at_seed": 10
+    },
+    {
+        "locale_set": [
+            "id",
+            "ky"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "id",
+            "nl"
+        ],
+        "key_count_at_seed": 13
+    },
+    {
+        "locale_set": [
+            "id",
+            "no"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "id",
+            "ro"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "id",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "id",
+            "th"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "id",
+            "vi"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "it",
+            "nl"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "it",
+            "sv"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "nl",
+            "no"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 24
+    },
+    {
+        "locale_set": [
+            "nl",
+            "sv"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 13
+    },
+    {
+        "locale_set": [
+            "sv",
+            "tr"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "hr"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "nl"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "sv"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 10
+    },
+    {
+        "locale_set": [
+            "da",
+            "fr",
+            "sv"
+        ],
+        "key_count_at_seed": 7
+    },
+    {
+        "locale_set": [
+            "da",
+            "id",
+            "it"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "id",
+            "no"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "it",
+            "nl"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "nl",
+            "no"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "da",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 44
+    },
+    {
+        "locale_set": [
+            "de",
+            "id",
+            "it"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "id",
+            "nl"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "de",
+            "it",
+            "nl"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "de",
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "nl",
+            "th"
+        ],
+        "key_count_at_seed": 17
+    },
+    {
+        "locale_set": [
+            "de",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "et",
+            "id",
+            "ky"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "et",
+            "sv",
+            "tr"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id",
+            "vi"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "fr",
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 30
+    },
+    {
+        "locale_set": [
+            "fr",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "fr",
+            "ro",
+            "tr"
+        ],
+        "key_count_at_seed": 7
+    },
+    {
+        "locale_set": [
+            "id",
+            "pl",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "id",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "nl",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "cs",
+            "de",
+            "nl",
+            "th"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "cs",
+            "de",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "sv"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "it",
+            "nl"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "da",
+            "fr",
+            "nl",
+            "no"
+        ],
+        "key_count_at_seed": 97
+    },
+    {
+        "locale_set": [
+            "da",
+            "id",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "de",
+            "fr",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX"
+        ],
+        "key_count_at_seed": 32
+    },
+    {
+        "locale_set": [
+            "et",
+            "hi",
+            "id",
+            "uk"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "id",
+            "nl",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "id",
+            "it",
+            "nl"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "id",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 11
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 12
+    },
+    {
+        "locale_set": [
+            "da",
+            "et",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "da",
+            "id",
+            "it",
+            "nl",
+            "no"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "it"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "ro"
+        ],
+        "key_count_at_seed": 16
+    },
+    {
+        "locale_set": [
+            "id",
+            "it",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "de",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 10
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "it",
+            "nl",
+            "sv"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "id",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "it",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "English loanwords that are the ordinary business word in Germanic and Italian: live, Lead, Team. Checked each value rather than the count."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "nl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 13
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 5
+    },
+    {
+        "locale_set": [
+            "fr",
+            "id",
+            "it",
+            "nl",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 8
+    },
+    {
+        "locale_set": [
+            "cs",
+            "de",
+            "fr",
+            "it",
+            "nl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "da",
+            "fr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "hr",
+            "id",
+            "nl",
+            "pl",
+            "ro",
+            "tr"
+        ],
+        "key_count_at_seed": 11
+    },
+    {
+        "locale_set": [
+            "cs",
+            "de",
+            "fil",
+            "fr",
+            "it",
+            "nl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 71
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "it",
+            "nl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 12
+    },
+    {
+        "locale_set": [
+            "da",
+            "et",
+            "fr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "id",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "id",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "et",
+            "hr",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 12
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "hr",
+            "id",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 9
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 15
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 14
+    },
+    {
+        "locale_set": [
+            "da",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "id",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 6
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "id",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 49
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 34
+    },
+    {
+        "locale_set": [
+            "da",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "id",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "id",
+            "pt",
+            "pt-BR",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 18
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "id",
+            "no",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 7
+    },
+    {
+        "locale_set": [
+            "da",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "id",
+            "no",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 4
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "de",
+            "fr",
+            "hr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "de",
+            "et",
+            "fr",
+            "hr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "de",
+            "et",
+            "fil",
+            "fr",
+            "hr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bg",
+            "cs",
+            "da",
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "hi",
+            "hr",
+            "id",
+            "it",
+            "ko",
+            "ky",
+            "mn",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ro",
+            "ru",
+            "sv",
+            "th",
+            "tr",
+            "vi"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "it",
+            "sv"
+        ],
+        "key_count_at_seed": 10,
+        "note": "'Budget' is spelled identically in Danish, German, French, Italian and Swedish (French is the word's origin; the others adopted it unchanged as a loanword). Every other locale in the repo renders its own distinct spelling (Presupuesto, Eelarve, Budjetti, Begroting, Budsjett, Budzet, Orcamento, Buget, Byudjet, Byudzhet...), confirming this 5-locale set is a genuine cognate, not a leak."
+    },
+    {
+        "locale_set": [
+            "cs",
+            "fr",
+            "it",
+            "nl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 7,
+        "note": "'Max' as the abbreviation for maximum is spelled identically in Czech, French, Italian, Dutch, Romanian and Swedish. Every other locale spells its own abbreviation differently (Maks, Maksimum, Maximo, Enimmaismaara, Maks., Makс...), including locales one letter away (hr 'Maks.', id 'Maks', pl 'Maks')."
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "et",
+            "fr",
+            "hr",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Same cognate as the Max cluster above, for 'Min': identical spelling in these 12 locales, every other locale spells its own version differently (Mín., Min., Ελάχ., न्यूनतम...)."
+    },
+    {
+        "locale_set": [
+            "da",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 5,
+        "note": "Two unrelated cognates share this exact 4-locale set: 'Start' (identical spelling in Danish, Norwegian, Polish, Swedish; every other locale differs, e.g. cs Zacatek, fr Debut, it Inizio, id Awal) and 'system' (identical in the same four; other locales differ, e.g. fr systeme, it/es/pt sistema, nl systeem). Verified both terms against the full 42-locale set, not just the cluster members."
+    },
+    {
+        "locale_set": [
+            "id",
+            "nl",
+            "pl",
+            "ro"
+        ],
+        "key_count_at_seed": 3,
+        "note": "'Operator' spelled identically in Indonesian, Dutch, Polish, Romanian. Every other Latin-script locale differs (Operator, Operador, Operatore, Operatör, Operateur, Operatør...); Cyrillic locales render Cyrillic transliteration and are a different script, not a byte match, so correctly excluded from the set."
+    },
+    {
+        "locale_set": [
+            "da",
+            "nl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "'Leads' (CRM/sales pipeline noun) kept as an adopted English loanword in Danish, Dutch, Portuguese, Brazilian Portuguese and Swedish. Confirmed deliberate, not missed, by each locale's own fully-translated prose elsewhere in the same file explicitly naming the UI tab in English, e.g. da 'Nye henvendelser starter paa Leads-fanen', nl 'Nieuwe aanvragen beginnen op het tabblad Leads', sv 'Nya foerfraagningar startar paa fliken Leads', pt/pt-BR 'Os novos contactos comecam no separador Leads'."
+    },
+    {
+        "locale_set": [
+            "da",
+            "hr",
+            "it",
+            "nl",
+            "pt",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Singular 'Lead', same adopted-loanword pattern as the Leads cluster above. Each locale grammatically integrates 'lead' as a native noun elsewhere in the same file, which a copy-paste leak would not produce: da 'et lead'/'leadet markeres' (definite suffix), sv 'leaden' (definite suffix), it 'il lead'/'un lead' (gendered article), nl 'een lead'/'deze lead', pt/pt-BR 'este lead esta qualificado', hr 'od leada' (genitive case ending). Lower confidence on hr specifically: hr.ts also uses several different native translations for the same concept elsewhere (Potencijalni klijenti, Vodilja, Voditi) with visibly uneven quality, so a native Croatian reviewer re-checking this one locale would be worthwhile."
+    },
+    {
+        "locale_set": [
+            "da",
+            "it",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Three unrelated keys share this set. boq.scenario_default_name: 'scenario' is an identical Latin-root cognate in all five. fieldreports.equiptype_dumper: 'dumper' (site dump truck) is the standard construction-equipment term in all five, not a translation gap. propdev.dashboards.funnel.stage_lead: same adopted-loanword 'Lead' as the two clusters above; no also grammatically integrates it elsewhere ('Dette leadet er kvalifisert') even though it prefers other native words (Prospekt, Interessent) for sibling keys - two valid renderings coexisting, not evidence of a miss."
+    },
+    {
+        "locale_set": [
+            "fr",
+            "it"
+        ],
+        "key_count_at_seed": 3,
+        "note": "costs.classification 'Class.', resources.alloc 'Alloc', tendering.tab_addenda 'Addenda' are genuine French/Italian cognates, not leaks. Both languages inherit the Latin roots directly (fr classification/allocation are spelled identically to English; it classificazione/allocazione share the same 5-letter prefix), and both files demonstrate they know and use the full native words correctly elsewhere in the same section: it.ts/fr.ts write out 'Allocazione %'/'Allocation %' on the very next key after 'Alloc', and the whole tendering.addendum.* key family (create, draft, published, revision...) is meticulously translated except for the one title key where French/Italian addendum/addenda is the same word as English by inheritance, not by omission. Contrast with Hindi and Indonesian, which also render tendering.addendum.title as literal Latin-script 'Addenda' (not part of this 13-cluster job, left for a separate pass) - that is a real leak, because Hindi has no Latin cognate to fall back on; French and Italian do."
+    },
+    {
+        "locale_set": [
+            "en-GB"
+        ],
+        "key_count_at_seed": 26
+    },
+    {
+        "locale_set": [
+            "en-GB",
+            "en-US"
+        ],
+        "key_count_at_seed": 8,
+        "note": "BOQ review workflow labels (submit, in-review, request-changes, returned-to-draft, scope-to-section, submit-tooltip, submitted) added in the aa9200fbb wave. British and American English have no distinct spelling for these construction workflow verbs, so en-GB and en-US carry the same value as en by construction. Every other locale (ar, de, fr, ru, zh ...) has a real translation."
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bg",
+            "bn",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "et",
+            "fa",
+            "fi",
+            "fil",
+            "fr",
+            "he",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "ja",
+            "kk",
+            "ko",
+            "ky",
+            "mn",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ro",
+            "ru",
+            "sv",
+            "th",
+            "tr",
+            "uk",
+            "ur",
+            "vi",
+            "zh"
+        ],
+        "key_count_at_seed": 3
+    },
+    {
+        "locale_set": [
+            "pl",
+            "tr"
+        ],
+        "key_count_at_seed": 10,
+        "note": "Short English loanwords and UI verbs (Active, Approve, Cancel, Reject, Awards) that Polish and Turkish keep unchanged. Each locale translates longer prose correctly elsewhere in the same modules."
+    },
+    {
+        "locale_set": [
+            "pt"
+        ],
+        "key_count_at_seed": 3,
+        "note": "RFIs, the module name. Portuguese calls the module RFI throughout since the RFI wording pass replaced SDI; pt-BR inherits these keys from pt."
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "pt",
+            "pt-BR",
+            "ro"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Total and Local, spelled the same in the Romance locales (erp_chat.action.field.total, login.mod.local, takeoff_viewer.local_only). Each of these locales translates the surrounding prose."
+    },
+    {
+        "locale_set": [
+            "es",
+            "fil"
+        ],
+        "key_count_at_seed": 6,
+        "note": "The singular of a counted error label, '{{count}} error': Spanish spells the noun the same as English and Filipino uses the English loanword, as its own error strings already do. Their plural forms (errores, and the unchanged Filipino) are translated."
+    },
+    {
+        "locale_set": [
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Videos is the German and the Spanish word as well (nav.videos, videos.stat_videos, videos.view_videos). Checked in de and es; ru, fr and pt translate it."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "fr",
+            "ro",
+            "tr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Net is the ordinary accounting word for the net amount in French, Romanian, Turkish and Filipino (finance.line_net, finance.total_net, certified_payroll.col.net). Checked in each; German reads Netto, so it is translated where the language differs."
+    },
+    {
+        "locale_set": [
+            "de",
+            "fil",
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Code is the ordinary word for a code column in German, French, Dutch and Filipino (bi.kpi_code, cost_plan.col_code, boq.import_preview.col_ordinal as Pos. / Code). Checked in each; Spanish, Italian and Russian write their own word, so it is translated where the language differs."
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fil"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Error, spelled the same in all four Spanish locales and borrowed as-is into Filipino: the bare noun (jobs.error = 'Error'), and the singular of a counted label, '{{count}} error', in dashboard.validation_portfolio.errors_count_one and schedule.tabular_import.count_errors_one. Their plural forms (errores, and the unchanged Filipino) are translated."
+    },
+    {
+        "locale_set": [
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fr",
+            "it",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Base, the ordinary word for a cost base or basis in Spanish, French, Italian and Portuguese, spelled the same as English: boq.display_base, hakedis.basis.base, propdev.pricing.base_price. Checked each value rather than the count; the three Spanish regional locales copy es."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "id",
+            "no",
+            "pt",
+            "pt-BR",
+            "sv",
+            "tr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Normal, the ordinary word for a priority level in Danish, German, Spanish, Indonesian, Norwegian, Portuguese, Swedish and Turkish, spelled the same as English: rfi.priority_normal, takeoff_crosslink.priority_normal, tasks.priority_normal. Checked each value rather than the count."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "it"
+        ],
+        "key_count_at_seed": 6,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "fr",
+            "nl"
+        ],
+        "key_count_at_seed": 5,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "de",
+            "fr",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "cs",
+            "da",
+            "de",
+            "et",
+            "id",
+            "no"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "it",
+            "pt",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bg",
+            "bn",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "et",
+            "fa",
+            "fi",
+            "fr",
+            "he",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ro",
+            "ru",
+            "sv",
+            "th",
+            "tr",
+            "uk",
+            "ur",
+            "vi"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "fil",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bg",
+            "bn",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "et",
+            "fa",
+            "fi",
+            "fil",
+            "he",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "ja",
+            "kk",
+            "ko",
+            "ky",
+            "mn",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ro",
+            "ru",
+            "sv",
+            "th",
+            "tr",
+            "uk",
+            "ur",
+            "vi"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-13 with the eleven project management modules: the members are words the listed languages write as in English (Status, Position, Investor, Code, Neutral, Regime, File, Project manager in Italian as cases.* already has it) or template-only strings, not an untranslated block."
+    },
+    {
+        "locale_set": [
+            "et"
+        ],
+        "key_count_at_seed": 6,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Number is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.catalogue.de_planschluessel.field.number, design.catalogue.iso19650_generic.field.number, design.catalogue.iso19650_uk_na.field.number, design.catalogue.simple_sequential.field.number, design.ui.drawings.number, permits.ui.condition.number."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 5,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Status is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: commitment.export.col_status, design.ui.drawings.status, postcalc.qc.col_status, qualityConcept.expert.state, staffing.position.status."
+    },
+    {
+        "locale_set": [
+            "de",
+            "fil",
+            "fr"
+        ],
+        "key_count_at_seed": 5,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Phase is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.field.phase, design.ui.wbs_kind.phase, quality_concept.export.col.phase, quality_concept.export.col_phase, staffing.position.phase."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "fr",
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 4,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Concept, Contact is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.team.contact, module_builder.target.contact, qualityConcept.tabs.concept, tasks.assignee_kind_contact."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Status is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.ui.ofi.col_status, delivery_model.ui.packages.col_status, permits.ui.roadmap.col_state, runtime_module.status."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "fr",
+            "hr",
+            "id",
+            "no",
+            "pl",
+            "ro",
+            "sv",
+            "uz"
+        ],
+        "key_count_at_seed": 2,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Format is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.issue.format, finance.einvoice.formatSection."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "fr",
+            "hr",
+            "id",
+            "no",
+            "pl",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 1,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Format is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: stakeholders.ui.plan.format."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id",
+            "pl",
+            "ro",
+            "uz"
+        ],
+        "key_count_at_seed": 2,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator, operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.catalogue.neutral.party.operator, price_index.ri.operator_line."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id",
+            "pl",
+            "ro"
+        ],
+        "key_count_at_seed": 1,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: plant.catalogue.party.operator."
+    },
+    {
+        "locale_set": [
+            "da",
+            "fil"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Reference, {{count}} overlap is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: qualityConcept.packages.ref, resources.overlap_count_n_one, site_logistics.plan.f.reference."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id",
+            "nl"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Spreadsheet, Spreadsheet (.xlsx) is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: delivery_model.ui.export.xlsx, permits.ui.export_xlsx, qualityConcept.export.xlsx."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "id",
+            "ro"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: Operator is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: permits.enum.applicant_role.operator, stakeholders.catalogue.category.operator, stakeholders.catalogue.role.operator."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the translation of the eleven modules: System is the ordinary word in the listed languages, spelled the same as English, while the other locales carry their own word (checked values in ar, bg and bn among others). Keys: design.ui.wbs_kind.system, qualityConcept.stages.system, quality_concept.export.col_system."
+    },
+    {
+        "locale_set": [
+            "id",
+            "tr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the second translation wave: No. and Ref is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: engineeringBrief.programme.code, interface_management.col_reference, permits.ui.conditions.number."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "es",
+            "es-CL",
+            "es-CO",
+            "es-MX",
+            "et",
+            "fil",
+            "fr",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "nl",
+            "no",
+            "pt",
+            "pt-BR",
+            "ro",
+            "sv",
+            "tr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the second translation wave: Gate (the project stage-gate loanword) is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: commitment.item_form.gate, engineeringBrief.schedule.gate, engineering_brief.milestone_kind.gate."
+    },
+    {
+        "locale_set": [
+            "fil",
+            "fr",
+            "it",
+            "nl",
+            "ro"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed 2026-10-14 with the second translation wave: Concept is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: engineeringBrief.phase.concept, engineeringBrief.requirements.answered, engineeringBrief.tabs.concept."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fil",
+            "id",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Reviewed: analytics.perf.median, analytics.perf.stat.median and analytics.hist.cost_median read 'Median' because the statistical term is spelled Median in Danish, German, Norwegian, Swedish, Indonesian and Filipino; the non-member locales carry their own word (ru Медиана, fr Médiane, nl Mediaan)."
+    },
+    {
+        "locale_set": [
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Bind/Full are the native Norwegian and Swedish words"
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "fr",
+            "it",
+            "no",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Standard is the native word in each of these languages"
+    },
+    {
+        "locale_set": [
+            "es",
+            "fr",
+            "id",
+            "pt",
+            "ro"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Total is the native word in each of these languages"
+    },
+    {
+        "locale_set": [
+            "hr",
+            "it"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Formula is the native word in Croatian and Italian (boq.apply_tab_formula, boq.column_formula, boq.measurement.formula); a shared word, not a leak."
+    },
+    {
+        "locale_set": [
+            "en-GB",
+            "fr"
+        ],
+        "key_count_at_seed": 6,
+        "note": "Description, Notes, Active, inactive and page are the native French words (field_clock.fence_*, offline_sync.field_*, supplier_catalogs.f_notes, boq.drawing_ref.page_n); en-GB is a delta over en."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "et",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
+    },
+    {
+        "locale_set": [
+            "de",
+            "en-GB"
+        ],
+        "key_count_at_seed": 3,
+        "note": "German and British English share the words Position and Name; identical by language, not by leak."
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "en-GB",
+            "fr",
+            "it",
+            "no",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
+    },
+    {
+        "locale_set": [
+            "de",
+            "es",
+            "id",
+            "pt",
+            "ro",
+            "sv"
+        ],
+        "key_count_at_seed": 4,
+        "note": "Material is the native word in each of these languages; reviewed 2026-11-05"
+    },
+    {
+        "locale_set": [
+            "id",
+            "pt-BR"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Item and Van are the words used in Indonesian and Brazilian Portuguese; reviewed 2026-11-05"
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "et",
+            "id",
+            "nl",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Register and Filter are the native words in each of these languages; reviewed 2026-11-05"
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "hu",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Bank is the native word in each of these languages; reviewed 2026-11-05"
+    },
+    {
+        "locale_set": [
+            "de",
+            "fr",
+            "no",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Journal is the accounting term in each of these languages; reviewed 2026-11-05"
+    },
+    {
+        "locale_set": [
+            "fr",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Position, Guide and Session are the native words in French and Swedish; reviewed 2026-11-06"
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bg",
+            "bn",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "et",
+            "fa",
+            "fi",
+            "fil",
+            "fr",
+            "he",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "ja",
+            "kk",
+            "ko",
+            "ky",
+            "mn",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "ro",
+            "ru",
+            "sv",
+            "th",
+            "tr",
+            "uk",
+            "ur",
+            "uz",
+            "vi",
+            "zh"
+        ],
+        "key_count_at_seed": 14,
+        "note": "site sensors units and frequency bands, 19.3.0"
+    },
+    {
+        "locale_set": [
+            "ar",
+            "bn",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "et",
+            "fa",
+            "fi",
+            "fil",
+            "fr",
+            "he",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "it",
+            "ja",
+            "ko",
+            "nl",
+            "no",
+            "pl",
+            "pt",
+            "ro",
+            "sv",
+            "th",
+            "tr",
+            "ur",
+            "uz",
+            "vi",
+            "zh"
+        ],
+        "key_count_at_seed": 8,
+        "note": "site sensors units and frequency bands, 19.3.0"
+    },
+    {
+        "locale_set": [
+            "en-GB",
+            "fil"
+        ],
+        "key_count_at_seed": 7,
+        "note": "Filipino keeps English trade terms (Estimator, Billing, DWG takeoff); en-GB has no British spelling for them"
+    },
+    {
+        "locale_set": [
+            "en-GB",
+            "nl"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Dutch spells Project and Water the same and uses clashes as the BIM term"
+    },
+    {
+        "locale_set": [
+            "da",
+            "fil",
+            "hu",
+            "id",
+            "nl",
+            "tr"
+        ],
+        "key_count_at_seed": 3,
+        "note": "Platform is the same word in Danish, Filipino, Hungarian, Indonesian, Dutch and Turkish"
+    },
+    {
+        "locale_set": [
+            "da",
+            "de",
+            "en-GB",
+            "fil",
+            "hr",
+            "id",
+            "nl",
+            "no",
+            "pl",
+            "pt-BR",
+            "sv"
+        ],
+        "key_count_at_seed": 3,
+        "note": "\"Status\" is the native word in these languages; three column headers carry it."
+    }
 ]

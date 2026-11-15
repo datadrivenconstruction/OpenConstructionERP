@@ -1,7 +1,5 @@
 import { apiGet, apiPost } from '@/shared/lib/api';
 
-const BASE = '/v1/submittals/spec-imports';
-
 export interface SpecImportStatus {
   id: string;
   status: 'uploaded' | 'parsed' | 'confirmed' | 'failed';
@@ -40,7 +38,7 @@ export interface SpecConfirmResult {
 }
 
 export function startSpecImport(projectId: string, documentId: string, useOcr = false): Promise<SpecImportStatus> {
-  return apiPost<SpecImportStatus, { project_id: string; document_id: string; use_ocr: boolean }>(`${BASE}/`, {
+  return apiPost<SpecImportStatus, { project_id: string; document_id: string; use_ocr: boolean }>(`/v1/submittals/spec-imports/`, {
     project_id: projectId,
     document_id: documentId,
     use_ocr: useOcr,
@@ -48,11 +46,11 @@ export function startSpecImport(projectId: string, documentId: string, useOcr = 
 }
 
 export function getSpecImport(id: string): Promise<SpecImportStatus> {
-  return apiGet<SpecImportStatus>(`${BASE}/${id}/`);
+  return apiGet<SpecImportStatus>(`/v1/submittals/spec-imports/${id}/`);
 }
 
 export function getSpecProposals(id: string): Promise<SpecImportProposals> {
-  return apiGet<SpecImportProposals>(`${BASE}/${id}/proposals/`);
+  return apiGet<SpecImportProposals>(`/v1/submittals/spec-imports/${id}/proposals/`);
 }
 
 export function confirmSpecImport(
@@ -61,7 +59,7 @@ export function confirmSpecImport(
   edits: Record<string, { title?: string }>,
 ): Promise<SpecConfirmResult> {
   return apiPost<SpecConfirmResult, { accept_ids: string[]; edits: Record<string, { title?: string }> }>(
-    `${BASE}/${id}/confirm/`,
+    `/v1/submittals/spec-imports/${id}/confirm/`,
     { accept_ids: acceptIds, edits },
   );
 }
