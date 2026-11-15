@@ -3330,6 +3330,11 @@ export function CreateContractModal({
                 : t(knownDefaults.release_period.note_key ?? '', {
                     defaultValue: knownDefaults.release_period.note,
                   })}
+              {' '}
+              {t('common.lien_reference_disclaimer', {
+                defaultValue:
+                  'Reference only, not legal advice. Lien rules and deadlines vary by state and change; verify with counsel before relying on them.',
+              })}
             </p>
           ) : null}
         </WideModalField>
