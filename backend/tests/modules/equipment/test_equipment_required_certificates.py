@@ -22,7 +22,7 @@ async def session() -> AsyncSession:
 
 
 async def test_required_certificates_round_trip(session: AsyncSession) -> None:
-    svc = EquipmentService(session)
+    svc = EquipmentService(session, "tenant-a")
     unit = await svc.create_equipment(EquipmentCreate(code=f"EX-{uuid.uuid4().hex[:8]}", name="Excavator"))
     assert EquipmentResponse.model_validate(unit).required_certificates == []
 
@@ -45,7 +45,7 @@ async def test_required_certificates_round_trip(session: AsyncSession) -> None:
 
 
 async def test_create_stores_required_certificates(session: AsyncSession) -> None:
-    svc = EquipmentService(session)
+    svc = EquipmentService(session, "tenant-a")
     unit = await svc.create_equipment(
         EquipmentCreate(code=f"CR-{uuid.uuid4().hex[:8]}", name="Crane", required_certificates=["Crane Operator"])
     )

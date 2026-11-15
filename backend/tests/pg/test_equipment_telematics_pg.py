@@ -66,7 +66,12 @@ async def _site(session, *, rate_hour: str = "50", fence: bool = True) -> tuple[
             )
         )
     eq = Equipment(
-        code=f"T-{uuid.uuid4().hex[:6]}", name="Excavator", type_code="excavator", currency="EUR", cost_code="EARTH"
+        tenant_id="t-test",
+        code=f"T-{uuid.uuid4().hex[:6]}",
+        name="Excavator",
+        type_code="excavator",
+        currency="EUR",
+        cost_code="EARTH",
     )
     session.add(eq)
     await session.flush()
@@ -195,7 +200,12 @@ async def test_rules_see_outside_fence_overdue_and_unallocated_machines(session)
         )
     )
     loose = Equipment(
-        code=f"L-{uuid.uuid4().hex[:6]}", name="Loose roller", type_code="compactor", location_lat=LAT, location_lng=LNG
+        tenant_id="t-test",
+        code=f"L-{uuid.uuid4().hex[:6]}",
+        name="Loose roller",
+        type_code="compactor",
+        location_lat=LAT,
+        location_lng=LNG,
     )
     session.add(loose)
     rental.start_date = (datetime.now(UTC).date() - timedelta(days=1)).isoformat()

@@ -12515,6 +12515,7 @@ async def _seed_module_data(
         for e_idx, (e_name, e_type, day_rate, hour_rate) in enumerate(_eq_specs):
             eq = Equipment(
                 id=_id(),
+                tenant_id=str(owner_id),
                 code=_eq_codes[e_idx],
                 name=e_name,
                 type_code=e_type,
