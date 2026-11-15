@@ -139,7 +139,13 @@ class SpecImport(Base):
         nullable=False,
         index=True,
     )
-    document_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    # The import and its proposals are a parse of this one file; confirmed submittals do not link back.
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_documents_document.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     # uploaded -> parsed -> confirmed; ``failed`` carries ``error_code``.
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="uploaded", server_default="uploaded")
     parser_version: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
