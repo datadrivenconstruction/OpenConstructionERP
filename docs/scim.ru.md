@@ -28,4 +28,6 @@
 
 Поддерживается: Users и Groups, GET/POST/PUT/PATCH/DELETE, `filter` с `eq` по `userName`, `externalId` (пользователи) и `displayName` (группы), постраничная выдача `startIndex` и `count` (не более 100), PatchOp `add`, `replace`, `remove`, включая объект значений Entra без пути.
 
-Не поддерживается: SAML (поставьте перед системой мост SAML-в-OIDC на стороне IdP и используйте вход по OIDC), Bulk, ETag, сортировка, синхронизация паролей (`changePassword`), расширение enterprise, вложенные группы и другие операторы фильтра (ответ 400 `invalidFilter`).
+Не поддерживается: Bulk, ETag, сортировка, синхронизация паролей (`changePassword`), расширение enterprise, вложенные группы и другие операторы фильтра (ответ 400 `invalidFilter`).
+
+Вход через SAML и OIDC: см. [SSO](sso.ru.md).
