@@ -122,13 +122,13 @@ export function AcademyMark({ className }: { className?: string }) {
 /* ── App lockup ────────────────────────────────────────────────────────── */
 
 const LOCKUP = {
-  nav: { mark: '24px', text: '14px', gap: 'gap-1.5' },
+  nav: { mark: '20px', text: '13px', gap: 'gap-1.5' },
   lg: { mark: '32px', text: '20px', gap: 'gap-2.5' },
 } as const;
 
 /**
  * Product lockup for app chrome: kit mark plus the name as ONE word,
- * "OpenConstructionERP", Onest semibold, "ERP" in brand blue (founder 13.11).
+ * "OpenConstructionERP", Onest medium, "ERP" in brand blue (founder 13.11).
  * Sizes are absolute so the root font scale never inflates the brand.
  */
 export function BrandLockup({ size = 'nav', animate, className }: { size?: keyof typeof LOCKUP; animate?: boolean; className?: string }) {
@@ -138,7 +138,7 @@ export function BrandLockup({ size = 'nav', animate, className }: { size?: keyof
       <Logo animate={animate} className="!h-[var(--oe-lockup-mark)] !w-[var(--oe-lockup-mark)]" />
       <span
         aria-hidden
-        className="whitespace-nowrap font-semibold leading-none tracking-tight text-content-primary"
+        className="whitespace-nowrap font-medium leading-none tracking-tight text-content-primary"
         style={{ fontFamily: WORDMARK_FONT, fontSize: s.text }}
       >
         OpenConstruction<span className="text-oe-blue">ERP</span>
