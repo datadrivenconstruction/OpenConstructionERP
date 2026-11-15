@@ -32,6 +32,8 @@ def main() -> None:
     # Also check env vars as fallback
     host = os.environ.get("HOST", host)
     port = int(os.environ.get("PORT", str(port)))
+    # A served install opens its port at once and finishes startup behind it.
+    os.environ.setdefault("OE_BOOT_BACKGROUND", "1")
 
     # Desktop app mode: serve frontend, production settings
     if getattr(sys, "frozen", False):
