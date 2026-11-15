@@ -1371,7 +1371,7 @@ export function ProjectCard({
       onClick={isArchived ? undefined : () => void openProject(project.id, project.name)}
     >
       {mapEnabled && !isArchived && (
-        <div className="relative" onClick={(e) => e.stopPropagation()}>
+        <div className="relative min-h-24" onClick={(e) => e.stopPropagation()}>
           <ProjectMap
             variant="card"
             lat={project.address?.lat ?? null}

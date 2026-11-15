@@ -1967,7 +1967,7 @@ export function TasksPage() {
               ) : (
                 <button
                   onClick={() => setShowAddStatus(true)}
-                  className="rounded-md border-2 border-dashed border-border-medium px-4 py-3 flex items-center justify-center gap-2 text-xs text-content-tertiary hover:text-oe-blue hover:border-oe-blue/30 hover:bg-oe-blue/5 transition-all"
+                  className="whitespace-nowrap rounded-md border-2 border-dashed border-border-medium px-4 py-3 flex items-center justify-center gap-2 text-xs text-content-tertiary hover:text-oe-blue hover:border-oe-blue/30 hover:bg-oe-blue/5 transition-all"
                 >
                   <Plus size={14} />
                   {t('tasks.add_column', { defaultValue: 'Add column' })}
