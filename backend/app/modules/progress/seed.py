@@ -111,6 +111,33 @@ async def _worked_positions(session: AsyncSession, project_id: uuid.UUID) -> lis
     return [pid for pid, quantity, unit in rows if str(unit or "").strip() and _positive_quantity(quantity)]
 
 
+#: How many positions a project with no booked hours gets a reading on.
+_FALLBACK_POSITIONS = 8
+
+
+async def _first_positions(session: AsyncSession, project_id: uuid.UUID) -> list[uuid.UUID]:
+    """The first measurable positions of the project's bills, for a project nobody booked hours on.
+
+    A showcase project can carry a priced bill and no time sheets. Its progress
+    screen would read "no tracked positions" although the site is plainly under
+    way, so the first few measurable positions are shown as in progress.
+    """
+    try:
+        from app.modules.boq.models import BOQ, Position
+    except ImportError:
+        return []
+    rows = (
+        await session.execute(
+            select(Position.id, Position.quantity, Position.unit)
+            .join(BOQ, Position.boq_id == BOQ.id)
+            .where(BOQ.project_id == project_id)
+            .order_by(Position.ordinal, Position.id)
+        )
+    ).all()
+    found = [pid for pid, quantity, unit in rows if str(unit or "").strip() and _positive_quantity(quantity)]
+    return found[:_FALLBACK_POSITIONS]
+
+
 async def _has_position_progress(session: AsyncSession, project_id: uuid.UUID) -> bool:
     found = (
         (
@@ -130,7 +157,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, owner_id: 
     """Write one reading per worked position. Returns how many were written."""
     if await _has_position_progress(session, project_id):
         return 0
-    positions = await _worked_positions(session, project_id)
+    positions = await _worked_positions(session, project_id) or await _first_positions(session, project_id)
     if not positions:
         return 0
     rng = _rng_for(project_id)
