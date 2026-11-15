@@ -217,6 +217,14 @@ server = [
     "celery[redis]>=5.4.0,<6",
     "boto3>=1.35.0,<2",
 ]
+# SAML 2.0 single sign-on (OIDC needs nothing extra). python3-saml pulls in xmlsec.
+saml = [
+    "python3-saml>=1.16.0,<2",
+]
+# Parquet export of the BI feeds on installs that slim pyarrow out of the base set.
+parquet = [
+    "pyarrow>=23.0.1,<26",
+]
 # Embedded vector search (LanceDB)
 # pyarrow is now in base deps (was here before v1.3.13).
 vector = [

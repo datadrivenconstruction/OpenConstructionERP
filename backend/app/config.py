@@ -510,6 +510,16 @@ class Settings(BaseSettings):
     oidc_role_claims: str = "groups,roles"
     # Role for a new SSO user that matches no mapped group. Least privilege by default.
     oidc_default_role: Literal["admin", "manager", "editor", "viewer"] = "viewer"
+    # SAML 2.0 (optional extra ``saml``). Roles come from SAML_ROLE_ATTRIBUTE through OIDC_GROUP_ROLE_MAP.
+    saml_enabled: bool = False
+    saml_sp_entity_id: str = ""
+    saml_acs_url: str = ""
+    saml_idp_entity_id: str = ""
+    saml_idp_sso_url: str = ""
+    saml_idp_x509_cert: str = ""
+    saml_email_attribute: str = "email"
+    saml_name_attribute: str = "displayName"
+    saml_role_attribute: str = "groups"
     # SCIM 2.0 provisioning (module oe_scim). A group may map to the admin role only when
     # this is true; the IdP can never send a role itself, an admin sets it on the group.
     scim_allow_admin_groups: bool = False
