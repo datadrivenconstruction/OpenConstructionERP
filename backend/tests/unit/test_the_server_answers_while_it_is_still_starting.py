@@ -120,10 +120,12 @@ def test_gated_paths(path: str, gated: bool) -> None:
 @pytest.mark.parametrize(
     ("env", "background"),
     [
-        ({}, True),
-        ({"OE_TEST_FAST_STARTUP": "1"}, False),
-        ({"OE_BOOT_INLINE": "true"}, False),
-        ({"OE_BOOT_INLINE": "0"}, True),
+        ({}, False),
+        ({"OE_BOOT_BACKGROUND": "1"}, True),
+        ({"OE_BOOT_BACKGROUND": "1", "OE_TEST_FAST_STARTUP": "1"}, False),
+        ({"OE_BOOT_BACKGROUND": "1", "OE_BOOT_INLINE": "true"}, False),
+        ({"OE_BOOT_BACKGROUND": "1", "OE_BOOT_INLINE": "0"}, True),
+        ({"OE_BOOT_BACKGROUND": "0"}, False),
     ],
 )
 def test_boot_mode_follows_the_environment(env: dict[str, str], background: bool) -> None:

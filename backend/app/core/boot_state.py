@@ -189,19 +189,28 @@ class BootGateMiddleware:
 #: did: for a harness that wants the first 200 on any route to mean "fully up".
 BOOT_INLINE_ENV = "OE_BOOT_INLINE"
 
+#: Set by the server entry points (``serve``, ``python -m app``, the container
+#: image). An in-process host (TestClient, ``lifespan_context``) never sets it,
+#: so its lifespan still returns a fully mounted, seeded app.
+BOOT_BACKGROUND_ENV = "OE_BOOT_BACKGROUND"
+
 
 def boot_in_background(env: Mapping[str, str] | None = None) -> bool:
     """Should startup run behind an already open port?
 
-    Yes unless the test suite's fast startup or ``OE_BOOT_INLINE`` asks for the
-    old order. The suite builds an app per module and expects it seeded when the
-    lifespan returns, so it keeps startup inline.
+    Only when a real server asked for it (``OE_BOOT_BACKGROUND``) and neither
+    the test suite's fast startup nor ``OE_BOOT_INLINE`` asks for the old order.
+    Anything that hosts the app in-process reads it as soon as the lifespan
+    returns, so for it startup stays inline.
     """
     source = os.environ if env is None else env
-    for var in ("OE_TEST_FAST_STARTUP", BOOT_INLINE_ENV):
-        if source.get(var, "").strip().lower() in ("1", "true", "yes"):
-            return False
-    return True
+
+    def _on(var: str) -> bool:
+        return source.get(var, "").strip().lower() in ("1", "true", "yes")
+
+    if _on("OE_TEST_FAST_STARTUP") or _on(BOOT_INLINE_ENV):
+        return False
+    return _on(BOOT_BACKGROUND_ENV)
 
 
 def request_server_exit() -> None:
@@ -220,6 +229,7 @@ def request_server_exit() -> None:
 
 
 __all__ = [
+    "BOOT_BACKGROUND_ENV",
     "BOOT_INLINE_ENV",
     "BOOT_PHASES",
     "RETRY_AFTER_S",

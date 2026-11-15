@@ -439,6 +439,8 @@ def _setup_env(data_dir: Path, host: str, port: int) -> None:
     os.environ.setdefault("VECTOR_DATA_DIR", str(data_dir / "vectors"))
     os.environ.setdefault("APP_ENV", "development")
     os.environ.setdefault("APP_DEBUG", "false")
+    # A served install opens its port at once and finishes startup behind it.
+    os.environ.setdefault("OE_BOOT_BACKGROUND", "1")
     os.environ.setdefault("ALLOWED_ORIGINS", f"http://{host}:{port}")
     os.environ.setdefault("JWT_SECRET", "openestimate-local-dev-key")
 

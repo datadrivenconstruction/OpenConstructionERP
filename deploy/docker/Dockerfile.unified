@@ -185,7 +185,8 @@ RUN mkdir -p /data && chown oe:oe /data
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    OE_DATA_DIR=/data
+    OE_DATA_DIR=/data \
+    OE_BOOT_BACKGROUND=1
 
 # --- Stage: api (backend only, port 8000) ----------------------------------
 # Paired with the nginx image from Dockerfile.frontend, which expects to reach
