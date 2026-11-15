@@ -10,11 +10,17 @@ import { create } from 'zustand';
 interface PageHeaderSlotState {
   el: HTMLElement | null;
   setEl: (el: HTMLElement | null) => void;
+  /** The top bar's own mount point, for screens with no `PageHeader` row
+   *  (full-bleed canvases): the widget docks there, never over the page. */
+  topBarEl: HTMLElement | null;
+  setTopBarEl: (el: HTMLElement | null) => void;
 }
 
 export const usePageHeaderSlot = create<PageHeaderSlotState>((set) => ({
   el: null,
   setEl: (el) => set({ el }),
+  topBarEl: null,
+  setTopBarEl: (el) => set({ topBarEl: el }),
 }));
 
 /**

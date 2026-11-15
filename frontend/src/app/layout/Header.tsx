@@ -40,6 +40,7 @@ import { SupportUsButton } from './SupportUsButton';
 import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
 import { useTopBarPrefs } from '@/shared/lib/topBarPrefs';
+import { usePageHeaderSlot } from '@/shared/ui/pageHeaderSlot';
 import { PresenceAvatarStack } from '@/features/global_presence';
 import { getRouteIcon } from './routeIcons';
 import { useIconOverridesVersion } from './menuIcons';
@@ -384,6 +385,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   const projectStripe = useActiveProjectColor();
   const { t, i18n } = useTranslation();
   const bar = useTopBarPrefs();
+  const setTopBarSlot = usePageHeaderSlot((s) => s.setTopBarEl);
   // Header mounts at app boot, before lazy-loaded locale chunks arrive.
   // ``useTranslation`` doesn't always pick up bundle-added events under
   // React StrictMode (subscription gets churned by double-mount), so we
@@ -548,6 +550,8 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           tension with the project switcher on the left; planted next
           to Support/Help, the two CTAs read as a coherent cluster. */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Mount point for "Learn this step" on screens without a PageHeader row. */}
+        <span ref={setTopBarSlot} className="contents" />
         {/* ── Journey (orientation) ─────────────────────────────────
             Names the lifecycle phase the current screen belongs to and
             opens the whole-platform journey map. First in the cluster so it
