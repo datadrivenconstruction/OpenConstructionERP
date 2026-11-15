@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy import select
 
-from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
+from app.core.demo_projects import DEMO_TEMPLATES, _demo_anchor, install_demo_project
 from app.modules.schedule.models import Activity, Schedule
 
 pytestmark = pytest.mark.asyncio
@@ -43,18 +43,23 @@ _STRADDLE_DEMO = "test-straddle-programme"
 
 
 def _straddling_phases(now: datetime) -> list[tuple[str, str, str]]:
-    """Phases either side of ``now``, so 0 and 100 are both reachable answers."""
+    """Phases either side of ``now``, so 0 and 100 are both reachable answers.
 
-    def iso(days: int) -> str:
-        return (now + timedelta(days=days)).strftime("%Y-%m-%d")
+    The programme starts on the project start (the demo anchor): one that began
+    earlier would be moved forward as a block, which is not what is tested here.
+    """
+    start = _demo_anchor(now)
+
+    def iso(when: datetime) -> str:
+        return when.strftime("%Y-%m-%d")
 
     return [
-        ("Site preparation", iso(-540), iso(-400)),
-        ("Substructure", iso(-400), iso(-210)),
-        ("Superstructure", iso(-210), iso(60)),
-        ("Envelope", iso(-40), iso(160)),
-        ("Fit-out", iso(70), iso(260)),
-        ("Commissioning", iso(220), iso(330)),
+        ("Site preparation", iso(start), iso(start + timedelta(days=20))),
+        ("Substructure", iso(start + timedelta(days=20)), iso(start + timedelta(days=45))),
+        ("Superstructure", iso(start + timedelta(days=45)), iso(now + timedelta(days=60))),
+        ("Envelope", iso(now - timedelta(days=10)), iso(now + timedelta(days=160))),
+        ("Fit-out", iso(now + timedelta(days=70)), iso(now + timedelta(days=260))),
+        ("Commissioning", iso(now + timedelta(days=220)), iso(now + timedelta(days=330))),
     ]
 
 
@@ -111,7 +116,7 @@ async def test_a_seeded_programme_has_finished_and_unstarted_phases(pg_session, 
     assert len(phases) == 6, f"seeded {len(phases)} phases from a six-phase template"
 
     progress = sorted(int(a.progress_pct) for a in activities)
-    assert 100 in progress, f"no phase finished, on a programme whose first phase ended 400 days ago: {progress}"
+    assert 100 in progress, f"no phase finished, on a programme whose first two phases ended before today: {progress}"
     assert 0 in progress, f"no phase still to come, on a programme whose last phase starts in 220 days: {progress}"
 
 
