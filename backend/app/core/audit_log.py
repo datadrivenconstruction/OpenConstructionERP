@@ -51,9 +51,11 @@ Usage::
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import logging
 import uuid
+from collections.abc import AsyncIterator
 from contextvars import ContextVar
 from typing import Any
 
@@ -61,7 +63,7 @@ from sqlalchemy import JSON, Index, String, Text, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.database import GUID, Base
+from app.database import GUID, Base, _utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -350,6 +352,13 @@ async def log_activity(
         before_state=_bounded_state(before_state),
         after_state=_bounded_state(after_state),
     )
+    deferred = session.info.get(_DEFERRED_KEY) if hasattr(session, "info") else None
+    if deferred is not None:
+        # Bulk writer: stamp the row now so the order of events survives, insert with the rest at exit.
+        entry.id = uuid.uuid4()
+        entry.created_at = _utcnow()
+        deferred.append(entry)
+        return entry
     # Epic H §H3 - central error handling. The audit write MUST NOT break
     # the business write. ``session.add`` can raise if the caller passed
     # a non-Session stub (common in unit tests that patch the repo
@@ -420,6 +429,34 @@ async def log_activity(
         actor_id,
     )
     return entry
+
+
+_DEFERRED_KEY = "oe_audit_deferred"
+
+
+@contextlib.asynccontextmanager
+async def deferred_audit(session: AsyncSession) -> AsyncIterator[None]:
+    """Collect the :func:`log_activity` rows of a bulk writer and insert them in one statement at exit.
+
+    Same rows, ids and order as writing them one by one; only the per-row savepoint and flush go.
+    A failing insert is dropped like a failing single row (logged, the caller's work stays). On an
+    exception in the body nothing is written: the caller rolls the work back anyway.
+    """
+    if _DEFERRED_KEY in session.info:
+        yield
+        return
+    session.info[_DEFERRED_KEY] = pending = []
+    try:
+        yield
+    finally:
+        session.info.pop(_DEFERRED_KEY, None)
+    if pending:
+        try:
+            async with session.begin_nested():
+                session.add_all(pending)
+                await session.flush()
+        except Exception:
+            logger.exception("activity_log: dropped %d deferred audit rows", len(pending))
 
 
 # Stable verb for an ownership (ball-in-court) hand-off row. The
