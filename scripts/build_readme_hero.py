@@ -5,7 +5,8 @@ Two steps, run from the repo root:
     py -3 scripts/build_readme_hero.py capture --base http://127.0.0.1:5173
     py -3 scripts/build_readme_hero.py render
 
-``capture`` signs in with the demo seed account and saves the source
+``capture`` signs in with the demo seed account (the public demo can be captured
+with ``scripts/readme_hero_capture.cjs`` instead, which uses its own "Try demo" flow) and saves the source
 screenshots to ``docs/screenshots/hero/src/``. ``render`` lays them out with
 the ERP mark and writes ``docs/screenshots/hero-light.png`` and
 ``hero-dark.png``. Requires Playwright with Chromium.
@@ -32,7 +33,7 @@ PALETTE = {
     "dark": {"bg": "#111316", "ink": "#F0EEEB", "muted": "#A3A7AD", "line": "rgba(240,238,235,.12)", "chip": "#1B1E22"},
 }
 
-STATS = ["190+ modules", "44 languages", "120,000+ cost items", "Self-hosted", "AGPL-3.0"]
+STATS = ["240+ modules", "44 languages", "120,000+ cost items", "Self-hosted", "AGPL-3.0"]
 
 
 def _api(page, path: str):
@@ -141,10 +142,10 @@ def _dismiss_dialogs(page) -> None:
 
 def _wait_ready(page, name: str) -> None:
     if name == "boq":
-        page.wait_for_selector("[data-testid=boq-grid] [role=row], [data-testid=boq-grid] tr", timeout=60000)
+        page.wait_for_selector("[data-testid=boq-grid] [role=row], [data-testid=boq-grid] tr, .ag-row", timeout=240000)
         page.wait_for_function(
-            "() => document.querySelectorAll('[data-testid=boq-grid] [role=row], [data-testid=boq-grid] tbody tr').length > 4",
-            timeout=60000,
+            "() => document.querySelectorAll('[data-testid=boq-grid] [role=row], [data-testid=boq-grid] tbody tr, .ag-row').length > 4",
+            timeout=240000,
         )
         page.wait_for_timeout(2500)
     elif name == "takeoff":
@@ -167,6 +168,17 @@ def _wait_ready(page, name: str) -> None:
             except Exception:
                 pass
         page.wait_for_timeout(6000)
+    elif name == "costs":
+        page.get_by_placeholder(re.compile("Search by description", re.I)).fill("cable")
+        page.wait_for_selector("text=/NYM-J/", timeout=120000)
+        page.wait_for_timeout(2000)
+        try:  # open the first result to show its resources
+            page.get_by_text(re.compile(r"NYM-J 3.1\.5")).first.locator("xpath=preceding-sibling::*[1]").click(
+                timeout=4000
+            )
+            page.wait_for_timeout(3000)
+        except Exception:
+            pass
     else:
         page.wait_for_function(
             "() => !document.querySelector('.animate-pulse, [class*=skeleton]') && !/^Loading/m.test(document.body.innerText)",
@@ -188,6 +200,51 @@ def _wait_ready(page, name: str) -> None:
             raise SystemExit(f"{name}: page still shows '{bad}', refusing to save")
     if name == "boq" and "/boq/" not in page.url:
         raise SystemExit("boq: editor not opened")
+
+
+def _box(page, locator):
+    box = locator.first.bounding_box()
+    if not box:
+        raise SystemExit("scene anchor not found")
+    return box
+
+
+def _shoot(page, name: str, theme: str) -> None:
+    """Save the scene, cropped to the part that reads well at README width."""
+    out = str(SRC / f"{name}-{theme}.png")
+    vw = page.viewport_size["width"]
+    if name == "bim":
+        # three times the pixel density, tight on the building; G hides the ground grid
+        cdp = page.context.new_cdp_session(page)
+        cdp.send(
+            "Emulation.setDeviceMetricsOverride",
+            {"width": vw, "height": page.viewport_size["height"], "deviceScaleFactor": 3, "mobile": False},
+        )
+        page.wait_for_timeout(4000)
+        clip = {"x": 774, "y": 466, "width": 460, "height": 247}
+        page.screenshot(path=str(SRC / f"bim-grid-{theme}.png"), clip=clip)
+        page.keyboard.press("g")
+        page.wait_for_timeout(2500)
+        page.screenshot(path=out, clip=clip)
+        cdp.send("Emulation.clearDeviceMetricsOverride")
+        return
+    if name == "boq":
+        box = _box(page, page.locator("[data-testid=boq-grid]"))
+        width = min(box["width"], vw - box["x"] - 4)
+        clip = {"x": box["x"], "y": box["y"], "width": width, "height": width / 2.9}
+    elif name == "costs":
+        box = _box(page, page.get_by_placeholder(re.compile("Search by description", re.I)))
+        width = min(1100, vw - box["x"] - 4)
+        clip = {"x": box["x"] - 4, "y": box["y"] - 8, "width": width, "height": width / 3.1}
+    elif name == "schedule":
+        page.get_by_text("APRIL 2026").first.evaluate("(e) => e.scrollIntoView({block: 'start'})")
+        page.wait_for_timeout(800)
+        box = _box(page, page.get_by_text("APRIL 2026"))
+        width = vw - box["x"] - 14
+        clip = {"x": box["x"] - 8, "y": max(0, box["y"] - 8), "width": width, "height": width / 3.0}
+    else:  # takeoff: the drawing canvas without the layers panel
+        clip = {"x": 250, "y": 400, "width": 990, "height": 324}
+    page.screenshot(path=out, clip=clip)
 
 
 def capture(base: str, theme: str, only: set[str] | None = None) -> None:
@@ -225,11 +282,9 @@ def capture(base: str, theme: str, only: set[str] | None = None) -> None:
         scenes = {
             "takeoff": (f"/dwg-takeoff?drawingId={ids['takeoff']}", "takeoff"),
             "boq": (f"/boq/{ids['boq']}", None),
-            "cde": ("/cde", "project"),
             "bim": (f"/bim/{ids['bim']}", "project"),
             "schedule": ("/schedule", "project"),
             "costs": ("/costs", "project"),
-            "validation": ("/validation", "project"),
         }
         for name, (route, ctx_key) in scenes.items():
             if only and name not in only:
@@ -242,6 +297,8 @@ def capture(base: str, theme: str, only: set[str] | None = None) -> None:
                     "([id, name]) => localStorage.setItem('oe_active_project', JSON.stringify({id, name, boqId: null}))",
                     ctx,
                 )
+            if name == "boq":  # a narrower window makes the columns, and so the rows, read larger
+                page.set_viewport_size({"width": 1300, "height": 900})
             page.goto(f"{base}{route}", wait_until="commit", timeout=120000)
             _settle(page)
             _dismiss_dialogs(page)
@@ -263,10 +320,9 @@ def capture(base: str, theme: str, only: set[str] | None = None) -> None:
                   }
                 })"""
             )
-            # the sidebar and top bar are the same on every shot: keep the content
-            page.screenshot(
-                path=str(SRC / f"{name}-{theme}.png"), clip={"x": 250, "y": 54, "width": 1350, "height": 946}
-            )
+            _shoot(page, name, theme)
+            if name == "boq":
+                page.set_viewport_size({"width": 1600, "height": 1000})
             print("captured", name, theme, page.url)
         browser.close()
 
@@ -276,47 +332,39 @@ def _data_uri(path: Path) -> str:
     return f"data:image/{kind};base64," + base64.b64encode(path.read_bytes()).decode()
 
 
-# (scene, caption, one-line proof, x, y, w, h, zoom, zoom origin) on a 1760 x 1180 canvas; h includes the caption bar
+# (scene, caption, one-line proof, x, y, w, h); h includes the caption bar. Shots are cropped at capture time.
 TILES = [
-    ("bim", "BIM 3D takeoff", "Quantities straight from IFC and Revit models", 40, 212, 1000, 620, 1.08, (0.58, 0.52)),
-    ("schedule", "4D schedule", "Gantt programme tied to the model", 1060, 212, 660, 300, 1.2, (0.0, 1.0)),
-    ("cde", "Common data environment", "ISO 19650 containers and approvals", 1060, 532, 660, 300, 1.25, (0.0, 0.66)),
-    ("boq", "BOQ editor", "Live totals, markups, GAEB and Excel", 40, 852, 405, 300, 1.9, (0.33, 0.5)),
-    ("costs", "Cost databases", "Rates and resources for every region", 465, 852, 405, 300, 1.9, (0.5, 0.8)),
-    ("takeoff", "DWG takeoff", "Measure on drawings, link to the BOQ", 890, 852, 405, 300, 1.5, (0.28, 0.62)),
-    ("validation", "Validation", "Rule checks before anything is issued", 1315, 852, 405, 300, 2.2, (0.1, 0.27)),
+    ("bim", "BIM 3D takeoff", "Quantities straight from IFC and Revit models", 40, 212, 1060, 950),
+    ("schedule", "4D schedule", "Gantt programme linked to the model", 1120, 212, 600, 303),
+    ("boq", "BOQ editor", "Live totals, markups, GAEB and Excel export", 1120, 535, 600, 303),
+    ("takeoff", "DWG takeoff", "Measure on drawings, link to the BOQ", 1120, 858, 600, 304),
 ]
 CAPTION_H = 62
 
 
-SHOT_AR = 1350 / 946  # captured clip, width over height
+def _place(src: Path, w: int, h: int) -> str:
+    """Cover the box with the shot, anchored top left, trimming the overflow."""
+    from PIL import Image
 
-
-def _place(w: int, h: int, zoom: float, focus: tuple[float, float]) -> str:
-    """Absolute placement of a shot so that ``focus`` (fractions of the shot) is centred, clamped to the box."""
-    width = w * zoom
-    height = width / SHOT_AR
-    left = min(0.0, max(w - width, w / 2 - focus[0] * width))
-    top = min(0.0, max(h - height, h / 2 - focus[1] * height))
-    return f"position:absolute;left:{left:.1f}px;top:{top:.1f}px;width:{width:.1f}px;height:auto"
+    iw, ih = Image.open(src).size
+    scale = max(w / iw, h / ih)
+    return f"position:absolute;left:0;top:0;width:{iw * scale:.1f}px;height:{ih * scale:.1f}px"
 
 
 def _html(theme: str) -> str:
     c = PALETTE[theme]
     mark = _data_uri(MARK / f"erp-mark-{theme}.svg")
 
-    def shot(name: str) -> str:
+    def shot_path(name: str) -> Path:
         p = SRC / f"{name}-{theme}.png"
-        if not p.exists():
-            p = SRC / f"{name}-light.png"
-        return _data_uri(p)
+        return p if p.exists() else SRC / f"{name}-light.png"
 
     stats = "".join(f"<li>{html.escape(s)}</li>" for s in STATS)
     tiles = "".join(
         f'<figure class="tile" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px">'
-        f'<div class="shot" style="height:{h - CAPTION_H}px"><img src="{shot(n)}" style="{_place(w, h - CAPTION_H, z, focus)}"></div>'
+        f'<div class="shot" style="height:{h - CAPTION_H}px"><img src="{_data_uri(shot_path(n))}" style="{_place(shot_path(n), w, h - CAPTION_H)}"></div>'
         f"<figcaption><b>{html.escape(cap)}</b><span>{html.escape(sub)}</span></figcaption></figure>"
-        for n, cap, sub, x, y, w, h, z, focus in TILES
+        for n, cap, sub, x, y, w, h in TILES
     )
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=block" rel="stylesheet">
