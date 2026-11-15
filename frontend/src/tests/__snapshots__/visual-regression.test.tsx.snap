@@ -761,7 +761,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           </span>
         </div>
         <div
-          class="flex flex-1 flex-wrap items-center gap-1.5 min-w-0"
+          class="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:flex-1 sm:basis-0"
         >
           <button
             aria-controls="whatsnew-chip-cost-control-popover"
