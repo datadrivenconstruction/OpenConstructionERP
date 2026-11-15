@@ -86,6 +86,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { ScimPanel } from './ScimPanel';
+import { SsoPanel } from './SsoPanel';
 import { AvatarEditor } from './AvatarEditor';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import {
@@ -2345,7 +2346,10 @@ export function SettingsPage() {
           {/* ── IDENTITY (SCIM) ──────────────────────────────────── */}
           {activeTab === 'identity' && userRole === 'admin' && (
             <div className="lg:col-span-2">
-              <ScimPanel />
+              <SsoPanel />
+              <div className="mt-4">
+                <ScimPanel />
+              </div>
             </div>
           )}
 
