@@ -306133,7 +306133,7 @@
           "method": "POST",
           "path": "/auth/saml/acs/",
           "handler": "saml_acs",
-          "response_model": "TokenResponse",
+          "response_model": "None",
           "request_schema": "Request"
         },
         {
@@ -316001,10 +316001,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 22,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 22
+      "test_files": 8,
+      "total_files": 25
     },
     {
       "name": "authority-submission",
@@ -319462,7 +319462,7 @@
     "total_schemas": 4735,
     "total_python_files": 3406,
     "frontend_features": 238,
-    "frontend_ts_files": 4206,
+    "frontend_ts_files": 4209,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
