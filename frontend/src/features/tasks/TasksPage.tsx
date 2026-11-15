@@ -37,7 +37,7 @@ import { PlanningCrossLinks } from '@/features/schedule/PlanningCrossLinks';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
-import { extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
+import { extractErrorMessageFromBody, triggerDownload, type Page } from '@/shared/lib/api';
 import { AssigneePicker } from '@/features/contacts/AssigneePicker';
 import { assigneeFields } from './assignee';
 import { fetchProjectList } from '@/shared/lib/projectList';
@@ -1278,13 +1278,13 @@ export function TasksPage() {
       updateTask(id, { status: status as TaskStatus }),
     onMutate: async ({ id, status }) => {
       await qc.cancelQueries({ queryKey: ['tasks'] });
-      const snapshots = qc.getQueriesData<Task[]>({ queryKey: ['tasks'] });
-      for (const [key, list] of snapshots) {
-        if (!list) continue;
-        qc.setQueryData<Task[]>(
-          key,
-          list.map((t) => (t.id === id ? { ...t, status: status as TaskStatus } : t)),
-        );
+      const snapshots = qc.getQueriesData<Page<Task>>({ queryKey: ['tasks'] });
+      for (const [key, cached] of snapshots) {
+        if (!cached?.items) continue;
+        qc.setQueryData<Page<Task>>(key, {
+          ...cached,
+          items: cached.items.map((t) => (t.id === id ? { ...t, status: status as TaskStatus } : t)),
+        });
       }
       return { snapshots };
     },
