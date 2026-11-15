@@ -40,7 +40,7 @@ type Basis = (typeof BASES)[number];
 /** Best-effort title-case of a token like "change_order". */
 function humanize(token: string): string {
   return (token || '')
-    .replace(/[_-]+/g, ' ')
+    .replace(/[_.-]+/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
 }

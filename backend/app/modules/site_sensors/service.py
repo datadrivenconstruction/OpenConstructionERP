@@ -774,6 +774,10 @@ class SiteSensorsService:
 
     async def sweep_offline(self, project_id: uuid.UUID | None = None, now: datetime | None = None) -> int:
         """Open an offline alert for every active device silent longer than its window."""
+        from app.core.demo_read_only import demo_read_only_enabled
+
+        if demo_read_only_enabled():
+            return 0  # a read must not raise alerts on a demo that refuses writes
         now = now or datetime.now(UTC)
         opened = 0
         for device in await self.repo.devices(project_id):

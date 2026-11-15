@@ -12553,6 +12553,37 @@ async def _seed_module_data(
     except Exception:
         logger.debug("Full EVM module not loaded, skipping demo forecasts", exc_info=True)
 
+    # ── Cost control: a cost line under every budget line, commitments bound to them ──
+    try:
+        from app.modules.costmodel.cost_control_demo import link_showcase_cost_control
+
+        linked = await link_showcase_cost_control(session, project_id)
+        if linked:
+            results["cost_lines"] = linked
+    except Exception:
+        logger.debug("Cost control not loaded, skipping demo cost lines", exc_info=True)
+
+    # ── Currency policy: one currency end to end, so the FX panel opens configured ──
+    try:
+        from app.modules.fx import repository as fx_repo
+
+        ccy = (template.currency or "EUR").upper()[:3]
+        if len(ccy) == 3 and ccy.isalpha():
+            await fx_repo.upsert_policy(
+                session,
+                project_id,
+                estimating_currency=ccy,
+                procurement_currency=ccy,
+                reporting_currency=ccy,
+                rate_mode="live",
+                pinned_rate_set_id=None,
+                max_rate_age_days=30,
+                note="",
+            )
+            results["fx_policy"] = 1
+    except Exception:
+        logger.debug("FX module not loaded, skipping demo currency policy", exc_info=True)
+
     # ── Statutory payment clocks (Germany: § 16 VOB/B deadlines) ──────
     # German projects only. The regimes elsewhere in the catalogue have no
     # hand-authored demo chain yet, and a clock seeded under the wrong
@@ -12560,6 +12591,10 @@ async def _seed_module_data(
     # project. Dates are anchored to the installation day inside the seeder:
     # a payment clock is about deadlines relative to now.
     try:
+        # The catalogue is reference data; a read-only demo cannot seed it on first read.
+        from app.modules.payment_clock.service import ensure_regimes as _ensure_regimes
+
+        await _ensure_regimes(session)
         if _country_code_for(template) == "DE":
             from app.modules.payment_clock.demo import seed_demo_payment_clocks
 

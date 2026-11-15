@@ -178,7 +178,7 @@ export function DashboardsHub() {
           icon={<Grid3X3 size={14} />}
           to="/property-dev/dashboards/inventory-heatmap"
         >
-          <InventoryHeatmap developmentId={developmentId} />
+          {developmentId ? <InventoryHeatmap developmentId={developmentId} /> : null}
         </DashboardTile>
         <DashboardTile
           title={t('propdev.dashboards.velocity.card_title', {
@@ -187,7 +187,7 @@ export function DashboardsHub() {
           icon={<LineChartIcon size={14} />}
           to="/property-dev/dashboards/sales-velocity"
         >
-          <SalesVelocity developmentId={developmentId} />
+          {developmentId ? <SalesVelocity developmentId={developmentId} /> : null}
         </DashboardTile>
         <DashboardTile
           title={t('propdev.dashboards.cashflow.card_title', {
@@ -196,7 +196,7 @@ export function DashboardsHub() {
           icon={<Coins size={14} />}
           to="/property-dev/dashboards/cashflow-waterfall"
         >
-          <CashFlowWaterfall developmentId={developmentId} />
+          {developmentId ? <CashFlowWaterfall developmentId={developmentId} /> : null}
         </DashboardTile>
         <DashboardTile
           title={t('propdev.dashboards.ageing.card_title', {
@@ -205,7 +205,7 @@ export function DashboardsHub() {
           icon={<Clock size={14} />}
           to="/property-dev/dashboards/inventory-ageing"
         >
-          <InventoryAgeing developmentId={developmentId} />
+          {developmentId ? <InventoryAgeing developmentId={developmentId} /> : null}
         </DashboardTile>
         <DashboardTile
           title={t('propdev.dashboards.funnel.card_title', {
@@ -214,7 +214,7 @@ export function DashboardsHub() {
           icon={<Filter size={14} />}
           to="/property-dev/dashboards/funnel-conversion"
         >
-          <FunnelConversion developmentId={developmentId} />
+          {developmentId ? <FunnelConversion developmentId={developmentId} /> : null}
         </DashboardTile>
         <Card className="flex min-h-[260px] flex-col p-3">
           <header className="mb-2 flex items-center gap-2">

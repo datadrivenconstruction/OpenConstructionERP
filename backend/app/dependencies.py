@@ -719,6 +719,10 @@ class RequirePermission:
                 user_id,
                 role,
             )
+            from app.core.demo_read_only import DEMO_READ_GRANTS, demo_read_only_enabled
+
+            if self.permission in DEMO_READ_GRANTS and demo_read_only_enabled():
+                return
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Missing permission: {self.permission}",

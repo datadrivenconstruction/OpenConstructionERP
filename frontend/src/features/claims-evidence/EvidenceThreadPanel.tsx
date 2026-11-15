@@ -34,7 +34,7 @@ import type { EvidencePack } from './types';
 /** Best-effort title-case of a token like "variation_order". */
 function humanize(token: string): string {
   return (token || '')
-    .replace(/[_-]+/g, ' ')
+    .replace(/[_.-]+/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
 }
