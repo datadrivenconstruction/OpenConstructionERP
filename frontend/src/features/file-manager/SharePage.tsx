@@ -48,6 +48,7 @@ export function SharePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [unlockedName, setUnlockedName] = useState<string | null>(null);
 
   // 1. Initial probe.
   useEffect(() => {
@@ -83,7 +84,10 @@ export function SharePage() {
     (async () => {
       try {
         const res = await accessShareLink(token, undefined);
-        if (!cancelled) setDownloadUrl(res.download_url);
+        if (!cancelled) {
+          setDownloadUrl(res.download_url);
+          setUnlockedName(res.filename);
+        }
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
       }
@@ -101,6 +105,7 @@ export function SharePage() {
     try {
       const res = await accessShareLink(token, password);
       setDownloadUrl(res.download_url);
+      setUnlockedName(res.filename);
     } catch (e) {
       const msg = (e as Error).message;
       if (msg === 'UNAUTHORIZED') {
@@ -198,6 +203,7 @@ export function SharePage() {
           {/* Open: password prompt or auto-resolved download */}
           {state.kind === 'open' && (
             <>
+              {(unlockedName ?? state.info.filename) && (
               <div className="flex items-start gap-3 rounded-lg bg-surface-secondary/40 border border-border-light p-3">
                 <FileText
                   size={20}
@@ -210,13 +216,14 @@ export function SharePage() {
                   </p>
                   <p
                     className="text-sm font-medium text-content-primary truncate"
-                    title={state.info.filename}
+                    title={unlockedName ?? state.info.filename ?? undefined}
                     data-testid="share-filename"
                   >
-                    {state.info.filename}
+                    {unlockedName ?? state.info.filename}
                   </p>
                 </div>
               </div>
+              )}
 
               {state.info.requires_password && !downloadUrl && (
                 <form onSubmit={handleSubmit} className="space-y-3">
