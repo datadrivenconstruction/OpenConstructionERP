@@ -21,3 +21,5 @@ You only ever see the projects you own or belong to. A key without `bi:read` is 
     openconstructionerp bi disable
 
 `bi enable` creates the schema `oe_bi` with one view per feed (same column names) and a read-only login role `oe_bi_reader`. The password is printed once and not stored. Use `--single-tenant` only when the instance serves one organisation. It is off by default.
+
+Parquet needs the optional package: `pip install "openconstructionerp[parquet]"`. Without it a `.parquet` feed answers with a clear error naming this extra, and the Parquet URL is hidden on the Data feeds page. CSV and JSON are unaffected.
