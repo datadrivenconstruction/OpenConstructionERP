@@ -57731,6 +57731,7 @@ const resource = {
     "modules.catalog.surfaces_volumes": "Oppervlakken en volumes",
     "modules.catalog.norm_pricing": "Normprijsbepaling",
     "modules.catalog.project_tax": "Belastingprofiel van het project",
+    "modules.catalog.sso": "Eenmalige aanmelding",
     "modules.pp_desc_eleven_areas_framework": "Projectsturing vanuit de opdrachtgever in elf managementgebieden, in twee fasen, projectontwikkeling en uitvoering, met één go/no-go-moment ertussen en één goedgekeurd kaderdocument per gebied.",
     "modules.pp_name_pakistan_pk": "Bouwpakket Pakistan",
     "modules.pp_name_peru_pe": "Bouwpakket Peru",

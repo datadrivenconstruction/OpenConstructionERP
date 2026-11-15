@@ -59761,6 +59761,7 @@ const resource = {
     "modules.catalog.mine_survey": "Topografía de mina",
     "modules.catalog.norm_pricing": "Precios por normas",
     "modules.catalog.project_tax": "Perfil fiscal del proyecto",
+    "modules.catalog.sso": "Inicio de sesión único",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "modules.pp_name_peru_pe": "Paquete de construcción Perú",

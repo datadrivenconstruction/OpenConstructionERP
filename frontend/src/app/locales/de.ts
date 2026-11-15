@@ -59294,6 +59294,7 @@ const resource = {
     "modules.catalog.monitoring": "Bauwerksüberwachung",
     "modules.catalog.norm_pricing": "Normbasierte Preisbildung",
     "modules.catalog.project_tax": "Steuerprofil des Projekts",
+    "modules.catalog.sso": "Single Sign-On",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     "modules.pp_name_hongkong_hk": "Hongkong-Baupaket",

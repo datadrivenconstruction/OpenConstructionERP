@@ -56810,6 +56810,7 @@ const resource = {
     "modules.catalog.mine_survey": "نقشه‌برداری معدن",
     "modules.catalog.norm_pricing": "قیمت‌گذاری بر پایه فهرست‌بها",
     "modules.catalog.project_tax": "پروفایل مالیاتی پروژه",
+    "modules.catalog.sso": "ورود یکپارچه",
     "modules.pp_desc_eleven_areas_framework": "مدیریت پروژه از سوی کارفرما در یازده حوزه مدیریتی و در دو فاز، توسعه پروژه و اجرای ساخت، با یک گیت میان آن‌ها و یک سند چارچوب تأییدشده برای هر حوزه.",
     "modules.pp_name_pakistan_pk": "بسته ساخت‌وساز پاکستان",
     "modules.pp_name_peru_pe": "بسته ساخت‌وساز پرو",

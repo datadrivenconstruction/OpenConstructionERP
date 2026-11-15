@@ -56967,6 +56967,7 @@ const resource = {
     "modules.catalog.mine_survey": "Тоо-кен маркшейдерлиги",
     "modules.catalog.norm_pricing": "Нормалар боюнча баа белгилөө",
     "modules.catalog.project_tax": "Долбоордун салык профили",
+    "modules.catalog.sso": "Бирдиктүү кирүү",
     "modules.pp_desc_eleven_areas_framework": "Иеси тарабынан долбоорду башкаруу он бир башкаруу тармагында, эки этапта: долбоорду иштеп чыгуу жана курулушту аткаруу. Экөөнүн ортосунда бир дарбаза жана ар бир тармак үчүн бир бекитилген алкактык документ бар.",
     "modules.pp_name_pakistan_pk": "Пакистан курулуш пакети",
     "modules.pp_name_peru_pe": "Перу курулуш пакети",

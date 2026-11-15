@@ -56808,6 +56808,7 @@ const resource = {
     "modules.catalog.setting_out": "Pagmamarka sa lugar",
     "modules.catalog.norm_pricing": "Pagpepresyo ayon sa pamantayan",
     "modules.catalog.project_tax": "Profile ng buwis ng proyekto",
+    "modules.catalog.sso": "Single Sign-On",
     "modules.pp_desc_eleven_areas_framework": "Pamamahala ng proyekto sa panig ng may-ari sa labing-isang lugar ng pamamahala, sa dalawang yugto, ang pagpapaunlad ng proyekto at ang konstruksyon, na may isang gate sa pagitan at isang naaprubahang balangkas na dokumento sa bawat lugar.",
     "modules.pp_name_pakistan_pk": "Construction Pack ng Pakistan",
     "modules.pp_name_peru_pe": "Pakete sa Konstruksyon ng Peru",

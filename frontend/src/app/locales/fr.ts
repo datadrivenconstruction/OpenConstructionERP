@@ -59756,6 +59756,7 @@ const resource = {
     "modules.catalog.surfaces_volumes": "Surfaces et volumes",
     "modules.catalog.norm_pricing": "Tarification par normes",
     "modules.catalog.project_tax": "Profil fiscal du projet",
+    "modules.catalog.sso": "Authentification unique",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
     "modules.pp_name_peru_pe": "Pack construction Pérou",

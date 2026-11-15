@@ -59749,6 +59749,7 @@ const resource = {
     "modules.catalog.surfaces_volumes": "Superfícies e volumes",
     "modules.catalog.norm_pricing": "Orçamentação por normas",
     "modules.catalog.project_tax": "Perfil fiscal do projeto",
+    "modules.catalog.sso": "Início de sessão único",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do dono de obra em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre ambas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_pakistan_pk": "Pacote de Construção: Paquistão",
     "modules.pp_name_peru_pe": "Pacote de construção Peru",

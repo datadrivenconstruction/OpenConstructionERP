@@ -56810,6 +56810,7 @@ const resource = {
     "modules.catalog.mine_survey": "Μετρήσεις ορυχείου",
     "modules.catalog.norm_pricing": "Τιμολόγηση με πρότυπα",
     "modules.catalog.project_tax": "Φορολογικό προφίλ έργου",
+    "modules.catalog.sso": "Ενιαία σύνδεση",
     "modules.pp_desc_eleven_areas_framework": "Διαχείριση του έργου από την πλευρά του κυρίου του έργου σε έντεκα τομείς διαχείρισης, σε δύο φάσεις, την ανάπτυξη του έργου και την εκτέλεση της κατασκευής, με μία πύλη μεταξύ τους και ένα εγκεκριμένο πλαίσιο εγγράφου για κάθε τομέα.",
     "modules.pp_name_pakistan_pk": "Πακέτο Κατασκευών: Πακιστάν",
     "modules.pp_name_peru_pe": "Πακέτο κατασκευών Περού",

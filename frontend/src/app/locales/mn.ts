@@ -56828,6 +56828,7 @@ const resource = {
     "modules.catalog.mine_survey": "Уурхайн хэмжилт",
     "modules.catalog.norm_pricing": "Нормоор үнэ тогтоох",
     "modules.catalog.project_tax": "Төслийн татварын тохиргоо",
+    "modules.catalog.sso": "Нэг удаагийн нэвтрэлт",
     "modules.pp_desc_eleven_areas_framework": "Захиалагчийн талаас төслийг арван нэгэн удирдлагын салбарт, хоёр үе шатанд удирдах: төслийн хөгжүүлэлт ба барилгын гүйцэтгэл. Хоёрын хооронд нэг гарц, салбар бүрт нэг батлагдсан төлөвлөгөөний баримт бичигтэй.",
     "modules.pp_name_pakistan_pk": "Барилгын багц: Пакистан",
     "modules.pp_name_peru_pe": "Перугийн барилгын багц",

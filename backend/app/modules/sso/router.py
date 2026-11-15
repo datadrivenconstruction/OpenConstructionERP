@@ -129,9 +129,10 @@ async def oidc_callback(slug: str, body: sch.OidcCallback, svc: SsoService = Dep
 # ── Admin ──────────────────────────────────────────────────────────────
 
 
-@router.get("/providers/admin/", response_model=list[sch.ProviderOut], dependencies=_admin)
-async def list_providers(svc: SsoService = Depends(_service)) -> list[sch.ProviderOut]:
-    return [svc.to_out(p) for p in await svc.repo.list_providers()]
+@router.get("/providers/admin/", response_model=sch.SsoListResponse, dependencies=_admin)
+async def list_providers(svc: SsoService = Depends(_service)) -> sch.SsoListResponse:
+    items = [svc.to_out(p) for p in await svc.repo.list_providers()]
+    return sch.SsoListResponse(items=items, total=len(items), limit=max(len(items), 50))
 
 
 @router.post("/providers/admin/", response_model=sch.ProviderOut, status_code=201, dependencies=_admin)

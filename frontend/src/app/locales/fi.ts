@@ -56854,6 +56854,7 @@ const resource = {
     "modules.catalog.mine_survey": "Kaivosmittaus",
     "modules.catalog.norm_pricing": "Normihinnoittelu",
     "modules.catalog.project_tax": "Projektin veroprofiili",
+    "modules.catalog.sso": "Kertakirjautuminen",
     "modules.pp_desc_eleven_areas_framework": "Hankkeen ohjaus tilaajan puolelta yhdessätoista ohjausalueessa kahdessa vaiheessa, hankkeen kehittämisessä ja rakentamisen toteutuksessa, niiden välissä yksi porttivaihe ja yksi hyväksytty kehysasiakirja kullekin alueelle.",
     "modules.pp_name_pakistan_pk": "Rakennuspaketti: Pakistan",
     "modules.pp_name_peru_pe": "Perun rakennuspaketti",

@@ -56811,6 +56811,7 @@ const resource = {
     "modules.catalog.mine_survey": "Кен маркшейдерлігі",
     "modules.catalog.norm_pricing": "Нормалар бойынша баға белгілеу",
     "modules.catalog.project_tax": "Жобаның салық профилі",
+    "modules.catalog.sso": "Бірыңғай кіру",
     "modules.pp_desc_eleven_areas_framework": "Иеленушінің жағынан жобаны басқару он бір басқару саласында, екі кезеңде: жобаны әзірлеу және құрылысты орындау. Олардың арасында бір қақпа және әр сала үшін бекітілген бір негіздеме құжаты бар.",
     "modules.pp_name_pakistan_pk": "Пәкістан құрылыс пакеті",
     "modules.pp_name_peru_pe": "Перу құрылыс пакеті",

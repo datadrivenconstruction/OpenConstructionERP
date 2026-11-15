@@ -56606,6 +56606,7 @@ const resource = {
     "modules.catalog.mine_survey": "การสำรวจเหมือง",
     "modules.catalog.norm_pricing": "การกำหนดราคาตามบรรทัดฐาน",
     "modules.catalog.project_tax": "โปรไฟล์ภาษีของโครงการ",
+    "modules.catalog.sso": "การลงชื่อเข้าใช้แบบครั้งเดียว",
     "modules.pp_desc_eleven_areas_framework": "การบริหารโครงการจากฝั่งเจ้าของใน 11 ด้านการจัดการ แบ่งเป็นสองระยะ ได้แก่การพัฒนาโครงการและการดำเนินการก่อสร้าง มีจุดตรวจสอบหนึ่งจุดคั่นกลาง และเอกสารกรอบที่ได้รับอนุมัติหนึ่งฉบับต่อด้าน",
     "modules.pp_name_pakistan_pk": "แพ็กก่อสร้างปากีสถาน",
     "modules.pp_name_peru_pe": "แพ็กเกจก่อสร้างเปรู",

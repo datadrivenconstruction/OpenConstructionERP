@@ -56800,6 +56800,7 @@ const resource = {
     "modules.catalog.mine_survey": "Kaevandusmõõdistus",
     "modules.catalog.norm_pricing": "Normipõhine hinnastamine",
     "modules.catalog.project_tax": "Projekti maksuprofiil",
+    "modules.catalog.sso": "Ühekordne sisselogimine",
     "modules.pp_desc_eleven_areas_framework": "Tellija poolne projektijuhtimine üheteistkümnes juhtimisvaldkonnas kahes faasis, projekti arendus ja ehitusteostus, nende vahel üks värav ning iga valdkonna kohta üks kinnitatud raamdokument.",
     "modules.pp_name_pakistan_pk": "Ehituspakett: Pakistan",
     "modules.pp_name_peru_pe": "Peruu ehituspakett",
