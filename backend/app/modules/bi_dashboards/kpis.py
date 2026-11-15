@@ -1886,7 +1886,7 @@ async def embodied_carbon_per_m2_kpi(
     unit="percent",
     category="operational",
     source_modules=["equipment"],
-    description="hours_used / hours_available.",
+    description="worked / (worked + idle) hours from the daily utilisation log.",
 )
 async def equipment_utilization_kpi(
     session: AsyncSession,
@@ -1898,18 +1898,18 @@ async def equipment_utilization_kpi(
     available = Decimal("0")
     count = 0
     try:
-        from app.modules.equipment.models import Equipment  # type: ignore
+        from app.modules.equipment.models import UtilisationDay  # type: ignore
 
-        stmt = select(Equipment)
+        # A unit belongs to a project only through its allocated days, never on the register.
+        stmt = select(UtilisationDay)
         if project_id is not None:
-            stmt = stmt.where(Equipment.project_id == project_id)
-        stmt = _scope_portfolio(stmt, Equipment.project_id, project_id, allowed_project_ids)
+            stmt = stmt.where(UtilisationDay.project_id == project_id)
+        stmt = _scope_portfolio(stmt, UtilisationDay.project_id, project_id, allowed_project_ids)
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
-            used += _to_decimal(getattr(row, "hours_used", 0))
-            available += _to_decimal(
-                getattr(row, "hours_available", None) or getattr(row, "total_hours", 0),
-            )
+            worked = _to_decimal(row.worked_hours)
+            used += worked
+            available += worked + _to_decimal(row.idle_hours)
             count += 1
     except ImportError:
         pass
