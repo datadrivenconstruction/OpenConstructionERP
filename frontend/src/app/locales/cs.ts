@@ -62207,6 +62207,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Developer bytové výstavby, Toronto",
     "demo_switcher.tab_school_paris": "Rozpočtář, Paříž",
     "demo_switcher.tab_office_shanghai": "Nákladové poradenství, Šanghaj",
+    "demo_switcher.switch": "Přepnout ukázku",
     "demo_chooser.title": "Kterou firmu chcete vidět?",
     "demo_chooser.subtitle": "Každé demo je projekt ve skutečné velikosti, který vede jiný typ firmy, s nabídkou upravenou pro její práci. Přepínejte kdykoli z lišty nahoře.",
     "demo_chooser.none": "Na tomto serveru zatím není nainstalován žádný demo projekt.",
@@ -65588,6 +65589,10 @@ const resource = {
     "letter_templates.download": "Stáhnout PDF",
     "demo_market.label": "Jazyk a trh",
     "demo_market.hint": "Přepne jazyk rozhraní a otevře demo dané země s jejími vlastními daty a normami.",
+    "demo_scope.only_project": "Zobrazuje se pouze ukázka {{name}}.",
+    "demo_scope.all_projects": "Zobrazují se všechny ukázkové projekty.",
+    "demo_scope.show_all": "Zobrazit všechny ukázkové projekty",
+    "demo_scope.only_this": "Zpět na {{name}}",
   }
 } as { translation: Record<string, string> };
 

@@ -61220,6 +61220,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "יזם מגורים, טורונטו",
     "demo_switcher.tab_school_paris": "כלכלן בנייה, פריז",
     "demo_switcher.tab_office_shanghai": "ייעוץ עלויות, שנגחאי",
+    "demo_switcher.switch": "החלפת הדגמה",
     "demo_chooser.title": "איזו חברה תרצו לראות?",
     "demo_chooser.subtitle": "כל דמו הוא פרויקט בקנה מידה אמיתי שמנהלת חברה מסוג אחר, עם תפריט מותאם לעבודתה. אפשר לעבור בכל עת מהסרגל שלמעלה.",
     "demo_chooser.none": "עדיין לא הותקן פרויקט הדגמה בשרת זה.",
@@ -64570,6 +64571,10 @@ const resource = {
     "letter_templates.download": "הורדת PDF",
     "demo_market.label": "שפה ושוק",
     "demo_market.hint": "מחליף את שפת הממשק ופותח את ההדגמה של אותה מדינה, עם הנתונים והתקנים שלה.",
+    "demo_scope.all_projects": "מוצגים כל פרויקטי ההדגמה.",
+    "demo_scope.show_all": "הצג את כל פרויקטי ההדגמה",
+    "demo_scope.only_this": "חזרה אל {{name}}",
+    "demo_scope.only_project": "מוצגת רק ההדגמה {{name}}.",
   }
 } as { translation: Record<string, string> };
 

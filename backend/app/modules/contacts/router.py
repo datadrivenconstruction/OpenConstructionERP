@@ -170,6 +170,10 @@ async def list_contacts(
         "(e.g. ?tag=paid&tag=de). Each tag is a substring match against the "
         "JSON-serialised metadata column.",
     ),
+    project_id: uuid.UUID | None = Query(
+        default=None,
+        description="Only contacts recorded against this project (metadata.project_id).",
+    ),
     offset: int = Query(default=0, ge=0),
     # Raised cap from 100 → 500 so the shared ``ContactSearchInput``
     # "Select from contacts" browse dropdown (which requests
@@ -206,6 +210,7 @@ async def list_contacts(
             is_active=is_active,
             owner_id=owner_filter,
             tags=tag,
+            project_id=str(project_id) if project_id else None,
             limit=limit,
             after=after,
         )
@@ -222,6 +227,7 @@ async def list_contacts(
         is_active=is_active,
         owner_id=owner_filter,
         tags=tag,
+        project_id=str(project_id) if project_id else None,
         offset=offset,
         limit=limit,
         sort_by=resolved_sort,
@@ -290,6 +296,7 @@ async def search_contacts(
 async def contact_stats(
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    project_id: uuid.UUID | None = Query(default=None, description="Only contacts recorded against this project."),
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactStatsResponse:
@@ -301,7 +308,7 @@ async def contact_stats(
     aggregates.
     """
     owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
-    raw = await service.get_stats(owner_id=owner_filter)
+    raw = await service.get_stats(owner_id=owner_filter, project_id=str(project_id) if project_id else None)
     return ContactStatsResponse(
         total=raw["total"],
         by_type=raw["by_type"],

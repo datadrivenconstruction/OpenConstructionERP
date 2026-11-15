@@ -61811,6 +61811,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Woningontwikkelaar, Toronto",
     "demo_switcher.tab_school_paris": "Kostendeskundige, Parijs",
     "demo_switcher.tab_office_shanghai": "Kostenadviesbureau, Shanghai",
+    "demo_switcher.switch": "Andere demo",
     "demo_chooser.title": "Welk bedrijf wilt u zien?",
     "demo_chooser.subtitle": "Elke demo is een project op ware grootte, uitgevoerd door een ander soort bedrijf, met een menu op maat van zijn werk. Schakel op elk moment via de balk bovenaan.",
     "demo_chooser.none": "Er is nog geen demoproject geïnstalleerd op deze server.",
@@ -65130,6 +65131,10 @@ const resource = {
     "letter_templates.download": "PDF downloaden",
     "demo_market.label": "Taal en markt",
     "demo_market.hint": "Zet de taal van de interface om en opent de demo van dat land, met eigen gegevens en normen.",
+    "demo_scope.all_projects": "Alle demoprojecten worden getoond.",
+    "demo_scope.show_all": "Alle demoprojecten tonen",
+    "demo_scope.only_this": "Terug naar {{name}}",
+    "demo_scope.only_project": "Alleen de demo {{name}} wordt getoond.",
   }
 } as { translation: Record<string, string> };
 

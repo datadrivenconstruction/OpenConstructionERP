@@ -24,6 +24,7 @@ import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
+import { useDemoPack } from '@/shared/hooks/useDemoPack';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +42,7 @@ interface PartnerLogoBadgeProps {
 export function PartnerLogoBadge({ variant, className = '' }: PartnerLogoBadgeProps) {
   const { t } = useTranslation();
   const packQ = usePartnerPack();
+  const demoPack = useDemoPack();
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(SESSION_DISMISS_KEY) === '1';
@@ -59,9 +61,14 @@ export function PartnerLogoBadge({ variant, className = '' }: PartnerLogoBadgePr
     }
   }, [dismissed]);
 
-  if (packQ.isLoading || !packQ.data?.active || dismissed) return null;
-
-  const m = packQ.data.manifest!;
+  if (dismissed) return null;
+  // In an open demo the banner is that demo's country pack, never the install's.
+  const m = demoPack.inDemo
+    ? demoPack.manifest
+    : !packQ.isLoading && packQ.data?.active
+      ? (packQ.data.manifest ?? null)
+      : null;
+  if (!m) return null;
   // Same computed-key shape as the other pack surfaces (see regionalPack.ts):
   // the manifest strings are English fallbacks, the locale files name the pack.
   const packName = t(`modules.pp_name_${packNameSlug(m.slug)}`, { defaultValue: m.partner_name });

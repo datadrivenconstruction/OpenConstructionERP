@@ -14,6 +14,8 @@ import { DemoSwitcherBar, captureDemoPick } from './DemoSwitcherBar';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { useMenuLayoutStore } from '@/app/layout/useMenuLayoutStore';
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 
 function renderBar() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -29,6 +31,7 @@ function renderBar() {
 const PROJECTS = [
   { id: 'p1', name: 'Consultancy', metadata: { demo_id: 'office-london' } },
   { id: 'p2', name: 'Contractor', metadata: { demo_id: 'medical-us' } },
+  { id: 'p3', name: 'School', metadata: { demo_id: 'school-paris' } },
   { id: 'p9', name: 'Mine', metadata: {} },
 ];
 
@@ -52,9 +55,9 @@ describe('DemoSwitcherBar', () => {
     fetchProjectList.mockResolvedValue(PROJECTS);
     renderBar();
     const tabs = await screen.findAllByRole('tab');
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
     tabs.forEach((tab) => expect(tab).not.toBeDisabled());
-    expect(tabs.map((tab) => tab.getAttribute('title'))).toEqual(['Consultancy', 'Contractor']);
+    expect(tabs.map((tab) => tab.getAttribute('title'))).toEqual(['Consultancy', 'Contractor', 'School']);
   });
 
   it('marks each demo with its photo in a hexagon, and a drawing when the photo fails', async () => {
@@ -126,5 +129,58 @@ describe('DemoSwitcherBar', () => {
     fetchProjectList.mockResolvedValue(PROJECTS);
     renderBar();
     await waitFor(() => expect(screen.queryByRole('tablist')).toBeNull());
+  });
+
+  it('opens a demo in its work mode, so the menu is the short list of that company', async () => {
+    useMenuLayoutStore.getState().dispatch({ type: 'setMode', mode: 'all' });
+    captureDemoPick('?demo=medical-us');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    await waitFor(() => expect(useMenuLayoutStore.getState().layout.activeMode).toBe('manager'));
+  });
+
+  it('applies the demo work mode on reload once per session, then leaves a later choice alone', async () => {
+    useMenuLayoutStore.getState().dispatch({ type: 'setMode', mode: 'all' });
+    sessionStorage.setItem('oe_demo_chosen', 'office-london');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    const first = renderBar();
+    await waitFor(() => expect(useMenuLayoutStore.getState().layout.activeMode).toBe('finance'));
+    first.unmount();
+    useMenuLayoutStore.getState().dispatch({ type: 'setMode', mode: 'all' });
+    renderBar();
+    await screen.findAllByRole('tab');
+    expect(useMenuLayoutStore.getState().layout.activeMode).toBe('all');
+  });
+
+  it('names the current language, never a placeholder, when the demo is in another language', async () => {
+    captureDemoPick('?demo=school-paris');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    await waitFor(() => expect(useProjectContextStore.getState().activeProjectId).toBe('p3'));
+    const select = (await screen.findByTestId('demo-market-switch')) as HTMLSelectElement;
+    expect(select.value).toBe('');
+    const shown = select.options[select.selectedIndex]!.textContent;
+    // The test i18n stores no language, as on a first visit: English is what is on screen.
+    expect(SUPPORTED_LANGUAGES.map((l) => l.name)).toContain(shown);
+    expect(shown).toMatch(/^English/);
+    expect(shown).not.toMatch(/select/i);
+  });
+
+  it('folds the strip on a phone to one line that opens the tabs', async () => {
+    captureDemoPick('?demo=medical-us');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    const toggle = await screen.findByTestId('demo-switcher-toggle');
+    const body = screen.getByTestId('demo-switcher-body');
+    expect(body.className).toMatch(/(^|\s)hidden(\s|$)/);
+    expect(body.className).toContain('sm:flex');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(body.className).not.toMatch(/(^|\s)hidden(\s|$)/);
   });
 });

@@ -61862,6 +61862,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Turar joy dezvoloper, Toronto",
     "demo_switcher.tab_school_paris": "Smetachi, Parij",
     "demo_switcher.tab_office_shanghai": "Narx boʻyicha maslahat, Shanxay",
+    "demo_switcher.switch": "Demoni almashtirish",
     "demo_chooser.title": "Qaysi kompaniyani koʻrmoqchisiz?",
     "demo_chooser.subtitle": "Har bir demo boshqa turdagi kompaniya olib boradigan haqiqiy hajmdagi loyiha boʻlib, menyusi uning ishiga moslab qirqilgan. Yuqoridagi paneldan istalgan vaqtda almashtiring.",
     "demo_chooser.none": "Bu serverda hali demo loyiha oʻrnatilmagan.",
@@ -65181,6 +65182,10 @@ const resource = {
     "letter_templates.download": "PDF yuklab olish",
     "demo_market.label": "Til va bozor",
     "demo_market.hint": "Interfeys tilini almashtiradi va oʻsha mamlakatning oʻz maʼlumotlari va standartlari bilan demosini ochadi.",
+    "demo_scope.all_projects": "Barcha demo loyihalar koʻrsatilmoqda.",
+    "demo_scope.only_this": "{{name}} ga qaytish",
+    "demo_scope.only_project": "Faqat {{name}} demosi koʻrsatilmoqda.",
+    "demo_scope.show_all": "Barcha demo loyihalarni koʻrsatish",
   }
 } as { translation: Record<string, string> };
 

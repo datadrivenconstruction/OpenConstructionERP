@@ -60934,6 +60934,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Asuntokehittäjä, Toronto",
     "demo_switcher.tab_school_paris": "Kustannuslaskija, Pariisi",
     "demo_switcher.tab_office_shanghai": "Kustannuskonsultointi, Shanghai",
+    "demo_switcher.switch": "Vaihda demo",
     "demo_chooser.title": "Minkä yrityksen haluat nähdä?",
     "demo_chooser.subtitle": "Jokainen demo on todellisen kokoinen hanke, jota johtaa eri tyyppinen yritys, ja valikko on rajattu sen työhön. Vaihda milloin tahansa yläpalkista.",
     "demo_chooser.none": "Tälle palvelimelle ei ole vielä asennettu demoprojektia.",
@@ -64253,6 +64254,10 @@ const resource = {
     "letter_templates.download": "Lataa PDF",
     "demo_market.label": "Kieli ja markkina",
     "demo_market.hint": "Vaihtaa käyttöliittymän kielen ja avaa sen maan demon omine tietoineen ja standardeineen.",
+    "demo_scope.all_projects": "Näytetään kaikki demoprojektit.",
+    "demo_scope.show_all": "Näytä kaikki demoprojektit",
+    "demo_scope.only_this": "Takaisin: {{name}}",
+    "demo_scope.only_project": "Näytetään vain demo {{name}}.",
   }
 } as { translation: Record<string, string> };
 

@@ -64142,6 +64142,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Девелопер жилья, Торонто",
     "demo_switcher.tab_school_paris": "Сметчик, Париж",
     "demo_switcher.tab_office_shanghai": "Консультант по стоимости, Шанхай",
+    "demo_switcher.switch": "Сменить демо",
     "demo_chooser.title": "Какую компанию вы хотите посмотреть?",
     "demo_chooser.subtitle": "Каждое демо это проект реального масштаба, который ведёт компания своего профиля, с меню под её задачи. Переключайтесь в любой момент в панели сверху.",
     "demo_chooser.none": "На этом сервере пока не установлен ни один демо-проект.",
@@ -67523,6 +67524,10 @@ const resource = {
     "letter_templates.download": "Скачать PDF",
     "demo_market.label": "Язык и рынок",
     "demo_market.hint": "Переключает язык интерфейса и открывает демо этой страны с её данными и стандартами.",
+    "demo_scope.all_projects": "Показаны все демонстрационные проекты.",
+    "demo_scope.show_all": "Показать все демо-проекты",
+    "demo_scope.only_this": "Вернуться к {{name}}",
+    "demo_scope.only_project": "Показана только демонстрация {{name}}.",
   }
 } as { translation: Record<string, string> };
 

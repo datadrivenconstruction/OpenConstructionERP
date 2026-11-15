@@ -62468,6 +62468,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Deweloper mieszkaniowy, Toronto",
     "demo_switcher.tab_school_paris": "Kosztorysant, Paryż",
     "demo_switcher.tab_office_shanghai": "Doradztwo kosztowe, Szanghaj",
+    "demo_switcher.switch": "Zmień demo",
     "demo_chooser.title": "Którą firmę chcesz zobaczyć?",
     "demo_chooser.subtitle": "Każde demo to projekt w rzeczywistej skali, prowadzony przez inny typ firmy, z menu dopasowanym do jej pracy. Przełączaj w dowolnym momencie z paska u góry.",
     "demo_chooser.none": "Na tym serwerze nie zainstalowano jeszcze żadnego projektu demo.",
@@ -65849,6 +65850,10 @@ const resource = {
     "letter_templates.download": "Pobierz PDF",
     "demo_market.label": "Język i rynek",
     "demo_market.hint": "Zmienia język interfejsu i otwiera demo tego kraju z jego własnymi danymi i normami.",
+    "demo_scope.all_projects": "Wyświetlane są wszystkie projekty demonstracyjne.",
+    "demo_scope.show_all": "Pokaż wszystkie projekty demonstracyjne",
+    "demo_scope.only_this": "Wróć do {{name}}",
+    "demo_scope.only_project": "Wyświetlane jest tylko demo {{name}}.",
   }
 } as { translation: Record<string, string> };
 

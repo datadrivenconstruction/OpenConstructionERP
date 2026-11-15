@@ -61261,6 +61261,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Dezvoltator rezidențial, Toronto",
     "demo_switcher.tab_school_paris": "Economist în construcții, Paris",
     "demo_switcher.tab_office_shanghai": "Consultanță în costuri, Shanghai",
+    "demo_switcher.switch": "Schimbă demo-ul",
     "demo_chooser.title": "Ce companie doriți să vedeți?",
     "demo_chooser.subtitle": "Fiecare demo este un proiect de dimensiune reală condus de un alt tip de companie, cu un meniu croit pe munca ei. Comutați oricând din bara de sus.",
     "demo_chooser.none": "Pe acest server nu este instalat încă niciun proiect demo.",
@@ -64611,6 +64612,10 @@ const resource = {
     "letter_templates.download": "Descarcă PDF",
     "demo_market.label": "Limbă și piață",
     "demo_market.hint": "Schimbă limba interfeței și deschide demo-ul acelei țări, cu datele și standardele proprii.",
+    "demo_scope.all_projects": "Se afișează toate proiectele demonstrative.",
+    "demo_scope.show_all": "Afișează toate proiectele demonstrative",
+    "demo_scope.only_this": "Înapoi la {{name}}",
+    "demo_scope.only_project": "Se afișează doar demo-ul {{name}}.",
   }
 } as { translation: Record<string, string> };
 

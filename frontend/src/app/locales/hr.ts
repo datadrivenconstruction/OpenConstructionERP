@@ -61271,6 +61271,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Razvojni investitor stanova, Toronto",
     "demo_switcher.tab_school_paris": "Troškovničar, Pariz",
     "demo_switcher.tab_office_shanghai": "Savjetovanje o troškovima, Šangaj",
+    "demo_switcher.switch": "Promijeni demo",
     "demo_chooser.title": "Koju tvrtku želite vidjeti?",
     "demo_chooser.subtitle": "Svaki demo je projekt stvarne veličine koji vodi druga vrsta tvrtke, s izbornikom skrojenim za njezin posao. Prebacujte se bilo kada s trake na vrhu.",
     "demo_chooser.none": "Na ovom poslužitelju još nije instaliran nijedan demo projekt.",
@@ -64621,6 +64622,10 @@ const resource = {
     "letter_templates.download": "Preuzmi PDF",
     "demo_market.label": "Jezik i tržište",
     "demo_market.hint": "Mijenja jezik sučelja i otvara demo te zemlje s njezinim podacima i normama.",
+    "demo_scope.all_projects": "Prikazuju se svi demo projekti.",
+    "demo_scope.show_all": "Prikaži sve demo projekte",
+    "demo_scope.only_this": "Natrag na {{name}}",
+    "demo_scope.only_project": "Prikazuje se samo demo {{name}}.",
   }
 } as { translation: Record<string, string> };
 

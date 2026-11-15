@@ -60896,6 +60896,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "رہائشی ڈویلپر، ٹورنٹو",
     "demo_switcher.tab_school_paris": "تعمیراتی لاگت کا ماہر، پیرس",
     "demo_switcher.tab_office_shanghai": "لاگت کنسلٹنسی، شنگھائی",
+    "demo_switcher.switch": "ڈیمو تبدیل کریں",
     "demo_chooser.title": "آپ کون سی کمپنی دیکھنا چاہتے ہیں؟",
     "demo_chooser.subtitle": "ہر ڈیمو حقیقی پیمانے کا ایک منصوبہ ہے جسے مختلف قسم کی کمپنی چلاتی ہے، اور مینو اس کے کام کے مطابق ہے۔ اوپر کی پٹی سے جب چاہیں بدلیں۔",
     "demo_chooser.none": "اس سرور پر ابھی تک کوئی ڈیمو پروجیکٹ انسٹال نہیں ہے۔",
@@ -64215,6 +64216,10 @@ const resource = {
     "letter_templates.download": "PDF ڈاؤن لوڈ کریں",
     "demo_market.label": "زبان اور مارکیٹ",
     "demo_market.hint": "انٹرفیس کی زبان بدلتا ہے اور اس ملک کا ڈیمو اس کے اپنے ڈیٹا اور معیارات کے ساتھ کھولتا ہے۔",
+    "demo_scope.all_projects": "تمام ڈیمو پروجیکٹس دکھائے جا رہے ہیں۔",
+    "demo_scope.only_this": "{{name}} پر واپس جائیں",
+    "demo_scope.only_project": "صرف {{name}} ڈیمو دکھایا جا رہا ہے۔",
+    "demo_scope.show_all": "تمام ڈیمو پروجیکٹس دکھائیں",
   }
 } as { translation: Record<string, string> };
 

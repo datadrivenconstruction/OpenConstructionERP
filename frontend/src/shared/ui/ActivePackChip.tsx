@@ -32,6 +32,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useInstalledPacks } from '@/shared/hooks/usePartnerPack';
+import { useDemoPack } from '@/shared/hooks/useDemoPack';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 
@@ -45,6 +46,7 @@ interface ActivePackChipProps {
 export function ActivePackChip({ className = '' }: ActivePackChipProps) {
   const { t } = useTranslation();
   const { data, isLoading } = useInstalledPacks();
+  const demoPack = useDemoPack();
 
   // While the list is in flight there is no honest thing to say: "none" would
   // be a guess that is wrong for every reader who does have a pack, and it
@@ -53,7 +55,11 @@ export function ActivePackChip({ className = '' }: ActivePackChipProps) {
 
   // `active_slug` rather than a separate call to /current: the same envelope
   // already carries which pack is applied, and two sources for one fact drift.
-  const applied = data.installed.find((p) => p.slug === data.active_slug) ?? null;
+  // In an open demo the chip names that demo's country pack, or stays away.
+  if (demoPack.inDemo && !demoPack.manifest) return null;
+  const applied = demoPack.inDemo
+    ? demoPack.manifest
+    : (data.installed.find((p) => p.slug === data.active_slug) ?? null);
 
   const base =
     'inline-flex max-w-[13rem] items-center gap-1.5 rounded-full px-2 py-1 text-xs transition-colors';

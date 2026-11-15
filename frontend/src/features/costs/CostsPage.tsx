@@ -63,6 +63,7 @@ import { costsGuide } from './costsGuide';
 import { UsageBadge } from './UsageBadge';
 import { EscalationCalculator } from './EscalationCalculator';
 import { RegionalAdjustPanel } from './RegionalAdjustPanel';
+import { useDemoScope } from '@/shared/lib/useDemoScope';
 import { CostCategoryTree } from '@/features/boq/CostCategoryTree';
 import { fetchCategoryTree, type CategoryTreeNode } from '@/features/boq/api';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
@@ -748,6 +749,20 @@ export function CostsPage() {
   // stop that from becoming a loop.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadedRegions, userCatalogs, catalogId, activeRegion, region]);
+
+  // On the hosted demo the database opens on the open demo's own region (from
+  // its profile), once per visit, unless a deep link named one.
+  const demoCostRegion = useDemoScope().profile?.costRegion ?? '';
+  const demoRegionDone = useRef(false);
+  useEffect(() => {
+    if (demoRegionDone.current || !demoCostRegion || hadRegionDeepLink.current) return;
+    if (!Array.isArray(loadedRegions)) return;
+    demoRegionDone.current = true;
+    if (!loadedRegions.includes(demoCostRegion)) return;
+    regionAutoPickDone.current = true;
+    setRegion(demoCostRegion);
+    setActiveRegion(demoCostRegion);
+  }, [demoCostRegion, loadedRegions, setActiveRegion]);
 
   // A persisted or deep-linked region that merely repeats a catalogue name is
   // not a region: it would filter the tree and list to that one catalogue while

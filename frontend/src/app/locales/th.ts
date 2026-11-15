@@ -60682,6 +60682,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "ผู้พัฒนาที่พักอาศัย, โทรอนโต",
     "demo_switcher.tab_school_paris": "นักประมาณราคาก่อสร้าง ปารีส",
     "demo_switcher.tab_office_shanghai": "ที่ปรึกษาด้านต้นทุน เซี่ยงไฮ้",
+    "demo_switcher.switch": "สลับเดโม",
     "demo_chooser.title": "ต้องการดูบริษัทไหน?",
     "demo_chooser.subtitle": "เดโมแต่ละชุดเป็นโครงการขนาดจริงที่ดำเนินการโดยบริษัทคนละประเภท พร้อมเมนูที่ปรับให้เข้ากับงานของบริษัทนั้น สลับได้ทุกเมื่อจากแถบด้านบน",
     "demo_chooser.none": "ยังไม่มีโครงการเดโมติดตั้งบนเซิร์ฟเวอร์นี้",
@@ -63984,6 +63985,10 @@ const resource = {
     "letter_templates.download": "ดาวน์โหลด PDF",
     "demo_market.label": "ภาษาและตลาด",
     "demo_market.hint": "เปลี่ยนภาษาของหน้าจอและเปิดเดโมของประเทศนั้นพร้อมข้อมูลและมาตรฐานของตนเอง",
+    "demo_scope.all_projects": "แสดงโครงการเดโมทั้งหมด",
+    "demo_scope.only_this": "กลับไปที่ {{name}}",
+    "demo_scope.only_project": "แสดงเฉพาะเดโม {{name}}",
+    "demo_scope.show_all": "แสดงโครงการเดโมทั้งหมด",
   }
 } as { translation: Record<string, string> };
 

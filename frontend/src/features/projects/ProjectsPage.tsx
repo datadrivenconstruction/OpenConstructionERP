@@ -36,6 +36,8 @@ import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
 import { getNumberLocale, useSecondaryCalendar } from '@/stores/usePreferencesStore';
 import { invalidateProjectLists } from './invalidateProjectLists';
 import { DemoSeedingHint } from '@/features/processes/DemoSeedingHint';
+import { useDemoScope } from '@/shared/lib/useDemoScope';
+import { DemoScopeNotice } from '@/shared/ui/DemoScopeNotice';
 
 const LIVE_DEFAULT_MIGRATED_KEY = 'oe_projects_filters_live_default';
 
@@ -342,9 +344,17 @@ export function ProjectsPage() {
     return set.size > 1;
   }, [projects]);
 
+  const demoScope = useDemoScope();
+  const demoProjectId = demoScope.projectId;
   const filtered = useMemo(() => {
     if (!projects) return [];
     let list = [...projects];
+
+    // On the hosted demo the open demo's project comes first, alone, until
+    // the visitor asks for every demo project.
+    if (demoProjectId) {
+      list = list.filter((p) => p.id === demoProjectId);
+    }
 
     // Search by name and description
     if (searchQuery) {
@@ -413,7 +423,7 @@ export function ProjectsPage() {
     });
 
     return list;
-  }, [projects, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies, compareNames]);
+  }, [projects, demoProjectId, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies, compareNames]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -616,6 +626,8 @@ export function ProjectsPage() {
           </div>
         }
       />
+
+      <DemoScopeNotice scope={demoScope} />
 
       <DismissibleInfo
         storageKey="projects"

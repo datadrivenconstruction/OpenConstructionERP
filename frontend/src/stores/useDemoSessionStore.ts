@@ -25,10 +25,34 @@ export interface DemoSessionState {
   groups: readonly string[] | null;
   /** Routes of the modules the demo covers, in menu order; null outside a demo. */
   modules: readonly string[] | null;
+  /** The visitor asked list pages to show every demo project, not only this demo's. */
+  showAll: boolean;
   setDemo: (slug: DemoSlug | null) => void;
+  setShowAll: (showAll: boolean) => void;
 }
 
-function sessionFor(slug: DemoSlug | null): Omit<DemoSessionState, 'setDemo'> {
+const SHOW_ALL_KEY = 'oe_demo_show_all';
+
+function readShowAll(): boolean {
+  try {
+    return sessionStorage.getItem(SHOW_ALL_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeShowAll(showAll: boolean): void {
+  try {
+    if (showAll) sessionStorage.setItem(SHOW_ALL_KEY, '1');
+    else sessionStorage.removeItem(SHOW_ALL_KEY);
+  } catch {
+    // Storage blocked: the choice lasts until the next reload.
+  }
+}
+
+type DemoSessionData = Omit<DemoSessionState, 'setDemo' | 'setShowAll' | 'showAll'>;
+
+function sessionFor(slug: DemoSlug | null): DemoSessionData {
   const profile = demoProfile(slug);
   if (!profile) return { slug: null, locale: null, groups: null, modules: null };
   return {
@@ -41,5 +65,14 @@ function sessionFor(slug: DemoSlug | null): Omit<DemoSessionState, 'setDemo'> {
 
 export const useDemoSessionStore = create<DemoSessionState>((set) => ({
   ...sessionFor(readChosenDemo()),
-  setDemo: (slug) => set(sessionFor(slug)),
+  showAll: readShowAll(),
+  // Opening a demo puts the lists back on that demo's own project.
+  setDemo: (slug) => {
+    writeShowAll(false);
+    set({ ...sessionFor(slug), showAll: false });
+  },
+  setShowAll: (showAll) => {
+    writeShowAll(showAll);
+    set({ showAll });
+  },
 }));

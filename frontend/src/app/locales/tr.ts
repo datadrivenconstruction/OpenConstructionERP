@@ -61811,6 +61811,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Konut geliştiricisi, Toronto",
     "demo_switcher.tab_school_paris": "Maliyet uzmanı, Paris",
     "demo_switcher.tab_office_shanghai": "Maliyet danışmanlığı, Şanghay",
+    "demo_switcher.switch": "Demoyu değiştir",
     "demo_chooser.title": "Hangi şirketi görmek istersiniz?",
     "demo_chooser.subtitle": "Her demo, farklı türde bir şirketin yürüttüğü gerçek ölçekli bir projedir ve menüsü onun işine göre kesilmiştir. İstediğiniz zaman üstteki çubuktan geçiş yapın.",
     "demo_chooser.none": "Bu sunucuda henüz bir demo proje kurulu değil.",
@@ -65130,6 +65131,10 @@ const resource = {
     "letter_templates.download": "PDF indir",
     "demo_market.label": "Dil ve pazar",
     "demo_market.hint": "Arayüz dilini değiştirir ve o ülkenin kendi verileri ve standartlarıyla demosunu açar.",
+    "demo_scope.all_projects": "Tüm demo projeleri gösteriliyor.",
+    "demo_scope.only_this": "{{name}} projesine dön",
+    "demo_scope.only_project": "Yalnızca {{name}} demosu gösteriliyor.",
+    "demo_scope.show_all": "Tüm demo projelerini göster",
   }
 } as { translation: Record<string, string> };
 

@@ -25,6 +25,7 @@ const hookMock = vi.hoisted(() => ({
   partnerLogoUrl: vi.fn(() => '/api/v1/partner-pack/logo'),
 }));
 vi.mock('@/shared/hooks/usePartnerPack', () => hookMock);
+vi.mock('@/shared/hooks/useDemoPack', () => ({ useDemoPack: () => ({ inDemo: false, manifest: null }) }));
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
 

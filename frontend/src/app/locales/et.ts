@@ -60880,6 +60880,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Elamuarendaja, Toronto",
     "demo_switcher.tab_school_paris": "Ehituskalkulaator, Pariis",
     "demo_switcher.tab_office_shanghai": "Kulunõustamine, Shanghai",
+    "demo_switcher.switch": "Vaheta demo",
     "demo_chooser.title": "Millist ettevõtet soovite näha?",
     "demo_chooser.subtitle": "Iga demo on päris mahus projekt, mida veab erinev ettevõtte tüüp, menüü on kohandatud selle tööle. Vaheta igal ajal ülariba kaudu.",
     "demo_chooser.none": "Sellesse serverisse ei ole veel ühtegi demoprojekti paigaldatud.",
@@ -64199,6 +64200,10 @@ const resource = {
     "letter_templates.download": "Laadi PDF alla",
     "demo_market.label": "Keel ja turg",
     "demo_market.hint": "Vahetab liidese keele ja avab selle riigi demo koos tema enda andmete ja standarditega.",
+    "demo_scope.only_project": "Kuvatakse ainult demo {{name}}.",
+    "demo_scope.all_projects": "Kuvatakse kõik demoprojektid.",
+    "demo_scope.show_all": "Näita kõiki demoprojekte",
+    "demo_scope.only_this": "Tagasi: {{name}}",
   }
 } as { translation: Record<string, string> };
 

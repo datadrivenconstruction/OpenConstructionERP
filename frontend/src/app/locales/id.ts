@@ -60681,6 +60681,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Pengembang hunian, Toronto",
     "demo_switcher.tab_school_paris": "Ahli biaya konstruksi, Paris",
     "demo_switcher.tab_office_shanghai": "Konsultan biaya, Shanghai",
+    "demo_switcher.switch": "Ganti demo",
     "demo_chooser.title": "Perusahaan mana yang ingin Anda lihat?",
     "demo_chooser.subtitle": "Setiap demo adalah proyek berskala nyata yang dijalankan jenis perusahaan berbeda, dengan menu yang disesuaikan dengan pekerjaannya. Beralih kapan saja dari bilah di atas.",
     "demo_chooser.none": "Belum ada proyek demo yang terpasang di server ini.",
@@ -63983,6 +63984,10 @@ const resource = {
     "letter_templates.download": "Unduh PDF",
     "demo_market.label": "Bahasa dan pasar",
     "demo_market.hint": "Mengganti bahasa antarmuka dan membuka demo negara tersebut dengan data dan standarnya sendiri.",
+    "demo_scope.all_projects": "Menampilkan semua proyek demo.",
+    "demo_scope.show_all": "Tampilkan semua proyek demo",
+    "demo_scope.only_this": "Kembali ke {{name}}",
+    "demo_scope.only_project": "Hanya menampilkan demo {{name}}.",
   }
 } as { translation: Record<string, string> };
 

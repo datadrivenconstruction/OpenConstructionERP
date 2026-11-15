@@ -60933,6 +60933,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "आवासीय डेवलपर, टोरंटो",
     "demo_switcher.tab_school_paris": "निर्माण लागत विशेषज्ञ, पेरिस",
     "demo_switcher.tab_office_shanghai": "लागत परामर्श, शंघाई",
+    "demo_switcher.switch": "डेमो बदलें",
     "demo_chooser.title": "आप किस कंपनी को देखना चाहते हैं?",
     "demo_chooser.subtitle": "हर डेमो असली पैमाने का एक प्रोजेक्ट है, जिसे अलग तरह की कंपनी चलाती है, और मेन्यू उसके काम के हिसाब से कटा हुआ है। ऊपर की पट्टी से कभी भी बदलें।",
     "demo_chooser.none": "इस सर्वर पर अभी कोई डेमो प्रोजेक्ट इंस्टॉल नहीं है।",
@@ -64252,6 +64253,10 @@ const resource = {
     "letter_templates.download": "PDF डाउनलोड करें",
     "demo_market.label": "भाषा और बाज़ार",
     "demo_market.hint": "इंटरफ़ेस की भाषा बदलता है और उस देश का डेमो उसके अपने डेटा और मानकों के साथ खोलता है।",
+    "demo_scope.all_projects": "सभी डेमो प्रोजेक्ट दिखाए जा रहे हैं।",
+    "demo_scope.show_all": "सभी डेमो प्रोजेक्ट दिखाएँ",
+    "demo_scope.only_this": "{{name}} पर वापस जाएँ",
+    "demo_scope.only_project": "केवल {{name}} डेमो दिखाया जा रहा है।",
   }
 } as { translation: Record<string, string> };
 

@@ -63495,6 +63495,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Lakásfejlesztő, Toronto",
     "demo_switcher.tab_school_paris": "Költségtervező, Párizs",
     "demo_switcher.tab_office_shanghai": "Költségtanácsadás, Sanghaj",
+    "demo_switcher.switch": "Bemutató váltása",
     "demo_chooser.title": "Melyik céget szeretné megnézni?",
     "demo_chooser.subtitle": "Minden demó valós méretű projekt, amelyet más-más típusú cég visz, a munkájához szabott menüvel. Bármikor váltson a felső sávról.",
     "demo_chooser.none": "Ezen a szerveren még nincs telepítve demó projekt.",
@@ -66814,6 +66815,10 @@ const resource = {
     "letter_templates.download": "PDF letöltése",
     "demo_market.label": "Nyelv és piac",
     "demo_market.hint": "Átállítja a felület nyelvét, és megnyitja az adott ország demóját saját adatokkal és szabványokkal.",
+    "demo_scope.all_projects": "Az összes bemutatóprojekt látható.",
+    "demo_scope.show_all": "Összes bemutatóprojekt megjelenítése",
+    "demo_scope.only_this": "Vissza ide: {{name}}",
+    "demo_scope.only_project": "Csak a(z) {{name}} bemutató látható.",
   }
 } as { translation: Record<string, string> };
 
