@@ -9,6 +9,15 @@ import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { readRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 
+const ERROR_KEYS: Record<string, [string, string]> = {
+  invalid_saml_response: ['auth.saml_errors.invalid_response', 'The identity provider response could not be verified.'],
+  saml_library_missing: ['auth.saml_errors.library_missing', 'SAML sign-in is not available on this server: the optional SAML package is not installed.'],
+  missing_claims: ['auth.oidc_errors.missing_claims', 'The identity provider did not return a user id or email.'],
+  account_not_found: ['auth.oidc_errors.account_not_found', 'No account exists for this sign-in and automatic account creation is off. Ask your administrator to invite you.'],
+  account_disabled: ['auth.saml_errors.account_disabled', 'This account is disabled. Contact your administrator.'],
+  not_enabled: ['auth.saml_errors.not_enabled', 'SAML sign-in is not enabled on this server.'],
+};
+
 export function SamlCallback() {
   const navigate = useNavigate();
   const setTokens = useAuthStore((s) => s.setTokens);
@@ -22,8 +31,14 @@ export function SamlCallback() {
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
     const access = params.get('access_token');
     const refresh = params.get('refresh_token');
+    const code = params.get('error');
     // Drop the tokens from the address bar and history right away.
     window.history.replaceState(null, '', window.location.pathname);
+    if (code) {
+      const [key, fallback] = ERROR_KEYS[code] ?? ['auth.saml_errors.failed', 'SAML sign-in failed. Please try again.'];
+      setError(t(key, { defaultValue: fallback }));
+      return;
+    }
     if (!access || !refresh) {
       setError(t('auth.saml_errors.no_tokens', { defaultValue: 'The identity provider did not return a sign-in. Please try again.' }));
       return;

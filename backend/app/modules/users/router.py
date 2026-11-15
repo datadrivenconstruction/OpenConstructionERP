@@ -587,16 +587,22 @@ async def saml_login(request: Request) -> RedirectResponse:
     return RedirectResponse(saml.login_url(s, request.url.netloc, request.url.path), status_code=302)
 
 
-@router.post("/auth/saml/acs/", response_model=None)
-async def saml_acs(
-    request: Request,
-    service: UserService = Depends(_get_service),
-) -> TokenResponse | RedirectResponse:
-    """Assertion consumer service: verify the SAML response and issue local JWT tokens.
+_SAML_ERROR_CODES = frozenset({"invalid_saml_response", "saml_library_missing", "missing_claims", "account_not_found"})
 
-    A browser form post (the identity provider's redirect) is sent on to the SPA callback page with
-    the tokens in the URL fragment; any other client gets the token pair as JSON.
-    """
+
+def _saml_error_code(exc: HTTPException) -> str:
+    """Short machine code for the browser error redirect: never a message, never secrets."""
+    detail = exc.detail
+    if isinstance(detail, dict) and detail.get("code") in _SAML_ERROR_CODES:
+        return str(detail["code"])
+    if exc.status_code == 403:
+        return "account_disabled"
+    if exc.detail == "SAML authentication is not enabled.":
+        return "not_enabled"
+    return "failed"
+
+
+async def _saml_sign_in(request: Request, service: UserService) -> TokenResponse:
     from app.config import get_settings
     from app.modules.users import oidc, saml
 
@@ -616,7 +622,27 @@ async def saml_acs(
         role_from_groups=oidc.resolve_role(info["groups"], s.oidc_group_role_map),
         default_role=s.oidc_default_role,
     )
-    if "text/html" in request.headers.get("accept", ""):
+    return tokens
+
+
+@router.post("/auth/saml/acs/", response_model=None)
+async def saml_acs(
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> TokenResponse | RedirectResponse:
+    """Assertion consumer service: verify the SAML response and issue local JWT tokens.
+
+    A browser form post (the identity provider's redirect) is sent on to the SPA callback page with
+    the tokens in the URL fragment; any other client gets the token pair as JSON.
+    """
+    wants_html = "text/html" in request.headers.get("accept", "")
+    try:
+        tokens = await _saml_sign_in(request, service)
+    except HTTPException as exc:
+        if not wants_html:
+            raise
+        return RedirectResponse(f"/auth/saml/callback#error={_saml_error_code(exc)}", status_code=303)
+    if wants_html:
         from urllib.parse import urlencode
 
         fragment = urlencode({"access_token": tokens.access_token, "refresh_token": tokens.refresh_token})

@@ -81,4 +81,23 @@ describe('SamlCallback', () => {
     expect(await screen.findByText('auth.saml_errors.no_tokens')).toBeTruthy();
     expect(setTokens).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['invalid_saml_response', 'auth.saml_errors.invalid_response'],
+    ['account_disabled', 'auth.saml_errors.account_disabled'],
+    ['account_not_found', 'auth.oidc_errors.account_not_found'],
+    ['something_new', 'auth.saml_errors.failed'],
+  ])('maps the error fragment %s to %s', async (code, key) => {
+    const setTokens = vi.fn();
+    useAuthStore.setState({ setTokens } as never);
+    window.history.replaceState(null, '', `/auth/saml/callback#error=${code}`);
+    render(
+      <MemoryRouter>
+        <SamlCallback />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText(key)).toBeTruthy();
+    expect(setTokens).not.toHaveBeenCalled();
+    expect(window.location.hash).toBe('');
+  });
 });
