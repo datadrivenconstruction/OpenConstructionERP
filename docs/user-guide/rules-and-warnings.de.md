@@ -6,7 +6,7 @@ Kurze Übersicht über Regeln, die als Fehler oder Warnung erscheinen. Warnungen
 
 Die Basisinstallation deckt alles ab, außer zwei optionalen Paketen:
 
-- `pip install "openconstructionerp[saml]"` ergänzt SAML-Single-Sign-on, siehe [SSO](../sso.de.md). OIDC braucht nichts Zusätzliches.
+- `pip install "openconstructionerp[saml]"` ergänzt SAML-Single-Sign-on (die SAML-Option unter Einstellungen > Single Sign-on erscheint nach der Installation), siehe [SSO](../sso.de.md). OIDC braucht nichts Zusätzliches.
 - `pip install "openconstructionerp[parquet]"` ergänzt `pyarrow` für Parquet-Datenfeeds, siehe [Datenfeeds](../data-feeds.de.md). Ohne das Paket antwortet ein `.parquet`-Feed mit einer klaren Meldung, die dieses Paket nennt, und Einstellungen > Datenfeeds blendet die Parquet-URL aus. CSV und JSON funktionieren weiter.
 
 ## Geräte
