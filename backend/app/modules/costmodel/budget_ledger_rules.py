@@ -6,6 +6,7 @@
 * ``budget_ledger.below_committed``: a transfer or modification would take a line's budget below what is
   already committed on it.
 * ``budget_ledger.approved_immutable``: an approved or rejected entry is edited or deleted.
+* ``budget_ledger.self_approval``: the requester approves their own entry while segregation of duties is on.
 
 Each rule reads ``context.data["budget_ledger"]`` and is silent on any other payload.
 """
@@ -145,11 +146,38 @@ class ApprovedImmutableRule(_LedgerRule):
         return []
 
 
-LEDGER_RULES: tuple[type[_LedgerRule], ...] = (NetZeroRule, BelowCommittedRule, ApprovedImmutableRule)
+class SelfApprovalRule(_LedgerRule):
+    rule_id = "budget_ledger.self_approval"
+    name = "Requester does not approve own entry"
+    description = "With segregation of duties on, whoever requested a transfer or modification cannot approve it."
+
+    def check(self, context: ValidationContext, payload: dict[str, Any]) -> list[RuleResult]:
+        if (
+            payload.get("action") == "approve"
+            and payload.get("segregation_of_duties", True)
+            and payload.get("self_approval")
+        ):
+            return [
+                self._fail(
+                    context,
+                    "self_approval",
+                    element_ref=str(payload.get("code") or ""),
+                    code=str(payload.get("code") or ""),
+                )
+            ]
+        return []
+
+
+LEDGER_RULES: tuple[type[_LedgerRule], ...] = (
+    NetZeroRule,
+    BelowCommittedRule,
+    ApprovedImmutableRule,
+    SelfApprovalRule,
+)
 
 
 def register_budget_ledger_rules() -> None:
-    """Register the three rules into the ``budget_ledger`` rule set."""
+    """Register the four rules into the ``budget_ledger`` rule set."""
     for rule_cls in LEDGER_RULES:
         rule_registry.register(rule_cls(), [RULE_SET])
     logger.debug("Registered budget ledger validation rules")

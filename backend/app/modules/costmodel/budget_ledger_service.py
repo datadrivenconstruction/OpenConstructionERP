@@ -29,6 +29,7 @@ from app.modules.costmodel.budget_ledger_rules import PAYLOAD_KEY, RULE_SET
 from app.modules.costmodel.budget_ledger_schemas import (
     AuditOut,
     BudgetLedger,
+    LedgerSettings,
     LegOut,
     LineEffect,
     ModificationIn,
@@ -36,7 +37,7 @@ from app.modules.costmodel.budget_ledger_schemas import (
     TransferIn,
     TransferOut,
 )
-from app.modules.costmodel.models import CostLine
+from app.modules.costmodel.models import CostControlSettings, CostLine
 
 ZERO = Decimal("0")
 Q = Decimal("0.01")
@@ -111,6 +112,46 @@ class BudgetLedgerService:
                 failed += [r for r in await rule.validate(context) if not r.passed]
         if failed:
             raise HTTPException(422, detail=_detail(failed))
+
+    async def get_settings(self, project_id: uuid.UUID) -> LedgerSettings:
+        """The ledger settings; segregation of duties reads as on until a project switches it off."""
+        row = (
+            (
+                await self.session.execute(
+                    select(CostControlSettings).where(CostControlSettings.project_id == project_id)
+                )
+            )
+            .scalars()
+            .first()
+        )
+        return LedgerSettings(segregation_of_duties=True if row is None else bool(row.segregation_of_duties))
+
+    async def put_settings(self, project_id: uuid.UUID, body: LedgerSettings, user_id: str | None) -> LedgerSettings:
+        row = (
+            (
+                await self.session.execute(
+                    select(CostControlSettings).where(CostControlSettings.project_id == project_id)
+                )
+            )
+            .scalars()
+            .first()
+        )
+        if row is None:
+            row = CostControlSettings(id=uuid.uuid4(), project_id=project_id)
+            self.session.add(row)
+        row.segregation_of_duties = body.segregation_of_duties
+        row.updated_by = user_id
+        self._audit(
+            project_id,
+            "settings",
+            row.id,
+            "segregation_of_duties",
+            "",
+            "on" if body.segregation_of_duties else "off",
+            user_id,
+        )
+        await self.session.flush()
+        return body
 
     async def _spine(self, project_id: uuid.UUID) -> tuple[Any, str, dict[str, Decimal], dict[str, Decimal]]:
         from app.modules.costmodel.repository import CostSpineRepository
@@ -251,7 +292,11 @@ class BudgetLedgerService:
                 await self.session.execute(
                     select(CostLine.id).where(CostLine.id.in_(sorted({i for i, _ in legs}))).with_for_update()
                 )
-            await self._refuse_on_errors(await self._payload(project_id, kind, action, legs, entry), project_id, locale)
+            payload = await self._payload(project_id, kind, action, legs, entry)
+            if action == "approve":
+                payload["segregation_of_duties"] = (await self.get_settings(project_id)).segregation_of_duties
+                payload["self_approval"] = user_id is not None and entry.requested_by == user_id
+            await self._refuse_on_errors(payload, project_id, locale)
         before, entry.status = entry.status, to
         now = datetime.now(UTC)
         if action == "submit":

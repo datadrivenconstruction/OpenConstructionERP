@@ -39,16 +39,15 @@ async def test_blocking_rule_rejects_create_with_code(client, admin_auth, projec
 
 
 @pytest.mark.asyncio
-async def test_close_without_root_cause_is_rejected_and_not_written(client, admin_auth, project_id):
+async def test_close_without_root_cause_is_allowed_with_a_warning(client, admin_auth, project_id):
     uid, _ = admin_auth
     async with async_session_factory() as session:
         svc = NCRService(session)
         ncr = await svc.create_ncr(_data(project_id, status="verification", corrective_action="Grout"))
-        with pytest.raises(HTTPException) as err:
-            await svc.close_ncr(ncr.id, verified_by=uid)
-        assert err.value.status_code == 422
-        assert "ncr.closure_documented" in _rule_ids(err.value)
-        assert (await svc.get_ncr(ncr.id)).status == "verification"
+        closed = await svc.close_ncr(ncr.id, verified_by=uid)
+        assert closed.status == "closed"
+        warned = {(w["rule_id"], w["params"].get("field")) for w in closed.validation_warnings}
+        assert ("ncr.closure_documented", "root_cause") in warned
         await session.rollback()
 
 
