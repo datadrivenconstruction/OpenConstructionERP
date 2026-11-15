@@ -30,3 +30,4 @@ class SqlAccessStatus(BaseModel):
     schema_name: str
     role: str
     views: list[str] = Field(default_factory=list)
+    parquet: bool = True
