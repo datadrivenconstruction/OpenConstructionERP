@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Post {ordinal}: resursraderna har förlorat katalogens normtal och innehåller i stället postens mängd, så à-priset har inte räknats om utifrån dem",
       "whole_position_quantities": "Post {ordinal}: resursraderna innehåller mängder för hela posten i stället för normtal per enhet, så à-priset har inte räknats om utifrån dem",
       "suggestion": "Granska prisuppbyggnaden – härled posten på nytt från katalogposten via granskningen av resursnormtal eller korrigera raderna manuellt"
+    },
+    "rate_currency_missing": {
+      "fail": "Post {ordinal}: {count} resurspris saknar valuta och räknas i projektets basvaluta",
+      "suggestion": "Ange valuta för varje resurspris om den inte är projektets basvaluta"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} har beslutats och kan inte längre ändras eller tas bort.",
       "suggestion": "Registrera en ny överföring eller budgetändring som rättar den."
+    },
+    "self_approval": {
+      "fail": "{code} begärdes av dig, så du kan inte godkänna den (funktionsuppdelning är påslagen för projektet).",
+      "suggestion": "Be en annan godkännare avgöra den, eller stäng av funktionsuppdelning i inställningarna för huvudboken."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
       "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Sida {page} har inget läsbart ritningsnummer",
-      "suggestion": "Ange ritningsnumret från ritningshuvudet"
-    },
-    "number_unique_in_set": {
-      "fail": "Ritningsnummer {sheet} förekommer på {count} sidor i den här uppladdningen",
-      "suggestion": "Kontrollera ritningsuppsättningen för en dubblerad eller felnumrerad sida"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revidering {revision} av ritning {sheet} är lägre än gällande revidering {current}",
-      "suggestion": "Bekräfta att det är en äldre utgåva innan den läggs i historiken"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Ritning {sheet} lästes med textigenkänning på {confidence} och är inte bekräftad",
-      "suggestion": "Kontrollera fälten i ritningshuvudet och bekräfta avläsningen"
     }
   },
   "spec_import": {

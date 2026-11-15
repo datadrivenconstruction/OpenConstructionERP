@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Pozycja {ordinal}: wiersze zasobów utraciły normę katalogową i zamiast niej zawierają ilość pozycji, więc nie przeliczono na ich podstawie ceny jednostkowej",
       "whole_position_quantities": "Pozycja {ordinal}: wiersze zasobów zawierają ilości dla całej pozycji zamiast jednostkowych norm nakładów, więc nie przeliczono na ich podstawie ceny jednostkowej",
       "suggestion": "Sprawdź kalkulację — przelicz pozycję z jej podstawy katalogowej przez przegląd norm nakładów zasobów lub popraw wiersze ręcznie"
+    },
+    "rate_currency_missing": {
+      "fail": "Pozycja {ordinal}: {count} stawek zasobów nie ma waluty i jest liczonych w walucie bazowej projektu",
+      "suggestion": "Ustaw walutę każdej stawki zasobu, jeśli nie jest to waluta bazowa projektu"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "Dla {code} zapadła decyzja i nie można jej już zmieniać ani usuwać.",
       "suggestion": "Wprowadź nowe przesunięcie lub zmianę budżetu, która ją skoryguje."
+    },
+    "self_approval": {
+      "fail": "Wniosek {code} złożył(a) Pan(i), więc nie można go zatwierdzić (rozdział obowiązków jest włączony w tym projekcie).",
+      "suggestion": "Poproś innego zatwierdzającego o decyzję lub wyłącz rozdział obowiązków w ustawieniach księgi."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Na budowie była brygada {headcount} osób, ale nie zapisano ani robót, ani kontroli, ani opóźnienia.",
       "suggestion": "Dodaj, co robiła brygada, lub opóźnienie, które wstrzymało roboty."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Strona {page} nie ma czytelnego numeru arkusza",
-      "suggestion": "Wpisz numer arkusza z tabliczki rysunkowej"
-    },
-    "number_unique_in_set": {
-      "fail": "Numer arkusza {sheet} występuje na {count} stronach tego wgrania",
-      "suggestion": "Sprawdź komplet rysunków pod kątem zdublowanej lub błędnie ponumerowanej strony"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Rewizja {revision} arkusza {sheet} jest niższa niż bieżąca rewizja {current}",
-      "suggestion": "Potwierdź, że to starsze wydanie, zanim trafi do historii"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Arkusz {sheet} odczytano rozpoznawaniem tekstu z wynikiem {confidence} i nie został potwierdzony",
-      "suggestion": "Sprawdź pola tabliczki rysunkowej i potwierdź odczyt"
     }
   },
   "spec_import": {

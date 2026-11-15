@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Công tác {ordinal}: các dòng nguồn lực mất định mức danh mục và thay bằng khối lượng công tác nên đơn giá không được tính lại từ chúng",
       "whole_position_quantities": "Công tác {ordinal}: các dòng nguồn lực chứa lượng cho toàn bộ công tác thay vì định mức trên một đơn vị nên đơn giá không được tính lại từ chúng",
       "suggestion": "Kiểm tra phân tích đơn giá; tính lại công tác từ mục danh mục qua bước xem xét định mức nguồn lực hoặc sửa các dòng thủ công"
+    },
+    "rate_currency_missing": {
+      "fail": "Hạng mục {ordinal}: {count} đơn giá tài nguyên không có tiền tệ và được tính theo tiền tệ gốc của dự án",
+      "suggestion": "Đặt tiền tệ cho từng đơn giá tài nguyên nếu không phải tiền tệ gốc của dự án"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} đã có quyết định và không thể sửa hay xóa nữa.",
       "suggestion": "Hãy nhập một lần điều chuyển hoặc điều chỉnh ngân sách mới để sửa lại."
+    },
+    "self_approval": {
+      "fail": "{code} do chính bạn yêu cầu nên bạn không thể phê duyệt (dự án này đang bật phân tách nhiệm vụ).",
+      "suggestion": "Nhờ người phê duyệt khác quyết định, hoặc tắt phân tách nhiệm vụ trong cài đặt sổ cái."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Tổ đội {headcount} người có mặt nhưng không ghi công việc, kiểm tra hay chậm trễ.",
       "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Trang {page} không có số bản vẽ đọc được",
-      "suggestion": "Nhập số bản vẽ từ khung tên"
-    },
-    "number_unique_in_set": {
-      "fail": "Số bản vẽ {sheet} xuất hiện trên {count} trang của lần tải lên này",
-      "suggestion": "Kiểm tra bộ bản vẽ xem có trang bị trùng hoặc đánh số sai không"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Bản sửa đổi {revision} của bản vẽ {sheet} thấp hơn bản sửa đổi hiện hành {current}",
-      "suggestion": "Xác nhận đây là phiên bản cũ hơn trước khi đưa vào lịch sử"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Bản vẽ {sheet} được đọc bằng nhận dạng văn bản với độ tin cậy {confidence} và chưa được xác nhận",
-      "suggestion": "Kiểm tra các trường của khung tên và xác nhận kết quả đọc"
     }
   },
   "spec_import": {

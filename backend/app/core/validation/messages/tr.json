@@ -1202,6 +1202,10 @@
       "norm_collapsed": "{ordinal} pozu: kaynak satırları katalog normunu kaybedip yerine poz miktarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
       "whole_position_quantities": "{ordinal} pozu: kaynak satırları birim başına norm yerine tüm pozun miktarlarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
       "suggestion": "Analizi inceleyin; kaynak normu incelemesi yoluyla pozu katalog kaleminden yeniden türetin veya satırları elle düzeltin"
+    },
+    "rate_currency_missing": {
+      "fail": "Kalem {ordinal}: {count} kaynak birim fiyatının para birimi yok ve projenin ana para biriminde sayılıyor",
+      "suggestion": "Proje ana para birimi değilse her kaynak birim fiyatının para birimini belirleyin"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} hakkında karar verildi; artık değiştirilemez veya silinemez.",
       "suggestion": "Bunu düzeltecek yeni bir aktarım veya bütçe değişikliği girin."
+    },
+    "self_approval": {
+      "fail": "{code} talebini siz yaptınız, bu yüzden onaylayamazsınız (bu projede görev ayrılığı açık).",
+      "suggestion": "Kararı başka bir onaylayıcıya bırakın veya defter ayarlarında görev ayrılığını kapatın."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Sahada {headcount} kişilik bir ekip vardı ancak iş, kontrol veya gecikme kaydı yok.",
       "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "{page}. sayfada okunabilir bir pafta numarası yok",
-      "suggestion": "Pafta numarasını antetten girin"
-    },
-    "number_unique_in_set": {
-      "fail": "{sheet} pafta numarası bu yüklemenin {count} sayfasında geçiyor",
-      "suggestion": "Çizim setinde mükerrer veya yanlış numaralanmış sayfa olup olmadığını kontrol edin"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "{sheet} paftasının {revision} revizyonu, güncel {current} revizyonundan düşük",
-      "suggestion": "Geçmişe eklenmeden önce bunun eski bir sürüm olduğunu onaylayın"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "{sheet} paftası metin tanıma ile {confidence} güvenle okundu ve onaylanmadı",
-      "suggestion": "Antet alanlarını kontrol edin ve okumayı onaylayın"
     }
   },
   "spec_import": {
