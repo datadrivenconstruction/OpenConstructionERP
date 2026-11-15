@@ -6131,7 +6131,7 @@ export function BIMViewer({
                           ? 'text-rose-600'
                           : req.priority === 'should'
                             ? 'text-amber-600'
-                            : 'text-slate-500';
+                            : 'text-content-tertiary';
                       return (
                         <li
                           key={req.id}
