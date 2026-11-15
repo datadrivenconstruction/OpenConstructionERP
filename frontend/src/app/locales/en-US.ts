@@ -1696,7 +1696,6 @@ const resource = {
     "measurement_book.f_breadth": "Width",
     "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
-    "api_errors.budget_ledger_sod_admin_only": "Only an administrator can switch segregation of duties off.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
     "site_sensors.import.bad_time": "Time not recognized",
     "normPricing.subtitle": "Hourly labor rates from the estimate wage and the grade table of {{base}}, and the markup caps of the funding type. Lines cite norm codes like {{example}}.",
