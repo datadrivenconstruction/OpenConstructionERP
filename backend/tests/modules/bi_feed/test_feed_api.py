@@ -91,6 +91,17 @@ async def test_parquet_round_trip_through_the_endpoint_is_exact(session) -> None
     assert rows[0]["direction"] == "payable"
 
 
+async def test_parquet_without_pyarrow_is_a_clear_4xx(session, monkeypatch) -> None:
+    user = await make_user(session)
+    await _seed(session, user, positions=1)
+    monkeypatch.setattr(feed_service, "parquet_available", lambda: False)
+    async with http_client(build_app(session)) as client:
+        response = await client.get(f"{PREFIX}/feeds/invoices.parquet", headers={"X-Test-User": str(user.id)})
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "BI_FEED_PARQUET_UNAVAILABLE"
+    assert "pyarrow" in response.json()["detail"]["message"]
+
+
 async def test_json_preview_lists_columns_and_rows(session) -> None:
     user = await make_user(session)
     await _seed(session, user, positions=3)

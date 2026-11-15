@@ -21,7 +21,7 @@ from app.modules.bi_feed.feeds import (
     ResolvedFeed,
     build_catalogue,
 )
-from app.modules.bi_feed.formats import ENCODERS
+from app.modules.bi_feed.formats import ENCODERS, parquet_available
 from app.modules.bi_feed.schemas import FeedColumnInfo, FeedInfo, SqlAccessStatus
 from app.modules.bi_feed.validators import BiFeedError, FeedParams
 
@@ -128,6 +128,12 @@ class BiFeedService:
         feed = self.feed(feed_id)
         if not self._may_read(feed, role):
             raise BiFeedError(403, "BI_FEED_FORBIDDEN", f"Your role cannot read the {feed_id} feed")
+        if fmt == "parquet" and not parquet_available():
+            raise BiFeedError(
+                422,
+                "BI_FEED_PARQUET_UNAVAILABLE",
+                "Parquet export needs the optional pyarrow package: pip install 'openconstructionerp[parquet]'",
+            )
         await self._arm_timeout()
         conditions = await self._scope(feed, user_id, params)
         total = await self._count(feed, conditions)
