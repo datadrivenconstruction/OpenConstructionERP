@@ -403,11 +403,22 @@ def register_demo_data_seed(registry: ProcessRegistry, seed: Callable[[], Awaita
     Startup creates the demo accounts inline and hands the projects here, so
     the first login does not wait for them. It is reported, not switchable:
     stopping it halfway would leave a partial showcase until the next boot.
+
+    It holds the heavy-load slot (app.core.heavy_work) while it runs, so a cost
+    database import started from onboarding meanwhile waits instead of adding
+    its own peak on top.
     """
+
+    async def seed_in_slot() -> None:
+        from app.core.heavy_work import heavy_slot
+
+        async with heavy_slot("demo data seed"):
+            await seed()
+
     registry.register(
         ProcessSpec(
             id="demo_data_seed",
-            factory=lambda: OneShotProcess(run=seed),
+            factory=lambda: OneShotProcess(run=seed_in_slot),
             category="maintenance",
             start_mode="boot",
             stoppable=False,

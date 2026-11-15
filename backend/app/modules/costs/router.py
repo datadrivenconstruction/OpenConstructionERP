@@ -5634,6 +5634,47 @@ async def load_cwicr_region(
     resume_incomplete: bool = False,
     retry_home_language: bool = True,
 ) -> dict:
+    """Load one CWICR regional cost database, one heavy load at a time.
+
+    An import peaks at about +1.2 GB, so it takes the process-wide heavy-load
+    slot (app.core.heavy_work) and a second import, or the first-run demo seed,
+    waits its turn. A region that already holds rows skips the slot: that call
+    only answers ``already_loaded`` and must not queue behind a running import.
+    See :func:`_load_cwicr_region_now` for what the load does.
+    """
+    from sqlalchemy import func, select
+
+    from app.core.heavy_work import heavy_slot
+    from app.modules.costs.models import CostItem
+
+    if not resume_incomplete:
+        has_rows = (
+            await session.execute(
+                select(func.count()).select_from(
+                    select(CostItem.id)
+                    .where(CostItem.region == db_id, CostItem.is_active.is_(True))
+                    .limit(1)
+                    .subquery()
+                )
+            )
+        ).scalar_one()
+        if has_rows:
+            return await _load_cwicr_region_now(
+                db_id, session, resume_incomplete=resume_incomplete, retry_home_language=retry_home_language
+            )
+    async with heavy_slot(f"cost database {db_id}"):
+        return await _load_cwicr_region_now(
+            db_id, session, resume_incomplete=resume_incomplete, retry_home_language=retry_home_language
+        )
+
+
+async def _load_cwicr_region_now(
+    db_id: str,
+    session: AsyncSession,
+    *,
+    resume_incomplete: bool = False,
+    retry_home_language: bool = True,
+) -> dict:
     """Load one CWICR regional cost database into the relational store.
 
     Optimized: reads Parquet, deduplicates by rate_code (55K unique items

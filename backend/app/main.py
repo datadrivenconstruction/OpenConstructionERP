@@ -51,6 +51,7 @@ _INSTANCE_ID = str(_instance_uuid.uuid4())
 _BUILD_PEPPER = bytes(b ^ 0x55 for b in (b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"))
 _BUILD_HASH = _hashlib.sha256(_BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
 
+import contextlib
 from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 from datetime import UTC
@@ -340,6 +341,8 @@ def _expected_alembic_head(ini_path: os.PathLike[str] | str) -> str | None:
 #: tested against a variable nobody sets.
 PRIME_OPENAPI_SCHEMA_ENV = "OE_PRIME_OPENAPI_SCHEMA"
 
+from app.core.boot_state import boot_in_background, request_server_exit  # noqa: E402
+
 
 def should_prime_openapi_schema(
     *,
@@ -526,6 +529,9 @@ def _set_boot_phase(name: str) -> None:
     global _boot_phase, _boot_phase_started
     _boot_phase = name
     _boot_phase_started = time.monotonic()
+    from app.core.boot_state import boot_state
+
+    boot_state.set_phase(name)
     try:
         from app.core.embedded_pg import emit_stage
 
@@ -2601,6 +2607,13 @@ def create_app() -> FastAPI:
 
     app.add_middleware(DemoUploadBlockMiddleware, enabled=settings.demo_block_uploads)
 
+    # Outermost: while startup runs behind the open port, API calls get a 503
+    # naming the phase and the SPA shows its setup screen (app.core.boot_state).
+    from app.core.boot_state import BootGateMiddleware, boot_state
+
+    boot_state.reset()
+    app.add_middleware(BootGateMiddleware)
+
     # ── Global exception handler - return JSON for unhandled errors ────
     from fastapi import Request
     from fastapi.exceptions import RequestValidationError
@@ -2847,8 +2860,8 @@ def create_app() -> FastAPI:
     # Store startup time for uptime calculation
     _startup_time: float = time.time()
 
-    @app.get("/api/health", tags=["System"])
-    async def health_check() -> dict[str, Any]:
+    @app.get("/api/health", tags=["System"], response_model=None)
+    async def health_check() -> dict[str, Any] | JSONResponse:
         """Whether this process is running and fit to be used.
 
         This endpoint is UNAUTHENTICATED on purpose. The desktop shell polls it
@@ -2876,7 +2889,22 @@ def create_app() -> FastAPI:
         lists of internal names - a module path maps the deployment quite as
         well as a repair id does - and both stay in the log for the same reason
         the failing statement does.
+
+        While startup still runs behind the open port the answer is a 503 with
+        ``status`` ``starting`` (or ``failed``) and a ``boot`` block naming the
+        phase. Not a 200: launchers, container healthchecks and test harnesses
+        read the first 200 as "usable", and the API is not open yet.
         """
+        from app.core.boot_state import boot_state as _boot_state
+
+        if not _boot_state.api_open:
+            _snap = _boot_state.snapshot()
+            return JSONResponse(
+                status_code=503,
+                content={"status": _snap["status"], "version": settings.app_version, "boot": _snap},
+                headers={"Retry-After": "3", "Cache-Control": "no-store"},
+            )
+
         import os as _os
         from pathlib import Path as _Path
 
@@ -4366,6 +4394,39 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     async def startup() -> None:
+        # Behind an open port by default: uvicorn binds as soon as this returns,
+        # health answers 503 "starting" with the phase, the SPA shows its setup
+        # screen, and the API opens when the sequence below finishes. A fresh
+        # install spends minutes in the schema build and the module load, and a
+        # closed port for that long reads as a broken install.
+        if boot_in_background():
+            from app.core.boot_state import boot_state as _boot_state
+
+            _boot_state.begin_background()
+            app.state.boot_task = asyncio.create_task(_boot_behind_open_port(), name="oe-boot")
+            return
+        await _boot_inline()
+
+    async def _boot_behind_open_port() -> None:
+        from app.core.boot_state import boot_state as _boot_state
+
+        try:
+            with _heartbeat_through_startup():
+                await _startup_impl()
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            # Same report as an inline failure, then the same outcome: the
+            # process stops, so the launcher and the operator see the cause
+            # instead of a server that answers 503 for ever.
+            _boot_state.mark_failed()
+            _emit_server_fail(exc)
+            request_server_exit()
+            return
+        _boot_state.mark_ready()
+        logger.info("Startup complete in %ss: the API is open", _boot_state.snapshot()["elapsed_seconds"])
+
+    async def _boot_inline() -> None:
         # Guard the whole startup sequence. If any fatal step (DB connect,
         # schema build, module load, demo seed) raises, surface the real cause
         # as a STAGE:server:fail marker and log the full traceback BEFORE
@@ -4569,9 +4630,6 @@ def create_app() -> FastAPI:
             # ``oe_event_effect`` (run-once ledger of event side effects) too.
             from app.core import event_effects as _event_effects_core  # noqa: F401
 
-            # ``oe_process_settings`` lives in app.core as well.
-            from app.core.processes import store as _process_store_core  # noqa: F401
-
             # Register EVERY module's SQLAlchemy models before create_all so
             # a fresh PostgreSQL database gets all tables. This was
             # previously a hand-maintained import list that silently omitted
@@ -4584,9 +4642,15 @@ def create_app() -> FastAPI:
             # Discovering models dynamically makes that whole class of bug
             # impossible: any module package with a models.py is registered
             # automatically - adding a new module needs no edit here.
+            from app.core.boot_state import yield_to_requests
+
+            # ``oe_process_settings`` lives in app.core as well.
+            from app.core.processes import store as _process_store_core  # noqa: F401
+
             for _m in pkgutil.iter_modules(_modules_pkg.__path__):
                 if not _m.ispkg:
                     continue
+                await yield_to_requests()
                 _models_mod = f"app.modules.{_m.name}.models"
                 try:
                     importlib.import_module(_models_mod)
@@ -5055,9 +5119,13 @@ def create_app() -> FastAPI:
         # image layer of a container) is copied once onto the operator data dir
         # before anything reads module states or installed modules.
         try:
+            import asyncio as _asyncio_hs
+
             from app.core.home_state import migrate_legacy_home_state
 
-            migrate_legacy_home_state()
+            # A worker thread: copying a large legacy tree must not freeze the
+            # health probe and the setup screen behind the open port.
+            await _asyncio_hs.to_thread(migrate_legacy_home_state)
         except Exception:
             logger.warning("Legacy home-state migration failed", exc_info=True)
         # Modules installed at runtime live in the instance's data directory,
@@ -5515,6 +5583,12 @@ def create_app() -> FastAPI:
     @app.on_event("shutdown")
     async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
+        _boot_task = getattr(app.state, "boot_task", None)
+        if _boot_task is not None and not _boot_task.done():
+            # Stopped mid-startup: end the sequence before the engine goes away.
+            _boot_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError, Exception):
+                await _boot_task
         from app.database import engine
 
         # Stop every registry process (schedulers, models, the embedding pool)

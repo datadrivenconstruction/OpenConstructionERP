@@ -12,6 +12,7 @@
 import i18next from 'i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { markDemoReadOnly, useDemoReadOnlyStore } from '@/stores/useDemoReadOnlyStore';
+import { reportIfServerStarting } from '@/stores/useServerBootStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
 import { logApiError, logError } from './errorLogger';
@@ -774,6 +775,7 @@ async function request<TResponse>(
     // before, so every caller's own error handling - including whatever it
     // does to undo an optimistic update - runs unchanged.
     reportIfDemoReadOnly(response.status, errorBody);
+    reportIfServerStarting(response.status, errorBody);
     throw new ApiError(response.status, response.statusText, errorBody);
   }
 

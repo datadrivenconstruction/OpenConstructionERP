@@ -516,7 +516,12 @@ class ModuleLoader:
 
         logger.info("Loading %d modules in order: %s", len(order), order)
 
+        from app.core.boot_state import yield_to_requests
+
         for module_name in order:
+            # Imports block the event loop; behind an open port, let health and
+            # static requests through between modules.
+            await yield_to_requests()
             try:
                 await self._load_module(module_name, app)
             except Exception:
