@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.6.0] - 2026-11-15
+
+### Added
+
+- The app opens at once on first start and shows its startup progress while the database, modules and demo data load in the background.
+- Each hosted demo stays inside its own project: lists, contacts, the country pack banner, the cost region and the menu follow the demo that is open, with one click to show every module of the platform. The Riyadh demo opens with every module.
+- E-invoice settings in all six company demos: XRechnung for Berlin, Factur-X for Paris, Peppol for London and Dubai, UBL for Toronto and Shanghai, with the VAT rate of the demo's country.
+- Demo data for RFQs with comparable quotes, captured quotes, a takt plan, a dispatch board, progress readings and variations on every demo project.
+
+### Changed
+
+- German, French, Chinese and Arabic demos show their quality, closeout, site preparation, temporary works, HSE and construction control records in their own language.
+- The README hero shows the large BIM model.
+
+### Fixed
+
+- Icons, fonts, the logo and the app manifest load under the /demo address of the hosted demo.
+- Showcase demos book their commitments under cost groups instead of leaving them unassigned.
+
 ## [19.5.1] - 2026-11-15
 
 ### Fixed

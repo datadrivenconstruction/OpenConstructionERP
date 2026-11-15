@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.6.0',
+    date: '2026-11-15',
+    tag: 'NEW',
+    summary:
+      'The app opens at once on first start and shows its startup progress. Each hosted demo stays inside its own project with one click to show every module, all six demos carry e-invoice settings, and the German, French, Chinese and Arabic demos speak their language in more modules.',
+  },
+  {
     version: '19.5.1',
     date: '2026-11-15',
     tag: 'FIX',
