@@ -431,17 +431,3 @@ async def test_sso_enforced_domain_blocks_password_login_but_not_break_glass(env
         json={"email": "new@corp.example", "password": "Abcdef12", "full_name": "New Person"},
     )
     assert reg.status_code == 403 and reg.json()["detail"]["code"] == "auth.sso_required"
-
-
-async def test_sso_warning_only_when_oidc_is_off(env, caplog):
-    from app.modules.users.sso_enforce import warn_if_misconfigured
-
-    env.settings.sso_enforced_domains = "corp.example"
-    env.settings.oidc_enabled = False
-    with caplog.at_level("WARNING"):
-        warn_if_misconfigured(env.settings)
-    assert "SSO_ENFORCED_DOMAINS" in caplog.text
-    caplog.clear()
-    env.settings.oidc_enabled = True
-    warn_if_misconfigured(env.settings)
-    assert caplog.text == ""

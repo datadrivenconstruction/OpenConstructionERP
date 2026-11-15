@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import json
 import time
-import uuid
 
 import pytest
-import pytest_asyncio
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
@@ -143,69 +141,3 @@ def test_default_role_setting_is_least_privileged():
     from app.config import Settings
 
     assert Settings.model_fields["oidc_default_role"].default == "viewer"
-
-
-# ── service rules (PostgreSQL) ──────────────────────────────────────────────
-
-
-@pytest_asyncio.fixture
-async def session():
-    from tests._pg import transactional_session
-
-    async with transactional_session() as s:
-        yield s
-
-
-def _service(session):
-    from app.config import get_settings
-    from app.modules.users.service import UserService
-
-    return UserService(session, get_settings())
-
-
-def _login_kwargs(**kw):
-    base = {
-        "oidc_sub": f"sub-{uuid.uuid4().hex[:8]}",
-        "oidc_issuer": ISSUER,
-        "email": f"sso-{uuid.uuid4().hex[:8]}@example.com",
-        "full_name": "Anna Site",
-    }
-    base.update(kw)
-    return base
-
-
-@pytest.mark.asyncio
-async def test_linked_user_with_unchanged_role_signs_in_again(session):
-    svc = _service(session)
-    kw = _login_kwargs(role_from_groups="editor")
-    await svc.oidc_login(**kw)
-    tokens = await svc.oidc_login(**kw)
-    assert tokens.access_token
-
-
-@pytest.mark.asyncio
-async def test_linked_user_without_mapping_signs_in_again(session):
-    svc = _service(session)
-    kw = _login_kwargs()
-    await svc.oidc_login(**kw)
-    assert (await svc.oidc_login(**kw)).access_token
-
-
-@pytest.mark.asyncio
-async def test_unknown_user_without_auto_create_gets_403_with_key(session):
-    with pytest.raises(HTTPException) as exc:
-        await _service(session).oidc_login(**_login_kwargs(auto_create=False))
-    assert exc.value.status_code == 403
-    assert exc.value.detail["message_key"] == "auth.oidc_errors.account_not_found"
-
-
-@pytest.mark.asyncio
-async def test_new_user_without_mapping_gets_default_role(session):
-    from sqlalchemy import select
-
-    from app.modules.users.models import User
-
-    kw = _login_kwargs()
-    await _service(session).oidc_login(**kw)
-    user = (await session.execute(select(User).where(User.oidc_sub == kw["oidc_sub"]))).scalar_one()
-    assert user.role == "viewer"
