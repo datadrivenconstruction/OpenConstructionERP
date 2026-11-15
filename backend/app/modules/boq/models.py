@@ -10,6 +10,7 @@ Tables:
     oe_boq_snapshot - point-in-time BOQ state for version history
     oe_boq_branch - lifecycle of an estimate branch (variant) of a main BOQ
     oe_boq_quantity_link - live model→position quantity binding
+    oe_boq_template - user-owned editable estimate templates
     oe_boq_exchange_report - what an import or export did not carry across
 """
 
@@ -794,3 +795,43 @@ class BOQExchangeReport(Base):
 # (``oe_boq_change_flag``) is registered the same way.
 from app.modules.boq.change_review_models import BOQChangeFlag  # noqa: E402,F401
 from app.modules.boq.copilot_models import PositionCopilotMessage  # noqa: E402,F401
+
+
+class BOQTemplate(Base):
+    """A user-owned, editable estimate template.
+
+    The built-in templates live in code (``templates.py``) and are never
+    mutated; a user edits a copy, which is a row here. ``sections`` holds the
+    whole structure as JSON in the shape of the built-ins, so one expander
+    serves both. The row carries no project, BOQ or position reference, so a
+    template cannot leak the estimate it was taken from.
+    """
+
+    __tablename__ = "oe_boq_template"
+    __table_args__ = (Index("ix_boq_template_owner_name", "owner_id", "name"),)
+
+    owner_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    icon: Mapped[str] = mapped_column(String(50), nullable=False, default="FileText")
+    #: Classification standard the section/position codes follow (din276, nrm, masterformat ...), "" when none.
+    classification_standard: Mapped[str] = mapped_column(String(50), nullable=False, default="")
+    #: ``manual``, ``boq`` (taken from an estimate) or ``copy`` (duplicate of another template).
+    origin: Mapped[str] = mapped_column(String(20), nullable=False, default="manual")
+    #: Built-in template id this was copied from, when it was.
+    copied_from: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    sections: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    markups: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
+    def __repr__(self) -> str:
+        return f"<BOQTemplate {self.name}>"

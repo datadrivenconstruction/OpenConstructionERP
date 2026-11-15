@@ -7,7 +7,7 @@ import { useNavigate, useLocation, useParams, useSearchParams } from 'react-rout
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus, Pencil,
   Search, ArrowUpDown, GitCompareArrows, X, Loader2,
-  CalendarDays, LayoutGrid, List,
+  CalendarDays, LayoutGrid, List, LayoutTemplate,
 } from 'lucide-react';
 import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb, FileTypeChips, DismissibleInfo, IntroRichText, RecoveryCard } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -36,6 +36,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { canDeleteBoq } from './canDeleteBoq';
 import { CreateBOQModal } from './CreateBOQPage';
 import { BOQRenameDialog } from './BOQRenameDialog';
+import { TemplateFromBoqDialog } from './TemplateFromBoqDialog';
 import { projectFilterOptions } from './projectFilterOptions';
 import { useDemoScope } from '@/shared/lib/useDemoScope';
 import { scopeToProject } from '@/shared/lib/demoScope';
@@ -508,6 +509,7 @@ export function BOQListPage() {
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
+  const [templateTarget, setTemplateTarget] = useState<{ id: string; name: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState(() => {
     try {
@@ -1365,6 +1367,14 @@ export function BOQListPage() {
                     <Pencil size={14} />
                   </button>
                   <button
+                    onClick={() => setTemplateTarget({ id: boq.id, name: boq.name })}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
+                    title={t('boq_templates.save_as_template', { defaultValue: 'Save as template' })}
+                    aria-label={t('boq_templates.save_as_template', { defaultValue: 'Save as template' })}
+                  >
+                    <LayoutTemplate size={14} />
+                  </button>
+                  <button
                     onClick={() => duplicateMutation.mutate(boq.id)}
                     disabled={duplicateMutation.isPending}
                     className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
@@ -1522,6 +1532,14 @@ export function BOQListPage() {
                         <Pencil size={14} />
                       </button>
                       <button
+                        onClick={(e) => { e.stopPropagation(); setTemplateTarget({ id: boq.id, name: boq.name }); }}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
+                        title={t('boq_templates.save_as_template', { defaultValue: 'Save as template' })}
+                        aria-label={t('boq_templates.save_as_template', { defaultValue: 'Save as template' })}
+                      >
+                        <LayoutTemplate size={14} />
+                      </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(boq.id); }}
                         disabled={duplicateMutation.isPending}
                         className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
@@ -1647,6 +1665,14 @@ export function BOQListPage() {
         onClose={() => setCreateModalOpen(false)}
         defaultProjectId={createModalProjectId}
       />
+      {templateTarget && (
+        <TemplateFromBoqDialog
+          key={templateTarget.id}
+          boqId={templateTarget.id}
+          boqName={templateTarget.name}
+          onClose={() => setTemplateTarget(null)}
+        />
+      )}
       {renameTarget && (
         <BOQRenameDialog
           key={renameTarget.id}

@@ -18,6 +18,7 @@ import { ProjectsPage, CreateProjectPage, ProjectDetailPage, ProjectSettingsPage
 import { BOQListPage } from '@/features/boq/BOQListPage';
 import { CreateBOQPage } from '@/features/boq/CreateBOQPage';
 import { TemplatesPage } from '@/features/boq/TemplatesPage';
+import { TemplateEditorPage } from '@/features/boq/TemplateEditorPage';
 import { syncCustomUnitsFromServer } from '@/features/boq/boqHelpers';
 // Pure URL helpers, no React or grid code: safe on the eager edge.
 import { rulesTabFromParams } from '@/features/bim/quantityRuleLinks';
@@ -1481,6 +1482,7 @@ export default function App() {
         <Route path="/boq/:boqId/offer" element={<P title="Customer offer"><OfferPage /></P>} />
         <Route path="/boq/:boqId/owner-schedule" element={<P title="Owner bid schedule"><OwnerSchedulePage /></P>} />
         <Route path="/templates" element={<P title="BOQ Templates"><TemplatesPage /></P>} />
+        <Route path="/templates/:templateId" element={<P title="BOQ Template"><TemplateEditorPage /></P>} />
 
         <Route path="/costs" element={<P title="Cost Database"><CostsPage /></P>} />
         <Route path="/costs/import" element={<P title="Import Cost Database"><ImportDatabasePage /></P>} />

@@ -252,7 +252,17 @@ from app.modules.boq.service import (
     resource_fx_factor,
 )
 from app.modules.boq.supplier_suggestion_router import supplier_suggestion_router
+from app.modules.boq.template_schemas import (
+    TemplateDetail,
+    TemplateFromBOQRequest,
+    TemplateIssue,
+    TemplateWrite,
+)
+from app.modules.boq.template_service import TemplateService, row_to_detail
+from app.modules.boq.template_service import summary as tpl_summary
+from app.modules.boq.template_service import with_warnings as tpl_with_warnings
 from app.modules.boq.units import is_lump_sum_unit, to_gaeb_unit_code
+from app.modules.boq.user_templates import validate_template
 from app.modules.costs.repository import CostItemRepository
 from app.modules.measurement.presets import PRESETS as MEASUREMENT_PRESETS
 from app.modules.price_breakdown.presets import PRESETS as PRICE_BREAKDOWN_PRESETS
@@ -870,6 +880,8 @@ async def list_exchange_formats(
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
 async def list_templates(
+    _user_id: CurrentUserId,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> list[TemplateInfo]:
     """List all available BOQ templates.
@@ -887,7 +899,8 @@ async def list_templates(
     - **retail** - Shopping mall, 1-3 floors
     - **infrastructure** - Bridge / overpass
     """
-    return service.list_templates()
+    mine = [TemplateInfo(**tpl_summary(row_to_detail(r))) for r in await TemplateService(session).list_rows(_user_id)]
+    return [*service.list_templates(), *mine]
 
 
 @router.post(
@@ -919,9 +932,113 @@ async def create_boq_from_template(
     # this any role holder could create BOQs in a project/tenant they cannot
     # access (and a bogus project_id would surface as a raw FK 500 instead of 404).
     await _verify_project_owner_for_boq(session, data.project_id, _user_id, payload)
-    boq = await service.create_boq_from_template(data)
+    boq = await service.create_boq_from_template(data, owner_id=_user_id)
     await _stamp_creator(session, boq, _user_id)
     return BOQResponse.model_validate(boq)
+
+
+@router.post(
+    "/boqs/templates/validate/",
+    response_model=list[TemplateIssue],
+    summary="Check a template body and return warnings",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def validate_template_body(body: TemplateWrite) -> list[TemplateIssue]:
+    """Run the template rules on an unsaved body. Warnings only; nothing is stored."""
+    return [TemplateIssue(**i) for i in validate_template(body.model_dump())]
+
+
+@router.post(
+    "/boqs/templates/from-boq/",
+    response_model=TemplateDetail,
+    status_code=201,
+    summary="Create a template from an existing estimate",
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def create_template_from_boq(
+    data: TemplateFromBOQRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+) -> TemplateDetail:
+    """Copy structure, descriptions, units and classification codes of a bill into a template.
+
+    Quantities and rates are kept only when asked for. Project links, BIM links,
+    actuals, attachments and notes are never copied; empty sections are dropped
+    and positions are renumbered unless ``renumber`` is false.
+    """
+    await _verify_boq_owner(session, data.boq_id, _user_id, payload)
+    from app.modules.boq.models import BOQ
+
+    boq = await session.get(BOQ, data.boq_id)
+    if boq is None:
+        raise HTTPException(status_code=404, detail="BOQ not found")
+    detail = await TemplateService(session).create_from_boq(boq, _user_id, data)
+    return TemplateDetail(**detail)
+
+
+@router.post(
+    "/boqs/templates/",
+    response_model=TemplateDetail,
+    status_code=201,
+    summary="Create your own template",
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def create_template(body: TemplateWrite, _user_id: CurrentUserId, session: SessionDep) -> TemplateDetail:
+    return TemplateDetail(**await TemplateService(session).create(_user_id, body))
+
+
+@router.get(
+    "/boqs/templates/{template_id}/",
+    response_model=TemplateDetail,
+    summary="Get a template with its sections and positions",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_template(template_id: str, _user_id: CurrentUserId, session: SessionDep) -> TemplateDetail:
+    detail = await TemplateService(session).get_detail(template_id, _user_id)
+    return TemplateDetail(**tpl_with_warnings(detail))
+
+
+@router.put(
+    "/boqs/templates/{template_id}/",
+    response_model=TemplateDetail,
+    summary="Save changes to your own template",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def update_template(
+    template_id: str,
+    body: TemplateWrite,
+    _user_id: CurrentUserId,
+    session: SessionDep,
+) -> TemplateDetail:
+    """Built-in templates answer 403: duplicate one and edit the copy."""
+    return TemplateDetail(**await TemplateService(session).update(template_id, _user_id, body))
+
+
+@router.delete(
+    "/boqs/templates/{template_id}/",
+    status_code=204,
+    summary="Delete your own template",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def delete_template(template_id: str, _user_id: CurrentUserId, session: SessionDep) -> None:
+    await TemplateService(session).delete(template_id, _user_id)
+
+
+@router.post(
+    "/boqs/templates/{template_id}/duplicate/",
+    response_model=TemplateDetail,
+    status_code=201,
+    summary="Copy a built-in or own template as your own",
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def duplicate_template(
+    template_id: str,
+    _user_id: CurrentUserId,
+    session: SessionDep,
+    name: str | None = Query(default=None, max_length=255),
+) -> TemplateDetail:
+    return TemplateDetail(**await TemplateService(session).duplicate(template_id, _user_id, name))
 
 
 # ── AI-powered Classification ─────────────────────────────────────────────
