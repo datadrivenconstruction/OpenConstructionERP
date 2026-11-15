@@ -7578,7 +7578,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_allowances",
@@ -7887,6 +7888,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -7939,6 +7944,10 @@
             {
               "name": "created_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -8072,7 +8081,8 @@
         "simulate.py",
         "sla_engine.py",
         "sla_monitor.py",
-        "timeline.py"
+        "timeline.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_approval_routes",
@@ -8705,6 +8715,10 @@
             {
               "name": "steps",
               "type": "list[StepResponse]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -8965,6 +8979,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -11241,7 +11259,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_assets",
@@ -11752,6 +11771,10 @@
             {
               "name": "health",
               "type": "AssetHealthSchema"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -27830,6 +27853,7 @@
         "rule_runtime.py",
         "schemas.py",
         "service.py",
+        "validators.py",
         "yaml_loader.py"
       ],
       "manifest": {
@@ -41716,7 +41740,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "suitability.py"
+        "suitability.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_cde",
@@ -42466,6 +42491,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -48826,7 +48855,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_clash",
@@ -50265,6 +50295,10 @@
               "type": "list[ClashHistoryEntry]"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "meta",
               "type": "dict"
             },
@@ -50375,6 +50409,10 @@
               "name": "requested",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -58568,7 +58606,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_compliance_docs",
@@ -58963,6 +59002,10 @@
               "name": "days_until_expiry",
               "type": "int",
               "description": "Signed integer - negative when already expired, 0 on expiry day, positive when still valid."
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -60581,7 +60624,8 @@
         "seed_text.py",
         "service.py",
         "signing.py",
-        "uer.py"
+        "uer.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_construction_control",
@@ -62479,6 +62523,10 @@
           "docstring": "",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -62723,6 +62771,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -63135,6 +63187,10 @@
           "docstring": "",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -63537,6 +63593,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -63967,6 +64027,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -64798,7 +64862,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_contacts",
@@ -65560,6 +65625,10 @@
             {
               "name": "custom_properties",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -73122,7 +73191,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_coordination_hub",
@@ -73575,6 +73645,10 @@
               "name": "message",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -81357,6 +81431,7 @@
         "schemas.py",
         "service.py",
         "translations/__init__.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -82333,6 +82408,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -84655,7 +84734,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_crm",
@@ -86436,6 +86516,10 @@
             {
               "name": "competitor_names",
               "type": "list[str]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -105373,6 +105457,7 @@
         "sheet_fields.py",
         "sheet_index.py",
         "sheet_ocr.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -106338,6 +106423,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "cde_state",
@@ -108944,7 +109033,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_dwg_takeoff",
@@ -109595,6 +109685,10 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "created_by",
               "type": "str",
               "default": "''"
@@ -110006,6 +110100,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -123733,7 +123831,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_estimate_basis",
@@ -124568,6 +124667,10 @@
               "name": "budget_target",
               "type": "dict | None",
               "description": "Client budget target alongside the calculated estimate."
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict]"
             },
             {
               "name": "generated_at",
@@ -133524,7 +133627,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_file_transmittals",
@@ -133856,6 +133960,10 @@
             {
               "name": "sort_order",
               "type": "int"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -134012,6 +134120,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -174068,7 +174180,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "templates.py"
+        "templates.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_methodology",
@@ -174694,6 +174807,10 @@
           "docstring": "An analytical dimension returned from the API, with its values.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -174803,6 +174920,10 @@
           ],
           "docstring": "A funding source returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -175064,6 +175185,10 @@
               "name": "effective_vat",
               "type": "EffectiveVat | None",
               "default": "None"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -188251,7 +188376,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "transcription.py"
+        "transcription.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_phonelog",
@@ -188585,6 +188711,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -190627,7 +190757,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_plan_room",
@@ -190839,6 +190970,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -197017,7 +197152,8 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "tree_logic.py"
+        "tree_logic.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_portfolio",
@@ -197341,6 +197477,10 @@
               "type": "dict"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict]"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -197496,6 +197636,10 @@
             {
               "name": "lag_days",
               "type": "int"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict]"
             },
             {
               "name": "created_at",
@@ -197697,7 +197841,8 @@
         "tests/__init__.py",
         "tests/test_cost_link.py",
         "tests/test_stage_guard.py",
-        "tests/test_unit_link.py"
+        "tests/test_unit_link.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_prefab",
@@ -198098,6 +198243,10 @@
               "type": "datetime"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "boq_position_id",
               "type": "UUID | None",
               "default": "None"
@@ -198352,7 +198501,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_preliminaries",
@@ -198608,6 +198758,10 @@
               "type": "DecimalMoney"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -198765,7 +198919,8 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "statssa_p0151.py"
+        "statssa_p0151.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_price_index",
@@ -199202,6 +199357,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -199290,6 +199449,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -211589,7 +211752,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_projects",
@@ -213146,6 +213310,10 @@
             {
               "name": "owner_id",
               "type": "UUID"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "metadata",
@@ -229059,7 +229227,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_qms",
@@ -231339,6 +231508,10 @@
           "docstring": "NCR returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -231649,6 +231822,10 @@
           ],
           "docstring": "Punch item returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -232533,6 +232710,10 @@
           ],
           "docstring": "Calibration record returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -238022,7 +238203,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_reconciliation",
@@ -238355,6 +238537,10 @@
             {
               "name": "created_by",
               "type": "str | None"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -238605,7 +238791,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_reporting",
@@ -239151,6 +239338,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -239272,6 +239463,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -239469,6 +239664,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -240328,6 +240524,10 @@
           "docstring": "Requirement item returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -240713,6 +240913,10 @@
           ],
           "docstring": "Requirement set returned from the API (without nested requirements).",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -250712,7 +250916,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_rom_estimate",
@@ -250981,6 +251186,11 @@
               "name": "positions_created",
               "type": "int",
               "description": "Number of provisional concept-rate positions created."
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]",
+              "description": "Non-blocking rule findings of this write."
             }
           ]
         },
@@ -251350,6 +251560,10 @@
               "name": "created_by",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -264296,7 +264510,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_service",
@@ -265680,6 +265895,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -266375,6 +266594,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -268709,7 +268932,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_signing",
@@ -269274,6 +269498,10 @@
             {
               "name": "signatures",
               "type": "list[SignatureResponse]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -273289,7 +273517,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_site_prep",
@@ -273570,6 +273799,10 @@
           "docstring": "A mobilisation plan returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -273730,6 +273963,10 @@
           ],
           "docstring": "A readiness item returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -275992,6 +276229,7 @@
         "permissions.py",
         "repository.py",
         "router.py",
+        "rules.py",
         "schemas.py",
         "service.py",
         "validators.py"
@@ -276382,6 +276620,10 @@
           "docstring": "Visit returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -276533,6 +276775,10 @@
           ],
           "docstring": "Entry returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -286488,6 +286734,10 @@
         "rules.py",
         "schemas.py",
         "service.py",
+        "spec_checks.py",
+        "spec_parser.py",
+        "spec_routes.py",
+        "spec_service.py",
         "tracking.py",
         "validators.py",
         "vector_adapter.py"
@@ -286693,6 +286943,158 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SpecImport",
+          "tablename": "oe_submittals_spec_import",
+          "docstring": "One parse of a specification book (a Document) into proposed submittals.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "parser_version",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "section_count",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "pages_total",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "pages_done",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "error_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SpecProposal",
+          "tablename": "oe_submittals_spec_proposal",
+          "docstring": "A submittal the specification asks for, proposed with a confidence, never created by itself.",
+          "columns": [
+            {
+              "name": "import_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_submittals_spec_import.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "spec_section",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "section_title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "submittal_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_page",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "source_excerpt",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confidence",
+              "annotation": "Mapped[float]",
+              "sql_type": "Float",
+              "nullable": false
+            },
+            {
+              "name": "decision",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "submittal_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -287441,6 +287843,7 @@
       "import_dependencies": [
         "approval_routes",
         "documents",
+        "file_search",
         "users"
       ]
     },
@@ -292769,6 +293172,7 @@
         "__init__.py",
         "carry_over.py",
         "dedup.py",
+        "floorplan.py",
         "manifest.py",
         "manifest_verifier.py",
         "models.py",
@@ -292784,7 +293188,10 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "text_analyze.py"
+        "sheet_type.py",
+        "text_analyze.py",
+        "validators.py",
+        "vector_plan.py"
       ],
       "manifest": {
         "name": "oe_takeoff",
@@ -293864,6 +294271,11 @@
               "name": "notes",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "truncated",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -294452,6 +294864,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_by",
@@ -307523,6 +307939,7 @@
         "service.py",
         "time_factors_service.py",
         "time_saved.py",
+        "validators.py",
         "value_math.py"
       ],
       "manifest": {
@@ -307992,6 +308409,10 @@
             {
               "name": "factors",
               "type": "list[TimeFactorOut]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -313245,6 +313666,7 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "validators.py",
         "waste_math.py"
       ],
       "manifest": {
@@ -313442,6 +313864,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -316299,10 +316725,10 @@
     },
     {
       "name": "inspections",
-      "ts_files": 7,
+      "ts_files": 8,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 7
+      "test_files": 2,
+      "total_files": 8
     },
     {
       "name": "integrations",
@@ -316425,10 +316851,10 @@
     },
     {
       "name": "moc",
-      "ts_files": 6,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "module-builder",
@@ -316957,10 +317383,10 @@
     },
     {
       "name": "submittals",
-      "ts_files": 24,
+      "ts_files": 27,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 24
+      "test_files": 9,
+      "total_files": 27
     },
     {
       "name": "supplier-catalogs",
@@ -316985,10 +317411,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 8
+      "test_files": 2,
+      "total_files": 9
     },
     {
       "name": "tax-rates",
@@ -318862,6 +319288,7 @@
     "submittals": [
       "approval_routes",
       "documents",
+      "file_search",
       "projects",
       "users"
     ],
@@ -318989,14 +319416,14 @@
   "statistics": {
     "backend_modules": 245,
     "modules_with_manifests": 245,
-    "total_models": 908,
-    "total_columns": 10659,
+    "total_models": 910,
+    "total_columns": 10681,
     "total_relationships": 261,
     "total_routes": 5218,
     "total_schemas": 4735,
-    "total_python_files": 3360,
+    "total_python_files": 3403,
     "frontend_features": 238,
-    "frontend_ts_files": 4194,
+    "frontend_ts_files": 4200,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
