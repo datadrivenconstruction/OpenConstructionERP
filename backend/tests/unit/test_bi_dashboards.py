@@ -2423,3 +2423,25 @@ async def test_safety_trir_computes_the_rate_when_exposure_hours_are_recorded(
     assert result.source_record_count == 1
     assert result.value == Decimal("2")  # 1 x 200000 / 100000
     assert Decimal(result.breakdown["hours_worked"]) == Decimal("100000")
+
+
+async def test_equipment_utilization_reads_the_daily_log() -> None:
+    from types import SimpleNamespace
+
+    from app.modules.bi_dashboards import kpis
+
+    days = [
+        SimpleNamespace(worked_hours=Decimal("6"), idle_hours=Decimal("2")),
+        SimpleNamespace(worked_hours=Decimal("3"), idle_hours=Decimal("1")),
+    ]
+    result_proxy = MagicMock()
+    result_proxy.scalars.return_value.all.return_value = days
+    fake = MagicMock()
+
+    async def execute(_stmt: Any) -> Any:
+        return result_proxy
+
+    fake.execute = execute
+    result = await kpis.equipment_utilization_kpi(fake, project_id=uuid.uuid4())
+    assert result.source_record_count == 2
+    assert result.value == Decimal("75")
