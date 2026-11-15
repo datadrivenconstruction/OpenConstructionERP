@@ -64117,7 +64117,7 @@ const resource = {
     "sso.field_slug": "Tên ngắn (trong URL)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Khóa bí mật của ứng dụng",
     "sso.secret_keep": "Để trống để giữ secret đã lưu.",
     "sso.field_idp_entity": "Entity ID của IdP",
     "sso.field_idp_sso_url": "URL đăng nhập của IdP",

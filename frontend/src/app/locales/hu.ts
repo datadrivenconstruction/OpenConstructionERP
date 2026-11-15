@@ -66939,7 +66939,7 @@ const resource = {
     "sso.field_slug": "Rövid név (az URL-ekben)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Kliens titkos kulcs",
     "sso.secret_keep": "Hagyja üresen a mentett secret megtartásához.",
     "sso.field_idp_entity": "Az IdP entity ID-ja",
     "sso.field_idp_sso_url": "Az IdP bejelentkezési URL-je",

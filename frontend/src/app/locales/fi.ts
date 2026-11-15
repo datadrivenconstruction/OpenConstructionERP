@@ -64378,7 +64378,7 @@ const resource = {
     "sso.field_slug": "Lyhyt nimi (URL-osoitteissa)",
     "sso.field_issuer": "Issuer-URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Asiakkaan salainen avain",
     "sso.secret_keep": "Jätä tyhjäksi, jos haluat säilyttää tallennetun secretin.",
     "sso.field_idp_entity": "IdP:n entity ID",
     "sso.field_idp_sso_url": "IdP:n kirjautumis-URL",
