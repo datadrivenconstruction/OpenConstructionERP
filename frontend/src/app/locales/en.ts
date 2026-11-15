@@ -58505,6 +58505,19 @@ const resource = {
     "letter_templates.download": "Download PDF",
     "demo_market.label": "Language and market",
     "demo_market.hint": "Sets the interface language and opens the demo for that country, with its own data and standards.",
+    "sso.title": "Single sign-on",
+    "sso.saved": "Identity provider saved",
+    "sso.deleted": "Identity provider removed",
+    "sso.subtitle": "Let people sign in with the company identity provider. Accounts are created on first sign-in.",
+    "sso.disabled": "Disabled",
+    "sso.sp_metadata": "SP metadata",
+    "sso.edit": "Edit",
+    "sso.confirm_delete": "Remove this identity provider?",
+    "sso.delete": "Remove",
+    "sso.none": "No identity providers yet.",
+    "sso.add_oidc": "Add OpenID Connect",
+    "sso.saml_not_installed": "SAML needs the optional [sso] server extra.",
+    "sso.field_name": "Button label",
   }
 } as { translation: Record<string, string> };
 

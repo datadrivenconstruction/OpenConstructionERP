@@ -378,9 +378,14 @@ analytics = []
 s3 = [
     "aioboto3>=12.0.0,<16",
 ]
+# SAML 2.0 single sign-on. signxml (pure Python over lxml + cryptography) verifies XML
+# signatures; without it the SAML UI is hidden and OIDC keeps working.
+sso = [
+    "signxml>=4.0.0,<6",
+]
 # Everything
 all = [
-    "openconstructionerp[server,vector,semantic,cv,s3,pointcloud,geo,analytics]",
+    "openconstructionerp[server,vector,semantic,cv,s3,pointcloud,geo,analytics,sso]",
 ]
 # Development tools
 dev = [
@@ -411,6 +416,7 @@ dev = [
     # (tests/unit/test_gaeb_export_xsd.py validates exported X83/X84 against the
     # official GAEB schema). Test-only; the runtime XML path uses defusedxml.
     "lxml>=5.0.0",
+    "signxml>=4.0.0,<6",
     # Pinned exactly: the CI "ruff format --check" gate compares against the
     # formatter's output, which can shift between ruff releases. A floating
     # spec let CI pick a newer ruff than contributors ran locally, so formatted
