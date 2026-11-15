@@ -58,6 +58,7 @@ from app.modules.temporary_works.schemas import (
     TemporaryWorksItemCreate,
     TemporaryWorksPermitCreate,
 )
+from app.modules.temporary_works.seed_text import temporary_works_text
 from app.modules.temporary_works.service import TemporaryWorksService
 
 logger = logging.getLogger(__name__)
@@ -536,10 +537,10 @@ def _max_level(demo_id: str) -> int:
     return _MAX_LEVEL_BY_ARCHETYPE.get(head, _DEFAULT_MAX_LEVEL)
 
 
-def _location(rng: random.Random, spec: _ItemSpec, max_level: int) -> str:
+def _location(rng: random.Random, spec: _ItemSpec, max_level: int, locale: str | None = None) -> str:
     """Render a spec's location against this project's blocks, levels and grids."""
-    return spec.location.format(
-        block=rng.choice(_BLOCKS),
+    return temporary_works_text(locale, spec.location).format(
+        block=temporary_works_text(locale, rng.choice(_BLOCKS)),
         level=rng.randint(1, max_level),
         grid=rng.choice(_GRIDS),
     )[:500]
@@ -746,6 +747,9 @@ async def _seed_project(
     if already is not None:
         return empty
 
+    from app.modules.projects.models import Project
+
+    locale = (await session.execute(select(Project.locale).where(Project.id == project_id))).scalars().first()
     rng = _rng_for(project_id)
     today = datetime.now(UTC).date()
     count = _ITEM_COUNTS[ordinal % len(_ITEM_COUNTS)]
@@ -805,8 +809,8 @@ async def _seed_project(
             project_id,
             TemporaryWorksItemCreate(
                 reference=f"TW-{index + 1:03d}",
-                title=spec.title,
-                description=spec.description,
+                title=temporary_works_text(locale, spec.title),
+                description=temporary_works_text(locale, spec.description),
                 tw_type=spec.tw_type,
                 design_check_category=spec.category,
                 designer_name=designer,
@@ -817,9 +821,9 @@ async def _seed_project(
                 required_load_date=load_date,
                 required_strike_date=strike_date,
                 design_due_date=design_due,
-                location=_location(rng, spec, max_level),
+                location=_location(rng, spec, max_level, locale),
                 sort_order=index,
-                notes=_STATUS_NOTES[status],
+                notes=temporary_works_text(locale, _STATUS_NOTES[status]),
             ),
             created_by,
         )
@@ -835,6 +839,7 @@ async def _seed_project(
             parties=parties,
             lapsed=index == lapsed_at,
             next_number=_permit_number,
+            locale=locale,
         ):
             await service.create_permit(project_id, item.id, payload, created_by)
             counts["permits"] += 1
@@ -853,6 +858,7 @@ def _permits_for(
     parties: _Parties,
     lapsed: bool,
     next_number: Callable[[str], str],
+    locale: str | None = None,
 ) -> list[TemporaryWorksPermitCreate]:
     """Build the permits an item at ``status`` would actually have on file.
 
@@ -896,7 +902,7 @@ def _permits_for(
             closed_by=parties.twc_user_id if load_status == _CLOSED else None,
             prereq_design_check_accepted=status != _ON_HOLD,
             prereq_inspection_passed=not is_draft,
-            conditions=_PERMIT_CONDITIONS[_PERMIT_TO_LOAD],
+            conditions=temporary_works_text(locale, _PERMIT_CONDITIONS[_PERMIT_TO_LOAD]),
         ),
     )
 
@@ -913,7 +919,7 @@ def _permits_for(
                 valid_to=(strike_date or today) + timedelta(days=rng.randint(7, 21)),
                 prereq_design_check_accepted=True,
                 prereq_inspection_passed=True,
-                conditions=_PERMIT_CONDITIONS[_PERMIT_TO_STRIKE],
+                conditions=temporary_works_text(locale, _PERMIT_CONDITIONS[_PERMIT_TO_STRIKE]),
             ),
         )
     elif status in (_STRUCK, _REMOVED):
@@ -936,7 +942,7 @@ def _permits_for(
                 closed_by=parties.twc_user_id,
                 prereq_design_check_accepted=True,
                 prereq_inspection_passed=True,
-                conditions=_PERMIT_CONDITIONS[permit_type],
+                conditions=temporary_works_text(locale, _PERMIT_CONDITIONS[permit_type]),
             ),
         )
     return permits

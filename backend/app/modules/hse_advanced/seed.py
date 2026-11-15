@@ -46,7 +46,7 @@ from app.modules.hse_advanced.models import (
     ToolboxTalk,
     ToolboxTopic,
 )
-from app.modules.hse_advanced.seed_text import investigation_notes
+from app.modules.hse_advanced.seed_text import bulk_phrase, bulk_text, investigation_notes, permit_kind
 
 logger = logging.getLogger(__name__)
 
@@ -242,15 +242,18 @@ _JSA_COUNT = 50
 _PERMIT_COUNT = 40
 _PPE_COUNT = 80
 _JSA_TASKS: tuple[str, ...] = ("Cast slab", "Erect scaffold", "Install ductwork", "Pour foundation", "Install glazing")
-_PERMIT_CONDITIONS = "Comply with site SOP and applicable PPE matrix."
 
 
-def _jsa_task_description(idx: int, task: str) -> str:
-    return f"Task {idx + 1}: {task}"
+#: Languages a bulk row can be written in; the cleanup matches a row against every one of them.
+_BULK_LANGUAGES: tuple[str, ...] = ("en", "de", "fr")
 
 
-def _jsa_location(idx: int) -> str:
-    return f"Block {chr(65 + (idx % 6))} - Level {(idx % 5) + 1}"
+def _jsa_task_description(idx: int, task: str, locale: str | None = None) -> str:
+    return bulk_text(locale, "jsa_task", n=idx + 1, task=bulk_phrase(locale, task))
+
+
+def _jsa_location(idx: int, locale: str | None = None) -> str:
+    return bulk_text(locale, "jsa_location", block=chr(65 + (idx % 6)), level=(idx % 5) + 1)
 
 
 def _permit_number(idx: int) -> str:
@@ -261,12 +264,12 @@ def _permit_type(idx: int) -> str:
     return _PERMIT_TYPES[idx % len(_PERMIT_TYPES)]
 
 
-def _permit_description(idx: int) -> str:
-    return f"{_permit_type(idx).replace('_', ' ').title()} permit for routine site activity #{idx + 1}"
+def _permit_description(idx: int, locale: str | None = None) -> str:
+    return bulk_text(locale, "permit_description", kind=permit_kind(locale, _permit_type(idx)), n=idx + 1)
 
 
-def _permit_location(idx: int) -> str:
-    return f"Zone {chr(65 + (idx % 5))}"
+def _permit_location(idx: int, locale: str | None = None) -> str:
+    return bulk_text(locale, "permit_location", zone=chr(65 + (idx % 5)))
 
 
 def _ppe_serial(idx: int) -> str:
@@ -474,6 +477,11 @@ async def seed_hse_advanced_demo(
     now = datetime.now(UTC)
     today = date.today()
     counts: dict[str, int] = {}
+    from app.modules.projects.models import Project
+
+    locales: dict[uuid.UUID, str | None] = dict(
+        (await session.execute(select(Project.id, Project.locale).where(Project.id.in_(project_pool)))).all()
+    )
 
     # ── Toolbox topics (30) ──────────────────────────────────────────────
     topics: list[ToolboxTopic] = []
@@ -501,24 +509,28 @@ async def seed_hse_advanced_demo(
     jsas: list[JobSafetyAnalysis] = []
     for idx in range(_JSA_COUNT):
         project_id = project_pool[idx % len(project_pool)]
+        locale = locales.get(project_id)
         hazard_count = rng.randint(2, 6)
         hazards = [
             {
-                "step": f"Step {h + 1}",
-                "hazard": rng.choice(
-                    [
-                        "Falling object",
-                        "Pinch point",
-                        "Slip hazard",
-                        "Exposed wiring",
-                        "Sharp edge",
-                        "Hot surface",
-                        "Suspended load",
-                    ]
+                "step": bulk_text(locale, "jsa_step", n=h + 1),
+                "hazard": bulk_phrase(
+                    locale,
+                    rng.choice(
+                        [
+                            "Falling object",
+                            "Pinch point",
+                            "Slip hazard",
+                            "Exposed wiring",
+                            "Sharp edge",
+                            "Hot surface",
+                            "Suspended load",
+                        ]
+                    ),
                 ),
                 "severity": rng.randint(1, 5),
                 "likelihood": rng.randint(1, 5),
-                "controls": "Use PPE, sign work area, supervisor sign-off",
+                "controls": bulk_text(locale, "jsa_controls"),
             }
             for h in range(hazard_count)
         ]
@@ -527,8 +539,8 @@ async def seed_hse_advanced_demo(
         jsa = JobSafetyAnalysis(
             id=uuid.uuid4(),
             project_id=project_id,
-            task_description=_jsa_task_description(idx, rng.choice(list(_JSA_TASKS))),
-            location=_jsa_location(idx),
+            task_description=_jsa_task_description(idx, rng.choice(list(_JSA_TASKS)), locale),
+            location=_jsa_location(idx, locale),
             work_date=(today + timedelta(days=(idx % 30) - 5)).isoformat(),
             prepared_by=None,
             status=status_choice,
@@ -548,6 +560,7 @@ async def seed_hse_advanced_demo(
     permits: list[PermitToWork] = []
     for idx in range(_PERMIT_COUNT):
         project_id = project_pool[idx % len(project_pool)]
+        locale = locales.get(project_id)
         permit_type = _permit_type(idx)
         status_choice = _PERMIT_STATUSES[idx % len(_PERMIT_STATUSES)]
         # Spread windows from -10d to +20d around today
@@ -559,19 +572,17 @@ async def seed_hse_advanced_demo(
             project_id=project_id,
             permit_number=_permit_number(idx),
             permit_type=permit_type,
-            description=_permit_description(idx),
-            location=_permit_location(idx),
+            description=_permit_description(idx, locale),
+            location=_permit_location(idx, locale),
             work_start=work_start,
             work_end=work_end,
             applicant_id=None,
             supervisor_id=None,
             jsa_id=jsas[idx % len(jsas)].id if jsas else None,
             status=status_choice,
-            conditions=_PERMIT_CONDITIONS,
+            conditions=bulk_text(locale, "permit_conditions"),
             closure_checklist_passed=(status_choice == "closed"),
-            closure_notes=(
-                "Area cleared, debris removed, post-work inspection signed." if status_choice == "closed" else ""
-            ),
+            closure_notes=bulk_text(locale, "permit_closure") if status_choice == "closed" else "",
             created_by=None,
         )
         if status_choice in {"approved", "active", "closed"}:
@@ -597,7 +608,7 @@ async def seed_hse_advanced_demo(
             conducted_by=None,
             language=topic.language,
             attendance_count=10,
-            notes=f"Talk #{idx + 1}: workforce engaged; questions noted.",
+            notes=bulk_text(locales.get(project_id), "talk_notes", n=idx + 1),
             library_topic_ref=topic.id,
             created_by=None,
         )
@@ -664,7 +675,7 @@ async def seed_hse_advanced_demo(
             score_total=None,
             max_score=None,
             status=status_choice,
-            summary=f"Routine audit #{idx + 1}; six categories inspected.",
+            summary=bulk_text(locales.get(project_id), "audit_summary", n=idx + 1),
             checklist_template_ref=None,
             created_by=None,
         )
@@ -675,21 +686,25 @@ async def seed_hse_advanced_demo(
     # ── Audit findings (300) - 6 per audit × 50 audits ───────────────────
     findings: list[SafetyAuditFinding] = []
     for audit in audits:
+        audit_locale = locales.get(audit.project_id)
         for j in range(6):
             finding = SafetyAuditFinding(
                 id=uuid.uuid4(),
                 audit_id=audit.id,
-                item_description=rng.choice(
-                    [
-                        "PPE worn correctly",
-                        "Permit on site",
-                        "Walkways unobstructed",
-                        "Fire extinguishers tagged",
-                        "Cables not damaged",
-                        "MSDS available",
-                        "Edge protection intact",
-                        "Tools inspected",
-                    ]
+                item_description=bulk_phrase(
+                    audit_locale,
+                    rng.choice(
+                        [
+                            "PPE worn correctly",
+                            "Permit on site",
+                            "Walkways unobstructed",
+                            "Fire extinguishers tagged",
+                            "Cables not damaged",
+                            "MSDS available",
+                            "Edge protection intact",
+                            "Tools inspected",
+                        ]
+                    ),
                 ),
                 category=_FINDING_CATEGORIES[j % len(_FINDING_CATEGORIES)],
                 severity=rng.choice(_FINDING_SEVERITIES),
@@ -706,6 +721,7 @@ async def seed_hse_advanced_demo(
     capas: list[CorrectiveAction] = []
     for idx in range(80):
         project_id = project_pool[idx % len(project_pool)]
+        locale = locales.get(project_id)
         # Distribution: 25% overdue (target in past, status overdue),
         # 50% open / in_progress, 25% closed (completed or cancelled).
         bucket = idx % 4
@@ -724,13 +740,13 @@ async def seed_hse_advanced_demo(
             project_id=project_id,
             source_type=_CAPA_SOURCE_TYPES[idx % len(_CAPA_SOURCE_TYPES)],
             source_ref=audits[idx % len(audits)].id if audits else None,
-            title=f"CAPA #{idx + 1}: address finding from audit",
-            description=("Verify control measures, retrain crew, and report back to safety officer."),
+            title=bulk_text(locale, "capa_title", n=idx + 1),
+            description=bulk_text(locale, "capa_description"),
             owner_user_id=None,
             target_date=target_date,
             status=status_choice,
             completed_at=(now - timedelta(days=rng.randint(1, 60))) if status_choice == "completed" else None,
-            verification_notes="Verified on site walk-down." if status_choice == "completed" else "",
+            verification_notes=bulk_text(locale, "capa_verification") if status_choice == "completed" else "",
             root_cause_category=rng.choice(_ROOT_CAUSES + (None,)),
             created_by=None,
         )
@@ -796,8 +812,12 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
         return []
 
     jsa_specs = {
-        (_jsa_task_description(idx, task), _jsa_location(idx)) for idx in range(_JSA_COUNT) for task in _JSA_TASKS
+        (_jsa_task_description(idx, task, lang), _jsa_location(idx, lang))
+        for lang in _BULK_LANGUAGES
+        for idx in range(_JSA_COUNT)
+        for task in _JSA_TASKS
     }
+    permit_conditions = {bulk_text(lang, "permit_conditions") for lang in _BULK_LANGUAGES}
     jsa_rows = (
         await session.execute(
             select(
@@ -816,7 +836,8 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
     ]
 
     permit_specs = {
-        (_permit_number(idx), _permit_type(idx), _permit_description(idx), _permit_location(idx))
+        (_permit_number(idx), _permit_type(idx), _permit_description(idx, lang), _permit_location(idx, lang))
+        for lang in _BULK_LANGUAGES
         for idx in range(_PERMIT_COUNT)
     }
     permit_rows = (
@@ -836,7 +857,7 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
         r.id
         for r in permit_rows
         if (r.permit_number, r.permit_type, r.description, r.location) in permit_specs
-        and r.conditions == _PERMIT_CONDITIONS
+        and r.conditions in permit_conditions
         and r.created_by is None
     ]
     return [(PermitToWork, permits, "hse_permits_to_work"), (JobSafetyAnalysis, jsas, "hse_job_safety_analyses")]

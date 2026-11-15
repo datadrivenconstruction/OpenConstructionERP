@@ -49,6 +49,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.closeout import checklist_templates as templates
 from app.modules.closeout.models import CloseoutBinding, CloseoutPackage, CloseoutSlot
+from app.modules.closeout.seed_text import closeout_text
 from app.modules.closeout.service import CloseoutService
 
 logger = logging.getLogger(__name__)
@@ -299,6 +300,7 @@ async def _seed_project(
     metadata: dict | None,
     owner_id: uuid.UUID,
     ordinal: int,
+    locale: str | None = None,
 ) -> dict[str, int]:
     """Seed one project's closeout package. Returns per-entity counts."""
     empty = {"projects": 0, "packages": 0, "slots": 0, "bindings": 0, "verified": 0}
@@ -314,7 +316,7 @@ async def _seed_project(
 
     package = CloseoutPackage(
         project_id=project_id,
-        title="Handover & Closeout Package",
+        title=closeout_text(locale, "Handover & Closeout Package"),
         project_type=template_key,
         checklist_template=template_key,
         status="draft",
@@ -330,7 +332,7 @@ async def _seed_project(
         slot = CloseoutSlot(
             package_id=package.id,
             slot_key=slot_def["slot_key"],
-            title=slot_def["title"],
+            title=closeout_text(locale, slot_def["title"]),
             category=slot_def.get("category", "other"),
             discipline=slot_def.get("discipline"),
             is_required=bool(slot_def.get("is_required", True)),
@@ -351,7 +353,7 @@ async def _seed_project(
             CloseoutSlot(
                 package_id=package.id,
                 slot_key=slot_key,
-                title=title,
+                title=closeout_text(locale, title),
                 category=category,
                 discipline=discipline,
                 is_required=is_required,
@@ -447,7 +449,9 @@ async def seed_closeout_demo(
 
     rows = (
         await session.execute(
-            select(Project.id, Project.owner_id, Project.project_type, Project.metadata_).where(Project.id.in_(ids))
+            select(Project.id, Project.owner_id, Project.project_type, Project.metadata_, Project.locale).where(
+                Project.id.in_(ids)
+            )
         )
     ).all()
     # ``enrich_all`` hands this seeder every project in the database, which on a
@@ -460,7 +464,7 @@ async def seed_closeout_demo(
     # the one project users actually land on.
     demo = {
         pid: (owner, ptype, meta)
-        for pid, owner, ptype, meta in rows
+        for pid, owner, ptype, meta, _locale in rows
         if isinstance(meta, dict) and str(meta.get("demo_id") or "").strip()
     }
     # Numbered within the demo estate, not within the caller's list. The list is
@@ -469,6 +473,7 @@ async def seed_closeout_demo(
     # different position - and therefore a different checklist - than on a fresh
     # one.
     demo_ids = [pid for pid in ids if pid in demo]
+    locales = {row[0]: row[4] for row in rows}
 
     for ordinal, project_id in enumerate(demo_ids):
         owner_id, project_type, metadata = demo[project_id]
@@ -479,7 +484,9 @@ async def seed_closeout_demo(
             # every later project would then fail on a poisoned session rather
             # than on anything wrong with itself.
             async with session.begin_nested():
-                counts = await _seed_project(session, project_id, project_type, metadata, owner_id, ordinal)
+                counts = await _seed_project(
+                    session, project_id, project_type, metadata, owner_id, ordinal, locales.get(project_id)
+                )
         except Exception:
             logger.warning("Closeout demo seed skipped for project=%s (non-fatal)", project_id, exc_info=True)
             continue
