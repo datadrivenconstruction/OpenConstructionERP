@@ -11,9 +11,13 @@ from typing import Any
 from fastapi import HTTPException
 
 from app.config import Settings
+from app.core.self_upgrade import DESKTOP_NO_EXTRA, repair_hint
 from app.modules.users.oidc import oidc_error
 
-INSTALL_HINT = "SAML sign-in needs the optional python3-saml package: pip install 'openconstructionerp[saml]'"
+INSTALL_HINT = repair_hint(
+    "SAML sign-in needs the optional python3-saml package: pip install 'openconstructionerp[saml]'",
+    DESKTOP_NO_EXTRA,
+)
 
 
 def require_saml_library() -> Any:
