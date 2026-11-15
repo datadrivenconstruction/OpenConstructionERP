@@ -26,7 +26,7 @@
 //   aria-labelledby={`<tabId>`}   // e.g. tabIds.tabId(activeId)
 // — use the `tabIds` helper exported here to keep id naming consistent.
 
-import { useCallback, useId, type KeyboardEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
 
 export interface TabBarTab<TId extends string = string> {
@@ -119,7 +119,8 @@ function tabButtonClasses({
   fullWidth: boolean;
 }): string {
   const base = clsx(
-    'inline-flex items-center justify-center gap-1.5 font-medium transition-colors',
+    'inline-flex items-center justify-center gap-1.5 whitespace-nowrap font-medium transition-colors',
+    !fullWidth && 'shrink-0',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
     SIZE_CLASSES[size],
     fullWidth && 'flex-1',
@@ -172,6 +173,30 @@ export function TabBar<TId extends string = string>({
 
   const enabledTabs = tabs.filter((t) => !t.disabled);
 
+  // A strip wider than its box scrolls; fade the cut edge so a half-visible
+  // tab reads as "more this way" instead of as clipped text.
+  const listRef = useRef<HTMLDivElement>(null);
+  const [fade, setFade] = useState({ start: false, end: false });
+  const measure = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const pos = Math.abs(el.scrollLeft);
+    const next = { start: max > 2 && pos > 2, end: max > 2 && pos < max - 2 };
+    setFade((f) => (f.start === next.start && f.end === next.end ? f : next));
+  }, []);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return undefined;
+    measure();
+    const active = el.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (active && el.scrollWidth > el.clientWidth) active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [measure, activeId, tabs.length]);
+
   const focusTab = useCallback(
     (id: string) => {
       const el = document.getElementById(ids.tabId(id));
@@ -222,10 +247,20 @@ export function TabBar<TId extends string = string>({
 
   return (
     <div
+      ref={listRef}
       role="tablist"
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
-      className={clsx(VARIANT_CLASSES[variant].container, className)}
+      onScroll={measure}
+      data-fade-start={fade.start || undefined}
+      data-fade-end={fade.end || undefined}
+      className={clsx(
+        VARIANT_CLASSES[variant].container,
+        fade.end && !fade.start && '[mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)]',
+        fade.start && !fade.end && '[mask-image:linear-gradient(to_right,transparent,#000_28px)]',
+        fade.start && fade.end && '[mask-image:linear-gradient(to_right,transparent,#000_28px,#000_calc(100%-28px),transparent)]',
+        className,
+      )}
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeId;
