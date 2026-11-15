@@ -3144,7 +3144,11 @@ function RequirementsTabContent({
                   </td>
                   <td>
                     {t(`requirements.cat_${req.category}`, {
-                      defaultValue: req.category.replace(/_/g, ' '),
+                      defaultValue: req.category.startsWith('quality.')
+                        ? t(`quality_concept.catalogue.requirement_category.${req.category.slice(8)}`, {
+                            defaultValue: req.category.slice(8).replace(/[_.]/g, ' '),
+                          })
+                        : req.category.replace(/_/g, ' '),
                     })}
                   </td>
                   <td>

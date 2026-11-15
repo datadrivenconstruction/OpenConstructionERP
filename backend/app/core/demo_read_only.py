@@ -202,6 +202,13 @@ _READ_ONLY_ENDPOINTS = (
     "app.modules.costs.router:suggest_costs_for_element",
     "app.modules.costs.router:suggest_costs_for_element_by_id",
     "app.modules.costs.router:preview_cost_file",
+    "app.modules.costs.router:get_cost_item_certainty_batch",
+    "app.modules.costs.router:get_cost_item_usage_counts",
+    "app.modules.costs.router:cost_benchmark_portfolio",
+    "app.modules.formwork.router:compare_systems",
+    "app.modules.formwork.router:validate_project",
+    "app.modules.labor_rates.router:compute_rate",
+    "app.modules.project_intelligence.router:get_recommendations",
     # Logs the report and writes no row; a browser reports errors before sign-in too.
     "app.modules.client_errors.router:submit_client_error",
 )
@@ -242,6 +249,17 @@ ALLOWED_ENDPOINTS: dict[str, WriteScope] = {
     **dict.fromkeys(_READ_ONLY_ENDPOINTS, WriteScope.NONE),
     **dict.fromkeys(_READ_ONLY_SOCKET_ENDPOINTS, WriteScope.NONE),
 }
+
+
+#: Read permissions the demo visitor holds although the role they sign in with ranks lower.
+#: Only consulted on a read-only demo, so a self-hosted install never takes this branch.
+DEMO_READ_GRANTS: frozenset[str] = frozenset(
+    {
+        "accounting_sync.read",
+        "portal.admin.users.read",
+        "portal.admin.audit.read",
+    }
+)
 
 
 class DemoReadOnlyError(Exception):

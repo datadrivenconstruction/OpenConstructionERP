@@ -32,6 +32,7 @@ from typing import Any
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo_read_only import DemoReadOnlyError
 from app.modules.payment_clock.clock import (
     ClockSchedule,
     compute_schedule,
@@ -131,6 +132,9 @@ async def ensure_regimes(session: AsyncSession, *, refresh: bool = False) -> dic
     except IntegrityError:
         logger.info("Payment regimes were seeded by a concurrent request; keeping its rows")
         return {"created": 0, "updated": 0, "unchanged": len(await _repo_regime_codes(session))}
+    except DemoReadOnlyError:
+        # A read-only demo cannot seed on the read path; the installer seeds the catalogue.
+        return {"created": 0, "updated": 0, "unchanged": len(present)}
 
 
 # ── The schedule ─────────────────────────────────────────────────────────────

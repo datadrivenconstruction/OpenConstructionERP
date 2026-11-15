@@ -677,3 +677,96 @@ async def install_cost_control_demo(
         await session.flush()
         previous_id = snap.id
     return pid
+
+
+async def link_showcase_cost_control(session: AsyncSession, project_id: uuid.UUID) -> int:
+    """Give a showcase project's budget and commitments a cost line to sit on.
+
+    The showcase installers write budget lines per BOQ section and subcontracts
+    as headers, so the cost control report found no cost line: planned money read
+    zero and every commitment landed in the "not on any cost line" row. This
+    makes one cost line per budget line that has none, then binds each
+    subcontract (as a one-line schedule) and each purchase order item to a cost
+    line in turn. Idempotent; flushes but does not commit.
+
+    Returns:
+        The number of cost lines created.
+    """
+    from app.modules.contracts.models import Contract, ContractLine
+    from app.modules.costmodel.models import BudgetLine, CostLine
+    from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+
+    budget_lines = (
+        (await session.execute(select(BudgetLine).where(BudgetLine.project_id == project_id).order_by(BudgetLine.id)))
+        .scalars()
+        .all()
+    )
+    if not budget_lines:
+        return 0
+    created = 0
+    for number, bl in enumerate(budget_lines, start=1):
+        if bl.cost_line_id is not None:
+            continue
+        line = CostLine(
+            project_id=project_id,
+            code=f"CL-{number:02d}",
+            description=(bl.category or bl.description or "")[:200],
+            source="manual",
+            estimate_amount=str(bl.planned_amount or "0"),
+            currency=bl.currency or "",
+            metadata_={"demo_link": True},
+        )
+        session.add(line)
+        await session.flush()
+        bl.cost_line_id = line.id
+        created += 1
+    line_ids = [bl.cost_line_id for bl in budget_lines if bl.cost_line_id is not None]
+    if not line_ids:
+        return created
+
+    contracts = (
+        (
+            await session.execute(
+                select(Contract)
+                .where(Contract.project_id == project_id, Contract.counterparty_type == "subcontractor")
+                .order_by(Contract.code)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for index, contract in enumerate(contracts):
+        has_lines = (
+            await session.execute(select(ContractLine.id).where(ContractLine.contract_id == contract.id).limit(1))
+        ).first()
+        if has_lines is not None or not contract.total_value:
+            continue
+        session.add(
+            ContractLine(
+                contract_id=contract.id,
+                code="01",
+                description=contract.title,
+                quantity=D("1"),
+                unit_rate=contract.total_value,
+                total_value=contract.total_value,
+                original_value=contract.total_value,
+                origin="original",
+                cost_line_id=line_ids[index % len(line_ids)],
+            )
+        )
+    items = (
+        (
+            await session.execute(
+                select(PurchaseOrderItem)
+                .join(PurchaseOrder, PurchaseOrder.id == PurchaseOrderItem.po_id)
+                .where(PurchaseOrder.project_id == project_id, PurchaseOrderItem.cost_line_id.is_(None))
+                .order_by(PurchaseOrderItem.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for index, item in enumerate(items):
+        item.cost_line_id = line_ids[(index + 1) % len(line_ids)]
+    await session.flush()
+    return created
