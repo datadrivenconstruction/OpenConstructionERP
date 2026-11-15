@@ -770,3 +770,42 @@ async def link_showcase_cost_control(session: AsyncSession, project_id: uuid.UUI
         item.cost_line_id = line_ids[(index + 1) % len(line_ids)]
     await session.flush()
     return created
+
+
+async def rehome_showcase_cost_lines(session: AsyncSession, project_ids: list[uuid.UUID]) -> dict[str, int]:
+    """Move demo-linked budget, contract and order bindings onto the cost model's coded cost lines.
+
+    ``link_showcase_cost_control`` runs at install and its cost lines carry no control account, so the cost
+    frame reads their commitments as "not under any cost group". Once the cost model seeder has written
+    coded cost lines for the project, the bindings move onto them and the placeholder lines are dropped.
+    Idempotent; a project without coded cost lines is left alone.
+    """
+    from sqlalchemy import delete, update
+
+    from app.modules.contracts.models import ContractLine
+    from app.modules.costmodel.models import BudgetLine, CostLine
+    from app.modules.procurement.models import PurchaseOrderItem
+
+    moved = 0
+    for pid in project_ids:
+        placeholders = (
+            (await session.execute(select(CostLine).where(CostLine.project_id == pid).order_by(CostLine.code)))
+            .scalars()
+            .all()
+        )
+        demo = [
+            line for line in placeholders if line.control_account_id is None and (line.metadata_ or {}).get("demo_link")
+        ]
+        coded = [line for line in placeholders if line.control_account_id is not None]
+        if not demo or not coded:
+            continue
+        for index, old in enumerate(demo):
+            new_id = coded[index % len(coded)].id
+            for model in (BudgetLine, ContractLine, PurchaseOrderItem):
+                result = await session.execute(
+                    update(model).where(model.cost_line_id == old.id).values(cost_line_id=new_id)
+                )
+                moved += result.rowcount or 0
+        await session.execute(delete(CostLine).where(CostLine.id.in_([line.id for line in demo])))
+    await session.flush()
+    return {"rehomed_bindings": moved} if moved else {}
