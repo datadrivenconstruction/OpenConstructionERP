@@ -68,10 +68,17 @@ async def test_meta_payload_reports_thresholds_and_caps(monkeypatch) -> None:
 def _proposal(*, conf: float, verdict: str = "ok", mtype: str = "area") -> Any:
     return SimpleNamespace(
         id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
         type=mtype,
         confidence=conf,
         review_status="proposed",
         metadata_={"verdict": verdict},
+        measurement_value=12.0,
+        measurement_unit="m2",
+        volume=None,
+        points=[{"x": 0.0, "y": 0.0}, {"x": 400.0, "y": 0.0}, {"x": 400.0, "y": 300.0}, {"x": 0.0, "y": 300.0}],
+        scale_pixels_per_unit=100.0,
+        linked_boq_position_id=None,
     )
 
 
