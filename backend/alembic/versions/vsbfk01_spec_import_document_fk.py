@@ -15,6 +15,7 @@ Create Date: 2026-11-15
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -24,6 +25,8 @@ revision: str = "vsbfk01_spec_import_document_fk"
 down_revision: str | Sequence[str] | None = "vsod01_budget_ledger_segregation"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
+
+log = logging.getLogger("alembic.runtime.migration")
 
 _T = "oe_submittals_spec_import"
 _PROPOSAL = "oe_submittals_spec_proposal"
@@ -42,9 +45,14 @@ def upgrade() -> None:
     if _T not in tables or _DOC not in tables or _has_fk(insp):
         return
     orphans = f"SELECT id FROM {_T} WHERE document_id NOT IN (SELECT id FROM {_DOC})"
+    proposals = 0
     if _PROPOSAL in tables:
-        op.execute(sa.text(f"DELETE FROM {_PROPOSAL} WHERE import_id IN ({orphans})"))
-    op.execute(sa.text(f"DELETE FROM {_T} WHERE id IN ({orphans})"))
+        proposals = bind.execute(sa.text(f"DELETE FROM {_PROPOSAL} WHERE import_id IN ({orphans})")).rowcount or 0
+    imports = bind.execute(sa.text(f"DELETE FROM {_T} WHERE id IN ({orphans})")).rowcount or 0
+    if imports or proposals:
+        log.warning(
+            "vsbfk01: deleted %d spec imports and %d proposals whose document no longer exists", imports, proposals
+        )
     with op.batch_alter_table(_T) as batch:
         batch.create_foreign_key(_FK, _DOC, ["document_id"], ["id"], ondelete="CASCADE")
 
