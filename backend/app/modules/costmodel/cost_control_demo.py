@@ -679,6 +679,17 @@ async def install_cost_control_demo(
     return pid
 
 
+async def _has_economics_story(session: AsyncSession, project_id: uuid.UUID) -> bool:
+    """A pack demo with its own economics story builds its coded cost spine there; placeholders would hide it."""
+    from app.core.demo_marker import demo_id_of
+    from app.modules.project_governance.public import demo_module_story
+    from app.modules.projects.models import Project
+
+    meta = (await session.execute(select(Project.metadata_).where(Project.id == project_id))).scalar_one_or_none()
+    demo_id = demo_id_of(meta or {})
+    return bool(demo_id) and bool(demo_module_story(demo_id, "economics"))
+
+
 async def link_showcase_cost_control(session: AsyncSession, project_id: uuid.UUID) -> int:
     """Give a showcase project's budget and commitments a cost line to sit on.
 
@@ -701,7 +712,7 @@ async def link_showcase_cost_control(session: AsyncSession, project_id: uuid.UUI
         .scalars()
         .all()
     )
-    if not budget_lines:
+    if not budget_lines or await _has_economics_story(session, project_id):
         return 0
     created = 0
     for number, bl in enumerate(budget_lines, start=1):
