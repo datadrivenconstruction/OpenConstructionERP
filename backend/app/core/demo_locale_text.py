@@ -18,8 +18,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.demo_locale_text_zh_ar import AUTHORITY_ZH_AR, ROWS_ZH_AR
+
 #: Languages that have a table; any other project language reads the English default.
-LOCALISED_LANGUAGES: tuple[str, ...] = ("de", "fr")
+LOCALISED_LANGUAGES: tuple[str, ...] = ("de", "fr", "zh", "ar")
 
 # key: (English, German, French)
 _ROWS: dict[str, tuple[str, str, str]] = {
@@ -865,6 +867,8 @@ GENERATED_TEXT: dict[str, dict[str, str]] = {
     "en": {key: row[0] for key, row in _ROWS.items()},
     "de": {key: row[1] for key, row in _ROWS.items()},
     "fr": {key: row[2] for key, row in _ROWS.items()},
+    "zh": {key: row[0] for key, row in ROWS_ZH_AR.items()},
+    "ar": {key: row[1] for key, row in ROWS_ZH_AR.items()},
 }
 
 #: The authority a start of works is notified to, by language and country code. The German forms carry no
@@ -872,6 +876,7 @@ GENERATED_TEXT: dict[str, dict[str, str]] = {
 AUTHORITY: dict[str, dict[str, str]] = {
     "de": {"DE": "Bauaufsichtsamt", "AT": "Baubehörde", "CH": "Baubewilligungsbehörde"},
     "fr": {"FR": "la mairie", "CH": "l'autorité cantonale des constructions"},
+    **AUTHORITY_ZH_AR,
 }
 
 #: English sentences carried by hand-written demo rows, by target language.
