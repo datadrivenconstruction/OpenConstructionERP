@@ -59,30 +59,18 @@ ALLOWED_BARE_NAMES = frozenset({"LICENSE", "README", "NOTICE", "py.typed"})
 # ids of frontend/src/app/layout/navCatalog.ts by a test.
 KNOWN_NAV_GROUPS = frozenset(
     {
-        "grp_overview", "grp_estimating", "grp_cost_data", "grp_procurement", "grp_commercial",
-        "grp_scheduling", "grp_site", "grp_quality", "grp_finance", "grp_documents", "grp_coordination",
-        "grp_real_estate", "grp_automation_ai",
+        "grp_overview", "grp_takeoff", "grp_cost_data", "grp_estimating", "grp_drawings", "grp_reality",
+        "grp_coordination", "grp_scheduling", "grp_cost_control", "grp_commercial", "grp_procurement",
+        "grp_estimate_detail", "grp_change", "grp_records", "grp_field", "grp_site", "grp_resources",
+        "grp_quality", "grp_handover", "grp_safety", "grp_esg", "grp_communication", "grp_documents",
+        "grp_real_estate", "grp_finance", "grp_controls_bi", "grp_rate_buildup", "grp_estimating_ai",
+        "grp_automation_ai",
     }
 )  # fmt: skip
 # Group ids folded into another group; mirrors NAV_GROUP_ALIASES in navCatalog.ts so manifests
-# written against the earlier sidebar still validate and land in the group that holds their rows now.
+# written against an earlier sidebar still validate and land in the group that holds their rows now.
 NAV_GROUP_ALIASES = {
-    "grp_takeoff": "grp_estimating",
-    "grp_estimate_detail": "grp_estimating",
-    "grp_estimating_ai": "grp_estimating",
-    "grp_rate_buildup": "grp_cost_data",
-    "grp_change": "grp_commercial",
-    "grp_resources": "grp_scheduling",
-    "grp_field": "grp_site",
-    "grp_safety": "grp_quality",
-    "grp_handover": "grp_quality",
-    "grp_cost_control": "grp_finance",
-    "grp_drawings": "grp_documents",
-    "grp_communication": "grp_documents",
-    "grp_reality": "grp_coordination",
-    "grp_controls_bi": "grp_coordination",
-    "grp_esg": "grp_coordination",
-    "grp_records": "grp_automation_ai",
+    "grp_assistant": "grp_automation_ai",
 }
 # Mirrored by RUNTIME_MODULE_ICONS in the frontend sidebar.
 ALLOWED_ICONS = frozenset(

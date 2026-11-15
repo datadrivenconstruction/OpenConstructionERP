@@ -9115,7 +9115,7 @@ class BOQService:
 
         if data.area_m2 is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="area_m2 is required for a built-in template",
             )
         boq_name = data.boq_name or template["name"]
