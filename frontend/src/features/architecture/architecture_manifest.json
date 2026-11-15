@@ -52342,6 +52342,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_text.py",
         "service.py",
         "validators.py"
       ],
@@ -60578,6 +60579,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_phrases.py",
         "seed_text.py",
         "service.py",
         "signing.py",
@@ -81304,6 +81306,7 @@
         "payment_release",
         "procurement",
         "progress",
+        "project_governance",
         "projects",
         "resources",
         "rfq_bidding",
@@ -103448,6 +103451,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "service.py",
         "validators.py"
       ],
@@ -104880,6 +104884,7 @@
         "equipment",
         "field_time",
         "notifications",
+        "projects",
         "resources"
       ]
     },
@@ -153539,6 +153544,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_text.py",
         "service.py",
         "validators.py"
       ],
@@ -229059,6 +229065,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_text.py",
         "service.py"
       ],
       "manifest": {
@@ -235677,6 +235684,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "service.py",
         "units.py",
         "validators.py"
@@ -247469,6 +247477,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "service.py",
         "validators.py"
       ],
@@ -249459,7 +249468,9 @@
         }
       ],
       "import_dependencies": [
-        "bid_management"
+        "bid_management",
+        "contacts",
+        "projects"
       ]
     },
     {
@@ -257516,6 +257527,7 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "takt_seed.py",
         "validators.py"
       ],
       "manifest": {
@@ -273289,6 +273301,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_text.py",
         "service.py"
       ],
       "manifest": {
@@ -299744,6 +299757,7 @@
         "router.py",
         "schemas.py",
         "seed.py",
+        "seed_text.py",
         "service.py",
         "validators.py"
       ],
@@ -315612,6 +315626,13 @@
       "total_files": 10
     },
     {
+      "name": "boot",
+      "ts_files": 2,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 2
+    },
+    {
       "name": "boq",
       "ts_files": 274,
       "css_files": 0,
@@ -315767,10 +315788,10 @@
     },
     {
       "name": "contacts",
-      "ts_files": 9,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 9
+      "test_files": 4,
+      "total_files": 10
     },
     {
       "name": "contracts",
@@ -317076,10 +317097,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 48,
+      "ts_files": 49,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 48
+      "test_files": 14,
+      "total_files": 49
     },
     {
       "name": "voice",
@@ -317616,6 +317637,7 @@
       "payment_release",
       "procurement",
       "progress",
+      "project_governance",
       "projects",
       "resources",
       "rfq_bidding",
@@ -318994,9 +319016,9 @@
     "total_relationships": 261,
     "total_routes": 5218,
     "total_schemas": 4735,
-    "total_python_files": 3360,
-    "frontend_features": 238,
-    "frontend_ts_files": 4194,
+    "total_python_files": 3370,
+    "frontend_features": 239,
+    "frontend_ts_files": 4198,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
@@ -319024,6 +319046,7 @@
     "bid-portal": "portal",
     "bim": "bim_hub",
     "bim_requirements": "bim_requirements",
+    "boot": null,
     "boq": "boq",
     "buyer-portal": "portal",
     "cad-explorer": "cad",

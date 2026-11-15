@@ -201,6 +201,8 @@ async def list_contacts(
     _sort_aliases = {"name": "company_name", "email": "primary_email"}
     resolved_sort = _sort_aliases.get(sort_by, sort_by) if sort_by else None
 
+    if project_id is not None:
+        await verify_project_access(project_id, str(user_id), session)
     owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     if cursor is not None:
         after = _decode_cursor(cursor)
@@ -307,6 +309,8 @@ async def contact_stats(
     Stats are scoped to the caller's own contacts; admins see global
     aggregates.
     """
+    if project_id is not None:
+        await verify_project_access(project_id, str(user_id), session)
     owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     raw = await service.get_stats(owner_id=owner_filter, project_id=str(project_id) if project_id else None)
     return ContactStatsResponse(
