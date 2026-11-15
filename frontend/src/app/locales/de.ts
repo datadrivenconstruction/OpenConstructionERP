@@ -17245,6 +17245,7 @@ const resource = {
     "share.page.loading": "Link wird geladen…",
     "share.page.ready_title": "Bereit zum Herunterladen",
     "share.page.ready_body": "Klicken Sie auf die Schaltfläche unten, um die Datei herunterzuladen.",
+    "share.page.protected_file": "Geschützte Datei",
     "files.bulk.delete_all_failed": "Keine der {{count}} ausgewählten Datei(en) konnte gelöscht werden.",
     "files.bulk.delete_partial": "{{deleted}} von {{total}} gelöscht",
     "files.bulk.delete_partial_detail": "{{failed}} Datei(en) konnte(n) nicht gelöscht werden.",

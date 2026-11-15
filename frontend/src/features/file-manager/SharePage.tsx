@@ -206,15 +206,19 @@ export function SharePage() {
                 />
                 <div className="min-w-0">
                   <p className="text-2xs uppercase tracking-wide text-content-tertiary">
-                    {t('share.page.filename_label', { defaultValue: 'File' })}
+                    {state.info.filename
+                      ? t('share.page.filename_label', { defaultValue: 'File' })
+                      : t('share.page.protected_file', { defaultValue: 'Protected file' })}
                   </p>
-                  <p
-                    className="text-sm font-medium text-content-primary truncate"
-                    title={state.info.filename}
-                    data-testid="share-filename"
-                  >
-                    {state.info.filename}
-                  </p>
+                  {state.info.filename && (
+                    <p
+                      className="text-sm font-medium text-content-primary truncate"
+                      title={state.info.filename}
+                      data-testid="share-filename"
+                    >
+                      {state.info.filename}
+                    </p>
+                  )}
                 </div>
               </div>
 

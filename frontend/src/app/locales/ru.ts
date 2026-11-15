@@ -17794,6 +17794,7 @@ const resource = {
     "share.page.loading": "Загрузка ссылки…",
     "share.page.ready_title": "Готово к скачиванию",
     "share.page.ready_body": "Нажмите кнопку ниже для скачивания файла.",
+    "share.page.protected_file": "Защищённый файл",
     "files.bulk.delete_all_failed": "Ни один из {{count}} выбранных файлов не удалось удалить.",
     "files.bulk.delete_partial": "{{deleted}} из {{total}} удалено",
     "files.bulk.delete_partial_detail": "{{failed}} файл(ов) удалить не удалось.",

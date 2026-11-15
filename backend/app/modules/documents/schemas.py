@@ -662,7 +662,7 @@ class ShareLinkPublicInfo(BaseModel):
     nothing about the owner or usage history leaks to recipients.
     """
 
-    filename: str
+    filename: str | None = None
     requires_password: bool = False
     expired: bool = False
 

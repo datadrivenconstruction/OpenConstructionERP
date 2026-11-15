@@ -122,6 +122,13 @@ class JsonEncoder:
         return json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
+def parquet_available() -> bool:
+    """Whether pyarrow can be imported; Parquet is the one format that needs the optional ``bi`` extra."""
+    import importlib.util
+
+    return importlib.util.find_spec("pyarrow") is not None
+
+
 class ParquetEncoder:
     """Parquet with exact ``decimal128(38,6)`` money; written in row groups as chunks arrive."""
 

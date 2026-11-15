@@ -226,15 +226,15 @@ describe('ShareLinkModal', () => {
 /* ── SharePage ─────────────────────────────────────────────────────── */
 
 describe('SharePage', () => {
-  it('shows the filename + password input for a protected link', async () => {
+  it('shows a generic protected-file label, no filename, for a protected link', async () => {
     publicInfoResponse = {
       status: 200,
-      body: { filename: 'spec.pdf', requires_password: true, expired: false },
+      body: { filename: null, requires_password: true, expired: false },
     };
     renderSharePage();
-    await waitFor(() => {
-      expect(screen.getByTestId('share-filename').textContent).toBe('spec.pdf');
-    });
+    expect(await screen.findByTestId('share-password-input')).toBeInTheDocument();
+    expect(screen.queryByTestId('share-filename')).toBeNull();
+    expect(screen.getByText('Protected file')).toBeInTheDocument();
     expect(screen.getByTestId('share-password-input')).toBeInTheDocument();
     expect(screen.getByTestId('share-unlock-button')).toBeInTheDocument();
   });

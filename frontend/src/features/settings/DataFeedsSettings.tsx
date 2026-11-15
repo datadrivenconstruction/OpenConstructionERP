@@ -43,6 +43,7 @@ interface SqlStatus {
   schema_name: string;
   role: string;
   views: string[];
+  parquet?: boolean;
 }
 
 interface ApiKeyRow {
@@ -299,6 +300,7 @@ export function DataFeedsSettings() {
                         >
                           {t('bi_feed.copy_csv', { defaultValue: 'Copy CSV URL' })}
                         </Button>
+                        {sqlQuery.data?.parquet !== false && (
                         <Button
                           size="sm"
                           variant="secondary"
@@ -308,6 +310,7 @@ export function DataFeedsSettings() {
                         >
                           {t('bi_feed.copy_parquet', { defaultValue: 'Copy Parquet URL' })}
                         </Button>
+                        )}
                       </span>
                     </td>
                   </tr>

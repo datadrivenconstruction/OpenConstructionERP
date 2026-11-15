@@ -8289,6 +8289,7 @@ const resource = {
     "share.page.loading": "Loading link…",
     "share.page.ready_title": "Ready to download",
     "share.page.ready_body": "Click the button below to download the file.",
+    "share.page.protected_file": "Protected file",
     "files.title_all": "All files",
     "files.empty_category": "No {{category}} yet",
     "files.cta.add_first": "Add your first {{category}}",

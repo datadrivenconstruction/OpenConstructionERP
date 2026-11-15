@@ -94,3 +94,24 @@ def test_command_line_declares_bi_actions() -> None:
 
 def test_feed_ids_are_valid_postgres_identifiers() -> None:
     assert all(re.fullmatch(r"[a-z][a-z0-9_]*", feed_id) for feed_id in FEEDS)
+
+
+def test_no_migration_creates_the_bi_schema_or_role() -> None:
+    """The oe_bi schema and role exist only after ``bi enable``; a migration must never create them."""
+    from pathlib import Path
+
+    versions = Path(__file__).resolve().parents[3] / "alembic" / "versions"
+    pattern = re.compile(r"oe_bi(_reader)?")
+    offenders = [p.name for p in versions.glob("*.py") if pattern.search(p.read_text(encoding="utf-8"))]
+    assert offenders == []
+
+
+async def test_parquet_without_pyarrow_is_a_clear_4xx(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.bi_feed import service as feed_service
+    from app.modules.bi_feed.validators import BiFeedError, FeedParams
+
+    monkeypatch.setattr(feed_service, "parquet_available", lambda: False)
+    with pytest.raises(BiFeedError) as err:
+        await feed_service.BiFeedService(None).export("projects", "parquet", "u", "admin", FeedParams())  # type: ignore[arg-type]
+    assert err.value.status_code == 400
+    assert err.value.code == "BI_FEED_PARQUET_UNAVAILABLE"

@@ -1687,10 +1687,10 @@ async def get_share_link_info(
 ) -> ShareLinkPublicInfo:
     """Public probe - what the recipient sees BEFORE entering a password.
 
-    Returns the filename so the share page can display a meaningful
-    title, plus two flags so the frontend knows whether to prompt for a
-    password or render an "expired" notice. Revoked links 404 so a
-    third party can't tell whether a token is wrong, revoked, or expired.
+    Returns two flags so the frontend knows whether to prompt for a
+    password or render an "expired" notice. The filename is sent only for
+    an open link without a password; protected and expired links reveal
+    nothing about the file. Revoked links 404.
     """
     from app.modules.documents.share_service import (
         _is_expired,
@@ -1699,10 +1699,12 @@ async def get_share_link_info(
 
     _throttle_share_link(request, token)
     link, doc = await get_share_link_public(session, token)
+    requires_password = bool(link.password_hash)
+    expired = _is_expired(link)
     return ShareLinkPublicInfo(
-        filename=doc.name,
-        requires_password=bool(link.password_hash),
-        expired=_is_expired(link),
+        filename=None if requires_password or expired else doc.name,
+        requires_password=requires_password,
+        expired=expired,
     )
 
 

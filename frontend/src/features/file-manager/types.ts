@@ -163,7 +163,8 @@ export interface ShareLinkResponse {
 }
 
 export interface ShareLinkPublicInfo {
-  filename: string;
+  /** Null for password-protected and expired links. */
+  filename: string | null;
   requires_password: boolean;
   expired: boolean;
 }
