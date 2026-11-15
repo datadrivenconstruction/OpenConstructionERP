@@ -60969,6 +60969,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "Tilausta {{po_number}} ei voi vielä laskuttaa: vain annetun tilauksen voi laskuttaa.",
     "api_errors.invoice_capture_invoice_read_only": "Hyväksytty tai kirjattu lasku on vain luku -tilassa. Palauta se ensin luonnokseksi.",
     "api_errors.module_disabled": "Moduuli {{module}} on poistettu käytöstä tässä työtilassa. Ylläpitäjä voi ottaa sen käyttöön kohdassa Moduulit > Ratkaisupaketit.",
+    "api_errors.budget_ledger_sod_admin_only": "Vain ylläpitäjä voi poistaa tehtävien erottelun käytöstä.",
     "conv.stage_upload": "Tiedoston lataaminen",
     "conv.stage_upload_hint": "Tiedosto lähetetään palvelimelle. Pidä välilehti auki, kunnes lataus on valmis.",
     "conv.stage_converter": "Muuntimen valmistelu",

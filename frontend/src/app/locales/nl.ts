@@ -61846,6 +61846,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "Order {{po_number}} kan nog niet worden gefactureerd: alleen een uitgegeven order kan worden gefactureerd.",
     "api_errors.invoice_capture_invoice_read_only": "Een goedgekeurde of geboekte factuur is alleen-lezen. Zet hem eerst terug naar concept.",
     "api_errors.module_disabled": "De module {{module}} is uitgeschakeld voor deze werkruimte. Een beheerder kan hem inschakelen via Modules > Oplossingspakketten.",
+    "api_errors.budget_ledger_sod_admin_only": "Alleen een beheerder kan functiescheiding uitzetten.",
     "conv.stage_upload": "Bestand uploaden",
     "conv.stage_upload_hint": "Het bestand wordt naar de server gestuurd. Houd dit tabblad open tot het klaar is.",
     "conv.stage_converter": "Converter voorbereiden",

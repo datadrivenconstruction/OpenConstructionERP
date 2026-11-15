@@ -56648,6 +56648,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "El pedido {{po_number}} aún no se puede facturar: solo se puede facturar un pedido emitido.",
     "api_errors.invoice_capture_invoice_read_only": "Una factura aprobada o contabilizada es de solo lectura. Devuélvala primero a borrador.",
     "api_errors.module_disabled": "El módulo {{module}} está desactivado en este espacio de trabajo. Un administrador puede activarlo en Módulos > Paquetes de soluciones.",
+    "api_errors.budget_ledger_sod_admin_only": "Solo un administrador puede desactivar la segregación de funciones.",
     "conv.stage_upload": "Subiendo el archivo",
     "conv.stage_upload_hint": "Enviando el archivo al servidor. Mantenga esta pestaña abierta hasta que termine.",
     "conv.stage_converter": "Preparando el conversor",

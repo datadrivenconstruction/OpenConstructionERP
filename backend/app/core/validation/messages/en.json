@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} was requested by you, so you cannot approve it (segregation of duties is on for this project).",
       "suggestion": "Ask another approver to decide it, or switch segregation of duties off in the ledger settings."
+    },
+    "sod_prepared": {
+      "fail": "{code} was last edited or submitted by you, so you cannot approve it (segregation of duties is on for this project).",
+      "suggestion": "Ask another approver to decide it."
+    },
+    "sod_unattributed": {
+      "fail": "{code} has no recorded requester, so it cannot be approved while segregation of duties is on.",
+      "suggestion": "Reject it and enter it again so the requester is recorded."
     }
   },
   "schedule": {

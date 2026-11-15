@@ -61082,6 +61082,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "{{po_number}} буйрутмасына азырынча эсеп чыгаруу мүмкүн эмес: берилген буйрутмага гана чыгарууга болот.",
     "api_errors.invoice_capture_invoice_read_only": "Бекитилген же жүргүзүлгөн эсеп окуу үчүн гана. Адегенде аны долбоорго кайтарыңыз.",
     "api_errors.module_disabled": "{{module}} модулу бул жумуш мейкиндиги үчүн өчүрүлгөн. Администратор аны Модулдар > Чечим пакеттери бөлүмүндө күйгүзө алат.",
+    "api_errors.budget_ledger_sod_admin_only": "Милдеттерди бөлүүнү администратор гана өчүрө алат.",
     "conv.stage_upload": "Файл жүктөлүүдө",
     "conv.stage_upload_hint": "Файл серверге жөнөтүлүүдө. Бүтмөйүнчө бул өтмөктү ачык кармаңыз.",
     "conv.stage_converter": "Конвертер даярдалууда",

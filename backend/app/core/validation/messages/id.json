@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} diajukan oleh Anda, sehingga Anda tidak dapat menyetujuinya (pemisahan tugas aktif untuk proyek ini).",
       "suggestion": "Minta penyetuju lain untuk memutuskan, atau matikan pemisahan tugas di pengaturan buku besar."
+    },
+    "sod_prepared": {
+      "fail": "{code} terakhir diubah atau diajukan oleh Anda, sehingga Anda tidak dapat menyetujuinya (pemisahan tugas aktif untuk proyek ini).",
+      "suggestion": "Minta penyetuju lain untuk memutuskan."
+    },
+    "sod_unattributed": {
+      "fail": "{code} tidak memiliki pemohon yang tercatat, sehingga tidak dapat disetujui selama pemisahan tugas aktif.",
+      "suggestion": "Tolak dan masukkan ulang agar pemohon tercatat."
     }
   },
   "schedule": {
