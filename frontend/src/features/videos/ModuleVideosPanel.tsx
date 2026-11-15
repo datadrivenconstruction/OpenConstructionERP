@@ -15,11 +15,11 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { EyeOff, Hourglass, X } from 'lucide-react';
+import { CornerDownRight, EyeOff, Hourglass, X } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
 import { useToastStore } from '@/stores/useToastStore';
-import type { AcademyVideo } from './academyTypes';
-import { formatClock, recommend, videosForRoute } from './academy';
+import type { AcademyVideo, VideoChapter } from './academyTypes';
+import { chapterForRoute, formatClock, recommend, videosForRoute } from './academy';
 import { useVideoContext } from './useVideoContext';
 import { useVideoLabels } from './videoLabels';
 import { useVideoHintsStore } from './videoRoutes';
@@ -80,6 +80,15 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
   const itemTotal = itemTotalForRoute(route, reader);
   const label = moduleLabel(route);
   const moduleName = label ? t(label.key, { defaultValue: label.fallback }) : '';
+  const jumps = useMemo(() => {
+    const names = [moduleName, label?.fallback ?? ''].filter(Boolean);
+    const out: Record<string, VideoChapter> = {};
+    for (const v of videos.slice(0, SHOWN)) {
+      const c = chapterForRoute(v, route, names);
+      if (c) out[v.id] = c;
+    }
+    return out;
+  }, [videos, route, moduleName, label?.fallback]);
 
   const hideHere = () => {
     hideOn(route);
@@ -184,6 +193,26 @@ export default function ModuleVideosPanel({ route, open, panelId, onClose }: Pan
                     </span>
                   </span>
                 </button>
+                {jumps[video.id] && (
+                  <button
+                    type="button"
+                    data-testid="module-videos-jump"
+                    onClick={() => {
+                      setPlaying({ video, start: jumps[video.id]!.t });
+                      onClose();
+                    }}
+                    className="mx-3 mb-2 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-md border border-oe-blue/30 bg-oe-blue/[0.06] px-1.5 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                  >
+                    <CornerDownRight size={12} className="shrink-0" aria-hidden />
+                    <span className="truncate">
+                      {t('videos.jump_to', {
+                        defaultValue: 'From {{time}}: {{chapter}}',
+                        time: formatClock(jumps[video.id]!.t),
+                        chapter: jumps[video.id]!.title,
+                      })}
+                    </span>
+                  </button>
+                )}
               </li>
             ))}
           </ul>
