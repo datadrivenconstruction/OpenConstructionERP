@@ -66521,7 +66521,7 @@ const resource = {
     "sso.field_slug": "Коротка назва (в URL)",
     "sso.field_issuer": "URL видавця (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Секрет клієнта",
     "sso.secret_keep": "Залиште порожнім, щоб зберегти поточний секрет.",
     "sso.field_idp_entity": "Entity ID провайдера (IdP)",
     "sso.field_idp_sso_url": "URL входу IdP",

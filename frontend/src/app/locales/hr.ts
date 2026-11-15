@@ -64746,7 +64746,7 @@ const resource = {
     "sso.field_slug": "Kratki naziv (u URL-ovima)",
     "sso.field_issuer": "URL izdavatelja (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Tajni ključ klijenta",
     "sso.secret_keep": "Ostavite prazno da zadržite spremljeni secret.",
     "sso.field_idp_entity": "Entity ID pružatelja (IdP)",
     "sso.field_idp_sso_url": "URL prijave IdP-a",

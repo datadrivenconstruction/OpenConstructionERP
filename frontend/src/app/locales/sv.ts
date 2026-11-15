@@ -64989,7 +64989,7 @@ const resource = {
     "sso.field_slug": "Kort namn (i URL:er)",
     "sso.field_issuer": "Issuer-URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Klienthemlighet",
     "sso.secret_keep": "Lämna tomt för att behålla den sparade secret.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP-URL för inloggning",

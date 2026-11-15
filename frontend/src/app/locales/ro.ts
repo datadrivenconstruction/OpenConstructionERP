@@ -64736,7 +64736,7 @@ const resource = {
     "sso.field_slug": "Nume scurt (în URL-uri)",
     "sso.field_issuer": "URL-ul emitentului (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Secretul clientului",
     "sso.secret_keep": "Lasă gol pentru a păstra secretul salvat.",
     "sso.field_idp_entity": "Entity ID al IdP",
     "sso.field_idp_sso_url": "URL-ul de autentificare al IdP",
