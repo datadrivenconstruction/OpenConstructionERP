@@ -122,6 +122,16 @@ class JsonEncoder:
         return json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
+def parquet_available() -> bool:
+    """Whether pyarrow can be imported (it is an optional extra on slim installs)."""
+    try:
+        import pyarrow  # noqa: F401
+        import pyarrow.parquet  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
 class ParquetEncoder:
     """Parquet with exact ``decimal128(38,6)`` money; written in row groups as chunks arrive."""
 
