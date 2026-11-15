@@ -9,13 +9,15 @@ has a row only one rule gets right, so a test failing names the rule.
 from __future__ import annotations
 
 import asyncio
+import threading
 import tracemalloc
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from decimal import Decimal
 
 import pytest
 
 from app.modules.boq.importers import REGISTERED_IMPORTERS, ImportedBOQ, ImporterParseError
+from app.modules.boq.importers import xpwe as xpwe_module
 from app.modules.boq.importers.xpwe import (
     XpweDocument,
     XpweImporter,
@@ -770,58 +772,30 @@ def test_a_sixty_megabyte_export_parses_in_bounded_memory() -> None:
     assert list_peak < 0.25 * size, f"price list: peak {list_peak / 2**20:.0f} MiB for a {size / 2**20:.0f} MiB file"
 
 
-def test_parsing_does_not_hold_the_event_loop() -> None:
-    """The single worker keeps answering other requests while a large bill is read."""
+def test_a_large_bill_parses_to_its_measured_items(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A large bill is read in a worker thread, off the event loop, and yields every measured item."""
     content = fx.large_bill(8 * 1024 * 1024)
+    real = xpwe_module._parse_sync
+    threads: list[int] = []
 
-    async def watch(work: Awaitable[object]) -> tuple[float, float]:
-        loop = asyncio.get_running_loop()
-        gaps: list[float] = []
-        done = asyncio.Event()
+    def spy(data: bytes) -> ImportedBOQ:
+        threads.append(threading.get_ident())
+        return real(data)
 
-        async def ticker() -> None:
-            last = loop.time()
-            while not done.is_set():
-                await asyncio.sleep(0.01)
-                now = loop.time()
-                gaps.append(now - last)
-                last = now
+    monkeypatch.setattr(xpwe_module, "_parse_sync", spy)
 
-        tick = asyncio.create_task(ticker())
-        started = loop.time()
-        await work
-        elapsed = loop.time() - started
-        done.set()
-        await tick
-        return elapsed, max(gaps, default=elapsed)
+    async def run() -> tuple[ImportedBOQ, int]:
+        loop_thread = threading.get_ident()
+        return await XpweImporter.parse(content, locale="en"), loop_thread
 
-    async def run() -> tuple[float, float, float]:
-        elapsed, worst_gap = await watch(XpweImporter.parse(content, locale="en"))
-        # The same ticker over an idle loop for as long, so a loaded runner's
-        # own scheduling jitter is not read as the parser holding the loop.
-        _, idle_gap = await watch(asyncio.sleep(min(elapsed, 2.0)))
-        return elapsed, worst_gap, idle_gap
+    boq, loop_thread = asyncio.run(run())
 
-    # A parser that holds the loop holds it on every run. A runner that froze
-    # the whole process for a moment does not do it three times in a row at the
-    # same place, and the idle control, taken after the parse, cannot see a
-    # freeze that fell inside it. So the bound is the same as ever and one
-    # clean run out of three is enough; a real hold fails all three.
-    seen: list[str] = []
-    for _attempt in range(3):
-        elapsed, worst_gap, idle_gap = asyncio.run(run())
-        if worst_gap < max(0.25, elapsed / 4, 5 * idle_gap):
-            return
-        seen.append(f"{worst_gap:.2f}s of a {elapsed:.2f}s parse, idle jitter {idle_gap:.2f}s")
-    pytest.fail("loop held on every one of three runs: " + "; ".join(seen))
-
-
-def test_parsing_inline_would_fail_the_event_loop_check(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The check above is not satisfied by retrying: a parse on the loop fails all three runs."""
-
-    async def inline(func: Callable[..., object], *args: object) -> object:
-        return func(*args)
-
-    monkeypatch.setattr(asyncio, "to_thread", inline)
-    with pytest.raises(pytest.fail.Exception, match="every one of three runs"):
-        test_parsing_does_not_hold_the_event_loop()
+    assert len(threads) == 1
+    assert threads[0] != loop_thread
+    items = [p for p in boq.positions if not p.is_section]
+    assert len(boq.positions) == 302
+    assert len(items) == 300
+    assert {p.quantity for p in items} == {6.0}
+    assert items[0].ordinal == "1.1.1"
+    assert items[0].unit_rate == 3.25
+    assert items[0].description.startswith("Fornitura e posa in opera")
