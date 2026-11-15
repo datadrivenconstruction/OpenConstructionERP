@@ -30,6 +30,7 @@ from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.equipment.cost_board import DEFAULT_DAY_HOURS, DEFAULT_MIN_UTILISATION_PCT
 from app.modules.equipment.cost_board_service import CostBoardService
+from app.modules.equipment.router import require_tenant
 from app.modules.equipment.telematics import TelematicsParseError, TelematicsSample, parse_aemp, parse_csv
 from app.modules.equipment.telematics_service import DEFAULT_IDLE_THRESHOLD, RAW_RETENTION_DAYS, TelematicsService
 from app.modules.equipment.validators import run_rules
@@ -86,7 +87,12 @@ class AllocateIn(BaseModel):
     project_id: uuid.UUID | None = None
 
 
-def _service(session: SessionDep) -> TelematicsService:
+def _service(session: SessionDep, tenant_id: str = Depends(require_tenant)) -> TelematicsService:
+    return TelematicsService(session, tenant_id)
+
+
+def _device_service(session: SessionDep) -> TelematicsService:
+    """Device ingest is authenticated by the device token, whose machine fixes the tenant."""
     return TelematicsService(session)
 
 
@@ -188,7 +194,7 @@ async def device_ingest(
     request: Request,
     data: IngestIn,
     x_device_token: str | None = Header(default=None),
-    service: TelematicsService = Depends(_service),
+    service: TelematicsService = Depends(_device_service),
 ) -> dict[str, Any]:
     """Machine data from one device, authenticated by its own token (no user session)."""
     allowed, _remaining = device_ingest_limiter.is_allowed(client_identifier(request))
@@ -241,6 +247,7 @@ def _window(date_from: date | None, date_to: date | None) -> tuple[date, date]:
 async def utilisation(
     user_id: CurrentUserId,
     session: SessionDep,
+    tenant_id: str = Depends(require_tenant),
     project_id: uuid.UUID | None = Query(default=None),
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
@@ -249,13 +256,14 @@ async def utilisation(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     start, end = _window(date_from, date_to)
-    return await TelematicsService(session).utilisation(start, end, project_id)
+    return await TelematicsService(session, tenant_id).utilisation(start, end, project_id)
 
 
 @router.get("/cost-board/")
 async def cost_board(
     user_id: CurrentUserId,
     session: SessionDep,
+    tenant_id: str = Depends(require_tenant),
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
     day_hours: Decimal = Query(default=DEFAULT_DAY_HOURS, gt=0, le=24),
@@ -267,7 +275,7 @@ async def cost_board(
         raise HTTPException(status_code=422, detail="date_to_before_date_from")
     if (end - start).days > 731:
         raise HTTPException(status_code=422, detail="window_too_long")
-    board = await CostBoardService(session).board(start, end, day_hours, min_utilisation_pct)
+    board = await CostBoardService(session, tenant_id).board(start, end, day_hours, min_utilisation_pct)
     results = await run_rules({"machines": board["machines"]})
     return {**board, "results": results, "failed": sum(1 for r in results if not r["passed"])}
 
@@ -277,26 +285,28 @@ async def allocate(
     data: AllocateIn,
     user_id: CurrentUserId,
     session: SessionDep,
+    tenant_id: str = Depends(require_tenant),
     _perm: None = Depends(RequirePermission("equipment.update")),
 ) -> dict[str, Any]:
     if data.date_to < data.date_from:
         raise HTTPException(status_code=422, detail="date_to_before_date_from")
     if data.project_id is not None:
         await verify_project_access(data.project_id, user_id, session)
-    return await TelematicsService(session).allocate(data.date_from, data.date_to, data.project_id)
+    return await TelematicsService(session, tenant_id).allocate(data.date_from, data.date_to, data.project_id)
 
 
 @router.get("/validation/")
 async def validation(
     user_id: CurrentUserId,
     session: SessionDep,
+    tenant_id: str = Depends(require_tenant),
     project_id: uuid.UUID | None = Query(default=None),
     idle_threshold: Decimal = Query(default=DEFAULT_IDLE_THRESHOLD, gt=0, le=1),
     _perm: None = Depends(RequirePermission("equipment.read")),
 ) -> dict[str, Any]:
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
-    payload = await TelematicsService(session).validation_payload(project_id, idle_threshold)
+    payload = await TelematicsService(session, tenant_id).validation_payload(project_id, idle_threshold)
     results = await run_rules(payload)
     failed = [r for r in results if not r["passed"]]
     return {"results": results, "failed": len(failed), "machines": len(payload["machines"])}

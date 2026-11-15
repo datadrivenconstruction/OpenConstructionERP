@@ -4,12 +4,13 @@
 
 from __future__ import annotations
 
+import uuid
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import and_, select
+from sqlalchemy import Select, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.equipment.cost_board import (
@@ -25,6 +26,7 @@ from app.modules.equipment.models import (
     PartsLog,
     UtilisationDay,
 )
+from app.modules.equipment.repository import tenant_options
 
 _ZERO = Decimal("0")
 
@@ -50,8 +52,20 @@ def _in_window(column: Any, date_from: date, date_to: date) -> tuple[Any, Any]:
 class CostBoardService:
     """Per-machine owning vs operating cost against used hours."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None) -> None:
         self.session = session
+        self.tenant_id = tenant_id
+
+    async def _run(self, stmt: Any) -> Any:
+        """Execute ``stmt`` confined to the caller's tenant (system callers pass none)."""
+        if self.tenant_id is not None and isinstance(stmt, Select):
+            stmt = stmt.options(*tenant_options(self.tenant_id))
+        return await self.session.execute(stmt)
+
+    async def _get(self, model: Any, row_id: uuid.UUID) -> Any:
+        if self.tenant_id is None:
+            return await self.session.get(model, row_id)
+        return (await self._run(select(model).where(model.id == row_id))).scalar_one_or_none()
 
     async def board(
         self,
@@ -60,22 +74,20 @@ class CostBoardService:
         day_hours: Decimal = DEFAULT_DAY_HOURS,
         min_utilisation_pct: Decimal = DEFAULT_MIN_UTILISATION_PCT,
     ) -> dict[str, Any]:
-        eqs = list(
-            (await self.session.execute(select(Equipment).where(Equipment.status != "decommissioned"))).scalars().all()
-        )
+        eqs = list((await self._run(select(Equipment).where(Equipment.status != "decommissioned"))).scalars().all())
         days_by_eq: dict[Any, list[UtilisationDay]] = defaultdict(list)
         stmt = select(UtilisationDay).where(and_(UtilisationDay.day >= date_from, UtilisationDay.day <= date_to))
-        for d in (await self.session.execute(stmt)).scalars():
+        for d in (await self._run(stmt)).scalars():
             days_by_eq[d.equipment_id].append(d)
         fuel_by_eq: dict[Any, list[FuelLog]] = defaultdict(list)
         for fl in (
-            await self.session.execute(select(FuelLog).where(*_in_window(FuelLog.logged_at, date_from, date_to)))
+            await self._run(select(FuelLog).where(*_in_window(FuelLog.logged_at, date_from, date_to)))
         ).scalars():
             if (when := _day(fl.logged_at)) and date_from <= when <= date_to:
                 fuel_by_eq[fl.equipment_id].append(fl)
         wo_by_eq: dict[Any, list[MaintenanceWorkOrder]] = defaultdict(list)
         for wo in (
-            await self.session.execute(
+            await self._run(
                 select(MaintenanceWorkOrder).where(
                     MaintenanceWorkOrder.status == "completed",
                     *_in_window(MaintenanceWorkOrder.completed_at, date_from, date_to),
@@ -87,7 +99,7 @@ class CostBoardService:
         parts_by_eq: dict[Any, list[PartsLog]] = defaultdict(list)
         # Parts tied to a work order are already inside that order's cost.
         for p in (
-            await self.session.execute(
+            await self._run(
                 select(PartsLog).where(
                     PartsLog.work_order_id.is_(None), *_in_window(PartsLog.logged_at, date_from, date_to)
                 )

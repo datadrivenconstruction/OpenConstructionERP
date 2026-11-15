@@ -8,8 +8,9 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import desc, func, select, update
+from sqlalchemy import Select, desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import with_loader_criteria
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
@@ -24,21 +25,64 @@ from app.modules.equipment.models import (
     MaintenanceSchedule,
     MaintenanceWorkOrder,
     PartsLog,
+    TelematicsDevice,
     TelemetryReading,
+    UtilisationDay,
+)
+from app.modules.equipment.validators import ASSIGNMENT_STATUSES
+
+_UNIT_CHILDREN = (
+    TelemetryReading,
+    MaintenanceSchedule,
+    MaintenanceWorkOrder,
+    Inspection,
+    EquipmentRental,
+    FuelLog,
+    PartsLog,
+    DamageReport,
+    TelematicsDevice,
+    UtilisationDay,
 )
 
 
+def tenant_options(tenant_id: str | None) -> list[Any]:
+    """Loader criteria that confine a statement to one tenant's fleet.
+
+    ``Equipment`` carries the tenant; every other fleet table is reached through
+    its ``equipment_id``. Applied to a statement they hold in subqueries and
+    joins too. ``None`` returns no criteria: reserved for system callers (seeds,
+    event subscribers); the HTTP layer never passes it.
+    """
+    if tenant_id is None:
+        return []
+    own_units = select(Equipment.id).where(Equipment.tenant_id == tenant_id)
+    options: list[Any] = [with_loader_criteria(Equipment, Equipment.tenant_id == tenant_id, include_aliases=True)]
+    for model in _UNIT_CHILDREN:
+        options.append(with_loader_criteria(model, model.equipment_id.in_(own_units), include_aliases=True))
+    return options
+
+
 class _BaseRepository:
-    """Common CRUD primitives."""
+    """Common CRUD primitives, optionally confined to one tenant."""
 
     model: type
     session: AsyncSession
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None) -> None:
         self.session = session
+        self.tenant_id = tenant_id
+
+    async def _run(self, stmt: Any) -> Any:
+        """Execute ``stmt`` with the tenant criteria attached."""
+        if self.tenant_id is not None and isinstance(stmt, Select):
+            stmt = stmt.options(*tenant_options(self.tenant_id))
+        return await self.session.execute(stmt)
 
     async def get_by_id(self, entity_id: uuid.UUID) -> Any:
-        return await self.session.get(self.model, entity_id)
+        if self.tenant_id is None:
+            return await self.session.get(self.model, entity_id)
+        result = await self._run(select(self.model).where(self.model.id == entity_id))
+        return result.scalar_one_or_none()
 
     async def create(self, entity: Any) -> Any:
         self.session.add(entity)
@@ -46,8 +90,10 @@ class _BaseRepository:
         return entity
 
     async def update_fields(self, entity_id: uuid.UUID, **fields: Any) -> None:
+        if self.tenant_id is not None and await self.get_by_id(entity_id) is None:
+            return
         stmt = update(self.model).where(self.model.id == entity_id).values(**fields)
-        await self.session.execute(stmt)
+        await self._run(stmt)
         await self.session.flush()
         instance = self.session.identity_map.get(identity_key(self.model, entity_id))
         if instance is None:
@@ -72,11 +118,11 @@ class EquipmentTypeRepository(_BaseRepository):
     model = EquipmentType
 
     async def list_all(self) -> list[EquipmentType]:
-        result = await self.session.execute(select(EquipmentType).order_by(EquipmentType.code))
+        result = await self._run(select(EquipmentType).order_by(EquipmentType.code))
         return list(result.scalars().all())
 
     async def get_by_code(self, code: str) -> EquipmentType | None:
-        result = await self.session.execute(select(EquipmentType).where(EquipmentType.code == code))
+        result = await self._run(select(EquipmentType).where(EquipmentType.code == code))
         return result.scalar_one_or_none()
 
 
@@ -86,7 +132,7 @@ class EquipmentRepository(_BaseRepository):
     model = Equipment
 
     async def get_by_code(self, code: str) -> Equipment | None:
-        result = await self.session.execute(select(Equipment).where(Equipment.code == code))
+        result = await self._run(select(Equipment).where(Equipment.code == code))
         return result.scalar_one_or_none()
 
     async def list_(
@@ -107,16 +153,14 @@ class EquipmentRepository(_BaseRepository):
             base = base.where(Equipment.ownership == ownership)
 
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
 
         stmt = base.order_by(Equipment.code).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
 
     async def list_by_status(self, status: str) -> list[Equipment]:
-        result = await self.session.execute(
-            select(Equipment).where(Equipment.status == status).order_by(Equipment.code)
-        )
+        result = await self._run(select(Equipment).where(Equipment.status == status).order_by(Equipment.code))
         return list(result.scalars().all())
 
     async def list_blocked(self, today: str) -> list[Equipment]:
@@ -124,7 +168,7 @@ class EquipmentRepository(_BaseRepository):
         # Sub-query: equipment with at least one expired inspection.
         expired_inspections = select(Inspection.equipment_id).where(Inspection.valid_until < today).distinct()
         stmt = select(Equipment).where((Equipment.status != "active") | (Equipment.id.in_(expired_inspections)))
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all())
 
 
@@ -140,7 +184,7 @@ class TelemetryRepository(_BaseRepository):
             .order_by(desc(TelemetryReading.recorded_at))
             .limit(1)
         )
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return result.scalar_one_or_none()
 
     async def list_since(
@@ -153,7 +197,7 @@ class TelemetryRepository(_BaseRepository):
         if since is not None:
             stmt = stmt.where(TelemetryReading.recorded_at >= since)
         stmt = stmt.order_by(desc(TelemetryReading.recorded_at)).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all())
 
 
@@ -163,13 +207,11 @@ class MaintenanceScheduleRepository(_BaseRepository):
     model = MaintenanceSchedule
 
     async def list_for_equipment(self, equipment_id: uuid.UUID) -> list[MaintenanceSchedule]:
-        result = await self.session.execute(
-            select(MaintenanceSchedule).where(MaintenanceSchedule.equipment_id == equipment_id)
-        )
+        result = await self._run(select(MaintenanceSchedule).where(MaintenanceSchedule.equipment_id == equipment_id))
         return list(result.scalars().all())
 
     async def list_active(self) -> list[MaintenanceSchedule]:
-        result = await self.session.execute(select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True)))
+        result = await self._run(select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True)))
         return list(result.scalars().all())
 
 
@@ -193,10 +235,10 @@ class WorkOrderRepository(_BaseRepository):
             base = base.where(MaintenanceWorkOrder.status == status)
 
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
 
         stmt = base.order_by(desc(MaintenanceWorkOrder.created_at)).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
 
     async def count_open_for_equipment(self, equipment_id: uuid.UUID) -> int:
@@ -208,7 +250,7 @@ class WorkOrderRepository(_BaseRepository):
                 MaintenanceWorkOrder.status.in_(("scheduled", "in_progress")),
             )
         )
-        return (await self.session.execute(stmt)).scalar_one()
+        return (await self._run(stmt)).scalar_one()
 
     async def count_open_fleet(self) -> int:
         """Total open (scheduled / in_progress) work orders across the fleet.
@@ -221,7 +263,7 @@ class WorkOrderRepository(_BaseRepository):
             .select_from(MaintenanceWorkOrder)
             .where(MaintenanceWorkOrder.status.in_(("scheduled", "in_progress")))
         )
-        return (await self.session.execute(stmt)).scalar_one()
+        return (await self._run(stmt)).scalar_one()
 
 
 class InspectionRepository(_BaseRepository):
@@ -230,7 +272,7 @@ class InspectionRepository(_BaseRepository):
     model = Inspection
 
     async def list_for_equipment(self, equipment_id: uuid.UUID) -> list[Inspection]:
-        result = await self.session.execute(select(Inspection).where(Inspection.equipment_id == equipment_id))
+        result = await self._run(select(Inspection).where(Inspection.equipment_id == equipment_id))
         return list(result.scalars().all())
 
     async def expiring_within(self, today: str, days: int) -> list[Inspection]:
@@ -249,12 +291,12 @@ class InspectionRepository(_BaseRepository):
             .where(Inspection.valid_until <= cutoff)
             .order_by(Inspection.valid_until)
         )
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all())
 
     async def expired_for_equipment(self, equipment_id: uuid.UUID, today: str) -> list[Inspection]:
         stmt = select(Inspection).where(Inspection.equipment_id == equipment_id).where(Inspection.valid_until < today)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all())
 
 
@@ -284,15 +326,28 @@ class RentalRepository(_BaseRepository):
             base = base.where(EquipmentRental.status == status)
 
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
 
         stmt = base.order_by(desc(EquipmentRental.start_date)).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
+
+    async def assignments_for(self, equipment_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Dated assignments of one machine that still count (not cancelled)."""
+        result = await self._run(
+            select(EquipmentRental).where(
+                EquipmentRental.equipment_id == equipment_id,
+                EquipmentRental.status.in_(ASSIGNMENT_STATUSES),
+            )
+        )
+        return [
+            {"id": r.id, "project_id": r.project_id, "start_date": r.start_date, "end_date": r.end_date}
+            for r in result.scalars()
+        ]
 
     async def count_active(self) -> int:
         stmt = select(func.count()).select_from(EquipmentRental).where(EquipmentRental.status == "active")
-        return (await self.session.execute(stmt)).scalar_one()
+        return (await self._run(stmt)).scalar_one()
 
 
 class FuelLogRepository(_BaseRepository):
@@ -309,9 +364,9 @@ class FuelLogRepository(_BaseRepository):
     ) -> tuple[list[FuelLog], int]:
         base = select(FuelLog).where(FuelLog.equipment_id == equipment_id)
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
         stmt = base.order_by(desc(FuelLog.logged_at)).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
 
     async def fuel_consumption(
@@ -327,7 +382,7 @@ class FuelLogRepository(_BaseRepository):
             .where(FuelLog.logged_at >= period_start)
             .where(FuelLog.logged_at <= period_end)
         )
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         rows = list(result.scalars().all())
         total_l = sum((r.fuel_liters or Decimal("0") for r in rows), Decimal("0"))
         total_cost = sum((r.cost or Decimal("0") for r in rows), Decimal("0"))
@@ -346,7 +401,7 @@ class FuelLogRepository(_BaseRepository):
         )
         if equipment_id is not None:
             stmt = stmt.where(FuelLog.equipment_id == equipment_id)
-        raw = (await self.session.execute(stmt)).scalar_one()
+        raw = (await self._run(stmt)).scalar_one()
         return Decimal(str(raw or "0"))
 
 
@@ -364,9 +419,9 @@ class PartsLogRepository(_BaseRepository):
     ) -> tuple[list[PartsLog], int]:
         base = select(PartsLog).where(PartsLog.equipment_id == equipment_id)
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
         stmt = base.order_by(desc(PartsLog.created_at)).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
 
 
@@ -389,9 +444,9 @@ class DamageReportRepository(_BaseRepository):
         if status is not None:
             base = base.where(DamageReport.status == status)
         count_stmt = select(func.count()).select_from(base.subquery())
-        total = (await self.session.execute(count_stmt)).scalar_one()
+        total = (await self._run(count_stmt)).scalar_one()
         stmt = base.order_by(desc(DamageReport.reported_at)).offset(offset).limit(limit)
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return list(result.scalars().all()), total
 
 

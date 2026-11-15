@@ -17,6 +17,7 @@ renders the sentence in the user's language; ``message`` is the English text.
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -30,6 +31,34 @@ from app.core.validation.engine import (
 )
 
 EQUIPMENT_RULE_SET = "equipment_telematics"
+
+
+#: Rental statuses that occupy the machine on the dates they cover.
+ASSIGNMENT_STATUSES = ("active", "returned")
+
+
+def _day(raw: Any) -> date | None:
+    try:
+        return date.fromisoformat(str(raw)[:10]) if raw else None
+    except ValueError:
+        return None
+
+
+def find_overlaps(assignments: list[dict[str, Any]]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Pairs of dated assignments of one machine whose inclusive date ranges intersect.
+
+    An empty ``end_date`` is open-ended. Rows without a parseable start are skipped.
+    """
+    dated = [(a, d) for a in assignments if (d := _day(a.get("start_date"))) is not None]
+    dated.sort(key=lambda pair: pair[1])
+    clashes: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for i, (a, a_start) in enumerate(dated):
+        a_end = _day(a.get("end_date")) or date.max
+        for b, b_start in dated[i + 1 :]:
+            if b_start > a_end:
+                break
+            clashes.append((a, b))
+    return clashes
 
 
 def _machines(context: ValidationContext) -> list[dict[str, Any]]:
@@ -194,6 +223,23 @@ class CostPerHourWithinMarket(_MachineRule):
         )
 
 
+class AssignmentsDoNotOverlap(_MachineRule):
+    """One machine cannot be on two projects, or twice on one, at the same time."""
+
+    rule_id = "equipment_telematics.assignments_overlap"
+    name = "Dated assignments of a machine do not overlap"
+    severity = Severity.ERROR
+    key = "assignments_overlap"
+    text = "{equipment} has overlapping project assignments ({count} clashing pair(s))"
+
+    def check(self, machine: dict[str, Any], context: ValidationContext) -> RuleResult | None:
+        assignments = machine.get("assignments")
+        if assignments is None:
+            return None
+        clashes = find_overlaps([a for a in assignments if isinstance(a, dict)])
+        return self._result(machine, not clashes, count=len(clashes))
+
+
 EQUIPMENT_RULES: tuple[type[_MachineRule], ...] = (
     MachineOnSiteHasAllocation,
     MaintenanceNotOverdue,
@@ -202,6 +248,7 @@ EQUIPMENT_RULES: tuple[type[_MachineRule], ...] = (
     DeviceReportsRegularly,
     OwningCostKnown,
     CostPerHourWithinMarket,
+    AssignmentsDoNotOverlap,
 )
 
 

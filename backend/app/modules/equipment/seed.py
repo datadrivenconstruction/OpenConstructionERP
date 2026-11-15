@@ -29,6 +29,7 @@ from app.modules.equipment.models import (
     PartsLog,
     TelemetryReading,
 )
+from app.modules.equipment.tenancy import default_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +109,14 @@ async def seed_equipment_demo(session: AsyncSession) -> dict[str, int]:
         ("generator", 8),
         ("truck", 7),
     )
+    tenant_id = await default_tenant_id(session)
     equipment_units: list[Equipment] = []
     code_idx = 1
     for type_code, qty in plan:
         for _ in range(qty):
             year = rng.randint(2018, 2025)
             e = Equipment(
+                tenant_id=tenant_id,
                 code=f"EQ-{code_idx:04d}",
                 name=f"{type_code.title()} #{code_idx}",
                 type_code=type_code,

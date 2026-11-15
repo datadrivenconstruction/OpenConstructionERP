@@ -699,7 +699,9 @@ async def test_return_rental_emits_event_and_sets_calculated_at(session: AsyncSe
     project_id = await _seed_project(session)
 
     # Seed an active equipment unit so the rental's FK resolves.
-    equipment = Equipment(id=uuid.uuid4(), code=f"EQ-{uuid.uuid4().hex[:6]}", name="Excavator", status="active")
+    equipment = Equipment(
+        tenant_id="t-test", id=uuid.uuid4(), code=f"EQ-{uuid.uuid4().hex[:6]}", name="Excavator", status="active"
+    )
     session.add(equipment)
     await session.flush()
 
@@ -747,7 +749,9 @@ async def test_return_rental_zero_billing_no_event(session: AsyncSession, monkey
     from app.modules.equipment.service import EquipmentService
 
     project_id = await _seed_project(session)
-    equipment = Equipment(id=uuid.uuid4(), code=f"EQ-{uuid.uuid4().hex[:6]}", name="Idle", status="active")
+    equipment = Equipment(
+        tenant_id="t-test", id=uuid.uuid4(), code=f"EQ-{uuid.uuid4().hex[:6]}", name="Idle", status="active"
+    )
     session.add(equipment)
     await session.flush()
 
