@@ -59,6 +59,7 @@ import clsx from 'clsx';
 import { ConfirmDialog } from './ConfirmDialog';
 import { apiGet, apiPut } from '@/shared/lib/api';
 import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
+import { useProcessesUi } from '@/features/processes/useProcessesUi';
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
@@ -1246,6 +1247,8 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
     };
   }, []);
 
+  const firstRunModalOpen = useProcessesUi((s) => s.wizardOpen || s.panelOpen);
+
   /* ── First-login auto-start ──────────────────────────────────────────── */
   useEffect(() => {
     if (active) return;
@@ -1289,8 +1292,14 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
 
     if (!DASHBOARD_ROUTES.has(location.pathname)) return;
 
+    // First-run modal (background services choice) open: the tour waits for it
+    // to close, then this effect re-runs and starts.
+    if (firstRunModalOpen) return;
+
     // Small delay so the dashboard has time to mount its targets.
     const id = window.setTimeout(() => {
+      const ui = useProcessesUi.getState();
+      if (ui.wizardOpen || ui.panelOpen) return;
       try {
         localStorage.setItem(autoStartedKeyFor(defaultTourId), 'true');
       } catch {
@@ -1302,7 +1311,15 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
       setActive(true);
     }, 600);
     return () => window.clearTimeout(id);
-  }, [active, location.pathname, defaultTourId, serverHydrated, serverOnboarding, completedThisSession]);
+  }, [
+    active,
+    location.pathname,
+    defaultTourId,
+    serverHydrated,
+    serverOnboarding,
+    completedThisSession,
+    firstRunModalOpen,
+  ]);
 
   /* ── Never over the onboarding wizard ────────────────────────────────── */
   /**
