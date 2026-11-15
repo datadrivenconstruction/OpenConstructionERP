@@ -38,6 +38,10 @@ def _has_fk(insp: sa.Inspector) -> bool:
     return any(fk.get("name") == _FK for fk in insp.get_foreign_keys(_T))
 
 
+# data-rewrite-ack: table=oe_submittals_spec_import growth=bounded rows=one row per specification book imported, a handful per project
+# data-rewrite-ack: table=oe_submittals_spec_proposal growth=bounded rows=proposed submittal items per imported book, hundreds per project at most
+# boot-repair: gap - an install that never runs alembic keeps spec imports whose book was deleted; they point at no document and the UI lists nothing for them
+
 def upgrade() -> None:
     bind = op.get_bind()
     insp = sa.inspect(bind)
