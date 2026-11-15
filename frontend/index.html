@@ -91,6 +91,20 @@
          over one codepoint are in assets/vendor/fonts/README.txt. -->
     <link rel="stylesheet" href="/assets/vendor/fonts/fonts.css" />
 
+    <!-- Served under /demo/ the host hands root-absolute icon, font and manifest
+         links to another site. Prefix them the same way main.tsx prefixes the
+         router; at the root (desktop, localhost, pip) nothing changes. -->
+    <script>
+      (function () {
+        var p = location.pathname;
+        if (p !== '/demo' && p.indexOf('/demo/') !== 0) return;
+        var ls = document.querySelectorAll(
+          'link[href^="/favicon"],link[href^="/apple-touch"],link[href^="/brand/"],link[href^="/assets/vendor/"],link[rel="manifest"][href^="/"]'
+        );
+        for (var i = 0; i < ls.length; i++) ls[i].setAttribute('href', '/demo' + ls[i].getAttribute('href'));
+      })();
+    </script>
+
     <!-- Appearance boot: puts the saved style (accent, font, density, radius),
          the menu look and the dark class on <html> before first paint, so a reload never
          flashes the default look. Mirrors src/shared/lib/appearance.ts; the
