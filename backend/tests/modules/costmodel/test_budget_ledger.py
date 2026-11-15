@@ -17,7 +17,7 @@ from app.modules.costmodel import budget_ledger_service as svc_mod
 from app.modules.costmodel.budget_ledger_models import BudgetLedgerAudit, BudgetModification, BudgetTransfer
 from app.modules.costmodel.budget_ledger_router import router
 from app.modules.costmodel.budget_ledger_rules import PAYLOAD_KEY, RULE_SET
-from app.modules.costmodel.budget_ledger_schemas import LegIn, ModificationIn, TransferIn
+from app.modules.costmodel.budget_ledger_schemas import LedgerSettings, LegIn, ModificationIn, TransferIn
 from app.modules.costmodel.budget_ledger_service import BudgetLedgerService
 from app.modules.costmodel.validators import register_costmodel_validation_rules
 
@@ -179,6 +179,12 @@ def service(monkeypatch):
     monkeypatch.setattr(s, "_codes", codes)
     monkeypatch.setattr(s, "_legs", legs)
     monkeypatch.setattr(s, "_get", get)
+
+    async def settings(_project):
+        return LedgerSettings(segregation_of_duties=s.sod)  # type: ignore[attr-defined]
+
+    s.sod = True  # type: ignore[attr-defined]
+    monkeypatch.setattr(s, "get_settings", settings)
     monkeypatch.setattr(svc_mod, "approved_budget_delta", delta)
     s.store = store  # type: ignore[attr-defined]
     return s
@@ -387,3 +393,38 @@ async def test_code_race_takes_the_next_number(service, monkeypatch):
         "en",
     )
     assert state["clashed"] and out.code == "BT-002"
+
+
+# ── segregation of duties ─────────────────────────────────────────────────
+
+
+async def test_requester_cannot_approve_own_transfer_by_default(service):
+    t = await _draft(service)
+    await service.transfer_step(PROJECT, t.id, "submit", "u1", "", "en")
+    with pytest.raises(HTTPException) as err:
+        await service.transfer_step(PROJECT, t.id, "approve", "u1", "", "en")
+    assert 400 <= err.value.status_code < 500
+    assert err.value.detail[0]["rule_id"] == "budget_ledger.self_approval"
+    assert "BT-001" in err.value.detail[0]["message"]
+    assert t.status == "submitted"
+
+
+async def test_requester_may_approve_own_transfer_when_the_setting_is_off(service):
+    service.sod = False
+    t = await _draft(service)
+    await service.transfer_step(PROJECT, t.id, "submit", "u1", "", "en")
+    out = await service.transfer_step(PROJECT, t.id, "approve", "u1", "", "en")
+    assert out.status == "approved" and t.decided_by == "u1"
+
+
+async def test_another_user_may_approve_with_the_setting_on(service):
+    t = await _draft(service)
+    await service.transfer_step(PROJECT, t.id, "submit", "u1", "", "en")
+    assert (await service.transfer_step(PROJECT, t.id, "approve", "u2", "", "en")).status == "approved"
+
+
+async def test_self_approval_rule_both_ways():
+    own = {"kind": "transfer", "action": "approve", "code": "BT-001", "self_approval": True}
+    assert (await _run({**own, "segregation_of_duties": True}))["budget_ledger.self_approval"]
+    assert not (await _run({**own, "segregation_of_duties": False}))["budget_ledger.self_approval"]
+    assert not (await _run({**own, "self_approval": False}))["budget_ledger.self_approval"]

@@ -67,7 +67,7 @@ CASES = [
         {**GOOD_DOC, "coverage_amount": None},
         GOOD_DOC,
         "compliance_docs.coverage_amount",
-        E,
+        W,
     ),
     (cd.CurrencyCodeRule, "doc", {**GOOD_DOC, "currency": "euro"}, GOOD_DOC, "compliance_docs.currency_code", E),
     (

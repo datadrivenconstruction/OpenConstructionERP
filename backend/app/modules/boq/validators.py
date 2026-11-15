@@ -510,6 +510,62 @@ class UnitRateNotRederivedFromUntrustedBuildup(ValidationRule):
         return results
 
 
+def _to_decimal_or_none(value: object) -> Decimal | None:
+    try:
+        return Decimal(str(value)) if value not in (None, "") else None
+    except (InvalidOperation, ValueError):
+        return None
+
+
+class ResourceRateWithoutCurrency(ValidationRule):
+    """A priced resource row names no currency, so it is priced in the project base currency.
+
+    The estimate totals already read a blank currency as the base currency (``resource_fx_factor``); this
+    finding makes that assumption visible instead of letting it pass silently.
+    """
+
+    rule_id = "boq.resources.rate_currency_missing"
+    name = "Resource rate has no currency"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A resource row with a unit rate and no currency is treated as the project base currency."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            resources = _position_metadata(position).get("resources")
+            if not isinstance(resources, list):
+                continue
+            missing = [
+                r
+                for r in resources
+                if isinstance(r, dict)
+                and _to_decimal_or_none(r.get("unit_rate"))
+                and not str(r.get("currency") or "").strip()
+            ]
+            if not missing:
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_resources.rate_currency_missing.fail", locale, ordinal=ordinal, count=len(missing)
+                    ),
+                    element_ref=str(position.get("id")) if position.get("id") else None,
+                    suggestion=translate("boq_resources.rate_currency_missing.suggestion", locale),
+                    details={"resources_without_currency": len(missing), "treated_as": "project_base_currency"},
+                )
+            )
+        return results
+
+
 # ── Drawing traceability rules ──────────────────────────────────────────────
 
 
@@ -861,6 +917,7 @@ _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
 
 _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     UnitRateNotRederivedFromUntrustedBuildup(),
+    ResourceRateWithoutCurrency(),
     EmbeddedExportRoundingGap(),
     TakeoffQuantityWithoutDrawingRevision(),
     PositionOnSupersededDrawing(),
