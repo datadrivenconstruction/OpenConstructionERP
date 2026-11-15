@@ -180,4 +180,10 @@ class BiFeedService:
         from app.modules.bi_feed import sqlview
 
         info = await (await self.session.connection()).run_sync(sqlview.status)
-        return SqlAccessStatus(enabled=info["enabled"], schema_name=SQL_SCHEMA, role=SQL_ROLE, views=info["views"])
+        return SqlAccessStatus(
+            enabled=info["enabled"],
+            schema_name=SQL_SCHEMA,
+            role=SQL_ROLE,
+            views=info["views"],
+            parquet=parquet_available(),
+        )
