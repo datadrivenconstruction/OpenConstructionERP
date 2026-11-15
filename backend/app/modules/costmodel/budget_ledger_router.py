@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Budget ledger endpoints, mounted on the cost model router.
 
+GET|PUT /projects/{project_id}/budget-ledger/settings/                segregation of duties (PUT: costmodel.manage)
 GET    /projects/{project_id}/budget-ledger/                        transfers, modifications, effect per line, audit
 POST   /projects/{project_id}/budget-ledger/transfers/              new draft transfer        (costmodel.write)
 PUT    /projects/{project_id}/budget-ledger/transfers/{id}/         change a draft            (costmodel.write)
@@ -22,6 +23,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.costmodel.budget_ledger_schemas import (
     BudgetLedger,
     DecisionIn,
+    LedgerSettings,
     ModificationIn,
     ModificationOut,
     TransferIn,
@@ -45,6 +47,20 @@ def _locale() -> str:
 async def _svc(project_id: uuid.UUID, user_id: CurrentUserId, session: SessionDep) -> BudgetLedgerService:
     await verify_project_access(project_id, user_id, session)
     return BudgetLedgerService(session)
+
+
+@router.get(f"{_BASE}/settings/", response_model=LedgerSettings, dependencies=_READ)
+async def get_ledger_settings(project_id: uuid.UUID, user_id: CurrentUserId, session: SessionDep) -> LedgerSettings:
+    """Whether the requester of an entry is barred from approving it (on by default)."""
+    return await (await _svc(project_id, user_id, session)).get_settings(project_id)
+
+
+@router.put(f"{_BASE}/settings/", response_model=LedgerSettings, dependencies=_MANAGE)
+async def put_ledger_settings(
+    project_id: uuid.UUID, body: LedgerSettings, user_id: CurrentUserId, session: SessionDep
+) -> LedgerSettings:
+    svc = await _svc(project_id, user_id, session)
+    return await svc.put_settings(project_id, body, str(user_id))
 
 
 @router.get(f"{_BASE}/", response_model=BudgetLedger, dependencies=_READ)

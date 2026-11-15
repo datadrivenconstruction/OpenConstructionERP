@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.core.validation.engine import ValidationContext, rule_registry
+from app.core.validation.engine import Severity, ValidationContext, rule_registry
 from app.modules.ncr.validators import (
     NCR_RULE_SET,
     NcrClosureDocumentedRule,
@@ -60,6 +60,13 @@ async def test_open_ncr_needs_no_closure_fields() -> None:
 async def test_missing_root_cause_and_action_report_both() -> None:
     results = await _run(NcrClosureDocumentedRule(), _ncr(root_cause="", corrective_action=""))
     assert [r.details["field"] for r in results if not r.passed] == ["root_cause", "corrective_action"]
+
+
+async def test_missing_root_cause_only_warns_but_missing_action_is_an_error() -> None:
+    root = [r for r in await _run(NcrClosureDocumentedRule(), _ncr(root_cause="")) if not r.passed]
+    assert [(r.details["field"], r.severity) for r in root] == [("root_cause", Severity.WARNING)]
+    action = [r for r in await _run(NcrClosureDocumentedRule(), _ncr(corrective_action="")) if not r.passed]
+    assert [(r.details["field"], r.severity) for r in action] == [("corrective_action", Severity.ERROR)]
 
 
 async def test_open_ncr_not_overdue_before_due_date_or_without_one() -> None:

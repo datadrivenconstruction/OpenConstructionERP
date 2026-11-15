@@ -25,6 +25,7 @@ from app.core.file_signature import (
     mime_for_signature,
 )
 from app.core.file_signature import require as require_signature
+from app.core.i18n import get_locale
 from app.core.storage import module_data_dir
 from app.dependencies import (
     CurrentUserId,
@@ -38,6 +39,7 @@ from app.modules.compliance_docs.schemas import (
     ComplianceDocUpdate,
 )
 from app.modules.compliance_docs.service import ComplianceDocService
+from app.modules.compliance_docs.validators import coverage_findings
 
 # Compliance evidence is typically a scanned PDF / image; we accept the
 # project-wide document allow-list (PDF / PNG / JPEG / GIF / WebP /
@@ -80,7 +82,13 @@ def _to_response(item: object) -> ComplianceDocResponse:
             days_until_expiry = 0
 
     resp = ComplianceDocResponse.model_validate(item)
-    return resp.model_copy(update={"days_until_expiry": days_until_expiry})
+    return resp.model_copy(
+        update={
+            "days_until_expiry": days_until_expiry,
+            # A write carries its gate's findings; a plain read recomputes the coverage warning.
+            "validation_warnings": getattr(item, "validation_warnings", None) or coverage_findings(item, get_locale()),
+        }
+    )
 
 
 @router.get(
