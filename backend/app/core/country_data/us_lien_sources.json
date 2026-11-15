@@ -1,0 +1,139 @@
+{
+  "_comment": "Every entry is verified (official source_url + date_verified) or verified:false. Reference only, not legal advice.",
+  "entries": [
+    {
+      "id": "lien:tx_lien_affidavit_residential",
+      "citation": "Tex. Prop. Code § 53.052",
+      "verified": true,
+      "source_url": "https://capitol.texas.gov/tlodocs/87R/billtext/html/HB02237F.htm",
+      "date_verified": "2026-11-15",
+      "note": "Checked against the enrolled text of H.B. 2237 (sections 53.052, 53.158, 37-38) on capitol.texas.gov; the codified-statute site is not machine readable."
+    },
+    {
+      "id": "lien:tx_lien_affidavit_nonresidential",
+      "citation": "Tex. Prop. Code § 53.052",
+      "verified": true,
+      "source_url": "https://capitol.texas.gov/tlodocs/87R/billtext/html/HB02237F.htm",
+      "date_verified": "2026-11-15",
+      "note": "Checked against the enrolled text of H.B. 2237 (sections 53.052, 53.158, 37-38) on capitol.texas.gov; the codified-statute site is not machine readable."
+    },
+    {
+      "id": "lien:tx_lien_foreclosure_suit",
+      "citation": "Tex. Prop. Code § 53.158",
+      "verified": true,
+      "source_url": "https://capitol.texas.gov/tlodocs/87R/billtext/html/HB02237F.htm",
+      "date_verified": "2026-11-15",
+      "note": "Checked against the enrolled text of H.B. 2237 (sections 53.052, 53.158, 37-38) on capitol.texas.gov; the codified-statute site is not machine readable."
+    },
+    {
+      "id": "lien:tx_lien_2022_amendments_scope",
+      "citation": "Tex. Prop. Code ch. 53, H.B. 2237 (87th Leg.)",
+      "verified": true,
+      "source_url": "https://capitol.texas.gov/tlodocs/87R/billtext/html/HB02237F.htm",
+      "date_verified": "2026-11-15",
+      "note": "Checked against the enrolled text of H.B. 2237 (sections 53.052, 53.158, 37-38) on capitol.texas.gov; the codified-statute site is not machine readable."
+    },
+    {
+      "id": "lien:ca_preliminary_notice",
+      "citation": "Cal. Civ. Code § 8200",
+      "verified": false,
+      "candidate_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CIV",
+      "note": "Official site returned 403; values match secondary summaries only."
+    },
+    {
+      "id": "lien:ca_lien_recording_no_notice_of_completion",
+      "citation": "Cal. Civ. Code §§ 8412, 8414",
+      "verified": false,
+      "candidate_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CIV",
+      "note": "Official site returned 403; values match secondary summaries only."
+    },
+    {
+      "id": "lien:ca_lien_recording_after_notice_of_completion",
+      "citation": "Cal. Civ. Code § 8414",
+      "verified": false,
+      "candidate_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CIV",
+      "note": "Official site returned 403; values match secondary summaries only."
+    },
+    {
+      "id": "lien:ca_lien_foreclosure_suit",
+      "citation": "Cal. Civ. Code § 8460",
+      "verified": false,
+      "candidate_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CIV",
+      "note": "Official site returned 403; values match secondary summaries only."
+    },
+    {
+      "id": "waiver:US-AZ",
+      "citation": "A.R.S. § 33-1008",
+      "verified": true,
+      "source_url": "https://www.azleg.gov/ars/33/01008.htm",
+      "date_verified": "2026-11-15",
+      "note": "Section exists with heading 'Waiver of lien'; form wording not compared."
+    },
+    {
+      "id": "waiver:US-CA",
+      "citation": "Cal. Civ. Code §§ 8132-8138",
+      "verified": false,
+      "candidate_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CIV",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-FL",
+      "citation": "Fla. Stat. § 713.20",
+      "verified": true,
+      "source_url": "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0700-0799/0713/Sections/0713.20.html",
+      "date_verified": "2026-11-15",
+      "note": "Section exists with heading 'Waiver or release of liens'; form wording not compared."
+    },
+    {
+      "id": "waiver:US-GA",
+      "citation": "O.C.G.A. § 44-14-366",
+      "verified": false,
+      "candidate_url": "https://www.legis.ga.gov/",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-MI",
+      "citation": "MCL 570.1115",
+      "verified": false,
+      "candidate_url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-570-1115",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-MS",
+      "citation": "Miss. Code Ann. § 85-7-433",
+      "verified": false,
+      "candidate_url": "https://law.justia.com/codes/mississippi/",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-NV",
+      "citation": "NRS 108.2457",
+      "verified": false,
+      "candidate_url": "https://www.leg.state.nv.us/nrs/nrs-108.html",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-TX",
+      "citation": "Tex. Prop. Code § 53.284",
+      "verified": true,
+      "source_url": "https://capitol.texas.gov/tlodocs/87R/billtext/html/HB02237F.htm",
+      "date_verified": "2026-11-15",
+      "note": "Section 53.284 prescribes the waiver forms; referenced by name in the enrolled H.B. 2237 text, form wording not compared."
+    },
+    {
+      "id": "waiver:US-UT",
+      "citation": "Utah Code § 38-1a-802",
+      "verified": false,
+      "candidate_url": "https://le.utah.gov/xcode/Title38/Chapter1A/38-1a-S802.html",
+      "note": "Official page unreachable or not machine readable; citation from memory."
+    },
+    {
+      "id": "waiver:US-WY",
+      "citation": "Wyo. Stat. § 29-10-101",
+      "verified": true,
+      "source_url": "https://wyoleg.gov/statutes/compress/title29.pdf",
+      "date_verified": "2026-11-15",
+      "note": "Section exists in the official Title 29 PDF (preliminary notice and lien waiver form)."
+    }
+  ]
+}
