@@ -188,7 +188,19 @@ def _from_the_bill(text: str, template: Any) -> bool:
     """True when the sentence is the project's own data (a trade or item title), which no table translates."""
     names = {str(sec[1]) for sec in template.sections if len(sec) > 1}
     names |= {str(item[1]) for sec in template.sections for item in (sec[3] if len(sec) > 3 else [])}
+    # the e-invoice showcase is hand-written in the demo's language; English-looking wording still fails
+    names |= {t for t in _strings(template.einvoice_showcase) if not _ENGLISH.search(t)}
     return text in names
+
+
+def _strings(node: Any) -> list[str]:
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, dict):
+        node = list(node.values())
+    if isinstance(node, (list, tuple)):
+        return [t for child in node for t in _strings(child)]
+    return []
 
 
 def test_english_stays_the_default_for_other_languages() -> None:
