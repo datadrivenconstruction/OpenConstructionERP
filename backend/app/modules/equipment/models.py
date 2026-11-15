@@ -76,9 +76,13 @@ class Equipment(Base):
         Index("ix_oe_equipment_equipment_status", "status"),
         Index("ix_oe_equipment_equipment_type", "type_code"),
         Index("ix_oe_equipment_equipment_rate_item", "rate_item_id"),
+        Index("uq_oe_equipment_equipment_tenant_code", "tenant_id", "code", unique=True),
     )
 
-    code: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
+    # Required owner scope: every unit belongs to exactly one tenant (see
+    # ``app.core.tenant_scope``); project linkage is the dated EquipmentRental.
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    code: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     type_code: Mapped[str] = mapped_column(String(50), nullable=False, default="other")
     manufacturer: Mapped[str | None] = mapped_column(String(255), nullable=True)

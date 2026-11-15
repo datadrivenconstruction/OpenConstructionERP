@@ -74,6 +74,7 @@ from app.modules.equipment.schemas import (
     PartsLogCreate,
     TelemetryReadingCreate,
 )
+from app.modules.equipment.validators import ASSIGNMENT_STATUSES, find_overlaps
 
 logger = logging.getLogger(__name__)
 
@@ -277,18 +278,24 @@ def depreciation_value_at(
 class EquipmentService:
     """Business logic for equipment, maintenance, rentals, inspections, fuel, parts, damage."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None) -> None:
+        """``tenant_id`` confines every read and write to one tenant's fleet.
+
+        ``None`` is for system callers only (seeds, event subscribers); the HTTP
+        layer always passes the caller's tenant.
+        """
         self.session = session
-        self.equipment_repo = EquipmentRepository(session)
+        self.tenant_id = tenant_id
+        self.equipment_repo = EquipmentRepository(session, tenant_id)
         self.type_repo = EquipmentTypeRepository(session)
-        self.telemetry_repo = TelemetryRepository(session)
-        self.schedule_repo = MaintenanceScheduleRepository(session)
-        self.workorder_repo = WorkOrderRepository(session)
-        self.inspection_repo = InspectionRepository(session)
-        self.rental_repo = RentalRepository(session)
-        self.fuel_repo = FuelLogRepository(session)
-        self.parts_repo = PartsLogRepository(session)
-        self.damage_repo = DamageReportRepository(session)
+        self.telemetry_repo = TelemetryRepository(session, tenant_id)
+        self.schedule_repo = MaintenanceScheduleRepository(session, tenant_id)
+        self.workorder_repo = WorkOrderRepository(session, tenant_id)
+        self.inspection_repo = InspectionRepository(session, tenant_id)
+        self.rental_repo = RentalRepository(session, tenant_id)
+        self.fuel_repo = FuelLogRepository(session, tenant_id)
+        self.parts_repo = PartsLogRepository(session, tenant_id)
+        self.damage_repo = DamageReportRepository(session, tenant_id)
 
     # ── EquipmentType ────────────────────────────────────────────────────
 
@@ -332,6 +339,8 @@ class EquipmentService:
     # ── Equipment ────────────────────────────────────────────────────────
 
     async def create_equipment(self, data: EquipmentCreate) -> Equipment:
+        if not self.tenant_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Equipment requires a tenant")
         existing = await self.equipment_repo.get_by_code(data.code)
         if existing is not None:
             raise HTTPException(
@@ -342,7 +351,7 @@ class EquipmentService:
         certificates = values.pop("required_certificates", None)
         if certificates:
             values["metadata_"] = {REQUIRED_CERTIFICATES_KEY: certificates}
-        entity = Equipment(**values)
+        entity = Equipment(tenant_id=self.tenant_id, **values)
         await self.equipment_repo.create(entity)
         logger.info("Equipment created: %s (%s)", entity.code, entity.name)
         return entity
@@ -727,6 +736,7 @@ class EquipmentService:
         Raises ``ValueError`` if the unit is blocked. Emits
         ``equipment.assigned`` on success.
         """
+        await self.get_equipment(equipment_id)  # 404 for a unit outside the caller's tenant
         if await self.is_blocked_from_assignment(equipment_id):
             raise ValueError(
                 f"Equipment {equipment_id} is blocked from assignment (status != active or inspection expired)"
@@ -738,6 +748,7 @@ class EquipmentService:
         # of persisting a corrupt record.
         if end_date is not None and end_date < start_date:
             raise ValueError(f"Rental end_date {end_date} is before start_date {start_date}")
+        await self._ensure_no_overlap(equipment_id, start_date, end_date)
 
         rental = EquipmentRental(
             equipment_id=equipment_id,
@@ -763,6 +774,40 @@ class EquipmentService:
             },
             source_module="equipment",
         )
+        return rental
+
+    async def _ensure_no_overlap(
+        self,
+        equipment_id: uuid.UUID,
+        start_date: str,
+        end_date: str | None,
+        *,
+        exclude_id: uuid.UUID | None = None,
+    ) -> None:
+        """Raise ``ValueError`` when the dated assignment collides with another one of the machine."""
+        rows = await self.rental_repo.assignments_for(equipment_id)
+        candidate_id: Any = exclude_id or "new"
+        candidate = {"id": candidate_id, "start_date": start_date, "end_date": end_date}
+        others = [r for r in rows if r["id"] != exclude_id]
+        if any(candidate_id in (a["id"], b["id"]) for a, b in find_overlaps([candidate, *others])):
+            raise ValueError(
+                f"Equipment {equipment_id} is already assigned in {start_date} to {end_date or 'open end'}"
+            )
+
+    async def update_rental(self, rental_id: uuid.UUID, fields: dict[str, Any]) -> EquipmentRental:
+        rental = await self.rental_repo.get_by_id(rental_id)
+        if rental is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rental not found")
+        if fields:
+            start = fields.get("start_date", rental.start_date)
+            end = fields.get("end_date", rental.end_date)
+            if end is not None and end < start:
+                raise ValueError(f"Rental end_date {end} is before start_date {start}")
+            new_status = fields.get("status", rental.status)
+            if new_status in ASSIGNMENT_STATUSES and {"start_date", "end_date", "status"} & fields.keys():
+                await self._ensure_no_overlap(rental.equipment_id, start, end, exclude_id=rental.id)
+            await self.rental_repo.update_fields(rental_id, **fields)
+            await self.session.refresh(rental)
         return rental
 
     async def create_rental(self, data: EquipmentRentalCreate) -> EquipmentRental:
@@ -1178,7 +1223,7 @@ class EquipmentService:
         from app.modules.equipment.predictive_service import EquipmentPredictiveService
 
         await self.get_equipment(equipment_id)
-        predictive = EquipmentPredictiveService(self.session)
+        predictive = EquipmentPredictiveService(self.session, self.tenant_id)
         assessment = await predictive.analyze_equipment_health(equipment_id)
         return HealthAnalyticsResponse(
             equipment_id=equipment_id,
@@ -1208,7 +1253,7 @@ class EquipmentService:
         from app.modules.equipment.predictive_service import EquipmentPredictiveService
 
         await self.get_equipment(equipment_id)
-        predictive = EquipmentPredictiveService(self.session)
+        predictive = EquipmentPredictiveService(self.session, self.tenant_id)
         forecast = await predictive.forecast_maintenance_need(equipment_id)
         return FailureForecastResponse(
             equipment_id=equipment_id,
@@ -1228,7 +1273,7 @@ class EquipmentService:
         """Fleet-wide optimisation recommendations."""
         from app.modules.equipment.predictive_service import EquipmentPredictiveService
 
-        predictive = EquipmentPredictiveService(self.session)
+        predictive = EquipmentPredictiveService(self.session, self.tenant_id)
         data = await predictive.fleet_optimization_recommendations(
             target_utilization_pct=target_utilization_pct,
             window_days=window_days,

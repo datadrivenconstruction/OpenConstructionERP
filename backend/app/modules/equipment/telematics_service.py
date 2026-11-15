@@ -19,7 +19,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy import Select, and_, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -32,8 +32,10 @@ from app.modules.equipment.models import (
     TelemetryReading,
     UtilisationDay,
 )
+from app.modules.equipment.repository import tenant_options
 from app.modules.equipment.schemas import TelemetryReadingCreate
 from app.modules.equipment.telematics import TelematicsSample, daily_utilisation
+from app.modules.equipment.validators import ASSIGNMENT_STATUSES
 
 logger = logging.getLogger(__name__)
 
@@ -84,14 +86,26 @@ def _rental_covers(rental: EquipmentRental, day: date) -> bool:
 class TelematicsService:
     """Telematics ingest and the views built on its daily rollup."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None) -> None:
         self.session = session
+        self.tenant_id = tenant_id
+
+    async def _run(self, stmt: Any) -> Any:
+        """Execute ``stmt`` confined to the caller's tenant (system callers pass none)."""
+        if self.tenant_id is not None and isinstance(stmt, Select):
+            stmt = stmt.options(*tenant_options(self.tenant_id))
+        return await self.session.execute(stmt)
+
+    async def _get(self, model: Any, row_id: uuid.UUID) -> Any:
+        if self.tenant_id is None:
+            return await self.session.get(model, row_id)
+        return (await self._run(select(model).where(model.id == row_id))).scalar_one_or_none()
 
     # ── Devices ─────────────────────────────────────────────────────────
 
     async def create_device(self, equipment_id: uuid.UUID, label: str = "") -> tuple[TelematicsDevice, str]:
         """Register a device and return it with its plaintext token (shown once)."""
-        if await self.session.get(Equipment, equipment_id) is None:
+        if await self._get(Equipment, equipment_id) is None:
             raise LookupError("equipment_not_found")
         token = TOKEN_PREFIX + secrets.token_urlsafe(32)
         device = TelematicsDevice(
@@ -117,10 +131,10 @@ class TelematicsService:
             stmt = stmt.where(TelematicsDevice.equipment_id == equipment_id)
         if project_id is not None:
             stmt = stmt.where(TelematicsDevice.equipment_id.in_(self._project_machines(project_id)))
-        return list((await self.session.execute(stmt)).scalars())
+        return list((await self._run(stmt)).scalars())
 
     async def revoke_device(self, device_id: uuid.UUID) -> None:
-        device = await self.session.get(TelematicsDevice, device_id)
+        device = await self._get(TelematicsDevice, device_id)
         if device is None:
             raise LookupError("device_not_found")
         device.active = False
@@ -131,7 +145,7 @@ class TelematicsService:
         if not token or not token.startswith(TOKEN_PREFIX):
             return None
         row = (
-            await self.session.execute(select(TelematicsDevice).where(TelematicsDevice.token_hash == hash_token(token)))
+            await self._run(select(TelematicsDevice).where(TelematicsDevice.token_hash == hash_token(token)))
         ).scalar_one_or_none()
         return row if row is not None and row.active else None
 
@@ -141,9 +155,7 @@ class TelematicsService:
         if not refs:
             return {}
         rows = (
-            await self.session.execute(
-                select(Equipment).where(or_(Equipment.code.in_(refs), Equipment.serial.in_(refs)))
-            )
+            await self._run(select(Equipment).where(or_(Equipment.code.in_(refs), Equipment.serial.in_(refs))))
         ).scalars()
         out: dict[str, Equipment] = {}
         for eq in rows:
@@ -170,7 +182,7 @@ class TelematicsService:
         """
         from app.modules.equipment.service import EquipmentService
 
-        eq_service = EquipmentService(self.session)
+        eq_service = EquipmentService(self.session, self.tenant_id)
         by_ref = (
             {}
             if equipment_id
@@ -241,11 +253,15 @@ class TelematicsService:
         """
         cutoff = datetime.now(UTC) - timedelta(days=max(keep_days, 7))
         stmt = delete(TelemetryReading).where(TelemetryReading.recorded_at < cutoff)
+        if self.tenant_id is not None:
+            stmt = stmt.where(
+                TelemetryReading.equipment_id.in_(select(Equipment.id).where(Equipment.tenant_id == self.tenant_id))
+            )
         if equipment_ids is not None:
             stmt = stmt.where(TelemetryReading.equipment_id.in_(equipment_ids))
         if project_id is not None:
             stmt = stmt.where(TelemetryReading.equipment_id.in_(self._project_machines(project_id)))
-        result = await self.session.execute(stmt)
+        result = await self._run(stmt)
         return int(getattr(result, "rowcount", 0) or 0)
 
     async def _prune_if_due(self, equipment_ids: set[uuid.UUID]) -> None:
@@ -277,7 +293,7 @@ class TelematicsService:
         latest = {
             eq_id: ts
             for eq_id, ts in (
-                await self.session.execute(
+                await self._run(
                     select(TelemetryReading.equipment_id, func.max(TelemetryReading.recorded_at))
                     .where(TelemetryReading.equipment_id.in_(eq_ids))
                     .group_by(TelemetryReading.equipment_id)
@@ -287,7 +303,7 @@ class TelematicsService:
         rentals = {
             r.equipment_id: r
             for r in (
-                await self.session.execute(
+                await self._run(
                     select(EquipmentRental).where(
                         EquipmentRental.equipment_id.in_(eq_ids), EquipmentRental.status == "active"
                     )
@@ -330,7 +346,7 @@ class TelematicsService:
             if project is None or project.owner_id is None:
                 continue
             already = (
-                await self.session.execute(
+                await self._run(
                     select(func.count())
                     .select_from(Notification)
                     .where(
@@ -343,7 +359,7 @@ class TelematicsService:
             ).scalar_one()
             if already:
                 continue
-            eq = await self.session.get(Equipment, s["equipment_id"])
+            eq = await self._get(Equipment, s["equipment_id"])
             await NotificationService(self.session).create(
                 user_id=project.owner_id,
                 notification_type="warning",
@@ -361,7 +377,7 @@ class TelematicsService:
 
     async def _rental_for(self, equipment_id: uuid.UUID, day: date) -> EquipmentRental | None:
         rows = (
-            await self.session.execute(
+            await self._run(
                 select(EquipmentRental).where(
                     EquipmentRental.equipment_id == equipment_id,
                     EquipmentRental.status.in_(("active", "returned")),
@@ -376,7 +392,7 @@ class TelematicsService:
         from app.modules.field_time.models import FieldSiteGeofence
 
         rows = (
-            await self.session.execute(
+            await self._run(
                 select(FieldSiteGeofence).where(
                     FieldSiteGeofence.project_id == project_id, FieldSiteGeofence.active.is_(True)
                 )
@@ -414,7 +430,7 @@ class TelematicsService:
         start = datetime(day.year, day.month, day.day, tzinfo=UTC)
         readings = (
             (
-                await self.session.execute(
+                await self._run(
                     select(TelemetryReading)
                     .where(
                         TelemetryReading.equipment_id == equipment_id,
@@ -440,7 +456,7 @@ class TelematicsService:
         if use is None:
             return None
         row = (
-            await self.session.execute(
+            await self._run(
                 select(UtilisationDay).where(UtilisationDay.equipment_id == equipment_id, UtilisationDay.day == day)
             )
         ).scalar_one_or_none()
@@ -490,7 +506,7 @@ class TelematicsService:
             project = await self.session.get(Project, project_id)
             if project is None or project.owner_id is None:
                 return
-            eq = await self.session.get(Equipment, equipment_id)
+            eq = await self._get(Equipment, equipment_id)
             await NotificationService(self.session).create(
                 user_id=project.owner_id,
                 notification_type="warning",
@@ -514,7 +530,7 @@ class TelematicsService:
             stmt = stmt.where(UtilisationDay.project_id == project_id)
         if equipment_id is not None:
             stmt = stmt.where(UtilisationDay.equipment_id == equipment_id)
-        return list((await self.session.execute(stmt.order_by(UtilisationDay.day))).scalars())
+        return list((await self._run(stmt.order_by(UtilisationDay.day))).scalars())
 
     async def utilisation(self, date_from: date, date_to: date, project_id: uuid.UUID | None = None) -> dict[str, Any]:
         """Worked, idle and off hours per machine and in total over a window."""
@@ -548,10 +564,7 @@ class TelematicsService:
                 m["project_ids"].add(str(d.project_id))
         eqs = {}
         if machines:
-            eqs = {
-                e.id: e
-                for e in (await self.session.execute(select(Equipment).where(Equipment.id.in_(machines)))).scalars()
-            }
+            eqs = {e.id: e for e in (await self._run(select(Equipment).where(Equipment.id.in_(machines)))).scalars()}
         rows = []
         totals = dict.fromkeys(("worked_hours", "idle_hours", "off_hours", "fuel_l", "co2_kg", "hire_cost"), _ZERO)
         for eq_id, m in machines.items():
@@ -600,7 +613,7 @@ class TelematicsService:
             if rental is None:
                 skipped_no_project += 1
                 continue
-            eq = await self.session.get(Equipment, d.equipment_id)
+            eq = await self._get(Equipment, d.equipment_id)
             engine = d.worked_hours + d.idle_hours
             rate_h = Decimal(str(rental.internal_rate_per_hour or 0))
             rate_d = Decimal(str(rental.internal_rate_per_day or 0))
@@ -663,7 +676,7 @@ class TelematicsService:
         today = datetime.now(UTC).date()
         fence_pids = set(
             (
-                await self.session.execute(
+                await self._run(
                     select(FieldSiteGeofence.project_id).where(FieldSiteGeofence.active.is_(True)).distinct()
                 )
             ).scalars()
@@ -673,23 +686,24 @@ class TelematicsService:
         fences = {pid: await self._fences(pid) for pid in fence_pids}
         rentals = [
             r
-            for r in (
-                await self.session.execute(select(EquipmentRental).where(EquipmentRental.status == "active"))
-            ).scalars()
+            for r in (await self._run(select(EquipmentRental).where(EquipmentRental.status == "active"))).scalars()
             if _rental_covers(r, today)
         ]
         allocated = {r.equipment_id: r.project_id for r in rentals}
-        equipment = list(
-            (await self.session.execute(select(Equipment).where(Equipment.status != "disposed"))).scalars()
-        )
+        equipment = list((await self._run(select(Equipment).where(Equipment.status != "disposed"))).scalars())
         schedules = list(
-            (
-                await self.session.execute(select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True)))
-            ).scalars()
+            (await self._run(select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True)))).scalars()
         )
         week = await self._days(today - timedelta(days=7), today, None)
         silent = {s["equipment_id"]: s for s in await self.silent_devices()}
         with_device = {d.equipment_id for d in await self.list_devices() if d.active}
+        assignments: dict[uuid.UUID, list[dict[str, Any]]] = {}
+        for r in (
+            await self._run(select(EquipmentRental).where(EquipmentRental.status.in_(ASSIGNMENT_STATUSES)))
+        ).scalars():
+            assignments.setdefault(r.equipment_id, []).append(
+                {"id": str(r.id), "project_id": str(r.project_id), "start_date": r.start_date, "end_date": r.end_date}
+            )
         machines = []
         for eq in equipment:
             on_site = await self._on_site_project(eq, fences)
@@ -717,6 +731,7 @@ class TelematicsService:
                     "on_site_project_id": str(on_site) if on_site else None,
                     "allocated_project_id": str(alloc) if alloc else None,
                     "maintenance_overdue": overdue,
+                    "assignments": assignments.get(eq.id, []),
                     "outside_geofence_m": str(outside) if outside is not None else None,
                     "has_device": eq.id in with_device,
                     "device_silent_hours": silent[eq.id]["hours_silent"] if eq.id in silent else None,

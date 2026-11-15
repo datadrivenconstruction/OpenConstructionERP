@@ -87,6 +87,7 @@ def _make_service() -> EquipmentService:
     """
     service = EquipmentService.__new__(EquipmentService)
     service.session = _StubSession()
+    service.tenant_id = "t-test"
     service.equipment_repo = _make_repo()
     service.type_repo = _make_repo()
     service.telemetry_repo = _make_repo()
@@ -116,6 +117,7 @@ def _make_repo() -> MagicMock:
     repo.latest_telemetry = AsyncMock(return_value=None)
     repo.count_open_for_equipment = AsyncMock(return_value=0)
     repo.count_active = AsyncMock(return_value=0)
+    repo.assignments_for = AsyncMock(return_value=[])
     repo.cost_in_range = AsyncMock(return_value=Decimal("0"))
     repo.expiring_within = AsyncMock(return_value=[])
     repo.expired_for_equipment = AsyncMock(return_value=[])
@@ -136,6 +138,7 @@ def _attach_meta(obj: Any) -> Any:
 
 def _make_equipment(**overrides: Any) -> Equipment:
     e = Equipment(
+        tenant_id="t-test",
         code=overrides.get("code", "EQ-TEST"),
         name=overrides.get("name", "Test Excavator"),
         type_code=overrides.get("type_code", "excavator"),

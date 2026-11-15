@@ -100,6 +100,7 @@ async def seed_telematics_demo(session: AsyncSession, project_ids: Iterable[uuid
     for idx, (code, name, type_code, cost_code, emission, rate, idle_share, fuel_lph, interval) in enumerate(_MACHINES):
         start_hours = Decimal(1200 + 650 * idx)
         eq = Equipment(
+            tenant_id=str(project.owner_id),
             code=code,
             name=name,
             type_code=type_code,

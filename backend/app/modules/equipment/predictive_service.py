@@ -557,11 +557,12 @@ def _bundle(label: str, units: list[FleetUnitInsight]) -> dict[str, object]:
 class EquipmentPredictiveService:
     """Orchestrates predictive analytics over persisted equipment data."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None) -> None:
         self.session = session
-        self.equipment_repo = EquipmentRepository(session)
-        self.telemetry_repo = TelemetryRepository(session)
-        self.workorder_repo = WorkOrderRepository(session)
+        self.tenant_id = tenant_id
+        self.equipment_repo = EquipmentRepository(session, tenant_id)
+        self.telemetry_repo = TelemetryRepository(session, tenant_id)
+        self.workorder_repo = WorkOrderRepository(session, tenant_id)
 
     @staticmethod
     def _to_samples(readings: list[TelemetryReading]) -> list[TelemetrySample]:
@@ -581,7 +582,7 @@ class EquipmentPredictiveService:
     async def _overdue_inspection(self, equipment_id: uuid.UUID) -> bool:
         from app.modules.equipment.repository import InspectionRepository
 
-        repo = InspectionRepository(self.session)
+        repo = InspectionRepository(self.session, self.tenant_id)
         today_iso = date.today().isoformat()
         expired = await repo.expired_for_equipment(equipment_id, today_iso)
         return len(expired) > 0
@@ -609,7 +610,7 @@ class EquipmentPredictiveService:
         readings = await self.telemetry_repo.list_since(equipment_id, since=None, limit=1000)
         samples = self._to_samples(readings)
 
-        sched_repo = MaintenanceScheduleRepository(self.session)
+        sched_repo = MaintenanceScheduleRepository(self.session, self.tenant_id)
         schedules = await sched_repo.list_for_equipment(equipment_id)
         # Earliest upcoming hours-based service meter, if any.
         next_meter: float | None = None

@@ -70,6 +70,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import (
+    CurrentTenantId,
     CurrentUserId,
     RequirePermission,
     SessionDep,
@@ -122,8 +123,15 @@ router = APIRouter(tags=["equipment"])
 logger = logging.getLogger(__name__)
 
 
-def _get_service(session: SessionDep) -> EquipmentService:
-    return EquipmentService(session)
+def require_tenant(tenant_id: CurrentTenantId) -> str:
+    """The caller's tenant; the fleet has no unscoped view, so no tenant means no access."""
+    if not tenant_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant could not be resolved")
+    return tenant_id
+
+
+def _get_service(session: SessionDep, tenant_id: str = Depends(require_tenant)) -> EquipmentService:
+    return EquipmentService(session, tenant_id)
 
 
 # ── Equipment Types ──────────────────────────────────────────────────────
@@ -677,16 +685,10 @@ async def update_rental(
     _perm: None = Depends(RequirePermission("equipment.assign")),
     service: EquipmentService = Depends(_get_service),
 ) -> EquipmentRentalResponse:
-    rental = await service.rental_repo.get_by_id(rental_id)
-    if rental is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rental not found",
-        )
-    fields = data.model_dump(exclude_unset=True)
-    if fields:
-        await service.rental_repo.update_fields(rental_id, **fields)
-        await service.session.refresh(rental)
+    try:
+        rental = await service.update_rental(rental_id, data.model_dump(exclude_unset=True))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     return EquipmentRentalResponse.model_validate(rental)
 
 
