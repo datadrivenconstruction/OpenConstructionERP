@@ -42,6 +42,7 @@ def _has_fk(insp: sa.Inspector) -> bool:
 # data-rewrite-ack: table=oe_submittals_spec_proposal growth=bounded rows=proposed submittal items per imported book, hundreds per project at most
 # boot-repair: gap - an install that never runs alembic keeps spec imports whose book was deleted; they point at no document and the UI lists nothing for them
 
+
 def upgrade() -> None:
     bind = op.get_bind()
     insp = sa.inspect(bind)
