@@ -67,7 +67,7 @@ async def _machine(session, *, hired: bool = False, start: str = "2026-10-01") -
             )
         )
         await session.flush()
-    eq = Equipment(code=f"EX-{uuid.uuid4().hex[:6]}", name="Excavator")
+    eq = Equipment(tenant_id="t-test", code=f"EX-{uuid.uuid4().hex[:6]}", name="Excavator")
     session.add(eq)
     await session.flush()
     if hired:

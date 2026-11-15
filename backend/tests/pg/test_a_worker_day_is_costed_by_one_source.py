@@ -370,6 +370,7 @@ async def test_a_timesheet_of_plant_only_publishes_no_labour(pg_session) -> None
     equipment_id = uuid.uuid4()
     pg_session.add(
         Equipment(
+            tenant_id="t-test",
             id=equipment_id,
             code=f"EQ-{uuid.uuid4().hex[:6]}",
             name="Excavator",

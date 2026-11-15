@@ -74,7 +74,9 @@ async def _setup(session):
     w1 = Resource(code=f"W1-{tag}", name="Anna Mason", resource_type="person")
     w2 = Resource(code=f"W2-{tag}", name="Ben Fixer", resource_type="person")
     w3 = Resource(code=f"W3-{tag}", name="Carl Op", resource_type="person")
-    ex = Equipment(code=f"EX-{tag}", name="Excavator", metadata_={"required_certificates": ["excavator"]})
+    ex = Equipment(
+        tenant_id="t-test", code=f"EX-{tag}", name="Excavator", metadata_={"required_certificates": ["excavator"]}
+    )
     session.add_all([project, w1, w2, w3, ex])
     await session.flush()
     await session.commit()
