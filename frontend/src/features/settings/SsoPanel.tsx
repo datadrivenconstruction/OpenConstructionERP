@@ -173,7 +173,7 @@ export function SsoPanel() {
     queryKey: ['sso', 'capabilities'],
     queryFn: () => apiGet<{ saml_available: boolean }>('/v1/sso/capabilities/'),
   });
-  const list = useQuery({ queryKey: LIST_KEY, queryFn: () => apiGet<Provider[]>('/v1/sso/providers/admin/') });
+  const list = useQuery({ queryKey: LIST_KEY, queryFn: () => apiGet<{ items: Provider[]; total: number }>('/v1/sso/providers/admin/').then((r) => r.items) });
   const samlAvailable = caps.data?.saml_available ?? false;
 
   const done = (title: string) => {

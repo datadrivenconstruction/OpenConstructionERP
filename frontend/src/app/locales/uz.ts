@@ -57162,6 +57162,7 @@ const resource = {
     "modules.catalog.win_loss": "Tender natijalari registri",
     "modules.catalog.offers": "Mijozga takliflar",
     "modules.catalog.letter_templates": "Xat shablonlari",
+    "modules.catalog.sso": "Yagona kirish",
     "modules.pp_desc_eleven_areas_framework": "Loyihani buyurtmachi tomonidan oʻn bir boshqaruv sohasida, ikki bosqichda boshqarish: loyihani ishlab chiqish va qurilishni amalga oshirish. Ular orasida bitta gate va har bir soha uchun bitta tasdiqlangan ramka hujjati bor.",
     "modules.pp_name_pakistan_pk": "Pokiston qurilish paketi",
     "modules.pp_name_peru_pe": "Peru qurilish paketi",

@@ -55908,6 +55908,7 @@ const resource = {
     "modules.catalog.win_loss": "Тендерийн үр дүнгийн бүртгэл",
     "modules.catalog.offers": "Харилцагчийн санал",
     "modules.catalog.letter_templates": "Захидлын загварууд",
+    "modules.catalog.sso": "Нэг удаагийн нэвтрэлт",
     "modules.pp_desc_eleven_areas_framework": "Захиалагчийн талаас төслийг арван нэгэн удирдлагын салбарт, хоёр үе шатанд удирдах: төслийн хөгжүүлэлт ба барилгын гүйцэтгэл. Хоёрын хооронд нэг гарц, салбар бүрт нэг батлагдсан төлөвлөгөөний баримт бичигтэй.",
     "modules.pp_name_pakistan_pk": "Барилгын багц: Пакистан",
     "modules.pp_name_peru_pe": "Перугийн барилгын багц",
