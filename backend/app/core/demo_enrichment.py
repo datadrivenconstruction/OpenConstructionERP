@@ -213,6 +213,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.construction_control.seed import seed_construction_control_demo
         from app.modules.contracts.seed import seed_contracts_demo
         from app.modules.cost_benchmarks.demo import seed_cost_benchmarks_demo
+        from app.modules.costmodel.cost_control_demo import rehome_showcase_cost_lines
         from app.modules.costmodel.seed import seed_costmodel
         from app.modules.crm.seed import seed_crm_demo
         from app.modules.cvr.seed import seed_cvr_demo
@@ -407,6 +408,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # The generic cost model is priced in one currency and one standard; the showcase projects
             # outside it get their cost history from the schedule seeder instead.
             ("costmodel", None, lambda s: seed_costmodel(s, _generic_cost_pids)),
+            ("cost_line_rehome", None, lambda s: rehome_showcase_cost_lines(s, _demo_pids)),
             ("moc", None, lambda s: seed_moc(s, _focus_pids)),
             ("takeoff", None, lambda s: seed_takeoff_demo(s, _demo_pids)),
             ("accommodation", None, lambda s: seed_accommodation(s, _focus_pids)),
