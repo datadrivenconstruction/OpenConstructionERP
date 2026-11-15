@@ -64412,7 +64412,7 @@ const resource = {
     "sso.field_slug": "Кыска ат (URL ичинде)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Кардардын жашыруун ачкычы",
     "sso.secret_keep": "Сакталган secret калышы үчүн бош калтырыңыз.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP кирүү URL-и",

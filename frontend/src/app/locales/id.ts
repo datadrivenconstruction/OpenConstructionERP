@@ -64029,7 +64029,7 @@ const resource = {
     "sso.field_slug": "Nama singkat (di URL)",
     "sso.field_issuer": "URL Issuer",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Rahasia klien",
     "sso.secret_keep": "Kosongkan untuk mempertahankan secret yang tersimpan.",
     "sso.field_idp_entity": "Entity ID IdP",
     "sso.field_idp_sso_url": "URL masuk IdP",

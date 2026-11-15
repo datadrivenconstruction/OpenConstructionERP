@@ -64299,7 +64299,7 @@ const resource = {
     "sso.field_slug": "Кратко име (в URL адресите)",
     "sso.field_issuer": "URL на издателя (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Таен ключ на клиента",
     "sso.secret_keep": "Оставете празно, за да запазите текущия secret.",
     "sso.field_idp_entity": "Entity ID на IdP",
     "sso.field_idp_sso_url": "URL за вход на IdP",

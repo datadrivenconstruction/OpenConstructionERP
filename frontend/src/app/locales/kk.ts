@@ -64256,7 +64256,7 @@ const resource = {
     "sso.field_slug": "Қысқа атау (URL ішінде)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Клиенттің құпия кілті",
     "sso.secret_keep": "Сақталған secret қалуы үшін бос қалдырыңыз.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP кіру URL-і",

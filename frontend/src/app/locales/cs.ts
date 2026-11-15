@@ -65634,7 +65634,7 @@ const resource = {
     "sso.field_slug": "Krátký název (v URL)",
     "sso.field_issuer": "URL vydavatele (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Tajný klíč klienta",
     "sso.secret_keep": "Nechte prázdné, aby se zachoval uložený secret.",
     "sso.field_idp_entity": "Entity ID poskytovatele (IdP)",
     "sso.field_idp_sso_url": "URL přihlášení IdP",

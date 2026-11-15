@@ -63973,7 +63973,7 @@ const resource = {
     "sso.field_slug": "Богино нэр (URL-д)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Клиентийн нууц түлхүүр",
     "sso.secret_keep": "Хадгалсан secret-ийг үлдээхийн тулд хоосон орхино уу.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP нэвтрэх URL",

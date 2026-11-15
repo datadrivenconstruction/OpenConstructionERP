@@ -65895,7 +65895,7 @@ const resource = {
     "sso.field_slug": "Krótka nazwa (w adresach URL)",
     "sso.field_issuer": "URL wystawcy (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Sekret klienta",
     "sso.secret_keep": "Zostaw puste, aby zachować zapisany secret.",
     "sso.field_idp_entity": "Entity ID dostawcy (IdP)",
     "sso.field_idp_sso_url": "URL logowania IdP",

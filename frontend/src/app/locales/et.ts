@@ -64245,7 +64245,7 @@ const resource = {
     "sso.field_slug": "Lühinimi (URL-ides)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Kliendi salavõti",
     "sso.secret_keep": "Jäta tühjaks, et salvestatud secret säiliks.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP sisselogimise URL",

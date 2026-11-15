@@ -64255,7 +64255,7 @@ const resource = {
     "sso.field_slug": "Σύντομο όνομα (στα URL)",
     "sso.field_issuer": "URL εκδότη (issuer)",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Μυστικό κλειδί πελάτη",
     "sso.secret_keep": "Αφήστε κενό για να κρατήσετε το αποθηκευμένο secret.",
     "sso.field_idp_entity": "Entity ID του IdP",
     "sso.field_idp_sso_url": "URL σύνδεσης του IdP",
