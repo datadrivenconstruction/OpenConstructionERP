@@ -264307,6 +264307,7 @@
         }
       ],
       "import_dependencies": [
+        "sso",
         "users"
       ]
     },
@@ -278390,7 +278391,7 @@
           "method": "GET",
           "path": "/providers/admin/",
           "handler": "list_providers",
-          "response_model": "list[sch.ProviderOut]",
+          "response_model": "sch.SsoListResponse",
           "request_schema": "SsoService"
         },
         {
@@ -278679,6 +278680,33 @@
               "name": "metadata_url",
               "type": "str | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SsoListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProviderOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         },
@@ -307936,7 +307964,8 @@
         }
       ],
       "import_dependencies": [
-        "boq"
+        "boq",
+        "sso"
       ]
     },
     {
@@ -319871,6 +319900,7 @@
       "variations"
     ],
     "scim": [
+      "sso",
       "users"
     ],
     "search": [
@@ -320069,7 +320099,8 @@
       "us_pack"
     ],
     "users": [
-      "boq"
+      "boq",
+      "sso"
     ],
     "validation": [
       "bim_hub",
@@ -320128,7 +320159,7 @@
     "total_columns": 10712,
     "total_relationships": 261,
     "total_routes": 5228,
-    "total_schemas": 4745,
+    "total_schemas": 4746,
     "total_python_files": 3415,
     "frontend_features": 238,
     "frontend_ts_files": 4209,

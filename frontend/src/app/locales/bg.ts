@@ -56234,6 +56234,7 @@ const resource = {
     "modules.catalog.win_loss": "Регистър на резултатите от оферти",
     "modules.catalog.offers": "Оферти за клиенти",
     "modules.catalog.letter_templates": "Шаблони за писма",
+    "modules.catalog.sso": "Единен вход (SSO)",
     "modules.pp_desc_eleven_areas_framework": "Управление на проекта от страна на инвеститора в единадесет области на управление през два етапа - развитие на проекта и изпълнение на строителството, с един гейт между тях и по един одобрен рамков документ за всяка област.",
     "modules.pp_name_pakistan_pk": "Строителен пакет Пакистан",
     "modules.pp_name_peru_pe": "Строителен пакет Перу",

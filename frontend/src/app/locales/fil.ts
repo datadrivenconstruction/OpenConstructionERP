@@ -56188,6 +56188,7 @@ const resource = {
     "modules.catalog.win_loss": "Talaan ng Resulta ng Bid",
     "modules.catalog.offers": "Mga alok sa kustomer",
     "modules.catalog.letter_templates": "Mga Template ng Liham",
+    "modules.catalog.sso": "Single Sign-On",
     "modules.pp_desc_eleven_areas_framework": "Pamamahala ng proyekto sa panig ng may-ari sa labing-isang lugar ng pamamahala, sa dalawang yugto, ang pagpapaunlad ng proyekto at ang konstruksyon, na may isang gate sa pagitan at isang naaprubahang balangkas na dokumento sa bawat lugar.",
     "modules.pp_name_pakistan_pk": "Construction Pack ng Pakistan",
     "modules.pp_name_peru_pe": "Pakete sa Konstruksyon ng Peru",
