@@ -65130,6 +65130,19 @@ const resource = {
     "letter_templates.download": "PDF indir",
     "demo_market.label": "Dil ve pazar",
     "demo_market.hint": "Arayüz dilini değiştirir ve o ülkenin kendi verileri ve standartlarıyla demosunu açar.",
+    "boot.starting_title": "OpenConstructionERP kuruluyor",
+    "boot.starting_body": "İlk başlatmada veritabanı hazırlanır ve modüller yüklenir; bu birkaç dakika sürebilir. Sunucu hazır olduğunda bu sayfa kendiliğinden açılır; demo projeler ve maliyet verileri bundan sonra arka planda yüklenmeye devam eder.",
+    "boot.failed_title": "Sunucu başlatılamadı",
+    "boot.failed_body": "Başlatma bir hata nedeniyle durdu. Nedeni sunucu günlüğünde yazıyor; sorun giderildikten sonra uygulamayı yeniden başlatın.",
+    "boot.step_of": "Adım {{step}} / {{steps}}",
+    "boot.phase.starting": "Sunucu başlatılıyor",
+    "boot.phase.translations": "Çeviriler yükleniyor",
+    "boot.phase.database": "Veritabanı hazırlanıyor",
+    "boot.phase.modules": "Modüller yükleniyor",
+    "boot.phase.validation": "Doğrulama kuralları kaydediliyor",
+    "boot.phase.demo_data": "Demo hesapları ve referans veriler oluşturuluyor",
+    "boot.phase.services": "Arka plan hizmetleri hazırlanıyor",
+    "boot.phase.finishing": "Tamamlanıyor",
   }
 } as { translation: Record<string, string> };
 

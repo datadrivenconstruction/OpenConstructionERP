@@ -65130,6 +65130,19 @@ const resource = {
     "letter_templates.download": "PDF downloaden",
     "demo_market.label": "Taal en markt",
     "demo_market.hint": "Zet de taal van de interface om en opent de demo van dat land, met eigen gegevens en normen.",
+    "boot.starting_title": "OpenConstructionERP wordt ingesteld",
+    "boot.starting_body": "Bij de eerste start wordt de database voorbereid en worden de modules geladen; dat kan enkele minuten duren. Deze pagina opent vanzelf zodra de server klaar is; demoprojecten en kostendata blijven daarna op de achtergrond laden.",
+    "boot.failed_title": "De server kon niet starten",
+    "boot.failed_body": "Het starten is gestopt door een fout. Het serverlogboek noemt de oorzaak; start de applicatie opnieuw zodra de fout is opgelost.",
+    "boot.step_of": "Stap {{step}} van {{steps}}",
+    "boot.phase.starting": "Server starten",
+    "boot.phase.translations": "Vertalingen laden",
+    "boot.phase.database": "Database voorbereiden",
+    "boot.phase.modules": "Modules laden",
+    "boot.phase.validation": "Validatieregels registreren",
+    "boot.phase.demo_data": "Demo-accounts en referentiedata aanmaken",
+    "boot.phase.services": "Achtergrondservices voorbereiden",
+    "boot.phase.finishing": "Afronden",
   }
 } as { translation: Record<string, string> };
 

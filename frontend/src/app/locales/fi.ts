@@ -64253,6 +64253,19 @@ const resource = {
     "letter_templates.download": "Lataa PDF",
     "demo_market.label": "Kieli ja markkina",
     "demo_market.hint": "Vaihtaa käyttöliittymän kielen ja avaa sen maan demon omine tietoineen ja standardeineen.",
+    "boot.starting_title": "OpenConstructionERP:n käyttöönotto",
+    "boot.starting_body": "Ensimmäinen käynnistys valmistelee tietokannan ja lataa moduuleja, mikä voi kestää muutaman minuutin. Sivu avautuu itsestään, kun palvelin on valmis; demoprojektit ja kustannustiedot latautuvat sen jälkeen taustalla.",
+    "boot.failed_title": "Palvelinta ei voitu käynnistää",
+    "boot.failed_body": "Käynnistys keskeytyi virheeseen. Palvelimen loki kertoo syyn; käynnistä sovellus uudelleen, kun virhe on korjattu.",
+    "boot.step_of": "Vaihe {{step}} / {{steps}}",
+    "boot.phase.starting": "Käynnistetään palvelinta",
+    "boot.phase.translations": "Ladataan käännöksiä",
+    "boot.phase.database": "Valmistellaan tietokantaa",
+    "boot.phase.modules": "Ladataan moduuleja",
+    "boot.phase.validation": "Rekisteröidään validointisäännöt",
+    "boot.phase.demo_data": "Luodaan demotilit ja vertailutiedot",
+    "boot.phase.services": "Valmistellaan taustapalveluita",
+    "boot.phase.finishing": "Viimeistellään",
   }
 } as { translation: Record<string, string> };
 

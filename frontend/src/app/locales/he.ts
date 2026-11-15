@@ -64570,6 +64570,19 @@ const resource = {
     "letter_templates.download": "הורדת PDF",
     "demo_market.label": "שפה ושוק",
     "demo_market.hint": "מחליף את שפת הממשק ופותח את ההדגמה של אותה מדינה, עם הנתונים והתקנים שלה.",
+    "boot.starting_title": "מגדירים את OpenConstructionERP",
+    "boot.starting_body": "ההפעלה הראשונה מכינה את מסד הנתונים וטוענת את המודולים, וזה עשוי לקחת כמה דקות. הדף נפתח לבד כשהשרת מוכן; פרויקטי הדוגמה ונתוני העלויות ממשיכים להיטען ברקע לאחר מכן.",
+    "boot.failed_title": "השרת לא הצליח לעלות",
+    "boot.failed_body": "ההפעלה נעצרה עקב שגיאה. יומן השרת מציין את הסיבה; הפעל את היישום מחדש לאחר שהתיקון בוצע.",
+    "boot.step_of": "שלב {{step}} מתוך {{steps}}",
+    "boot.phase.starting": "השרת מתחיל לפעול",
+    "boot.phase.translations": "טוענים תרגומים",
+    "boot.phase.database": "מכינים את מסד הנתונים",
+    "boot.phase.modules": "טוענים מודולים",
+    "boot.phase.validation": "רושמים כללי אימות",
+    "boot.phase.demo_data": "יוצרים חשבונות דוגמה ונתוני ייחוס",
+    "boot.phase.services": "מכינים שירותי רקע",
+    "boot.phase.finishing": "מסיימים",
   }
 } as { translation: Record<string, string> };
 

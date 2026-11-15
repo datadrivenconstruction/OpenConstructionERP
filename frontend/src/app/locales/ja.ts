@@ -65516,6 +65516,19 @@ const resource = {
     "letter_templates.download": "PDF をダウンロード",
     "demo_market.label": "言語と市場",
     "demo_market.hint": "画面の言語を切り替え、その国のデータと規格を持つデモを開きます。",
+    "boot.starting_title": "OpenConstructionERP を設定しています",
+    "boot.starting_body": "初回起動ではデータベースの準備とモジュールの読み込みを行うため、数分かかることがあります。サーバーの準備が整うとこのページは自動的に開きます。デモプロジェクトとコストデータは、その後もバックグラウンドで読み込まれます。",
+    "boot.failed_title": "サーバーを起動できませんでした",
+    "boot.failed_body": "エラーのため起動が停止しました。原因はサーバーのログに記録されています。問題を解消してから、アプリケーションを再度起動してください。",
+    "boot.step_of": "ステップ {{step}} / {{steps}}",
+    "boot.phase.starting": "サーバーを起動しています",
+    "boot.phase.translations": "翻訳を読み込んでいます",
+    "boot.phase.database": "データベースを準備しています",
+    "boot.phase.modules": "モジュールを読み込んでいます",
+    "boot.phase.validation": "検証ルールを登録しています",
+    "boot.phase.demo_data": "デモアカウントと参照データを作成しています",
+    "boot.phase.services": "バックグラウンドサービスを準備しています",
+    "boot.phase.finishing": "仕上げ中",
   }
 } as { translation: Record<string, string> };
 

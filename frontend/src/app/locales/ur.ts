@@ -64215,6 +64215,19 @@ const resource = {
     "letter_templates.download": "PDF ڈاؤن لوڈ کریں",
     "demo_market.label": "زبان اور مارکیٹ",
     "demo_market.hint": "انٹرفیس کی زبان بدلتا ہے اور اس ملک کا ڈیمو اس کے اپنے ڈیٹا اور معیارات کے ساتھ کھولتا ہے۔",
+    "boot.starting_title": "OpenConstructionERP ترتیب دیا جا رہا ہے",
+    "boot.starting_body": "پہلی بار شروع کرنے پر ڈیٹابیس تیار ہوتا ہے اور ماڈیولز لوڈ ہوتے ہیں، جس میں چند منٹ لگ سکتے ہیں۔ سرور تیار ہوتے ہی یہ صفحہ خود کھل جائے گا؛ اس کے بعد ڈیمو پروجیکٹس اور لاگت کا ڈیٹا پس منظر میں لوڈ ہوتا رہے گا۔",
+    "boot.failed_title": "سرور شروع نہیں ہو سکا",
+    "boot.failed_body": "شروع کرنا ایک خرابی کی وجہ سے رک گیا۔ سرور لاگ میں وجہ درج ہے؛ خرابی دور ہونے کے بعد ایپلیکیشن دوبارہ شروع کریں۔",
+    "boot.step_of": "مرحلہ {{step}} از {{steps}}",
+    "boot.phase.starting": "سرور شروع ہو رہا ہے",
+    "boot.phase.translations": "ترجمے لوڈ ہو رہے ہیں",
+    "boot.phase.database": "ڈیٹابیس تیار ہو رہا ہے",
+    "boot.phase.modules": "ماڈیولز لوڈ ہو رہے ہیں",
+    "boot.phase.validation": "توثیق کے قواعد رجسٹر ہو رہے ہیں",
+    "boot.phase.demo_data": "ڈیمو اکاؤنٹس اور حوالہ ڈیٹا بنایا جا رہا ہے",
+    "boot.phase.services": "پس منظر کی سروسز تیار ہو رہی ہیں",
+    "boot.phase.finishing": "مکمل ہو رہا ہے",
   }
 } as { translation: Record<string, string> };
 

@@ -64611,6 +64611,19 @@ const resource = {
     "letter_templates.download": "Descarcă PDF",
     "demo_market.label": "Limbă și piață",
     "demo_market.hint": "Schimbă limba interfeței și deschide demo-ul acelei țări, cu datele și standardele proprii.",
+    "boot.starting_title": "Se configurează OpenConstructionERP",
+    "boot.starting_body": "Prima pornire pregătește baza de date și încarcă modulele, ceea ce poate dura câteva minute. Pagina se deschide singură când serverul este gata; proiectele demo și datele de costuri continuă să se încarce în fundal după aceea.",
+    "boot.failed_title": "Serverul nu a putut porni",
+    "boot.failed_body": "Pornirea s-a oprit din cauza unei erori. Jurnalul serverului indică cauza; porniți din nou aplicația după ce eroarea este remediată.",
+    "boot.step_of": "Pasul {{step}} din {{steps}}",
+    "boot.phase.starting": "Se pornește serverul",
+    "boot.phase.translations": "Se încarcă traducerile",
+    "boot.phase.database": "Se pregătește baza de date",
+    "boot.phase.modules": "Se încarcă modulele",
+    "boot.phase.validation": "Se înregistrează regulile de validare",
+    "boot.phase.demo_data": "Se creează conturile demo și datele de referință",
+    "boot.phase.services": "Se pregătesc serviciile de fundal",
+    "boot.phase.finishing": "Se finalizează",
   }
 } as { translation: Record<string, string> };
 

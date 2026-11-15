@@ -63983,6 +63983,19 @@ const resource = {
     "letter_templates.download": "Unduh PDF",
     "demo_market.label": "Bahasa dan pasar",
     "demo_market.hint": "Mengganti bahasa antarmuka dan membuka demo negara tersebut dengan data dan standarnya sendiri.",
+    "boot.starting_title": "Menyiapkan OpenConstructionERP",
+    "boot.starting_body": "Saat pertama dijalankan, database disiapkan dan modul dimuat, yang bisa memakan waktu beberapa menit. Halaman ini terbuka otomatis saat server siap; proyek demo dan data biaya terus dimuat di latar belakang setelahnya.",
+    "boot.failed_title": "Server tidak dapat dimulai",
+    "boot.failed_body": "Proses start berhenti karena galat. Log server menunjukkan penyebabnya; jalankan ulang aplikasi setelah galat diperbaiki.",
+    "boot.step_of": "Langkah {{step}} dari {{steps}}",
+    "boot.phase.starting": "Memulai server",
+    "boot.phase.translations": "Memuat terjemahan",
+    "boot.phase.database": "Menyiapkan database",
+    "boot.phase.modules": "Memuat modul",
+    "boot.phase.validation": "Mendaftarkan aturan validasi",
+    "boot.phase.demo_data": "Membuat akun demo dan data referensi",
+    "boot.phase.services": "Menyiapkan layanan latar belakang",
+    "boot.phase.finishing": "Menyelesaikan",
   }
 } as { translation: Record<string, string> };
 

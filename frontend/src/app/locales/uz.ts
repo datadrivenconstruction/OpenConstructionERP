@@ -65181,6 +65181,19 @@ const resource = {
     "letter_templates.download": "PDF yuklab olish",
     "demo_market.label": "Til va bozor",
     "demo_market.hint": "Interfeys tilini almashtiradi va oʻsha mamlakatning oʻz maʼlumotlari va standartlari bilan demosini ochadi.",
+    "boot.starting_title": "OpenConstructionERP sozlanmoqda",
+    "boot.starting_body": "Birinchi ishga tushirishda ma'lumotlar bazasi tayyorlanadi va modullar yuklanadi; bu bir necha daqiqa vaqt olishi mumkin. Server tayyor bo'lganda bu sahifa o'zi ochiladi; shundan keyin demo loyihalar va xarajat ma'lumotlari fonda yuklanishda davom etadi.",
+    "boot.failed_title": "Serverni ishga tushirib bo'lmadi",
+    "boot.failed_body": "Xatolik tufayli ishga tushirish to'xtadi. Sabab server jurnalida ko'rsatilgan; xatolik tuzatilgach, ilovani qayta ishga tushiring.",
+    "boot.step_of": "{{steps}} dan {{step}}-qadam",
+    "boot.phase.starting": "Server ishga tushirilmoqda",
+    "boot.phase.translations": "Tarjimalar yuklanmoqda",
+    "boot.phase.database": "Ma'lumotlar bazasi tayyorlanmoqda",
+    "boot.phase.modules": "Modullar yuklanmoqda",
+    "boot.phase.validation": "Tekshiruv qoidalari ro'yxatga olinmoqda",
+    "boot.phase.demo_data": "Demo hisoblar va ma'lumotnoma ma'lumotlari yaratilmoqda",
+    "boot.phase.services": "Fon xizmatlari tayyorlanmoqda",
+    "boot.phase.finishing": "Yakunlanmoqda",
   }
 } as { translation: Record<string, string> };
 

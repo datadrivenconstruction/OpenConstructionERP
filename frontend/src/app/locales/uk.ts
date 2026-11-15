@@ -66396,6 +66396,19 @@ const resource = {
     "letter_templates.download": "Завантажити PDF",
     "demo_market.label": "Мова і ринок",
     "demo_market.hint": "Перемикає мову інтерфейсу та відкриває демо цієї країни з її даними та стандартами.",
+    "boot.starting_title": "Налаштування OpenConstructionERP",
+    "boot.starting_body": "Під час першого запуску готується база даних і завантажуються модулі, це може тривати кілька хвилин. Сторінка відкриється сама, щойно сервер буде готовий; демопроєкти та дані про вартість і далі завантажуються у фоновому режимі.",
+    "boot.failed_title": "Не вдалося запустити сервер",
+    "boot.failed_body": "Запуск зупинився через помилку. Причину показано в журналі сервера; після виправлення запустіть застосунок знову.",
+    "boot.step_of": "Крок {{step}} з {{steps}}",
+    "boot.phase.starting": "Запуск сервера",
+    "boot.phase.translations": "Завантаження перекладів",
+    "boot.phase.database": "Підготовка бази даних",
+    "boot.phase.modules": "Завантаження модулів",
+    "boot.phase.validation": "Реєстрація правил перевірки",
+    "boot.phase.demo_data": "Створення демо-облікових записів і довідкових даних",
+    "boot.phase.services": "Підготовка фонових служб",
+    "boot.phase.finishing": "Завершення",
   }
 } as { translation: Record<string, string> };
 

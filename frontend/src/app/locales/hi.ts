@@ -64252,6 +64252,19 @@ const resource = {
     "letter_templates.download": "PDF डाउनलोड करें",
     "demo_market.label": "भाषा और बाज़ार",
     "demo_market.hint": "इंटरफ़ेस की भाषा बदलता है और उस देश का डेमो उसके अपने डेटा और मानकों के साथ खोलता है।",
+    "boot.starting_title": "OpenConstructionERP सेट अप हो रहा है",
+    "boot.starting_body": "पहली बार शुरू करने पर डेटाबेस तैयार होता है और मॉड्यूल लोड होते हैं, जिसमें कुछ मिनट लग सकते हैं। सर्वर तैयार होते ही यह पेज अपने आप खुल जाएगा; उसके बाद डेमो प्रोजेक्ट और लागत डेटा पृष्ठभूमि में लोड होता रहेगा।",
+    "boot.failed_title": "सर्वर शुरू नहीं हो सका",
+    "boot.failed_body": "एक त्रुटि के कारण शुरू होना रुक गया। सर्वर लॉग में कारण लिखा है; त्रुटि ठीक होने के बाद एप्लिकेशन फिर से शुरू करें।",
+    "boot.step_of": "चरण {{step}} / {{steps}}",
+    "boot.phase.starting": "सर्वर शुरू हो रहा है",
+    "boot.phase.translations": "अनुवाद लोड हो रहे हैं",
+    "boot.phase.database": "डेटाबेस तैयार किया जा रहा है",
+    "boot.phase.modules": "मॉड्यूल लोड हो रहे हैं",
+    "boot.phase.validation": "सत्यापन नियम पंजीकृत किए जा रहे हैं",
+    "boot.phase.demo_data": "डेमो खाते और संदर्भ डेटा बनाए जा रहे हैं",
+    "boot.phase.services": "पृष्ठभूमि सेवाएँ तैयार की जा रही हैं",
+    "boot.phase.finishing": "समाप्त किया जा रहा है",
   }
 } as { translation: Record<string, string> };
 

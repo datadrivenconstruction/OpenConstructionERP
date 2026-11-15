@@ -66814,6 +66814,19 @@ const resource = {
     "letter_templates.download": "PDF letöltése",
     "demo_market.label": "Nyelv és piac",
     "demo_market.hint": "Átállítja a felület nyelvét, és megnyitja az adott ország demóját saját adatokkal és szabványokkal.",
+    "boot.starting_title": "Az OpenConstructionERP beállítása",
+    "boot.starting_body": "Az első indítás előkészíti az adatbázist és betölti a modulokat, ez akár néhány percig is tarthat. Az oldal magától megnyílik, amint a szerver kész; a demo projektek és a költségadatok ezután a háttérben töltődnek be.",
+    "boot.failed_title": "A szerver nem tudott elindulni",
+    "boot.failed_body": "Az indítás hiba miatt leállt. A szerver naplója megmondja az okot; a javítás után indítsa újra az alkalmazást.",
+    "boot.step_of": "{{step}}. lépés a(z) {{steps}}-ból",
+    "boot.phase.starting": "A szerver indítása",
+    "boot.phase.translations": "Fordítások betöltése",
+    "boot.phase.database": "Adatbázis előkészítése",
+    "boot.phase.modules": "Modulok betöltése",
+    "boot.phase.validation": "Validációs szabályok regisztrálása",
+    "boot.phase.demo_data": "Demo fiókok és referenciaadatok létrehozása",
+    "boot.phase.services": "Háttérszolgáltatások előkészítése",
+    "boot.phase.finishing": "Befejezés",
   }
 } as { translation: Record<string, string> };
 

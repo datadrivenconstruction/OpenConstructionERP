@@ -65849,6 +65849,19 @@ const resource = {
     "letter_templates.download": "Pobierz PDF",
     "demo_market.label": "Język i rynek",
     "demo_market.hint": "Zmienia język interfejsu i otwiera demo tego kraju z jego własnymi danymi i normami.",
+    "boot.starting_title": "Konfigurowanie OpenConstructionERP",
+    "boot.starting_body": "Pierwsze uruchomienie przygotowuje bazę danych i wczytuje moduły, co może potrwać kilka minut. Ta strona otworzy się sama, gdy serwer będzie gotowy; projekty demonstracyjne i dane kosztorysowe dalej wczytują się w tle.",
+    "boot.failed_title": "Nie udało się uruchomić serwera",
+    "boot.failed_body": "Uruchamianie zostało przerwane przez błąd. Dziennik serwera podaje przyczynę; po jej usunięciu uruchom aplikację ponownie.",
+    "boot.step_of": "Krok {{step}} z {{steps}}",
+    "boot.phase.starting": "Uruchamianie serwera",
+    "boot.phase.translations": "Wczytywanie tłumaczeń",
+    "boot.phase.database": "Przygotowywanie bazy danych",
+    "boot.phase.modules": "Wczytywanie modułów",
+    "boot.phase.validation": "Rejestrowanie reguł walidacji",
+    "boot.phase.demo_data": "Tworzenie kont demonstracyjnych i danych referencyjnych",
+    "boot.phase.services": "Przygotowywanie usług w tle",
+    "boot.phase.finishing": "Kończenie",
   }
 } as { translation: Record<string, string> };
 

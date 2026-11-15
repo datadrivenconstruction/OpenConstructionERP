@@ -64864,6 +64864,19 @@ const resource = {
     "letter_templates.download": "Ladda ner PDF",
     "demo_market.label": "Språk och marknad",
     "demo_market.hint": "Byter gränssnittets språk och öppnar demon för det landet, med egna data och standarder.",
+    "boot.starting_title": "Konfigurerar OpenConstructionERP",
+    "boot.starting_body": "Vid första starten förbereds databasen och modulerna läses in, vilket kan ta några minuter. Sidan öppnas automatiskt när servern är klar; demoprojekt och kostnadsdata fortsätter läsas in i bakgrunden efteråt.",
+    "boot.failed_title": "Servern kunde inte starta",
+    "boot.failed_body": "Starten avbröts på grund av ett fel. Serverloggen visar orsaken; starta programmet igen när felet är åtgärdat.",
+    "boot.step_of": "Steg {{step}} av {{steps}}",
+    "boot.phase.starting": "Startar servern",
+    "boot.phase.translations": "Läser in översättningar",
+    "boot.phase.database": "Förbereder databasen",
+    "boot.phase.modules": "Läser in moduler",
+    "boot.phase.validation": "Registrerar valideringsregler",
+    "boot.phase.demo_data": "Skapar demokonton och referensdata",
+    "boot.phase.services": "Förbereder bakgrundstjänster",
+    "boot.phase.finishing": "Slutför",
   }
 } as { translation: Record<string, string> };
 

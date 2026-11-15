@@ -64207,6 +64207,19 @@ const resource = {
     "letter_templates.download": "I-download ang PDF",
     "demo_market.label": "Wika at merkado",
     "demo_market.hint": "Pinapalitan ang wika ng interface at binubuksan ang demo ng bansang iyon, kasama ang sarili nitong data at pamantayan.",
+    "boot.starting_title": "Inihahanda ang OpenConstructionERP",
+    "boot.starting_body": "Inihahanda ng unang pagsisimula ang database at ina-load ang mga module, na maaaring tumagal ng ilang minuto. Kusang magbubukas ang pahinang ito kapag handa na ang server; patuloy na mag-lo-load sa background ang mga demo project at datos ng gastos.",
+    "boot.failed_title": "Hindi nakapagsimula ang server",
+    "boot.failed_body": "Huminto ang pagsisimula dahil sa error. Ipinapakita ng server log ang dahilan; simulan muli ang application kapag naayos na.",
+    "boot.step_of": "Hakbang {{step}} ng {{steps}}",
+    "boot.phase.starting": "Sinisimulan ang server",
+    "boot.phase.translations": "Nilo-load ang mga salin",
+    "boot.phase.database": "Inihahanda ang database",
+    "boot.phase.modules": "Nilo-load ang mga module",
+    "boot.phase.validation": "Nirerehistro ang mga patakaran sa validation",
+    "boot.phase.demo_data": "Ginagawa ang mga demo account at reference data",
+    "boot.phase.services": "Inihahanda ang mga background service",
+    "boot.phase.finishing": "Tinatapos",
   }
 } as { translation: Record<string, string> };
 

@@ -65588,6 +65588,19 @@ const resource = {
     "letter_templates.download": "Stáhnout PDF",
     "demo_market.label": "Jazyk a trh",
     "demo_market.hint": "Přepne jazyk rozhraní a otevře demo dané země s jejími vlastními daty a normami.",
+    "boot.starting_title": "Nastavování OpenConstructionERP",
+    "boot.starting_body": "První spuštění připraví databázi a načte moduly, což může trvat několik minut. Tato stránka se otevře sama, jakmile je server připraven; ukázkové projekty a cenová data se pak dál načítají na pozadí.",
+    "boot.failed_title": "Server se nepodařilo spustit",
+    "boot.failed_body": "Spuštění se zastavilo kvůli chybě. Protokol serveru uvádí příčinu; až ji opravíte, aplikaci spusťte znovu.",
+    "boot.step_of": "Krok {{step}} z {{steps}}",
+    "boot.phase.starting": "Spouštění serveru",
+    "boot.phase.translations": "Načítání překladů",
+    "boot.phase.database": "Příprava databáze",
+    "boot.phase.modules": "Načítání modulů",
+    "boot.phase.validation": "Registrace validačních pravidel",
+    "boot.phase.demo_data": "Vytváření demo účtů a referenčních dat",
+    "boot.phase.services": "Příprava služeb na pozadí",
+    "boot.phase.finishing": "Dokončování",
   }
 } as { translation: Record<string, string> };
 
