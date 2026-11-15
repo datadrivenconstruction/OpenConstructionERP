@@ -67336,7 +67336,7 @@ const resource = {
     "sso.field_slug": "Qisqa nom (URL ichida)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Mijoz maxfiy kaliti",
     "sso.secret_keep": "Saqlangan secret qolishi uchun boʻsh qoldiring.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP kirish URL manzili",

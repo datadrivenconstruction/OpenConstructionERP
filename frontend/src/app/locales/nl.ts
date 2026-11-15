@@ -67285,7 +67285,7 @@ const resource = {
     "sso.field_slug": "Korte naam (in URL's)",
     "sso.field_issuer": "Issuer-URL",
     "sso.field_client_id": "Client-ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Clientgeheim",
     "sso.secret_keep": "Leeg laten om het opgeslagen secret te behouden.",
     "sso.field_idp_entity": "Entity-ID van de IdP",
     "sso.field_idp_sso_url": "Aanmeld-URL van de IdP",

@@ -66137,7 +66137,7 @@ const resource = {
     "sso.field_slug": "ชื่อสั้น (ใน URL)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "รหัสลับไคลเอนต์",
     "sso.secret_keep": "เว้นว่างไว้เพื่อคง secret ที่บันทึกไว้",
     "sso.field_idp_entity": "Entity ID ของ IdP",
     "sso.field_idp_sso_url": "URL ลงชื่อเข้าใช้ของ IdP",

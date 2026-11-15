@@ -67285,7 +67285,7 @@ const resource = {
     "sso.field_slug": "Kısa ad (URL içinde)",
     "sso.field_issuer": "Issuer URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "İstemci gizli anahtarı",
     "sso.secret_keep": "Kayıtlı secret'ı korumak için boş bırakın.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP oturum açma URL'si",

@@ -66404,7 +66404,7 @@ const resource = {
     "sso.field_slug": "Kort navn (i URL-er)",
     "sso.field_issuer": "Issuer-URL",
     "sso.field_client_id": "Client ID",
-    "sso.field_client_secret": "Client secret",
+    "sso.field_client_secret": "Klienthemmelighet",
     "sso.secret_keep": "La feltet stå tomt for å beholde lagret secret.",
     "sso.field_idp_entity": "IdP entity ID",
     "sso.field_idp_sso_url": "IdP-URL for pålogging",
