@@ -32,6 +32,7 @@ import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { beginOidcLogin } from './oidcPkce';
+import { SamlSignInButton } from './SamlSignInButton';
 
 /* Segmented theme switch (Light / Dark / System) for the login page. */
 function ThemeSwitch() {
@@ -923,6 +924,8 @@ export function LoginPage() {
                 </Button>
               </div>
             )}
+
+            <SamlSignInButton />
 
             {registrationOpen && (
               <div className="mt-4 border-t border-border-light pt-3.5 animate-stagger-in" style={{ animationDelay: '460ms' }}>
