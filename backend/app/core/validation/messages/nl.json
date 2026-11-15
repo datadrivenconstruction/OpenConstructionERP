@@ -1239,6 +1239,10 @@
       "norm_collapsed": "Post {ordinal}: de middelenregels zijn hun catalogusnorm kwijt en bevatten in plaats daarvan de totale posthoeveelheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
       "whole_position_quantities": "Post {ordinal}: de middelenregels bevatten hoeveelheden voor de hele post in plaats van verbruiksnormen per eenheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
       "suggestion": "Controleer de prijsopbouw: leid de post via de beoordeling van de middelennormen opnieuw af uit de cataloguspost, of corrigeer de regels handmatig"
+    },
+    "rate_currency_missing": {
+      "fail": "Positie {ordinal}: {count} resourcetarief/-tarieven zonder valuta, gerekend in de basisvaluta van het project",
+      "suggestion": "Stel bij elk resourcetarief de valuta in als dit niet de basisvaluta van het project is"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "Over {code} is besloten; het kan niet meer worden gewijzigd of verwijderd.",
       "suggestion": "Voer een nieuwe verschuiving of budgetwijziging in die het corrigeert."
+    },
+    "self_approval": {
+      "fail": "{code} is door u aangevraagd, dus u kunt het niet goedkeuren (functiescheiding staat aan voor dit project).",
+      "suggestion": "Vraag een andere goedkeurder om te beslissen, of zet functiescheiding uit in de instellingen van het grootboek."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "De ArchSD-prijsindex vermeldt geen bron: vermeld het Architectural Services Department"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Pagina {page} heeft geen leesbaar tekeningnummer",
-      "suggestion": "Voer het tekeningnummer uit het titelblok in"
-    },
-    "number_unique_in_set": {
-      "fail": "Tekeningnummer {sheet} komt op {count} pagina's van deze upload voor",
-      "suggestion": "Controleer de tekeningenset op een dubbele of verkeerd genummerde pagina"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revisie {revision} van tekening {sheet} is lager dan de huidige revisie {current}",
-      "suggestion": "Bevestig dat dit een oudere uitgave is voordat deze in de historie komt"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Tekening {sheet} is met tekstherkenning gelezen met {confidence} en is niet bevestigd",
-      "suggestion": "Controleer de velden van het titelblok en bevestig de uitlezing"
     }
   },
   "spec_import": {

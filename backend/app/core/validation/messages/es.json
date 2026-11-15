@@ -1257,6 +1257,10 @@
       "norm_collapsed": "Posición {ordinal}: las filas de recursos perdieron su rendimiento de catálogo y llevan la cantidad de la posición en su lugar, por lo que el precio unitario no se volvió a derivar de ellas",
       "whole_position_quantities": "Posición {ordinal}: las filas de recursos llevan cantidades de toda la posición en vez de rendimientos por unidad, por lo que el precio unitario no se volvió a derivar de ellas",
       "suggestion": "Revise el descompuesto - vuelva a derivar la posición desde su elemento de catálogo mediante la revisión de rendimientos de recursos, o corrija las filas a mano"
+    },
+    "rate_currency_missing": {
+      "fail": "Posición {ordinal}: {count} precio(s) de recurso sin moneda, contados en la moneda base del proyecto",
+      "suggestion": "Indique la moneda de cada precio de recurso si no es la moneda base del proyecto"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} ya está resuelto y no se puede modificar ni eliminar.",
       "suggestion": "Introduzca un nuevo traspaso o cambio de presupuesto que lo corrija."
+    },
+    "self_approval": {
+      "fail": "{code} fue solicitado por usted, por lo que no puede aprobarlo (la segregación de funciones está activada en este proyecto).",
+      "suggestion": "Pida a otro aprobador que decida, o desactive la segregación de funciones en los ajustes del libro."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "El índice de precios ArchSD no indica su fuente: cite al Architectural Services Department"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "La página {page} no tiene un número de plano legible",
-      "suggestion": "Introduzca el número de plano del cajetín"
-    },
-    "number_unique_in_set": {
-      "fail": "El número de plano {sheet} aparece en {count} páginas de esta carga",
-      "suggestion": "Revise el juego de planos por si hay una página duplicada o mal numerada"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "La revisión {revision} del plano {sheet} es inferior a la revisión vigente {current}",
-      "suggestion": "Confirme que es una edición anterior antes de añadirla al historial"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "El plano {sheet} se leyó por reconocimiento de texto con {confidence} y no está confirmado",
-      "suggestion": "Revise los campos del cajetín y confirme la lectura"
     }
   },
   "spec_import": {

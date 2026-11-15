@@ -1239,6 +1239,10 @@
       "norm_collapsed": "Posisyong {ordinal}: nawala ang catalogue norm sa resource rows at dami ng posisyon ang laman sa halip, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
       "whole_position_quantities": "Posisyong {ordinal}: dami ng buong posisyon ang laman ng resource rows sa halip na per-unit norms, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
       "suggestion": "Suriin ang buildup; kalkulahin muli ang posisyon mula sa catalogue item nito sa pamamagitan ng resource norm review o itama ang mga row nang mano-mano"
+    },
+    "rate_currency_missing": {
+      "fail": "Posisyon {ordinal}: {count} rate ng resource ang walang currency at binibilang sa base currency ng proyekto",
+      "suggestion": "Itakda ang currency sa bawat rate ng resource kung hindi ito ang base currency ng proyekto"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "Napagdesisyunan na ang {code} at hindi na ito mababago o mabubura.",
       "suggestion": "Maglagay ng bagong paglilipat o pagbabago sa budget na magwawasto rito."
+    },
+    "self_approval": {
+      "fail": "Ikaw ang humiling ng {code}, kaya hindi mo ito maaaprubahan (naka-on ang paghihiwalay ng tungkulin para sa proyektong ito).",
+      "suggestion": "Hilingin sa ibang tagapag-apruba na magpasya, o patayin ang paghihiwalay ng tungkulin sa mga setting ng ledger."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "Walang source attribution ang ArchSD price index: banggitin ang Architectural Services Department"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Walang mabasang numero ng sheet ang pahina {page}",
-      "suggestion": "Ilagay ang numero ng sheet mula sa title block"
-    },
-    "number_unique_in_set": {
-      "fail": "Ang numero ng sheet na {sheet} ay lumalabas sa {count} pahina ng upload na ito",
-      "suggestion": "Suriin ang set ng mga drawing kung may doble o maling numero na pahina"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Mas mababa ang revision {revision} ng sheet {sheet} kaysa sa kasalukuyang revision {current}",
-      "suggestion": "Tiyaking mas lumang isyu ito bago idagdag sa kasaysayan"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Nabasa ang sheet {sheet} sa pamamagitan ng text recognition na may {confidence} at hindi pa kumpirmado",
-      "suggestion": "Suriin ang mga field ng title block at kumpirmahin ang pagkakabasa"
     }
   },
   "spec_import": {

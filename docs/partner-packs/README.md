@@ -473,6 +473,9 @@ teach identifiers that were never rule sets at all.
 | `field_productivity` | Labour hours booked to a position against the progress measured in the same period |
 | `workforce` | Schedule activities that load labour: every labour resource names a trade |
 | `sheet_intake` | Uploaded drawing sheets: a number on every sheet, no duplicate number at one revision, no older revision replacing a newer one, OCR readings confirmed by a person |
+| `spec_import` | Specification book import: at least one section read from the book |
+| `spec_section` | Spec section: the submittal types it normally needs are asked for |
+| `spec_submittal_item` | Proposed submittal from a spec section: section number well formed, not a duplicate in the register |
 | `submittal` | Submittals |
 | `bid_leveling` | Bid leveling sheet: plugged gaps and their share of the bid |
 | `bid_award` | Bid at the point of award |

@@ -1239,6 +1239,10 @@
       "norm_collapsed": "項目 {ordinal}: 資源行のカタログ歩掛が失われ、代わりに項目の数量が設定されているため、資源行に基づく単価の再計算は行われませんでした",
       "whole_position_quantities": "項目 {ordinal}: 資源行には単位当たりの歩掛ではなく項目全体の数量が設定されているため、資源行に基づく単価の再計算は行われませんでした",
       "suggestion": "単価構成を確認してください。資源歩掛の確認を通じてカタログ項目から再計算するか、各行を手作業で修正してください"
+    },
+    "rate_currency_missing": {
+      "fail": "項目 {ordinal}：{count} 件のリソース単価に通貨がなく、プロジェクトの基準通貨で計上されています",
+      "suggestion": "基準通貨でない場合は、各リソース単価に通貨を設定してください"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} は決裁済みのため、変更も削除もできません。",
       "suggestion": "修正するには、新しい振替または予算変更を入力してください。"
+    },
+    "self_approval": {
+      "fail": "{code} はあなたが申請したものなので、承認できません（このプロジェクトでは職務分掌が有効です）。",
+      "suggestion": "別の承認者に判断を依頼するか、台帳の設定で職務分掌をオフにしてください。"
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "ArchSD 入札価格指数に出典表示がありません：Architectural Services Department を明記してください"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "{page} ページ目に読み取れる図面番号がありません",
-      "suggestion": "表題欄から図面番号を入力してください"
-    },
-    "number_unique_in_set": {
-      "fail": "図面番号 {sheet} がこのアップロードの {count} ページに現れています",
-      "suggestion": "図面セットに重複ページや番号の誤りがないか確認してください"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "図面 {sheet} の改訂 {revision} は現行の改訂 {current} より古いものです",
-      "suggestion": "履歴に積む前に、これが旧版であることを確認してください"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "図面 {sheet} は文字認識で {confidence} として読み取られ、未確認です",
-      "suggestion": "表題欄の各項目を確認し、読み取り結果を確定してください"
     }
   },
   "spec_import": {

@@ -1239,6 +1239,10 @@
       "norm_collapsed": "Item {ordinal}: as linhas de recursos perderam os coeficientes do catálogo e contêm a quantidade do item em seu lugar; por isso, o preço unitário não foi recalculado a partir delas",
       "whole_position_quantities": "Item {ordinal}: as linhas de recursos contêm as quantidades do item inteiro, em vez dos coeficientes de consumo por unidade; por isso, o preço unitário não foi recalculado a partir delas",
       "suggestion": "Revise a composição: recalcule o item a partir da referência do catálogo por meio da revisão dos coeficientes dos recursos ou corrija as linhas manualmente"
+    },
+    "rate_currency_missing": {
+      "fail": "Posição {ordinal}: {count} preço(s) de recurso sem moeda, contados na moeda base do projeto",
+      "suggestion": "Defina a moeda de cada preço de recurso se não for a moeda base do projeto"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} já foi decidido e não pode mais ser alterado nem excluído.",
       "suggestion": "Registre uma nova transferência ou alteração de orçamento que o corrija."
+    },
+    "self_approval": {
+      "fail": "{code} foi solicitado por si, por isso não o pode aprovar (a segregação de funções está ativa neste projeto).",
+      "suggestion": "Peça a outro aprovador que decida, ou desative a segregação de funções nas definições do livro."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "O índice de preços ArchSD não indica a fonte: cite o Architectural Services Department"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "A página {page} não tem número de prancha legível",
-      "suggestion": "Digite o número da prancha conforme o carimbo"
-    },
-    "number_unique_in_set": {
-      "fail": "O número de prancha {sheet} aparece em {count} páginas deste envio",
-      "suggestion": "Confira o conjunto de desenhos: página duplicada ou numerada errada"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "A revisão {revision} da prancha {sheet} é inferior à revisão atual {current}",
-      "suggestion": "Confirme que é uma emissão anterior antes de incluí-la no histórico"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "A prancha {sheet} foi lida por reconhecimento de texto com {confidence} e não está confirmada",
-      "suggestion": "Confira os campos do carimbo e confirme a leitura"
     }
   },
   "spec_import": {

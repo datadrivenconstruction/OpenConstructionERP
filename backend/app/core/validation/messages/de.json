@@ -1257,6 +1257,10 @@
       "norm_collapsed": "Position {ordinal}: die Ressourcenzeilen haben ihren Katalogansatz verloren und tragen stattdessen die Positionsmenge, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
       "whole_position_quantities": "Position {ordinal}: die Ressourcenzeilen tragen Gesamtmengen der Position statt Ansätzen je Einheit, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
       "suggestion": "Aufbau prüfen - die Position über die Ressourcenansatz-Prüfung aus ihrer Katalogposition neu ableiten oder die Zeilen von Hand korrigieren"
+    },
+    "rate_currency_missing": {
+      "fail": "Position {ordinal}: {count} Ressourcenpreis(e) ohne Währung, gerechnet in der Basiswährung des Projekts",
+      "suggestion": "Legen Sie bei jedem Ressourcenpreis die Währung fest, wenn sie nicht der Basiswährung des Projekts entspricht"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} ist entschieden und kann nicht mehr geändert oder gelöscht werden.",
       "suggestion": "Erfassen Sie eine neue Umbuchung oder Budgetänderung, die sie korrigiert."
+    },
+    "self_approval": {
+      "fail": "{code} wurde von Ihnen beantragt, daher können Sie sie nicht genehmigen (Funktionstrennung ist für dieses Projekt aktiv).",
+      "suggestion": "Bitten Sie einen anderen Genehmiger um die Entscheidung oder schalten Sie die Funktionstrennung in den Einstellungen des Budgetbuchs aus."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "Der ArchSD-Baupreisindex hat keine Quellenangabe: das Architectural Services Department als Quelle nennen"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Seite {page} hat keine lesbare Plannummer",
-      "suggestion": "Plannummer aus dem Schriftfeld eintragen"
-    },
-    "number_unique_in_set": {
-      "fail": "Plannummer {sheet} kommt auf {count} Seiten dieses Uploads vor",
-      "suggestion": "Plansatz auf doppelte oder falsch nummerierte Seiten prüfen"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Planindex {revision} von Plan {sheet} ist niedriger als der aktuelle Index {current}",
-      "suggestion": "Bestätigen, dass es ein älterer Stand ist, bevor er in die Historie aufgenommen wird"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Plan {sheet} wurde per Texterkennung mit {confidence} gelesen und ist nicht bestätigt",
-      "suggestion": "Felder des Schriftfelds prüfen und das Ergebnis bestätigen"
     }
   },
   "spec_import": {

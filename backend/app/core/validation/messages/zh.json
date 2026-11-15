@@ -1239,6 +1239,10 @@
       "norm_collapsed": "清单项 {ordinal}：资源明细丢失了目录中的消耗定额，改为记录清单项总工程量，因此未据此重新计算单价。",
       "whole_position_quantities": "清单项 {ordinal}：资源明细记录的是整个清单项的用量，而非单位工程量的消耗定额，因此未据此重新计算单价。",
       "suggestion": "请核查组价，通过资源定额审核从目录条目重新推导清单项，或手动更正资源明细。"
+    },
+    "rate_currency_missing": {
+      "fail": "项目 {ordinal}：{count} 条资源单价没有币种，按项目基准币种计算",
+      "suggestion": "若资源单价不是项目基准币种，请为每条单价设置币种"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} 已有决定，不能再修改或删除。",
       "suggestion": "请录入一笔新的调拨或预算变更来更正。"
+    },
+    "self_approval": {
+      "fail": "{code} 由您本人提出，因此您不能批准它（本项目已启用职责分离）。",
+      "suggestion": "请另一位审批人决定，或在账簿设置中关闭职责分离。"
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "ArchSD 投标价格指数未注明来源：请注明建筑署"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "第 {page} 页没有可识别的图号",
-      "suggestion": "请从图签中录入图号"
-    },
-    "number_unique_in_set": {
-      "fail": "图号 {sheet} 在本次上传的 {count} 页中出现",
-      "suggestion": "请检查图纸集中是否有重复或编号错误的页面"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "图纸 {sheet} 的版次 {revision} 低于当前版次 {current}",
-      "suggestion": "请先确认这是较早版本，再将其计入历史"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "图纸 {sheet} 经文字识别读取，置信度 {confidence}，尚未确认",
-      "suggestion": "请核对图签各字段并确认识别结果"
     }
   },
   "spec_import": {

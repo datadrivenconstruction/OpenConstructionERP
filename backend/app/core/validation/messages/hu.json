@@ -1239,6 +1239,10 @@
       "norm_collapsed": "A(z) {ordinal}. tétel erőforrássorai elvesztették a katalógus szerinti normát, és helyette a teljes tételmennyiséget tartalmazzák, ezért az egységár nem számítódott újra belőlük",
       "whole_position_quantities": "A(z) {ordinal}. tétel erőforrássoraiban egységre vetített normák helyett a teljes tétel mennyiségei szerepelnek, ezért az egységár nem számítódott újra belőlük",
       "suggestion": "Ellenőrizze az erőforrás-bontást: az erőforrásnormák felülvizsgálatával származtassa újra a tételt a katalógustételből, vagy kézzel javítsa a sorokat"
+    },
+    "rate_currency_missing": {
+      "fail": "{ordinal}. tétel: {count} erőforrás-egységár pénzneme hiányzik, ezeket a projekt alappénznemében számoljuk",
+      "suggestion": "Adja meg minden erőforrás-egységár pénznemét, ha az nem a projekt alappénzneme"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} el van döntve, és már nem módosítható vagy törölhető.",
       "suggestion": "Rögzítsen új átcsoportosítást vagy költségvetés-módosítást, amely kijavítja."
+    },
+    "self_approval": {
+      "fail": "A(z) {code} kérelmét Ön adta be, ezért nem hagyhatja jóvá (ennél a projektnél be van kapcsolva a feladatok szétválasztása).",
+      "suggestion": "Kérjen meg egy másik jóváhagyót a döntésre, vagy kapcsolja ki a feladatok szétválasztását a főkönyv beállításaiban."
     }
   },
   "schedule": {
@@ -2571,24 +2579,6 @@
     },
     "index_attribution": {
       "fail": "Az ArchSD árindexnél hiányzik a forrás: tüntesse fel az Architectural Services Department-et"
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "A(z) {page}. oldalon nincs olvasható rajzszám",
-      "suggestion": "Adja meg a rajzszámot a rajzfejből"
-    },
-    "number_unique_in_set": {
-      "fail": "A(z) {sheet} rajzszám {count} oldalon szerepel ebben a feltöltésben",
-      "suggestion": "Ellenőrizze a rajzkészletet: lehet, hogy az oldal kétszer szerepel vagy rosszul van számozva"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "A(z) {sheet} rajz {revision} módosítási jelzése alacsonyabb a jelenlegi {current} jelzésnél",
-      "suggestion": "Erősítse meg, hogy régebbi kiadásról van szó, mielőtt bekerül az előzményekbe"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "A(z) {sheet} rajzot szövegfelismeréssel olvasta be a rendszer {confidence} értékkel, és nincs megerősítve",
-      "suggestion": "Ellenőrizze a rajzfej mezőit, és erősítse meg a beolvasást"
     }
   },
   "spec_import": {
