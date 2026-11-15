@@ -6,7 +6,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: a large BIM 3D model view beside the 4D schedule, BOQ editor and DWG takeoff in one workspace" width="880" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM 3D takeoff, 4D schedule, project dashboard, BOQ editor, cost databases, DWG takeoff and validation in one workspace" width="880" />
 </picture>
 
 **The open-source construction ERP.** BOQ, BIM and CAD takeoff, 4D scheduling, 5D cost and tendering in one self-hosted platform. Free under AGPL-3.0, no per-seat fees, your data stays on your server.

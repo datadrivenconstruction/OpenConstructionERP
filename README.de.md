@@ -6,7 +6,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: ein großes BIM-3D-Modell neben 4D-Terminplan, LV-Editor und DWG-Mengenermittlung in einem Arbeitsbereich" width="880" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM-3D-Mengenermittlung, 4D-Terminplan, Projekt-Dashboard, LV-Editor, Kostendatenbanken, DWG-Mengenermittlung und Validierung in einem Arbeitsbereich" width="880" />
 </picture>
 
 **Das Open-Source-ERP für das Bauwesen.** LV, BIM- und CAD-Mengenermittlung, 4D-Terminplanung, 5D-Kosten und Ausschreibung in einer selbst gehosteten Plattform. Kostenlos unter AGPL-3.0, keine Lizenzgebühr pro Nutzer, Ihre Daten bleiben auf Ihrem Server.

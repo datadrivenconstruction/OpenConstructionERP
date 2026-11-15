@@ -6,7 +6,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: крупная 3D BIM-модель рядом с 4D-графиком, редактором сметы и обмером по DWG в одном рабочем месте" width="880" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: обмер по 3D BIM-модели, 4D-график, дашборд проекта, редактор сметы, базы расценок, обмер по DWG и валидация в одном рабочем месте" width="880" />
 </picture>
 
 **Открытая ERP для строительства.** Смета, обмер по BIM и CAD, 4D-планирование, 5D-стоимость и тендеры в одной самостоятельно размещаемой платформе. Бесплатно по лицензии AGPL-3.0, без платы за рабочее место, данные остаются на вашем сервере.
