@@ -39,7 +39,7 @@ from datetime import date as _date
 from decimal import Decimal
 from typing import Any, Awaitable, Callable
 
-from sqlalchemy import false, select
+from sqlalchemy import false, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -1892,6 +1892,8 @@ async def equipment_utilization_kpi(
     session: AsyncSession,
     project_id: uuid.UUID | None = None,
     allowed_project_ids: set[uuid.UUID] | None = None,
+    period_start: _date | None = None,
+    period_end: _date | None = None,
     **_: Any,
 ) -> KPIComputation:
     used = Decimal("0")
@@ -1900,17 +1902,24 @@ async def equipment_utilization_kpi(
     try:
         from app.modules.equipment.models import UtilisationDay  # type: ignore
 
+        # Summed in SQL: the daily log grows by one row per unit per day.
+        stmt = select(
+            func.coalesce(func.sum(UtilisationDay.worked_hours), 0),
+            func.coalesce(func.sum(UtilisationDay.idle_hours), 0),
+            func.count(UtilisationDay.id),
+        )
         # A unit belongs to a project only through its allocated days, never on the register.
-        stmt = select(UtilisationDay)
         if project_id is not None:
             stmt = stmt.where(UtilisationDay.project_id == project_id)
+        if period_start is not None:
+            stmt = stmt.where(UtilisationDay.day >= period_start)
+        if period_end is not None:
+            stmt = stmt.where(UtilisationDay.day <= period_end)
         stmt = _scope_portfolio(stmt, UtilisationDay.project_id, project_id, allowed_project_ids)
-        rows = (await session.execute(stmt)).scalars().all()
-        for row in rows:
-            worked = _to_decimal(row.worked_hours)
-            used += worked
-            available += worked + _to_decimal(row.idle_hours)
-            count += 1
+        worked, idle, count = (await session.execute(stmt)).one()
+        used = _to_decimal(worked)
+        available = used + _to_decimal(idle)
+        count = int(count or 0)
     except ImportError:
         pass
     except Exception:
