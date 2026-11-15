@@ -57170,6 +57170,7 @@ const resource = {
     "modules.catalog.win_loss": "Register van uitslagen",
     "modules.catalog.offers": "Klantoffertes",
     "modules.catalog.letter_templates": "Briefsjablonen",
+    "modules.catalog.sso": "Eenmalige aanmelding",
     "modules.pp_desc_eleven_areas_framework": "Projectsturing vanuit de opdrachtgever in elf managementgebieden, in twee fasen, projectontwikkeling en uitvoering, met één go/no-go-moment ertussen en één goedgekeurd kaderdocument per gebied.",
     "modules.pp_name_pakistan_pk": "Bouwpakket Pakistan",
     "modules.pp_name_peru_pe": "Bouwpakket Peru",
