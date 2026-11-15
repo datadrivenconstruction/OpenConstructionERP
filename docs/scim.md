@@ -28,4 +28,6 @@ Connect your identity provider (IdP) once. People then appear in OpenConstructio
 
 Supported: Users and Groups, GET/POST/PUT/PATCH/DELETE, `filter` with `eq` on `userName`, `externalId` (users) and `displayName` (groups), paging with `startIndex` and `count` (at most 100), PatchOp `add`, `replace`, `remove` including the Entra style value object without a path.
 
-Not supported: SAML (put the SAML-to-OIDC bridge of your IdP in front, then use OIDC sign-in), Bulk, ETag, sorting, password sync (`changePassword`), the enterprise extension schema, nested groups and other filter operators (they answer 400 `invalidFilter`).
+Not supported: Bulk, ETag, sorting, password sync (`changePassword`), the enterprise extension schema, nested groups and other filter operators (they answer 400 `invalidFilter`).
+
+SAML and OIDC sign-in: see [SSO](sso.md).

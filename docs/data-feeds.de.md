@@ -21,3 +21,5 @@ Sie sehen nur Projekte, die Ihnen gehoeren oder in denen Sie Mitglied sind. Ein 
     openconstructionerp bi disable
 
 `bi enable` legt das Schema `oe_bi` mit einer Sicht je Feed (gleiche Spaltennamen) und die schreibgeschuetzte Anmelderolle `oe_bi_reader` an. Das Passwort wird einmal ausgegeben und nicht gespeichert. `--single-tenant` nur verwenden, wenn die Instanz eine einzige Organisation bedient. Standardmaessig ist der Zugriff aus.
+
+Parquet benötigt das optionale Paket `pip install "openconstructionerp[parquet]"`. Ohne es antwortet ein `.parquet`-Feed mit einer klaren Fehlermeldung, die dieses Paket nennt, und die Parquet-URL wird auf der Seite Datenfeeds ausgeblendet. CSV und JSON sind nicht betroffen.
