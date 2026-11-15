@@ -3701,7 +3701,7 @@ export function BIMPage() {
           <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             onClick={() => setUploadOpen((p) => !p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm"
             data-testid="bim-add-model-top"
           >
             <Plus size={14} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
@@ -3733,7 +3733,7 @@ export function BIMPage() {
                 onClick={() => navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId }))}
                 disabled={elements.length === 0}
                 data-testid="bim-rules-link-top"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <SlidersHorizontal size={14} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
@@ -3743,7 +3743,7 @@ export function BIMPage() {
             <>
               <button
                 onClick={() => setFilterPanelOpen((p) => !p)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   filterPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3764,7 +3764,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setSummaryPanelOpen(!summaryPanelOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   summaryPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3788,7 +3788,7 @@ export function BIMPage() {
                   user sees only the queried elements (v3.12.0 / Stream D). */}
               <button
                 onClick={() => setPropertySearchOpen((p) => !p)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   propertySearchOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3811,7 +3811,7 @@ export function BIMPage() {
               {projectId && (
                 <button
                   onClick={() => setSnapshotsOpen((p) => !p)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                     snapshotsOpen
                       ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                       : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3841,7 +3841,7 @@ export function BIMPage() {
                       : `/projects/${projectId}/geo`;
                     navigate(url);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
                   title={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   aria-label={t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
                   data-testid="bim-view-on-map"
@@ -3862,7 +3862,7 @@ export function BIMPage() {
                   onClick={() => {
                     navigate(`/data-explorer?bimModel=${encodeURIComponent(activeModelId)}`);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
                   title={t('bim.open_in_data_explorer_title', {
                     defaultValue: 'Explore extracted data tables',
                   })}
@@ -3888,7 +3888,7 @@ export function BIMPage() {
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button
                 onClick={() => setDimensionsVisible(!dimensionsVisible)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   dimensionsVisible
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3915,7 +3915,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setAssetCardEnabled(!assetCardEnabled)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   assetCardEnabled
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3941,7 +3941,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setBoqPanelOpen(!boqPanelOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   boqPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3957,7 +3957,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setDiffPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   diffPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -3977,7 +3977,7 @@ export function BIMPage() {
 
               <button
                 onClick={() => setSmartViewsPanelOpen((o) => !o)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                   smartViewsPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
@@ -4130,7 +4130,7 @@ export function BIMPage() {
                   onClick={() =>
                     setIsolatedIds((cur) => (cur ? null : [selectedElementId]))
                   }
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-2xs font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors border ${
                     isolatedIds
                       ? 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/30'
                       : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
