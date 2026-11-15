@@ -231,6 +231,9 @@ test-screenshots/
 !desktop/src-tauri/icons/**/*.png
 !frontend/public/favicon.png
 !frontend/public/logo.png
+# Home screen and installed-app icons are rendered by frontend/scripts/build-brand-icons.mjs
+!frontend/public/apple-touch-icon.png
+!frontend/public/pwa/*.png
 # Public brand assets ship in the wheel (About page founder avatar, book
 # cover, logo). The global *.png ignore above kept these untracked, so CI
 # built the frontend without them and a fresh install served the SPA
