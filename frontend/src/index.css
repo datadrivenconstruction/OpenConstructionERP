@@ -2216,6 +2216,11 @@ html[data-look='classic'] .glass-strong,
 html[data-look='classic'] [class*='backdrop-blur'] {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+/* Glass panels turn solid; dark dialog scrims keep their own dimming instead of turning the page white. */
+html[data-look='classic'] .glass,
+html[data-look='classic'] .glass-strong,
+html[data-look='classic'] [class*='backdrop-blur']:not([class*='bg-black']) {
   background-color: var(--oe-bg-elevated) !important;
 }
 html[data-look='classic'] [class*='animate-glow'],

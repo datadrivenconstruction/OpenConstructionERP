@@ -201,7 +201,7 @@ const PRIORITY_BADGE: Record<TaskPriority, { variant: 'neutral' | 'blue' | 'warn
 
 const STATUS_HEADER_CLS: Record<TaskStatus, string> = {
   draft: 'bg-surface-secondary text-content-secondary',
-  open: 'bg-semantic-error-bg text-semantic-error',
+  open: 'bg-oe-blue/10 text-oe-blue',
   in_progress: 'bg-semantic-warning-bg text-semantic-warning',
   completed: 'bg-semantic-success-bg text-semantic-success',
 };
@@ -592,7 +592,7 @@ const TaskCard = React.memo(function TaskCard({
         'px-2.5 py-2 mb-1.5 hover:shadow-md transition-all group cursor-grab active:cursor-grabbing',
         'hover:border-border hover:-translate-y-px',
         isDragging && 'opacity-40 scale-[0.97] shadow-none',
-        isOverdue && 'bg-semantic-error/10',
+        isOverdue && 'border-s-2 border-s-semantic-error/70',
       )}
     >
       {/* Top row: type icon + title + priority */}
@@ -612,11 +612,8 @@ const TaskCard = React.memo(function TaskCard({
           <h4
             className={clsx(
               'text-xs font-semibold line-clamp-2 leading-snug',
-              task.status === 'completed'
-                ? 'text-content-tertiary line-through'
-                : isOverdue
-                  ? 'text-semantic-error'
-                  : 'text-content-primary',
+              // Overdue shows on the due date chip; a red title on every late card reads as an error page.
+              task.status === 'completed' ? 'text-content-tertiary line-through' : 'text-content-primary',
             )}
           >
             {task.title}
