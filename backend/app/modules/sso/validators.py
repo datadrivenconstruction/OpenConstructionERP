@@ -3,7 +3,7 @@
 """SSO provider validation rules (rule set ``sso``).
 
 * ``sso.slug_format`` - ERROR. Slug is 2-64 chars of a-z, 0-9 and dashes (it is part of URLs).
-* ``sso.protocol_fields`` - ERROR. OIDC needs an https issuer and a client ID; SAML needs the IdP
+* ``sso.protocol_fields`` - ERROR. OIDC needs an https issuer (http only for loopback hosts) and a client ID; SAML needs the IdP
   entity ID, an https SSO URL and a PEM certificate.
 * ``sso.saml_available`` - ERROR. A SAML provider needs the optional ``[saml]`` extra installed.
 * ``sso.idp_certificate`` - ERROR when the certificate does not parse, WARNING when it expires in
@@ -77,8 +77,23 @@ class SlugFormat(ValidationRule):
         return [_result(self, ok, "OK" if ok else f"Slug '{slug[:64]}' is not URL safe.", slug[:64])]
 
 
+_LOOPBACK = ("localhost", "127.0.0.1", "[::1]")
+
+
 def _https(url: Any) -> bool:
-    return isinstance(url, str) and url.startswith("https://") and len(url) > 8
+    """True for an https URL; plain http is accepted only for loopback hosts (local dev IdP)."""
+    if not isinstance(url, str):
+        return False
+    if url.startswith("https://"):
+        return len(url) > 8
+    if url.startswith("http://"):
+        host = url[7:].split("/", 1)[0].split("?", 1)[0].rsplit("@", 1)[-1]
+        if not host.startswith("["):
+            host = host.split(":", 1)[0]
+        else:
+            host = host.split("]", 1)[0] + "]"
+        return host.lower() in _LOOPBACK
+    return False
 
 
 class ProtocolFields(ValidationRule):
