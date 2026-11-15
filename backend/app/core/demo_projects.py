@@ -10551,7 +10551,7 @@ async def _seed_module_data(
         for inv in inv_list:
             items_data = inv.pop("line_items", [])
             subtotal = sum(float(li["amount"]) for li in items_data)
-            tax = round(subtotal * float(demo_vat_rate(template.currency)), 2)
+            tax = round(subtotal * float(demo_vat_rate(template.currency, _country_code_for(template))), 2)
             # A progress claim holds back retention; a sent or paid document is
             # never dated after the day the demo is installed.
             retention = round(
@@ -12075,7 +12075,7 @@ async def _seed_module_data(
             po_notes = f"{po_vendor} - {po_subject}" if po_vendor and po_subject else (po_subject or None)
             po_items = po.get("items", [])
             po_net = sum((Decimal(str(li.get("amount", 0))) for li in po_items), Decimal(0)).quantize(Decimal("0.01"))
-            po_tax = (po_net * demo_vat_rate(template.currency)).quantize(Decimal("0.01"))
+            po_tax = (po_net * demo_vat_rate(template.currency, _country_code_for(template))).quantize(Decimal("0.01"))
             po_obj = PurchaseOrder(
                 id=_id(),
                 project_id=project_id,
