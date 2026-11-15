@@ -19,7 +19,9 @@ import { itemCountForRoute, useVideoHintsStore, videoCountForRoute, videoRouteFo
 const loadPanel = () => import('./ModuleVideosPanel');
 const ModuleVideosPanel = lazy(loadPanel);
 
-function Chip({ route, inRow }: { route: string; inRow: boolean }) {
+// 'row' sits in the PageHeader action row; 'bar' is the compact top-bar form for
+// full-bleed screens that have no PageHeader (it never floats over their canvas).
+function Chip({ route, where }: { route: string; where: 'row' | 'bar' }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -50,7 +52,7 @@ function Chip({ route, inRow }: { route: string; inRow: boolean }) {
   }, [open]);
 
   return (
-    <div ref={boxRef} className={clsx('relative', inRow ? 'z-30' : 'z-30 ms-auto w-fit')} data-testid="module-videos">
+    <div ref={boxRef} className="relative z-30" data-testid="module-videos">
       <button
         type="button"
         onClick={() => {
@@ -61,11 +63,14 @@ function Chip({ route, inRow }: { route: string; inRow: boolean }) {
         onFocus={() => void loadPanel()}
         aria-expanded={open}
         aria-controls={panelId}
+        aria-label={where === 'bar' ? label : undefined}
+        title={where === 'bar' ? label : undefined}
         data-testid="module-videos-toggle"
         data-oe-button="secondary"
         className={clsx(
           // Same geometry as a secondary `Button` md: it shares the header row.
-          'inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 text-sm font-medium shadow-xs transition-colors',
+          'inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border text-sm font-medium shadow-xs transition-colors',
+          where === 'bar' ? 'px-2 xl:px-3' : 'px-3',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-1 active:scale-[0.98]',
           open
             ? 'border-oe-blue/50 bg-oe-blue/10 text-oe-blue-text'
@@ -73,7 +78,7 @@ function Chip({ route, inRow }: { route: string; inRow: boolean }) {
         )}
       >
         <Icon size={16} className="text-oe-blue-text" aria-hidden />
-        {label}
+        <span className={where === 'bar' ? 'hidden xl:inline' : undefined}>{label}</span>
         <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue-text">{count}</span>
         <ChevronDown size={14} className={clsx('text-content-tertiary transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden />
       </button>
@@ -91,8 +96,9 @@ export function ModuleVideosSlot() {
   const route = videoRouteFor(pathname);
   const hidden = useVideoHintsStore((s) => (route ? s.off || s.hidden.includes(route) : true));
   const slot = usePageHeaderSlot((s) => s.el);
-  // Pages without a PageHeader get the chip on its own line, but only once it
-  // is clear none is coming, so header pages never flash the old row.
+  const barSlot = usePageHeaderSlot((s) => s.topBarEl);
+  // Pages without a PageHeader dock the chip in the top bar, but only once it
+  // is clear no header row is coming, so header pages never flash it there.
   const [fallback, setFallback] = useState(false);
   useEffect(() => {
     setFallback(false);
@@ -100,6 +106,6 @@ export function ModuleVideosSlot() {
     return () => window.clearTimeout(id);
   }, [pathname]);
   if (!route || hidden) return null;
-  if (slot) return createPortal(<Chip key={route} route={route} inRow />, slot);
-  return fallback ? <div className="mb-3"><Chip key={route} route={route} inRow={false} /></div> : null;
+  if (slot) return createPortal(<Chip key={route} route={route} where="row" />, slot);
+  return fallback && barSlot ? createPortal(<Chip key={route} route={route} where="bar" />, barSlot) : null;
 }
