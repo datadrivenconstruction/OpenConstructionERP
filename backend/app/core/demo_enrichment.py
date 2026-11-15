@@ -208,6 +208,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.catalog.seed import seed_catalog
         from app.modules.clash.seed import seed_clash
         from app.modules.closeout.seed import seed_closeout_demo
+        from app.modules.dispatch.seed import seed_dispatch_demo
         from app.modules.commissioning.seed import seed_commissioning_demo
         from app.modules.commitment_release.seed import seed_commitment_release_demo
         from app.modules.construction_control.seed import seed_construction_control_demo
@@ -249,6 +250,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.portfolio.seed import seed_portfolio_demo
         from app.modules.procurement_concept.seed import seed_procurement_concept_demo
         from app.modules.progress.seed import seed_position_progress_demo
+        from app.modules.quote_capture.seed import seed_quote_capture_demo
+        from app.modules.rfq_bidding.seed import seed_rfq_demo
         from app.modules.project_handbook.seed import seed_project_handbook_demo
         from app.modules.qms.models import ITPPlan
         from app.modules.qms.seed import seed_qms
@@ -256,6 +259,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.reconciliation.seed import seed_reconciliation_demo
         from app.modules.schedule.evm_demo import seed_schedule_evm_demo
         from app.modules.schedule_advanced.seed import seed_schedule_advanced_demo
+        from app.modules.schedule_advanced.takt_seed import seed_takt_demo
         from app.modules.service.seed import seed_service_demo, seed_service_recurring_schedules
         from app.modules.site_inventory.seed import seed_site_inventory_demo
         from app.modules.site_logistics.demo import seed_site_logistics_demo
@@ -365,6 +369,10 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # seeder guards per project itself now.
             ("schedule_advanced", None, lambda s: seed_schedule_advanced_demo(s, _focus_pids)),
             ("variations", None, lambda s: seed_variations_demo(s, _demo_pids)),
+            ("rfq_bidding", None, lambda s: seed_rfq_demo(s, _demo_pids)),
+            ("takt", None, lambda s: seed_takt_demo(s, _demo_pids)),
+            ("dispatch", None, lambda s: seed_dispatch_demo(s, _demo_pids)),
+            ("quote_capture", None, lambda s: seed_quote_capture_demo(s, _demo_pids)),
             # Field time runs after variations so a daywork booking can name an
             # open variation order, and after the equipment seed (which runs at
             # boot before this list) so plant hours price off a real rental.
