@@ -1376,7 +1376,7 @@ function StepStartChoice({
       <div
         className={clsx(
           'mt-6 w-full grid grid-cols-1 gap-3',
-          canInstallPacks ? 'max-w-5xl sm:grid-cols-3' : 'max-w-3xl sm:grid-cols-2',
+          canInstallPacks ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
         )}
       >
         {/* Quick Start card */}
@@ -1465,7 +1465,7 @@ function StepStartChoice({
         </button>
       </div>
 
-      <StepNav onBack={onBack} className={canInstallPacks ? undefined : 'max-w-3xl'} />
+      <StepNav onBack={onBack} />
     </div>
   );
 }
@@ -1823,7 +1823,7 @@ export function ReadyPackPicker({
         <div
           role="alert"
           data-testid="ready-pack-load-error"
-          className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-semantic-warning-bg px-4 py-3 text-xs text-semantic-warning"
+          className="mt-6 flex w-full items-center gap-3 rounded-xl bg-semantic-warning-bg px-4 py-3 text-xs text-semantic-warning"
         >
           <AlertTriangle size={16} className="shrink-0" />
           <span className="flex-1">
@@ -1852,7 +1852,7 @@ export function ReadyPackPicker({
           country, or gave one we have neither pack nor preset for - this
           renders nothing at all rather than a card that shrugs. */}
       {!isLoading && countryOffer?.kind === 'preset' && (
-        <div className="mt-6 flex w-full max-w-lg flex-col items-center gap-3 rounded-xl bg-oe-blue-subtle/40 p-4 ring-1 ring-oe-blue/20">
+        <div className="mt-6 flex w-full flex-col items-center gap-3 rounded-xl bg-oe-blue-subtle/40 p-4 ring-1 ring-oe-blue/20">
           <div className="flex items-center gap-2">
             <CountryFlag code={countryOffer.preset.flagId} size={20} className="rounded-sm shadow-sm" />
             <span className="text-sm font-semibold text-content-primary">
@@ -1946,7 +1946,7 @@ export function ReadyPackPicker({
       {/* No pack at all on this deployment: the curated presets are the whole
           step, and the Back row below is theirs. */}
       {!isLoading && packs.length === 0 && !installing && presetsWithoutPack.length > 0 && (
-        <div className="mt-7 w-full max-w-5xl">
+        <div className="mt-7 w-full">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {presetsWithoutPack.map((pack) => renderPresetTile(pack, null))}
           </div>
@@ -1982,7 +1982,7 @@ export function ReadyPackPicker({
       {!isLoading && (selectedPack || installing) && (
         <div
           className={clsx(
-            'mt-6 w-full max-w-lg',
+            'mt-6 w-full',
             !installing &&
               'sticky bottom-3 z-sticky rounded-2xl bg-surface-primary/95 p-3 shadow-lg ring-1 ring-border-light backdrop-blur',
           )}
@@ -2466,7 +2466,7 @@ function StepCompanyProfile({
 
       {/* Businesses: three columns on desktop, two on tablet, one on mobile. */}
       <div
-        className="mt-6 grid w-full max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        className="mt-6 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
         data-testid="profile-companies"
       >
         {companies.map((preset) => (
@@ -2491,7 +2491,7 @@ function StepCompanyProfile({
             aria-pressed={isSelected}
             data-testid={`profile-card-${everything.key}`}
             className={clsx(
-              'group relative mt-3 flex w-full max-w-2xl items-center gap-4 p-4 text-start active:scale-[0.99]',
+              'group relative mt-3 flex w-full items-center gap-4 p-4 text-start active:scale-[0.99]',
               choiceCard(isSelected),
             )}
           >
@@ -2529,7 +2529,7 @@ function StepCompanyProfile({
 
       {/* Job profiles: for one person setting the tool up for their own job. */}
       {roles.length > 0 && (
-        <div className="mt-5 flex w-full max-w-5xl flex-col items-center">
+        <div className="mt-5 flex w-full flex-col items-center">
           <button
             type="button"
             onClick={() => setRolesOpen((open) => !open)}
@@ -2574,7 +2574,7 @@ function StepCompanyProfile({
       {/* What the picked profile switches on, in module names. */}
       {selectedPreset && previewShown.length > 0 && (
         <div
-          className="mt-6 w-full max-w-3xl rounded-xl border border-border-light bg-surface-secondary/40 p-4 text-start"
+          className="mt-6 w-full rounded-xl border border-border-light bg-surface-secondary/40 p-4 text-start"
           data-testid="profile-preview"
         >
           <div className="flex items-center gap-2">
@@ -2733,7 +2733,7 @@ function StepModuleConfig({
       </div>
 
       {/* AI Tools toggle */}
-      <div className="mt-4 w-full max-w-2xl">
+      <div className="mt-4 w-full">
         <div className="flex items-center justify-between rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] px-4 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30 shrink-0">
@@ -2782,7 +2782,7 @@ function StepModuleConfig({
 
       {/* Search — the fastest route to one known module, and it opens every
           matching group so a hit is never hidden behind a closed header. */}
-      <div className="mt-4 w-full max-w-2xl relative">
+      <div className="mt-4 w-full relative">
         <Search
           size={16}
           className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary"
@@ -2799,7 +2799,7 @@ function StepModuleConfig({
       </div>
 
       {/* Module list grouped by what the person does, one closed row per group */}
-      <div className="mt-3 w-full max-w-2xl max-h-[50vh] overflow-y-auto pr-1 space-y-2 scrollbar-thin">
+      <div className="mt-3 w-full max-h-[50vh] overflow-y-auto pr-1 space-y-2 scrollbar-thin">
         {groups.map(({ group, label, all, visible }) => {
           const isOpen = expanded.has(group.id) || !!needle;
           const onCount = all.filter((m) => m.core || enabledModules.has(m.key)).length;
@@ -2890,7 +2890,7 @@ function StepModuleConfig({
         )}
       </div>
 
-      <StepNav onBack={onBack} className="max-w-2xl">
+      <StepNav onBack={onBack}>
         <Button
           variant="primary"
           onClick={onNext}
@@ -4273,7 +4273,7 @@ export function StepDataSetup({
         })}
       />
 
-      <div className="mt-6 w-full max-w-2xl space-y-4">
+      <div className="mt-6 w-full space-y-4">
         {/* Cost base first: pick the regional pricing base(s) you estimate
             with. This leads the step so the choice of bases comes before
             anything else; the ready-made country packs just below can set the
@@ -4595,7 +4595,7 @@ export function StepDataSetup({
         })}
       </p>
 
-      <StepNav onBack={onBack} className="max-w-2xl">
+      <StepNav onBack={onBack}>
         <Button variant="secondary" onClick={onNext}>
           {t('onboarding.skip', { defaultValue: 'Skip - set up later' })}
         </Button>
@@ -4831,7 +4831,7 @@ export function StepFinish({
         />
       )}
 
-      <StepNav onBack={onBack} className="max-w-md">
+      <StepNav onBack={onBack}>
         <Button
           variant="primary"
           onClick={handleFinish}
