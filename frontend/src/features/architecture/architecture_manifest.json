@@ -58999,6 +58999,10 @@
               "type": "datetime"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "days_until_expiry",
               "type": "int",
               "description": "Signed integer - negative when already expired, 0 on expiry day, positive when still valid."
@@ -78989,6 +78993,12 @@
               "annotation": "Mapped[Decimal | None]",
               "sql_type": "Numeric",
               "nullable": true
+            },
+            {
+              "name": "segregation_of_duties",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
             },
             {
               "name": "updated_by",
@@ -107585,11 +107595,12 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Public probe response - what the recipient sees before unlocking.\n\nIntentionally omits ``download_count`` and ``id``/``created_by`` so\nnothing about the owner or usage history leaks to recipients.",
+          "docstring": "Public probe response - what the recipient sees before unlocking.\n\nIntentionally omits ``download_count`` and ``id``/``created_by`` so\nnothing about the owner or usage history leaks to recipients. ``filename`` is\nwithheld until the link is open (no password, not expired).",
           "fields": [
             {
               "name": "filename",
-              "type": "str"
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "requires_password",
@@ -118735,6 +118746,7 @@
         "models.py",
         "permissions.py",
         "predictive_service.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -118744,6 +118756,7 @@
         "telematics_router.py",
         "telematics_seed.py",
         "telematics_service.py",
+        "tenancy.py",
         "validators.py"
       ],
       "manifest": {
@@ -118816,6 +118829,12 @@
           "tablename": "oe_equipment_equipment",
           "docstring": "A single piece of equipment in the fleet.",
           "columns": [
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
             {
               "name": "code",
               "annotation": "Mapped[str]",
@@ -122084,7 +122103,8 @@
         "costmodel",
         "field_time",
         "notifications",
-        "projects"
+        "projects",
+        "users"
       ]
     },
     {
@@ -305734,6 +305754,7 @@
         "permissions.py",
         "repository.py",
         "router.py",
+        "saml.py",
         "schemas.py",
         "service.py",
         "sso_enforce.py",
@@ -306094,6 +306115,24 @@
           "method": "POST",
           "path": "/auth/oidc/callback/",
           "handler": "oidc_callback",
+          "response_model": "TokenResponse",
+          "request_schema": "Request"
+        },
+        {
+          "method": "GET",
+          "path": "/auth/saml/config/",
+          "handler": "saml_config"
+        },
+        {
+          "method": "GET",
+          "path": "/auth/saml/login/",
+          "handler": "saml_login",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/auth/saml/acs/",
+          "handler": "saml_acs",
           "response_model": "TokenResponse",
           "request_schema": "Request"
         },
@@ -316725,10 +316764,10 @@
     },
     {
       "name": "inspections",
-      "ts_files": 8,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 8
+      "test_files": 4,
+      "total_files": 10
     },
     {
       "name": "integrations",
@@ -316851,10 +316890,10 @@
     },
     {
       "name": "moc",
-      "ts_files": 7,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 7
+      "test_files": 4,
+      "total_files": 9
     },
     {
       "name": "module-builder",
@@ -317411,10 +317450,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 9,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 9
+      "test_files": 4,
+      "total_files": 11
     },
     {
       "name": "tax-rates",
@@ -319417,13 +319456,13 @@
     "backend_modules": 245,
     "modules_with_manifests": 245,
     "total_models": 910,
-    "total_columns": 10681,
+    "total_columns": 10683,
     "total_relationships": 261,
-    "total_routes": 5218,
+    "total_routes": 5221,
     "total_schemas": 4735,
-    "total_python_files": 3403,
+    "total_python_files": 3406,
     "frontend_features": 238,
-    "frontend_ts_files": 4200,
+    "frontend_ts_files": 4206,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
