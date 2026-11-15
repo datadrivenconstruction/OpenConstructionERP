@@ -17905,6 +17905,11 @@
             {
               "name": "views",
               "type": "list[str]"
+            },
+            {
+              "name": "parquet",
+              "type": "bool",
+              "default": "True"
             }
           ]
         }
@@ -286984,7 +286989,9 @@
               "name": "document_id",
               "annotation": "Mapped[uuid.UUID]",
               "sql_type": "GUID",
-              "nullable": false
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_documents_document.id"
             },
             {
               "name": "status",
