@@ -142,6 +142,46 @@ export function chapterStartingAt(video: AcademyVideo, t: number): VideoChapter 
   return video.chapters.find((c) => c.t === t);
 }
 
+const ROUTE_TOKEN_STOP = new Set(['and', 'the', 'for', 'with', 'und', 'der', 'die', 'das', 'page', 'view']);
+
+/** The chapter of `video` that is about `route`, so "Learn this step" can open
+ *  the player at that minute. An editorial case start on this route wins;
+ *  otherwise the chapter whose title shares the most words with the route or
+ *  module name. A chapter at 0:00 is the video itself and never returned. */
+export function chapterForRoute(
+  video: AcademyVideo,
+  route: string,
+  moduleNames: string[] = [],
+  cases: Record<string, AcademyCaseRef> = ACADEMY_CATALOG.cases,
+): VideoChapter | undefined {
+  const base = route.split('?')[0] ?? route;
+  for (const id of video.cases) {
+    const start = video.caseStarts?.[id];
+    if (!start || !cases[id]?.routes.includes(base)) continue;
+    const hit = [...video.chapters].reverse().find((c) => c.t <= start);
+    if (hit && hit.t > 0) return hit;
+  }
+  const tokens = new Set(
+    [base, ...moduleNames]
+      .flatMap((s) => fold(s).split(/[^\p{L}\p{N}]+/u))
+      .filter((w) => w.length >= 3 &&!ROUTE_TOKEN_STOP.has(w)),
+  );
+  if (tokens.size === 0) return undefined;
+  let best: VideoChapter | undefined;
+  let bestScore = 0;
+  for (const c of video.chapters) {
+    if (c.t <= 0) continue;
+    const title = fold(c.title);
+    let score = 0;
+    for (const w of tokens) if (title.includes(w)) score += 1;
+    if (score > bestScore) {
+      best = c;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
 /** Videos linked to a case. */
 export function videosForCase(caseId: string, videos: AcademyVideo[] = VIDEOS): AcademyVideo[] {
   return videos.filter((v) => v.cases.includes(caseId));
