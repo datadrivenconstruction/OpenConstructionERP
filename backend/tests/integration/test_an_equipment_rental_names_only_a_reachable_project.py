@@ -213,4 +213,6 @@ async def test_the_unfiltered_rental_list_shows_only_reachable_projects(http_cli
     as_admin = await http_client.get(f"{EQUIPMENT}/rentals/", params={"limit": 500}, headers=a["headers"])
     assert as_admin.status_code == 200, as_admin.text
     admin_ids = {r["id"] for r in as_admin.json()}
-    assert {a["rental_id"], b["rental_id"]} <= admin_ids
+    # The fleet is tenant-scoped, so even an admin sees only its own tenant's rentals.
+    assert a["rental_id"] in admin_ids
+    assert b["rental_id"] not in admin_ids

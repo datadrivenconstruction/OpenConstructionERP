@@ -54,6 +54,8 @@ _LITE_ROW_FIELDS = frozenset(
         "metadata_",
         "created_at",
         "updated_at",
+        # Write-point rule warnings ride on every CostItemResponse; empty on a list row.
+        "validation_warnings",
     }
 )
 

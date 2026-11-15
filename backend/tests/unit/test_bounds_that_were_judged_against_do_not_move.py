@@ -69,6 +69,7 @@ class _Session:
 def _criterion_service(judged: int) -> tuple[ConstructionControlService, SimpleNamespace]:
     row = SimpleNamespace(
         id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
         code="ACC-004",
         title="Slab level",
         unit="mm",
