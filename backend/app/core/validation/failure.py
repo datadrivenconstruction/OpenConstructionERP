@@ -75,6 +75,16 @@ def raise_rule_failure(report: ValidationReport, errors: Sequence[RuleResult] | 
         )
 
 
+def finding_key(r: RuleResult) -> tuple[Any, ...]:
+    """Identity of a finding: rule, record part, text and the offending values.
+
+    A new bad value that happens to produce the same text still differs by its values or element, so it
+    is never mistaken for a legacy finding.
+    """
+    values = tuple(sorted((str(k), str(v)) for k, v in (r.details or {}).items()))
+    return (r.rule_id, r.element_ref or "", r.message, values)
+
+
 async def introduced_errors(
     report: ValidationReport,
     before: Callable[[], Awaitable[ValidationReport]] | None,
@@ -82,10 +92,11 @@ async def introduced_errors(
     """Errors of ``report`` that the edit introduces.
 
     A record saved before the rules existed is not frozen: with ``before`` (a thunk running the rules
-    over the stored record) an error the stored record already had does not block the edit.
+    over the stored record) an error the stored record already had does not block the edit; findings are
+    matched by ``finding_key`` (rule, element, text, values), never by rule and text alone.
     """
     blocking = list(report.errors)
     if blocking and before is not None:
-        legacy = {(r.rule_id, r.message) for r in (await before()).errors}
-        blocking = [r for r in blocking if (r.rule_id, r.message) not in legacy]
+        legacy = {finding_key(r) for r in (await before()).errors}
+        blocking = [r for r in blocking if finding_key(r) not in legacy]
     return blocking
