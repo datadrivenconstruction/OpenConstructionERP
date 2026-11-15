@@ -289,8 +289,7 @@ TEMPLATE = DemoTemplate(
         "structure_system": "钢筋混凝土核心筒 + 钢管混凝土框架",
         "seismic_design": "抗震设防烈度 7 度",
         "design_codes": (
-            "GB 50010 混凝土结构, GB 50011 抗震, GB 50009 荷载, GB 50016 建筑防火, "
-            "GB 50352 民用建筑设计统一标准"
+            "GB 50010 混凝土结构, GB 50011 抗震, GB 50009 荷载, GB 50016 建筑防火, GB 50352 民用建筑设计统一标准"
         ),
         "pricing_standard": "GB 50500-2013《建设工程工程量清单计价规范》",
         "measurement_standard": "GB 50854-2013《房屋建筑与装饰工程工程量计算规范》",

@@ -208,7 +208,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.catalog.seed import seed_catalog
         from app.modules.clash.seed import seed_clash
         from app.modules.closeout.seed import seed_closeout_demo
-        from app.modules.dispatch.seed import seed_dispatch_demo
         from app.modules.commissioning.seed import seed_commissioning_demo
         from app.modules.commitment_release.seed import seed_commitment_release_demo
         from app.modules.construction_control.seed import seed_construction_control_demo
@@ -224,6 +223,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         )
         from app.modules.delivery_model.seed import seed_delivery_model_demo
         from app.modules.design_management.seed import align_demo_wbs_with_references, seed_design_management_demo
+        from app.modules.dispatch.seed import seed_dispatch_demo
         from app.modules.documents.documents_seed import seed_documents_demo
         from app.modules.documents.photos_seed import seed_photos
         from app.modules.dwg_takeoff.seed import seed_dwg_takeoff_demo
@@ -250,13 +250,13 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.portfolio.seed import seed_portfolio_demo
         from app.modules.procurement_concept.seed import seed_procurement_concept_demo
         from app.modules.progress.seed import seed_position_progress_demo
-        from app.modules.quote_capture.seed import seed_quote_capture_demo
-        from app.modules.rfq_bidding.seed import seed_rfq_demo
         from app.modules.project_handbook.seed import seed_project_handbook_demo
         from app.modules.qms.models import ITPPlan
         from app.modules.qms.seed import seed_qms
         from app.modules.quality_concept.seed import seed_quality_concept_demo
+        from app.modules.quote_capture.seed import seed_quote_capture_demo
         from app.modules.reconciliation.seed import seed_reconciliation_demo
+        from app.modules.rfq_bidding.seed import seed_rfq_demo
         from app.modules.schedule.evm_demo import seed_schedule_evm_demo
         from app.modules.schedule_advanced.seed import seed_schedule_advanced_demo
         from app.modules.schedule_advanced.takt_seed import seed_takt_demo
