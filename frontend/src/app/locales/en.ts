@@ -45827,6 +45827,7 @@ const resource = {
     "common.default_filter_save": "Save as my default",
     "common.default_filter_clear": "Clear my default",
     "common.more_actions": "More actions",
+    "common.lien_reference_disclaimer": "Reference only, not legal advice. Lien rules and deadlines vary by state and change; verify with counsel before relying on them.",
     "commitment.abort.follow_up.cancel": "Cancel this order in procurement",
     "commitment.abort.follow_up.terminate": "Terminate this contract in the contracts module",
     "commitment.abort.follow_up_title": "Still to do by hand. Stopping the item ends no contract or order by itself:",

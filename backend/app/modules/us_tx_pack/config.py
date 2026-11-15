@@ -389,7 +389,8 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "name": "Lien affidavit deadline, residential construction",
             "description": (
                 "The affidavit must be filed not later than the 15th day of the third calendar month after "
-                "the month in which the claimant's work was completed, terminated or abandoned. The deadline "
+                "the month in which the original contractor's work was completed, terminated or abandoned, "
+                "or, for any other claimant, the month it last provided labor or materials. The deadline "
                 "is a day of a month rather than a count of days, so it cannot be computed by adding a "
                 "period to a date."
             ),
@@ -403,8 +404,9 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "name": "Lien affidavit deadline, non-residential",
             "description": (
                 "For non-residential work the affidavit must be filed not later than the 15th day of the "
-                "fourth calendar month after the month in which the work was completed, terminated or "
-                "abandoned."
+                "fourth calendar month after the month in which the original contractor's work was completed, "
+                "terminated or abandoned, or, for any other claimant, the month it last provided labor or "
+                "materials."
             ),
             "value": "4",
             "unit": "months_to_fifteenth_day",
