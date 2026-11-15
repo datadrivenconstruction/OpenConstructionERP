@@ -213,9 +213,10 @@ server = [
     "celery[redis]>=5.4.0,<6",
     "boto3>=1.35.0,<2",
 ]
-# SAML 2.0 single sign-on (OIDC needs nothing extra). python3-saml pulls in xmlsec.
+# SAML 2.0 single sign-on (OIDC needs nothing extra). signxml is pure Python over lxml and
+# cryptography; without it the SAML option is hidden in Settings and OIDC keeps working.
 saml = [
-    "python3-saml>=1.16.0,<2",
+    "signxml>=4.0.0,<6",
 ]
 # Parquet export of the BI feeds on installs that slim pyarrow out of the base set.
 parquet = [
@@ -419,6 +420,8 @@ dev = [
     # (tests/unit/test_gaeb_export_xsd.py validates exported X83/X84 against the
     # official GAEB schema). Test-only; the runtime XML path uses defusedxml.
     "lxml>=5.0.0",
+    # Verifies SAML signatures in tests/modules/oe_sso (runtime: extra [saml]).
+    "signxml>=4.0.0,<6",
     # Pinned exactly: the CI "ruff format --check" gate compares against the
     # formatter's output, which can shift between ruff releases. A floating
     # spec let CI pick a newer ruff than contributors ran locally, so formatted

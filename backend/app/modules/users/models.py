@@ -11,7 +11,7 @@ Tables:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -21,6 +21,8 @@ class User(Base):
     """Application user."""
 
     __tablename__ = "oe_users_user"
+    # A subject is only unique within the issuer that minted it.
+    __table_args__ = (Index("uq_oe_users_user_oidc_issuer_sub", "oidc_issuer", "oidc_sub", unique=True),)
 
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -41,7 +43,7 @@ class User(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # OIDC subject identifier (Keycloak / any OIDC provider). Set on first
     # OIDC login and used to match returning OIDC users to local accounts.
-    oidc_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
+    oidc_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     oidc_issuer: Mapped[str | None] = mapped_column(String(500), nullable=True)
     # Identity of this person at the company IdP (SCIM externalId) and which path created the
     # account: "scim", "oidc" or "local". NULL means created before provisioning was tracked.
