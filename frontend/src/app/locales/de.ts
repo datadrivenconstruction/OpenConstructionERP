@@ -58739,6 +58739,7 @@ const resource = {
     "modules.catalog.win_loss": "Erfolgsbilanz der Angebote",
     "modules.catalog.offers": "Kundenangebote",
     "modules.catalog.letter_templates": "Briefvorlagen",
+    "modules.catalog.sso": "Single Sign-On",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start

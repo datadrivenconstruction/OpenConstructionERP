@@ -81,6 +81,13 @@ class ProviderOut(ProviderBase):
     metadata_url: str | None = None
 
 
+class SsoListResponse(BaseModel):
+    items: list[ProviderOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class PublicProvider(BaseModel):
     """What the login page may see: no secrets, no mapping."""
 

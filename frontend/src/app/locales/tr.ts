@@ -57170,6 +57170,7 @@ const resource = {
     "modules.catalog.win_loss": "Kazanılan ve kaybedilen teklifler",
     "modules.catalog.offers": "Müşteri teklifleri",
     "modules.catalog.letter_templates": "Mektup Şablonları",
+    "modules.catalog.sso": "Tek Oturum Açma",
     "modules.pp_desc_eleven_areas_framework": "Proje yönetimi işveren tarafından on bir yönetim alanında, iki aşamada yürütülür: proje geliştirme ve yapım uygulaması. Aralarında bir kapı ve her alan için onaylanmış bir çerçeve belge bulunur.",
     "modules.pp_name_pakistan_pk": "Pakistan İnşaat Paketi",
     "modules.pp_name_peru_pe": "Peru İnşaat Paketi",

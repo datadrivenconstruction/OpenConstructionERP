@@ -98,6 +98,15 @@ async def test_admin_crud_and_secret_never_returned(env, saml_required):
     assert r.status_code == 204
 
 
+async def test_admin_list_is_an_envelope(env):
+    await env.client.post("/api/v1/sso/providers/admin/", json=_saml_body(), headers=env.headers)
+    r = await env.client.get("/api/v1/sso/providers/admin/", headers=env.headers)
+    body = r.json()
+    assert r.status_code == 200
+    assert body["total"] == len(body["items"]) >= 1
+    assert {"offset", "limit"} <= body.keys()
+
+
 async def test_admin_requires_admin_role(env):
     assert (await env.client.get("/api/v1/sso/providers/admin/")).status_code in (401, 403)
 
