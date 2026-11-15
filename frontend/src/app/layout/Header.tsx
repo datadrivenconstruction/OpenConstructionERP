@@ -482,7 +482,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             {/* text-base until xl: at lg widths the right cluster + project
                 pill left too little room and module names truncated to
                 "Estima..." (uniformity sweep S5 follow-up). */}
-            <h1 className="hidden lg:flex items-center gap-2 min-w-0 text-base font-semibold text-content-primary xl:text-lg">
+            <h1 className="hidden lg:flex items-center gap-2 min-w-[7rem] text-base font-semibold text-content-primary xl:text-lg">
               {/* Module icon — mirrors the active route's sidebar icon so the
                   top title is visually tied to the module. Decorative
                   (aria-hidden); absent (no layout shift) when the route has
@@ -577,9 +577,9 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             'text-sm text-content-tertiary shadow-sm',
             'transition-colors duration-fast ease-oe',
             'hover:border-content-quaternary/40 hover:bg-white dark:hover:bg-surface-primary hover:text-content-secondary',
-            // w-56 only at xl: at lg the wide search box squeezed the left
+            // w-56 only at 2xl: below that the wide search box squeezed the left
             // workspace zone and truncated the module title.
-            'w-40 md:w-44 xl:w-56',
+            'w-40 md:w-44 2xl:w-56',
           )}
         >
           <Search size={14} strokeWidth={1.75} className="shrink-0" />
@@ -617,7 +617,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           )}
         >
           <Sparkles size={16} strokeWidth={1.75} />
-          <span className="hidden xl:inline text-sm">{t('header.ask_ai', { defaultValue: 'Ask AI' })}</span>
+          <span className="hidden 2xl:inline text-sm">{t('header.ask_ai', { defaultValue: 'Ask AI' })}</span>
         </button>
         )}
 
@@ -1937,7 +1937,7 @@ function ProjectSwitcher() {
           // at 1280-1440px; the pill gets its full 260px back on xl+.
           // OC-12: widened lg to 220px so names like "Landshut" stay readable
           // at 125% zoom (180px rendered as ~144px, cutting anything > 10 chars).
-          'flex items-stretch rounded-lg border transition-all max-w-[220px] xl:max-w-[280px] overflow-hidden',
+          'flex items-stretch rounded-lg border transition-all max-w-[200px] 2xl:max-w-[280px] overflow-hidden',
           activeProjectId
             ? 'bg-oe-blue-subtle border-oe-blue/30 hover:bg-oe-blue/10 hover:border-oe-blue/50 shadow-[0_1px_2px_rgba(0,122,255,0.05)]'
             : 'border-dashed border-oe-blue/40 bg-oe-blue/[0.04] hover:bg-oe-blue/[0.08] hover:border-oe-blue/60',

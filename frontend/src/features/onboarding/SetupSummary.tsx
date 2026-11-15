@@ -32,7 +32,7 @@ function Row({
   action: ReactNode;
 }) {
   return (
-    <li data-testid={`setup-summary-${id}`} className="flex items-center gap-3 px-4 py-2.5">
+    <li data-testid={`setup-summary-${id}`} className="flex items-center gap-3 bg-surface-elevated px-4 py-3">
       <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue">
         {icon}
       </span>
@@ -96,13 +96,13 @@ export function SetupSummary({
   const customised = mode === 'logo' || mode === 'text';
 
   return (
-    <div className="mt-6 w-full max-w-md text-start">
+    <div className="mt-6 w-full text-start">
       <h3 className="oe-card-title mb-2">
         {t('onboarding.summary_title', { defaultValue: 'What is set up' })}
       </h3>
       <ul
         data-testid="setup-summary"
-        className="divide-y divide-border-light overflow-hidden rounded-xl border border-border-light bg-surface-elevated"
+        className="grid gap-px overflow-hidden rounded-xl border border-border-light bg-border-light sm:grid-cols-2"
       >
         <Row
           id="language"
