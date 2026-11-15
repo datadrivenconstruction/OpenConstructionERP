@@ -440,7 +440,7 @@ async def deferred_audit(session: AsyncSession) -> AsyncIterator[None]:
 
     Same rows, ids and order as writing them one by one; only the per-row savepoint and flush go.
     A failing insert is dropped like a failing single row (logged, the caller's work stays). On an
-    exception in the body nothing is written: the caller rolls the work back anyway.
+    exception in the body nothing is written (the count is logged): the caller rolls the work back anyway.
     """
     if _DEFERRED_KEY in session.info:
         yield
@@ -448,9 +448,16 @@ async def deferred_audit(session: AsyncSession) -> AsyncIterator[None]:
     session.info[_DEFERRED_KEY] = pending = []
     try:
         yield
+    except BaseException:
+        if pending:
+            logger.warning("activity_log: dropped %d deferred audit rows, the body raised", len(pending))
+        raise
     finally:
         session.info.pop(_DEFERRED_KEY, None)
     if pending:
+        # Flush the caller's work outside the savepoint so its errors surface and a failed audit
+        # insert rolls back only the audit rows.
+        await session.flush()
         try:
             async with session.begin_nested():
                 session.add_all(pending)
