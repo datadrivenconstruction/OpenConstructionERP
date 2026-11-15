@@ -1699,10 +1699,13 @@ async def get_share_link_info(
 
     _throttle_share_link(request, token)
     link, doc = await get_share_link_public(session, token)
+    expired = _is_expired(link)
+    locked = bool(link.password_hash)
     return ShareLinkPublicInfo(
-        filename=doc.name,
-        requires_password=bool(link.password_hash),
-        expired=_is_expired(link),
+        # No file metadata before the password is entered or once the link has expired.
+        filename=None if locked or expired else doc.name,
+        requires_password=locked,
+        expired=expired,
     )
 
 
