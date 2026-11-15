@@ -39,7 +39,7 @@ import uuid
 from typing import Any, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile, status
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel
 
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
@@ -559,6 +559,57 @@ async def oidc_callback(
         full_name=name,
         auto_create=s.oidc_auto_create_users,
         role_from_groups=role_from_groups,
+        default_role=s.oidc_default_role,
+    )
+
+
+# ── SAML 2.0 authentication ────────────────────────────────────────────────
+
+
+@router.get("/auth/saml/config/")
+async def saml_config() -> dict:
+    """Whether SAML sign-in is configured, so the login page can show the button."""
+    from app.config import get_settings
+    from app.modules.users import saml
+
+    return {"enabled": saml.is_configured(get_settings())}
+
+
+@router.get("/auth/saml/login/")
+async def saml_login(request: Request) -> RedirectResponse:
+    """Start SP-initiated SAML sign-in: redirect the browser to the identity provider."""
+    from app.config import get_settings
+    from app.modules.users import saml
+
+    s = get_settings()
+    if not saml.is_configured(s):
+        raise HTTPException(status_code=400, detail="SAML authentication is not enabled.")
+    return RedirectResponse(saml.login_url(s, request.url.netloc, request.url.path), status_code=302)
+
+
+@router.post("/auth/saml/acs/", response_model=TokenResponse)
+async def saml_acs(
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> TokenResponse:
+    """Assertion consumer service: verify the SAML response and issue local JWT tokens."""
+    from app.config import get_settings
+    from app.modules.users import oidc, saml
+
+    s = get_settings()
+    if not saml.is_configured(s):
+        raise HTTPException(status_code=400, detail="SAML authentication is not enabled.")
+    form = {k: v for k, v in (await request.form()).items() if isinstance(v, str)}
+    info = saml.read_response(s, request.url.netloc, request.url.path, form)
+    if not info["sub"] or not info["email"]:
+        raise oidc.oidc_error(400, "missing_claims", "SAML response did not carry a subject or email.")
+    return await service.oidc_login(
+        oidc_sub=info["sub"],
+        oidc_issuer=s.saml_idp_entity_id,
+        email=info["email"],
+        full_name=info["name"],
+        auto_create=s.oidc_auto_create_users,
+        role_from_groups=oidc.resolve_role(info["groups"], s.oidc_group_role_map),
         default_role=s.oidc_default_role,
     )
 
