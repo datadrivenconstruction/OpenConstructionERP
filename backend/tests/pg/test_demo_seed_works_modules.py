@@ -43,7 +43,8 @@ from app.modules.projects.models import Project
 from app.modules.schedule.models import Activity, Schedule
 from app.modules.temporary_works import register
 from app.modules.temporary_works.models import TemporaryWorksItem, TemporaryWorksPermit
-from app.modules.temporary_works.seed import seed_temporary_works_demo
+from app.modules.temporary_works.seed import _ITEM_SPECS, seed_temporary_works_demo
+from app.modules.temporary_works.seed_text import temporary_works_text
 from app.modules.temporary_works.service import TemporaryWorksService
 from app.modules.users.models import User
 
@@ -231,7 +232,10 @@ async def test_the_temporary_works_register_is_populated_and_spans_the_lifecycle
             assert item.tw_type in register.ALL_TW_TYPES
             assert item.status in register.ALL_ITEM_STATUSES
             assert item.design_check_category in register.ALL_DESIGN_CHECK_CATEGORIES
-            assert item.description and "Design case:" in item.description
+            # the design case is carried by the description, in the project's language
+            assert item.description in {
+                temporary_works_text(lang, spec.description) for spec in _ITEM_SPECS for lang in ("en", "de", "fr")
+            }
             assert item.location
 
 
