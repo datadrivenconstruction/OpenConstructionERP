@@ -1085,6 +1085,54 @@ _BERLIN = DemoTemplate(
             ],
         ),
     ],
+    # XRechnung showcase: private-sector client, Leitweg-ID style buyer reference (BT-10).
+    einvoice_showcase={
+        "profile": "xrechnung",
+        "buyer_contact": {
+            "legal_name": "Vennhof Wohnbaugesellschaft mbH",
+            "vat_number": "DE318264975",
+            "address": {"street": "Chausseestraße 45", "city": "Berlin", "postcode": "10115"},
+        },
+        "invoice": {
+            "invoice_number": "AR-2026-031",
+            "notes": "2. Abschlagsrechnung Rohbau gem. Leistungsstand",
+            "line_items": [
+                {
+                    "description": "Erdarbeiten und Gründung gem. Aufmaß",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "412876.00",
+                    "amount": "412876.00",
+                },
+                {
+                    "description": "Stahlbetonrohbau KG-2.OG gem. Aufmaß",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "689340.00",
+                    "amount": "689340.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "19",
+            "leitweg_id": "11-0114-39",
+            "seller": {
+                "name": "Verdanko Hochbau AG",
+                "vat_id": "DE241873659",
+                "country_code": "DE",
+                "line1": "Storkower Straße 118",
+                "postcode": "10407",
+                "city": "Berlin",
+                "contact_name": "Katrin Verdank",
+                "contact_phone": "+49 30 4172680",
+                "contact_email": "rechnung@verdanko-hochbau.example",
+            },
+            "payee_iban": "DE02120300000000202051",
+            "payee_account_name": "Verdanko Hochbau AG",
+            "payment_means_code": "58",
+            "payment_terms": "Zahlbar innerhalb von 30 Tagen netto gem. § 16 VOB/B",
+        },
+    },
 )
 
 # ---------------------------------------------------------------------------
@@ -1317,6 +1365,57 @@ _LONDON = DemoTemplate(
         "basement_levels": 2,
         "breeam_target": "Excellent",
         "procurement": "Design & Build",
+    },
+    # Peppol BIS Billing 3.0 showcase: UK VAT, buyer reference as the PO number.
+    einvoice_showcase={
+        "profile": "peppol",
+        "buyer_contact": {
+            "legal_name": "Vittram Estates plc",
+            "vat_number": "GB284917356",
+            "address": {"street": "25 Canada Square", "city": "London", "postcode": "E14 5LQ"},
+        },
+        "invoice": {
+            "invoice_number": "INV-2026-0147",
+            "notes": "Interim application No. 6, substructure and podium frame",
+            "line_items": [
+                {
+                    "description": "Interim valuation No. 6, piling and basement box",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "1784250.00",
+                    "amount": "1784250.00",
+                },
+                {
+                    "description": "Interim valuation No. 6, podium frame and decks",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "963400.00",
+                    "amount": "963400.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "20",
+            "buyer_reference": "PO-EF-24-0318",
+            "seller": {
+                "name": "Brenhall Construction Ltd",
+                "vat_id": "GB417239865",
+                "legal_id": "08241567",
+                "country_code": "GB",
+                "line1": "14 Bow Common Lane",
+                "postcode": "E3 4AP",
+                "city": "London",
+                "contact_name": "Accounts Receivable",
+                "contact_phone": "+44 20 7946 0173",
+                "contact_email": "invoicing@brenhall.example",
+                "electronic_address": "GB417239865",
+                "electronic_address_scheme": "9932",
+            },
+            "payee_iban": "GB29NWBK60161331926819",
+            "payee_account_name": "Brenhall Construction Ltd",
+            "payment_means_code": "30",
+            "payment_terms": "Payable within 30 days of the certified valuation, 3% retention held",
+        },
     },
 )
 
@@ -1708,6 +1807,56 @@ _DUBAI = DemoTemplate(
         "clear_height_m": 12,
         "loading_docks": 8,
         "leed_target": "Silver",
+    },
+    # Peppol-based UAE e-invoicing showcase: TRN as tax number, UAE TIN electronic address.
+    einvoice_showcase={
+        "profile": "peppol",
+        "buyer_contact": {
+            "legal_name": "Marsa Gate Logistics FZE",
+            "address": {"street": "Plot JAFZA-S-4417, Jebel Ali Free Zone", "city": "Dubai", "postcode": "17000"},
+        },
+        "invoice": {
+            "invoice_number": "INV-2026-0092",
+            "notes": "Interim payment application No. 4, steel frame and cladding",
+            "line_items": [
+                {
+                    "description": "Interim certificate No. 4, structural steel erection",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "3265400.00",
+                    "amount": "3265400.00",
+                },
+                {
+                    "description": "Interim certificate No. 4, roof and wall cladding",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "1418750.00",
+                    "amount": "1418750.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "5",
+            "buyer_reference": "MGL-PO-2026-0215",
+            "seller": {
+                "name": "Rimaya Engineering & Contracting LLC",
+                "tax_number": "100384729100003",
+                "legal_id": "CN-1873642",
+                "country_code": "AE",
+                "line1": "Al Quoz Industrial Area 3",
+                "postcode": "00000",
+                "city": "Dubai",
+                "contact_name": "Accounts Receivable",
+                "contact_phone": "+971 4 555 0184",
+                "contact_email": "invoicing@rimaya.example",
+                "electronic_address": "100384729100003",
+                "electronic_address_scheme": "0235",
+            },
+            "payee_iban": "AE070331234567890123456",
+            "payee_account_name": "Rimaya Engineering & Contracting LLC",
+            "payment_means_code": "30",
+            "payment_terms": "Payable 30 days from the engineer's certificate, 10% retention held",
+        },
     },
 )
 
@@ -2393,6 +2542,56 @@ _PARIS = DemoTemplate(
             ],
         ),
     ],
+    # Factur-X showcase: public buyer, SIREN/SIRET identifiers, service code as buyer reference.
+    einvoice_showcase={
+        "profile": "facturx",
+        "buyer_contact": {
+            "legal_name": "Mairie de Paris - DASCO",
+            "address": {"street": "3 Rue de l'Hôtel de Ville", "city": "Paris", "postcode": "75004"},
+        },
+        "invoice": {
+            "invoice_number": "F-2026-0058",
+            "notes": "Situation de travaux n° 5 - gros œuvre et structure bois",
+            "line_items": [
+                {
+                    "description": "Situation n° 5, fondations et dallage",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "538640.00",
+                    "amount": "538640.00",
+                },
+                {
+                    "description": "Situation n° 5, structure bois-béton CLT",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "921375.00",
+                    "amount": "921375.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "20",
+            "buyer_reference": "DASCO-ECOLE-BELLEVILLE",
+            "seller": {
+                "name": "Tholmery Construction SAS",
+                "vat_id": "FR96412345670",
+                "legal_id": "41234567000126",
+                "country_code": "FR",
+                "line1": "28 Rue de Charenton",
+                "postcode": "75012",
+                "city": "Paris",
+                "contact_name": "Service comptabilité clients",
+                "contact_phone": "+33 1 44 76 21 30",
+                "contact_email": "facturation@tholmery.example",
+                "electronic_address": "41234567000126",
+                "electronic_address_scheme": "0009",
+            },
+            "payee_iban": "FR1420041010050500013M02606",
+            "payee_account_name": "Tholmery Construction SAS",
+            "payment_means_code": "30",
+            "payment_terms": "Paiement à 30 jours à compter de la réception de la facture",
+        },
+    },
 )
 
 

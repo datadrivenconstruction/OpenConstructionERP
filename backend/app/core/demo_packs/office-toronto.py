@@ -562,4 +562,52 @@ TEMPLATE = DemoTemplate(
     actual_spend_ratio=0.35,
     spi_override=0.98,
     cpi_override=1.01,
+    # No national mandate in Canada: plain EN 16931 UBL, Peppol optional; BN as tax number.
+    einvoice_showcase={
+        "profile": "ubl",
+        "buyer_contact": {
+            "legal_name": "Fennridge Development Corp.",
+            "address": {"street": "150 King Street West, Suite 2100", "city": "Toronto", "postcode": "M5H 1J9"},
+        },
+        "invoice": {
+            "invoice_number": "INV-2026-0213",
+            "notes": "Progress claim No. 7, structure levels 1 to 12",
+            "line_items": [
+                {
+                    "description": "Progress claim No. 7, concrete frame levels 1 to 8",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "6284500.00",
+                    "amount": "6284500.00",
+                },
+                {
+                    "description": "Progress claim No. 7, concrete frame levels 9 to 12",
+                    "quantity": "1",
+                    "unit": "lsum",
+                    "unit_rate": "3147250.00",
+                    "amount": "3147250.00",
+                },
+            ],
+        },
+        "einvoice": {
+            "vat_rate": "13",
+            "buyer_reference": "FDC-PC-2026-07",
+            "seller": {
+                "name": "Granthaven Construction Corp.",
+                "tax_number": "123456789RT0001",
+                "legal_id": "ON-1847263",
+                "country_code": "CA",
+                "line1": "88 Queens Quay West",
+                "postcode": "M5J 0B8",
+                "city": "Toronto",
+                "contact_name": "Accounts Receivable",
+                "contact_phone": "+1 416 555 0139",
+                "contact_email": "invoicing@granthaven.example",
+            },
+            "payee_iban": "000120041234567",
+            "payee_account_name": "Granthaven Construction Corp.",
+            "payment_means_code": "30",
+            "payment_terms": "Net 30 days from approval of the progress claim, 10% holdback",
+        },
+    },
 )
