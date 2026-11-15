@@ -52664,6 +52664,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Итгэмжлэлийн провайдертой холбогдож чадсангүй.",
     "auth.oidc_errors.provider_invalid": "Итгэмжлэлийн провайдерийн тохиргоо буруу байна.",
     "auth.oidc_errors.missing_claims": "Итгэмжлэлийн провайдер хэрэглэгчийн ID эсвэл имэйл буцаасангүй.",
+    "auth.oidc_errors.account_link_refused": "Энэ имэйлтэй бүртгэл аль хэдийн байгаа бөгөөд энэ нэвтрэлттэй холбох боломжгүй. Админтай холбогдоно уу.",
     "auth.oidc_back_to_login": "Нэвтрэх рүү буцах",
     "auth.oidc_completing": "SSO-оор нэвтрэлтийг дуусгаж байна...",
     "auth.saml_login": "SAML-аар нэвтрэх",

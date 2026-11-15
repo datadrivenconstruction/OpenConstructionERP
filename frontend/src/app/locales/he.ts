@@ -26901,6 +26901,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "לא ניתן להגיע לספק הזהות.",
     "auth.oidc_errors.provider_invalid": "הגדרות ספק הזהות אינן תקינות.",
     "auth.oidc_errors.missing_claims": "ספק הזהות לא החזיר מזהה משתמש או אימייל.",
+    "auth.oidc_errors.account_link_refused": "כבר קיים חשבון עם כתובת דוא\"ל זו ולא ניתן לקשר אותו לכניסה זו. פנה למנהל המערכת.",
     "auth.oidc_back_to_login": "חזרה להתחברות",
     "auth.oidc_completing": "משלימים את התחברות ה-SSO...",
     "auth.saml_login": "התחברות באמצעות SAML",

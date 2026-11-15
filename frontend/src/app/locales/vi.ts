@@ -52775,6 +52775,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Không thể kết nối tới nhà cung cấp danh tính.",
     "auth.oidc_errors.provider_invalid": "Cấu hình nhà cung cấp danh tính không hợp lệ.",
     "auth.oidc_errors.missing_claims": "Nhà cung cấp danh tính không trả về ID người dùng hoặc email.",
+    "auth.oidc_errors.account_link_refused": "Đã có tài khoản dùng email này và không thể liên kết với lần đăng nhập này. Hãy liên hệ quản trị viên.",
     "auth.oidc_back_to_login": "Quay lại đăng nhập",
     "auth.oidc_completing": "Đang hoàn tất đăng nhập SSO...",
     "auth.saml_login": "Đăng nhập bằng SAML",

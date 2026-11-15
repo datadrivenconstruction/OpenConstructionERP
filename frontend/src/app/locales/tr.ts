@@ -28182,6 +28182,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Kimlik sağlayıcıya ulaşılamadı.",
   "auth.oidc_errors.provider_invalid": "Kimlik sağlayıcı yapılandırması geçersiz.",
   "auth.oidc_errors.missing_claims": "Kimlik sağlayıcı kullanıcı kimliği veya e-posta döndürmedi.",
+  "auth.oidc_errors.account_link_refused": "Bu e-posta ile bir hesap zaten var ve bu oturum açmaya bağlanamaz. Yöneticinize başvurun.",
   "auth.oidc_back_to_login": "Girişe dön",
   "auth.oidc_completing": "SSO girişi tamamlanıyor...",
   "auth.saml_login": "SAML ile oturum aç",

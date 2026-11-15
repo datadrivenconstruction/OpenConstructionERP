@@ -943,6 +943,22 @@ class UserService:
 
         return tokens
 
+    async def consume_saml_assertion(self, assertion_id: str, expires_at: datetime) -> bool:
+        """Record a SAML assertion ID; False when it was already consumed and has not expired."""
+        from sqlalchemy import delete
+        from sqlalchemy.exc import IntegrityError
+
+        from app.modules.users.models import SamlAssertion
+
+        now = datetime.now(UTC)
+        await self.session.execute(delete(SamlAssertion).where(SamlAssertion.expires_at < now))
+        try:
+            async with self.session.begin_nested():
+                self.session.add(SamlAssertion(assertion_id=assertion_id, expires_at=expires_at))
+        except IntegrityError:
+            return False
+        return True
+
     async def oidc_login(
         self,
         *,
@@ -953,34 +969,48 @@ class UserService:
         auto_create: bool = True,
         role_from_groups: str | None = None,
         default_role: str = "viewer",
+        email_trusted: bool = False,
+        legacy_issuer_fallback: bool = False,
     ) -> TokenResponse:
-        """Authenticate via OIDC: find or create user by oidc_sub, issue tokens.
+        """Authenticate via OIDC or SAML: find or create the user by (issuer, subject), issue tokens.
 
-        When *role_from_groups* is set (resolved from the OIDC_GROUP_ROLE_MAP
-        configuration), it is applied to the user on every login so that group
-        membership changes in Keycloak propagate without manual intervention.
+        An existing local account is linked by email only when *email_trusted* (the IdP vouches for
+        the address) and the account is not bound to any SSO identity yet. *legacy_issuer_fallback*
+        matches rows written before the issuer was recorded and backfills it; the caller allows it
+        only when this issuer is the sole configured one. When *role_from_groups* is set it is
+        applied on every login so group changes at the IdP propagate.
         """
-        from sqlalchemy import select
-
         from app.modules.users.models import User
 
-        result = await self.session.execute(select(User).where(User.oidc_sub == oidc_sub))
-        user = result.scalar_one_or_none()
+        user = (
+            await self.session.execute(select(User).where(User.oidc_issuer == oidc_issuer, User.oidc_sub == oidc_sub))
+        ).scalar_one_or_none()
+        if user is None and legacy_issuer_fallback:
+            user = (
+                await self.session.execute(select(User).where(User.oidc_issuer.is_(None), User.oidc_sub == oidc_sub))
+            ).scalar_one_or_none()
+            if user is not None:
+                user.oidc_issuer = oidc_issuer
+                await self.session.flush()
 
         if user is None:
-            # Try matching by email
             user = await self.user_repo.get_by_email(email)
             if user is not None:
-                # Link existing account to OIDC
+                if not email_trusted or user.oidc_sub is not None:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail={
+                            "code": "account_link_refused",
+                            "message_key": "auth.oidc_errors.account_link_refused",
+                            "message": "An account with this email exists and cannot be linked to this sign-in.",
+                        },
+                    )
                 user.oidc_sub = oidc_sub
                 user.oidc_issuer = oidc_issuer
                 if role_from_groups:
                     user.role = role_from_groups
                 await self.session.flush()
             elif auto_create:
-                # Create new user from OIDC claims
-                import secrets
-
                 user = User(
                     email=email.lower().strip(),
                     hashed_password=hash_password(secrets.token_urlsafe(32)),

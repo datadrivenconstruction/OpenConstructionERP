@@ -27697,6 +27697,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Не може да се установи връзка с доставчика на идентичност.",
   "auth.oidc_errors.provider_invalid": "Конфигурацията на доставчика на идентичност е невалидна.",
   "auth.oidc_errors.missing_claims": "Доставчикът на идентичност не върна потребителски идентификатор или имейл.",
+  "auth.oidc_errors.account_link_refused": "Вече съществува акаунт с този имейл и той не може да бъде свързан с това влизане. Обърнете се към администратора.",
   "auth.oidc_back_to_login": "Обратно към входа",
   "auth.oidc_completing": "Завършване на входа чрез SSO...",
   "auth.saml_login": "Вход чрез SAML",

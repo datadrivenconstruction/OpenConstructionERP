@@ -52955,6 +52955,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Hindi maabot ang identity provider.",
     "auth.oidc_errors.provider_invalid": "Hindi wasto ang configuration ng identity provider.",
     "auth.oidc_errors.missing_claims": "Walang user ID o email na ibinalik ang identity provider.",
+    "auth.oidc_errors.account_link_refused": "May account na gamit ang email na ito at hindi ito maiuugnay sa sign-in na ito. Makipag-ugnayan sa iyong administrator.",
     "auth.oidc_back_to_login": "Bumalik sa login",
     "auth.oidc_completing": "Tinatapos ang SSO login...",
     "auth.saml_login": "Mag-sign in gamit ang SAML",

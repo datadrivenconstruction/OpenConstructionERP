@@ -13,12 +13,15 @@ from app.modules.users import oidc, saml
 from app.modules.users import router as users_router
 
 HTML = {"accept": "text/html,application/xhtml+xml"}
-INFO = {"sub": "u1", "email": "a@b.test", "name": "A", "groups": []}
+INFO = {"sub": "u1", "email": "a@b.test", "name": "A", "groups": [], "assertion_id": "a-1", "expires_at": None}
 
 
 class _Service:
     def __init__(self, error: HTTPException | None = None) -> None:
         self.error = error
+
+    async def consume_saml_assertion(self, *_a) -> bool:
+        return True
 
     async def oidc_login(self, **_kw):
         if self.error:

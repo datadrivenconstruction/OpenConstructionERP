@@ -27673,6 +27673,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Identitetsudbyderen kunne ikke nås.",
   "auth.oidc_errors.provider_invalid": "Konfigurationen af identitetsudbyderen er ugyldig.",
   "auth.oidc_errors.missing_claims": "Identitetsudbyderen returnerede ikke et bruger-ID eller en e-mail.",
+  "auth.oidc_errors.account_link_refused": "Der findes allerede en konto med denne e-mail, og den kan ikke knyttes til dette login. Kontakt din administrator.",
   "auth.oidc_back_to_login": "Tilbage til login",
   "auth.oidc_completing": "Fuldfører SSO-login...",
   "auth.saml_login": "Log ind med SAML",

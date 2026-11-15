@@ -176,6 +176,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "The identity provider could not be reached.",
     "auth.oidc_errors.provider_invalid": "The identity provider configuration is invalid.",
     "auth.oidc_errors.missing_claims": "The identity provider did not return a user id or email.",
+    "auth.oidc_errors.account_link_refused": "An account with this email already exists and cannot be linked to this sign-in. Ask your administrator.",
     "auth.oidc_back_to_login": "Back to login",
     "auth.oidc_completing": "Completing SSO login...",
     "schedule.activate": "Activate",

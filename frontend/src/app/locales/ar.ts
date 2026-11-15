@@ -28455,6 +28455,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "تعذر الوصول إلى مزود الهوية.",
   "auth.oidc_errors.provider_invalid": "إعدادات مزود الهوية غير صحيحة.",
   "auth.oidc_errors.missing_claims": "لم يُرجع مزود الهوية معرف المستخدم أو البريد الإلكتروني.",
+  "auth.oidc_errors.account_link_refused": "يوجد حساب بهذا البريد الإلكتروني بالفعل ولا يمكن ربطه بتسجيل الدخول هذا. تواصل مع المسؤول.",
   "auth.oidc_back_to_login": "العودة إلى تسجيل الدخول",
   "auth.oidc_completing": "جارٍ إكمال تسجيل الدخول عبر SSO...",
   "auth.saml_login": "تسجيل الدخول عبر SAML",

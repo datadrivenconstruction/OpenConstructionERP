@@ -40793,6 +40793,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Аныктоо провайдери менен байланыш орното алган жок.",
   "auth.oidc_errors.provider_invalid": "Аныктоо провайдеринин конфигурациясы жараксыз.",
   "auth.oidc_errors.missing_claims": "Аныктоо провайдери колдонуучунун ID же электрондук почтасын кайтарган жок.",
+  "auth.oidc_errors.account_link_refused": "Бул электрондук почта менен аккаунт мурунтан бар жана аны бул кирүүгө байланыштырууга болбойт. Администраторго кайрылыңыз.",
   "auth.oidc_back_to_login": "Кирүү бетине кайтуу",
   "auth.oidc_completing": "SSO менен кирүү аякталууда...",
   "auth.saml_login": "SAML аркылуу кирүү",

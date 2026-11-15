@@ -53384,6 +53384,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "ID 제공자에 연결할 수 없습니다.",
     "auth.oidc_errors.provider_invalid": "ID 제공자 설정이 올바르지 않습니다.",
     "auth.oidc_errors.missing_claims": "ID 제공자가 사용자 ID 또는 이메일을 반환하지 않았습니다.",
+    "auth.oidc_errors.account_link_refused": "이 이메일을 사용하는 계정이 이미 있으며 이 로그인에 연결할 수 없습니다. 관리자에게 문의하세요.",
     "auth.oidc_back_to_login": "로그인으로 돌아가기",
     "auth.oidc_completing": "SSO 로그인을 완료하는 중...",
     "auth.saml_login": "SAML로 로그인",

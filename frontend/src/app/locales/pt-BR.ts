@@ -26370,6 +26370,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Não foi possível acessar o provedor de identidade.",
   "auth.oidc_errors.provider_invalid": "A configuração do provedor de identidade é inválida.",
   "auth.oidc_errors.missing_claims": "O provedor de identidade não retornou um ID de usuário nem um e-mail.",
+  "auth.oidc_errors.account_link_refused": "Já existe uma conta com este e-mail e ela não pode ser vinculada a este login. Fale com o administrador.",
   "auth.oidc_back_to_login": "Voltar ao login",
   "auth.oidc_completing": "Concluindo o login SSO...",
   "auth.saml_login": "Entrar com SAML",

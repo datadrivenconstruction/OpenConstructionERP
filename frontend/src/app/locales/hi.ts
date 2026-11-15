@@ -27107,6 +27107,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "पहचान प्रदाता तक पहुँचा नहीं जा सका।",
   "auth.oidc_errors.provider_invalid": "पहचान प्रदाता की कॉन्फ़िगरेशन अमान्य है।",
   "auth.oidc_errors.missing_claims": "पहचान प्रदाता ने उपयोगकर्ता ID या ईमेल नहीं लौटाया।",
+  "auth.oidc_errors.account_link_refused": "इस ईमेल वाला खाता पहले से मौजूद है और इसे इस साइन-इन से नहीं जोड़ा जा सकता। अपने व्यवस्थापक से संपर्क करें।",
   "auth.oidc_back_to_login": "लॉगिन पर वापस जाएँ",
   "auth.oidc_completing": "SSO लॉगिन पूरा किया जा रहा है...",
   "auth.saml_login": "SAML से साइन इन करें",

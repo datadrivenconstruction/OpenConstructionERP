@@ -26717,6 +26717,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "ارتباط با ارائه‌دهنده هویت برقرار نشد.",
     "auth.oidc_errors.provider_invalid": "پیکربندی ارائه‌دهنده هویت نامعتبر است.",
     "auth.oidc_errors.missing_claims": "ارائه‌دهنده هویت شناسه کاربر یا ایمیل برنگرداند.",
+    "auth.oidc_errors.account_link_refused": "حسابی با این ایمیل از قبل وجود دارد و نمی‌توان آن را به این ورود پیوند داد. با مدیر سیستم تماس بگیرید.",
     "auth.oidc_back_to_login": "بازگشت به ورود",
     "auth.oidc_completing": "در حال تکمیل ورود SSO...",
     "auth.saml_login": "ورود با SAML",

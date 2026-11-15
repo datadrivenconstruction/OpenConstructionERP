@@ -26697,6 +26697,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Сәйкестендіру провайдерімен байланыс орнатылмады.",
     "auth.oidc_errors.provider_invalid": "Сәйкестендіру провайдерінің конфигурациясы жарамсыз.",
     "auth.oidc_errors.missing_claims": "Сәйкестендіру провайдері пайдаланушы ID-ін немесе электрондық поштаны қайтармады.",
+    "auth.oidc_errors.account_link_refused": "Осы электрондық поштасы бар тіркелгі бұрыннан бар және оны осы кіруге байланыстыру мүмкін емес. Әкімшіге хабарласыңыз.",
     "auth.oidc_back_to_login": "Кіру бетіне оралу",
     "auth.oidc_completing": "SSO арқылы кіру аяқталуда...",
     "auth.saml_login": "SAML арқылы кіру",

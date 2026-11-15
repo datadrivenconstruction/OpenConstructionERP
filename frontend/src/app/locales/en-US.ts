@@ -1512,6 +1512,7 @@ const resource = {
     "element_info.link_to_boq": "Link to Bid Schedule",
     "catalogue_install.indicator_title": "Catalog installs",
     "auth.company_placeholder": "Your company or organization",
+    "auth.oidc_errors.account_link_refused": "An account with this email already exists and cannot be linked to this sign-in. Ask your administrator.",
     "catalogues.install_aria": "Install catalog {{region}}",
     "catalogues.install_progress": "Installing catalog…",
     "catalogues.install_success_title": "Catalog installed",

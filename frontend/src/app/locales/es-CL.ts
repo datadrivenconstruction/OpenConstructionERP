@@ -49649,6 +49649,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "No se pudo contactar con el proveedor de identidad.",
     "auth.oidc_errors.provider_invalid": "La configuración del proveedor de identidad no es válida.",
     "auth.oidc_errors.missing_claims": "El proveedor de identidad no devolvió un ID de usuario ni un correo electrónico.",
+    "auth.oidc_errors.account_link_refused": "Ya existe una cuenta con este correo y no se puede vincular a este inicio de sesión. Consulte a su administrador.",
     "auth.oidc_back_to_login": "Volver al inicio de sesión",
     "auth.oidc_completing": "Completando el inicio de sesión con SSO...",
     "auth.saml_login": "Iniciar sesión con SAML",

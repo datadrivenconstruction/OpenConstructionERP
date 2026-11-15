@@ -27498,6 +27498,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Az azonosítószolgáltató nem érhető el.",
     "auth.oidc_errors.provider_invalid": "Az azonosítószolgáltató beállítása érvénytelen.",
     "auth.oidc_errors.missing_claims": "Az azonosítószolgáltató nem adott vissza felhasználói azonosítót vagy e-mail-címet.",
+    "auth.oidc_errors.account_link_refused": "Ezzel az e-mail-címmel már létezik fiók, és nem kapcsolható ehhez a bejelentkezéshez. Forduljon a rendszergazdához.",
     "auth.oidc_back_to_login": "Vissza a bejelentkezéshez",
     "auth.oidc_completing": "SSO-bejelentkezés befejezése...",
     "auth.saml_login": "Bejelentkezés SAML-lel",

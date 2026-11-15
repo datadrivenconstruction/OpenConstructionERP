@@ -28009,6 +28009,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Poskytovatel identity není dostupný.",
   "auth.oidc_errors.provider_invalid": "Konfigurace poskytovatele identity je neplatná.",
   "auth.oidc_errors.missing_claims": "Poskytovatel identity nevrátil ID uživatele ani e-mail.",
+  "auth.oidc_errors.account_link_refused": "Účet s tímto e-mailem již existuje a nelze jej propojit s tímto přihlášením. Obraťte se na správce.",
   "auth.oidc_back_to_login": "Zpět na přihlášení",
   "auth.oidc_completing": "Dokončování přihlášení přes SSO...",
   "auth.saml_login": "Přihlásit se přes SAML",

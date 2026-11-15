@@ -52755,6 +52755,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Penyedia identitas tidak dapat dihubungi.",
     "auth.oidc_errors.provider_invalid": "Konfigurasi penyedia identitas tidak valid.",
     "auth.oidc_errors.missing_claims": "Penyedia identitas tidak mengembalikan ID pengguna atau email.",
+    "auth.oidc_errors.account_link_refused": "Akun dengan email ini sudah ada dan tidak dapat ditautkan ke proses masuk ini. Hubungi administrator Anda.",
     "auth.oidc_back_to_login": "Kembali ke login",
     "auth.oidc_completing": "Menyelesaikan login SSO...",
     "auth.saml_login": "Masuk dengan SAML",

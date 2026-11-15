@@ -27,7 +27,7 @@ def test_missing_library_raises_501_with_install_hint(monkeypatch) -> None:
     monkeypatch.setitem(sys.modules, "onelogin", None)
     monkeypatch.setitem(sys.modules, "onelogin.saml2", None)
     with pytest.raises(HTTPException) as exc:
-        saml.login_url(_settings(), "erp.example", "/api/v1/users/auth/saml/login/")
+        saml.login_url(_settings())
     assert exc.value.status_code == 501
     assert exc.value.detail["code"] == "saml_library_missing"
     assert "openconstructionerp[saml]" in exc.value.detail["message"]

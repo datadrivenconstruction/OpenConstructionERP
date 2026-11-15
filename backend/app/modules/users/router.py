@@ -487,7 +487,7 @@ async def oidc_callback(
     import httpx
 
     from app.config import get_settings
-    from app.modules.users import oidc
+    from app.modules.users import oidc, saml
 
     s = get_settings()
     if not s.oidc_enabled:
@@ -560,6 +560,8 @@ async def oidc_callback(
         auto_create=s.oidc_auto_create_users,
         role_from_groups=role_from_groups,
         default_role=s.oidc_default_role,
+        email_trusted=s.oidc_link_by_email and claims.get("email_verified") is True and email == claims.get("email"),
+        legacy_issuer_fallback=not saml.is_configured(s),
     )
 
 
@@ -584,10 +586,24 @@ async def saml_login(request: Request) -> RedirectResponse:
     s = get_settings()
     if not saml.is_configured(s):
         raise HTTPException(status_code=400, detail="SAML authentication is not enabled.")
-    return RedirectResponse(saml.login_url(s, request.url.netloc, request.url.path), status_code=302)
+    url, request_id = saml.login_url(s)
+    response = RedirectResponse(url, status_code=302)
+    # SameSite=None: the IdP returns the browser with a cross-site POST to the ACS.
+    response.set_cookie(
+        saml.REQUEST_COOKIE,
+        saml.sign_request_id(s, request_id),
+        max_age=int(saml.REQUEST_COOKIE_TTL.total_seconds()),
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path=saml.cookie_path(s),
+    )
+    return response
 
 
-_SAML_ERROR_CODES = frozenset({"invalid_saml_response", "saml_library_missing", "missing_claims", "account_not_found"})
+_SAML_ERROR_CODES = frozenset(
+    {"invalid_saml_response", "saml_library_missing", "missing_claims", "account_not_found", "account_link_refused"}
+)
 
 
 def _saml_error_code(exc: HTTPException) -> str:
@@ -610,9 +626,12 @@ async def _saml_sign_in(request: Request, service: UserService) -> TokenResponse
     if not saml.is_configured(s):
         raise HTTPException(status_code=400, detail="SAML authentication is not enabled.")
     form = {k: v for k, v in (await request.form()).items() if isinstance(v, str)}
-    info = saml.read_response(s, request.url.netloc, request.url.path, form)
+    request_id = saml.verify_request_id(s, request.cookies.get(saml.REQUEST_COOKIE))
+    info = saml.read_response(s, form, request_id)
     if not info["sub"] or not info["email"]:
         raise oidc.oidc_error(400, "missing_claims", "SAML response did not carry a subject or email.")
+    if not await service.consume_saml_assertion(info["assertion_id"], info["expires_at"]):
+        raise oidc.oidc_error(401, "invalid_saml_response", "SAML response was rejected.")
     tokens = await service.oidc_login(
         oidc_sub=info["sub"],
         oidc_issuer=s.saml_idp_entity_id,
@@ -621,6 +640,7 @@ async def _saml_sign_in(request: Request, service: UserService) -> TokenResponse
         auto_create=s.oidc_auto_create_users,
         role_from_groups=oidc.resolve_role(info["groups"], s.oidc_group_role_map),
         default_role=s.oidc_default_role,
+        email_trusted=s.saml_link_by_email,
     )
     return tokens
 
@@ -645,8 +665,13 @@ async def saml_acs(
     if wants_html:
         from urllib.parse import urlencode
 
+        from app.config import get_settings
+        from app.modules.users import saml
+
         fragment = urlencode({"access_token": tokens.access_token, "refresh_token": tokens.refresh_token})
-        return RedirectResponse(f"/auth/saml/callback#{fragment}", status_code=303)
+        response = RedirectResponse(f"/auth/saml/callback#{fragment}", status_code=303)
+        response.delete_cookie(saml.REQUEST_COOKIE, path=saml.cookie_path(get_settings()))
+        return response
     return tokens
 
 

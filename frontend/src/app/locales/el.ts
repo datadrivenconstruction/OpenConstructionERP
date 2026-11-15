@@ -26746,6 +26746,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Δεν ήταν δυνατή η επικοινωνία με τον πάροχο ταυτότητας.",
     "auth.oidc_errors.provider_invalid": "Η ρύθμιση του παρόχου ταυτότητας δεν είναι έγκυρη.",
     "auth.oidc_errors.missing_claims": "Ο πάροχος ταυτότητας δεν επέστρεψε αναγνωριστικό χρήστη ή email.",
+    "auth.oidc_errors.account_link_refused": "Υπάρχει ήδη λογαριασμός με αυτό το email και δεν μπορεί να συνδεθεί με αυτή τη σύνδεση. Επικοινωνήστε με τον διαχειριστή.",
     "auth.oidc_back_to_login": "Πίσω στη σύνδεση",
     "auth.oidc_completing": "Ολοκλήρωση σύνδεσης SSO...",
     "auth.saml_login": "Σύνδεση με SAML",

@@ -55236,6 +55236,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "无法连接身份提供方。",
     "auth.oidc_errors.provider_invalid": "身份提供方配置无效。",
     "auth.oidc_errors.missing_claims": "身份提供方未返回用户 ID 或邮箱。",
+    "auth.oidc_errors.account_link_refused": "使用此邮箱的账户已存在，无法关联到此次登录。请联系管理员。",
     "auth.oidc_back_to_login": "返回登录",
     "auth.oidc_completing": "正在完成 SSO 登录...",
     "auth.saml_login": "使用 SAML 登录",

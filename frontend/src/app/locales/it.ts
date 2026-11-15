@@ -27909,6 +27909,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Impossibile raggiungere il provider di identità.",
   "auth.oidc_errors.provider_invalid": "La configurazione del provider di identità non è valida.",
   "auth.oidc_errors.missing_claims": "Il provider di identità non ha restituito un ID utente né un'email.",
+  "auth.oidc_errors.account_link_refused": "Esiste già un account con questa email e non può essere collegato a questo accesso. Rivolgiti all'amministratore.",
   "auth.oidc_back_to_login": "Torna al login",
   "auth.oidc_completing": "Completamento dell'accesso SSO...",
   "auth.saml_login": "Accedi con SAML",

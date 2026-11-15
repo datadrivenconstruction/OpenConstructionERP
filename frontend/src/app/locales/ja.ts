@@ -54299,6 +54299,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "IDプロバイダーに接続できませんでした。",
     "auth.oidc_errors.provider_invalid": "IDプロバイダーの設定が正しくありません。",
     "auth.oidc_errors.missing_claims": "IDプロバイダーからユーザーIDもメールアドレスも返されませんでした。",
+    "auth.oidc_errors.account_link_refused": "このメールアドレスのアカウントは既に存在し、このサインインに紐付けることはできません。管理者にお問い合わせください。",
     "auth.oidc_back_to_login": "ログインに戻る",
     "auth.oidc_completing": "SSOログインを完了しています...",
     "auth.saml_login": "SAML でサインイン",

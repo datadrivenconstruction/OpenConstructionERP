@@ -27899,6 +27899,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Le fournisseur d'identité est injoignable.",
   "auth.oidc_errors.provider_invalid": "La configuration du fournisseur d'identité est invalide.",
   "auth.oidc_errors.missing_claims": "Le fournisseur d'identité n'a renvoyé ni identifiant utilisateur ni e-mail.",
+  "auth.oidc_errors.account_link_refused": "Un compte avec cet e-mail existe déjà et ne peut pas être lié à cette connexion. Contactez votre administrateur.",
   "auth.oidc_back_to_login": "Retour à la connexion",
   "auth.oidc_completing": "Finalisation de la connexion SSO...",
   "auth.saml_login": "Se connecter avec SAML",

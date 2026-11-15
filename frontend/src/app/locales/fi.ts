@@ -27574,6 +27574,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Tunnistepalveluun ei saatu yhteyttä.",
   "auth.oidc_errors.provider_invalid": "Tunnistepalvelun asetukset ovat virheelliset.",
   "auth.oidc_errors.missing_claims": "Tunnistepalvelu ei palauttanut käyttäjätunnusta tai sähköpostiosoitetta.",
+  "auth.oidc_errors.account_link_refused": "Tällä sähköpostilla on jo tili, eikä sitä voi liittää tähän kirjautumiseen. Ota yhteys järjestelmänvalvojaan.",
   "auth.oidc_back_to_login": "Takaisin kirjautumiseen",
   "auth.oidc_completing": "Viimeistellään SSO-kirjautumista...",
   "auth.saml_login": "Kirjaudu SAML:lla",

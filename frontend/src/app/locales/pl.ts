@@ -28428,6 +28428,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Nie można połączyć się z dostawcą tożsamości.",
   "auth.oidc_errors.provider_invalid": "Konfiguracja dostawcy tożsamości jest nieprawidłowa.",
   "auth.oidc_errors.missing_claims": "Dostawca tożsamości nie zwrócił identyfikatora użytkownika ani adresu e-mail.",
+  "auth.oidc_errors.account_link_refused": "Konto z tym adresem e-mail już istnieje i nie można go powiązać z tym logowaniem. Skontaktuj się z administratorem.",
   "auth.oidc_back_to_login": "Powrót do logowania",
   "auth.oidc_completing": "Finalizowanie logowania SSO...",
   "auth.saml_login": "Zaloguj się przez SAML",

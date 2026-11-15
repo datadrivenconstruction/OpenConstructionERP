@@ -53267,6 +53267,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "পরিচয় প্রদানকারীর সাথে যোগাযোগ করা যায়নি।",
     "auth.oidc_errors.provider_invalid": "পরিচয় প্রদানকারীর কনফিগারেশন সঠিক নয়।",
     "auth.oidc_errors.missing_claims": "পরিচয় প্রদানকারী ব্যবহারকারী আইডি বা ইমেল ফেরত দেয়নি।",
+    "auth.oidc_errors.account_link_refused": "এই ইমেলের একটি অ্যাকাউন্ট ইতিমধ্যে আছে এবং এটিকে এই সাইন-ইনের সাথে যুক্ত করা যাবে না। আপনার প্রশাসকের সাথে যোগাযোগ করুন।",
     "auth.oidc_back_to_login": "লগইনে ফিরে যান",
     "auth.oidc_completing": "SSO লগইন সম্পন্ন করা হচ্ছে...",
     "auth.saml_login": "SAML দিয়ে সাইন ইন করুন",

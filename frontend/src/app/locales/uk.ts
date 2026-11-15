@@ -28466,6 +28466,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Провайдер ідентифікації недоступний.",
     "auth.oidc_errors.provider_invalid": "Конфігурація провайдера ідентифікації некоректна.",
     "auth.oidc_errors.missing_claims": "Провайдер ідентифікації не повернув ідентифікатор користувача або e-mail.",
+    "auth.oidc_errors.account_link_refused": "Обліковий запис із цією адресою вже існує і не може бути пов'язаний із цим входом. Зверніться до адміністратора.",
     "auth.oidc_back_to_login": "Назад до входу",
     "auth.oidc_completing": "Завершення входу через SSO...",
     "auth.saml_login": "Увійти через SAML",

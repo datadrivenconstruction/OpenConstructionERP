@@ -27640,6 +27640,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "De identity provider is niet bereikbaar.",
   "auth.oidc_errors.provider_invalid": "De configuratie van de identity provider is ongeldig.",
   "auth.oidc_errors.missing_claims": "De identity provider heeft geen gebruikers-ID of e-mailadres teruggestuurd.",
+  "auth.oidc_errors.account_link_refused": "Er bestaat al een account met dit e-mailadres en het kan niet aan deze aanmelding worden gekoppeld. Neem contact op met je beheerder.",
   "auth.oidc_back_to_login": "Terug naar inloggen",
   "auth.oidc_completing": "SSO-inlog wordt afgerond...",
   "auth.saml_login": "Inloggen met SAML",

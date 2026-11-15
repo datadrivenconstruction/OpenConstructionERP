@@ -28156,6 +28156,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Провайдер удостоверения недоступен.",
   "auth.oidc_errors.provider_invalid": "Настройки провайдера удостоверения некорректны.",
   "auth.oidc_errors.missing_claims": "Провайдер удостоверения не вернул ID пользователя или e-mail.",
+  "auth.oidc_errors.account_link_refused": "Учётная запись с этим адресом уже существует и не может быть связана с этим входом. Обратитесь к администратору.",
   "auth.oidc_back_to_login": "Назад к входу",
   "auth.oidc_completing": "Завершение входа через SSO...",
   "auth.saml_login": "Войти через SAML",

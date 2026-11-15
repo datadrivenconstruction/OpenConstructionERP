@@ -26759,6 +26759,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "شناختی فراہم کنندہ تک رسائی نہیں ہو سکی۔",
     "auth.oidc_errors.provider_invalid": "شناختی فراہم کنندہ کی ترتیب درست نہیں ہے۔",
     "auth.oidc_errors.missing_claims": "شناختی فراہم کنندہ نے صارف ID یا ای میل واپس نہیں کیا۔",
+    "auth.oidc_errors.account_link_refused": "اس ای میل کے ساتھ ایک اکاؤنٹ پہلے سے موجود ہے اور اسے اس سائن اِن سے منسلک نہیں کیا جا سکتا۔ اپنے منتظم سے رابطہ کریں۔",
     "auth.oidc_back_to_login": "لاگ ان پر واپس جائیں",
     "auth.oidc_completing": "SSO لاگ ان مکمل ہو رہا ہے...",
     "auth.saml_login": "SAML کے ذریعے سائن ان کریں",

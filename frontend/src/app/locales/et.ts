@@ -27594,6 +27594,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Identiteedipakkujaga ei õnnestunud ühendust luua.",
     "auth.oidc_errors.provider_invalid": "Identiteedipakkuja seadistus on vale.",
     "auth.oidc_errors.missing_claims": "Identiteedipakkuja ei tagastanud kasutaja ID-d ega e-posti aadressi.",
+    "auth.oidc_errors.account_link_refused": "Selle e-postiga konto on juba olemas ja seda ei saa selle sisselogimisega siduda. Pöörduge administraatori poole.",
     "auth.oidc_back_to_login": "Tagasi sisselogimisse",
     "auth.oidc_completing": "SSO-sisselogimise lõpetamine...",
     "auth.saml_login": "Logi sisse SAML-iga",

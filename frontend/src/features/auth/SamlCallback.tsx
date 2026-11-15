@@ -14,6 +14,7 @@ const ERROR_KEYS: Record<string, [string, string]> = {
   saml_library_missing: ['auth.saml_errors.library_missing', 'SAML sign-in is not available on this server: the optional SAML package is not installed.'],
   missing_claims: ['auth.oidc_errors.missing_claims', 'The identity provider did not return a user id or email.'],
   account_not_found: ['auth.oidc_errors.account_not_found', 'No account exists for this sign-in and automatic account creation is off. Ask your administrator to invite you.'],
+  account_link_refused: ['auth.oidc_errors.account_link_refused', 'An account with this email already exists and cannot be linked to this sign-in. Ask your administrator.'],
   account_disabled: ['auth.saml_errors.account_disabled', 'This account is disabled. Contact your administrator.'],
   not_enabled: ['auth.saml_errors.not_enabled', 'SAML sign-in is not enabled on this server.'],
 };

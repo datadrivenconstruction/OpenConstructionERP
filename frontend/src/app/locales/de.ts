@@ -27870,6 +27870,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Der Identitätsanbieter ist nicht erreichbar.",
   "auth.oidc_errors.provider_invalid": "Die Konfiguration des Identitätsanbieters ist ungültig.",
   "auth.oidc_errors.missing_claims": "Der Identitätsanbieter hat keine Benutzer-ID oder E-Mail-Adresse zurückgegeben.",
+  "auth.oidc_errors.account_link_refused": "Ein Konto mit dieser E-Mail-Adresse existiert bereits und kann nicht mit dieser Anmeldung verknüpft werden. Wenden Sie sich an Ihren Administrator.",
   "auth.oidc_back_to_login": "Zurück zur Anmeldung",
   "auth.oidc_completing": "SSO-Anmeldung wird abgeschlossen...",
   "auth.saml_login": "Mit SAML anmelden",

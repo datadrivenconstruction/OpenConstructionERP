@@ -502,6 +502,8 @@ class Settings(BaseSettings):
     oidc_client_secret: str = ""
     oidc_scopes: str = "openid email profile"
     oidc_auto_create_users: bool = True
+    # Link an existing local account by email only when the ID token says email_verified=true.
+    oidc_link_by_email: bool = True
     # Group-to-role mapping: JSON object mapping group names, Entra group object ids
     # or app role values to local roles, e.g. {"estimators": "editor"}. Values are read
     # from OIDC_ROLE_CLAIMS in the verified ID token, then userinfo. Highest role wins.
@@ -520,6 +522,10 @@ class Settings(BaseSettings):
     saml_email_attribute: str = "email"
     saml_name_attribute: str = "displayName"
     saml_role_attribute: str = "groups"
+    # Trust the IdP's email attribute to link an existing local account. Off: SAML never links.
+    saml_link_by_email: bool = False
+    # Accept responses the IdP sends without a prior SP request. Off: only SP-initiated sign-in.
+    saml_allow_idp_initiated: bool = False
     # SCIM 2.0 provisioning (module oe_scim). A group may map to the admin role only when
     # this is true; the IdP can never send a role itself, an admin sets it on the group.
     scim_allow_admin_groups: bool = False

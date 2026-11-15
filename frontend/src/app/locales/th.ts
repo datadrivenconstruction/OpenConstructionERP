@@ -52767,6 +52767,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "ไม่สามารถเชื่อมต่อกับผู้ให้บริการระบุตัวตนได้",
     "auth.oidc_errors.provider_invalid": "การตั้งค่าผู้ให้บริการระบุตัวตนไม่ถูกต้อง",
     "auth.oidc_errors.missing_claims": "ผู้ให้บริการระบุตัวตนไม่ได้ส่งรหัสผู้ใช้หรืออีเมลกลับมา",
+    "auth.oidc_errors.account_link_refused": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้วและไม่สามารถเชื่อมกับการลงชื่อเข้าใช้นี้ได้ โปรดติดต่อผู้ดูแลระบบ",
     "auth.oidc_back_to_login": "กลับไปหน้าเข้าสู่ระบบ",
     "auth.oidc_completing": "กำลังดำเนินการเข้าสู่ระบบ SSO...",
     "auth.saml_login": "ลงชื่อเข้าใช้ด้วย SAML",

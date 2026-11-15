@@ -27779,6 +27779,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Pružatelj identiteta nije dostupan.",
   "auth.oidc_errors.provider_invalid": "Konfiguracija pružatelja identiteta nije ispravna.",
   "auth.oidc_errors.missing_claims": "Pružatelj identiteta nije vratio ID korisnika ni e-adresu.",
+  "auth.oidc_errors.account_link_refused": "Račun s ovom e-poštom već postoji i ne može se povezati s ovom prijavom. Obratite se administratoru.",
   "auth.oidc_back_to_login": "Natrag na prijavu",
   "auth.oidc_completing": "Dovršavanje SSO prijave...",
   "auth.saml_login": "Prijava putem SAML-a",

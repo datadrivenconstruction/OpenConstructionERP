@@ -27847,6 +27847,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Não foi possível contactar o fornecedor de identidade.",
   "auth.oidc_errors.provider_invalid": "A configuração do fornecedor de identidade é inválida.",
   "auth.oidc_errors.missing_claims": "O fornecedor de identidade não devolveu um ID de utilizador nem um e-mail.",
+  "auth.oidc_errors.account_link_refused": "Já existe uma conta com este e-mail e não pode ser associada a este início de sessão. Contacte o administrador.",
   "auth.oidc_back_to_login": "Voltar ao início de sessão",
   "auth.oidc_completing": "A concluir o início de sessão SSO...",
   "auth.saml_login": "Iniciar sessão com SAML",

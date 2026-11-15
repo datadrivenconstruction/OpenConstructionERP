@@ -27685,6 +27685,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Identitetsleverandøren kunne ikke nås.",
   "auth.oidc_errors.provider_invalid": "Konfigurasjonen av identitetsleverandøren er ugyldig.",
   "auth.oidc_errors.missing_claims": "Identitetsleverandøren returnerte ikke en bruker-ID eller e-post.",
+  "auth.oidc_errors.account_link_refused": "Det finnes allerede en konto med denne e-postadressen, og den kan ikke kobles til denne påloggingen. Kontakt administratoren.",
   "auth.oidc_back_to_login": "Tilbake til innlogging",
   "auth.oidc_completing": "Fullfører SSO-innlogging...",
   "auth.saml_login": "Logg inn med SAML",

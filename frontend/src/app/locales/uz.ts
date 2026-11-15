@@ -27928,6 +27928,7 @@ const resource = {
     "auth.oidc_errors.provider_unreachable": "Identifikatsiya provayderi bilan bogʼlanib boʼlmadi.",
     "auth.oidc_errors.provider_invalid": "Identifikatsiya provayderi sozlamalari notoʼgʼri.",
     "auth.oidc_errors.missing_claims": "Identifikatsiya provayderi foydalanuvchi ID yoki emailini qaytarmadi.",
+    "auth.oidc_errors.account_link_refused": "Bu elektron pochta bilan hisob allaqachon mavjud va uni ushbu kirishga bog'lab bo'lmaydi. Administratoringizga murojaat qiling.",
     "auth.oidc_back_to_login": "Kirish sahifasiga qaytish",
     "auth.oidc_completing": "SSO orqali kirish yakunlanmoqda...",
     "auth.saml_login": "SAML orqali kirish",

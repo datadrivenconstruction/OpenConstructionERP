@@ -27856,6 +27856,7 @@ const resource = {
   "auth.oidc_errors.provider_unreachable": "Furnizorul de identitate nu poate fi contactat.",
   "auth.oidc_errors.provider_invalid": "Configurația furnizorului de identitate nu este validă.",
   "auth.oidc_errors.missing_claims": "Furnizorul de identitate nu a returnat un ID de utilizator sau un e-mail.",
+  "auth.oidc_errors.account_link_refused": "Există deja un cont cu acest e-mail și nu poate fi asociat acestei autentificări. Contactați administratorul.",
   "auth.oidc_back_to_login": "Înapoi la autentificare",
   "auth.oidc_completing": "Se finalizează autentificarea SSO...",
   "auth.saml_login": "Conectare cu SAML",
