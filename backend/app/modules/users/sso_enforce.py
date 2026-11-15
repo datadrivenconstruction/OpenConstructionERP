@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from fastapi import HTTPException, status
-
-logger = logging.getLogger(__name__)
 
 SSO_REQUIRED_CODE = "auth.sso_required"
 
@@ -41,13 +38,3 @@ def assert_password_allowed(settings: Any, email: str, user: Any = None) -> None
             "message": "Your organisation requires single sign-on. Use the SSO button to sign in.",
         },
     )
-
-
-def warn_if_misconfigured(settings: Any) -> None:
-    """Startup hint: enforcing SSO while OIDC is off would lock these users out."""
-    if enforced_domains(settings) and not getattr(settings, "oidc_enabled", False):
-        logger.warning(
-            "SSO_ENFORCED_DOMAINS is set but OIDC_ENABLED is false: users on %s have no way to sign in "
-            "except break-glass admins.",
-            ", ".join(sorted(enforced_domains(settings))),
-        )

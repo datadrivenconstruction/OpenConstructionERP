@@ -495,7 +495,9 @@ class Settings(BaseSettings):
     # here after a rotation keeps existing sessions alive until they expire.
     # See docs/jwt-key-rotation.md. Binds JWT_PREVIOUS_SECRETS / OE_JWT_PREVIOUS_SECRETS.
     jwt_previous_secrets: str = ""
-    # OIDC / Keycloak (all optional - local auth remains the default)
+    # Legacy OIDC settings. Single sign-on is configured per tenant in Settings (module oe_sso);
+    # these are read only once, by the oe_sso boot repair that turns them into a provider row.
+    # oidc_default_role is still the SCIM default role.
     oidc_enabled: bool = False
     oidc_issuer_url: str = ""
     oidc_client_id: str = ""
@@ -510,16 +512,6 @@ class Settings(BaseSettings):
     oidc_role_claims: str = "groups,roles"
     # Role for a new SSO user that matches no mapped group. Least privilege by default.
     oidc_default_role: Literal["admin", "manager", "editor", "viewer"] = "viewer"
-    # SAML 2.0 (optional extra ``saml``). Roles come from SAML_ROLE_ATTRIBUTE through OIDC_GROUP_ROLE_MAP.
-    saml_enabled: bool = False
-    saml_sp_entity_id: str = ""
-    saml_acs_url: str = ""
-    saml_idp_entity_id: str = ""
-    saml_idp_sso_url: str = ""
-    saml_idp_x509_cert: str = ""
-    saml_email_attribute: str = "email"
-    saml_name_attribute: str = "displayName"
-    saml_role_attribute: str = "groups"
     # SCIM 2.0 provisioning (module oe_scim). A group may map to the admin role only when
     # this is true; the IdP can never send a role itself, an admin sets it on the group.
     scim_allow_admin_groups: bool = False
