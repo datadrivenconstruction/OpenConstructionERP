@@ -65,7 +65,7 @@ describe('SamlCallback', () => {
       </MemoryRouter>,
     );
     await waitFor(() => expect(setTokens).toHaveBeenCalled());
-    expect(setTokens.mock.calls[0].slice(0, 2)).toEqual(['a1', 'r1']);
+    expect(setTokens.mock.calls[0]?.slice(0, 2)).toEqual(['a1', 'r1']);
     expect(window.location.hash).toBe('');
   });
 
