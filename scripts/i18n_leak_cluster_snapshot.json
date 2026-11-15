@@ -2274,5 +2274,22 @@
     ],
     "key_count_at_seed": 3,
     "note": "Platform is the same word in Danish, Filipino, Hungarian, Indonesian, Dutch and Turkish"
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fil",
+      "hr",
+      "id",
+      "nl",
+      "no",
+      "pl",
+      "pt-BR",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "\"Status\" is the native word in these languages; three column headers carry it."
   }
 ]
