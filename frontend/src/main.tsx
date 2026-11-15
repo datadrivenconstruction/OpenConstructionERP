@@ -1,5 +1,6 @@
 import { recoverFromStaleChunk } from '@/shared/lib/chunkRecovery';
 import React from 'react';
+import { appBasePath } from '@/shared/lib/publicAsset';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
@@ -111,9 +112,7 @@ startAccountLanguageSync();
 // matching basename there. Desktop and localhost serve at the root, where the
 // path never starts with /demo, so the basename stays undefined ("/").
 const routerBasename =
-  window.location.pathname === '/demo' || window.location.pathname.startsWith('/demo/')
-    ? '/demo'
-    : undefined;
+  appBasePath() || undefined;
 
 const renderApp = () => {
   ReactDOM.createRoot(__rootEl).render(

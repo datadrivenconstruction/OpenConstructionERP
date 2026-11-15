@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { publicAsset } from '@/shared/lib/publicAsset';
 import { APP_VERSION } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -2903,7 +2904,7 @@ function DashboardPageInner() {
           className="group/ddc inline-flex items-center gap-1.5 text-2xs text-content-tertiary hover:text-content-secondary transition-colors"
         >
           <img
-            src="/brand/ddc-logo.webp"
+            src={publicAsset('/brand/ddc-logo.webp')}
             alt="DataDrivenConstruction"
             className="h-3.5 w-auto opacity-60 group-hover/ddc:opacity-100 transition-opacity"
           />

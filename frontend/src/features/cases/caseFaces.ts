@@ -71,9 +71,10 @@
 
 import { COUNTRY_PORTRAITS } from './countryPortraits.generated';
 import type { CompanyType } from './types';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 /** Base public path every returned image URL is rooted at. */
-export const PEOPLE_ASSETS_BASE = '/assets/people';
+export const PEOPLE_ASSETS_BASE = publicAsset('/assets/people');
 
 /**
  * The eight COMPANY TYPES a case is filed under: `data-companies` on the site,

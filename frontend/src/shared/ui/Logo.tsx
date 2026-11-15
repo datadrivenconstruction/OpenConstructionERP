@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import clsx from 'clsx';
+import { publicAsset } from '../lib/publicAsset';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -25,8 +26,6 @@ const sizeMap: Record<LogoSize, string> = {
   xl: 'h-16 w-16',
 };
 
-const MARK_LIGHT = '/brand/erp/erp-mark-light.svg';
-const MARK_DARK = '/brand/erp/erp-mark-dark.svg';
 
 /** OpenConstructionERP mark, rendered from the unmodified brand-kit SVGs. */
 export function Logo({ size = 'md', animate = false, tone = 'auto', className }: LogoProps) {
@@ -38,7 +37,7 @@ export function Logo({ size = 'md', animate = false, tone = 'auto', className }:
     >
       {tone !== 'dark' && (
         <img
-          src={MARK_LIGHT}
+          src={publicAsset('/brand/erp/erp-mark-light.svg')}
           alt=""
           aria-hidden
           draggable={false}
@@ -47,7 +46,7 @@ export function Logo({ size = 'md', animate = false, tone = 'auto', className }:
       )}
       {tone !== 'light' && (
         <img
-          src={MARK_DARK}
+          src={publicAsset('/brand/erp/erp-mark-dark.svg')}
           alt=""
           aria-hidden
           draggable={false}
@@ -114,8 +113,8 @@ export function AcademyMark({ className }: { className?: string }) {
   const img = 'block h-full w-full select-none';
   return (
     <span className={clsx('relative inline-block shrink-0', className ?? 'h-4 w-4')} data-testid="oe-academy-mark" aria-hidden>
-      <img src="/brand/academy/academy-mark-light.svg" alt="" draggable={false} className={clsx(img, 'dark:hidden')} />
-      <img src="/brand/academy/academy-mark-dark.svg" alt="" draggable={false} className={clsx(img, 'hidden dark:block')} />
+      <img src={publicAsset('/brand/academy/academy-mark-light.svg')} alt="" draggable={false} className={clsx(img, 'dark:hidden')} />
+      <img src={publicAsset('/brand/academy/academy-mark-dark.svg')} alt="" draggable={false} className={clsx(img, 'hidden dark:block')} />
     </span>
   );
 }

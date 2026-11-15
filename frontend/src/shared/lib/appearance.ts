@@ -14,6 +14,7 @@
  */
 
 import { applyCustomAccent, normalizeHex } from './customAccent';
+import { publicAsset } from './publicAsset';
 
 export const ACCENTS = ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite', 'crimson'] as const;
 export const FONTS = ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'] as const;
@@ -195,7 +196,7 @@ export function writeStoredAppearance(key: string, value: Partial<Appearance> | 
 
 /** Public URL of a web font's stylesheet; null for the system stack. */
 export function fontStylesheetHref(font: FontChoice): string | null {
-  return font === 'system' ? null : `/assets/vendor/fonts/${font}.css`;
+  return font === 'system' ? null : publicAsset(`/assets/vendor/fonts/${font}.css`);
 }
 
 /**

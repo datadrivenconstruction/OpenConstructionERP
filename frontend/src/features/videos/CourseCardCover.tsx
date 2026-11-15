@@ -40,16 +40,17 @@ import {
 } from 'lucide-react';
 import type { AcademyItem, CourseStep } from './academyTypes';
 import { CourseCover } from './CourseCover';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 /** Photo of a course's project, shipped as `public/academy-courses/<slug>.webp`. */
 export function coursePhotoUrl(item: Pick<AcademyItem, 'id' | 'kind'>): string | null {
   if (item.kind !== 'course') return null;
   const slug = item.id.split(':')[1];
-  return slug ? `${import.meta.env.BASE_URL}academy-courses/${slug}.webp` : null;
+  return slug ? `${publicAsset('/academy-courses')}/${slug}.webp` : null;
 }
 
 function personUrl(img: string): string {
-  return `${import.meta.env.BASE_URL}academy-courses/people/${img}.webp`;
+  return `${publicAsset('/academy-courses')}/people/${img}.webp`;
 }
 
 export type StepState = 'done' | 'current' | 'ahead';
